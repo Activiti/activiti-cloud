@@ -19,7 +19,6 @@
 
     <!-- plugins -->
     <spring-boot-maven-plugin.version>1.5.4.RELEASE</spring-boot-maven-plugin.version>
-    <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
     <spring.cloud.version>Finchley.BUILD-SNAPSHOT</spring.cloud.version>
     <springfox.version>2.7.0</springfox.version>
   </properties>
@@ -178,35 +177,6 @@
           <execution>
             <goals>
               <goal>repackage</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>io.fabric8</groupId>
-        <artifactId>docker-maven-plugin</artifactId>
-        <version>${docker.maven.plugin.version}</version>
-        <configuration>
-          <images>
-            <image>
-              <name>activiti/activiti-cloud-query</name>
-              <alias>activit-cloud-query</alias>
-              <build>
-                <from>openjdk:alpine</from>
-                <assembly>
-                  <descriptorRef>artifact</descriptorRef>
-                </assembly>
-                <cmd>java -jar maven/${project.artifactId}-${project.version}.jar</cmd>
-              </build>
-            </image>
-          </images>
-        </configuration>
-        <executions>
-          <execution>
-            <id>docker:build</id>
-            <phase>install</phase>
-            <goals>
-              <goal>build</goal>
             </goals>
           </execution>
         </executions>
