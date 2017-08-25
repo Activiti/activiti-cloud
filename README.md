@@ -1,2 +1,3 @@
 # activiti-cloud-query
-Activiti Cloud Query
+
+Example implementation of an Activiti cloud query service.
