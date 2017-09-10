@@ -1,2 +1,2 @@
 # activiti-cloud-connectors
-Repository of "official" connectors
+Repository of "official" activiti cloud connectors
