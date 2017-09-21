@@ -4,7 +4,7 @@
 
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-query</artifactId>
-  <version>7-201708-EA</version>
+  <version>7-201709-EA-SNAPSHOT</version>
 
   <packaging>jar</packaging>
   <name>Activiti Cloud :: Query</name>
@@ -195,7 +195,7 @@
     <url>https://github.com/Activiti/activiti-cloud-query</url>
     <connection>scm:git:https://github.com/Activiti/activiti-cloud-query.git</connection>
     <developerConnection>scm:git:https://github.com/Activiti/activiti-cloud-query.git</developerConnection>
-    <tag>activiti-7-201708-EA</tag>
+    <tag>HEAD</tag>
   </scm>
   <developers>
     <developer>
