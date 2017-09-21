@@ -19,6 +19,7 @@
     <!-- plugins -->
     <spring-boot-maven-plugin.version>1.5.4.RELEASE</spring-boot-maven-plugin.version>
     <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
+    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
   </properties>
 
 
@@ -131,9 +132,33 @@
   </build>
 
 
+
+  <profiles>
+    <!-- Profile to sign artifacts, triggered when releasing -->
+    <profile>
+      <id>sign</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>${maven-gpg-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <distributionManagement>
     <repository>
-      <id>activiti-alfresco-releases</id>
+      <id>alfresco.release.repo</id>
       <name>Alfresco internal repo</name>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
     </repository>
