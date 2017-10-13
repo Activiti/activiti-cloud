@@ -9,4 +9,9 @@ FROM openjdk:alpine
 
 COPY --from=BUILDQ /usr/src/myapp/target/*.jar /maven/
 
-CMD java -jar maven/*.jar
+# set debug=true to get spring boot debug-level logging
+ENV debug=false
+# set REMOTE_DEBUG=true to enable connections to remote debug port
+ENV REMOTE_DEBUG=false
+
+CMD if [ "x$REMOTE_DEBUG" = "xfalse" ] ; then java -jar maven/*.jar ; else java -agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n -jar maven/*.jar ; fi
