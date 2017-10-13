@@ -12,21 +12,55 @@
   <properties>
     <version.activiti>${project.version}</version.activiti>
     <version.activiti.cloud>${project.version}</version.activiti.cloud>
+
+    <!--configuration properties-->
+    <jdk.version>1.8</jdk.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
     <!-- Spring Boot / Cloud / Stream deps -->
-    <spring.boot.version>2.0.0.M3</spring.boot.version>
+    <spring.boot.version>2.0.0.M5</spring.boot.version>
     <spring.cloud.version>Finchley.M2</spring.cloud.version>
-    <spring.cloud.stream.version>Ditmars.M2</spring.cloud.stream.version>
+    <spring.cloud.stream.version>Elmhurst.BUILD-SNAPSHOT</spring.cloud.stream.version>
     <!-- using SNAPSHOT version to benefit from https://github.com/spring-projects/spring-hateoas/issues/583 -->
     <spring.hateoas.version>0.24.0.BUILD-SNAPSHOT</spring.hateoas.version>
 
-    <!--configuration properties-->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <enforcer.failOnDuplicatedClasses>true</enforcer.failOnDuplicatedClasses>
-    <jdk.version>1.8</jdk.version>
-
     <h2.version>1.4.193</h2.version>
 
+    <!-- Docker props -->
+    <docker.keycloak.port>8180</docker.keycloak.port>
+    <docker.keycloak.start.timeout>40000</docker.keycloak.start.timeout>
+    <docker.rabbitmq.tcp.port>5672</docker.rabbitmq.tcp.port>
+    <docker.rabbitmq.cli.port>15672</docker.rabbitmq.cli.port>
+    <docker.rabbitmq.start.timeout>15000</docker.rabbitmq.start.timeout>
+
+    <!-- using hibernate and JPA for the services -->
+
+    <hibernate-core.version>5.2.2.Final</hibernate-core.version>
+    <hibernate-jpa-2.1-api.version>1.0.0.Final</hibernate-jpa-2.1-api.version>
+    <hibernate-validator.version>5.3.4.Final</hibernate-validator.version>
+    <hibernate-entitymanager.version>5.0.12.Final</hibernate-entitymanager.version>
+
+    <!-- Jetty impl -->
+    <jetty.javax.servlet.version>3.0.0.v201112011016</jetty.javax.servlet.version>
+    <jetty-server.version>8.1.16.v20140903</jetty-server.version>
+    <jetty-servlet.version>8.1.16.v20140903</jetty-servlet.version>
+    <jetty-http.version>8.1.16.v20140903</jetty-http.version>
+    <jetty-webapp.version>8.1.16.v20140903</jetty-webapp.version>
+    <jetty-io.version>8.1.16.v20140903</jetty-io.version>
+    <jetty-util.version>8.1.16.v20140903</jetty-util.version>
+
+    <!-- Swagger -->
+    <swagger.version>1.5.10</swagger.version>
+    <springfox.version>2.7.0</springfox.version>
+
+    <!-- Rest Easy -->
+    <resteasy.version>3.0.21.Final</resteasy.version>
+
+    <!-- Query DSL -->
+    <querydsl.version>4.1.4</querydsl.version>
+
     <!-- plugins -->
+    <enforcer.failOnDuplicatedClasses>true</enforcer.failOnDuplicatedClasses>
     <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>2.20</maven-failsafe-plugin.version>
@@ -36,23 +70,26 @@
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <maven.enforcer.plugin.version>1.4.1</maven.enforcer.plugin.version>
     <maven.docker.plugin.version>0.21.0</maven.docker.plugin.version>
+    <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
+    <assertions-generator-plugin.version>2.0.0</assertions-generator-plugin.version>
     <jacoco.maven.plugin.version>0.7.9</jacoco.maven.plugin.version>
     <extra-enforcer-rules.version>1.0-beta-6</extra-enforcer-rules.version>
     <illegal-transitive-dependency-check.version>1.7.4</illegal-transitive-dependency-check.version>
     <spring-boot-maven-plugin.version>1.5.4.RELEASE</spring-boot-maven-plugin.version>
-    <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
     <directory.maven.plugin.version>0.1</directory.maven.plugin.version>
-    <springfox.version>2.7.0</springfox.version>
+
+
+
+
+    <!-- configuration properties for tests-->
     <mockito.version>2.7.22</mockito.version>
     <junit.version>4.12</junit.version>
     <assertj.version>3.8.0</assertj.version>
     <jsonunit.version>1.24.0</jsonunit.version>
-    <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
-    <assertions-generator-plugin.version>2.0.0</assertions-generator-plugin.version>
 
-    <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
     <generated-assertions-package>org.activiti.test</generated-assertions-package>
+
   </properties>
   
   <modules>
