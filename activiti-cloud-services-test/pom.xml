@@ -1,24 +1,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-service-common-parent</artifactId>
     <version>7-201710-EA-SNAPSHOT</version>
   </parent>
 
-  <artifactId>activiti-cloud-starter-test</artifactId>
-  <name>Activiti Cloud Starter :: Test</name>
-
+  <artifactId>activiti-cloud-services-test</artifactId>
+  <name>Activiti Cloud Services :: Test</name>
+  <description>Activiti Cloud Services Test</description>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-core-model</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-test</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-stream</artifactId>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
     </dependency>
   </dependencies>
-
 </project>
