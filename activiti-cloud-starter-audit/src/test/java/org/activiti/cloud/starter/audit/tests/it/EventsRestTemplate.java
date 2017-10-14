@@ -18,7 +18,7 @@ package org.activiti.cloud.starter.audit.tests.it;
 
 import java.util.Map;
 
-import org.activiti.services.audit.events.ProcessEngineEventEntity;
+import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;

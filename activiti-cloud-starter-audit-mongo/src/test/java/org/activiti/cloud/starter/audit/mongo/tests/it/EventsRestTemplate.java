@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
 
-import org.activiti.services.audit.mongo.events.ProcessEngineEventDocument;
+import org.activiti.cloud.services.audit.mongo.events.ProcessEngineEventDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;

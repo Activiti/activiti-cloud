@@ -16,10 +16,10 @@
 
 package org.activiti.cloud.starter.audit.tests.it;
 
-import org.activiti.services.audit.EventsRelProvider;
-import org.activiti.services.audit.events.ActivityCompletedEventEntity;
-import org.activiti.services.audit.events.ProcessEngineEventEntity;
-import org.activiti.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.audit.EventsRelProvider;
+import org.activiti.cloud.services.audit.events.ActivityCompletedEventEntity;
+import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.*;

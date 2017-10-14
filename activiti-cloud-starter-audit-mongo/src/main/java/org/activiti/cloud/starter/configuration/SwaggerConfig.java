@@ -31,7 +31,7 @@ public class SwaggerConfig {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2).select()
-                                                      .apis(RequestHandlerSelectors.basePackage("org.activiti.services.audit.mongo"))
+                                                      .apis(RequestHandlerSelectors.basePackage("org.activiti.cloud.services.audit.mongo"))
                                                       .paths(PathSelectors.any())
                                                       .build();
     }

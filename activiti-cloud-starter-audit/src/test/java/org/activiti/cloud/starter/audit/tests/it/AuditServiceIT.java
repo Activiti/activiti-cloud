@@ -21,15 +21,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.activiti.services.api.events.ProcessEngineEvent;
-import org.activiti.services.audit.EventsRepository;
-import org.activiti.services.audit.events.ActivityStartedEventEntity;
-import org.activiti.services.audit.events.ActivityStartedEventEntityAssert;
-import org.activiti.services.audit.events.ProcessEngineEventEntity;
-import org.activiti.services.audit.events.TaskAssignedEventEntity;
-import org.activiti.services.audit.events.TaskAssignedEventEntityAssert;
-import org.activiti.starters.test.MockProcessEngineEvent;
-import org.activiti.starters.test.MyProducer;
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.audit.EventsRepository;
+import org.activiti.cloud.services.audit.events.ActivityStartedEventEntity;
+import org.activiti.cloud.services.audit.events.ActivityStartedEventEntityAssert;
+import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
+import org.activiti.cloud.services.audit.events.TaskAssignedEventEntity;
+import org.activiti.cloud.services.audit.events.TaskAssignedEventEntityAssert;
+import org.activiti.cloud.starters.test.MockProcessEngineEvent;
+import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +40,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.activiti.starters.test.ActivityEventBuilder.aActivityStartedEvent;
+import static org.activiti.cloud.starters.test.ActivityEventBuilder.aActivityStartedEvent;
 import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)

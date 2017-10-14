@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>activiti-services-audit</module>
+    <module>activiti-cloud-services-audit</module>
     <module>activiti-cloud-starter-audit</module>
     <module>activiti-cloud-starter-audit-mongo</module>
   </modules>

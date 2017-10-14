@@ -12,19 +12,19 @@
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-identity-keycloak</artifactId>
+      <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-core-model</artifactId>
+      <artifactId>activiti-cloud-services-core-model</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-audit-jpa</artifactId>
+      <artifactId>activiti-cloud-services-audit-jpa</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-api</artifactId>
+      <artifactId>activiti-cloud-services-api</artifactId>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -144,7 +144,7 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-test</artifactId>
+      <artifactId>activiti-cloud-services-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -269,8 +269,8 @@
         <configuration>
 
           <packages>
-            <package>org.activiti.services.core.model</package>
-            <package>org.activiti.services.audit.events</package>
+            <package>org.activiti.cloud.services.core.model</package>
+            <package>org.activiti.cloud.services.audit.events</package>
           </packages>
           <classes>
             <class>org.springframework.http.ResponseEntity</class>
