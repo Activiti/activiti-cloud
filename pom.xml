@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>activiti-services-query</module>
+    <module>activiti-cloud-services-query</module>
     <module>activiti-cloud-starter-query</module>
   </modules>
 

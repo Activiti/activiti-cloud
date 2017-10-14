@@ -12,15 +12,15 @@
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-identity-keycloak</artifactId>
+      <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-core-model</artifactId>
+      <artifactId>activiti-cloud-services-core-model</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-query-rest</artifactId>
+      <artifactId>activiti-cloud-services-query-rest</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
@@ -91,7 +91,7 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-test</artifactId>
+      <artifactId>activiti-cloud-services-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
