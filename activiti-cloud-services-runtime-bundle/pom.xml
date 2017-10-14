@@ -1,0 +1,22 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.activiti.cloud</groupId>
+    <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
+    <version>7-201710-EA-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>activiti-cloud-services-runtime-bundle</artifactId>
+  <name>Activiti Cloud Services :: Runtime Bundle</name>
+  <description>Activiti Cloud Services Runtime Bundle</description>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>activiti-cloud-services-core</module>
+    <module>activiti-cloud-services-events</module>
+    <module>activiti-cloud-services-rest-api</module>
+    <module>activiti-cloud-services-rest-impl</module>
+  </modules>
+
+</project>

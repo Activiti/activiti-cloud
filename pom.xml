@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>activiti-services-runtime-bundle</module>
+    <module>activiti-cloud-services-runtime-bundle</module>
     <module>activiti-cloud-starter-configure</module>
     <module>activiti-cloud-starter-runtime-bundle</module>
   </modules>

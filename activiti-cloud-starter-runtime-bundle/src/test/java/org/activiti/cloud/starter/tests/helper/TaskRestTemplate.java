@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
-import org.activiti.services.core.model.commands.SetTaskVariablesCmd;
+import org.activiti.cloud.services.core.model.commands.SetTaskVariablesCmd;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;

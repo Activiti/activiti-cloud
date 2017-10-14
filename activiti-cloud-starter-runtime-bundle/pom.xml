@@ -23,19 +23,19 @@
     <!-- keycloak included as default identity provider to be excluded if overridden -->
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-identity-keycloak</artifactId>
+      <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-core-model</artifactId>
+      <artifactId>activiti-cloud-services-core-model</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-events</artifactId>
+      <artifactId>activiti-cloud-services-events</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-rest-impl</artifactId>
+      <artifactId>activiti-cloud-services-rest-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -154,7 +154,7 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-services-test</artifactId>
+      <artifactId>activiti-cloud-services-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

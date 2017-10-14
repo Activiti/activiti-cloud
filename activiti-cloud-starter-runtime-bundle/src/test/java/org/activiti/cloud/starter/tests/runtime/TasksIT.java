@@ -17,11 +17,11 @@
 package org.activiti.cloud.starter.tests.runtime;
 
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.activiti.services.core.model.ProcessDefinition;
-import org.activiti.services.core.model.ProcessInstance;
-import org.activiti.services.core.model.Task;
-import org.activiti.services.core.model.commands.CompleteTaskCmd;
-import org.activiti.services.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.cloud.services.core.model.ProcessDefinition;
+import org.activiti.cloud.services.core.model.ProcessInstance;
+import org.activiti.cloud.services.core.model.Task;
+import org.activiti.cloud.services.core.model.commands.CompleteTaskCmd;
+import org.activiti.cloud.services.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

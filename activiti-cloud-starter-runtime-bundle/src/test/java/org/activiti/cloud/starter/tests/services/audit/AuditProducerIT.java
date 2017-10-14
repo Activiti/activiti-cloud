@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.activiti.services.core.model.ProcessDefinition;
-import org.activiti.starters.test.MockProcessEngineEvent;
+import org.activiti.cloud.services.core.model.ProcessDefinition;
+import org.activiti.cloud.starters.test.MockProcessEngineEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

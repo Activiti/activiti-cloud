@@ -16,10 +16,10 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.activiti.services.core.model.ProcessDefinition;
-import org.activiti.services.core.model.ProcessInstance;
-import org.activiti.services.core.model.Task;
-import org.activiti.services.core.model.commands.SignalProcessInstancesCmd;
+import org.activiti.cloud.services.core.model.ProcessDefinition;
+import org.activiti.cloud.services.core.model.ProcessInstance;
+import org.activiti.cloud.services.core.model.Task;
+import org.activiti.cloud.services.core.model.commands.SignalProcessInstancesCmd;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.junit.Before;

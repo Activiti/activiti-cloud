@@ -17,8 +17,8 @@
 package org.activiti.cloud.starter.tests.runtime;
 
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
-import org.activiti.services.core.model.ProcessDefinition;
-import org.activiti.services.core.model.ProcessInstance;
+import org.activiti.cloud.services.core.model.ProcessDefinition;
+import org.activiti.cloud.services.core.model.ProcessInstance;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.junit.Before;
 import org.junit.Test;
