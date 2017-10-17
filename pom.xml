@@ -671,7 +671,7 @@
             <noDeploy>false</noDeploy>
             <useReleaseProfile>true</useReleaseProfile> <!-- Do not generate javadoc when releaseing -->
             <pushReleases>true</pushReleases>
-            <squash>true</squash>
+            <squash>false</squash>
           </configuration>
         </plugin>
         <plugin>
