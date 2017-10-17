@@ -101,7 +101,7 @@
 
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
     <generated-assertions-package>org.activiti.test</generated-assertions-package>
-    <jgitflow.plugin.version>1.0-m3</jgitflow.plugin.version>
+    <jgitflow.plugin.version>1.0-m5.1</jgitflow.plugin.version>
   </properties>
 
   <modules>
