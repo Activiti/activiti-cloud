@@ -19,7 +19,7 @@ package org.activiti.cloud.starter.tests.runtime;
 import java.util.UUID;
 
 import org.activiti.services.connectors.model.IntegrationRequestEvent;
-import org.activiti.services.connectors.model.IntegrationResult;
+import org.activiti.services.connectors.model.IntegrationResultEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -38,9 +38,9 @@ public class ServiceTaskConsumerHandler {
     public synchronized void receive(IntegrationRequestEvent integrationRequestEvent) {
         integrationRequestEvent.putVariable("age",
                                             42);
-        Message<IntegrationResult> message = MessageBuilder.withPayload(new IntegrationResult(UUID.randomUUID().toString(),
-                                                                                              integrationRequestEvent.getExecutionId(),
-                                                                                              integrationRequestEvent.getVariables())).build();
+        Message<IntegrationResultEvent> message = MessageBuilder.withPayload(new IntegrationResultEvent(UUID.randomUUID().toString(),
+                                                                                                        integrationRequestEvent.getExecutionId(),
+                                                                                                        integrationRequestEvent.getVariables())).build();
         consumerChannels.integrationResultsProducer().send(message);
     }
 }

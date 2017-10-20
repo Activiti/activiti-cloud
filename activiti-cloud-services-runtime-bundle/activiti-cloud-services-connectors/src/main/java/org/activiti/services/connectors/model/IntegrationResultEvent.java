@@ -21,7 +21,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IntegrationResult {
+public class IntegrationResultEvent {
 
     private String id;
 
@@ -30,12 +30,12 @@ public class IntegrationResult {
     private Map<String, Object> variables;
 
     //used by json deserialization
-    public IntegrationResult() {
+    public IntegrationResultEvent() {
     }
 
-    public IntegrationResult(String id,
-                             String executionId,
-                             Map<String, Object> variables) {
+    public IntegrationResultEvent(String id,
+                                  String executionId,
+                                  Map<String, Object> variables) {
         this.id = id;
         this.executionId = executionId;
         this.variables = variables;

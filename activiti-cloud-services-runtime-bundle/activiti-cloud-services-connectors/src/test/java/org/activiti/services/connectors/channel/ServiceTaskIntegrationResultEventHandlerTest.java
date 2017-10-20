@@ -22,7 +22,7 @@ import java.util.Map;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
-import org.activiti.services.connectors.model.IntegrationResult;
+import org.activiti.services.connectors.model.IntegrationResultEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -32,7 +32,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class ServiceTaskIntegrationResultHandlerTest {
+public class ServiceTaskIntegrationResultEventHandlerTest {
 
 
     @InjectMocks
@@ -60,12 +60,12 @@ public class ServiceTaskIntegrationResultHandlerTest {
         given(integrationContextService.findIntegrationContextByExecutionId(executionId)).willReturn(integrationContext);
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
-        IntegrationResult integrationResult = new IntegrationResult("resultId",
-                                                                    executionId,
-                                                                    variables);
+        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent("resultId",
+                                                                                   executionId,
+                                                                                   variables);
 
         //when
-        handler.receive(integrationResult);
+        handler.receive(integrationResultEvent);
 
         //then
         verify(runtimeService).trigger(executionId,
