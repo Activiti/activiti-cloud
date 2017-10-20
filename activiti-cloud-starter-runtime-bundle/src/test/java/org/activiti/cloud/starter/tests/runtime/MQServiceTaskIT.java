@@ -69,7 +69,7 @@ public class MQServiceTaskIT {
         assertThat(updatedVariables)
                 .containsEntry("firstName", "John")
                 .containsEntry("lastName", "Smith")
-                .containsEntry("age", 42);
+                .containsEntry("age", 20);
 
     }
 }

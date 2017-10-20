@@ -16,7 +16,7 @@
 
 package org.activiti.services.connectors.model;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 public class IntegrationRequestEvent {
@@ -47,39 +47,16 @@ public class IntegrationRequestEvent {
         return processInstanceId;
     }
 
-    public void setProcessInstanceId(String processInstanceId) {
-        this.processInstanceId = processInstanceId;
-    }
-
     public String getProcessDefinitionId() {
         return processDefinitionId;
-    }
-
-    public void setProcessDefinitionId(String processDefinitionId) {
-        this.processDefinitionId = processDefinitionId;
     }
 
     public String getExecutionId() {
         return executionId;
     }
 
-    public void setExecutionId(String executionId) {
-        this.executionId = executionId;
-    }
-
     public Map<String, Object> getVariables() {
-        return variables;
-    }
-
-    public void setVariables(Map<String, Object> variables) {
-        this.variables = variables;
-    }
-
-    public void putVariable(String name, Object value) {
-        if (variables == null) {
-            variables = new HashMap<>();
-        }
-        variables.put(name, value);
+        return Collections.unmodifiableMap(variables);
     }
 
 }
