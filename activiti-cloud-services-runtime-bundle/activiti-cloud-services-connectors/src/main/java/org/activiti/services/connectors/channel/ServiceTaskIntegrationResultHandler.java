@@ -45,15 +45,15 @@ public class ServiceTaskIntegrationResultHandler {
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
     public synchronized void receive(IntegrationResult integrationResult) {
-        IntegrationContextEntity integrationContext = integrationContextService.findIntegrationContextByCorrelationId(integrationResult.getCorrelationId());
+        IntegrationContextEntity integrationContext = integrationContextService.findIntegrationContextByExecutionId(integrationResult.getExecutionId());
 
         if (integrationContext != null) {
 
             runtimeService.trigger(integrationContext.getExecutionId(),
                                    integrationResult.getVariables());
         } else {
-            LOGGER.warn("No task is waiting for integration result with correlation id `" +
-                                integrationResult.getCorrelationId() +
+            LOGGER.warn("No task is waiting for integration result with execution id `" +
+                                integrationResult.getExecutionId() +
                                 "`. The integration result `" + integrationResult.getId() + "` will be ignored." );
         }
     }

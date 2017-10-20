@@ -25,7 +25,7 @@ public class IntegrationResult {
 
     private String id;
 
-    private String correlationId;
+    private String executionId;
 
     private Map<String, Object> variables;
 
@@ -34,10 +34,10 @@ public class IntegrationResult {
     }
 
     public IntegrationResult(String id,
-                             String correlationId,
+                             String executionId,
                              Map<String, Object> variables) {
         this.id = id;
-        this.correlationId = correlationId;
+        this.executionId = executionId;
         this.variables = variables;
     }
 
@@ -45,8 +45,8 @@ public class IntegrationResult {
         return id;
     }
 
-    public String getCorrelationId() {
-        return correlationId;
+    public String getExecutionId() {
+        return executionId;
     }
 
     public Map<String, Object> getVariables() {

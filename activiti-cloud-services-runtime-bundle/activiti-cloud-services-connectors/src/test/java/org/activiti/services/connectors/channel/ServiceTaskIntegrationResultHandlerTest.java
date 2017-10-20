@@ -53,17 +53,15 @@ public class ServiceTaskIntegrationResultHandlerTest {
     public void receiveShouldTriggerTheExecution() throws Exception {
         //given
         String executionId = "execId";
-        String correlationId = "corId";
 
         IntegrationContextEntityImpl integrationContext = new IntegrationContextEntityImpl();
-        integrationContext.setCorrelationId(correlationId);
         integrationContext.setExecutionId(executionId);
 
-        given(integrationContextService.findIntegrationContextByCorrelationId(correlationId)).willReturn(integrationContext);
+        given(integrationContextService.findIntegrationContextByExecutionId(executionId)).willReturn(integrationContext);
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
         IntegrationResult integrationResult = new IntegrationResult("resultId",
-                                                                    correlationId,
+                                                                    executionId,
                                                                     variables);
 
         //when

@@ -85,11 +85,10 @@ public class MQServiceTaskBehaviorTest {
         assertThat(entity.getExecutionId()).isEqualTo("execId");
         assertThat(entity.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(entity.getProcessInstanceId()).isEqualTo("procInstId");
-        assertThat(entity.getCorrelationId()).isNotNull();
 
         verify(messageChannel).send(captor.capture());
         Message<IntegrationEvent> message = captor.getValue();
-        assertThat(message.getPayload().getCorrelationId()).isNotNull();
+        assertThat(message.getPayload().getExecutionId()).isNotNull();
         assertThat(message.getPayload().getProcessInstanceId()).isEqualTo("procInstId");
         assertThat(message.getPayload().getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(message.getHeaders().get("connectorType")).isEqualTo(connectorType);

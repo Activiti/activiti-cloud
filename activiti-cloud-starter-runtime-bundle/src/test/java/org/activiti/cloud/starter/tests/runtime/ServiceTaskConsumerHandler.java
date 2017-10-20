@@ -39,7 +39,7 @@ public class ServiceTaskConsumerHandler {
         integrationEvent.putVariable("age",
                                             42);
         Message<IntegrationResult> message = MessageBuilder.withPayload(new IntegrationResult(UUID.randomUUID().toString(),
-                                                                                              integrationEvent.getCorrelationId(),
+                                                                                              integrationEvent.getExecutionId(),
                                                                                               integrationEvent.getVariables())).build();
         consumerChannels.integrationResultsProducer().send(message);
     }

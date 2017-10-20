@@ -17,7 +17,6 @@
 package org.activiti.services.connectors.behavior;
 
 import java.util.Date;
-import java.util.UUID;
 
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.engine.delegate.DelegateExecution;
@@ -58,11 +57,10 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
 
     private Message<IntegrationEvent> buildMessage(DelegateExecution execution,
                                                    IntegrationContextEntity integrationContext) {
-        IntegrationEvent event = new IntegrationEvent();
-        event.setProcessInstanceId(execution.getProcessInstanceId());
-        event.setProcessDefinitionId(execution.getProcessDefinitionId());
-        event.setCorrelationId(integrationContext.getCorrelationId());
-        event.setVariables(execution.getVariables());
+        IntegrationEvent event = new IntegrationEvent(execution.getProcessInstanceId(),
+                                                      execution.getProcessDefinitionId(),
+                                                      integrationContext.getExecutionId(),
+                                                      execution.getVariables());
 
         String implementation = ((ServiceTask) execution.getCurrentFlowElement()).getImplementation();
         return MessageBuilder.withPayload(event)
@@ -73,7 +71,6 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
 
     private IntegrationContextEntity buildIntegrationContext(DelegateExecution execution) {
         IntegrationContextEntity integrationContext = integrationContextManager.create();
-        integrationContext.setCorrelationId(UUID.randomUUID().toString());
         integrationContext.setExecutionId(execution.getId());
         integrationContext.setProcessInstanceId(execution.getProcessInstanceId());
         integrationContext.setProcessDefinitionId(execution.getProcessDefinitionId());

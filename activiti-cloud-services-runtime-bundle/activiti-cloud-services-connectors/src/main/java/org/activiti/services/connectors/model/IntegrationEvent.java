@@ -25,9 +25,23 @@ public class IntegrationEvent {
 
     private String processDefinitionId;
 
-    private String correlationId;
+    private String executionId;
 
     private Map<String, Object> variables;
+
+    //used by json deserialization
+    public IntegrationEvent() {
+    }
+
+    public IntegrationEvent(String processInstanceId,
+                            String processDefinitionId,
+                            String executionId,
+                            Map<String, Object> variables) {
+        this.processInstanceId = processInstanceId;
+        this.processDefinitionId = processDefinitionId;
+        this.executionId = executionId;
+        this.variables = variables;
+    }
 
     public String getProcessInstanceId() {
         return processInstanceId;
@@ -45,12 +59,12 @@ public class IntegrationEvent {
         this.processDefinitionId = processDefinitionId;
     }
 
-    public String getCorrelationId() {
-        return correlationId;
+    public String getExecutionId() {
+        return executionId;
     }
 
-    public void setCorrelationId(String correlationId) {
-        this.correlationId = correlationId;
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
     }
 
     public Map<String, Object> getVariables() {
