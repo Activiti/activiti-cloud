@@ -21,7 +21,7 @@ import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
-import org.activiti.services.connectors.model.IntegrationEvent;
+import org.activiti.services.connectors.model.IntegrationRequestEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -53,7 +53,7 @@ public class MQServiceTaskBehaviorTest {
     private MessageChannel messageChannel;
 
     @Captor
-    private ArgumentCaptor<Message<IntegrationEvent>> captor;
+    private ArgumentCaptor<Message<IntegrationRequestEvent>> captor;
 
     @Before
     public void setUp() throws Exception {
@@ -87,7 +87,7 @@ public class MQServiceTaskBehaviorTest {
         assertThat(entity.getProcessInstanceId()).isEqualTo("procInstId");
 
         verify(messageChannel).send(captor.capture());
-        Message<IntegrationEvent> message = captor.getValue();
+        Message<IntegrationRequestEvent> message = captor.getValue();
         assertThat(message.getPayload().getExecutionId()).isNotNull();
         assertThat(message.getPayload().getProcessInstanceId()).isEqualTo("procInstId");
         assertThat(message.getPayload().getProcessDefinitionId()).isEqualTo("procDefId");

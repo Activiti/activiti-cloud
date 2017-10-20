@@ -25,7 +25,7 @@ import org.activiti.engine.impl.delegate.TriggerableActivityBehavior;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
-import org.activiti.services.connectors.model.IntegrationEvent;
+import org.activiti.services.connectors.model.IntegrationRequestEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -50,17 +50,17 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
         IntegrationContextEntity integrationContext = buildIntegrationContext(execution);
         integrationContextManager.insert(integrationContext);
 
-        Message<IntegrationEvent> message = buildMessage(execution,
-                                                         integrationContext);
+        Message<IntegrationRequestEvent> message = buildMessage(execution,
+                                                                integrationContext);
         channels.integrationEventsProducer().send(message);
     }
 
-    private Message<IntegrationEvent> buildMessage(DelegateExecution execution,
-                                                   IntegrationContextEntity integrationContext) {
-        IntegrationEvent event = new IntegrationEvent(execution.getProcessInstanceId(),
-                                                      execution.getProcessDefinitionId(),
-                                                      integrationContext.getExecutionId(),
-                                                      execution.getVariables());
+    private Message<IntegrationRequestEvent> buildMessage(DelegateExecution execution,
+                                                          IntegrationContextEntity integrationContext) {
+        IntegrationRequestEvent event = new IntegrationRequestEvent(execution.getProcessInstanceId(),
+                                                                    execution.getProcessDefinitionId(),
+                                                                    integrationContext.getExecutionId(),
+                                                                    execution.getVariables());
 
         String implementation = ((ServiceTask) execution.getCurrentFlowElement()).getImplementation();
         return MessageBuilder.withPayload(event)

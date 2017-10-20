@@ -19,7 +19,7 @@ package org.activiti.services.connectors.model;
 import java.util.HashMap;
 import java.util.Map;
 
-public class IntegrationEvent {
+public class IntegrationRequestEvent {
 
     private String processInstanceId;
 
@@ -30,13 +30,13 @@ public class IntegrationEvent {
     private Map<String, Object> variables;
 
     //used by json deserialization
-    public IntegrationEvent() {
+    public IntegrationRequestEvent() {
     }
 
-    public IntegrationEvent(String processInstanceId,
-                            String processDefinitionId,
-                            String executionId,
-                            Map<String, Object> variables) {
+    public IntegrationRequestEvent(String processInstanceId,
+                                   String processDefinitionId,
+                                   String executionId,
+                                   Map<String, Object> variables) {
         this.processInstanceId = processInstanceId;
         this.processDefinitionId = processDefinitionId;
         this.executionId = executionId;

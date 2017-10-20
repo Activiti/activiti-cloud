@@ -18,7 +18,7 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import java.util.UUID;
 
-import org.activiti.services.connectors.model.IntegrationEvent;
+import org.activiti.services.connectors.model.IntegrationRequestEvent;
 import org.activiti.services.connectors.model.IntegrationResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -35,12 +35,12 @@ public class ServiceTaskConsumerHandler {
     private ConnectorIntegrationChannels consumerChannels;
 
     @StreamListener(value = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER, condition = "headers['connectorType']=='payment'")
-    public synchronized void receive(IntegrationEvent integrationEvent) {
-        integrationEvent.putVariable("age",
+    public synchronized void receive(IntegrationRequestEvent integrationRequestEvent) {
+        integrationRequestEvent.putVariable("age",
                                             42);
         Message<IntegrationResult> message = MessageBuilder.withPayload(new IntegrationResult(UUID.randomUUID().toString(),
-                                                                                              integrationEvent.getExecutionId(),
-                                                                                              integrationEvent.getVariables())).build();
+                                                                                              integrationRequestEvent.getExecutionId(),
+                                                                                              integrationRequestEvent.getVariables())).build();
         consumerChannels.integrationResultsProducer().send(message);
     }
 }
