@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
 import org.activiti.engine.HistoryService;
@@ -26,6 +25,8 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.UserGroupLookupProxy;
+import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
+import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.spring.ProcessEngineFactoryBean;
 import org.activiti.spring.SpringAsyncExecutor;
 import org.activiti.spring.SpringCallerRunsRejectedJobsHandler;
@@ -198,5 +199,19 @@ public abstract class AbstractProcessEngineAutoConfiguration
   @ConditionalOnMissingBean
   public TaskExecutor taskExecutor() {
     return new SimpleAsyncTaskExecutor();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  @Override
+  public IntegrationContextManager integrationContextManagerBean(ProcessEngine processEngine) {
+    return super.integrationContextManagerBean(processEngine);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  @Override
+  public IntegrationContextService integrationContextServiceBean(ProcessEngine processEngine) {
+    return super.integrationContextServiceBean(processEngine);
   }
 }

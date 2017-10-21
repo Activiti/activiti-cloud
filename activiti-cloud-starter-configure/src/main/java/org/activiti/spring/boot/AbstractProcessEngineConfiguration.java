@@ -15,7 +15,6 @@ package org.activiti.spring.boot;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.sql.DataSource;
 
 import org.activiti.engine.HistoryService;
@@ -24,6 +23,8 @@ import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
+import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.spring.ProcessEngineFactoryBean;
 import org.activiti.spring.SpringAsyncExecutor;
 import org.activiti.spring.SpringProcessEngineConfiguration;
@@ -108,6 +109,14 @@ public abstract class AbstractProcessEngineConfiguration {
 
   public ManagementService managementServiceBeanBean(ProcessEngine processEngine) {
     return processEngine.getManagementService();
+  }
+
+  public IntegrationContextManager integrationContextManagerBean(ProcessEngine processEngine) {
+      return processEngine.getProcessEngineConfiguration().getIntegrationContextManager();
+  }
+
+  public IntegrationContextService integrationContextServiceBean(ProcessEngine processEngine) {
+      return processEngine.getProcessEngineConfiguration().getIntegrationContextService();
   }
 
 }
