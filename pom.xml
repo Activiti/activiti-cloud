@@ -10,7 +10,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <version.activiti>${project.version}</version.activiti>
+    <version.activiti>7-201710-EA-SNAPSHOT</version.activiti>
     <version.activiti.cloud>${project.version}</version.activiti.cloud>
 
     <!--configuration properties-->
@@ -223,6 +223,11 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-events</artifactId>
+        <version>${version.activiti.cloud}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-connectors</artifactId>
         <version>${version.activiti.cloud}</version>
       </dependency>
       <dependency>
@@ -805,27 +810,27 @@
                   <module name="Checker">
                     <!-- Checks for whitespace. -->
                     <module name="FileTabCharacter">
-                      <property name="severity" value="error"/>
-                      <property name="eachLine" value="true"/>
+                      <property name="severity" value="error" />
+                      <property name="eachLine" value="true" />
                     </module>
                     <module name="TreeWalker">
                       <!-- Import settings: getting rid of redundant import, forbid star notation, defined order of imports. -->
-                      <module name="RedundantImport"/>
+                      <module name="RedundantImport" />
                       <module name="AvoidStarImport">
-                        <property name="excludes" value="org.junit.Assert,org.assertj.core.api.Assertions,org.mockito.Mockito"/>
-                        <property name="allowClassImports" value="false"/>
-                        <property name="allowStaticMemberImports" value="false"/>
+                        <property name="excludes" value="org.junit.Assert,org.assertj.core.api.Assertions,org.mockito.Mockito" />
+                        <property name="allowClassImports" value="false" />
+                        <property name="allowStaticMemberImports" value="false" />
                       </module>
                       <module name="CustomImportOrder">
-                        <property name="customImportOrderRules" value="STANDARD_JAVA_PACKAGE###THIRD_PARTY_PACKAGE###STATIC"/>
-                        <property name="sortImportsInGroupAlphabetically" value="true"/>
-                        <property name="separateLineBetweenGroups" value="true"/>
+                        <property name="customImportOrderRules" value="STANDARD_JAVA_PACKAGE###THIRD_PARTY_PACKAGE###STATIC" />
+                        <property name="sortImportsInGroupAlphabetically" value="true" />
+                        <property name="separateLineBetweenGroups" value="true" />
                       </module>
 
                       <module name="NeedBraces">
-                        <property name="tokens" value="LITERAL_IF, LITERAL_ELSE, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO"/>
+                        <property name="tokens" value="LITERAL_IF, LITERAL_ELSE, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO" />
                       </module>
-                      <module name="EqualsHashCode"/>
+                      <module name="EqualsHashCode" />
                     </module>
                   </module>
                 </checkstyleRules>
