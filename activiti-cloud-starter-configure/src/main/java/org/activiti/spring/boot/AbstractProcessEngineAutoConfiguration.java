@@ -119,6 +119,10 @@ public abstract class AbstractProcessEngineAutoConfiguration
       conf.setCustomMybatisXMLMappers(new HashSet<String>(activitiProperties.getCustomMybatisXMLMappers()));
     }
     
+    if (activitiProperties.isUseStrongUuids()) {
+      conf.setIdGenerator(new StrongUuidGenerator());
+    }
+    
     if (processEngineConfigurationConfigurer != null) {
     	processEngineConfigurationConfigurer.configure(conf);
     }
