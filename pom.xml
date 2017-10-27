@@ -67,8 +67,8 @@
      see https://issues.jboss.org/browse/KEYCLOAK-5098
      https://github.com/keycloak/keycloak/pull/4279
      -->
-    <keycloak.snapshot.version>3.2.0.CR1-SNAPSHOT</keycloak.snapshot.version>
-    <keycloak.version>3.2.0.Final</keycloak.version>
+    <keycloak.snapshot.version>3.4.0.CR1-SNAPSHOT</keycloak.snapshot.version>
+    <keycloak.version>3.3.0.CR2</keycloak.version>
     <resteasy-client.version>3.0.21.Final</resteasy-client.version>
 
     <!-- plugins -->
@@ -416,6 +416,11 @@
         <groupId>org.keycloak</groupId>
         <artifactId>keycloak-spring-security-adapter</artifactId>
         <version>${keycloak.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-spring-boot-adapter-core</artifactId>
+        <version>${keycloak.snapshot.version}</version>
       </dependency>
       <dependency>
         <groupId>org.keycloak</groupId>
