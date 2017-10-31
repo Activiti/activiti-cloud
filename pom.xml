@@ -19,7 +19,7 @@
 
     <!-- Spring Boot / Cloud / Stream deps -->
     <spring.boot.version>2.0.0.M5</spring.boot.version>
-    <spring.cloud.version>Finchley.BUILD-SNAPSHOT</spring.cloud.version>
+    <spring.cloud.version>Finchley.M3</spring.cloud.version>
     <spring.cloud.stream.version>Ditmars.RELEASE</spring.cloud.stream.version>
     <!-- using SNAPSHOT version to benefit from https://github.com/spring-projects/spring-hateoas/issues/583 -->
     <spring.hateoas.version>0.24.0.BUILD-SNAPSHOT</spring.hateoas.version>

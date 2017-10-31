@@ -32,3 +32,13 @@ For example:
 ```
 
 Versions are going to be handled by maven. 
+
+## Spring Version Alignment
+
+We are using spring boot and spring cloud. These versions need to be aligned. See:
+
+http://projects.spring.io/spring-cloud/
+
+And tags at:
+
+https://github.com/spring-cloud/spring-cloud-release
