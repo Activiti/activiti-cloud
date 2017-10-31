@@ -61,12 +61,14 @@ public class Task implements Serializable {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModifiedFrom;
 
-    @ManyToOne
-    @JoinColumn(name="processInstanceId", referencedColumnName="processInstanceId", insertable=false, updatable=false)
+    @ManyToOne(optional=true)
+    @JoinColumn(name="processInstanceId", referencedColumnName="processInstanceId", insertable=false, updatable=false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
     private ProcessInstance processInstance;
     
-    @OneToMany(fetch=FetchType.EAGER) 
-    @JoinColumn(name="taskId", referencedColumnName="id", insertable=false, updatable=false)
+    @OneToMany(fetch=FetchType.EAGER)
+    @JoinColumn(name="taskId", referencedColumnName="id", insertable=false, updatable=false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
     private Set<Variable> variables;    
     
     public Task() {

@@ -47,11 +47,13 @@ public class Variable {
     private String value;
 
     @ManyToOne(optional=true)
-    @JoinColumn(name="taskId", referencedColumnName="id", insertable=false, updatable=false, nullable = true)
+    @JoinColumn(name="taskId", referencedColumnName="id", insertable=false, updatable=false, nullable=true
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
     private Task task;
 
-    @ManyToOne
-    @JoinColumn(name="processInstanceId", referencedColumnName="processInstanceId", insertable=false, updatable=false)
+    @ManyToOne(optional=true)
+    @JoinColumn(name="processInstanceId", referencedColumnName="processInstanceId", insertable=false, updatable=false
+    , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
     private ProcessInstance processInstance;
     
     public Variable() {
