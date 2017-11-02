@@ -50,10 +50,12 @@ public class ProcessInstance {
 
     @GraphQLDescription("Associated tasks entities")
     @OneToMany(mappedBy="processInstance")
+    @org.hibernate.annotations.ForeignKey(name = "none")
     private Set<Task> tasks;     
 
     @GraphQLDescription("Associated process instance variables")
     @OneToMany(mappedBy="processInstance")
+    @org.hibernate.annotations.ForeignKey(name = "none")
     private Set<Variable> variables;     
     
     public ProcessInstance() {
