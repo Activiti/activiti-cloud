@@ -82,6 +82,17 @@ public class ProcessDefinitionIT {
                 "ProcessWithBoundarySignal");
     }
 
+    private ProcessDefinition getProcessDefinition(String name) {
+        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
+        Iterator<ProcessDefinition> it = processDefinitionsEntity.getBody().getContent().iterator();
+        ProcessDefinition aProcessDefinition = null;
+        do {
+            aProcessDefinition = it.next();
+        } while (!aProcessDefinition.getName().equals(name));
+
+        return aProcessDefinition;
+    }
+
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
         ParameterizedTypeReference<PagedResources<ProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<ProcessDefinition>>() {
         };
@@ -122,16 +133,7 @@ public class ProcessDefinitionIT {
         ParameterizedTypeReference<ProcessDefinitionMeta> responseType = new ParameterizedTypeReference<ProcessDefinitionMeta>() {
         };
 
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
-        assertThat(processDefinitionsEntity).isNotNull();
-        assertThat(processDefinitionsEntity.getBody()).isNotNull();
-        assertThat(processDefinitionsEntity.getBody().getContent()).isNotEmpty();
-        ProcessDefinition aProcessDefinition = null;
-
-        Iterator<ProcessDefinition> it = processDefinitionsEntity.getBody().getContent().iterator();
-        do {
-            aProcessDefinition = it.next();
-        } while (!aProcessDefinition.getName().equals(PROCESS_WITH_VARIABLES_2));
+        ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_WITH_VARIABLES_2);
 
         //when
         ResponseEntity<ProcessDefinitionMeta> entity = restTemplate.exchange(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/meta",
@@ -154,16 +156,7 @@ public class ProcessDefinitionIT {
         ParameterizedTypeReference<ProcessDefinitionMeta> responseType = new ParameterizedTypeReference<ProcessDefinitionMeta>() {
         };
 
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
-        assertThat(processDefinitionsEntity).isNotNull();
-        assertThat(processDefinitionsEntity.getBody()).isNotNull();
-        assertThat(processDefinitionsEntity.getBody().getContent()).isNotEmpty();
-        ProcessDefinition aProcessDefinition = null;
-
-        Iterator<ProcessDefinition> it = processDefinitionsEntity.getBody().getContent().iterator();
-        do {
-            aProcessDefinition = it.next();
-        } while (!aProcessDefinition.getName().equals(PROCESS_POOL_LANE));
+        ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_POOL_LANE);
 
         //when
         ResponseEntity<ProcessDefinitionMeta> entity = restTemplate.exchange(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/meta",
@@ -182,11 +175,8 @@ public class ProcessDefinitionIT {
 
     @Test
     public void shouldRetriveProcessModel() throws Exception {
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
-        assertThat(processDefinitionsEntity).isNotNull();
-        assertThat(processDefinitionsEntity.getBody()).isNotNull();
-        assertThat(processDefinitionsEntity.getBody().getContent()).isNotEmpty();
-        ProcessDefinition aProcessDefinition = processDefinitionsEntity.getBody().getContent().iterator().next();
+
+        ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_POOL_LANE);
 
         //when
         String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/xml",
@@ -195,16 +185,13 @@ public class ProcessDefinitionIT {
         //then
         assertThat(responseData).isNotNull();
         assertThat(responseData).isEqualTo(TestResourceUtil.getProcessXml(aProcessDefinition.getId().split(":")[0]));
+
     }
 
     @Test
     public void shouldRetriveBpmnModel() throws Exception {
         //given
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
-        assertThat(processDefinitionsEntity).isNotNull();
-        assertThat(processDefinitionsEntity.getBody()).isNotNull();
-        assertThat(processDefinitionsEntity.getBody().getContent()).isNotEmpty();
-        ProcessDefinition aProcessDefinition = processDefinitionsEntity.getBody().getContent().iterator().next();
+        ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_WITH_VARIABLES_2);
 
         //when
         String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/json",
@@ -227,15 +214,14 @@ public class ProcessDefinitionIT {
         for (FlowElement element : targetModel.getMainProcess().getFlowElements()) {
             assertThat(sourceModel.getFlowElement(element.getId()) != null);
         }
+
+
     }
 
     @Test
     public void shouldRetriveDiagram() throws Exception {
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
-        assertThat(processDefinitionsEntity).isNotNull();
-        assertThat(processDefinitionsEntity.getBody()).isNotNull();
-        assertThat(processDefinitionsEntity.getBody().getContent()).isNotEmpty();
-        ProcessDefinition aProcessDefinition = processDefinitionsEntity.getBody().getContent().iterator().next();
+
+        ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_POOL_LANE);
 
         //when
         String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/svg",

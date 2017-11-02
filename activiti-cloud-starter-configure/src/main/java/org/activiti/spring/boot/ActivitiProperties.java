@@ -18,16 +18,12 @@ import java.util.List;
 import org.activiti.engine.impl.history.HistoryLevel;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/**
 
-
- */
 @ConfigurationProperties("spring.activiti")
 public class ActivitiProperties {
 
   private boolean checkProcessDefinitions = true;
-  private boolean asyncExecutorActivate = true;
-  private boolean restApiEnabled;
+  private boolean asyncExecutorActivate = false;
   private String deploymentName;
   private String mailServerHost = "localhost";
   private int mailServerPort = 1025;
@@ -38,16 +34,14 @@ public class ActivitiProperties {
   private boolean mailServerUseTls;
   private String databaseSchemaUpdate = "true";
   private String databaseSchema;
-  private boolean isDbIdentityUsed = true;
-  private boolean isDbHistoryUsed = true;
-  private HistoryLevel historyLevel = HistoryLevel.AUDIT;
+  private boolean isDbIdentityUsed = false;
+  private boolean isDbHistoryUsed = false;
+  private HistoryLevel historyLevel = HistoryLevel.NONE;
   private String processDefinitionLocationPrefix = "classpath:/processes/";
   private List<String> processDefinitionLocationSuffixes = Arrays.asList("**.bpmn20.xml", "**.bpmn");
-  private String restApiMapping = "/api/*";
-  private String restApiServletName = "activitiRestApi";
-  private boolean jpaEnabled = true; // true by default
   private List<String> customMybatisMappers;
   private List<String> customMybatisXMLMappers;
+  private boolean useStrongUuids = true;
 
   public boolean isAsyncExecutorActivate() {
     return asyncExecutorActivate;
@@ -55,38 +49,6 @@ public class ActivitiProperties {
 
   public void setAsyncExecutorActivate(boolean asyncExecutorActivate) {
     this.asyncExecutorActivate = asyncExecutorActivate;
-  }
-
-  public boolean isRestApiEnabled() {
-    return restApiEnabled;
-  }
-
-  public void setRestApiEnabled(boolean restApiEnabled) {
-    this.restApiEnabled = restApiEnabled;
-  }
-
-  public boolean isJpaEnabled() {
-    return jpaEnabled;
-  }
-
-  public void setJpaEnabled(boolean jpaEnabled) {
-    this.jpaEnabled = jpaEnabled;
-  }
-
-  public String getRestApiMapping() {
-    return restApiMapping;
-  }
-
-  public void setRestApiMapping(String restApiMapping) {
-    this.restApiMapping = restApiMapping;
-  }
-
-  public String getRestApiServletName() {
-    return restApiServletName;
-  }
-
-  public void setRestApiServletName(String restApiServletName) {
-    this.restApiServletName = restApiServletName;
   }
 
   public boolean isCheckProcessDefinitions() {
@@ -234,4 +196,13 @@ public class ActivitiProperties {
   public void setCustomMybatisXMLMappers(List<String> customMybatisXMLMappers) {
     this.customMybatisXMLMappers = customMybatisXMLMappers;
   }
+  
+  public boolean isUseStrongUuids() {
+	return useStrongUuids;
+  }
+  
+  public void setUseStrongUuids(boolean useStrongUuids) {
+	this.useStrongUuids = useStrongUuids;
+  }
+  
 }

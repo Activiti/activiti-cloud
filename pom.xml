@@ -4,13 +4,19 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7-201710-EA-SNAPSHOT</version>
+    <version>7-201710-EA</version>
   </parent>
 
   <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
+  <version>7-201710-EA</version>
   <name>Activiti Cloud :: Runtime Bundle Service Parent</name>
   <description>Activiti Cloud :: Runtime Bundle Service Parent</description>
   <packaging>pom</packaging>
+
+  <properties>
+    <version.activiti>${project.version}</version.activiti>
+    <version.activiti.cloud>${project.version}</version.activiti.cloud>
+  </properties>
 
   <modules>
     <module>activiti-cloud-services-runtime-bundle</module>

@@ -1,41 +1,39 @@
 package org.activiti.cloud.starter.tests.services.audit;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.services.core.model.ProcessDefinition;
-import org.activiti.cloud.starters.test.MockProcessEngineEvent;
+import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.Assertions.*;
+
 @RunWith(SpringRunner.class)
+@ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@EnableBinding(AuditConsumer.class)
 public class AuditProducerIT {
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
+    public static final String AUDIT_PRODUCER_IT = "AuditProducerIT";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -43,12 +41,13 @@ public class AuditProducerIT {
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
 
+    @Autowired
+    private AuditConsumerStreamHandler streamHandler;
+
     @Value("${keycloaktestuser}")
     protected String keycloaktestuser;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
-
-    private static boolean messageRecievedFlag;
 
     @Before
     public void setUp() throws Exception {
@@ -62,25 +61,8 @@ public class AuditProducerIT {
 
     }
 
-    @EnableAutoConfiguration
-    public static class StreamHandler {
-
-        @StreamListener(AuditConsumer.AUDIT_CONSUMER)
-        public void recieve(MockProcessEngineEvent[] events) {
-            assertThat(events).isNotNull();
-            assertThat(events.length).isEqualTo(6);
-            assertThat(events[0].getEventType()).isEqualTo("ProcessStartedEvent");
-            assertThat(events[1].getEventType()).isEqualTo("ActivityStartedEvent");
-            assertThat(events[2].getEventType()).isEqualTo("ActivityCompletedEvent");
-            assertThat(events[3].getEventType()).isEqualTo("SequenceFlowTakenEvent");
-            assertThat(events[4].getEventType()).isEqualTo("ActivityStartedEvent");
-            assertThat(events[5].getEventType()).isEqualTo("TaskCreatedEvent");
-            messageRecievedFlag = true;
-        }
-    }
-
     @Test
-    public void shouldRecieveAuditMessage() throws Exception {
+    public void shouldReceiveAuditMessage() throws Exception {
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
@@ -88,7 +70,7 @@ public class AuditProducerIT {
         waitForMessage();
 
         //then
-        assertThat(messageRecievedFlag).isTrue();
+        assertThat(streamHandler.isMessageReceived()).isTrue();
 
     }
 

@@ -29,16 +29,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 @EnableBinding(ProcessEngineIntegrationChannels.class)
-public class ServiceTaskIntegrationResultHandler {
+public class ServiceTaskIntegrationResultEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskIntegrationResultHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskIntegrationResultEventHandler.class);
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
 
     @Autowired
-    public ServiceTaskIntegrationResultHandler(RuntimeService runtimeService,
-                                               IntegrationContextService integrationContextService) {
+    public ServiceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
+                                                    IntegrationContextService integrationContextService) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
     }
@@ -48,7 +48,7 @@ public class ServiceTaskIntegrationResultHandler {
         IntegrationContextEntity integrationContext = integrationContextService.findIntegrationContextByExecutionId(integrationResultEvent.getExecutionId());
 
         if (integrationContext != null) {
-
+            integrationContextService.deleteIntegrationContext(integrationContext);
             runtimeService.trigger(integrationContext.getExecutionId(),
                                    integrationResultEvent.getVariables());
         } else {
