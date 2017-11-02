@@ -5,12 +5,12 @@
   <description>Activiti Cloud (Parent)</description>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-parent</artifactId>
-  <version>7-201710-EA-SNAPSHOT</version>
+  <version>7-201710-EA</version>
 
   <packaging>pom</packaging>
 
   <properties>
-    <version.activiti>7-201710-EA-SNAPSHOT</version.activiti>
+    <version.activiti>${project.version}</version.activiti>
     <version.activiti.cloud>${project.version}</version.activiti.cloud>
 
     <!--configuration properties-->
