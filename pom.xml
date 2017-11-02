@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7-201710-EA-SNAPSHOT</version>
+    <version>7-201710-EA</version>
   </parent>
 
   <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
@@ -14,8 +14,8 @@
   <packaging>pom</packaging>
 
   <properties>
-    <version.activiti>7-201710-EA-SNAPSHOT</version.activiti>
-    <version.activiti.cloud>7-201710-EA-SNAPSHOT</version.activiti.cloud>
+    <version.activiti>${project.version}</version.activiti>
+    <version.activiti.cloud>${project.version}</version.activiti.cloud>
   </properties>
 
   <modules>
