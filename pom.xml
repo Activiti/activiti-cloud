@@ -10,6 +10,7 @@
   <artifactId>activiti-cloud-query-service-parent</artifactId>
   <name>Activiti Cloud - Query Services :: Parent</name>
   <description>Activiti Cloud Query Services Parent</description>
+  <version>7-201710-EA-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
