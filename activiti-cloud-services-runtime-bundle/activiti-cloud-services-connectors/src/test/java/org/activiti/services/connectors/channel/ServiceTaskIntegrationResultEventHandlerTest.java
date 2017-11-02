@@ -36,7 +36,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
 
     @InjectMocks
-    private ServiceTaskIntegrationResultHandler handler;
+    private ServiceTaskIntegrationResultEventHandler handler;
 
     @Mock
     private RuntimeService runtimeService;
@@ -50,7 +50,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     }
 
     @Test
-    public void receiveShouldTriggerTheExecution() throws Exception {
+    public void receiveShouldTriggerTheExecutionAndDeleteTheRelatedIntegrationContext() throws Exception {
         //given
         String executionId = "execId";
 
@@ -68,6 +68,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         handler.receive(integrationResultEvent);
 
         //then
+        verify(integrationContextService).deleteIntegrationContext(integrationContext);
         verify(runtimeService).trigger(executionId,
                                        variables);
     }
