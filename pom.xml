@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7-201710-EA-SNAPSHOT</version>
+    <version>7-201710-EA</version>
   </parent>
 
 
@@ -14,8 +14,8 @@
   <version>7-201710-EA-SNAPSHOT</version>
 
   <properties>
-    <version.activiti>7-201710-EA-SNAPSHOT</version.activiti>
-    <version.activiti.cloud>7-201710-EA-SNAPSHOT</version.activiti.cloud>
+    <version.activiti>${project.version}</version.activiti>
+    <version.activiti.cloud>${project.version}</version.activiti.cloud>
   </properties>
   <modules>
     <module>activiti-cloud-connectors-starter</module>
