@@ -11,6 +11,7 @@
 
   <artifactId>activiti-cloud-connectors-parent</artifactId>
   <packaging>pom</packaging>
+  <version>7-201710-EA-SNAPSHOT</version>
 
   <properties>
     <version.activiti>7-201710-EA-SNAPSHOT</version.activiti>
