@@ -29,6 +29,7 @@ import org.activiti.cloud.services.audit.events.TaskCompletedEventEntity;
 import org.activiti.cloud.services.audit.events.VariableDeletedEventEntity;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
+import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
 
 @Configuration
@@ -36,6 +37,10 @@ public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
 
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
+
+        config.setBasePath("/v1");
+        config.setRepositoryDetectionStrategy(RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
+
         config.exposeIdsFor(ActivityCompletedEventEntity.class);
         config.exposeIdsFor(ActivityStartedEventEntity.class);
         config.exposeIdsFor(ProcessCompletedEventEntity.class);

@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.audit.EventsRepository;
+import org.activiti.cloud.services.audit.repository.EventsRepository;
 import org.activiti.cloud.services.audit.events.ActivityStartedEventEntity;
 import org.activiti.cloud.services.audit.events.ActivityStartedEventEntityAssert;
 import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
