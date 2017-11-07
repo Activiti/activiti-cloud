@@ -7,7 +7,9 @@
   </a>
   <a href='https://github.com/Activiti/activiti-cloud-build/blob/master/LICENSE.txt'>
        <img src='https://img.shields.io/hexpm/l/plug.svg' alt='license' />
-    </a>
+  </a>
+  <a href="https://cla-assistant.io/Activiti/activiti-build"><img src="https://cla-assistant.io/readme/badge/Activiti/activiti-build" alt="CLA assistant" /></a>
+
 </p>
 Activiti Cloud Parent and BOM (Bill of Materials)
 
