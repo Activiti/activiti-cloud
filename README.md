@@ -15,7 +15,7 @@
   <a href='https://github.com/Activiti/activiti-cloud-service-common/blob/master/LICENSE.txt'>
        <img src='https://img.shields.io/hexpm/l/plug.svg' alt='license' />
   </a>
-  <a href="https://cla-assistant.io/Activiti/Activiti"><img src="https://cla-assistant.io/readme/badge/Activiti/activiti-cloud-service-common" alt="CLA assistant" /></a>
+  <a href="https://cla-assistant.io/Activiti/activiti-cloud-service-common"><img src="https://cla-assistant.io/readme/badge/Activiti/activiti-cloud-service-common" alt="CLA assistant" /></a>
 
 </p>
 
