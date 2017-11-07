@@ -1,4 +1,15 @@
 # activiti-cloud-build
+========
+
+[![Join the chat at https://gitter.im/Activiti/Activiti7](https://badges.gitter.im/Activiti/Activiti7.svg)](https://gitter.im/Activiti/Activiti7?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+<p>
+  <a title='Build Status Travis' href="https://travis-ci.org/Activiti/activiti-cloud-build">
+    <img src='https://travis-ci.org/Activiti/activiti-cloud-build.svg?branch=master'  alt='Travis Status' />
+  </a>
+  <a href='https://github.com/Activiti/activiti-cloud-build/blob/master/LICENSE.txt'>
+       <img src='https://img.shields.io/hexpm/l/plug.svg' alt='license' />
+    </a>
+</p>
 Activiti Cloud Parent and BOM (Bill of Materials)
 
 ## activiti-cloud-parent
