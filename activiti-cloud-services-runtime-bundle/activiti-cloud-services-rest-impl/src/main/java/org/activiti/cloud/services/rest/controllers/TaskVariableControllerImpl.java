@@ -17,11 +17,10 @@ package org.activiti.cloud.services.rest.controllers;
 
 import java.util.Map;
 
+import org.activiti.cloud.services.api.model.TaskVariables;
 import org.activiti.engine.TaskService;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.model.TaskVariables;
-import org.activiti.cloud.services.core.model.TaskVariables.TaskVariableScope;
-import org.activiti.cloud.services.core.model.commands.SetTaskVariablesCmd;
+import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
 import org.activiti.cloud.services.rest.api.resources.assembler.TaskVariableResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +59,7 @@ public class TaskVariableControllerImpl implements TaskVariableController {
             method = RequestMethod.GET)
     public Resource<Map<String, Object>> getVariables(@PathVariable String taskId) {
         Map<String, Object> variables = taskService.getVariables(taskId);
-        return variableResourceBuilder.toResource(new TaskVariables(taskId, variables, TaskVariableScope.GLOBAL));
+        return variableResourceBuilder.toResource(new TaskVariables(taskId, variables, TaskVariables.TaskVariableScope.GLOBAL));
     }
 
     @Override
@@ -68,7 +67,7 @@ public class TaskVariableControllerImpl implements TaskVariableController {
             method = RequestMethod.GET)
     public Resource<Map<String, Object>> getVariablesLocal(@PathVariable String taskId) {
         Map<String, Object> variables = taskService.getVariablesLocal(taskId);
-        return variableResourceBuilder.toResource(new TaskVariables(taskId, variables, TaskVariableScope.LOCAL));
+        return variableResourceBuilder.toResource(new TaskVariables(taskId, variables, TaskVariables.TaskVariableScope.LOCAL));
     }
 
     @Override

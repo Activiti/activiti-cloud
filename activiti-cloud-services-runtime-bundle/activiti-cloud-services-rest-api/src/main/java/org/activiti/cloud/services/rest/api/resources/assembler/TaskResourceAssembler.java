@@ -18,11 +18,11 @@ package org.activiti.cloud.services.rest.api.resources.assembler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.rest.api.HomeController;
-import org.activiti.cloud.services.rest.api.resources.TaskResource;
-import org.activiti.cloud.services.core.model.Task;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
 import org.activiti.cloud.services.rest.api.TaskController;
+import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.stereotype.Component;

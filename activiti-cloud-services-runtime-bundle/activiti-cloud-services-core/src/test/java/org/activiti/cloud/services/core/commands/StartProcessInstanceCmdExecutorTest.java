@@ -2,10 +2,10 @@ package org.activiti.cloud.services.core.commands;
 
 import java.util.Date;
 
+import org.activiti.cloud.services.api.commands.results.StartProcessInstanceResults;
+import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.model.ProcessInstance;
-import org.activiti.cloud.services.core.model.commands.StartProcessInstanceCmd;
-import org.activiti.cloud.services.core.model.commands.results.StartProcessInstanceResults;
+import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;

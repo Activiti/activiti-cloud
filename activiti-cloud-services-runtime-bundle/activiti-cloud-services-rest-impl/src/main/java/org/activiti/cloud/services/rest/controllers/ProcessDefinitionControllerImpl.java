@@ -21,13 +21,13 @@ import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.services.api.model.ProcessDefinition;
+import org.activiti.cloud.services.api.model.converter.ProcessDefinitionConverter;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
-import org.activiti.cloud.services.core.model.ProcessDefinition;
-import org.activiti.cloud.services.core.model.converter.ProcessDefinitionConverter;
 import org.activiti.cloud.services.core.pageable.PageableRepositoryService;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionController;
 import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;

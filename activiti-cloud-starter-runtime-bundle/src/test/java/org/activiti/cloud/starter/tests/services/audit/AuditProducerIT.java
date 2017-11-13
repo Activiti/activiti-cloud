@@ -3,7 +3,7 @@ package org.activiti.cloud.starter.tests.services.audit;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.services.core.model.ProcessDefinition;
+import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.junit.Before;
 import org.junit.Test;

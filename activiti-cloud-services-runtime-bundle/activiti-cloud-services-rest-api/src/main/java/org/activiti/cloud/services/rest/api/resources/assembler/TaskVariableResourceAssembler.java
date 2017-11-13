@@ -16,19 +16,17 @@
 
 package org.activiti.cloud.services.rest.api.resources.assembler;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-
+import org.activiti.cloud.services.api.model.TaskVariables;
 import org.activiti.cloud.services.rest.api.HomeController;
 import org.activiti.cloud.services.rest.api.TaskController;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
 import org.activiti.cloud.services.rest.api.resources.VariablesResource;
-import org.activiti.cloud.services.core.model.TaskVariables;
-import org.activiti.cloud.services.core.model.TaskVariables.TaskVariableScope;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.stereotype.Component;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Component
 public class TaskVariableResourceAssembler extends ResourceAssemblerSupport<TaskVariables, VariablesResource> {
@@ -41,7 +39,7 @@ public class TaskVariableResourceAssembler extends ResourceAssemblerSupport<Task
     @Override
     public VariablesResource toResource(TaskVariables taskVariables) {
         Link selfRel;
-        if (TaskVariableScope.GLOBAL.equals(taskVariables.getScope())) {
+        if (TaskVariables.TaskVariableScope.GLOBAL.equals(taskVariables.getScope())) {
             selfRel = linkTo(methodOn(TaskVariableController.class).getVariables(taskVariables.getTaskId())).withSelfRel();
         } else {
             selfRel = linkTo(methodOn(TaskVariableController.class).getVariablesLocal(taskVariables.getTaskId())).withSelfRel();

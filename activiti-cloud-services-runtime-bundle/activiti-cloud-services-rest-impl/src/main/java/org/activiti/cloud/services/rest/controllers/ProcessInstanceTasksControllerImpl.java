@@ -16,10 +16,10 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.rest.api.ProcessInstanceTasksController;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.api.resources.assembler.TaskResourceAssembler;
-import org.activiti.cloud.services.core.model.Task;
 import org.activiti.cloud.services.core.pageable.PageableTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

@@ -17,8 +17,8 @@
 package org.activiti.cloud.starter.tests.services;
 
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.model.commands.ActivateProcessInstanceCmd;
-import org.activiti.cloud.services.core.model.commands.SuspendProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
 import org.junit.Before;
 import org.junit.Test;

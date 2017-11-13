@@ -13,6 +13,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>activiti-cloud-services-api</module>
     <module>activiti-cloud-services-core</module>
     <module>activiti-cloud-services-events</module>
     <module>activiti-cloud-services-connectors</module>

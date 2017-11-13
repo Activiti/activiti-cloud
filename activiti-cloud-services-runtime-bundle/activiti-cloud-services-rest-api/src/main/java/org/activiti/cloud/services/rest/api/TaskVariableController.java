@@ -2,7 +2,7 @@ package org.activiti.cloud.services.rest.api;
 
 import java.util.Map;
 
-import org.activiti.cloud.services.core.model.commands.SetTaskVariablesCmd;
+import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;

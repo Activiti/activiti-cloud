@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <version.activiti>${project.version}</version.activiti>
+    <version.activiti>7-201711-EA-SNAPSHOT</version.activiti>
     <version.activiti.cloud>${project.version}</version.activiti.cloud>
   </properties>
 
@@ -22,8 +22,20 @@
     <module>activiti-cloud-services-runtime-bundle</module>
     <module>activiti-cloud-starter-configure</module>
     <module>activiti-cloud-starter-runtime-bundle</module>
+    <module>activiti-cloud-starter-test</module>
   </modules>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti</groupId>
+        <artifactId>activiti-dependencies</artifactId>
+        <version>${version.activiti}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <repositories>
     <repository>
       <id>spring-milestones</id>

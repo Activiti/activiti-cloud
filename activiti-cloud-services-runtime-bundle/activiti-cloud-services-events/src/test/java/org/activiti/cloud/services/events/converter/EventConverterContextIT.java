@@ -43,7 +43,7 @@ public class EventConverterContextIT {
     private EventConverterContext converterContext;
 
     @Configuration
-    @ComponentScan({"org.activiti.cloud.services.events.converter", "org.activiti.cloud.services.core.model.converter"})
+    @ComponentScan({"org.activiti.cloud.services.events.converter", "org.activiti.cloud.services.api.model.converter"})
     public static class EventConverterContextConfig {
 
     }

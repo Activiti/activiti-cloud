@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
@@ -29,11 +30,11 @@ import org.activiti.engine.ActivitiException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
-import org.activiti.cloud.services.core.model.ProcessInstance;
-import org.activiti.cloud.services.core.model.commands.ActivateProcessInstanceCmd;
-import org.activiti.cloud.services.core.model.commands.SignalProcessInstancesCmd;
-import org.activiti.cloud.services.core.model.commands.StartProcessInstanceCmd;
-import org.activiti.cloud.services.core.model.commands.SuspendProcessInstanceCmd;
+
+import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
+import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.rest.api.resources.assembler.ProcessInstanceResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;

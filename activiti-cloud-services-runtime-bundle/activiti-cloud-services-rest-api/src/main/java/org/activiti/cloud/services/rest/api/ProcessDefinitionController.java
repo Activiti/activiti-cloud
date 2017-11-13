@@ -1,6 +1,6 @@
 package org.activiti.cloud.services.rest.api;
 
-import org.activiti.cloud.services.core.model.ProcessDefinition;
+import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;

@@ -2,13 +2,13 @@ package org.activiti.cloud.starter.tests.cmdendpoint;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.activiti.cloud.services.core.model.commands.results.AbstractCommandResults;
-import org.activiti.cloud.services.core.model.commands.results.ActivateProcessInstanceResults;
-import org.activiti.cloud.services.core.model.commands.results.ClaimTaskResults;
-import org.activiti.cloud.services.core.model.commands.results.CompleteTaskResults;
-import org.activiti.cloud.services.core.model.commands.results.ReleaseTaskResults;
-import org.activiti.cloud.services.core.model.commands.results.StartProcessInstanceResults;
-import org.activiti.cloud.services.core.model.commands.results.SuspendProcessInstanceResults;
+import org.activiti.cloud.services.api.commands.results.ActivateProcessInstanceResults;
+import org.activiti.cloud.services.api.commands.results.ClaimTaskResults;
+import org.activiti.cloud.services.api.commands.results.CommandResults;
+import org.activiti.cloud.services.api.commands.results.CompleteTaskResults;
+import org.activiti.cloud.services.api.commands.results.ReleaseTaskResults;
+import org.activiti.cloud.services.api.commands.results.StartProcessInstanceResults;
+import org.activiti.cloud.services.api.commands.results.SuspendProcessInstanceResults;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Profile;
@@ -33,25 +33,25 @@ public class CommandEndPointITStreamHandler {
     private AtomicBoolean completedTaskAck = new AtomicBoolean(false);
 
     @StreamListener(MessageClientStream.MY_CMD_RESULTS)
-    public void consumeResults(AbstractCommandResults results) {
-        assertThat(results).isNotNull();
-        if (results instanceof StartProcessInstanceResults) {
-            assertThat(((StartProcessInstanceResults) results).getProcessInstance()).isNotNull();
-            assertThat(((StartProcessInstanceResults) results).getProcessInstance().getId()).isNotEmpty();
-            processInstanceId = ((StartProcessInstanceResults) results).getProcessInstance().getId();
+    public void consumeStartProcessInstanceResults(CommandResults results) {
+        if(results instanceof StartProcessInstanceResults){
+            assertThat(((StartProcessInstanceResults)results).getProcessInstance()).isNotNull();
+            assertThat(((StartProcessInstanceResults)results).getProcessInstance().getId()).isNotEmpty();
+            processInstanceId = ((StartProcessInstanceResults)results).getProcessInstance().getId();
             startedProcessInstanceAck.set(true);
-        } else if (results instanceof SuspendProcessInstanceResults) {
+        }else if( results instanceof SuspendProcessInstanceResults){
             suspendedProcessInstanceAck.set(true);
-        } else if (results instanceof ActivateProcessInstanceResults) {
+        }else if(results instanceof ActivateProcessInstanceResults){
             activatedProcessInstanceAck.set(true);
-        } else if (results instanceof ClaimTaskResults) {
+        }else if(results instanceof ClaimTaskResults){
             claimedTaskAck.set(true);
-        } else if (results instanceof ReleaseTaskResults) {
+        }else if(results instanceof ReleaseTaskResults){
             releasedTaskAck.set(true);
-        } else if (results instanceof CompleteTaskResults) {
+        }else if(results instanceof CompleteTaskResults){
             completedTaskAck.set(true);
         }
     }
+
 
     public String getProcessInstanceId() {
         return processInstanceId;

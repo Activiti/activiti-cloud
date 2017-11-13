@@ -19,7 +19,7 @@ package org.activiti.cloud.services.events;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 
-public interface ActivityCancelledEvent extends ProcessEngineEvent {
+public interface  ActivityCancelledEvent extends ProcessEngineEvent {
 
     /**
      * @return the id of the activity this event is related to. This corresponds to an id defined in the process definition.

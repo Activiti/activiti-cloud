@@ -15,7 +15,7 @@
 
 package org.activiti.cloud.services.rest.api.resources;
 
-import org.activiti.cloud.services.core.model.Task;
+import org.activiti.cloud.services.api.model.Task;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 

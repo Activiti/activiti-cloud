@@ -28,7 +28,7 @@ public class MessageProducerListenerTest {
     private MessageProducerActivitiEventListener eventListener;
 
     @Configuration
-    @ComponentScan({"org.activiti.cloud.services.events.tests.util", "org.activiti.cloud.services.events.converter", "org.activiti.cloud.services.core.model.converter"})
+    @ComponentScan({"org.activiti.cloud.services.events.tests.util", "org.activiti.cloud.services.events.converter", "org.activiti.cloud.services.api.model.converter"})
     public class ContextConfig {
     }
 

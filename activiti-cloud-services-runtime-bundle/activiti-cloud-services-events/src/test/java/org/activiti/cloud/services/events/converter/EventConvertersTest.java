@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.cloud.services.api.model.converter.ListConverter;
+import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
+import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.events.ActivityCompletedEventImpl;
 import org.activiti.cloud.services.events.ProcessCancelledEvent;
 import org.activiti.cloud.services.events.ProcessCompletedEvent;
@@ -30,9 +33,6 @@ import org.activiti.engine.delegate.event.impl.ActivitiEntityEventImpl;
 import org.activiti.engine.delegate.event.impl.ActivitiProcessCancelledEventImpl;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.activiti.engine.task.Task;
-import org.activiti.cloud.services.core.model.converter.ListConverter;
-import org.activiti.cloud.services.core.model.converter.ProcessInstanceConverter;
-import org.activiti.cloud.services.core.model.converter.TaskConverter;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ActivityCancelledEvent;
 import org.junit.Test;

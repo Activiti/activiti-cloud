@@ -17,13 +17,13 @@ package org.activiti.cloud.services.rest.controllers;
 
 import java.util.Map;
 
+import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.api.resources.assembler.TaskResourceAssembler;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.model.Task;
-import org.activiti.cloud.services.core.model.commands.ClaimTaskCmd;
-import org.activiti.cloud.services.core.model.commands.CompleteTaskCmd;
-import org.activiti.cloud.services.core.model.commands.ReleaseTaskCmd;
+import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
+import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
+import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.core.AuthenticationWrapper;
 import org.activiti.cloud.services.rest.api.TaskController;
 import org.springframework.beans.factory.annotation.Autowired;

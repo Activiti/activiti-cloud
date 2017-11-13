@@ -15,9 +15,9 @@
 
 package org.activiti.cloud.services.rest.api.resources.assembler;
 
+import org.activiti.cloud.services.api.model.ProcessInstanceVariables;
 import org.activiti.cloud.services.rest.api.HomeController;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
-import org.activiti.cloud.services.core.model.ProcessInstanceVariables;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
 import org.activiti.cloud.services.rest.api.resources.VariablesResource;
 import org.springframework.hateoas.Link;
