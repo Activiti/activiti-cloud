@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.querydsl.core.annotations.QueryEntity;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -33,7 +32,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 })
 @QueryEntity
 @Document(collection = "act_evt_log")
-public class ProcessEngineEventDocument implements ProcessEngineEvent {
+public class ProcessEngineEventDocument {
 
     @Id
     private String id;

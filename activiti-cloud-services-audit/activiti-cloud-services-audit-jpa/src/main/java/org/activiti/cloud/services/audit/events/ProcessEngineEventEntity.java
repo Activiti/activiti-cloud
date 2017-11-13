@@ -27,7 +27,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -54,7 +53,7 @@ import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "TYPE")
-public abstract class ProcessEngineEventEntity implements ProcessEngineEvent {
+public abstract class ProcessEngineEventEntity {
 
     @Id
     @GeneratedValue
@@ -67,27 +66,22 @@ public abstract class ProcessEngineEventEntity implements ProcessEngineEvent {
     private String processInstanceId;
     private String applicationName;
 
-    @Override
     public Long getTimestamp() {
         return timestamp;
     }
 
-    @Override
     public String getEventType() {
         return eventType;
     }
 
-    @Override
     public String getExecutionId() {
         return executionId;
     }
 
-    @Override
     public String getProcessDefinitionId() {
         return processDefinitionId;
     }
 
-    @Override
     public String getProcessInstanceId() {
         return processInstanceId;
     }
@@ -96,7 +90,6 @@ public abstract class ProcessEngineEventEntity implements ProcessEngineEvent {
         return id;
     }
 
-    @Override
     public String getApplicationName() {
         return applicationName;
     }
