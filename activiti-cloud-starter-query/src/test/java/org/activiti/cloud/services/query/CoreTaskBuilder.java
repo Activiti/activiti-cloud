@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.query;
 
-import org.activiti.cloud.services.core.model.Task;
+import org.activiti.cloud.services.api.model.Task;
 
 public class CoreTaskBuilder {
 

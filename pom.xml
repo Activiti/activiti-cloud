@@ -18,6 +18,11 @@
     <module>activiti-cloud-starter-query</module>
   </modules>
 
+  <properties>
+    <version.activiti>7-201711-EA-SNAPSHOT</version.activiti>
+    <version.activiti.cloud>7-201711-EA-SNAPSHOT</version.activiti.cloud>
+  </properties>
+
   <repositories>
     <repository>
       <id>spring-milestones</id>

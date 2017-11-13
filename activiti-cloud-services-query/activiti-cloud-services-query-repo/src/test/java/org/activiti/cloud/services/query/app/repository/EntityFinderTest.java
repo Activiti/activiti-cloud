@@ -19,7 +19,6 @@ package org.activiti.cloud.services.query.app.repository;
 import java.util.Optional;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.engine.ActivitiException;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.junit.Before;
 import org.junit.Rule;
@@ -72,7 +71,7 @@ public class EntityFinderTest {
         given(repository.findById(processInstanceId)).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(ActivitiException.class);
+        expectedException.expect(IllegalStateException.class);
         expectedException.expectMessage("Error");
 
         //when
@@ -103,7 +102,7 @@ public class EntityFinderTest {
         given(repository.findOne(predicate)).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(ActivitiException.class);
+        expectedException.expect(IllegalStateException.class);
         expectedException.expectMessage("Error");
 
         //when
