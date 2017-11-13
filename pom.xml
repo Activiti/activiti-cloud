@@ -10,8 +10,13 @@
   <packaging>pom</packaging>
 
   <properties>
-    <version.activiti>${project.version}</version.activiti>
+    <version.activiti>7-201711-EA-SNAPSHOT</version.activiti>
     <version.activiti.cloud>${project.version}</version.activiti.cloud>
+    <version.activiti.cloud.service-common>${project.version}</version.activiti.cloud.service-common>
+    <version.activiti.cloud.runtime-bundle>${project.version}</version.activiti.cloud.runtime-bundle>
+    <version.activiti.cloud.audit>${project.version}</version.activiti.cloud.audit>
+    <version.activiti.cloud.query>${project.version}</version.activiti.cloud.query>
+    <version.activiti.cloud.connectors>${project.version}</version.activiti.cloud.connectors>
 
     <!--configuration properties-->
     <jdk.version>1.8</jdk.version>
@@ -106,6 +111,11 @@
 
   <modules>
     <module>activiti-cloud-dependencies</module>
+    <module>activiti-cloud-service-common-dependencies</module>
+    <module>activiti-cloud-runtime-bundle-dependencies</module>
+    <module>activiti-cloud-query-dependencies</module>
+    <module>activiti-cloud-audit-dependencies</module>
+    <module>activiti-cloud-connectors-dependencies</module>
   </modules>
 
   <distributionManagement>
@@ -149,7 +159,7 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
-    <repository> 
+    <repository>
       <id>activiti-snapshots</id>
       <name>Activiti Snapshots</name>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
@@ -161,162 +171,145 @@
       </snapshots>
     </repository>
   </repositories>
+
   <!-- Here we add 3rd Party Dependencies -->
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.activiti</groupId>
-        <artifactId>activiti-dependencies</artifactId>
-        <version>${version.activiti}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
 
-      <!-- Activiti Cloud Service Common -->
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-service-common-parent</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
+      <!-- Activiti Cloud Runtime Bundle Modules for managed dependencies -->
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-api</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-core-model</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-identity-basic</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-test</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-
-      <!-- Activiti Cloud Runtime Bundle Services -->
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-runtime-bundle</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-core</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-events</artifactId>
-        <version>${version.activiti.cloud}</version>
+        <version>${version.activiti.cloud.runtime-bundle}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-connectors</artifactId>
-        <version>${version.activiti.cloud}</version>
+        <version>${version.activiti.cloud.runtime-bundle}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-core</artifactId>
+        <version>${version.activiti.cloud.runtime-bundle}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-events</artifactId>
+        <version>${version.activiti.cloud.runtime-bundle}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-rest-api</artifactId>
-        <version>${version.activiti.cloud}</version>
+        <version>${version.activiti.cloud.runtime-bundle}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-rest-impl</artifactId>
-        <version>${version.activiti.cloud}</version>
+        <version>${version.activiti.cloud.runtime-bundle}</version>
       </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-starter-configure</artifactId>
+        <version>${version.activiti.cloud.runtime-bundle}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
+        <version>${version.activiti.cloud.runtime-bundle}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-starter-test</artifactId>
+        <version>${version.activiti.cloud.runtime-bundle}</version>
+        <scope>test</scope>
+      </dependency>
+
+
+      <!-- Activiti Cloud Service Common Modules for managed dependencies -->
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-identity-basic</artifactId>
+        <version>${version.activiti.cloud.service-common}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
+        <version>${version.activiti.cloud.service-common}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-test</artifactId>
+        <version>${version.activiti.cloud.service-common}</version>
+        <scope>test</scope>
+      </dependency>
+
 
       <!-- Activiti Cloud Query Services -->
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-query-parent</artifactId>
-        <version>${version.activiti.cloud}</version>
+        <version>${version.activiti.cloud.query}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-query-model</artifactId>
-        <version>${version.activiti.cloud}</version>
+        <version>${version.activiti.cloud.query}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-query-repo</artifactId>
-        <version>${version.activiti.cloud}</version>
+        <version>${version.activiti.cloud.query}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-query-rest</artifactId>
-        <version>${version.activiti.cloud}</version>
+        <version>${version.activiti.cloud.query}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-query-graphql</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-
-      <!-- Activiti Cloud Query Services -->
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-audit-parent</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-audit-jpa</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-audit-mongo</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-
-      <!-- Activiti Cloud Modules for managed dependencies -->
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-starter-configure</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-starter-audit</artifactId>
-        <version>${version.activiti.cloud}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
-        <version>${version.activiti.cloud}</version>
+        <version>${version.activiti.cloud.query}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-query</artifactId>
-        <version>${version.activiti.cloud}</version>
+        <version>${version.activiti.cloud.query}</version>
+      </dependency>
+
+      <!-- Activiti Cloud Audit Services -->
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-audit-parent</artifactId>
+        <version>${version.activiti.cloud.audit}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-starter-test</artifactId>
-        <version>${version.activiti.cloud}</version>
-        <scope>test</scope>
+        <artifactId>activiti-cloud-services-audit-jpa</artifactId>
+        <version>${version.activiti.cloud.audit}</version>
       </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-audit-mongo</artifactId>
+        <version>${version.activiti.cloud.audit}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-starter-audit</artifactId>
+        <version>${version.activiti.cloud.audit}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
+        <version>${version.activiti.cloud.audit}</version>
+      </dependency>
+
+      <!-- Activiti Cloud Connectors --> 
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-connectors-starter</artifactId>
+        <version>${version.activiti.cloud.connectors}</version>
+      </dependency>
+
       <!-- Spring Boot / Cloud / Stream dependencies -->
       <dependency>
         <groupId>org.springframework.boot</groupId>
@@ -451,12 +444,6 @@
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti</groupId>
-        <artifactId>activiti-cloud-starters-tests</artifactId>
-        <version>${project.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -614,6 +601,10 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>external.atlassian.jgitflow</groupId>
+        <artifactId>jgitflow-maven-plugin</artifactId>
       </plugin>
 
     </plugins>

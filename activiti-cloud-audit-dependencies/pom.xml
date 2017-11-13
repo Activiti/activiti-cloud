@@ -7,48 +7,39 @@
     <version>7-201711-EA-SNAPSHOT</version>
   </parent>
 
-  <artifactId>activiti-cloud-dependencies</artifactId>
+  <artifactId>activiti-cloud-audit-dependencies</artifactId>
   <packaging>pom</packaging>
 
-  <name>Activiti Cloud Dependencies - BOM (Bill Of Materials)</name>
-  <description>Activiti Cloud Dependencies - BOM(Bill Of Materials)</description>
+  <name>Activiti Cloud Audit Dependencies - BOM (Bill Of Materials)</name>
+  <description>Activiti Cloud Audit Dependencies - BOM(Bill Of Materials)</description>
+
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
+        <artifactId>activiti-cloud-services-audit-parent</artifactId>
         <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-service-common-dependencies</artifactId>
+        <artifactId>activiti-cloud-services-audit-jpa</artifactId>
         <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-query-dependencies</artifactId>
+        <artifactId>activiti-cloud-services-audit-mongo</artifactId>
         <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-audit-dependencies</artifactId>
+        <artifactId>activiti-cloud-starter-audit</artifactId>
         <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-connectors-dependencies</artifactId>
+        <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
         <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
