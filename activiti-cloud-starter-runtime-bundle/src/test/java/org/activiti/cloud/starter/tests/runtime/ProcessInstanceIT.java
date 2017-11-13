@@ -37,10 +37,12 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 
 import java.io.ByteArrayInputStream;
@@ -137,8 +139,9 @@ public class ProcessInstanceIT {
         //when
         String responseData = executeRequest(
                 PROCESS_INSTANCES_RELATIVE_URL + startedProcessEntity.getBody()
-                        .getId() + "/svg",
-                HttpMethod.GET);
+                        .getId() + "/model",
+                HttpMethod.GET,
+                "image/svg+xml");
 
         //then
         assertThat(responseData).isNotNull();
@@ -245,10 +248,17 @@ public class ProcessInstanceIT {
                 responseType);
     }
 
-    private String executeRequest(String url, HttpMethod method) {
+    private String executeRequest(String url, HttpMethod method, String contentType) {
         return restTemplate.execute(url,
                 method,
-                null,
+                new RequestCallback() {
+                    @Override
+                    public void doWithRequest(ClientHttpRequest request) throws IOException {
+                        if (contentType != null && !contentType.isEmpty()) {
+                            request.getHeaders().add("Content-Type", contentType);
+                        }
+                    }
+                },
                 new ResponseExtractor<String>() {
 
                     @Override

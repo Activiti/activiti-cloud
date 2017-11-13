@@ -36,9 +36,11 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 
 import java.io.ByteArrayInputStream;
@@ -179,8 +181,9 @@ public class ProcessDefinitionIT {
         ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_POOL_LANE);
 
         //when
-        String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/xml",
-                HttpMethod.GET);
+        String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/model",
+                HttpMethod.GET,
+                "application/xml");
 
         //then
         assertThat(responseData).isNotNull();
@@ -194,8 +197,9 @@ public class ProcessDefinitionIT {
         ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_WITH_VARIABLES_2);
 
         //when
-        String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/json",
-                HttpMethod.GET);
+        String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/model",
+                HttpMethod.GET,
+                "application/json");
 
         //then
         assertThat(responseData).isNotNull();
@@ -224,8 +228,9 @@ public class ProcessDefinitionIT {
         ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_POOL_LANE);
 
         //when
-        String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/svg",
-                HttpMethod.GET);
+        String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/model",
+                HttpMethod.GET,
+                "image/svg+xml");
 
         //then
         assertThat(responseData).isNotNull();
@@ -250,10 +255,17 @@ public class ProcessDefinitionIT {
         }
     }
 
-    private String executeRequest(String url, HttpMethod method) {
+    private String executeRequest(String url, HttpMethod method, String contentType) {
         return restTemplate.execute(url,
                 method,
-                null,
+                new RequestCallback() {
+                    @Override
+                    public void doWithRequest(ClientHttpRequest request) throws IOException {
+                        if (contentType != null && !contentType.isEmpty()) {
+                            request.getHeaders().add("Content-Type", contentType);
+                        }
+                    }
+                },
                 new ResponseExtractor<String>() {
 
                     @Override

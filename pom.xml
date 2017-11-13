@@ -16,6 +16,7 @@
   <properties>
     <version.activiti>7-201711-EA-SNAPSHOT</version.activiti>
     <version.activiti.cloud>${project.version}</version.activiti.cloud>
+    <version.activiti.cloud.service-common>7-201711-EA-SNAPSHOT</version.activiti.cloud.service-common>
   </properties>
 
   <modules>
