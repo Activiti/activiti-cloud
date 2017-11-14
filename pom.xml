@@ -103,6 +103,9 @@
     <junit.version>4.12</junit.version>
     <assertj.version>3.8.0</assertj.version>
     <jsonunit.version>1.24.0</jsonunit.version>
+    <!-- configurations for Spring REST docs-->
+    <asciidoc.filename>index.adoc</asciidoc.filename>
+    <asciidoctor.version>1.5.6</asciidoctor.version>
 
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
     <generated-assertions-package>org.activiti.test</generated-assertions-package>
@@ -303,7 +306,7 @@
         <version>${version.activiti.cloud.audit}</version>
       </dependency>
 
-      <!-- Activiti Cloud Connectors --> 
+      <!-- Activiti Cloud Connectors -->
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-connectors-starter</artifactId>
@@ -470,7 +473,6 @@
         <version>${jsonunit.version}</version>
         <scope>test</scope>
       </dependency>
-
 
       <!-- TEST(DB) -->
       <dependency>
@@ -909,6 +911,28 @@
               <version>${assertj.version}</version>
             </dependency>
           </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.asciidoctor</groupId>
+          <artifactId>asciidoctor-maven-plugin</artifactId>
+          <version>${asciidoctor.version}</version>
+          <executions>
+            <execution>
+              <id>generate-docs</id>
+              <phase>prepare-package</phase>
+              <goals>
+                <goal>process-asciidoc</goal>
+              </goals>
+              <configuration>
+                <sourceDocumentName>${asciidoc.filename}</sourceDocumentName>
+                <backend>html</backend>
+                <doctype>book</doctype>
+                <attributes>
+                  <snippets>${project.basedir}/target/snippets</snippets>
+                </attributes>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
