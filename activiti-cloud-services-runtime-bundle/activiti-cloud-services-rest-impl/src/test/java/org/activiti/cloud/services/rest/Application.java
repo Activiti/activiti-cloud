@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.core;
+package org.activiti.cloud.services.rest;
 
-import org.activiti.engine.impl.identity.Authentication;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/**
- * Wrap Authentication.java so as to be able to mock static methods. May later want to move this to engine level but not necessary now.
- */
-@Component
-public class AuthenticationWrapper {
+@SpringBootApplication
+public class Application {
 
-    public void setAuthenticatedUserId(String user) {
-        Authentication.setAuthenticatedUserId(user);
-    }
-
-    public String getAuthenticatedUserId() {
-        return Authentication.getAuthenticatedUserId();
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class,
+                              args);
     }
 }

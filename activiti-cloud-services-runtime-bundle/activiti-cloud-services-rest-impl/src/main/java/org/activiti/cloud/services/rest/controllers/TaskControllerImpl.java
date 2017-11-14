@@ -45,11 +45,13 @@ public class TaskControllerImpl implements TaskController {
 
     private final TaskResourceAssembler taskResourceAssembler;
 
-    private AuthenticationWrapper authenticationWrapper = new AuthenticationWrapper();
+    private AuthenticationWrapper authenticationWrapper;
 
     @Autowired
     public TaskControllerImpl(ProcessEngineWrapper processEngine,
-                              TaskResourceAssembler taskResourceAssembler) {
+                              TaskResourceAssembler taskResourceAssembler,
+                              AuthenticationWrapper authenticationWrapper) {
+        this.authenticationWrapper = authenticationWrapper;
         this.processEngine = processEngine;
         this.taskResourceAssembler = taskResourceAssembler;
     }

@@ -24,19 +24,14 @@ import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
 import org.activiti.cloud.services.rest.api.resources.assembler.TaskVariableResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/v1/tasks/{taskId}/variables",
-        produces = MediaTypes.HAL_JSON_VALUE)
 public class TaskVariableControllerImpl implements TaskVariableController {
 
     private ProcessEngineWrapper processEngine;
@@ -55,24 +50,18 @@ public class TaskVariableControllerImpl implements TaskVariableController {
     }
 
     @Override
-    @RequestMapping(value = "/",
-            method = RequestMethod.GET)
     public Resource<Map<String, Object>> getVariables(@PathVariable String taskId) {
         Map<String, Object> variables = taskService.getVariables(taskId);
         return variableResourceBuilder.toResource(new TaskVariables(taskId, variables, TaskVariables.TaskVariableScope.GLOBAL));
     }
 
     @Override
-    @RequestMapping(value = "/local",
-            method = RequestMethod.GET)
     public Resource<Map<String, Object>> getVariablesLocal(@PathVariable String taskId) {
         Map<String, Object> variables = taskService.getVariablesLocal(taskId);
         return variableResourceBuilder.toResource(new TaskVariables(taskId, variables, TaskVariables.TaskVariableScope.LOCAL));
     }
 
     @Override
-    @RequestMapping(value = "/",
-            method = RequestMethod.POST)
     public ResponseEntity<Void> setVariables(@PathVariable String taskId,
                                              @RequestBody(required = true) SetTaskVariablesCmd setTaskVariablesCmd) {
         processEngine.setTaskVariables(setTaskVariablesCmd);
@@ -80,8 +69,6 @@ public class TaskVariableControllerImpl implements TaskVariableController {
     }
 
     @Override
-    @RequestMapping(value = "/local",
-            method = RequestMethod.POST)
     public ResponseEntity<Void> setVariablesLocal(@PathVariable String taskId,
                                                   @RequestBody(
                                                           required = true) SetTaskVariablesCmd setTaskVariablesCmd) {
