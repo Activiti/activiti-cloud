@@ -19,8 +19,7 @@
   </modules>
 
   <properties>
-    <version.activiti>7-201711-EA-SNAPSHOT</version.activiti>
-    <version.activiti.cloud>7-201711-EA-SNAPSHOT</version.activiti.cloud>
+    <version.activiti.cloud.query>${project.version}</version.activiti.cloud.query>
   </properties>
 
   <repositories>
