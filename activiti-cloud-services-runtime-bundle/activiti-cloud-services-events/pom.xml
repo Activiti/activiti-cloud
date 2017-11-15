@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-runtime-bundle</artifactId>
-    <version>7-201711-EA-SNAPSHOT</version>
+    <version>7-201711-EA-elias_1545_audit_evnt_integr_req-SNAPSHOT</version>
   </parent>
 
   <artifactId>activiti-cloud-services-events</artifactId>

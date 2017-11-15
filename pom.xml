@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
-  <version>7-201711-EA-SNAPSHOT</version>
+  <version>7-201711-EA-elias_1545_audit_evnt_integr_req-SNAPSHOT</version>
   <name>Activiti Cloud :: Runtime Bundle Service Parent</name>
   <description>Activiti Cloud :: Runtime Bundle Service Parent</description>
   <packaging>pom</packaging>
