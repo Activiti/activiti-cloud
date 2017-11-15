@@ -14,8 +14,11 @@
   <packaging>pom</packaging>
 
   <properties>
-    <version.activiti>7-201711-EA-SNAPSHOT</version.activiti>
-    <version.activiti.cloud>7-201711-EA-SNAPSHOT</version.activiti.cloud>
+    <!--
+    Override property from activiti-cloud-parent that's set to the default snapshot version.
+    This allow to easily create feature branches with a different Maven version.
+    -->
+    <version.activiti.cloud.audit>${project.version}</version.activiti.cloud.audit>
   </properties>
 
   <modules>
