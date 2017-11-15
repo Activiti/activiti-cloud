@@ -8,14 +8,12 @@
     <version>7-201711-EA-SNAPSHOT</version>
   </parent>
 
-
   <artifactId>activiti-cloud-connectors-parent</artifactId>
   <packaging>pom</packaging>
   <version>7-201711-EA-SNAPSHOT</version>
 
   <properties>
-    <version.activiti>7-201711-EA-SNAPSHOT</version.activiti>
-    <version.activiti.cloud>7-201711-EA-SNAPSHOT</version.activiti.cloud>
+    <version.activiti.cloud.connectors>${project.version}</version.activiti.cloud.connectors>
   </properties>
   <modules>
     <module>activiti-cloud-connectors-starter</module>
