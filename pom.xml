@@ -10,7 +10,7 @@
   <artifactId>activiti-cloud-audit-service-parent</artifactId>
   <name>Activiti Cloud - Audit Services :: Parent</name>
   <description>Activiti Cloud Audit Services Parent</description>
-  <version>7-201711-EA-SNAPSHOT</version>
+  <version>7-201711-EA-elias_1545_audit_evnt_integr_req-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
