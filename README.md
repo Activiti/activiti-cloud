@@ -1,4 +1,4 @@
-# activiti-cloud-service-common
+# Activiti Cloud Service Common
 [![Join the chat at https://gitter.im/Activiti/Activiti7](https://badges.gitter.im/Activiti/Activiti7.svg)](https://gitter.im/Activiti/Activiti7?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 <p>
@@ -21,7 +21,7 @@
 
 Activiti Cloud Shared Services &amp; APIs
 
-This repository contains Services and Starters that are consumed by other starters. 
+This repository contains Services and Starters that are consumed by other starters. Here you will find cross cutting concerns. 
 
 Other repositories consuming these artifacts are:
 - [activiti-cloud-runtime-bundle-service](https://github.com/activiti/activiti-cloud-runtime-bundle-service)
