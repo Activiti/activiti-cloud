@@ -48,7 +48,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = VariableCreatedEventEntity.class, name = VariableCreatedEventEntity.VARIABLE_CREATED_EVENT),
         @JsonSubTypes.Type(value = VariableUpdatedEventEntity.class, name = VariableUpdatedEventEntity.VARIABLE_UPDATED_EVENT),
         @JsonSubTypes.Type(value = VariableDeletedEventEntity.class, name = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT),
-        @JsonSubTypes.Type(value = SequenceFlowTakenEventEntity.class, name = SequenceFlowTakenEventEntity.SEQUENCE_FLOW_TAKEN_EVENT)
+        @JsonSubTypes.Type(value = SequenceFlowTakenEventEntity.class, name = SequenceFlowTakenEventEntity.SEQUENCE_FLOW_TAKEN_EVENT),
+        @JsonSubTypes.Type(value = IntegrationRequestSentEventEntity.class, name = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT)
 })
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)

@@ -16,10 +16,6 @@
 
 package org.activiti.cloud.starter.audit.mongo.tests.it;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +23,7 @@ import java.util.List;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.audit.mongo.events.ProcessEngineEventDocument;
 import org.activiti.cloud.services.audit.mongo.repository.EventsRepository;
+import org.activiti.cloud.starters.test.MockEventsSamples;
 import org.activiti.cloud.starters.test.MockProcessEngineEvent;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.Before;
@@ -37,6 +34,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -59,7 +58,7 @@ public class AuditServiceIT {
     @Test
     public void findAllShouldReturnAllAvailableEvents() throws Exception {
         //given
-        List<ProcessEngineEvent> coveredEvents = getCoveredEvents();
+        List<ProcessEngineEvent> coveredEvents = MockEventsSamples.allSupportedEvents();
         producer.send(coveredEvents.toArray(new ProcessEngineEvent[coveredEvents.size()]));
         waitForMessage();
 
@@ -83,76 +82,6 @@ public class AuditServiceIT {
         }
     }
 
-    private List<ProcessEngineEvent> getCoveredEvents() {
-        List<ProcessEngineEvent> coveredEvents = new ArrayList<>();
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "ActivityCancelledEvent",
-                                                     "100",
-                                                     "103",
-                                                     "104"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "ActivityStartedEvent",
-                                                     "2",
-                                                     "3",
-                                                     "4"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "ActivityCompletedEvent",
-                                                     "11",
-                                                     "23",
-                                                     "42"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "ProcessCompletedEvent",
-                                                     "12",
-                                                     "24",
-                                                     "43"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "ProcessCancelledEvent",
-                                                     "112",
-                                                     "124",
-                                                     "143"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "ProcessStartedEvent",
-                                                     "13",
-                                                     "25",
-                                                     "44"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "SequenceFlowTakenEvent",
-                                                     "14",
-                                                     "26",
-                                                     "45"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "TaskAssignedEvent",
-                                                     "15",
-                                                     "27",
-                                                     "46"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "TaskCompletedEvent",
-                                                     "16",
-                                                     "28",
-                                                     "47"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "TaskCreatedEvent",
-                                                     "17",
-                                                     "29",
-                                                     "48"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "VariableCreatedEvent",
-                                                     "18",
-                                                     "30",
-                                                     "49"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "VariableDeletedEvent",
-                                                     "19",
-                                                     "31",
-                                                     "50"));
-        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(),
-                                                     "VariableUpdatedEvent",
-                                                     "20",
-                                                     "32",
-                                                     "51"));
-        return coveredEvents;
-    }
-
     private void waitForMessage() throws InterruptedException {
         //FIXME improve the waiting mechanism
         Thread.sleep(500);
@@ -161,7 +90,7 @@ public class AuditServiceIT {
     @Test
     public void shouldBeAbleToFilterOnProcessInstanceId() throws Exception {
         //given
-        List<ProcessEngineEvent> coveredEvents = getCoveredEvents();
+        List<ProcessEngineEvent> coveredEvents = MockEventsSamples.allSupportedEvents();
         producer.send(coveredEvents.toArray(new ProcessEngineEvent[coveredEvents.size()]));
         waitForMessage();
 
@@ -182,7 +111,7 @@ public class AuditServiceIT {
     @Test
     public void shouldBeAbleToFilterOnEventType() throws Exception {
         //given
-        List<ProcessEngineEvent> coveredEvents = getCoveredEvents();
+        List<ProcessEngineEvent> coveredEvents = MockEventsSamples.allSupportedEvents();
         producer.send(coveredEvents.toArray(new ProcessEngineEvent[coveredEvents.size()]));
         waitForMessage();
 
