@@ -16,15 +16,10 @@
 
 package org.activiti.cloud.services.events.listeners;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.converter.EventConverterContext;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventListener;
-import org.activiti.engine.impl.context.Context;
-import org.activiti.engine.impl.interceptor.CommandContext;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,35 +28,20 @@ public class MessageProducerActivitiEventListener implements ActivitiEventListen
 
     private final EventConverterContext converterContext;
 
-    private final MessageProducerCommandContextCloseListener messageListener;
+    private final CommandContextEventsAggregator eventsAggregator;
 
     @Autowired
     public MessageProducerActivitiEventListener(EventConverterContext converterContext,
-                                                MessageProducerCommandContextCloseListener messageListener) {
+                                                CommandContextEventsAggregator eventsAggregator) {
         this.converterContext = converterContext;
-        this.messageListener = messageListener;
+        this.eventsAggregator = eventsAggregator;
     }
 
     @Override
     public void onEvent(ActivitiEvent event) {
-        CommandContext currentCommandContext = Context.getCommandContext();
         ProcessEngineEvent newEvent = converterContext.from(event);
-        if (newEvent == null) {
-            return;
-        }
-
-        List<ProcessEngineEvent> events = currentCommandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS);
-        if (events != null) {
-            events.add(newEvent);
-        } else {
-            events = new ArrayList<>();
-            events.add(newEvent);
-            currentCommandContext.addAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS,
-                                               events);
-        }
-
-        if (!currentCommandContext.hasCloseListener(MessageProducerCommandContextCloseListener.class)) {
-            currentCommandContext.addCloseListener(messageListener);
+        if (newEvent != null) {
+            eventsAggregator.add(newEvent);
         }
     }
 

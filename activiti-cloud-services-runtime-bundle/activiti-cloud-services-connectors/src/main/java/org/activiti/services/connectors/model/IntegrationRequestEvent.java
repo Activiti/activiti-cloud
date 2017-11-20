@@ -33,6 +33,8 @@ public class IntegrationRequestEvent {
 
     private String executionId;
 
+    private String integrationContextId;
+
     private Map<String, Object> variables;
 
     //used by json deserialization
@@ -43,12 +45,14 @@ public class IntegrationRequestEvent {
     public IntegrationRequestEvent(String processInstanceId,
                                    String processDefinitionId,
                                    String executionId,
+                                   String integrationContextId,
                                    Map<String, Object> variables) {
         this();
         this.processInstanceId = processInstanceId;
         this.processDefinitionId = processDefinitionId;
         this.executionId = executionId;
         this.variables = variables;
+        this.integrationContextId = integrationContextId;
     }
 
     public String getId() {
@@ -65,6 +69,10 @@ public class IntegrationRequestEvent {
 
     public String getExecutionId() {
         return executionId;
+    }
+
+    public String getIntegrationContextId() {
+        return integrationContextId;
     }
 
     public Map<String, Object> getVariables() {

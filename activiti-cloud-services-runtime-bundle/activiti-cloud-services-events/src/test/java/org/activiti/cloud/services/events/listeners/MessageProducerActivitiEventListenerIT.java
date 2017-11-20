@@ -25,8 +25,6 @@ import org.activiti.cloud.services.events.ActivityStartedEventImpl;
 import org.activiti.cloud.services.events.ProcessCompletedEventImpl;
 import org.activiti.cloud.services.events.ProcessStartedEventImpl;
 import org.activiti.cloud.services.events.SequenceFlowTakenEventImpl;
-import org.activiti.cloud.services.events.listeners.MessageProducerActivitiEventListener;
-import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
 import org.activiti.cloud.services.events.tests.util.MockMessageChannel;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngineConfiguration;
@@ -51,7 +49,13 @@ public class MessageProducerActivitiEventListenerIT {
     private MessageProducerActivitiEventListener eventListener;
 
     @Configuration
-    @ComponentScan({"org.activiti.cloud.services.events.tests.util", "org.activiti.cloud.services.events.converter", "org.activiti.cloud.services.api.model.converter"})
+    @ComponentScan(
+            {
+                    "org.activiti.cloud.services.events.tests.util",
+                    "org.activiti.cloud.services.events.converter",
+                    "org.activiti.cloud.services.api.model.converter",
+                    "org.activiti.cloud.services.events.listeners"
+            })
     public class ContextConfig {
     }
 

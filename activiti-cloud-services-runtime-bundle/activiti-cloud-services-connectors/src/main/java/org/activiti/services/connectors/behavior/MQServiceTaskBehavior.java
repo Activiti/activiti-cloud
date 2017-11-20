@@ -50,11 +50,20 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
 
     @Override
     public void execute(DelegateExecution execution) {
-        CommandContext currentCommandContext = getCurrentCommandContext();
+        IntegrationContextEntity integrationContext = storeIntegrationContext(execution);
+        registerMessage(execution,
+                        integrationContext);
+    }
 
+    private IntegrationContextEntity storeIntegrationContext(DelegateExecution execution) {
         IntegrationContextEntity integrationContext = buildIntegrationContext(execution);
         integrationContextManager.insert(integrationContext);
+        return integrationContext;
+    }
 
+    private void registerMessage(DelegateExecution execution,
+                                 IntegrationContextEntity integrationContext) {
+        CommandContext currentCommandContext = getCurrentCommandContext();
         List<Message<IntegrationRequestEvent>> messages = currentCommandContext.getGenericAttribute(IntegrationProducerCommandContextCloseListener.PROCESS_ENGINE_INTEGRATION_EVENTS);
         if (messages != null) {
             messages.add(buildMessage(execution,
@@ -81,6 +90,7 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
         IntegrationRequestEvent event = new IntegrationRequestEvent(execution.getProcessInstanceId(),
                                                                     execution.getProcessDefinitionId(),
                                                                     integrationContext.getExecutionId(),
+                                                                    integrationContext.getId(),
                                                                     execution.getVariables());
 
         String implementation = ((ServiceTask) execution.getCurrentFlowElement()).getImplementation();

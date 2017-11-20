@@ -2,6 +2,9 @@ package org.activiti.services.connectors.behavior;
 
 import java.util.List;
 
+import org.activiti.cloud.services.events.IntegrationRequestSentEventImpl;
+import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.listeners.CommandContextEventsAggregator;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
@@ -16,10 +19,16 @@ public class IntegrationProducerCommandContextCloseListener implements CommandCo
     public static final String PROCESS_ENGINE_INTEGRATION_EVENTS = "processEngineIntegrationEvents";
 
     private final ProcessEngineIntegrationChannels producer;
+    private final CommandContextEventsAggregator eventsAggregator;
+    private final ApplicationProperties applicationProperties;
 
     @Autowired
-    public IntegrationProducerCommandContextCloseListener(ProcessEngineIntegrationChannels producer) {
+    public IntegrationProducerCommandContextCloseListener(ProcessEngineIntegrationChannels producer,
+                                                          CommandContextEventsAggregator eventsAggregator,
+                                                          ApplicationProperties applicationProperties) {
         this.producer = producer;
+        this.eventsAggregator = eventsAggregator;
+        this.applicationProperties = applicationProperties;
     }
 
     @Override
@@ -28,10 +37,21 @@ public class IntegrationProducerCommandContextCloseListener implements CommandCo
                 .getGenericAttribute(PROCESS_ENGINE_INTEGRATION_EVENTS);
 
         if (messages != null) {
-            for (Message<IntegrationRequestEvent> m : messages) {
-                producer.integrationEventsProducer().send(m);
+            for (Message<IntegrationRequestEvent> message : messages) {
+                producer.integrationEventsProducer().send(message);
+                registerIntegrationRequestSentEvent(message);
             }
         }
+    }
+
+    private void registerIntegrationRequestSentEvent(Message<IntegrationRequestEvent> message) {
+        IntegrationRequestEvent integrationRequestEvent = message.getPayload();
+        IntegrationRequestSentEventImpl event = new IntegrationRequestSentEventImpl(applicationProperties.getName(),
+                                                                                    integrationRequestEvent.getExecutionId(),
+                                                                                    integrationRequestEvent.getProcessDefinitionId(),
+                                                                                    integrationRequestEvent.getProcessInstanceId(),
+                                                                                    integrationRequestEvent.getIntegrationContextId());
+        eventsAggregator.add(event);
     }
 
     @Override

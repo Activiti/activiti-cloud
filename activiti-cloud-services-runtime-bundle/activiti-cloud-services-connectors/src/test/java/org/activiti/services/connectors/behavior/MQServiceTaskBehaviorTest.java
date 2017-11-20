@@ -19,6 +19,10 @@ package org.activiti.services.connectors.behavior;
 import java.util.ArrayList;
 
 import org.activiti.bpmn.model.ServiceTask;
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.events.IntegrationRequestSentEvent;
+import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.listeners.CommandContextEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
@@ -38,11 +42,17 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class MQServiceTaskBehaviorTest {
 
+    private static final String CONNECTOR_TYPE = "payment";
+    private static final String EXECUTION_ID = "execId";
+    private static final String PROC_INST_ID = "procInstId";
+    private static final String PROC_DEF_ID = "procDefId";
+
     @Spy
     @InjectMocks
     private MQServiceTaskBehavior behavior;
 
     @Mock
+    private ProcessEngineIntegrationChannels integrationChannels;
     private IntegrationContextManager integrationContextManager;
 
     @Mock
@@ -50,27 +60,40 @@ public class MQServiceTaskBehaviorTest {
 
     @Mock
     private CommandContext commandContext;
+    private MessageChannel integrationRequestMessageChannel;
+
+    @Mock
+    private CommandContextEventsAggregator eventsAggregator;
+
+    @Mock
+    private ApplicationProperties applicationProperties;
+
+    @Captor
+    private ArgumentCaptor<Message<IntegrationRequestEvent>> integrationRequestCaptor;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
         when(behavior.getCurrentCommandContext()).thenReturn(commandContext);
+        when(integrationChannels.integrationEventsProducer()).thenReturn(integrationRequestMessageChannel);
     }
 
     @Test
     public void executeShouldStoreTheIntegrationContextAndSendAMessage() throws Exception {
         //given
-        String connectorType = "payment";
+        String connectorType = CONNECTOR_TYPE;
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setImplementation(connectorType);
 
         DelegateExecution execution = mock(DelegateExecution.class);
-        given(execution.getId()).willReturn("execId");
-        given(execution.getProcessInstanceId()).willReturn("procInstId");
-        given(execution.getProcessDefinitionId()).willReturn("procDefId");
+        given(execution.getId()).willReturn(EXECUTION_ID);
+        given(execution.getProcessInstanceId()).willReturn(PROC_INST_ID);
+        given(execution.getProcessDefinitionId()).willReturn(PROC_DEF_ID);
         given(execution.getCurrentFlowElement()).willReturn(serviceTask);
+        given(applicationProperties.getName()).willReturn("myApp");
 
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
+        entity.setId("entityId");
         given(integrationContextManager.create()).willReturn(entity);
 
         ArrayList<Message<IntegrationRequestEvent>> messages = new ArrayList<>();
@@ -82,16 +105,31 @@ public class MQServiceTaskBehaviorTest {
 
         //then
         verify(integrationContextManager).insert(entity);
-        assertThat(entity.getExecutionId()).isEqualTo("execId");
-        assertThat(entity.getProcessDefinitionId()).isEqualTo("procDefId");
-        assertThat(entity.getProcessInstanceId()).isEqualTo("procInstId");
+        assertThat(entity.getExecutionId()).isEqualTo(EXECUTION_ID);
+        assertThat(entity.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
+        assertThat(entity.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
 
         assertThat(messages).hasSize(1);
         Message<IntegrationRequestEvent> message = messages.get(0);
         assertThat(message.getPayload().getExecutionId()).isNotNull();
         assertThat(message.getPayload().getProcessInstanceId()).isEqualTo("procInstId");
         assertThat(message.getPayload().getProcessDefinitionId()).isEqualTo("procDefId");
+        verify(integrationRequestMessageChannel).send(integrationRequestCaptor.capture());
+        Message<IntegrationRequestEvent> message = integrationRequestCaptor.getValue();
+        assertThat(message.getPayload().getExecutionId()).isEqualTo(EXECUTION_ID);
+        assertThat(message.getPayload().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
+        assertThat(message.getPayload().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
         assertThat(message.getHeaders().get("connectorType")).isEqualTo(connectorType);
+
+        ArgumentCaptor<ProcessEngineEvent> processEngineEventArgumentCaptor = ArgumentCaptor.forClass(ProcessEngineEvent.class);
+        verify(eventsAggregator).add(processEngineEventArgumentCaptor.capture());
+        assertThat(processEngineEventArgumentCaptor.getValue()).isInstanceOf(IntegrationRequestSentEvent.class);
+        IntegrationRequestSentEvent integrationRequestSentEvent = (IntegrationRequestSentEvent) processEngineEventArgumentCaptor.getValue();
+        assertThat(integrationRequestSentEvent.getIntegrationContextId()).isEqualTo("entityId");
+        assertThat(integrationRequestSentEvent.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
+        assertThat(integrationRequestSentEvent.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
+        assertThat(integrationRequestSentEvent.getApplicationName()).isEqualTo("myApp");
+
     }
 
     @Test
