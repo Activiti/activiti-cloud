@@ -61,6 +61,7 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
         return integrationContext;
     }
 
+
     private void registerMessage(DelegateExecution execution,
                                  IntegrationContextEntity integrationContext) {
         CommandContext currentCommandContext = getCurrentCommandContext();
