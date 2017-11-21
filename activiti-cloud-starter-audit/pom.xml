@@ -89,8 +89,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-monitoring</artifactId>
     </dependency>
 
     <dependency>
