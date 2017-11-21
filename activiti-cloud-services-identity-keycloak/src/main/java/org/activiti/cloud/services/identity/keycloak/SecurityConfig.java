@@ -70,7 +70,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
         http.authorizeRequests()
-                .antMatchers("/v1/*").hasRole("user") //could optionally set these by autowiring and parsing keycloakSpringBootProperties
                 .anyRequest().permitAll().and().csrf().disable().httpBasic().disable();
     }
 }
