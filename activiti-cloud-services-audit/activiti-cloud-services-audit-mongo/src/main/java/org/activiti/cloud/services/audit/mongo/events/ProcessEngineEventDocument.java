@@ -29,7 +29,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
         @JsonSubTypes.Type(value = VariableUpdatedEventDocument.class, name = VariableUpdatedEventDocument.VARIABLE_UPDATED_EVENT),
         @JsonSubTypes.Type(value = VariableDeletedEventDocument.class, name = VariableDeletedEventDocument.VARIABLE_DELETED_EVENT),
         @JsonSubTypes.Type(value = SequenceFlowTakenEventDocument.class, name = SequenceFlowTakenEventDocument.SEQUENCE_FLOW_TAKEN_EVENT),
-        @JsonSubTypes.Type(value = IntegrationRequestSentEventDocument.class, name = IntegrationRequestSentEventDocument.INTEGRATION_REQUEST_SENT_EVENT)
+        @JsonSubTypes.Type(value = IntegrationRequestSentEventDocument.class, name = IntegrationRequestSentEventDocument.INTEGRATION_REQUEST_SENT_EVENT),
+        @JsonSubTypes.Type(value = IntegrationResultReceivedEventDocument.class, name = IntegrationResultReceivedEventDocument.INTEGRATION_RESULT_RECEIVED_EVENT)
 })
 @QueryEntity
 @Document(collection = "act_evt_log")

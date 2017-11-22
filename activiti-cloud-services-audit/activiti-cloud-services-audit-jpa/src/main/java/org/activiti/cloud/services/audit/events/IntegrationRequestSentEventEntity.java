@@ -21,7 +21,7 @@ import javax.persistence.Entity;
 
 @Entity
 @DiscriminatorValue(value = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT)
-public class IntegrationRequestSentEventEntity extends ProcessEngineEventEntity {
+public class IntegrationRequestSentEventEntity extends IntegrationEventEntity {
 
     protected static final String INTEGRATION_REQUEST_SENT_EVENT = "IntegrationRequestSentEvent";
 

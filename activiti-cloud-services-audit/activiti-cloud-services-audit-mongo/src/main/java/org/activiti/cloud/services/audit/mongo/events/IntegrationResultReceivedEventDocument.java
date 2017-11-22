@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.services.audit.mongo.events;
 
-public class IntegrationRequestSentEventDocument extends IntegrationEventDocument {
+public class IntegrationResultReceivedEventDocument extends IntegrationEventDocument {
 
-    protected static final String INTEGRATION_REQUEST_SENT_EVENT = "IntegrationRequestSentEvent";
+    protected static final String INTEGRATION_RESULT_RECEIVED_EVENT = "IntegrationResultReceivedEvent";
 
 }

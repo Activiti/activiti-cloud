@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.audit.mongo.events;
+package org.activiti.cloud.services.audit.events;
 
-public class IntegrationRequestSentEventDocument extends IntegrationEventDocument {
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
-    protected static final String INTEGRATION_REQUEST_SENT_EVENT = "IntegrationRequestSentEvent";
+@Entity
+@DiscriminatorValue(value = IntegrationResultReceivedEventEntity.INTEGRATION_RESULT_RECEIVED_EVENT)
+public class IntegrationResultReceivedEventEntity extends IntegrationEventEntity {
+
+    protected static final String INTEGRATION_RESULT_RECEIVED_EVENT = "IntegrationResultReceivedEvent";
 
 }
