@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization;
+package org.activiti.cloud.services.organization.jpa;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.activiti.cloud.organization.core.model.Group;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@SpringBootApplication
-public class Application {
+/**
+ * JPA Repository for {@link Group} entity
+ */
+@RepositoryRestResource(path = "groups",
+        collectionResourceRel = "groups",
+        itemResourceRel = "groups")
+public interface GroupRepository extends JpaRepository<Group, String> {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class,
-                              args);
-    }
 }
