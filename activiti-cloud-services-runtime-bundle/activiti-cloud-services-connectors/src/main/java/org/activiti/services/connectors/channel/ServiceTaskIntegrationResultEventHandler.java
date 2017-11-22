@@ -64,6 +64,16 @@ public class ServiceTaskIntegrationResultEventHandler {
             runtimeService.trigger(integrationContext.getExecutionId(),
                                    integrationResultEvent.getVariables());
 
+            sendAuditMessage(integrationContext);
+        } else {
+            LOGGER.warn("No task is waiting for integration result with execution id `" +
+                                integrationResultEvent.getExecutionId() +
+                                "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored.");
+        }
+    }
+
+    private void sendAuditMessage(IntegrationContextEntity integrationContext) {
+        if (applicationProperties.isIntegrationAuditEventsEnabled()) {
             Message<IntegrationResultReceivedEvent[]> message = MessageBuilder.withPayload(
                     new IntegrationResultReceivedEvent[]{
                             new IntegrationResultReceivedEventImpl(applicationProperties.getName(),

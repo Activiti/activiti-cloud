@@ -35,6 +35,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.messaging.Message;
 
+import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -81,15 +82,15 @@ public class MQServiceTaskBehaviorTest {
     @Test
     public void executeShouldStoreTheIntegrationContextAndSendAMessage() throws Exception {
         //given
-        String connectorType = CONNECTOR_TYPE;
         ServiceTask serviceTask = new ServiceTask();
-        serviceTask.setImplementation(connectorType);
+        serviceTask.setImplementation(CONNECTOR_TYPE);
 
-        DelegateExecution execution = mock(DelegateExecution.class);
-        given(execution.getId()).willReturn(EXECUTION_ID);
-        given(execution.getProcessInstanceId()).willReturn(PROC_INST_ID);
-        given(execution.getProcessDefinitionId()).willReturn(PROC_DEF_ID);
-        given(execution.getCurrentFlowElement()).willReturn(serviceTask);
+        DelegateExecution execution = anExecution()
+                .withId(EXECUTION_ID)
+                .withProcessInstanceId(PROC_INST_ID)
+                .withProcessDefinitionId(PROC_DEF_ID)
+                .withServiceTask(serviceTask)
+                .build();
         given(applicationProperties.getName()).willReturn("myApp");
 
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
@@ -119,17 +120,68 @@ public class MQServiceTaskBehaviorTest {
         assertThat(message.getPayload().getExecutionId()).isEqualTo(EXECUTION_ID);
         assertThat(message.getPayload().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(message.getPayload().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
-        assertThat(message.getHeaders().get("connectorType")).isEqualTo(connectorType);
+        assertThat(message.getHeaders().get("connectorType")).isEqualTo(CONNECTOR_TYPE);
 
+    }
+
+    @Test
+    public void executeShouldRegisterIntegrationAuditEventWhenIntegrationAuditEventsAreEnabled() throws Exception {
+        //given
+        given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(true);
+        given(applicationProperties.getName()).willReturn("myApp");
+
+        ServiceTask serviceTask = new ServiceTask();
+        serviceTask.setImplementation(CONNECTOR_TYPE);
+
+        DelegateExecution execution = anExecution()
+                .withId(EXECUTION_ID)
+                .withProcessInstanceId(PROC_INST_ID)
+                .withProcessDefinitionId(PROC_DEF_ID)
+                .withServiceTask(serviceTask)
+                .build();
+
+        IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
+        entity.setId("entityId");
+        given(integrationContextManager.create()).willReturn(entity);
+
+        //when
+        behavior.execute(execution);
+
+        //then
         ArgumentCaptor<ProcessEngineEvent> processEngineEventArgumentCaptor = ArgumentCaptor.forClass(ProcessEngineEvent.class);
         verify(eventsAggregator).add(processEngineEventArgumentCaptor.capture());
+
         assertThat(processEngineEventArgumentCaptor.getValue()).isInstanceOf(IntegrationRequestSentEvent.class);
         IntegrationRequestSentEvent integrationRequestSentEvent = (IntegrationRequestSentEvent) processEngineEventArgumentCaptor.getValue();
         assertThat(integrationRequestSentEvent.getIntegrationContextId()).isEqualTo("entityId");
         assertThat(integrationRequestSentEvent.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(integrationRequestSentEvent.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
         assertThat(integrationRequestSentEvent.getApplicationName()).isEqualTo("myApp");
+    }
 
+    @Test
+    public void executeShouldNotRegisterIntegrationAuditEventWhenIntegrationAuditEventsAreDisabled() throws Exception {
+        //given
+        given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(false);
+        given(applicationProperties.getName()).willReturn("myApp");
+
+        ServiceTask serviceTask = new ServiceTask();
+        serviceTask.setImplementation(CONNECTOR_TYPE);
+
+        DelegateExecution execution = anExecution()
+                .withId(EXECUTION_ID)
+                .withServiceTask(serviceTask)
+                .build();
+
+        IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
+        entity.setId("entityId");
+        given(integrationContextManager.create()).willReturn(entity);
+
+        //when
+        behavior.execute(execution);
+
+        //then
+        verify(eventsAggregator, never()).add(any(ProcessEngineEvent.class));
     }
 
     @Test

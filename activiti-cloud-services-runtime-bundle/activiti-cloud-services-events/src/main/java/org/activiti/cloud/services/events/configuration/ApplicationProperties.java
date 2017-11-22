@@ -25,12 +25,22 @@ public class ApplicationProperties {
 
     private String name;
 
+    private boolean integrationAuditEventsEnabled;
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isIntegrationAuditEventsEnabled() {
+        return integrationAuditEventsEnabled;
+    }
+
+    public void setIntegrationAuditEventsEnabled(boolean integrationAuditEventsEnabled) {
+        this.integrationAuditEventsEnabled = integrationAuditEventsEnabled;
     }
 
 }

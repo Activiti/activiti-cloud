@@ -43,6 +43,10 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ServiceTaskIntegrationResultEventHandlerTest {
 
+    private static final String EXECUTION_ID = "execId";
+    private static final String ENTITY_ID = "entityId";
+    private static final String PROC_INST_ID = "procInstId";
+    private static final String PROC_DEF_ID = "procDefId";
 
     @InjectMocks
     private ServiceTaskIntegrationResultEventHandler handler;
@@ -61,7 +65,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Mock
     private ApplicationProperties applicationProperties;
-
     @Captor
     private ArgumentCaptor<Message<IntegrationResultReceivedEvent[]>> messageCaptor;
 
@@ -72,26 +75,22 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     }
 
     @Test
-    public void receiveShouldTriggerTheExecutionDeleteTheRelatedIntegrationContextAndSendAuditEvent() throws Exception {
+    public void receiveShouldTriggerTheExecutionAndDeleteTheRelatedIntegrationContext() throws Exception {
         //given
-        String executionId = "execId";
-        String entityId = "entityId";
-        String procInstId = "procInstId";
-        String procDefId = "procDefId";
-
         IntegrationContextEntityImpl integrationContext = new IntegrationContextEntityImpl();
-        integrationContext.setExecutionId(executionId);
-        integrationContext.setId(entityId);
-        integrationContext.setProcessInstanceId(procInstId);
-        integrationContext.setProcessDefinitionId(procDefId);
+        integrationContext.setExecutionId(EXECUTION_ID);
+        integrationContext.setId(ENTITY_ID);
+        integrationContext.setProcessInstanceId(PROC_INST_ID);
+        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
 
-        given(integrationContextService.findIntegrationContextByExecutionId(executionId)).willReturn(integrationContext);
+        given(integrationContextService.findIntegrationContextByExecutionId(EXECUTION_ID)).willReturn(integrationContext);
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
 
         given(applicationProperties.getName()).willReturn("myApp");
+        given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(true);
 
-        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(executionId,
+        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
                                                                                    variables);
 
         //when
@@ -99,18 +98,43 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
         //then
         verify(integrationContextService).deleteIntegrationContext(integrationContext);
-        verify(runtimeService).trigger(executionId,
+        verify(runtimeService).trigger(EXECUTION_ID,
                                        variables);
+    }
 
+    @Test
+    public void receiveShouldSendIntegrationAuditEventWhenIntegrationAuditEventsAreEnabled() throws Exception {
+        //given
+        IntegrationContextEntityImpl integrationContext = new IntegrationContextEntityImpl();
+        integrationContext.setExecutionId(EXECUTION_ID);
+        integrationContext.setId(ENTITY_ID);
+        integrationContext.setProcessInstanceId(PROC_INST_ID);
+        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
+
+        given(integrationContextService.findIntegrationContextByExecutionId(EXECUTION_ID)).willReturn(integrationContext);
+        Map<String, Object> variables = Collections.singletonMap("var1",
+                                                                 "v");
+
+        given(applicationProperties.getName()).willReturn("myApp");
+        given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(true);
+
+        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent("resultId",
+                                                                                   EXECUTION_ID,
+                                                                                   variables);
+
+        //when
+        handler.receive(integrationResultEvent);
+
+        //then
         verify(auditChannel).send(messageCaptor.capture());
         Message<IntegrationResultReceivedEvent[]> message = messageCaptor.getValue();
         assertThat(message.getPayload()).hasSize(1);
         IntegrationResultReceivedEvent integrationResultReceivedEvent = message.getPayload()[0];
-        assertThat(integrationResultReceivedEvent.getIntegrationContextId()).isEqualTo(entityId);
+        assertThat(integrationResultReceivedEvent.getIntegrationContextId()).isEqualTo(ENTITY_ID);
         assertThat(integrationResultReceivedEvent.getApplicationName()).isEqualTo("myApp");
-        assertThat(integrationResultReceivedEvent.getExecutionId()).isEqualTo(executionId);
-        assertThat(integrationResultReceivedEvent.getProcessInstanceId()).isEqualTo(procInstId);
-        assertThat(integrationResultReceivedEvent.getProcessDefinitionId()).isEqualTo(procDefId);
+        assertThat(integrationResultReceivedEvent.getExecutionId()).isEqualTo(EXECUTION_ID);
+        assertThat(integrationResultReceivedEvent.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
+        assertThat(integrationResultReceivedEvent.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
     }
 
     @Test
@@ -127,5 +151,26 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
                 //when
                 () -> handler.receive(integrationResultEvent)
         ).withMessageContaining("No task is waiting for integration result with execution id");
+    }
+    public void retrieveShouldNotSentAuditEventWhenIntegrationAuditEventsAreDisabled() throws Exception {
+        //given
+        given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(false);
+
+        IntegrationContextEntityImpl integrationContext = new IntegrationContextEntityImpl();
+        String executionId = "execId";
+
+        given(integrationContextService.findIntegrationContextByExecutionId(executionId)).willReturn(integrationContext);
+        Map<String, Object> variables = Collections.singletonMap("var1",
+                                                                 "v");
+
+        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent("resultId",
+                                                                                   executionId,
+                                                                                   variables);
+
+        //when
+        handler.receive(integrationResultEvent);
+
+        //then
+        verify(auditChannel, never()).send(any(Message.class));
     }
 }

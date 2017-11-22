@@ -45,13 +45,15 @@ public class IntegrationProducerCommandContextCloseListener implements CommandCo
     }
 
     private void registerIntegrationRequestSentEvent(Message<IntegrationRequestEvent> message) {
-        IntegrationRequestEvent integrationRequestEvent = message.getPayload();
-        IntegrationRequestSentEventImpl event = new IntegrationRequestSentEventImpl(applicationProperties.getName(),
-                                                                                    integrationRequestEvent.getExecutionId(),
-                                                                                    integrationRequestEvent.getProcessDefinitionId(),
-                                                                                    integrationRequestEvent.getProcessInstanceId(),
-                                                                                    integrationRequestEvent.getIntegrationContextId());
-        eventsAggregator.add(event);
+        if (applicationProperties.isIntegrationAuditEventsEnabled()) {
+            IntegrationRequestEvent integrationRequestEvent = message.getPayload();
+            IntegrationRequestSentEventImpl event = new IntegrationRequestSentEventImpl(applicationProperties.getName(),
+                                                                                        integrationRequestEvent.getExecutionId(),
+                                                                                        integrationRequestEvent.getProcessDefinitionId(),
+                                                                                        integrationRequestEvent.getProcessInstanceId(),
+                                                                                        integrationRequestEvent.getIntegrationContextId());
+            eventsAggregator.add(event);
+        }
     }
 
     @Override
