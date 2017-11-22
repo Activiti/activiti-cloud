@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.events;
+package org.activiti.cloud.services.events.integration;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-
-public interface IntegrationRequestSentEvent extends ProcessEngineEvent {
-
-    String getIntegrationContextId();
+public interface IntegrationRequestSentEvent extends IntegrationEvent {
 
 }

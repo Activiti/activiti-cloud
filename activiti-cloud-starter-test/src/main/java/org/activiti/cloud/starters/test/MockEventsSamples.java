@@ -22,6 +22,7 @@ import java.util.List;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.anIntegrationRequestSentEvent;
+import static org.activiti.cloud.starters.test.MockProcessEngineEvent.anIntegrationResultRecievedEvent;
 
 public class MockEventsSamples {
 
@@ -93,6 +94,9 @@ public class MockEventsSamples {
                                                      "32",
                                                      "51"));
         coveredEvents.add(anIntegrationRequestSentEvent("21",
+                                                        "33",
+                                                        "52"));
+        coveredEvents.add(anIntegrationResultRecievedEvent("22",
                                                         "33",
                                                         "52"));
         return coveredEvents;

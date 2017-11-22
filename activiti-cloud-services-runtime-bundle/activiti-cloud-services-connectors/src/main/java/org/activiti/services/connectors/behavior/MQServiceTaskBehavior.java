@@ -21,6 +21,9 @@ import java.util.Date;
 import java.util.List;
 
 import org.activiti.bpmn.model.ServiceTask;
+import org.activiti.cloud.services.events.integration.IntegrationRequestSentEventImpl;
+import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.listeners.CommandContextEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
 import org.activiti.engine.impl.context.Context;

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.events.IntegrationRequestSentEvent;
+import org.activiti.cloud.services.events.integration.IntegrationRequestSentEvent;
 import org.activiti.cloud.services.events.configuration.ApplicationProperties;
 import org.activiti.cloud.services.events.listeners.CommandContextEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;

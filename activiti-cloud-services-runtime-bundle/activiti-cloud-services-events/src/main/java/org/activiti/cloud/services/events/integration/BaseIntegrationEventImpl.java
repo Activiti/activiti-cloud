@@ -14,31 +14,28 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.events;
+package org.activiti.cloud.services.events.integration;
 
-public class IntegrationRequestSentEventImpl extends AbstractProcessEngineEvent implements IntegrationRequestSentEvent {
+import org.activiti.cloud.services.events.AbstractProcessEngineEvent;
+
+public abstract class BaseIntegrationEventImpl extends AbstractProcessEngineEvent implements IntegrationEvent {
 
     private String integrationContextId;
 
     //used to deserialize from json
-    public IntegrationRequestSentEventImpl() {
+    public BaseIntegrationEventImpl() {
     }
 
-    public IntegrationRequestSentEventImpl(String applicationName,
-                                           String executionId,
-                                           String processDefinitionId,
-                                           String processInstanceId,
-                                           String integrationContextId) {
+    public BaseIntegrationEventImpl(String applicationName,
+                                    String executionId,
+                                    String processDefinitionId,
+                                    String processInstanceId,
+                                    String integrationContextId) {
         super(applicationName,
               executionId,
               processDefinitionId,
               processInstanceId);
         this.integrationContextId = integrationContextId;
-    }
-
-    @Override
-    public String getEventType() {
-        return "IntegrationRequestSentEvent";
     }
 
     @Override
