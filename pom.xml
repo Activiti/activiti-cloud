@@ -8,9 +8,9 @@
   </parent>
 
   <artifactId>activiti-cloud-service-common-parent</artifactId>
+  <version>7-201711-EA-SNAPSHOT</version>
   <name>Activiti Cloud :: Service Common Parent</name>
   <description>Activiti Cloud Service Common Parent</description>
-  <version>7-201711-EA-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -24,6 +24,7 @@
   <modules>
     <module>activiti-cloud-services-identity-keycloak</module>
     <module>activiti-cloud-services-identity-basic</module>
+    <module>activiti-cloud-services-security-policies</module>
     <module>activiti-cloud-services-test</module>
     <module>activiti-cloud-services-monitoring</module>
     <module>activiti-cloud-services-tracing</module>
