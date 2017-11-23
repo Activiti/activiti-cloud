@@ -26,6 +26,7 @@
     <module>activiti-cloud-services-identity-basic</module>
     <module>activiti-cloud-services-test</module>
     <module>activiti-cloud-services-monitoring</module>
+    <module>activiti-cloud-services-tracing</module>
   </modules>
 
   <dependencyManagement>
