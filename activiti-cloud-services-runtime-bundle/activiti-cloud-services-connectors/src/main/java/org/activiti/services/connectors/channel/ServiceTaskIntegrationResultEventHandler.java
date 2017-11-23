@@ -52,9 +52,12 @@ public class ServiceTaskIntegrationResultEventHandler {
             runtimeService.trigger(integrationContext.getExecutionId(),
                                    integrationResultEvent.getVariables());
         } else {
-            LOGGER.warn("No task is waiting for integration result with execution id `" +
-                                integrationResultEvent.getExecutionId() +
-                                "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored." );
+            String message = "No task is waiting for integration result with execution id `" +
+                    integrationResultEvent.getExecutionId() +
+                    "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored.";
+            LOGGER.error( message );
+            // This needs to throw an exception so the message goes back to the queue in case of other node can pick it up.
+            throw new IllegalStateException(message);
         }
     }
 }

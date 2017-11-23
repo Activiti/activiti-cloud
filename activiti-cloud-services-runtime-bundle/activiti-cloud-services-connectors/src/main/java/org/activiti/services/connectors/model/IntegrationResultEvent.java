@@ -17,6 +17,7 @@
 package org.activiti.services.connectors.model;
 
 import java.util.Map;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -31,12 +32,12 @@ public class IntegrationResultEvent {
 
     //used by json deserialization
     public IntegrationResultEvent() {
+        this.id = UUID.randomUUID().toString();
     }
 
-    public IntegrationResultEvent(String id,
-                                  String executionId,
+    public IntegrationResultEvent(String executionId,
                                   Map<String, Object> variables) {
-        this.id = id;
+        this();
         this.executionId = executionId;
         this.variables = variables;
     }
@@ -52,5 +53,4 @@ public class IntegrationResultEvent {
     public Map<String, Object> getVariables() {
         return variables;
     }
-
 }

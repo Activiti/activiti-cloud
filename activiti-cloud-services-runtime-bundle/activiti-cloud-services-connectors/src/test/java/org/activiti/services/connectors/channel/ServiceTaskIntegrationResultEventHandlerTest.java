@@ -23,6 +23,7 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.model.IntegrationResultEvent;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -60,8 +61,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findIntegrationContextByExecutionId(executionId)).willReturn(integrationContext);
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
-        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent("resultId",
-                                                                                   executionId,
+        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(executionId,
                                                                                    variables);
 
         //when
@@ -71,5 +71,21 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         verify(integrationContextService).deleteIntegrationContext(integrationContext);
         verify(runtimeService).trigger(executionId,
                                        variables);
+    }
+
+    @Test
+    public void receiveShouldThrowAnExceptionWhenNoRelatedIntegrationContextIsFound() throws Exception {
+        //given
+        String executionId = "execId";
+
+        given(integrationContextService.findIntegrationContextByExecutionId(executionId)).willReturn(null);
+        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(executionId,
+                                                                                   null);
+
+        //then
+        Assertions.assertThatExceptionOfType(IllegalStateException.class).isThrownBy(
+                //when
+                () -> handler.receive(integrationResultEvent)
+        ).withMessageContaining("No task is waiting for integration result with execution id");
     }
 }

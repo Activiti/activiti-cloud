@@ -16,21 +16,20 @@
 
 package org.activiti.services.connectors.behavior;
 
+import java.util.ArrayList;
+
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
-import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
 import org.activiti.services.connectors.model.IntegrationRequestEvent;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
@@ -44,21 +43,18 @@ public class MQServiceTaskBehaviorTest {
     private MQServiceTaskBehavior behavior;
 
     @Mock
-    private ProcessEngineIntegrationChannels channels;
-
-    @Mock
     private IntegrationContextManager integrationContextManager;
 
     @Mock
-    private MessageChannel messageChannel;
+    private IntegrationProducerCommandContextCloseListener contextCloseListener;
 
-    @Captor
-    private ArgumentCaptor<Message<IntegrationRequestEvent>> captor;
+    @Mock
+    private CommandContext commandContext;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        when(channels.integrationEventsProducer()).thenReturn(messageChannel);
+        when(behavior.getCurrentCommandContext()).thenReturn(commandContext);
     }
 
     @Test
@@ -77,6 +73,10 @@ public class MQServiceTaskBehaviorTest {
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         given(integrationContextManager.create()).willReturn(entity);
 
+        ArrayList<Message<IntegrationRequestEvent>> messages = new ArrayList<>();
+        given(commandContext.getGenericAttribute(IntegrationProducerCommandContextCloseListener.PROCESS_ENGINE_INTEGRATION_EVENTS))
+                .willReturn(messages);
+
         //when
         behavior.execute(execution);
 
@@ -86,12 +86,53 @@ public class MQServiceTaskBehaviorTest {
         assertThat(entity.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(entity.getProcessInstanceId()).isEqualTo("procInstId");
 
-        verify(messageChannel).send(captor.capture());
-        Message<IntegrationRequestEvent> message = captor.getValue();
+        assertThat(messages).hasSize(1);
+        Message<IntegrationRequestEvent> message = messages.get(0);
         assertThat(message.getPayload().getExecutionId()).isNotNull();
         assertThat(message.getPayload().getProcessInstanceId()).isEqualTo("procInstId");
         assertThat(message.getPayload().getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(message.getHeaders().get("connectorType")).isEqualTo(connectorType);
+    }
+
+    @Test
+    public void executeShouldRegisterCloseListenerWhenAbsent() throws Exception {
+        //given
+        given(commandContext.hasCloseListener(IntegrationProducerCommandContextCloseListener.class)).willReturn(false);
+        IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
+        given(integrationContextManager.create()).willReturn(entity);
+
+        //when
+        behavior.execute(anyExecution());
+
+        //then
+        verify(commandContext).addCloseListener(contextCloseListener);
+    }
+
+    @Test
+    public void executeShouldNotRegisterCloseListenerWhenAlreadyPresent() throws Exception {
+        //given
+
+        given(commandContext.hasCloseListener(IntegrationProducerCommandContextCloseListener.class)).willReturn(true);
+
+        IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
+        given(integrationContextManager.create()).willReturn(entity);
+
+        //when
+        behavior.execute(anyExecution());
+
+        //then
+        verify(commandContext, never()).addCloseListener(contextCloseListener);
+    }
+
+    private DelegateExecution anyExecution() {
+        String connectorType = "payment";
+        ServiceTask serviceTask = new ServiceTask();
+        serviceTask.setImplementation(connectorType);
+
+        DelegateExecution execution = mock(DelegateExecution.class);
+        given(execution.getId()).willReturn("execId");
+        given(execution.getCurrentFlowElement()).willReturn(serviceTask);
+        return execution;
     }
 
     @Test

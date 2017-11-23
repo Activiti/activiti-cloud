@@ -16,11 +16,11 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.events.VariableCreatedEventImpl;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiVariableEventImpl;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.events.VariableCreatedEventImpl;
 import org.springframework.stereotype.Component;
 
 import static org.activiti.engine.delegate.event.ActivitiEventType.VARIABLE_CREATED;
@@ -30,14 +30,16 @@ public class VariableCreatedEventConverter extends AbstractEventConverter {
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
+        ActivitiVariableEventImpl variableEvent = (ActivitiVariableEventImpl) event;
+
         return new VariableCreatedEventImpl(getApplicationName(),
                                             event.getExecutionId(),
                                             event.getProcessDefinitionId(),
                                             event.getProcessInstanceId(),
-                                            ((ActivitiVariableEventImpl) event).getVariableName(),
-                                            ((ActivitiVariableEventImpl) event).getVariableValue().toString(),
-                                            ((ActivitiVariableEventImpl) event).getVariableType().getTypeName(),
-                                            ((ActivitiVariableEventImpl) event).getTaskId());
+                                            variableEvent.getVariableName(),
+                                            (variableEvent.getVariableValue() != null) ? String.valueOf(variableEvent.getVariableValue()) : "",
+                                            (variableEvent.getVariableType() != null) ? variableEvent.getVariableType().getTypeName() : "",
+                                            variableEvent.getTaskId());
     }
 
     @Override

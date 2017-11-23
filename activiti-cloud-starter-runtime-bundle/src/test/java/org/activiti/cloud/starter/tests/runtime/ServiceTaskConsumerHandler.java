@@ -18,7 +18,6 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.activiti.services.connectors.model.IntegrationRequestEvent;
 import org.activiti.services.connectors.model.IntegrationResultEvent;
@@ -44,8 +43,7 @@ public class ServiceTaskConsumerHandler {
         HashMap<String, Object> resultVariables = new HashMap<>();
         resultVariables.put(variableToUpdate,
                             ((Integer) requestVariables.get(variableToUpdate)) + 1);
-        Message<IntegrationResultEvent> message = MessageBuilder.withPayload(new IntegrationResultEvent(UUID.randomUUID().toString(),
-                                                                                                        integrationRequestEvent.getExecutionId(),
+        Message<IntegrationResultEvent> message = MessageBuilder.withPayload(new IntegrationResultEvent(integrationRequestEvent.getExecutionId(),
                                                                                                         resultVariables)).build();
         consumerChannels.integrationResultsProducer().send(message);
     }
