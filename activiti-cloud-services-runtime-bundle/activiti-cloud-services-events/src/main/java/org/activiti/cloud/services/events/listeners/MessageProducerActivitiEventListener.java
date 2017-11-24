@@ -28,11 +28,11 @@ public class MessageProducerActivitiEventListener implements ActivitiEventListen
 
     private final EventConverterContext converterContext;
 
-    private final CommandContextEventsAggregator eventsAggregator;
+    private final ProcessEngineEventsAggregator eventsAggregator;
 
     @Autowired
     public MessageProducerActivitiEventListener(EventConverterContext converterContext,
-                                                CommandContextEventsAggregator eventsAggregator) {
+                                                ProcessEngineEventsAggregator eventsAggregator) {
         this.converterContext = converterContext;
         this.eventsAggregator = eventsAggregator;
     }

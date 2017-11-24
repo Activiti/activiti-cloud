@@ -37,7 +37,7 @@ public class MessageProducerActivitiEventListenerTest {
     private EventConverterContext converterContext;
 
     @Mock
-    private CommandContextEventsAggregator eventsAggregator;
+    private ProcessEngineEventsAggregator eventsAggregator;
 
     @Before
     public void setUp() throws Exception {

@@ -36,7 +36,7 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -65,6 +65,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Mock
     private ApplicationProperties applicationProperties;
+
     @Captor
     private ArgumentCaptor<Message<IntegrationResultReceivedEvent[]>> messageCaptor;
 
@@ -118,8 +119,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(applicationProperties.getName()).willReturn("myApp");
         given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(true);
 
-        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent("resultId",
-                                                                                   EXECUTION_ID,
+        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
                                                                                    variables);
 
         //when
@@ -152,6 +152,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
                 () -> handler.receive(integrationResultEvent)
         ).withMessageContaining("No task is waiting for integration result with execution id");
     }
+
+    @Test
     public void retrieveShouldNotSentAuditEventWhenIntegrationAuditEventsAreDisabled() throws Exception {
         //given
         given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(false);
@@ -163,8 +165,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
 
-        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent("resultId",
-                                                                                   executionId,
+        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(executionId,
                                                                                    variables);
 
         //when
@@ -173,4 +174,5 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         //then
         verify(auditChannel, never()).send(any(Message.class));
     }
+
 }

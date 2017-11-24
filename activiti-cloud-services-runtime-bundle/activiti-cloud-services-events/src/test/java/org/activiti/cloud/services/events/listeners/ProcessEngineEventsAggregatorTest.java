@@ -34,11 +34,11 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class CommandContextEventsAggregatorTest {
+public class ProcessEngineEventsAggregatorTest {
 
     @InjectMocks
     @Spy
-    private CommandContextEventsAggregator eventsAggregator;
+    private ProcessEngineEventsAggregator eventsAggregator;
 
     @Mock
     private MessageProducerCommandContextCloseListener closeListener;
@@ -56,6 +56,33 @@ public class CommandContextEventsAggregatorTest {
     public void setUp() throws Exception {
         initMocks(this);
         when(eventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
+    }
+
+    @Test
+    public void getCloseListenerClassShouldReturnMessageProducerCommandContextCloseListenerClass() throws Exception {
+        //when
+        Class<MessageProducerCommandContextCloseListener> listenerClass = eventsAggregator.getCloseListenerClass();
+
+        //then
+        assertThat(listenerClass).isEqualTo(MessageProducerCommandContextCloseListener.class);
+    }
+
+    @Test
+    public void getCloseListenerShouldReturnTheCloserListenerPassedInTheConstructor() throws Exception {
+        //when
+        MessageProducerCommandContextCloseListener retrievedCloseListener = eventsAggregator.getCloseListener();
+
+        //then
+        assertThat(retrievedCloseListener).isEqualTo(closeListener);
+    }
+
+    @Test
+    public void getAttributeKeyShouldReturnProcessEngineEvents() throws Exception {
+        //when
+        String attributeKey = eventsAggregator.getAttributeKey();
+
+        //then
+        assertThat(attributeKey).isEqualTo(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS);
     }
 
     @Test
@@ -81,9 +108,7 @@ public class CommandContextEventsAggregatorTest {
         eventsAggregator.add(event);
 
         //then
-        ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
-        verify(commandContext).addAttribute(keyCaptor.capture(), eventsCaptor.capture());
-        assertThat(keyCaptor.getValue()).isEqualTo(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS);
+        verify(commandContext).addAttribute(eq(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS), eventsCaptor.capture());
         assertThat(eventsCaptor.getValue()).containsExactly(event);
     }
 

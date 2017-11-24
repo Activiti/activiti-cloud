@@ -66,9 +66,12 @@ public class ServiceTaskIntegrationResultEventHandler {
 
             sendAuditMessage(integrationContext);
         } else {
-            LOGGER.warn("No task is waiting for integration result with execution id `" +
-                                integrationResultEvent.getExecutionId() +
-                                "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored.");
+            String message = "No task is waiting for integration result with execution id `" +
+                    integrationResultEvent.getExecutionId() +
+                    "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored.";
+            LOGGER.error( message );
+            // This needs to throw an exception so the message goes back to the queue in case of other node can pick it up.
+            throw new IllegalStateException(message);
         }
     }
 
@@ -84,13 +87,6 @@ public class ServiceTaskIntegrationResultEventHandler {
                     }).build();
 
             channels.auditProducer().send(message);
-        } else {
-            String message = "No task is waiting for integration result with execution id `" +
-                    integrationResultEvent.getExecutionId() +
-                    "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored.";
-            LOGGER.error( message );
-            // This needs to throw an exception so the message goes back to the queue in case of other node can pick it up.
-            throw new IllegalStateException(message);
         }
     }
 }
