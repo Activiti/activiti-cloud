@@ -19,8 +19,6 @@
     This allow to easily create feature branches with a different Maven version.
     -->
     <version.activiti.cloud.audit>${project.version}</version.activiti.cloud.audit>
-    <!--TODO remove this property before merging-->
-    <version.activiti.cloud.runtime-bundle>${project.version}</version.activiti.cloud.runtime-bundle>
   </properties>
 
   <modules>
