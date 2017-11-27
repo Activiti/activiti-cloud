@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.integration.IntegrationRequestSentEventImpl;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
@@ -22,15 +22,15 @@ public class IntegrationProducerCommandContextCloseListener implements CommandCo
 
     private final ProcessEngineIntegrationChannels integrationChannels;
     private final ProcessEngineChannels processEngineChannels;
-    private final ApplicationProperties applicationProperties;
+    private final RuntimeBundleProperties runtimeBundleProperties;
 
     @Autowired
     public IntegrationProducerCommandContextCloseListener(ProcessEngineIntegrationChannels integrationChannels,
                                                           ProcessEngineChannels processEngineChannels,
-                                                          ApplicationProperties applicationProperties) {
+                                                          RuntimeBundleProperties runtimeBundleProperties) {
         this.integrationChannels = integrationChannels;
         this.processEngineChannels = processEngineChannels;
-        this.applicationProperties = applicationProperties;
+        this.runtimeBundleProperties = runtimeBundleProperties;
     }
 
     @Override
@@ -47,9 +47,9 @@ public class IntegrationProducerCommandContextCloseListener implements CommandCo
     }
 
     private void sendIntegrationRequestSentEvent(Message<IntegrationRequestEvent> message) {
-        if (applicationProperties.isIntegrationAuditEventsEnabled()) {
+        if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             IntegrationRequestEvent integrationRequestEvent = message.getPayload();
-            IntegrationRequestSentEventImpl event = new IntegrationRequestSentEventImpl(applicationProperties.getName(),
+            IntegrationRequestSentEventImpl event = new IntegrationRequestSentEventImpl(runtimeBundleProperties.getName(),
                                                                                         integrationRequestEvent.getExecutionId(),
                                                                                         integrationRequestEvent.getProcessDefinitionId(),
                                                                                         integrationRequestEvent.getProcessInstanceId(),

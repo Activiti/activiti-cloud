@@ -18,7 +18,7 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.VariableCreatedEvent;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiVariableEventImpl;
 import org.activiti.engine.impl.variable.StringType;
@@ -38,7 +38,7 @@ public class VariableCreatedEventConverterTest {
     private VariableCreatedEventConverter converter;
 
     @Mock
-    private ApplicationProperties applicationProperties;
+    private RuntimeBundleProperties runtimeBundleProperties;
 
     @Before
     public void setUp() throws Exception {
@@ -48,7 +48,7 @@ public class VariableCreatedEventConverterTest {
     @Test
     public void internalVariableEventToExternalConvertion() throws Exception {
         //given
-        given(applicationProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getName()).willReturn("myApp");
 
         ActivitiVariableEventImpl activitiEvent = mock(ActivitiVariableEventImpl.class);
         given(activitiEvent.getType()).willReturn(ActivitiEventType.VARIABLE_CREATED);

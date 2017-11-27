@@ -19,7 +19,7 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.events.TaskCreatedEventImpl;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiEntityEventImpl;
@@ -35,7 +35,7 @@ public class TaskCreatedEventConverter extends AbstractEventConverter {
     private final TaskConverter taskConverter;
 
     @Autowired
-    public TaskCreatedEventConverter(TaskConverter taskConverter, ApplicationProperties applicationProperties) {
+    public TaskCreatedEventConverter(TaskConverter taskConverter, RuntimeBundleProperties applicationProperties) {
         super(applicationProperties);
         this.taskConverter = taskConverter;
     }

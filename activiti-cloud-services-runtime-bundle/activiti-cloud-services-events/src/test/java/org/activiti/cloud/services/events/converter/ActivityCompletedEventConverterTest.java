@@ -18,7 +18,7 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ActivityCompletedEventImpl;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiActivityEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.junit.Before;
@@ -37,7 +37,7 @@ public class ActivityCompletedEventConverterTest {
     private ActivityCompletedEventConverter converter;
 
     @Mock
-    private ApplicationProperties applicationProperties;
+    private RuntimeBundleProperties runtimeBundleProperties;
 
     @Before
     public void setUp() throws Exception {
@@ -56,7 +56,7 @@ public class ActivityCompletedEventConverterTest {
         given(activitiEvent.getActivityName()).willReturn("ActivityName");
         given(activitiEvent.getActivityType()).willReturn("ActivityType");
 
-        given(applicationProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = converter.from(activitiEvent);

@@ -18,7 +18,7 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ProcessCancelledEvent;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiProcessCancelledEventImpl;
 import org.junit.Before;
@@ -37,7 +37,7 @@ public class ProcessCancelledEventConverterTest {
     private ProcessCancelledEventConverter converter;
 
     @Mock
-    private ApplicationProperties applicationProperties;
+    private RuntimeBundleProperties runtimeBundleProperties;
 
     @Before
     public void setUp() throws Exception {
@@ -54,7 +54,7 @@ public class ProcessCancelledEventConverterTest {
         given(activitiEvent.getProcessDefinitionId()).willReturn("myProcessDef");
         given(activitiEvent.getCause()).willReturn("cause of the cancellation");
 
-        given(applicationProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = converter.from(activitiEvent);

@@ -18,7 +18,7 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ProcessCancelledEventImpl;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiCancelledEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
@@ -31,7 +31,7 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.PROCESS_CANCE
 public class ProcessCancelledEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public ProcessCancelledEventConverter(ApplicationProperties applicationProperties) {
+    public ProcessCancelledEventConverter(RuntimeBundleProperties applicationProperties) {
         super(applicationProperties);
     }
 

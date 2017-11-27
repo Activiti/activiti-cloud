@@ -22,7 +22,7 @@ import java.util.Collections;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.integration.IntegrationRequestSentEvent;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
@@ -70,7 +70,10 @@ public class IntegrationProducerCommandContextCloseListenerTest {
     private CommandContext commandContext;
 
     @Mock
-    private ApplicationProperties applicationProperties;
+    private RuntimeBundleProperties runtimeBundleProperties;
+
+    @Mock
+    private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
 
     @Mock
     private Message<IntegrationRequestEvent> firstIntegration;
@@ -86,6 +89,7 @@ public class IntegrationProducerCommandContextCloseListenerTest {
         initMocks(this);
         when(integrationChannels.integrationEventsProducer()).thenReturn(integrationProducerChannel);
         when(processEngineChannels.auditProducer()).thenReturn(audiProducerChannel);
+        when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
     }
 
     @Test
@@ -134,8 +138,8 @@ public class IntegrationProducerCommandContextCloseListenerTest {
     @Test
     public void executeShouldSendIntegrationAuditEventWhenIntegrationAuditEventsAreEnabled() throws Exception {
         //given
-        given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(true);
-        given(applicationProperties.getName()).willReturn(APP_NAME);
+        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
+        given(runtimeBundleProperties.getName()).willReturn(APP_NAME);
 
         given(commandContext.getGenericAttribute(IntegrationProducerCommandContextCloseListener.PROCESS_ENGINE_INTEGRATION_EVENTS))
                 .willReturn(Collections.singletonList(firstIntegration));
@@ -169,8 +173,8 @@ public class IntegrationProducerCommandContextCloseListenerTest {
     @Test
     public void executeShouldNotSendIntegrationAuditEventWhenIntegrationAuditEventsAreDisabled() throws Exception {
         //given
-        given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(false);
-        given(applicationProperties.getName()).willReturn(APP_NAME);
+        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(false);
+        given(runtimeBundleProperties.getName()).willReturn(APP_NAME);
 
         given(commandContext.getGenericAttribute(IntegrationProducerCommandContextCloseListener.PROCESS_ENGINE_INTEGRATION_EVENTS))
                 .willReturn(Collections.singletonList(firstIntegration));

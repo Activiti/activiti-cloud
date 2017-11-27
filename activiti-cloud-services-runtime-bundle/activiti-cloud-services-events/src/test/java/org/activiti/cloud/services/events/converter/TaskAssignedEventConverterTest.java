@@ -19,7 +19,7 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.events.TaskAssignedEvent;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiEntityEventImpl;
 import org.activiti.engine.task.Task;
@@ -42,7 +42,7 @@ public class TaskAssignedEventConverterTest {
     private TaskConverter taskConverter;
 
     @Mock
-    private ApplicationProperties applicationProperties;
+    private RuntimeBundleProperties runtimeBundleProperties;
 
     @Before
     public void setUp() throws Exception {
@@ -64,7 +64,7 @@ public class TaskAssignedEventConverterTest {
         org.activiti.cloud.services.api.model.Task externalTask = mock(org.activiti.cloud.services.api.model.Task.class);
         given(taskConverter.from(internalTask)).willReturn(externalTask);
 
-        given(applicationProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = taskAssignedEventConverter.from(activitiEvent);

@@ -18,7 +18,7 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.VariableCreatedEventImpl;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiVariableEventImpl;
@@ -31,7 +31,7 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.VARIABLE_CREA
 public class VariableCreatedEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public VariableCreatedEventConverter(ApplicationProperties applicationProperties) {
+    public VariableCreatedEventConverter(RuntimeBundleProperties applicationProperties) {
         super(applicationProperties);
     }
 

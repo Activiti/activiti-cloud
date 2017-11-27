@@ -19,7 +19,7 @@ package org.activiti.cloud.services.events.converter;
 import java.util.Map;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.ActivitiProcessStartedEvent;
 import org.assertj.core.api.Assertions;
@@ -37,7 +37,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = EventConverterContextIT.EventConverterContextConfig.class)
 @TestPropertySource("classpath:test-application.properties")
 public class EventConverterContextIT {
 
@@ -50,7 +49,6 @@ public class EventConverterContextIT {
             "org.activiti.cloud.services.events.configuration",
             "org.activiti.cloud.services.api.model.converter"
     })
-    @EnableConfigurationProperties(ApplicationProperties.class)
     public static class EventConverterContextConfig {
 
     }

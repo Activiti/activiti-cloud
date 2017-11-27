@@ -17,7 +17,7 @@
 package org.activiti.services.connectors.behavior;
 
 import org.activiti.bpmn.model.ServiceTask;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.IntegrationEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
@@ -56,7 +56,7 @@ public class MQServiceTaskBehaviorTest {
     private IntegrationEventsAggregator eventsAggregator;
 
     @Mock
-    private ApplicationProperties applicationProperties;
+    private RuntimeBundleProperties runtimeBundleProperties;
 
     @Captor
     private ArgumentCaptor<Message<IntegrationRequestEvent>> integrationRequestCaptor;
@@ -78,7 +78,7 @@ public class MQServiceTaskBehaviorTest {
                 .withProcessDefinitionId(PROC_DEF_ID)
                 .withServiceTask(serviceTask)
                 .build();
-        given(applicationProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getName()).willReturn("myApp");
 
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId("entityId");

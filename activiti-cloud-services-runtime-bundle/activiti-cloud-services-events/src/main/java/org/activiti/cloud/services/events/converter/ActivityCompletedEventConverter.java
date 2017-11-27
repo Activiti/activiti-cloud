@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.events.converter;
 
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiActivityEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
@@ -31,7 +31,7 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.ACTIVITY_COMP
 public class ActivityCompletedEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public ActivityCompletedEventConverter(ApplicationProperties applicationProperties) {
+    public ActivityCompletedEventConverter(RuntimeBundleProperties applicationProperties) {
         super(applicationProperties);
     }
 

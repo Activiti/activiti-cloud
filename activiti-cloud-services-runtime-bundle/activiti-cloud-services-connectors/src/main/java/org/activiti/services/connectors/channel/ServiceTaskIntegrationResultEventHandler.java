@@ -17,7 +17,7 @@
 package org.activiti.services.connectors.channel;
 
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEvent;
 import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEventImpl;
 import org.activiti.engine.RuntimeService;
@@ -42,17 +42,17 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
     private final ProcessEngineChannels channels;
-    private final ApplicationProperties applicationProperties;
+    private final RuntimeBundleProperties runtimeBundleProperties;
 
     @Autowired
     public ServiceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
                                                     IntegrationContextService integrationContextService,
                                                     ProcessEngineChannels channels,
-                                                    ApplicationProperties applicationProperties) {
+                                                    RuntimeBundleProperties runtimeBundleProperties) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
         this.channels = channels;
-        this.applicationProperties = applicationProperties;
+        this.runtimeBundleProperties = runtimeBundleProperties;
     }
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
@@ -76,10 +76,10 @@ public class ServiceTaskIntegrationResultEventHandler {
     }
 
     private void sendAuditMessage(IntegrationContextEntity integrationContext) {
-        if (applicationProperties.isIntegrationAuditEventsEnabled()) {
+        if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             Message<IntegrationResultReceivedEvent[]> message = MessageBuilder.withPayload(
                     new IntegrationResultReceivedEvent[]{
-                            new IntegrationResultReceivedEventImpl(applicationProperties.getName(),
+                            new IntegrationResultReceivedEventImpl(runtimeBundleProperties.getName(),
                                                                    integrationContext.getExecutionId(),
                                                                    integrationContext.getProcessDefinitionId(),
                                                                    integrationContext.getProcessInstanceId(),

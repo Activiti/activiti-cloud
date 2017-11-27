@@ -16,16 +16,18 @@
 
 package org.activiti.cloud.services.events.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "spring.application")
-public class ApplicationProperties {
+@ConfigurationProperties(prefix = "activiti.cloud.runtime-bundle")
+public class RuntimeBundleProperties {
 
+    @Value("${spring.application.name}")
     private String name;
 
-    private boolean integrationAuditEventsEnabled;
+    private RuntimeBundleEventsProperties eventsProperties = new RuntimeBundleEventsProperties();
 
     public String getName() {
         return name;
@@ -35,12 +37,24 @@ public class ApplicationProperties {
         this.name = name;
     }
 
-    public boolean isIntegrationAuditEventsEnabled() {
-        return integrationAuditEventsEnabled;
+    public RuntimeBundleEventsProperties getEventsProperties() {
+        return eventsProperties;
     }
 
-    public void setIntegrationAuditEventsEnabled(boolean integrationAuditEventsEnabled) {
-        this.integrationAuditEventsEnabled = integrationAuditEventsEnabled;
+    public void setEventsProperties(RuntimeBundleEventsProperties eventsProperties) {
+        this.eventsProperties = eventsProperties;
     }
 
+    public static class RuntimeBundleEventsProperties {
+
+        private boolean integrationAuditEventsEnabled;
+
+        public boolean isIntegrationAuditEventsEnabled() {
+            return integrationAuditEventsEnabled;
+        }
+
+        public void setIntegrationAuditEventsEnabled(boolean integrationAuditEventsEnabled) {
+            this.integrationAuditEventsEnabled = integrationAuditEventsEnabled;
+        }
+    }
 }

@@ -20,7 +20,7 @@ import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
 import org.activiti.cloud.services.events.ProcessCompletedEvent;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
@@ -44,7 +44,7 @@ public class ProcessCompletedEventConverterTest {
     private ProcessInstanceConverter processInstanceConverter;
 
     @Mock
-    private ApplicationProperties applicationProperties;
+    private RuntimeBundleProperties runtimeBundleProperties;
 
     @Before
     public void setUp() throws Exception {
@@ -65,7 +65,7 @@ public class ProcessCompletedEventConverterTest {
         given(activitiEvent.getEntity()).willReturn(executionEntity);
         given(executionEntity.getProcessInstance()).willReturn(internalProcessInstance);
 
-        given(applicationProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getName()).willReturn("myApp");
 
         ProcessInstance externalProcessInstance = mock(ProcessInstance.class);
         given(processInstanceConverter.from(internalProcessInstance)).willReturn(externalProcessInstance);

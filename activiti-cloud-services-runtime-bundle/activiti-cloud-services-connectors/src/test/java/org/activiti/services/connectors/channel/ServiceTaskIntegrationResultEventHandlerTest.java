@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEvent;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
@@ -36,7 +36,7 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -64,7 +64,10 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private MessageChannel auditChannel;
 
     @Mock
-    private ApplicationProperties applicationProperties;
+    private RuntimeBundleProperties runtimeBundleProperties;
+
+    @Mock
+    private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
 
     @Captor
     private ArgumentCaptor<Message<IntegrationResultReceivedEvent[]>> messageCaptor;
@@ -73,6 +76,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     public void setUp() throws Exception {
         initMocks(this);
         when(channels.auditProducer()).thenReturn(auditChannel);
+        when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
     }
 
     @Test
@@ -88,8 +92,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
 
-        given(applicationProperties.getName()).willReturn("myApp");
-        given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(true);
+        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
                                                                                    variables);
@@ -116,8 +120,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
 
-        given(applicationProperties.getName()).willReturn("myApp");
-        given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(true);
+        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
                                                                                    variables);
@@ -156,7 +160,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Test
     public void retrieveShouldNotSentAuditEventWhenIntegrationAuditEventsAreDisabled() throws Exception {
         //given
-        given(applicationProperties.isIntegrationAuditEventsEnabled()).willReturn(false);
+        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(false);
 
         IntegrationContextEntityImpl integrationContext = new IntegrationContextEntityImpl();
         String executionId = "execId";
@@ -172,7 +176,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         handler.receive(integrationResultEvent);
 
         //then
-        verify(auditChannel, never()).send(any(Message.class));
+        verify(auditChannel,
+               never()).send(any(Message.class));
     }
-
 }

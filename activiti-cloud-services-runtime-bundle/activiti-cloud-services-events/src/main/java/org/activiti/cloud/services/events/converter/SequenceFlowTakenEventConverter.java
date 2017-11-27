@@ -18,7 +18,7 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.SequenceFlowTakenEventImpl;
-import org.activiti.cloud.services.events.configuration.ApplicationProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiSequenceFlowTakenEventImpl;
@@ -31,7 +31,7 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.SEQUENCEFLOW_
 public class SequenceFlowTakenEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public SequenceFlowTakenEventConverter(ApplicationProperties applicationProperties) {
+    public SequenceFlowTakenEventConverter(RuntimeBundleProperties applicationProperties) {
         super(applicationProperties);
     }
 
