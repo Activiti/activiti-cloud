@@ -33,6 +33,11 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-security-policies</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-events</artifactId>
         <version>${project.version}</version>
       </dependency>

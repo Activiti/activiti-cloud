@@ -252,7 +252,7 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-security-policies</artifactId>
-        <version>${version.activiti.cloud.service-common}</version>
+        <version>${version.activiti.cloud.runtime-bundle}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
