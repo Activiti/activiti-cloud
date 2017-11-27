@@ -64,7 +64,7 @@ public class IntegrationProducerCommandContextCloseListenerTest {
     private ProcessEngineChannels processEngineChannels;
 
     @Mock
-    private MessageChannel audiProducerChannel;
+    private MessageChannel auditProducerChannel;
 
     @Mock
     private CommandContext commandContext;
@@ -88,7 +88,7 @@ public class IntegrationProducerCommandContextCloseListenerTest {
     public void setUp() throws Exception {
         initMocks(this);
         when(integrationChannels.integrationEventsProducer()).thenReturn(integrationProducerChannel);
-        when(processEngineChannels.auditProducer()).thenReturn(audiProducerChannel);
+        when(processEngineChannels.auditProducer()).thenReturn(auditProducerChannel);
         when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
     }
 
@@ -156,7 +156,7 @@ public class IntegrationProducerCommandContextCloseListenerTest {
         closeListener.closed(commandContext);
 
         //then
-        verify(audiProducerChannel).send(messageArgumentCaptor.capture());
+        verify(auditProducerChannel).send(messageArgumentCaptor.capture());
 
         Message<ProcessEngineEvent[]> message = messageArgumentCaptor.getValue();
         assertThat(message.getPayload()).hasSize(1);
@@ -187,7 +187,7 @@ public class IntegrationProducerCommandContextCloseListenerTest {
         closeListener.closed(commandContext);
 
         //then
-        verify(audiProducerChannel,
+        verify(auditProducerChannel,
                never()).send(ArgumentMatchers.any());
     }
 
