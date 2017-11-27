@@ -16,9 +16,11 @@
 
 package org.activiti.cloud.services.audit.events;
 
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 
 import org.activiti.cloud.services.audit.converter.TaskJpaJsonConverter;
 import org.activiti.cloud.services.audit.events.model.Task;
@@ -30,6 +32,8 @@ public class TaskCompletedEventEntity extends ProcessEngineEventEntity {
     protected static final String TASK_COMPLETED_EVENT = "TaskCompletedEvent";
 
     @Convert(converter = TaskJpaJsonConverter.class)
+    @Lob
+    @Column
     private Task task;
 
     public Task getTask() {
