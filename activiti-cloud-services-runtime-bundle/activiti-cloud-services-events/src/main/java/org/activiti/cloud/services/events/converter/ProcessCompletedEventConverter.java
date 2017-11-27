@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
@@ -34,7 +35,8 @@ public class ProcessCompletedEventConverter extends AbstractEventConverter {
     private final ProcessInstanceConverter processInstanceConverter;
 
     @Autowired
-    public ProcessCompletedEventConverter(ProcessInstanceConverter processInstanceConverter) {
+    public ProcessCompletedEventConverter(ProcessInstanceConverter processInstanceConverter, RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
         this.processInstanceConverter = processInstanceConverter;
     }
 

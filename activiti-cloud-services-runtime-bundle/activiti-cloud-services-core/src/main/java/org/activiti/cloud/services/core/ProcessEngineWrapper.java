@@ -1,7 +1,6 @@
 package org.activiti.cloud.services.core;
 
 import java.util.List;
-import java.util.Map;
 
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
@@ -17,7 +16,7 @@ import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.core.pageable.PageableProcessInstanceService;
 import org.activiti.cloud.services.core.pageable.PageableTaskService;
-import org.activiti.cloud.services.events.MessageProducerActivitiEventListener;
+import org.activiti.cloud.services.events.listeners.MessageProducerActivitiEventListener;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstanceBuilder;
@@ -108,12 +107,10 @@ public class ProcessEngineWrapper {
     }
 
     public void completeTask(CompleteTaskCmd completeTaskCmd) {
-        Map<String, Object> outputVariables = null;
         if (completeTaskCmd != null) {
-            outputVariables = completeTaskCmd.getOutputVariables();
+            taskService.complete(completeTaskCmd.getTaskId(),
+                                 completeTaskCmd.getOutputVariables());
         }
-        taskService.complete(completeTaskCmd.getTaskId(),
-                             outputVariables);
     }
 
     public void setTaskVariables(SetTaskVariablesCmd setTaskVariablesCmd) {

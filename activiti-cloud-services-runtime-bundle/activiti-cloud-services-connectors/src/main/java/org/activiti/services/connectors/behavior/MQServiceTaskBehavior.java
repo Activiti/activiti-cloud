@@ -16,16 +16,13 @@
 
 package org.activiti.services.connectors.behavior;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.activiti.bpmn.model.ServiceTask;
+import org.activiti.cloud.services.events.listeners.IntegrationEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
-import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.delegate.TriggerableActivityBehavior;
-import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.services.connectors.model.IntegrationRequestEvent;
@@ -39,41 +36,26 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
 
     private static final String CONNECTOR_TYPE = "connectorType";
     private final IntegrationContextManager integrationContextManager;
-    private final IntegrationProducerCommandContextCloseListener contextCloseListener;
+    private final IntegrationEventsAggregator eventsAggregator;
 
     @Autowired
     public MQServiceTaskBehavior(IntegrationContextManager integrationContextManager,
-                                 IntegrationProducerCommandContextCloseListener contextCloseListener) {
+                                 IntegrationEventsAggregator eventsAggregator) {
         this.integrationContextManager = integrationContextManager;
-        this.contextCloseListener = contextCloseListener;
+        this.eventsAggregator = eventsAggregator;
     }
 
     @Override
     public void execute(DelegateExecution execution) {
-        CommandContext currentCommandContext = getCurrentCommandContext();
-
-        IntegrationContextEntity integrationContext = buildIntegrationContext(execution);
-        integrationContextManager.insert(integrationContext);
-
-        List<Message<IntegrationRequestEvent>> messages = currentCommandContext.getGenericAttribute(IntegrationProducerCommandContextCloseListener.PROCESS_ENGINE_INTEGRATION_EVENTS);
-        if (messages != null) {
-            messages.add(buildMessage(execution,
-                                      integrationContext));
-        } else {
-            messages = new ArrayList<>();
-            messages.add(buildMessage(execution,
-                                      integrationContext));
-            currentCommandContext.addAttribute(IntegrationProducerCommandContextCloseListener.PROCESS_ENGINE_INTEGRATION_EVENTS,
-                                               messages);
-        }
-
-        if (!currentCommandContext.hasCloseListener(IntegrationProducerCommandContextCloseListener.class)) {
-            currentCommandContext.addCloseListener(contextCloseListener);
-        }
+        IntegrationContextEntity integrationContext = storeIntegrationContext(execution);
+        eventsAggregator.add(buildMessage(execution,
+                                          integrationContext));
     }
 
-    protected CommandContext getCurrentCommandContext() {
-        return Context.getCommandContext();
+    private IntegrationContextEntity storeIntegrationContext(DelegateExecution execution) {
+        IntegrationContextEntity integrationContext = buildIntegrationContext(execution);
+        integrationContextManager.insert(integrationContext);
+        return integrationContext;
     }
 
     private Message<IntegrationRequestEvent> buildMessage(DelegateExecution execution,
@@ -81,6 +63,7 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
         IntegrationRequestEvent event = new IntegrationRequestEvent(execution.getProcessInstanceId(),
                                                                     execution.getProcessDefinitionId(),
                                                                     integrationContext.getExecutionId(),
+                                                                    integrationContext.getId(),
                                                                     execution.getVariables());
 
         String implementation = ((ServiceTask) execution.getCurrentFlowElement()).getImplementation();

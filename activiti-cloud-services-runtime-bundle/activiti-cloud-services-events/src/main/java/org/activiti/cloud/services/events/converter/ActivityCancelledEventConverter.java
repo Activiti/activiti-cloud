@@ -16,17 +16,24 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiActivityCancelledEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ActivityCancelledEventImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.activiti.engine.delegate.event.ActivitiEventType.ACTIVITY_CANCELLED;
 
 @Component
 public class ActivityCancelledEventConverter extends AbstractEventConverter {
+
+    @Autowired
+    public ActivityCancelledEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
+    }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {

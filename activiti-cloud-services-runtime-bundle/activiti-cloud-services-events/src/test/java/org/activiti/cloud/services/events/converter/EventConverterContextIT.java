@@ -18,24 +18,25 @@ package org.activiti.cloud.services.events.converter;
 
 import java.util.Map;
 
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.ActivitiProcessStartedEvent;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = EventConverterContextIT.EventConverterContextConfig.class)
 @TestPropertySource("classpath:test-application.properties")
 public class EventConverterContextIT {
 
@@ -43,7 +44,11 @@ public class EventConverterContextIT {
     private EventConverterContext converterContext;
 
     @Configuration
-    @ComponentScan({"org.activiti.cloud.services.events.converter", "org.activiti.cloud.services.api.model.converter"})
+    @ComponentScan({
+            "org.activiti.cloud.services.events.converter",
+            "org.activiti.cloud.services.events.configuration",
+            "org.activiti.cloud.services.api.model.converter"
+    })
     public static class EventConverterContextConfig {
 
     }
@@ -82,7 +87,6 @@ public class EventConverterContextIT {
         ProcessEngineEvent processEngineEvent = converters.get(ActivitiEventType.PROCESS_STARTED).from(activitiEvent);
 
         assertThat(processEngineEvent).isNotNull();
-        assertThat(processEngineEvent.getApplicationName()).isNotEmpty();
         // this comes from the application.properties (test-application.properties) spring app name configuration
         assertThat(processEngineEvent.getApplicationName()).isEqualTo("test-app");
     }
