@@ -24,7 +24,6 @@
   <modules>
     <module>activiti-cloud-services-identity-keycloak</module>
     <module>activiti-cloud-services-identity-basic</module>
-    <module>activiti-cloud-services-security-policies</module>
     <module>activiti-cloud-services-test</module>
     <module>activiti-cloud-services-monitoring</module>
     <module>activiti-cloud-services-tracing</module>
