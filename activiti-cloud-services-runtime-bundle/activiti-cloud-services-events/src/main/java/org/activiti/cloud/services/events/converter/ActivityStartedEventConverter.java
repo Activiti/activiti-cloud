@@ -31,8 +31,8 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.ACTIVITY_STAR
 public class ActivityStartedEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public ActivityStartedEventConverter(RuntimeBundleProperties applicationProperties) {
-        super(applicationProperties);
+    public ActivityStartedEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
     }
 
     @Override

@@ -31,8 +31,8 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.VARIABLE_CREA
 public class VariableCreatedEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public VariableCreatedEventConverter(RuntimeBundleProperties applicationProperties) {
-        super(applicationProperties);
+    public VariableCreatedEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
     }
 
     @Override

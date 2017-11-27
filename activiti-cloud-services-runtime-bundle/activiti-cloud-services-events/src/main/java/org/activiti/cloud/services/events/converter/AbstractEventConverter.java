@@ -10,8 +10,8 @@ public abstract class AbstractEventConverter implements EventConverter{
     private final RuntimeBundleProperties runtimeBundleProperties;
 
     @Autowired
-    public AbstractEventConverter(RuntimeBundleProperties applicationProperties) {
-        this.runtimeBundleProperties = applicationProperties;
+    public AbstractEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        this.runtimeBundleProperties = runtimeBundleProperties;
     }
 
     public String getApplicationName() {

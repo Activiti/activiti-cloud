@@ -31,8 +31,8 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.VARIABLE_UPDA
 public class VariableUpdatedEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public VariableUpdatedEventConverter(RuntimeBundleProperties applicationProperties) {
-        super(applicationProperties);
+    public VariableUpdatedEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
     }
 
     @Override

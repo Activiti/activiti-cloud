@@ -31,8 +31,8 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.PROCESS_START
 public class ProcessStartedEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public ProcessStartedEventConverter(RuntimeBundleProperties applicationProperties) {
-        super(applicationProperties);
+    public ProcessStartedEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
     }
 
     @Override

@@ -31,8 +31,8 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.ACTIVITY_CANC
 public class ActivityCancelledEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public ActivityCancelledEventConverter(RuntimeBundleProperties applicationProperties) {
-        super(applicationProperties);
+    public ActivityCancelledEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
     }
 
     @Override

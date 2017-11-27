@@ -31,8 +31,8 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.VARIABLE_DELE
 public class VariableDeletedEventConveter extends AbstractEventConverter {
 
     @Autowired
-    public VariableDeletedEventConveter(RuntimeBundleProperties applicationProperties) {
-        super(applicationProperties);
+    public VariableDeletedEventConveter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
     }
 
     @Override

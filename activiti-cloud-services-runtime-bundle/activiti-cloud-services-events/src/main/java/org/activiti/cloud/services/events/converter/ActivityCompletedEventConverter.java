@@ -31,8 +31,8 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.ACTIVITY_COMP
 public class ActivityCompletedEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public ActivityCompletedEventConverter(RuntimeBundleProperties applicationProperties) {
-        super(applicationProperties);
+    public ActivityCompletedEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
     }
 
     @Override

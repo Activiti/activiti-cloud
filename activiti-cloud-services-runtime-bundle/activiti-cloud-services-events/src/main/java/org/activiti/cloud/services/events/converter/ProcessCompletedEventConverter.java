@@ -35,8 +35,8 @@ public class ProcessCompletedEventConverter extends AbstractEventConverter {
     private final ProcessInstanceConverter processInstanceConverter;
 
     @Autowired
-    public ProcessCompletedEventConverter(ProcessInstanceConverter processInstanceConverter, RuntimeBundleProperties applicationProperties) {
-        super(applicationProperties);
+    public ProcessCompletedEventConverter(ProcessInstanceConverter processInstanceConverter, RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
         this.processInstanceConverter = processInstanceConverter;
     }
 

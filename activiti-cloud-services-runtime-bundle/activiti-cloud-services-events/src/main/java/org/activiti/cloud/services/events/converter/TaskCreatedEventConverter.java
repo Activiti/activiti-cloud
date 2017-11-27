@@ -35,8 +35,8 @@ public class TaskCreatedEventConverter extends AbstractEventConverter {
     private final TaskConverter taskConverter;
 
     @Autowired
-    public TaskCreatedEventConverter(TaskConverter taskConverter, RuntimeBundleProperties applicationProperties) {
-        super(applicationProperties);
+    public TaskCreatedEventConverter(TaskConverter taskConverter, RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
         this.taskConverter = taskConverter;
     }
 

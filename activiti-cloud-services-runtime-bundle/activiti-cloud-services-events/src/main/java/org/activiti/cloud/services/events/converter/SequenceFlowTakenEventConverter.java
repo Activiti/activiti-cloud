@@ -31,8 +31,8 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.SEQUENCEFLOW_
 public class SequenceFlowTakenEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public SequenceFlowTakenEventConverter(RuntimeBundleProperties applicationProperties) {
-        super(applicationProperties);
+    public SequenceFlowTakenEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
     }
 
     @Override
