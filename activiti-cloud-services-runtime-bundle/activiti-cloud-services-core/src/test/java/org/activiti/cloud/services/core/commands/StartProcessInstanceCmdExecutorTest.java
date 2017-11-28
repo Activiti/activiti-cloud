@@ -46,7 +46,8 @@ public class StartProcessInstanceCmdExecutorTest {
                                                                   "initiator",
                                                                   new Date(),
                                                                   "businessKey",
-                                                                  "status");
+                                                                  "status",
+                                                                  "definitionKey");
 
         given(processEngine.startProcess(any())).willReturn(fakeProcessInstance);
 

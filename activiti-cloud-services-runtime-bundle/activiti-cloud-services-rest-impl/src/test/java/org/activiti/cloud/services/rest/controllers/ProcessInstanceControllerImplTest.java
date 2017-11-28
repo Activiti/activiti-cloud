@@ -27,7 +27,9 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
+import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.rest.api.resources.assembler.ProcessInstanceResourceAssembler;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.ProcessDiagramGenerator;
@@ -69,6 +71,8 @@ public class ProcessInstanceControllerImplTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
     @MockBean
     private ProcessEngineWrapper processEngine;
     @MockBean
@@ -113,9 +117,23 @@ public class ProcessInstanceControllerImplTest {
     }
 
     @Test
+    public void startProcessForbidden() throws Exception {
+        StartProcessInstanceCmd cmd = new StartProcessInstanceCmd("1");
+
+        when(processEngine.startProcess(any())).thenThrow(new ActivitiForbiddenException("Not permitted"));
+
+        this.mockMvc.perform(post("/v1/process-instances")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(cmd)))
+                .andExpect(status().isForbidden())
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/start"));
+    }
+
+    @Test
     public void getProcessInstanceById() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processEngine.getProcessInstanceById("1")).thenReturn(processInstance);
+        when(securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionId())).thenReturn(true);
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}",
                                  1))
@@ -124,6 +142,7 @@ public class ProcessInstanceControllerImplTest {
                                 pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
 
+
     @Test
     public void getProcessDiagram() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
@@ -131,6 +150,7 @@ public class ProcessInstanceControllerImplTest {
         InputStream diagram = new ByteArrayInputStream("diagram".getBytes());
         BpmnModel bpmnModel = mock(BpmnModel.class);
         when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId())).thenReturn(bpmnModel);
+        when(securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionId())).thenReturn(true);
         List<String> activitiIds = new ArrayList<>();
         when(processEngine.getActiveActivityIds("1")).thenReturn(activitiIds);
 
@@ -160,6 +180,9 @@ public class ProcessInstanceControllerImplTest {
 
     @Test
     public void suspend() throws Exception {
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processEngine.getProcessInstanceById("1")).thenReturn(processInstance);
+
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/suspend",
                                  1))
                 .andExpect(status().isOk())
@@ -169,6 +192,9 @@ public class ProcessInstanceControllerImplTest {
 
     @Test
     public void activate() throws Exception {
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processEngine.getProcessInstanceById("1")).thenReturn(processInstance);
+
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/activate",
                                  1))
                 .andExpect(status().isOk())

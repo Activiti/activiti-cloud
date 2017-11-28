@@ -23,8 +23,10 @@ import java.util.List;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
+import org.activiti.cloud.services.SecurityPolicy;
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.converter.ProcessDefinitionConverter;
+import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.core.pageable.PageableRepositoryService;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionMetaController;
 import org.activiti.cloud.services.rest.api.resources.assembler.ProcessDefinitionResourceAssembler;
@@ -70,6 +72,8 @@ public class ProcessDefinitionControllerImplTest {
     private MockMvc mockMvc;
 
     @MockBean
+    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    @MockBean
     private RepositoryService repositoryService;
     @MockBean
     private ProcessDiagramGenerator processDiagramGenerator;
@@ -104,6 +108,7 @@ public class ProcessDefinitionControllerImplTest {
     public void getProcessDefinition() throws Exception {
         ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
         when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
+        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery, SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
         when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
         when(processDefinitionQuery.singleResult()).thenReturn(new ProcessDefinitionEntityImpl());
 
@@ -118,6 +123,11 @@ public class ProcessDefinitionControllerImplTest {
     public void getProcessModel() throws Exception {
         InputStream xml = new ByteArrayInputStream("activiti".getBytes());
         when(repositoryService.getProcessModel("1")).thenReturn(xml);
+        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
+        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
+        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery, SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.singleResult()).thenReturn(new ProcessDefinitionEntityImpl());
 
         this.mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
@@ -135,6 +145,11 @@ public class ProcessDefinitionControllerImplTest {
         process.setName("Main Process");
         bpmnModel.getProcesses().add(process);
         when(repositoryService.getBpmnModel("1")).thenReturn(bpmnModel);
+        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
+        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
+        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery, SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.singleResult()).thenReturn(new ProcessDefinitionEntityImpl());
 
         this.mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
@@ -148,6 +163,11 @@ public class ProcessDefinitionControllerImplTest {
     public void getProcessDiagram() throws Exception {
         BpmnModel bpmnModel = new BpmnModel();
         when(repositoryService.getBpmnModel("1")).thenReturn(bpmnModel);
+        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
+        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
+        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery, SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.singleResult()).thenReturn(new ProcessDefinitionEntityImpl());
         InputStream img = new ByteArrayInputStream("img".getBytes());
         when(processDiagramGenerator.generateDiagram(bpmnModel,
                                                      processDiagramGenerator.getDefaultActivityFontName(),

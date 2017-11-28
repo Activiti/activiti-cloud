@@ -1,0 +1,12 @@
+activiti:
+  cloud:
+    runtime-bundle:
+      security:
+        group:
+          hr:
+            policy:
+              read: SimpleProcessYML1,SimpleProcessYML2
+        user:
+          bob:
+            policy:
+              read: TestProcess

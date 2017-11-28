@@ -16,9 +16,11 @@
 
 package org.activiti.cloud.starter.tests.services;
 
+import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
+import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +28,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessInstanceControllerImplTest {
@@ -36,6 +40,8 @@ public class ProcessInstanceControllerImplTest {
 
     @Mock
     private ProcessEngineWrapper processEngineWrapper;
+    @Mock
+    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
 
     @Before
     public void setUp() throws Exception {
@@ -46,6 +52,9 @@ public class ProcessInstanceControllerImplTest {
     public void suspendShouldCallSuspendOnRuntimeService() throws Exception {
         //given
         String processInstanceId = "7";
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processEngineWrapper.getProcessInstanceById("7")).thenReturn(processInstance);
+        when(securityPoliciesApplicationService.canWrite(processInstance.getProcessDefinitionId())).thenReturn(true);
 
         //when
         controller.suspend(processInstanceId);
@@ -58,6 +67,9 @@ public class ProcessInstanceControllerImplTest {
     public void activateShouldCallActivateOnRuntimeService() throws Exception {
         //given
         String processInstanceId = "7";
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processEngineWrapper.getProcessInstanceById("7")).thenReturn(processInstance);
+        when(securityPoliciesApplicationService.canWrite(processInstance.getProcessDefinitionId())).thenReturn(true);
 
         //when
         controller.activate(processInstanceId);
