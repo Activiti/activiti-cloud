@@ -25,14 +25,11 @@ import org.springframework.messaging.SubscribableChannel;
 public interface RuntimeMockStreams {
 
     String INTEGRATION_RESULT_CONSUMER = "integrationResultsConsumer";
+    String INTEGRATION_EVENT_PRODUCER = "integrationEventsProducer";
 
     @Input(INTEGRATION_RESULT_CONSUMER)
     SubscribableChannel integrationResultsConsumer();
 
-
-    String INTEGRATION_EVENT_PRODUCER = "integrationEventsProducer";
-
     @Output(INTEGRATION_EVENT_PRODUCER)
     MessageChannel integrationEventsProducer();
-
 }

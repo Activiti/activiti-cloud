@@ -21,31 +21,28 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.activiti.cloud.connectors.starter.model.IntegrationRequestEvent;
-import org.activiti.cloud.connectors.starter.model.IntegrationResultEvent;
+import org.activiti.cloud.connectors.starter.test.WaitUtil;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.binder.test.junit.rabbit.RabbitTestSupport;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@EnableBinding(RuntimeMockStreams.class)
+@ActiveProfiles(ConnectorsITStreamHandlers.CONNECTOR_IT)
 public class ActivitiCloudConnectorServiceIT {
-
 
     @Autowired
     private MessageChannel integrationEventsProducer;
@@ -53,60 +50,51 @@ public class ActivitiCloudConnectorServiceIT {
     @ClassRule
     public static RabbitTestSupport rabbitTestSupport = new RabbitTestSupport();
 
-    public static boolean integrationResultArrived = false;
+    @Autowired
+    private ConnectorsITStreamHandlers streamHandler;
+
+    private final static String PROCESS_INSTANCE_ID = "processInstanceId-" + UUID.randomUUID().toString();
+    private final static String PROCESS_DEFINITION_ID = "myProcessDefinitionId";
+    private final static String EXECUTION_ID = "executionId-" + UUID.randomUUID().toString();
 
     @Before
     public void setUp() throws Exception {
-
-    }
-
-    @EnableAutoConfiguration
-    public static class StreamHandler {
-
-        @StreamListener(value = RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
-        public void consumeIntegrationResults(IntegrationResultEvent integrationResultEvent) throws InterruptedException {
-
-            System.out.println(">>> Result Recieved Back from Connector: " + integrationResultEvent);
-            String executionId = integrationResultEvent.getExecutionId();
-            assertThat(integrationResultEvent.getVariables().get("var2")).isEqualTo(2);
-
-
-            integrationResultArrived = true;
-        }
+        streamHandler.setExecutionId(EXECUTION_ID);
     }
 
     @Test
-    public void findAllShouldReturnAllAvailableEvents() throws Exception {
+    public void integrationEventShouldBePickedByConnectorMock() throws Exception {
         //given
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("var1",
                       "value1");
         variables.put("var2",
-                      new Long(1));
-        String processDefId = "myProcessDefinitionId";
-        IntegrationRequestEvent ire = new IntegrationRequestEvent("processInstanceId-" + UUID.randomUUID().toString(),
-                                                                  processDefId,
-                                                                  "executionId-" + UUID.randomUUID().toString(),
+                      1L);
+
+        IntegrationRequestEvent ire = new IntegrationRequestEvent(PROCESS_INSTANCE_ID,
+                                                                  PROCESS_DEFINITION_ID,
+                                                                  EXECUTION_ID,
                                                                   variables);
 
         Message<IntegrationRequestEvent> message = MessageBuilder.withPayload(ire)
                 .setHeader("type",
                            "Mock")
-                .setHeader("processDefinitionId",
-                           // this is option and only if we are interested in filtering by processDefinitionId
-                           processDefId)
                 .build();
         integrationEventsProducer.send(message);
 
-        while (!integrationResultArrived) {
-            System.out.println("Waiting for result to arrive ...");
-            Thread.sleep(100);
-        }
+        message = MessageBuilder.withPayload(ire)
+                .setHeader("type",
+                           "MockProcessRuntime")
+                .build();
+        integrationEventsProducer.send(message);
 
+        WaitUtil.waitFor(streamHandler.isStartProcessInstanceCmdArrived());
 
-        assertThat(integrationResultArrived).isTrue();
+        assertThat(streamHandler.isStartProcessInstanceCmdArrived()).isTrue();
 
+        WaitUtil.waitForCounterGreaterThanThreshold(streamHandler.getIntegrationResultEventsCounter(),
+                                                    2);
     }
 }
 
