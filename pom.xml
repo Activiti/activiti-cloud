@@ -324,7 +324,7 @@
       <!-- Activiti Cloud Connectors -->
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-connectors-starter</artifactId>
+        <artifactId>activiti-cloud-starter-connector</artifactId>
         <version>${version.activiti.cloud.connectors}</version>
       </dependency>
 
