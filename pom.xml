@@ -10,8 +10,8 @@
   <packaging>pom</packaging>
 
   <properties>
-    <version.activiti>7-201711-EA-SNAPSHOT</version.activiti>
-    <version.activiti.cloud>7-201711-EA-SNAPSHOT</version.activiti.cloud>
+    <version.activiti>${project.version}</version.activiti>
+    <version.activiti.cloud>${project.version}</version.activiti.cloud>
     <version.activiti.cloud.service-common>${version.activiti.cloud}</version.activiti.cloud.service-common>
     <version.activiti.cloud.runtime-bundle>${version.activiti.cloud}</version.activiti.cloud.runtime-bundle>
     <version.activiti.cloud.audit>${version.activiti.cloud}</version.activiti.cloud.audit>
