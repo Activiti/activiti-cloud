@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.audit.channel;
 
-import org.activiti.cloud.services.audit.EventsRepository;
+import org.activiti.cloud.services.audit.repository.EventsRepository;
 import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;

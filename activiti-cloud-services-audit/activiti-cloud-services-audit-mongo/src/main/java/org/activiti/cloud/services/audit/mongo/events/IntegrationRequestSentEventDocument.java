@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.audit.resources;
+package org.activiti.cloud.services.audit.mongo.events;
 
-import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
+public class IntegrationRequestSentEventDocument extends IntegrationEventDocument {
 
-public class EventResource extends Resource<ProcessEngineEventEntity> {
-
-    public EventResource(ProcessEngineEventEntity content,
-                         Link... links) {
-        super(content,
-              links);
-    }
+    protected static final String INTEGRATION_REQUEST_SENT_EVENT = "IntegrationRequestSentEvent";
 
 }

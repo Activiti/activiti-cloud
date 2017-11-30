@@ -27,7 +27,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -49,12 +48,14 @@ import org.activiti.cloud.services.api.events.ProcessEngineEvent;
         @JsonSubTypes.Type(value = VariableCreatedEventEntity.class, name = VariableCreatedEventEntity.VARIABLE_CREATED_EVENT),
         @JsonSubTypes.Type(value = VariableUpdatedEventEntity.class, name = VariableUpdatedEventEntity.VARIABLE_UPDATED_EVENT),
         @JsonSubTypes.Type(value = VariableDeletedEventEntity.class, name = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT),
-        @JsonSubTypes.Type(value = SequenceFlowTakenEventEntity.class, name = SequenceFlowTakenEventEntity.SEQUENCE_FLOW_TAKEN_EVENT)
+        @JsonSubTypes.Type(value = SequenceFlowTakenEventEntity.class, name = SequenceFlowTakenEventEntity.SEQUENCE_FLOW_TAKEN_EVENT),
+        @JsonSubTypes.Type(value = IntegrationRequestSentEventEntity.class, name = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT),
+        @JsonSubTypes.Type(value = IntegrationResultReceivedEventEntity.class, name = IntegrationResultReceivedEventEntity.INTEGRATION_RESULT_RECEIVED_EVENT)
 })
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "TYPE")
-public abstract class ProcessEngineEventEntity implements ProcessEngineEvent {
+public abstract class ProcessEngineEventEntity {
 
     @Id
     @GeneratedValue
@@ -67,27 +68,22 @@ public abstract class ProcessEngineEventEntity implements ProcessEngineEvent {
     private String processInstanceId;
     private String applicationName;
 
-    @Override
     public Long getTimestamp() {
         return timestamp;
     }
 
-    @Override
     public String getEventType() {
         return eventType;
     }
 
-    @Override
     public String getExecutionId() {
         return executionId;
     }
 
-    @Override
     public String getProcessDefinitionId() {
         return processDefinitionId;
     }
 
-    @Override
     public String getProcessInstanceId() {
         return processInstanceId;
     }
@@ -96,7 +92,6 @@ public abstract class ProcessEngineEventEntity implements ProcessEngineEvent {
         return id;
     }
 
-    @Override
     public String getApplicationName() {
         return applicationName;
     }

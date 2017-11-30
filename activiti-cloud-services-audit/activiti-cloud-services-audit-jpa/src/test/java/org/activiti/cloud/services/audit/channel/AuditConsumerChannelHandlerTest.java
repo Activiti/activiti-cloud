@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.audit.channel;
 
-import org.activiti.cloud.services.audit.EventsRepository;
+import org.activiti.cloud.services.audit.repository.EventsRepository;
 import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
 import org.junit.Before;
 import org.junit.Test;

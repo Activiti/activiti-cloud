@@ -16,27 +16,13 @@
 
 package org.activiti.cloud.services.audit.events;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
-
-import org.activiti.cloud.services.audit.converter.TaskJpaJsonConverter;
-import org.activiti.cloud.services.audit.events.model.Task;
 
 @Entity
-@DiscriminatorValue(value = TaskCreatedEventEntity.TASK_CREATED_EVENT)
-public class TaskCreatedEventEntity extends ProcessEngineEventEntity {
+@DiscriminatorValue(value = IntegrationResultReceivedEventEntity.INTEGRATION_RESULT_RECEIVED_EVENT)
+public class IntegrationResultReceivedEventEntity extends IntegrationEventEntity {
 
-    protected static final String TASK_CREATED_EVENT = "TaskCreatedEvent";
+    protected static final String INTEGRATION_RESULT_RECEIVED_EVENT = "IntegrationResultReceivedEvent";
 
-    @Convert(converter = TaskJpaJsonConverter.class)
-    @Lob
-    @Column
-    private Task task;
-
-    public Task getTask() {
-        return task;
-    }
 }

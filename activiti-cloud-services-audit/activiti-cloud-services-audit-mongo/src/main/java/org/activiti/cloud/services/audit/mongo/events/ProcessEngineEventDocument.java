@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.querydsl.core.annotations.QueryEntity;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -29,11 +28,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
         @JsonSubTypes.Type(value = VariableCreatedEventDocument.class, name = VariableCreatedEventDocument.VARIABLE_CREATED_EVENT),
         @JsonSubTypes.Type(value = VariableUpdatedEventDocument.class, name = VariableUpdatedEventDocument.VARIABLE_UPDATED_EVENT),
         @JsonSubTypes.Type(value = VariableDeletedEventDocument.class, name = VariableDeletedEventDocument.VARIABLE_DELETED_EVENT),
-        @JsonSubTypes.Type(value = SequenceFlowTakenEventDocument.class, name = SequenceFlowTakenEventDocument.SEQUENCE_FLOW_TAKEN_EVENT)
+        @JsonSubTypes.Type(value = SequenceFlowTakenEventDocument.class, name = SequenceFlowTakenEventDocument.SEQUENCE_FLOW_TAKEN_EVENT),
+        @JsonSubTypes.Type(value = IntegrationRequestSentEventDocument.class, name = IntegrationRequestSentEventDocument.INTEGRATION_REQUEST_SENT_EVENT),
+        @JsonSubTypes.Type(value = IntegrationResultReceivedEventDocument.class, name = IntegrationResultReceivedEventDocument.INTEGRATION_RESULT_RECEIVED_EVENT)
 })
 @QueryEntity
 @Document(collection = "act_evt_log")
-public class ProcessEngineEventDocument implements ProcessEngineEvent {
+public class ProcessEngineEventDocument {
 
     @Id
     private String id;
