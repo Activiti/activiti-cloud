@@ -1,0 +1,198 @@
+= Activiti Cloud Services Runtime Bundle REST docs
+
+== Home 
+
+.Request
+include::{snippets}/home/http-request.adoc[]
+
+.Response
+include::{snippets}/home/http-response.adoc[]
+
+.Links
+include::{snippets}/home/links.adoc[]
+
+== Process definition
+
+=== Get process definitions
+.Request
+include::{snippets}/process-definition/list/http-request.adoc[]
+
+.Response
+include::{snippets}/process-definition/list/http-response.adoc[]
+
+=== Get a process definition by id
+.Request
+include::{snippets}/process-definition/get/http-request.adoc[]
+
+.Response
+include::{snippets}/process-definition/get/http-response.adoc[]
+
+=== Get a process model by id
+.Request
+include::{snippets}/process-definition/model/get/http-request.adoc[]
+
+.Response
+include::{snippets}/process-definition/model/get/http-response.adoc[]
+
+=== Get a BPMN model by id
+.Request
+include::{snippets}/process-definition/bpmn-model/get/http-request.adoc[]
+
+.Response
+include::{snippets}/process-definition/bpmn-model/get/http-response.adoc[]
+
+include::{snippets}/process-definition/bpmn-model/get/path-parameters.adoc[]
+
+=== Generate process diagram
+.Request
+include::{snippets}/process-definition/diagram/http-request.adoc[]
+
+.Response
+include::{snippets}/process-definition/diagram/http-response.adoc[]
+
+
+== Process definition metadata
+
+=== Get a process definition metadata
+.Request
+include::{snippets}/process-definition-meta/get/http-request.adoc[]
+
+.Response
+include::{snippets}/process-definition-meta/get/http-response.adoc[]
+
+== Process instance 
+
+=== Get a list of process instances
+.Request
+include::{snippets}/process-instance/list/http-request.adoc[]
+
+.Response
+include::{snippets}/process-instance/list/http-response.adoc[]
+
+=== Start a process instance
+.Request
+include::{snippets}/process-instance/start/http-request.adoc[]
+
+.Response
+include::{snippets}/process-instance/start/http-response.adoc[]
+
+=== Get a process instance by id
+.Request
+include::{snippets}/process-instance/get/http-request.adoc[]
+
+.Response
+include::{snippets}/process-instance/get/http-response.adoc[]
+
+=== Generate a diagram for a process instance
+.Request
+include::{snippets}/process-instance/diagram/http-request.adoc[]
+
+.Response
+include::{snippets}/process-instance/diagram/http-response.adoc[]
+
+=== Signal process instance
+.Request
+include::{snippets}/process-instance/signal/http-request.adoc[]
+
+.Response
+include::{snippets}/process-instance/signal/http-response.adoc[]
+
+=== Suspend process instance
+.Request
+include::{snippets}/process-instance/suspend/http-request.adoc[]
+
+.Response
+include::{snippets}/process-instance/suspend/http-response.adoc[]
+
+=== Activate process instance
+.Request
+include::{snippets}/process-instance/activate/http-request.adoc[]
+
+.Response
+include::{snippets}/process-instance/activate/http-response.adoc[]
+
+== Process instance tasks
+
+=== List process instance tasks
+.Request
+include::{snippets}/process-instance-tasks/list/http-request.adoc[]
+
+.Response
+include::{snippets}/process-instance-tasks/list/http-response.adoc[]
+
+== Process instance variables
+
+=== Get all variables for a process instance
+.Request
+include::{snippets}/process-instance-variables/list/http-request.adoc[]
+
+.Response
+include::{snippets}/process-instance-variables/list/http-response.adoc[]
+
+== Task
+
+=== List tasks
+.Request
+include::{snippets}/task/list/http-request.adoc[]
+
+.Response
+include::{snippets}/task/list/http-response.adoc[]
+
+=== Get a task by id
+.Request
+include::{snippets}/task/get/http-request.adoc[]
+
+.Response
+include::{snippets}/task/get/http-response.adoc[]
+
+=== Claim a task
+.Request
+include::{snippets}/task/claim/http-request.adoc[]
+
+.Response
+include::{snippets}/task/claim/http-response.adoc[]
+
+=== Release a task
+.Request
+include::{snippets}/task/release/http-request.adoc[]
+
+.Response
+include::{snippets}/task/release/http-response.adoc[]
+
+=== Complete a task
+.Request
+include::{snippets}/task/complete/http-request.adoc[]
+
+.Response
+include::{snippets}/task/complete/http-response.adoc[]
+
+== Task variable
+
+=== List task variables
+.Request
+include::{snippets}/task-variable/list/http-request.adoc[]
+
+.Response
+include::{snippets}/task-variable/list/http-response.adoc[]
+
+=== List task local variables
+.Request
+include::{snippets}/task-variable/list/local/http-request.adoc[]
+
+.Response
+include::{snippets}/task-variable/list/local/http-response.adoc[]
+
+=== Set task variables
+.Request
+include::{snippets}/task-variable/set/http-request.adoc[]
+
+.Response
+include::{snippets}/task-variable/set/http-response.adoc[]
+
+=== Set task local variables
+.Request
+include::{snippets}/task-variable/set/local/http-request.adoc[]
+
+.Response
+include::{snippets}/task-variable/set/local/http-response.adoc[]
+

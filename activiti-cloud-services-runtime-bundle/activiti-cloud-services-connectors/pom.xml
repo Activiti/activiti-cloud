@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-runtime-bundle</artifactId>
-    <version>7-201710-EA</version>
+    <version>7-201711-EA</version>
   </parent>
 
 
@@ -30,6 +30,10 @@
   <description>Activiti connectors service</description>
 
   <dependencies>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-events</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-engine</artifactId>

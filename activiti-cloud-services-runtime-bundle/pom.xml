@@ -4,20 +4,20 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
-    <version>7-201710-EA</version>
+    <version>7-201711-EA</version>
   </parent>
 
   <artifactId>activiti-cloud-services-runtime-bundle</artifactId>
   <name>Activiti Cloud Services :: Runtime Bundle</name>
   <description>Activiti Cloud Services Runtime Bundle</description>
   <packaging>pom</packaging>
-
   <modules>
+    <module>activiti-cloud-services-api</module>
     <module>activiti-cloud-services-core</module>
     <module>activiti-cloud-services-events</module>
     <module>activiti-cloud-services-connectors</module>
     <module>activiti-cloud-services-rest-api</module>
     <module>activiti-cloud-services-rest-impl</module>
+    <module>activiti-cloud-services-security-policies</module>
   </modules>
-
 </project>

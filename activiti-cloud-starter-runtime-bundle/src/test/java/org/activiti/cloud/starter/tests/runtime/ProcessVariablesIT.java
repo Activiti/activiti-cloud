@@ -16,9 +16,10 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import org.activiti.cloud.services.api.model.ProcessDefinition;
+import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
-import org.activiti.cloud.services.core.model.ProcessDefinition;
-import org.activiti.cloud.services.core.model.ProcessInstance;
+
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +79,7 @@ public class ProcessVariablesIT {
         variables.put("age",
                 15);
         ResponseEntity<ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
-                variables);
+                                                                                                 variables);
 
         //when
         ResponseEntity<Resource<Map<String, Object>>> variablesResponse = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startResponse.getBody().getId() + "/variables",

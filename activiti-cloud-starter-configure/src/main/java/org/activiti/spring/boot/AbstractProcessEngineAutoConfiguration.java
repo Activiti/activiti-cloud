@@ -111,10 +111,6 @@ public abstract class AbstractProcessEngineAutoConfiguration
       conf.setCustomMybatisXMLMappers(new HashSet<String>(activitiProperties.getCustomMybatisXMLMappers()));
     }
 
-    if (activitiProperties.getCustomMybatisMappers() != null) {
-      conf.setCustomMybatisMappers(getCustomMybatisMapperClasses(activitiProperties.getCustomMybatisMappers()));
-    }
-
     if (activitiProperties.getCustomMybatisXMLMappers() != null) {
       conf.setCustomMybatisXMLMappers(new HashSet<String>(activitiProperties.getCustomMybatisXMLMappers()));
     }

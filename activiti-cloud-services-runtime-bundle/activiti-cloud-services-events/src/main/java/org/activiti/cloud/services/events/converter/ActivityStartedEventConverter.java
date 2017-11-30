@@ -16,17 +16,24 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ActivityStartedEventImpl;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiActivityEventImpl;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.activiti.engine.delegate.event.ActivitiEventType.ACTIVITY_STARTED;
 
 @Component
 public class ActivityStartedEventConverter extends AbstractEventConverter {
+
+    @Autowired
+    public ActivityStartedEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
+    }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {

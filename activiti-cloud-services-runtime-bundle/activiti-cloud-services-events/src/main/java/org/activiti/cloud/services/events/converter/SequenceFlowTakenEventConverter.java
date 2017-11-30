@@ -16,17 +16,24 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.SequenceFlowTakenEventImpl;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiSequenceFlowTakenEventImpl;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.activiti.engine.delegate.event.ActivitiEventType.SEQUENCEFLOW_TAKEN;
 
 @Component
 public class SequenceFlowTakenEventConverter extends AbstractEventConverter {
+
+    @Autowired
+    public SequenceFlowTakenEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
+    }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {

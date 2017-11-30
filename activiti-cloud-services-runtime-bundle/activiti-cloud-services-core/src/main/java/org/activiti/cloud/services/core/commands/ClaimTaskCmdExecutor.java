@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.core.commands;
 
+import org.activiti.cloud.services.api.commands.results.ClaimTaskResults;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.model.commands.ClaimTaskCmd;
-import org.activiti.cloud.services.core.model.commands.results.ClaimTaskResults;
+import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;

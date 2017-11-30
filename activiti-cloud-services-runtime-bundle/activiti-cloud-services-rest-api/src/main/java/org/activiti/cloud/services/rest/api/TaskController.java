@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.rest.api;
 
+import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
+import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
-import org.activiti.cloud.services.core.model.Task;
-import org.activiti.cloud.services.core.model.commands.CompleteTaskCmd;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.MediaTypes;

@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.rest.api;
 
-import org.activiti.cloud.services.core.model.ProcessInstance;
-import org.activiti.cloud.services.core.model.commands.SignalProcessInstancesCmd;
-import org.activiti.cloud.services.core.model.commands.StartProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
+import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
+import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -29,9 +29,10 @@ public interface ProcessInstanceController {
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     Resource<ProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId);
 
-    @RequestMapping(value = "/{processInstanceId}/svg",
+    @RequestMapping(value = "/{processInstanceId}/model",
             method = RequestMethod.GET,
-            produces = "image/svg+xml")
+            produces = "image/svg+xml",
+            consumes="image/svg+xml")
     @ResponseBody
     String getProcessDiagram(@PathVariable String processInstanceId);
 

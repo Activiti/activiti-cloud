@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
-import org.activiti.cloud.services.core.model.ProcessInstance;
-import org.activiti.cloud.services.core.model.Task;
-import org.activiti.cloud.services.core.model.commands.StartProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
+import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.api.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;

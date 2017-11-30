@@ -18,8 +18,14 @@ package org.activiti.services.connectors.model;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IntegrationRequestEvent {
+
+    private String id;
 
     private String processInstanceId;
 
@@ -27,20 +33,30 @@ public class IntegrationRequestEvent {
 
     private String executionId;
 
+    private String integrationContextId;
+
     private Map<String, Object> variables;
 
     //used by json deserialization
     public IntegrationRequestEvent() {
+        this.id = UUID.randomUUID().toString();
     }
 
     public IntegrationRequestEvent(String processInstanceId,
                                    String processDefinitionId,
                                    String executionId,
+                                   String integrationContextId,
                                    Map<String, Object> variables) {
+        this();
         this.processInstanceId = processInstanceId;
         this.processDefinitionId = processDefinitionId;
         this.executionId = executionId;
         this.variables = variables;
+        this.integrationContextId = integrationContextId;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getProcessInstanceId() {
@@ -55,8 +71,11 @@ public class IntegrationRequestEvent {
         return executionId;
     }
 
+    public String getIntegrationContextId() {
+        return integrationContextId;
+    }
+
     public Map<String, Object> getVariables() {
         return Collections.unmodifiableMap(variables);
     }
-
 }

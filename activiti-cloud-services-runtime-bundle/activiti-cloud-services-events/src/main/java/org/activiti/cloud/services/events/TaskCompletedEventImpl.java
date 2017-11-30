@@ -17,7 +17,7 @@
 
 package org.activiti.cloud.services.events;
 
-import org.activiti.cloud.services.core.model.Task;
+import org.activiti.cloud.services.api.model.Task;
 
 public class TaskCompletedEventImpl extends AbstractProcessEngineEvent implements TaskCompletedEvent {
 

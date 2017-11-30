@@ -11,17 +11,20 @@ import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.bpmn.model.UserTask;
-import org.activiti.engine.ActivitiException;
-import org.activiti.engine.RepositoryService;
-import org.activiti.cloud.services.core.model.ProcessDefinitionMeta;
-import org.activiti.cloud.services.core.model.ProcessDefinitionServiceTask;
-import org.activiti.cloud.services.core.model.ProcessDefinitionUserTask;
-import org.activiti.cloud.services.core.model.ProcessDefinitionVariable;
+import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
+import org.activiti.cloud.services.api.model.ProcessDefinitionServiceTask;
+import org.activiti.cloud.services.api.model.ProcessDefinitionUserTask;
+import org.activiti.cloud.services.api.model.ProcessDefinitionVariable;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionMetaController;
 import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionMetaResource;
 import org.activiti.cloud.services.rest.api.resources.assembler.ProcessDefinitionMetaResourceAssembler;
+import org.activiti.engine.ActivitiObjectNotFoundException;
+import org.activiti.engine.RepositoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,6 +32,12 @@ public class ProcessDefinitionMetaControllerImpl implements ProcessDefinitionMet
 
     private final RepositoryService repositoryService;
     private final ProcessDefinitionMetaResourceAssembler resourceAssembler;
+
+    @ExceptionHandler(ActivitiObjectNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleAppException(ActivitiObjectNotFoundException ex) {
+        return ex.getMessage();
+    }
 
     @Autowired
     public ProcessDefinitionMetaControllerImpl(RepositoryService repositoryService,
@@ -43,15 +52,15 @@ public class ProcessDefinitionMetaControllerImpl implements ProcessDefinitionMet
                 .processDefinitionId(id)
                 .singleResult();
         if (processDefinition == null) {
-            throw new ActivitiException("Unable to find process definition for the given id:'" + id + "'");
+            throw new ActivitiObjectNotFoundException("Unable to find process definition for the given id:'" + id + "'");
         }
 
         List<Process> processes = repositoryService.getBpmnModel(id).getProcesses();
-        Set<ProcessDefinitionVariable> variables = new HashSet<ProcessDefinitionVariable>();
-        Set<String> users = new HashSet<String>();
-        Set<String> groups = new HashSet<String>();
-        Set<ProcessDefinitionUserTask> userTasks = new HashSet<ProcessDefinitionUserTask>();
-        Set<ProcessDefinitionServiceTask> serviceTasks = new HashSet<ProcessDefinitionServiceTask>();
+        Set<ProcessDefinitionVariable> variables = new HashSet<>();
+        Set<String> users = new HashSet<>();
+        Set<String> groups = new HashSet<>();
+        Set<ProcessDefinitionUserTask> userTasks = new HashSet<>();
+        Set<ProcessDefinitionServiceTask> serviceTasks = new HashSet<>();
 
         for (Process process : processes) {
             variables.addAll(getVariables(process));
@@ -86,7 +95,7 @@ public class ProcessDefinitionMetaControllerImpl implements ProcessDefinitionMet
     }
 
     private List<ProcessDefinitionVariable> getVariables(Process process) {
-        List<ProcessDefinitionVariable> variables = new ArrayList<ProcessDefinitionVariable>();
+        List<ProcessDefinitionVariable> variables = new ArrayList<>();
         if (!process.getExtensionElements().isEmpty()) {
             Iterator<List<ExtensionElement>> it = process.getExtensionElements().values().iterator();
             while (it.hasNext()) {

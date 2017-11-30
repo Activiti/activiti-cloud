@@ -17,8 +17,8 @@ package org.activiti.cloud.services.core.pageable;
 
 import java.util.List;
 
+import org.activiti.cloud.services.api.model.converter.ModelConverter;
 import org.activiti.engine.query.Query;
-import org.activiti.cloud.services.core.model.converter.ModelConverter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

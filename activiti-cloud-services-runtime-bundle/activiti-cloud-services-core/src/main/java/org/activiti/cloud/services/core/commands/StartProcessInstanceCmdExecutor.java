@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
+import org.activiti.cloud.services.api.commands.results.StartProcessInstanceResults;
+import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.model.ProcessInstance;
-import org.activiti.cloud.services.core.model.commands.StartProcessInstanceCmd;
-import org.activiti.cloud.services.core.model.commands.results.StartProcessInstanceResults;
+import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;

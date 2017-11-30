@@ -1,15 +1,20 @@
 package org.activiti.cloud.services.events.converter;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public abstract class AbstractEventConverter implements EventConverter{
 
-    @Value("${spring.application.name}")
-    protected String applicationName;
+    private final RuntimeBundleProperties runtimeBundleProperties;
+
+    @Autowired
+    public AbstractEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        this.runtimeBundleProperties = runtimeBundleProperties;
+    }
 
     public String getApplicationName() {
-        return applicationName;
+        return runtimeBundleProperties.getName();
     }
 }

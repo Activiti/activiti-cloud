@@ -15,15 +15,18 @@
 
 package org.activiti.cloud.services.core.pageable;
 
+import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
+import org.activiti.cloud.services.SecurityPolicy;
+import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
-import org.activiti.cloud.services.core.model.ProcessInstance;
-import org.activiti.cloud.services.core.model.converter.ProcessInstanceConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
 
 @Component
 public class PageableProcessInstanceService {
@@ -36,19 +39,26 @@ public class PageableProcessInstanceService {
 
     private ProcessInstanceConverter processInstanceConverter;
 
+    private final SecurityPoliciesApplicationService securityService;
+
     @Autowired
     public PageableProcessInstanceService(PageRetriever pageRetriever,
                                           RuntimeService runtimeService,
                                           ProcessInstanceSortApplier sortApplier,
-                                          ProcessInstanceConverter processInstanceConverter) {
+                                          ProcessInstanceConverter processInstanceConverter,
+                                          SecurityPoliciesApplicationService securityPolicyApplicationService) {
         this.pageRetriever = pageRetriever;
         this.runtimeService = runtimeService;
         this.sortApplier = sortApplier;
         this.processInstanceConverter = processInstanceConverter;
+        this.securityService = securityPolicyApplicationService;
     }
 
     public Page<ProcessInstance> getProcessInstances(Pageable pageable) {
+
         ProcessInstanceQuery query = runtimeService.createProcessInstanceQuery();
+        query = securityService.restrictProcessInstQuery(query, SecurityPolicy.READ);
+
         sortApplier.applySort(query,
                               pageable);
         return pageRetriever.loadPage(query,

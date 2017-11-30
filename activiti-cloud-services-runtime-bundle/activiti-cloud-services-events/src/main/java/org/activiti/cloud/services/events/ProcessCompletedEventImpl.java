@@ -17,7 +17,7 @@
 
 package org.activiti.cloud.services.events;
 
-import org.activiti.cloud.services.core.model.ProcessInstance;
+import org.activiti.cloud.services.api.model.ProcessInstance;
 
 public class ProcessCompletedEventImpl extends AbstractProcessEngineEvent implements ProcessCompletedEvent {
 

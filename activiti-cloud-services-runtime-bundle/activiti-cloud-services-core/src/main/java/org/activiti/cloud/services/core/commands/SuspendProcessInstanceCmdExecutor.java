@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.core.commands;
 
+import org.activiti.cloud.services.api.commands.results.SuspendProcessInstanceResults;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.model.commands.SuspendProcessInstanceCmd;
-import org.activiti.cloud.services.core.model.commands.results.SuspendProcessInstanceResults;
+import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;

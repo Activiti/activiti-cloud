@@ -16,6 +16,10 @@
 
 package org.activiti.services.connectors.channel;
 
+import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEvent;
+import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEventImpl;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
@@ -25,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,12 +41,18 @@ public class ServiceTaskIntegrationResultEventHandler {
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
+    private final ProcessEngineChannels channels;
+    private final RuntimeBundleProperties runtimeBundleProperties;
 
     @Autowired
     public ServiceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
-                                                    IntegrationContextService integrationContextService) {
+                                                    IntegrationContextService integrationContextService,
+                                                    ProcessEngineChannels channels,
+                                                    RuntimeBundleProperties runtimeBundleProperties) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
+        this.channels = channels;
+        this.runtimeBundleProperties = runtimeBundleProperties;
     }
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
@@ -51,10 +63,30 @@ public class ServiceTaskIntegrationResultEventHandler {
             integrationContextService.deleteIntegrationContext(integrationContext);
             runtimeService.trigger(integrationContext.getExecutionId(),
                                    integrationResultEvent.getVariables());
+
+            sendAuditMessage(integrationContext);
         } else {
-            LOGGER.warn("No task is waiting for integration result with execution id `" +
-                                integrationResultEvent.getExecutionId() +
-                                "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored." );
+            String message = "No task is waiting for integration result with execution id `" +
+                    integrationResultEvent.getExecutionId() +
+                    "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored.";
+            LOGGER.error( message );
+            // This needs to throw an exception so the message goes back to the queue in case of other node can pick it up.
+            throw new IllegalStateException(message);
+        }
+    }
+
+    private void sendAuditMessage(IntegrationContextEntity integrationContext) {
+        if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
+            Message<IntegrationResultReceivedEvent[]> message = MessageBuilder.withPayload(
+                    new IntegrationResultReceivedEvent[]{
+                            new IntegrationResultReceivedEventImpl(runtimeBundleProperties.getName(),
+                                                                   integrationContext.getExecutionId(),
+                                                                   integrationContext.getProcessDefinitionId(),
+                                                                   integrationContext.getProcessInstanceId(),
+                                                                   integrationContext.getId())
+                    }).build();
+
+            channels.auditProducer().send(message);
         }
     }
 }

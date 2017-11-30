@@ -1,6 +1,6 @@
 package org.activiti.cloud.services.rest.api;
 
-import org.activiti.cloud.services.core.model.ProcessDefinition;
+import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -23,21 +23,24 @@ public interface ProcessDefinitionController {
             method = RequestMethod.GET)
     ProcessDefinitionResource getProcessDefinition(@PathVariable String id);
 
-    @RequestMapping(value = "/{id}/xml",
+    @RequestMapping(value = "/{id}/model",
             method = RequestMethod.GET,
-            produces = "application/xml")
+            produces = "application/xml",
+            consumes="application/xml")
     @ResponseBody
     String getProcessModel(@PathVariable String id);
 
-    @RequestMapping(value = "/{id}/json",
+    @RequestMapping(value = "/{id}/model",
             method = RequestMethod.GET,
-            produces = "application/json")
+            produces = "application/json",
+            consumes="application/json")
     @ResponseBody
     String getBpmnModel(@PathVariable String id);
 
-    @RequestMapping(value = "/{id}/svg",
+    @RequestMapping(value = "/{id}/model",
             method = RequestMethod.GET,
-            produces = "image/svg+xml")
+            produces = "image/svg+xml",
+            consumes="image/svg+xml")
     @ResponseBody
     String getProcessDiagram(@PathVariable String id);
 }

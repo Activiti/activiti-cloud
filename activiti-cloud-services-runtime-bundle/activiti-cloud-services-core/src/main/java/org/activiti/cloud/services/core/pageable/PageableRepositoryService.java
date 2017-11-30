@@ -15,15 +15,18 @@
 
 package org.activiti.cloud.services.core.pageable;
 
+import org.activiti.cloud.services.api.model.ProcessDefinition;
+import org.activiti.cloud.services.api.model.converter.ProcessDefinitionConverter;
+import org.activiti.cloud.services.core.pageable.sort.ProcessDefinitionSortApplier;
+import org.activiti.cloud.services.SecurityPolicy;
+import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
-import org.activiti.cloud.services.core.model.ProcessDefinition;
-import org.activiti.cloud.services.core.model.converter.ProcessDefinitionConverter;
-import org.activiti.cloud.services.core.pageable.sort.ProcessDefinitionSortApplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
 
 @Component
 public class PageableRepositoryService {
@@ -36,23 +39,32 @@ public class PageableRepositoryService {
 
     private final ProcessDefinitionSortApplier sortApplier;
 
+    private final SecurityPoliciesApplicationService securityService;
+
     @Autowired
     public PageableRepositoryService(RepositoryService repositoryService,
                                      PageRetriever pageRetriever,
                                      ProcessDefinitionConverter processDefinitionConverter,
-                                     ProcessDefinitionSortApplier sortApplier) {
+                                     ProcessDefinitionSortApplier sortApplier,
+                                     SecurityPoliciesApplicationService securityPolicyApplicationService) {
         this.repositoryService = repositoryService;
         this.pageRetriever = pageRetriever;
         this.processDefinitionConverter = processDefinitionConverter;
         this.sortApplier = sortApplier;
+        this.securityService = securityPolicyApplicationService;
     }
 
     public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable) {
+
         ProcessDefinitionQuery query = repositoryService.createProcessDefinitionQuery();
+        query = securityService.restrictProcessDefQuery(query, SecurityPolicy.READ);
+
         sortApplier.applySort(query,
                               pageable);
         return pageRetriever.loadPage(query,
                                       pageable,
                                       processDefinitionConverter);
     }
+
+
 }

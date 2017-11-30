@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-runtime-bundle</artifactId>
-    <version>7-201710-EA</version>
+    <version>7-201711-EA</version>
   </parent>
 
 
@@ -32,10 +32,6 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-core-model</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.hateoas</groupId>

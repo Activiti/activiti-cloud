@@ -19,10 +19,11 @@ package org.activiti.cloud.starter.tests.runtime;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.converter.util.InputStreamProvider;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.services.api.model.ProcessDefinition;
+import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
-import org.activiti.cloud.services.core.model.ProcessDefinition;
-import org.activiti.cloud.services.core.model.ProcessInstance;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.junit.Before;
@@ -37,11 +38,14 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
+import org.springframework.web.client.RestClientException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -54,15 +58,19 @@ import java.util.Map;
 
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource("classpath:application-test.properties")
+@TestPropertySource({"classpath:application-test.properties","classpath:access-control.properties"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ProcessInstanceIT {
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
+
+    @Autowired
+    private KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -80,6 +88,8 @@ public class ProcessInstanceIT {
 
     @Before
     public void setUp() throws Exception{
+        keycloaktestuser = "hruser";
+        keycloakSecurityContextClientRequestInterceptor.setKeycloaktestuser(keycloaktestuser);
         ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -104,6 +114,15 @@ public class ProcessInstanceIT {
         assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
         assertThat(returnedProcInst.getInitiator()).isNotNull();
         assertThat(returnedProcInst.getInitiator()).isEqualTo(keycloaktestuser);//will only match if using username not id
+    }
+
+    @Test
+    public void shouldNotStartProcessWithoutPermission() throws Exception {
+        keycloakSecurityContextClientRequestInterceptor.setKeycloaktestuser("testuser");
+
+        assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+                        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS)));
+
     }
 
     @Test
@@ -137,8 +156,9 @@ public class ProcessInstanceIT {
         //when
         String responseData = executeRequest(
                 PROCESS_INSTANCES_RELATIVE_URL + startedProcessEntity.getBody()
-                        .getId() + "/svg",
-                HttpMethod.GET);
+                        .getId() + "/model",
+                HttpMethod.GET,
+                "image/svg+xml");
 
         //then
         assertThat(responseData).isNotNull();
@@ -245,10 +265,17 @@ public class ProcessInstanceIT {
                 responseType);
     }
 
-    private String executeRequest(String url, HttpMethod method) {
+    private String executeRequest(String url, HttpMethod method, String contentType) {
         return restTemplate.execute(url,
                 method,
-                null,
+                new RequestCallback() {
+                    @Override
+                    public void doWithRequest(ClientHttpRequest request) throws IOException {
+                        if (contentType != null && !contentType.isEmpty()) {
+                            request.getHeaders().add("Content-Type", contentType);
+                        }
+                    }
+                },
                 new ResponseExtractor<String>() {
 
                     @Override

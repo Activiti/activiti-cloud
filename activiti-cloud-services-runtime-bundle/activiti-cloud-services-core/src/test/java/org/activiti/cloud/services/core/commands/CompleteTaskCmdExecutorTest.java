@@ -3,9 +3,9 @@ package org.activiti.cloud.services.core.commands;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.activiti.cloud.services.api.commands.results.CompleteTaskResults;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.model.commands.CompleteTaskCmd;
-import org.activiti.cloud.services.core.model.commands.results.CompleteTaskResults;
+import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;

@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.core.commands;
 
+import org.activiti.cloud.services.api.commands.results.SignalProcessInstancesResults;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.model.commands.SignalProcessInstancesCmd;
-import org.activiti.cloud.services.core.model.commands.results.SignalProcessInstancesResults;
+import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;

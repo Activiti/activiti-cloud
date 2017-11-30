@@ -53,13 +53,13 @@ public class MQServiceTaskIT {
         variables.put("age", 19);
 
         //when
-        ProcessInstance procInst = runtimeService.startProcessInstanceByKey("noDelegate", variables);
+        ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskProcess", variables);
         assertThat(procInst).isNotNull();
 
 
         //then
         // the execution should arrive in the human tasks which follows the service task
-        Thread.sleep(600);
+        Thread.sleep(800);
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(procInst.getProcessInstanceId()).list();
         assertThat(tasks).isNotNull();
         assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");

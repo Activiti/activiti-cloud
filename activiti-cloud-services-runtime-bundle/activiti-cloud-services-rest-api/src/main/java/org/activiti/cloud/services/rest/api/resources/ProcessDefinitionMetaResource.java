@@ -1,6 +1,6 @@
 package org.activiti.cloud.services.rest.api.resources;
 
-import org.activiti.cloud.services.core.model.ProcessDefinitionMeta;
+import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
