@@ -20,50 +20,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.activiti.engine.UserGroupLookupProxy;
-import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("usergrouplookuproxy")
 public class KeycloakUserGroupLookupProxy implements UserGroupLookupProxy {
 
-    @Value("${keycloak.auth-server-url}")
-    private String authServer;
+    private KeycloakInstanceWrapper keycloakInstanceWrapper;
 
-    @Value("${keycloak.realm}")
-    private String realm;
-
-    @Value("${keycloakadminclientapp}")
-    private String keycloakadminclientapp;
-
-    @Value("${keycloakclientuser}")
-    private String clientUser;
-
-    @Value("${keycloakclientpassword}")
-    private String clientPassword;
+    @Autowired
+    public KeycloakUserGroupLookupProxy(KeycloakInstanceWrapper keycloakInstanceWrapper){
+        this.keycloakInstanceWrapper = keycloakInstanceWrapper;
+    }
 
     public List<String> getGroupsForCandidateUser(String candidateUser) {
         //candidateUser here will use identifier chosen in KeycloakActivitiAuthenticationProvider
 
-        Keycloak keycloak = Keycloak.getInstance(authServer,
-                                                 realm,
-                                                 clientUser,
-                                                 clientPassword,
-                                                 keycloakadminclientapp);
-
-        //if using id then could use keycloak.realms().realm(realm).users().get(candidateUser)
-        //but with name have to search for user
-        List<UserRepresentation> users = keycloak.realms().realm(realm).users().search(candidateUser,
-                                                                                       0,
-                                                                                       10);
+        List<UserRepresentation> users = keycloakInstanceWrapper.getUser(candidateUser);
         if (users.size() > 1) {
             throw new UnsupportedOperationException("User id " + candidateUser + " is not unique");
         }
         UserRepresentation user = users.get(0);
 
-        List<GroupRepresentation> groupRepresentations = keycloak.realms().realm(realm).users().get(user.getId()).groups();
+        List<GroupRepresentation> groupRepresentations = keycloakInstanceWrapper.getGroupsForUser(user.getId());
 
         List<String> groups = null;
         if (groupRepresentations != null && groupRepresentations.size() > 0) {
@@ -72,9 +53,8 @@ public class KeycloakUserGroupLookupProxy implements UserGroupLookupProxy {
                 groups.add(groupRepresentation.getName());
             }
         }
-
-        //to use roles instead of groups the query would be keycloak.realms().realm(realm).users().get(user.getId()).roles().realmLevel().listEffective()
-
+        
         return groups;
     }
+
 }

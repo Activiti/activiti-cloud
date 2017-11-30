@@ -4,23 +4,42 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7-201710-EA</version>
+    <version>7-201711-EA</version>
   </parent>
 
   <artifactId>activiti-cloud-service-common-parent</artifactId>
+  <version>7-201711-EA</version>
   <name>Activiti Cloud :: Service Common Parent</name>
   <description>Activiti Cloud Service Common Parent</description>
-  <version>7-201710-EA</version>
   <packaging>pom</packaging>
 
+  <properties>
+    <!--
+    Override property from activiti-cloud-parent that's set to the default snapshot version.
+    This allow to easily create feature branches with a different Maven version.
+    -->
+    <version.activiti.cloud.service-common>${project.version}</version.activiti.cloud.service-common>
+  </properties>
+
   <modules>
-    <module>activiti-cloud-services-api</module>
-    <module>activiti-cloud-services-core-model</module>
     <module>activiti-cloud-services-identity-keycloak</module>
     <module>activiti-cloud-services-identity-basic</module>
     <module>activiti-cloud-services-test</module>
-    <module>activiti-cloud-starter-test</module>
+    <module>activiti-cloud-services-monitoring</module>
+    <module>activiti-cloud-services-tracing</module>
   </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti</groupId>
+        <artifactId>activiti-dependencies</artifactId>
+        <version>${version.activiti}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <distributionManagement>
     <repository>
@@ -75,43 +94,6 @@
       </snapshots>
     </repository>
   </repositories>
-
-  <profiles>
-    <!-- Profile to sign artifacts, triggered when releasing -->
-    <profile>
-      <id>sign</id>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>${maven-gpg-plugin.version}</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <!-- option to publish to alfresco-->
-    <profile>
-      <id>distroAlfresco</id>
-      <distributionManagement>
-        <repository>
-          <id>activiti-enterprise-snapshots</id>
-          <name>Activiti Snapshots</name>
-          <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
-        </repository>
-      </distributionManagement>
-    </profile>
-
-  </profiles>
-
 
   <!-- Various information, not used by the build -->
 
