@@ -8,7 +8,7 @@
 
   <packaging>jar</packaging>
   <name>Activiti Cloud :: Query</name>
-
+ 
   <properties>
     <version.activiti.cloud>${project.version}</version.activiti.cloud>
 
