@@ -19,7 +19,6 @@ package org.activiti.cloud.services.query.app.repository;
 import java.util.Optional;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.engine.ActivitiException;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
@@ -40,7 +39,7 @@ public class EntityFinder {
         if (result.isPresent()) {
             return result.get();
         } else {
-            throw new ActivitiException(notFoundMessage);
+            throw new IllegalStateException(notFoundMessage);
         }
     }
 
