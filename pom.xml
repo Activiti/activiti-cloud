@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>activiti-cloud-service-common-parent</artifactId>
-  <version>7-201711-EA-SNAPSHOT</version>
+  <version>7-201712-EA-SNAPSHOT</version>
   <name>Activiti Cloud :: Service Common Parent</name>
   <description>Activiti Cloud Service Common Parent</description>
   <packaging>pom</packaging>
