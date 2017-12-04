@@ -10,7 +10,7 @@
   <name>Activiti Cloud :: Query</name>
  
   <properties>
-    <version.activiti.cloud>${project.version}</version.activiti.cloud>
+    <version.activiti.cloud>7-201712-EA-SNAPSHOT</version.activiti.cloud>
 
     <junit.version>4.12</junit.version>
     <h2.version>1.4.193</h2.version>
