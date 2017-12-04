@@ -19,6 +19,7 @@
     <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
     <spring-boot-maven-plugin.version>1.5.4.RELEASE</spring-boot-maven-plugin.version>
     <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
+    <jgitflow.plugin.version>1.0-m5.1</jgitflow.plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -156,6 +157,25 @@
           <environmentVariables>
             <ACT_RB_PROCESSES_PATH>${project.basedir}/src/test/resources/processes/</ACT_RB_PROCESSES_PATH>
           </environmentVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>external.atlassian.jgitflow</groupId>
+        <artifactId>jgitflow-maven-plugin</artifactId>
+        <version>${jgitflow.plugin.version}</version>
+        <configuration>
+          <enableFeatureVersions>true</enableFeatureVersions>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <allowSnapshots>true</allowSnapshots>
+          <noDeploy>true</noDeploy>
+          <useReleaseProfile>true</useReleaseProfile> <!-- Do not generate javadoc when releaseing -->
+          <pushReleases>true</pushReleases>
+          <squash>false</squash>
+          <versionTagPrefix>activiti-</versionTagPrefix>
+          <keepBranch>true</keepBranch>
+          <noFeatureBuild>true</noFeatureBuild>
+          <noFeatureMerge>true</noFeatureMerge>
+          <noReleaseBuild>true</noReleaseBuild>
         </configuration>
       </plugin>
     </plugins>
