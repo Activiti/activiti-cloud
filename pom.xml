@@ -44,6 +44,20 @@
     </dependencies>
   </dependencyManagement>
 
+
+  <distributionManagement>
+    <repository>
+      <id>activiti-enterprise-snapshots</id>
+      <name>Alfresco internal repo</name>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>activiti-enterprise-snapshots</id>
+      <name>Activiti Snapshots</name>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+  
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
