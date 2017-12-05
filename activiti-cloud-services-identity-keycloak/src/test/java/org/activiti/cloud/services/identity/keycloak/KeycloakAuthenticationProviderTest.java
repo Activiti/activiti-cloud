@@ -22,7 +22,7 @@ public class KeycloakAuthenticationProviderTest {
         KeycloakPrincipal principal = new KeycloakPrincipal("bob",keycloakSecurityContext);
         KeycloakAccount keycloakAccount = new SimpleKeycloakAccount(principal, new HashSet<>(Arrays.asList("role1","role2")),keycloakSecurityContext);
 
-        KeycloakAuthenticationToken token = new KeycloakAuthenticationToken(keycloakAccount);
+        KeycloakAuthenticationToken token = new KeycloakAuthenticationToken(keycloakAccount,false);
 
         assertThat(keycloakActivitiAuthenticationProvider.authenticate(token)).isNotNull();
 
