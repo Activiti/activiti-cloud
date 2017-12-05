@@ -71,7 +71,7 @@
      https://github.com/keycloak/keycloak/pull/4279
      -->
     <keycloak.snapshot.version>3.4.0.CR1-SNAPSHOT</keycloak.snapshot.version>
-    <keycloak.version>3.3.0.CR2</keycloak.version>
+    <keycloak.version>3.4.0.Final</keycloak.version>
     <resteasy-client.version>3.0.21.Final</resteasy-client.version>
 
     <!-- plugins -->
