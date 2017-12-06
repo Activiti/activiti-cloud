@@ -42,7 +42,7 @@ public class Group {
     @OneToMany(cascade = CascadeType.ALL)
     private List<Group> subgroups;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "group")
     private List<Project> projects;
 
     public Group() {    // for JPA

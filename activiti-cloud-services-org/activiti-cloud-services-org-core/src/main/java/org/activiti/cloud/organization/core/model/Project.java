@@ -20,6 +20,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -35,8 +37,11 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @JsonInclude(NON_NULL)
 public class Project {
 
+    @ManyToOne
+    @JoinColumn(name="group_id")
+    private Group group;
     @OneToMany(cascade = CascadeType.ALL)
-    List<Model> models;
+    private List<Model> models;
     @Id
     private String id;
 
@@ -61,5 +66,13 @@ public class Project {
 
     public void setModels(List<Model> models) {
         this.models = models;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
     }
 }

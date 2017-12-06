@@ -34,12 +34,16 @@ public class Model {
 
     @Id
     private String id;
+    private ModelType type;
+    private String refId;
 
     public Model() { // for JPA
     }
 
-    public Model(String id) {
+    public Model(String id, ModelType type, String refId) {
         this.id = id;
+        this.type = type;
+        this.refId = refId;
     }
 
     public String getId() {
@@ -48,5 +52,26 @@ public class Model {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public ModelType getType() {
+        return type;
+    }
+
+    public void setType(ModelType type) {
+        this.type = type;
+    }
+
+    public String getRefId() {
+        return refId;
+    }
+
+    public void setRefId(String refId) {
+        this.refId = refId;
+    }
+
+    public enum ModelType {
+        FORM,
+        PROCESS_MODEL
     }
 }
