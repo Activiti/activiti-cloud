@@ -35,7 +35,7 @@ import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.cloud.services.core.pageable.PageableRepositoryService;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionController;
 import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
-import org.activiti.cloud.services.rest.api.resources.assembler.ProcessDefinitionResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

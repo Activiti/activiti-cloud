@@ -21,7 +21,7 @@ import java.util.Collections;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.rest.api.resources.assembler.TaskVariableResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskVariablesResourceAssembler;
 import org.activiti.engine.TaskService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +52,7 @@ public class TaskVariableControllerImplTest {
 
     private static final String DOCUMENTATION_IDENTIFIER = "task-variable";
     @MockBean
-    private TaskVariableResourceAssembler variableResourceAssembler;
+    private TaskVariablesResourceAssembler variableResourceAssembler;
     @Autowired
     private MockMvc mockMvc;
     @MockBean

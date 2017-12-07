@@ -13,15 +13,14 @@
  *
  */
 
-package org.activiti.cloud.services.rest.api.resources.assembler;
+package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.cloud.services.api.model.ProcessInstanceVariables;
-import org.activiti.cloud.services.rest.api.HomeController;
-import org.activiti.cloud.services.rest.api.ProcessInstanceController;
-import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
 import org.activiti.cloud.services.rest.api.resources.VariablesResource;
+import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
+import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
+import org.activiti.cloud.services.rest.controllers.ProcessInstanceVariableControllerImpl;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.stereotype.Component;
 
@@ -29,18 +28,18 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Component
-public class ProcessVariableResourceAssembler extends ResourceAssemblerSupport<ProcessInstanceVariables, VariablesResource> {
+public class ProcessInstanceVariablesResourceAssembler extends ResourceAssemblerSupport<ProcessInstanceVariables, VariablesResource> {
 
-    public ProcessVariableResourceAssembler() {
-        super(ProcessInstanceVariableController.class,
+    public ProcessInstanceVariablesResourceAssembler() {
+        super(ProcessInstanceVariableControllerImpl.class,
               VariablesResource.class);
     }
 
     @Override
     public VariablesResource toResource(ProcessInstanceVariables processInstanceVariables) {
-        Link selfRel = linkTo(methodOn(ProcessInstanceVariableController.class).getVariables(processInstanceVariables.getProcessInstanceId())).withSelfRel();
-        Link processInstanceRel = ControllerLinkBuilder.linkTo(methodOn(ProcessInstanceController.class).getProcessInstanceById(processInstanceVariables.getProcessInstanceId())).withRel("processInstance");
-        Link homeLink = linkTo(HomeController.class).withRel("home");
+        Link selfRel = linkTo(methodOn(ProcessInstanceVariableControllerImpl.class).getVariables(processInstanceVariables.getProcessInstanceId())).withSelfRel();
+        Link processInstanceRel = linkTo(methodOn(ProcessInstanceControllerImpl.class).getProcessInstanceById(processInstanceVariables.getProcessInstanceId())).withRel("processInstance");
+        Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
         return new VariablesResource(processInstanceVariables.getVariables(),
                                      selfRel,
                                      processInstanceRel,

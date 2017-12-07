@@ -18,7 +18,7 @@ package org.activiti.cloud.services.rest.controllers;
 import java.util.Map;
 
 import org.activiti.cloud.services.api.model.ProcessInstanceVariables;
-import org.activiti.cloud.services.rest.api.resources.assembler.ProcessVariableResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariablesResourceAssembler;
 import org.activiti.engine.RuntimeService;
 
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
@@ -34,11 +34,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVariableController {
 
     private final RuntimeService runtimeService;
-    private final ProcessVariableResourceAssembler variableResourceBuilder;
+    private final ProcessInstanceVariablesResourceAssembler variableResourceBuilder;
 
     @Autowired
     public ProcessInstanceVariableControllerImpl(RuntimeService runtimeService,
-                                                 ProcessVariableResourceAssembler variableResourceBuilder) {
+                                                 ProcessInstanceVariablesResourceAssembler variableResourceBuilder) {
         this.runtimeService = runtimeService;
         this.variableResourceBuilder = variableResourceBuilder;
     }

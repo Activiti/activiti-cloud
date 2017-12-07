@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.core.pageable.PageableTaskService;
-import org.activiti.cloud.services.rest.api.resources.assembler.TaskResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

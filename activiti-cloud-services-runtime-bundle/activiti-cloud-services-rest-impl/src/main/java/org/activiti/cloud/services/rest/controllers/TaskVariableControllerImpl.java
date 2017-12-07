@@ -22,7 +22,7 @@ import org.activiti.engine.TaskService;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
-import org.activiti.cloud.services.rest.api.resources.assembler.TaskVariableResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskVariablesResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
@@ -38,12 +38,12 @@ public class TaskVariableControllerImpl implements TaskVariableController {
 
     private final TaskService taskService;
 
-    private final TaskVariableResourceAssembler variableResourceBuilder;
+    private final TaskVariablesResourceAssembler variableResourceBuilder;
 
     @Autowired
     public TaskVariableControllerImpl(ProcessEngineWrapper processEngine,
                                       TaskService taskService,
-                                      TaskVariableResourceAssembler variableResourceBuilder) {
+                                      TaskVariablesResourceAssembler variableResourceBuilder) {
         this.processEngine = processEngine;
         this.taskService = taskService;
         this.variableResourceBuilder = variableResourceBuilder;

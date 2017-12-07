@@ -19,7 +19,7 @@ import java.util.Map;
 
 import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
-import org.activiti.cloud.services.rest.api.resources.assembler.TaskResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
