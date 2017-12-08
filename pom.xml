@@ -247,6 +247,11 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-logging</artifactId>
+        <version>${version.activiti.cloud.service-common}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-security-policies</artifactId>
         <version>${version.activiti.cloud.runtime-bundle}</version>
       </dependency>
