@@ -24,7 +24,7 @@
   </parent>
 
   <artifactId>activiti-cloud-org-service-parent</artifactId>
-  <version>7-201711-EA-lucian_1559_configurations_activiti_cloud_org_service-SNAPSHOT</version>
+  <version>7-201712-EA-lucian_1559_configurations_activiti_cloud_org_service-SNAPSHOT</version>
   <name>Activiti Cloud - Organization Services :: Parent</name>
   <description>Activiti Cloud Process Model Services Parent</description>
   <packaging>pom</packaging>
