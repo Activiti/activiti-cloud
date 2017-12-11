@@ -17,6 +17,7 @@
     <version.activiti.cloud.audit>${version.activiti.cloud}</version.activiti.cloud.audit>
     <version.activiti.cloud.query>${version.activiti.cloud}</version.activiti.cloud.query>
     <version.activiti.cloud.connectors>${version.activiti.cloud}</version.activiti.cloud.connectors>
+    <version.activiti.cloud.process-model>${version.activiti.cloud}</version.activiti.cloud.process-model>
 
     <!--configuration properties-->
     <jdk.version>1.8</jdk.version>
@@ -26,6 +27,7 @@
     <spring.boot.version>2.0.0.M6</spring.boot.version>
     <spring.cloud.version>Finchley.M4</spring.cloud.version>
     <spring.cloud.stream.version>Ditmars.RELEASE</spring.cloud.stream.version>
+    <spring.cloud.contract.version>1.1.4.RELEASE</spring.cloud.contract.version>
 
     <h2.version>1.4.193</h2.version>
 
@@ -115,6 +117,7 @@
     <module>activiti-cloud-query-dependencies</module>
     <module>activiti-cloud-audit-dependencies</module>
     <module>activiti-cloud-connectors-dependencies</module>
+    <module>activiti-cloud-process-model-dependencies</module>
   </modules>
 
   <distributionManagement>
@@ -327,6 +330,23 @@
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-connector</artifactId>
         <version>${version.activiti.cloud.connectors}</version>
+      </dependency>
+
+      <!-- Activiti Cloud Process Model -->
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-starter-process-model</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-process-model-core</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-process-model-jpa</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
       </dependency>
 
       <dependency>
