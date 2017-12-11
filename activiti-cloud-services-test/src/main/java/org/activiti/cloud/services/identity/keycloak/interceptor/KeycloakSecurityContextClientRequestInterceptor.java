@@ -43,11 +43,11 @@ public class KeycloakSecurityContextClientRequestInterceptor implements ClientHt
     @Value("${keycloak.resource}")
     protected String resource;
 
-    @Value("${keycloaktestuser}")
-    protected String keycloaktestuser;
+    @Value("${activiti.keycloak.test-user}")
+    protected String keycloakTestUser;
 
-    @Value("${keycloaktestpassword}")
-    protected String keycloaktestpassword;
+    @Value("${activiti.keycloak.test-password}")
+    protected String keycloakTestPassword;
 
     @Override
     public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes, ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
@@ -57,15 +57,15 @@ public class KeycloakSecurityContextClientRequestInterceptor implements ClientHt
     }
 
     private AccessTokenResponse getAccessTokenResponse() {
-        return Keycloak.getInstance(authServer, realm, keycloaktestuser, keycloaktestpassword, resource).tokenManager().getAccessToken();
+        return Keycloak.getInstance(authServer, realm, keycloakTestUser, keycloakTestPassword, resource).tokenManager().getAccessToken();
     }
 
 
-    public void setKeycloaktestuser(String keycloaktestuser) {
-        this.keycloaktestuser = keycloaktestuser;
+    public void setKeycloakTestUser(String keycloakTestUser) {
+        this.keycloakTestUser = keycloakTestUser;
     }
 
-    public String getKeycloaktestuser(){
-        return keycloaktestuser;
+    public String getKeycloakTestUser(){
+        return keycloakTestUser;
     }
 }

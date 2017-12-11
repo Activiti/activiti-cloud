@@ -28,23 +28,19 @@ import org.springframework.stereotype.Component;
 @Component("usergrouplookuproxy")
 public class KeycloakUserGroupLookupProxy implements UserGroupLookupProxy {
 
-    private KeycloakInstanceWrapper keycloakInstanceWrapper;
+    private KeycloakLookupService keycloakLookupService;
 
     @Autowired
-    public KeycloakUserGroupLookupProxy(KeycloakInstanceWrapper keycloakInstanceWrapper){
-        this.keycloakInstanceWrapper = keycloakInstanceWrapper;
+    public KeycloakUserGroupLookupProxy(KeycloakLookupService keycloakLookupService){
+        this.keycloakLookupService = keycloakLookupService;
     }
 
     public List<String> getGroupsForCandidateUser(String candidateUser) {
         //candidateUser here will use identifier chosen in KeycloakActivitiAuthenticationProvider
 
-        List<UserRepresentation> users = keycloakInstanceWrapper.getUser(candidateUser);
-        if (users.size() > 1) {
-            throw new UnsupportedOperationException("User id " + candidateUser + " is not unique");
-        }
-        UserRepresentation user = users.get(0);
+        UserRepresentation user = keycloakLookupService.getUser(candidateUser);
 
-        List<GroupRepresentation> groupRepresentations = keycloakInstanceWrapper.getGroupsForUser(user.getId());
+        List<GroupRepresentation> groupRepresentations = keycloakLookupService.getGroupsForUser(user.getId());
 
         List<String> groups = null;
         if (groupRepresentations != null && groupRepresentations.size() > 0) {

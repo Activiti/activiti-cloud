@@ -16,23 +16,19 @@ public class KeycloakUserRoleLookupProxy implements UserRoleLookupProxy {
     @Value("${admin-role-name:admin}")
     private String adminRoleName;
 
-    private KeycloakInstanceWrapper keycloakInstanceWrapper;
+    private KeycloakLookupService keycloakLookupService;
 
     @Autowired
-    public KeycloakUserRoleLookupProxy(KeycloakInstanceWrapper keycloakInstanceWrapper){
-        this.keycloakInstanceWrapper = keycloakInstanceWrapper;
+    public KeycloakUserRoleLookupProxy(KeycloakLookupService keycloakLookupService){
+        this.keycloakLookupService = keycloakLookupService;
     }
 
     public List<String> getRolesForUser(String userName) {
 
-        List<UserRepresentation> users = keycloakInstanceWrapper.getUser(userName);
-        if (users.size() > 1) {
-            throw new UnsupportedOperationException("User id " + userName + " is not unique");
-        }
+        UserRepresentation user = keycloakLookupService.getUser(userName);
 
-        UserRepresentation user = users.get(0);
 
-        List<RoleRepresentation> roleRepresentations = keycloakInstanceWrapper.getRolesForUser(user.getId());
+        List<RoleRepresentation> roleRepresentations = keycloakLookupService.getRolesForUser(user.getId());
 
         List<String> roles = null;
         if (roleRepresentations != null && roleRepresentations.size() > 0) {
