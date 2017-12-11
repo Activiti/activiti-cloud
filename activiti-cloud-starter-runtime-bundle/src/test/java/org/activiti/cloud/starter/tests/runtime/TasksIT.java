@@ -74,7 +74,7 @@ public class TasksIT  {
 
     @Before
     public void setUp() throws Exception{
-        keycloakSecurityContextClientRequestInterceptor.setKeycloaktestuser("hruser");
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
 
         ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
@@ -106,7 +106,7 @@ public class TasksIT  {
 
     @Test
     public void shouldNotGetTasksWithoutPermission() throws Exception {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloaktestuser("testuser");
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
 
         //now authenticated as testuser who is not in hr group
 
@@ -180,7 +180,7 @@ public class TasksIT  {
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody().getAssignee()).isEqualTo(keycloakSecurityContextClientRequestInterceptor.getKeycloaktestuser());
+        assertThat(responseEntity.getBody().getAssignee()).isEqualTo(keycloakSecurityContextClientRequestInterceptor.getKeycloakTestUser());
     }
 
     private ResponseEntity<Task> executeRequestClaim(Task task) {

@@ -89,7 +89,7 @@ public class CommandEndpointIT {
 
     @Before
     public void setUp() throws Exception {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloaktestuser("hruser");
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
         // Get Available Process Definitions
         ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();

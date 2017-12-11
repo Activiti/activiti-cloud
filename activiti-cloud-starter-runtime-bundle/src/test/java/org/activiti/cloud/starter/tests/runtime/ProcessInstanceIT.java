@@ -81,15 +81,15 @@ public class ProcessInstanceIT {
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
 
-    @Value("${keycloaktestuser}")
-    protected String keycloaktestuser;
+    @Value("${activiti.keycloak.test-user}")
+    protected String keycloakTestUser;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
     @Before
     public void setUp() throws Exception{
-        keycloaktestuser = "hruser";
-        keycloakSecurityContextClientRequestInterceptor.setKeycloaktestuser(keycloaktestuser);
+        keycloakTestUser = "hruser";
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
         ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -113,12 +113,12 @@ public class ProcessInstanceIT {
         assertThat(returnedProcInst.getId()).isNotNull();
         assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
         assertThat(returnedProcInst.getInitiator()).isNotNull();
-        assertThat(returnedProcInst.getInitiator()).isEqualTo(keycloaktestuser);//will only match if using username not id
+        assertThat(returnedProcInst.getInitiator()).isEqualTo(keycloakTestUser);//will only match if using username not id
     }
 
     @Test
     public void shouldNotStartProcessWithoutPermission() throws Exception {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloaktestuser("testuser");
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
 
         assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
                         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS)));
