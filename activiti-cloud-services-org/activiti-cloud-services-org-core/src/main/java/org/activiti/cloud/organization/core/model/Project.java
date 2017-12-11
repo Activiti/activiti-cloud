@@ -44,12 +44,15 @@ public class Project {
     private List<Model> models;
     @Id
     private String id;
+    private String name;
 
     public Project() {  // for JPA
     }
 
-    public Project(String id) {
+    public Project(String id,
+                   String name) {
         this.id = id;
+        this.name = name;
     }
 
     public String getId() {
@@ -74,5 +77,13 @@ public class Project {
 
     public void setGroup(Group group) {
         this.group = group;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

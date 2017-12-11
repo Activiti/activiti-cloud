@@ -28,10 +28,12 @@
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-rest-core</artifactId>
     </dependency>
+
+    <!-- Tests -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <scope>runtime</scope>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

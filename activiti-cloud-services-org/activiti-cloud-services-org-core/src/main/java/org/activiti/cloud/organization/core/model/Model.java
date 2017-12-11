@@ -19,6 +19,7 @@ package org.activiti.cloud.organization.core.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -34,14 +35,20 @@ public class Model {
 
     @Id
     private String id;
+    private String name;
     private ModelType type;
+    @JsonIgnore
     private String refId;
 
     public Model() { // for JPA
     }
 
-    public Model(String id, ModelType type, String refId) {
+    public Model(String id,
+                 String name,
+                 ModelType type,
+                 String refId) {
         this.id = id;
+        this.name = name;
         this.type = type;
         this.refId = refId;
     }
@@ -68,6 +75,14 @@ public class Model {
 
     public void setRefId(String refId) {
         this.refId = refId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public enum ModelType {
