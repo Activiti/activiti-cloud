@@ -349,6 +349,11 @@
         <artifactId>activiti-cloud-services-process-model-jpa</artifactId>
         <version>${version.activiti.cloud.process-model}</version>
       </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-process-model-rest</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.hibernate.javax.persistence</groupId>
