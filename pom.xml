@@ -17,7 +17,7 @@
     <version.activiti.cloud.audit>${version.activiti.cloud}</version.activiti.cloud.audit>
     <version.activiti.cloud.query>${version.activiti.cloud}</version.activiti.cloud.query>
     <version.activiti.cloud.connectors>${version.activiti.cloud}</version.activiti.cloud.connectors>
-    <version.activiti.cloud.process-model>7-201712-EA-cciobotaru_1521_process_model_rest_api-SNAPSHOT</version.activiti.cloud.process-model>
+    <version.activiti.cloud.process-model>${version.activiti.cloud}</version.activiti.cloud.process-model>
 
     <!--configuration properties-->
     <jdk.version>1.8</jdk.version>
