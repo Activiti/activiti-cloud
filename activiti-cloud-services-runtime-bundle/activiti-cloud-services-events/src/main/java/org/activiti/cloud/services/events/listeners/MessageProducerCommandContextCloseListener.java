@@ -18,11 +18,10 @@ package org.activiti.cloud.services.events.listeners;
 
 import java.util.List;
 
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
@@ -41,13 +40,11 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
     @Override
     public void closed(CommandContext commandContext) {
-        CommandContext currentCommandContext = Context.getCommandContext();
-        List<ProcessEngineEvent> events = currentCommandContext
-                                                               .getGenericAttribute(PROCESS_ENGINE_EVENTS);
-        if (events != null && events.size() != 0) {
-            producer.auditProducer().send(MessageBuilder.withPayload(events.toArray(new ProcessEngineEvent[events
-                                                                                                                 .size()]))
-                                                        .build());
+        List<ProcessEngineEvent> events = commandContext.getGenericAttribute(PROCESS_ENGINE_EVENTS);
+        if (events != null && !events.isEmpty()) {
+            producer.auditProducer().send(MessageBuilder.withPayload(
+                    events.toArray(new ProcessEngineEvent[events.size()]))
+                                                  .build());
         }
     }
 
