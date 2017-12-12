@@ -24,9 +24,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Spring Boot / Cloud / Stream deps -->
-    <spring.boot.version>2.0.0.M6</spring.boot.version>
-    <spring.cloud.version>Finchley.M4</spring.cloud.version>
-    <spring.cloud.stream.version>Ditmars.RELEASE</spring.cloud.stream.version>
+    <spring.boot.version>2.0.0.M7</spring.boot.version>
+    <spring.cloud.version>Finchley.M5</spring.cloud.version>
+    <spring.cloud.stream.version>Elmhurst.M3</spring.cloud.stream.version>
 
     <h2.version>1.4.193</h2.version>
 
