@@ -17,6 +17,7 @@
     <version.activiti.cloud.audit>${version.activiti.cloud}</version.activiti.cloud.audit>
     <version.activiti.cloud.query>${version.activiti.cloud}</version.activiti.cloud.query>
     <version.activiti.cloud.connectors>${version.activiti.cloud}</version.activiti.cloud.connectors>
+    <version.activiti.cloud.process-model>${version.activiti.cloud}</version.activiti.cloud.process-model>
 
     <!--configuration properties-->
     <jdk.version>1.8</jdk.version>
@@ -93,6 +94,8 @@
     <extra-enforcer-rules.version>1.0-beta-6</extra-enforcer-rules.version>
     <illegal-transitive-dependency-check.version>1.7.4</illegal-transitive-dependency-check.version>
     <directory.maven.plugin.version>0.1</directory.maven.plugin.version>
+    <spring.cloud.contract.maven.plugin>1.1.4.RELEASE</spring.cloud.contract.maven.plugin>
+
 
 
     <!-- configuration properties for tests-->
@@ -115,6 +118,7 @@
     <module>activiti-cloud-query-dependencies</module>
     <module>activiti-cloud-audit-dependencies</module>
     <module>activiti-cloud-connectors-dependencies</module>
+    <module>activiti-cloud-process-model-dependencies</module>
   </modules>
 
   <distributionManagement>
@@ -329,6 +333,28 @@
         <version>${version.activiti.cloud.connectors}</version>
       </dependency>
 
+      <!-- Activiti Cloud Process Model -->
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-starter-process-model</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-process-model-core</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-process-model-jpa</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-process-model-rest</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
+
       <dependency>
         <groupId>org.hibernate.javax.persistence</groupId>
         <artifactId>hibernate-jpa-2.1-api</artifactId>
@@ -484,6 +510,20 @@
         <artifactId>h2</artifactId>
         <version>${h2.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-contract-verifier</artifactId>
+        <version>${spring.cloud.contract.maven.plugin}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-contract-wiremock</artifactId>
+        <version>${spring.cloud.contract.maven.plugin}</version>
+        <scope>test</scope>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
@@ -937,6 +977,19 @@
               </configuration>
             </execution>
           </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-contract-maven-plugin</artifactId>
+          <version>${spring.cloud.contract.maven.plugin}</version>
+          <extensions>true</extensions>
+          <dependencies>
+            <dependency>
+              <groupId>org.springframework.cloud</groupId>
+              <artifactId>spring-cloud-starter-contract-verifier</artifactId>
+              <version>${spring.cloud.contract.maven.plugin}</version>
+            </dependency>
+          </dependencies>
         </plugin>
       </plugins>
     </pluginManagement>
