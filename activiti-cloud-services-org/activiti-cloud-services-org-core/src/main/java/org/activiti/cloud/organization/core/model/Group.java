@@ -19,8 +19,8 @@ package org.activiti.cloud.organization.core.model;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -41,10 +41,13 @@ public class Group {
     @Id
     private String id;
     private String name;
+
+    @ManyToOne
+    private Group parent;
     @OneToMany(cascade = CascadeType.ALL)
     private List<Group> subgroups;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany
     private List<Project> projects;
 
     public Group() {    // for JPA
@@ -58,6 +61,14 @@ public class Group {
                  String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public Group(String id,
+                 String name,
+                 Group parent) {
+        this.id = id;
+        this.name = name;
+        this.parent = parent;
     }
 
     public List<Group> getSubgroups() {
@@ -90,5 +101,13 @@ public class Group {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Group getParent() {
+        return parent;
+    }
+
+    public void setParent(Group parent) {
+        this.parent = parent;
     }
 }

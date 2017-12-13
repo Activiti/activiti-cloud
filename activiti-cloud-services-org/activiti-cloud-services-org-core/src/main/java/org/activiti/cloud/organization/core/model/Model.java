@@ -18,6 +18,8 @@ package org.activiti.cloud.organization.core.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -31,11 +33,14 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
+@Table(name = "MODELS")
 public class Model {
 
     @Id
     private String id;
     private String name;
+    @ManyToOne
+    private Project project;
     private ModelType type;
     @JsonIgnore
     private String refId;
@@ -83,6 +88,14 @@ public class Model {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public enum ModelType {

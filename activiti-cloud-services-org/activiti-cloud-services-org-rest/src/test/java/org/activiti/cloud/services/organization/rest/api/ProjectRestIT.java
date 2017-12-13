@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.model.Project;
 import org.activiti.cloud.services.organization.config.Application;
+import org.activiti.cloud.services.organization.config.RepositoryRestConfig;
 import org.activiti.cloud.services.organization.jpa.ModelRepository;
 import org.activiti.cloud.services.organization.jpa.ProjectRepository;
 import org.junit.After;
@@ -48,7 +49,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
-public class ProjectRestTestIT {
+public class ProjectRestIT {
 
     private MockMvc mockMvc;
     @Autowired
@@ -85,7 +86,8 @@ public class ProjectRestTestIT {
         assertThat(project).isNotNull();
 
         //then
-        mockMvc.perform(get("/projects"))
+        mockMvc.perform(get("{version}/projects",
+                            RepositoryRestConfig.API_VERSION))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
@@ -104,7 +106,8 @@ public class ProjectRestTestIT {
                                       projectWithModelsName);
 
         // create a project
-        mockMvc.perform(post("/projects")
+        mockMvc.perform(post("{version}/projects",
+                             RepositoryRestConfig.API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(project)))
                 .andDo(print())
@@ -118,7 +121,8 @@ public class ProjectRestTestIT {
                                     Model.ModelType.FORM,
                                     "ref_model_form_id");
 
-        mockMvc.perform(post("/models")
+        mockMvc.perform(post("{version}/models",
+                             RepositoryRestConfig.API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(modelForm)))
                 .andDo(print())
@@ -132,17 +136,19 @@ public class ProjectRestTestIT {
                                        Model.ModelType.PROCESS_MODEL,
                                        "ref_process_model_id");
 
-        mockMvc.perform(post("/models")
+        mockMvc.perform(post("{version}/models",
+                             RepositoryRestConfig.API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
         //when
-        String uriList = "http://localhost/models/" + formModelId + "\n"
-                + "http://localhost/models/" + processModelId;
+        String uriList = "http://localhost" + RepositoryRestConfig.API_VERSION + "/models/" + formModelId + "\n"
+                + "http://localhost" + RepositoryRestConfig.API_VERSION + "/models/" + processModelId;
 
-        mockMvc.perform(put("/projects/{projectId}/models",
+        mockMvc.perform(put("{version}/projects/{projectId}/models",
+                            RepositoryRestConfig.API_VERSION,
                             projectWithModelsId)
                                 .contentType("text/uri-list")
                                 .content(uriList))
@@ -150,7 +156,8 @@ public class ProjectRestTestIT {
                 .andExpect(status().isNoContent());
 
         //then
-        mockMvc.perform(get("/projects/{projectId}/models",
+        mockMvc.perform(get("{version}/projects/{projectId}/models",
+                            RepositoryRestConfig.API_VERSION,
                             projectWithModelsId))
                 .andDo(print())
                 .andExpect(status().isOk())

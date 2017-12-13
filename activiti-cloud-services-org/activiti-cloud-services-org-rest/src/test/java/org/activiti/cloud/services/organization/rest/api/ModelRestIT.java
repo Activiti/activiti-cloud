@@ -19,13 +19,15 @@ package org.activiti.cloud.services.organization.rest.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.services.organization.config.Application;
+import org.activiti.cloud.services.organization.config.RepositoryRestConfig;
 import org.activiti.cloud.services.organization.jpa.ModelRepository;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,6 +38,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,7 +47,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
-public class ModelRestTestIT {
+public class ModelRestIT {
 
     private MockMvc mockMvc;
     @Autowired
@@ -58,6 +61,11 @@ public class ModelRestTestIT {
     public void setUp() {
 
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
+
+    @After
+    public void tearDown() {
+        modelRepository.deleteAllInBatch();
     }
 
     @Test
@@ -82,7 +90,8 @@ public class ModelRestTestIT {
         assertThat(processModel).isNotNull();
 
         //when
-        final ResultActions resultActions = mockMvc.perform(get("/models"))
+        final ResultActions resultActions = mockMvc.perform(get("{version}/models",
+                                                                RepositoryRestConfig.API_VERSION))
                 .andDo(print());
 
         //then
@@ -96,7 +105,6 @@ public class ModelRestTestIT {
     }
 
     @Test
-    @Ignore
     public void createModel() throws Exception {
         //given
         final String formModelId = "form_model_id";
@@ -106,7 +114,11 @@ public class ModelRestTestIT {
                                     Model.ModelType.FORM,
                                     "form_model_refId");
 
-//        mockMvc.perform(post("models"))
-//                .
+        mockMvc.perform(post("{version}/models",
+                             RepositoryRestConfig.API_VERSION)
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(formModel)))
+                .andDo(print())
+                .andExpect(status().isCreated());
     }
 }
