@@ -119,6 +119,7 @@
     <module>activiti-cloud-audit-dependencies</module>
     <module>activiti-cloud-connectors-dependencies</module>
     <module>activiti-cloud-process-model-dependencies</module>
+    <module>activiti-cloud-org-dependencies</module>
   </modules>
 
   <distributionManagement>
@@ -353,6 +354,28 @@
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-process-model-rest</artifactId>
         <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
+
+      <!-- Activiti Cloud Organization -->
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-starter-org</artifactId>
+        <version>${version.activiti.cloud.org}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-org-core</artifactId>
+        <version>${version.activiti.cloud.org}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-org-jpa</artifactId>
+        <version>${version.activiti.cloud.org}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-org-rest</artifactId>
+        <version>${version.activiti.cloud.org}</version>
       </dependency>
 
       <dependency>
