@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization;
+package org.activiti.cloud.services.organization.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
+import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
 
-@SpringBootApplication
-public class Application {
+@Configuration
+public class RepositoryRestConfig extends RepositoryRestConfigurerAdapter {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class,
-                              args);
+    public static final String API_VERSION = "/v1";
+
+    @Override
+    public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
+
+        config.setBasePath(API_VERSION);
     }
 }

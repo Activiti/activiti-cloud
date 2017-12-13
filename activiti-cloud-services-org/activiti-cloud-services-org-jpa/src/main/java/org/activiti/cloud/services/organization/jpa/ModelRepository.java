@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization;
+package org.activiti.cloud.services.organization.jpa;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.activiti.cloud.organization.core.model.Model;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@SpringBootApplication
-public class Application {
-
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class,
-                              args);
-    }
+/**
+ * JPA Repository for {@link Model} entity
+ */
+@RepositoryRestResource(path = "models",
+        collectionResourceRel = "models",
+        itemResourceRel = "models")
+public interface ModelRepository extends JpaRepository<Model, String> {
 }

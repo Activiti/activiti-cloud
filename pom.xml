@@ -20,13 +20,14 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7-201711-EA-SNAPSHOT</version>
+    <version>7-201712-EA-SNAPSHOT</version>
   </parent>
 
+
   <artifactId>activiti-cloud-org-service-parent</artifactId>
-  <version>7-201711-EA-SNAPSHOT</version>
+  <version>7-201712-EA-SNAPSHOT</version>
   <name>Activiti Cloud - Organization Services :: Parent</name>
-  <description>Activiti Cloud Process Model Services Parent</description>
+  <description>Activiti Cloud Organization Services Parent</description>
   <packaging>pom</packaging>
 
   <modules>
