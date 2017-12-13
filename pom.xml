@@ -20,14 +20,18 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7-201712-EA-dev_lucian_1559_cloud_build_org_dependencies-SNAPSHOT</version>
+    <version>7-201712-EA-SNAPSHOT</version>
   </parent>
+
 
   <artifactId>activiti-cloud-org-service-parent</artifactId>
   <version>7-201712-EA-lucian_1559_configurations_activiti_cloud_org_service-SNAPSHOT</version>
   <name>Activiti Cloud - Organization Services :: Parent</name>
   <description>Activiti Cloud Organization Services Parent</description>
   <packaging>pom</packaging>
+  <properties>
+    <version.activiti.cloud.org>7-201712-EA-lucian_1559_configurations_activiti_cloud_org_service-SNAPSHOT</version.activiti.cloud.org>
+  </properties>
 
   <modules>
     <module>activiti-cloud-services-org</module>
