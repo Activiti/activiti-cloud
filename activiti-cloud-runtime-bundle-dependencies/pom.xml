@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7-201712-EA-dev_lucian_1559_cloud_build_org_dependencies-SNAPSHOT</version>
+    <version>7-201712-EA-SNAPSHOT</version>
   </parent>
 
   <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
