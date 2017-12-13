@@ -18,7 +18,6 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-org-core</artifactId>
-      <version>${version.activiti.cloud}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.data</groupId>
