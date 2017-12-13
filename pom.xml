@@ -18,6 +18,7 @@
     <version.activiti.cloud.query>${version.activiti.cloud}</version.activiti.cloud.query>
     <version.activiti.cloud.connectors>${version.activiti.cloud}</version.activiti.cloud.connectors>
     <version.activiti.cloud.process-model>${version.activiti.cloud}</version.activiti.cloud.process-model>
+    <version.activiti.cloud.org>${version.activiti.cloud}</version.activiti.cloud.org>
 
     <!--configuration properties-->
     <jdk.version>1.8</jdk.version>
