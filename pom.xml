@@ -29,9 +29,6 @@
   <name>Activiti Cloud - Organization Services :: Parent</name>
   <description>Activiti Cloud Organization Services Parent</description>
   <packaging>pom</packaging>
-  <properties>
-    <version.activiti.cloud.org>7-201712-EA-lucian_1559_configurations_activiti_cloud_org_service-SNAPSHOT</version.activiti.cloud.org>
-  </properties>
 
   <modules>
     <module>activiti-cloud-services-org</module>
