@@ -7,43 +7,38 @@
     <version>7-201712-EA-dev_lucian_1559_cloud_build_org_dependencies-SNAPSHOT</version>
   </parent>
 
-  <artifactId>activiti-cloud-service-common-dependencies</artifactId>
+  <artifactId>activiti-cloud-org-dependencies</artifactId>
   <packaging>pom</packaging>
 
-  <name>Activiti Cloud Service Common Dependencies - BOM (Bill Of Materials)</name>
-  <description>Activiti Cloud Service Common Dependencies - BOM(Bill Of Materials)</description>
+  <name>Activiti Cloud Organization Dependencies - BOM (Bill Of Materials)</name>
+  <description>Activiti Cloud Organization Dependencies - BOM(Bill Of Materials)</description>
 
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-identity-basic</artifactId>
+        <artifactId>activiti-cloud-org-service-parent</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
+        <artifactId>activiti-cloud-services-org-core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-test</artifactId>
+        <artifactId>activiti-cloud-services-org-jpa</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-monitoring</artifactId>
+        <artifactId>activiti-cloud-services-org-rest</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-tracing</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-logging</artifactId>
+        <artifactId>activiti-cloud-starter-org</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
