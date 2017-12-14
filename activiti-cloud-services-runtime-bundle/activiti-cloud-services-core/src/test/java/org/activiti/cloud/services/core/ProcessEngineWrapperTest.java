@@ -12,9 +12,12 @@ import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
+import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.impl.RuntimeServiceImpl;
+import org.activiti.engine.impl.runtime.ProcessInstanceBuilderImpl;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.ProcessInstanceBuilder;
@@ -75,6 +78,34 @@ public class ProcessEngineWrapperTest {
         when(processInstanceConverter.from(engineInst)).thenReturn(instance);
         when(repositoryService.getProcessDefinition(any())).thenReturn(mock(ProcessDefinition.class));
         assertThat(processEngineWrapper.startProcess(mock(StartProcessInstanceCmd.class))).isEqualTo(instance);
+    }
+
+    @Test
+    public void shouldNotStartProcessWithNoProcessDefinitionKey(){
+        ProcessDefinitionQuery query = mock(ProcessDefinitionQuery.class);
+        when(repositoryService.createProcessDefinitionQuery()).thenReturn(query);
+        when(query.processDefinitionKey(any())).thenReturn(query);
+        StartProcessInstanceCmd cmd = new StartProcessInstanceCmd("processDefKey", null, null, null);
+        assertThatExceptionOfType(ActivitiObjectNotFoundException.class).isThrownBy(() -> processEngineWrapper.startProcess(cmd));
+    }
+
+    @Test
+    public void shouldStartProcessWithProcessDefinitionKey(){
+        when(securityService.canWrite(any())).thenReturn(true);
+        RuntimeServiceImpl runtimeServiceImpl = mock(RuntimeServiceImpl.class);
+        ProcessInstanceBuilderImpl builder = new ProcessInstanceBuilderImpl(runtimeServiceImpl);
+        when(runtimeService.createProcessInstanceBuilder()).thenReturn(builder);
+        org.activiti.engine.runtime.ProcessInstance engineInst = mock(org.activiti.engine.runtime.ProcessInstance.class);
+        when(builder.start()).thenReturn(engineInst);
+        ProcessInstance instance = mock(ProcessInstance.class);
+        when(processInstanceConverter.from(engineInst)).thenReturn(instance);
+        ProcessDefinitionQuery query = mock(ProcessDefinitionQuery.class);
+        when(repositoryService.createProcessDefinitionQuery()).thenReturn(query);
+        when(query.processDefinitionKey(any())).thenReturn(query);
+        when(query.count()).thenReturn(1L);
+        StartProcessInstanceCmd cmd = new StartProcessInstanceCmd("processDefKey", null, null, null);
+        processEngineWrapper.startProcess(cmd);
+        assertThat(builder.getProcessDefinitionKey()).isEqualTo("processDefKey");
     }
 
     @Test

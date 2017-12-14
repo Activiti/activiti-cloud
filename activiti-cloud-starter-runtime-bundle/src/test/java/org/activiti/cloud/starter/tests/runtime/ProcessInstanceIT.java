@@ -104,7 +104,9 @@ public class ProcessInstanceIT {
     @Test
     public void shouldStartProcess() throws Exception {
         //when
-        ResponseEntity<ProcessInstance> entity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<ProcessInstance> entity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                          null,
+                                                                                          "business_key");
 
         //then
         assertThat(entity).isNotNull();
@@ -114,6 +116,25 @@ public class ProcessInstanceIT {
         assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
         assertThat(returnedProcInst.getInitiator()).isNotNull();
         assertThat(returnedProcInst.getInitiator()).isEqualTo(keycloakTestUser);//will only match if using username not id
+        assertThat(returnedProcInst.getBusinessKey()).isEqualTo("business_key");
+    }
+
+    @Test
+    public void shouldStartProcessByKey() throws Exception {
+        //when
+        ResponseEntity<ProcessInstance> entity = processInstanceRestTemplate.startProcessByKey(SIMPLE_PROCESS,
+                                                                                          null,
+                                                                                          "business_key");
+
+        //then
+        assertThat(entity).isNotNull();
+        ProcessInstance returnedProcInst = entity.getBody();
+        assertThat(returnedProcInst).isNotNull();
+        assertThat(returnedProcInst.getId()).isNotNull();
+        assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
+        assertThat(returnedProcInst.getInitiator()).isNotNull();
+        assertThat(returnedProcInst.getInitiator()).isEqualTo(keycloakTestUser);//will only match if using username not id
+        assertThat(returnedProcInst.getBusinessKey()).isEqualTo("business_key");
     }
 
     @Test
