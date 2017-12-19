@@ -95,7 +95,6 @@
     <extra-enforcer-rules.version>1.0-beta-6</extra-enforcer-rules.version>
     <illegal-transitive-dependency-check.version>1.7.4</illegal-transitive-dependency-check.version>
     <directory.maven.plugin.version>0.1</directory.maven.plugin.version>
-    <spring.cloud.contract.maven.plugin>1.1.4.RELEASE</spring.cloud.contract.maven.plugin>
 
 
 
@@ -538,13 +537,16 @@
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-contract-verifier</artifactId>
-        <version>${spring.cloud.contract.maven.plugin}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-contract-wiremock</artifactId>
-        <version>${spring.cloud.contract.maven.plugin}</version>
         <scope>test</scope>
       </dependency>
 
@@ -1005,13 +1007,11 @@
         <plugin>
           <groupId>org.springframework.cloud</groupId>
           <artifactId>spring-cloud-contract-maven-plugin</artifactId>
-          <version>${spring.cloud.contract.maven.plugin}</version>
           <extensions>true</extensions>
           <dependencies>
             <dependency>
               <groupId>org.springframework.cloud</groupId>
               <artifactId>spring-cloud-starter-contract-verifier</artifactId>
-              <version>${spring.cloud.contract.maven.plugin}</version>
             </dependency>
           </dependencies>
         </plugin>
