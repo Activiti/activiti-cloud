@@ -28,7 +28,6 @@
     <spring.boot.version>2.0.0.M7</spring.boot.version>
     <spring.cloud.version>Finchley.M5</spring.cloud.version>
     <spring.cloud.stream.version>Elmhurst.M3</spring.cloud.stream.version>
-    <spring.cloud.contract.version>2.0.0.M5</spring.cloud.contract.version>
 
     <h2.version>1.4.193</h2.version>
 
@@ -96,7 +95,6 @@
     <extra-enforcer-rules.version>1.0-beta-6</extra-enforcer-rules.version>
     <illegal-transitive-dependency-check.version>1.7.4</illegal-transitive-dependency-check.version>
     <directory.maven.plugin.version>0.1</directory.maven.plugin.version>
-    <spring.cloud.contract.maven.plugin.version>2.0.0.M5</spring.cloud.contract.maven.plugin.version>
 
 
 
@@ -539,19 +537,16 @@
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-contract-verifier</artifactId>
-        <version>${spring.cloud.contract.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
-        <version>${spring.cloud.contract.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-contract-wiremock</artifactId>
-        <version>${spring.cloud.contract.version}</version>
         <scope>test</scope>
       </dependency>
 
@@ -1012,13 +1007,11 @@
         <plugin>
           <groupId>org.springframework.cloud</groupId>
           <artifactId>spring-cloud-contract-maven-plugin</artifactId>
-          <version>${spring.cloud.contract.maven.plugin.version}</version>
           <extensions>true</extensions>
           <dependencies>
             <dependency>
               <groupId>org.springframework.cloud</groupId>
               <artifactId>spring-cloud-starter-contract-verifier</artifactId>
-              <version>${spring.cloud.contract.version}</version>
             </dependency>
           </dependencies>
         </plugin>
