@@ -61,18 +61,15 @@ public class ServiceTaskIntegrationResultEventHandler {
 
         if (integrationContext != null) {
             integrationContextService.deleteIntegrationContext(integrationContext);
-            runtimeService.trigger(integrationContext.getExecutionId(),
-                                   integrationResultEvent.getVariables());
 
-            sendAuditMessage(integrationContext);
-        } else {
-            String message = "No task is waiting for integration result with execution id `" +
-                    integrationResultEvent.getExecutionId() +
-                    "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored.";
-            LOGGER.error( message );
-            // This needs to throw an exception so the message goes back to the queue in case of other node can pick it up.
-            throw new IllegalStateException(message);
         }
+
+        if(runtimeService.createExecutionQuery().executionId(integrationResultEvent.getExecutionId()).list().size()>0) {
+            runtimeService.trigger(integrationResultEvent.getExecutionId(),
+                    integrationResultEvent.getVariables());
+        }
+
+        sendAuditMessage(integrationContext);
     }
 
     private void sendAuditMessage(IntegrationContextEntity integrationContext) {

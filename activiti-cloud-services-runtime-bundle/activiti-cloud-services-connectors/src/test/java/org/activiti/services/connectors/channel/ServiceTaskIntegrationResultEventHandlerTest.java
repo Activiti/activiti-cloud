@@ -25,8 +25,9 @@ import org.activiti.cloud.services.events.integration.IntegrationResultReceivedE
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
+import org.activiti.engine.runtime.Execution;
+import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.services.connectors.model.IntegrationResultEvent;
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -36,9 +37,14 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ServiceTaskIntegrationResultEventHandlerTest {
@@ -72,11 +78,17 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Captor
     private ArgumentCaptor<Message<IntegrationResultReceivedEvent[]>> messageCaptor;
 
+    @Mock
+    private ExecutionQuery executionQuery;
+
     @Before
     public void setUp() throws Exception {
         initMocks(this);
         when(channels.auditProducer()).thenReturn(auditChannel);
         when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
+        when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
+        when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
+        when(executionQuery.list()).thenReturn(Collections.emptyList());
     }
 
     @Test
@@ -88,12 +100,11 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContext.setProcessInstanceId(PROC_INST_ID);
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
 
-        given(integrationContextService.findIntegrationContextByExecutionId(EXECUTION_ID)).willReturn(integrationContext);
+        given(integrationContextService.findIntegrationContextByExecutionId(EXECUTION_ID))
+                .willReturn(integrationContext);
+        given(executionQuery.list()).willReturn(Collections.singletonList(mock(Execution.class)));
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
-
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
-        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
                                                                                    variables);
@@ -141,21 +152,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         assertThat(integrationResultReceivedEvent.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
     }
 
-    @Test
-    public void receiveShouldThrowAnExceptionWhenNoRelatedIntegrationContextIsFound() throws Exception {
-        //given
-        String executionId = "execId";
-
-        given(integrationContextService.findIntegrationContextByExecutionId(executionId)).willReturn(null);
-        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(executionId,
-                                                                                   null);
-
-        //then
-        Assertions.assertThatExceptionOfType(IllegalStateException.class).isThrownBy(
-                //when
-                () -> handler.receive(integrationResultEvent)
-        ).withMessageContaining("No task is waiting for integration result with execution id");
-    }
 
     @Test
     public void retrieveShouldNotSentAuditEventWhenIntegrationAuditEventsAreDisabled() throws Exception {
