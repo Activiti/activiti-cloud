@@ -33,6 +33,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @EnableBinding(ProcessEngineIntegrationChannels.class)
 public class ServiceTaskIntegrationResultEventHandler {
@@ -57,11 +59,13 @@ public class ServiceTaskIntegrationResultEventHandler {
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
     public synchronized void receive(IntegrationResultEvent integrationResultEvent) {
-        IntegrationContextEntity integrationContext = integrationContextService.findIntegrationContextByExecutionId(integrationResultEvent.getExecutionId());
+        List<IntegrationContextEntity> integrationContexts = integrationContextService.findIntegrationContextByExecutionId(integrationResultEvent.getExecutionId());
 
-        if (integrationContext != null) {
-            integrationContextService.deleteIntegrationContext(integrationContext);
-
+        for(IntegrationContextEntity integrationContext:integrationContexts){
+            if (integrationContext != null) {
+                integrationContextService.deleteIntegrationContext(integrationContext);
+            }
+            sendAuditMessage(integrationContext);
         }
 
         if(runtimeService.createExecutionQuery().executionId(integrationResultEvent.getExecutionId()).list().size()>0) {
@@ -69,7 +73,7 @@ public class ServiceTaskIntegrationResultEventHandler {
                     integrationResultEvent.getVariables());
         }
 
-        sendAuditMessage(integrationContext);
+
     }
 
     private void sendAuditMessage(IntegrationContextEntity integrationContext) {

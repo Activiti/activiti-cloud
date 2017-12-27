@@ -16,6 +16,7 @@
 
 package org.activiti.services.connectors.channel;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -101,7 +102,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
 
         given(integrationContextService.findIntegrationContextByExecutionId(EXECUTION_ID))
-                .willReturn(integrationContext);
+                .willReturn(Arrays.asList(integrationContext));
         given(executionQuery.list()).willReturn(Collections.singletonList(mock(Execution.class)));
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
@@ -127,7 +128,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContext.setProcessInstanceId(PROC_INST_ID);
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
 
-        given(integrationContextService.findIntegrationContextByExecutionId(EXECUTION_ID)).willReturn(integrationContext);
+        given(integrationContextService.findIntegrationContextByExecutionId(EXECUTION_ID)).willReturn(Arrays.asList(integrationContext));
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
 
@@ -161,7 +162,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         IntegrationContextEntityImpl integrationContext = new IntegrationContextEntityImpl();
         String executionId = "execId";
 
-        given(integrationContextService.findIntegrationContextByExecutionId(executionId)).willReturn(integrationContext);
+        given(integrationContextService.findIntegrationContextByExecutionId(executionId)).willReturn(Arrays.asList(integrationContext));
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
 
