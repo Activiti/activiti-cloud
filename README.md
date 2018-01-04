@@ -21,6 +21,7 @@ You can build this service from source using Git & Maven or you can just run our
 > docker run -p 8182:8182 -d --name activiti-cloud-query activiti/activiti-cloud-query:latest
 
 ## Environemnt Variables
+```
 server.port=${ACT_QUERY_PORT:8182}
 spring.application.name=${ACT_QUERY_APP_NAME:query}
 spring.cloud.stream.bindings.producer.destination=${ACT_QUERY_PRODUCER_DEST:engineEvents}
@@ -37,10 +38,11 @@ keycloak.ssl-required=${ACT_KEYCLOAK_SSL_REQUIRED:none}
 keycloak.security-constraints[0].authRoles[0]=${ACT_KEYCLOAK_ROLES:user}
 keycloak.security-constraints[0].securityCollections[0].patterns[0]=${ACT_KEYCLOAK_PATTERNS:/*}
 keycloak.principal-attribute=${ACT_KEYCLOAK_PRINCIPAL_ATTRIBUTE:preferred-username}
-keycloakadminclientapp=${ACT_KEYCLOAK_CLIENT_APP:admin-cli}
-keycloakclientuser=${ACT_KEYCLOAK_CLIENT_USER:client}
-keycloakclientpassword=${ACT_KEYCLOAK_CLIENT_PASSWORD:client}
+activiti.keycloak.admin-client-app=${ACT_KEYCLOAK_CLIENT_APP:admin-cli}
+activiti.keycloak.client-user=${ACT_KEYCLOAK_CLIENT_USER:client}
+activiti.keycloak.client-password=${ACT_KEYCLOAK_CLIENT_PASSWORD:client}
 spring.rabbitmq.host=${ACT_RABBITMQ_HOST:rabbitmq}
 eureka.client.serviceUrl.defaultZone=${ACT_EUREKA_URL:http://activiti-cloud-registry:8761/eureka/}
 eureka.instance.hostname=${ACT_QUERY_HOST:activiti-cloud-query}
 eureka.client.enabled=${ACT_QUERY_EUREKA_CLIENT_ENABLED:true}
+```
