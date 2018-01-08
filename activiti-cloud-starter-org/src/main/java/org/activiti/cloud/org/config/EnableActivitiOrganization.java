@@ -14,31 +14,28 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.config;
+package org.activiti.cloud.org.config;
 
-import org.springframework.boot.SpringApplication;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Bean;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-@EnableWebMvc
-@ComponentScan("org.activiti")
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @EnableAutoConfiguration
+@ComponentScan("org.activiti")
 @EnableJpaRepositories("org.activiti.cloud.services.organization.jpa")
 @EntityScan("org.activiti.cloud.organization.core.model")
-public class Application {
+@Inherited
+@EnableDiscoveryClient
+public @interface EnableActivitiOrganization {
 
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class,
-                              args);
-    }
 }

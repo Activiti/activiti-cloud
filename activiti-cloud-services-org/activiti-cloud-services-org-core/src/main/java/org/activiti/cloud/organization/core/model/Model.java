@@ -19,11 +19,13 @@ package org.activiti.cloud.organization.core.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import org.activiti.cloud.organization.core.rest.resource.EntityWithRestResource;
+import org.activiti.cloud.organization.core.rest.resource.RestResource;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
@@ -31,19 +33,28 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
  * Model model entity
  */
 @Entity
+@EntityWithRestResource
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-@Table(name = "MODELS")
 public class Model {
 
     @Id
     private String id;
-    private String name;
+
     @ManyToOne
     private Project project;
+
     private ModelType type;
-    @JsonIgnore
+
     private String refId;
+
+    @Transient
+    @JsonUnwrapped
+    @RestResource(
+            path = "/v1/{#name}/{#id}",
+            resourceIdField = "refId",
+            resourceKeyField = "type")
+    private ModelReference data;
 
     public Model() { // for JPA
     }
@@ -53,9 +64,10 @@ public class Model {
                  ModelType type,
                  String refId) {
         this.id = id;
-        this.name = name;
         this.type = type;
         this.refId = refId;
+        this.data = new ModelReference(refId,
+                                       name);
     }
 
     public String getId() {
@@ -82,12 +94,12 @@ public class Model {
         this.refId = refId;
     }
 
-    public String getName() {
-        return name;
+    public ModelReference getData() {
+        return data;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setData(ModelReference data) {
+        this.data = data;
     }
 
     public Project getProject() {

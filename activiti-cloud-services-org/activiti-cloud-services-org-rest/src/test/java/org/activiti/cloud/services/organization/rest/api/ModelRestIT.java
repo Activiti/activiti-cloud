@@ -18,9 +18,11 @@ package org.activiti.cloud.services.organization.rest.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.Model;
+import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.services.organization.config.Application;
 import org.activiti.cloud.services.organization.config.RepositoryRestConfig;
 import org.activiti.cloud.services.organization.jpa.ModelRepository;
+import org.activiti.cloud.services.organization.mock.MockModelRestServiceServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +34,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.*;
@@ -50,6 +53,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 public class ModelRestIT {
 
     private MockMvc mockMvc;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Autowired
     private WebApplicationContext webApplicationContext;
     @Autowired
@@ -70,6 +77,15 @@ public class ModelRestIT {
 
     @Test
     public void getModels() throws Exception {
+        final ModelReference expectedFormModel = new ModelReference("form_model_refId",
+                                                                    "Form Model");
+        final ModelReference expectedProcessModel = new ModelReference("process_model_refId",
+                                                                       "Process Model");
+
+        MockModelRestServiceServer.createServer(restTemplate)
+                .expectFormModelRequest(expectedFormModel)
+                .expectProcessModelRequest(expectedProcessModel);
+
         //given
         final String formModelId = "form_model_id";
         final String formModelName = "Form Model";
@@ -106,6 +122,9 @@ public class ModelRestIT {
 
     @Test
     public void createModel() throws Exception {
+        MockModelRestServiceServer.createServer(restTemplate)
+                .expectFormModelCreation();
+
         //given
         final String formModelId = "form_model_id";
         final String formModelName = "Form Model";

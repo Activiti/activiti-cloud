@@ -18,11 +18,13 @@ package org.activiti.cloud.services.organization.rest.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.Model;
+import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.model.Project;
 import org.activiti.cloud.services.organization.config.Application;
 import org.activiti.cloud.services.organization.config.RepositoryRestConfig;
 import org.activiti.cloud.services.organization.jpa.ModelRepository;
 import org.activiti.cloud.services.organization.jpa.ProjectRepository;
+import org.activiti.cloud.services.organization.mock.MockModelRestServiceServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.*;
@@ -52,6 +55,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 public class ProjectRestIT {
 
     private MockMvc mockMvc;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Autowired
     private WebApplicationContext webApplicationContext;
     @Autowired
@@ -98,6 +105,13 @@ public class ProjectRestIT {
 
     @Test
     public void createProjectsWithModels() throws Exception {
+        MockModelRestServiceServer.createServer(restTemplate)
+                .expectFormModelCreation()
+                .expectProcessModelCreation()
+                .expectFormModelRequest(new ModelReference("ref_model_form_id",
+                                                           "Form Model"))
+                .expectProcessModelRequest(new ModelReference("ref_process_model_id",
+                                                              "Process Model"));
 
         //given
         final String projectWithModelsId = "project_with_models_id";

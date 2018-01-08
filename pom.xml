@@ -30,6 +30,10 @@
   <description>Activiti Cloud Organization Services Parent</description>
   <packaging>pom</packaging>
 
+  <properties>
+    <version.activiti.cloud.org>${project.version}</version.activiti.cloud.org>
+  </properties>
+
   <modules>
     <module>activiti-cloud-services-org</module>
     <module>activiti-cloud-starter-org</module>
