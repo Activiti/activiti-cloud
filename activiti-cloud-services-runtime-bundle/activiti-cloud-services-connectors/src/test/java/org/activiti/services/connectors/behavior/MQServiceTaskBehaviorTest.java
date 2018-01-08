@@ -18,7 +18,6 @@ package org.activiti.services.connectors.behavior;
 
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.listeners.IntegrationEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
@@ -26,6 +25,7 @@ import org.activiti.services.connectors.model.IntegrationRequestEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -52,8 +52,6 @@ public class MQServiceTaskBehaviorTest {
     @Mock
     private IntegrationContextManager integrationContextManager;
 
-    @Mock
-    private IntegrationEventsAggregator eventsAggregator;
 
     @Mock
     private RuntimeBundleProperties runtimeBundleProperties;
@@ -83,22 +81,16 @@ public class MQServiceTaskBehaviorTest {
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId("entityId");
         given(integrationContextManager.create()).willReturn(entity);
+        doNothing().when(behavior).registerTransactionSynchronization(ArgumentMatchers.any());
 
         //when
         behavior.execute(execution);
 
         //then
-        verify(integrationContextManager).insert(entity);
+        verify(behavior).registerTransactionSynchronization(ArgumentMatchers.any());
         assertThat(entity.getExecutionId()).isEqualTo(EXECUTION_ID);
         assertThat(entity.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
         assertThat(entity.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
-
-        verify(eventsAggregator).add(integrationRequestCaptor.capture());
-        Message<IntegrationRequestEvent> message = integrationRequestCaptor.getValue();
-        assertThat(message.getPayload().getExecutionId()).isEqualTo(EXECUTION_ID);
-        assertThat(message.getPayload().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
-        assertThat(message.getPayload().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
-        assertThat(message.getHeaders().get("connectorType")).isEqualTo(CONNECTOR_TYPE);
 
     }
 
