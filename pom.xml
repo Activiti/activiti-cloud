@@ -39,7 +39,7 @@
     <docker.rabbitmq.start.timeout>15000</docker.rabbitmq.start.timeout>
 
     <!-- GRAPHQL Java Lib + Schema Generation -->
-    <graphql.jpa-query.version>0.3.0</graphql.jpa-query.version>
+    <graphql.jpa-query.version>0.3.1</graphql.jpa-query.version>
 
     <!-- using hibernate and JPA for the services -->
 
