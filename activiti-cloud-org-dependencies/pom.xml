@@ -7,38 +7,38 @@
     <version>7-201712-EA</version>
   </parent>
 
-  <artifactId>activiti-cloud-audit-dependencies</artifactId>
+  <artifactId>activiti-cloud-org-dependencies</artifactId>
   <packaging>pom</packaging>
 
-  <name>Activiti Cloud Audit Dependencies - BOM (Bill Of Materials)</name>
-  <description>Activiti Cloud Audit Dependencies - BOM(Bill Of Materials)</description>
+  <name>Activiti Cloud Organization Dependencies - BOM (Bill Of Materials)</name>
+  <description>Activiti Cloud Organization Dependencies - BOM(Bill Of Materials)</description>
 
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-audit-parent</artifactId>
+        <artifactId>activiti-cloud-org-service-parent</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-audit-jpa</artifactId>
+        <artifactId>activiti-cloud-services-org-core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-audit-mongo</artifactId>
+        <artifactId>activiti-cloud-services-org-jpa</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-starter-audit</artifactId>
+        <artifactId>activiti-cloud-services-org-rest</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
+        <artifactId>activiti-cloud-starter-org</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

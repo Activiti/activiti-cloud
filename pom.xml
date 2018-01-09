@@ -5,7 +5,7 @@
   <description>Activiti Cloud (Parent)</description>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-parent</artifactId>
-  <version>7-201711-EA</version>
+  <version>7-201712-EA</version>
 
   <packaging>pom</packaging>
 
@@ -17,15 +17,17 @@
     <version.activiti.cloud.audit>${version.activiti.cloud}</version.activiti.cloud.audit>
     <version.activiti.cloud.query>${version.activiti.cloud}</version.activiti.cloud.query>
     <version.activiti.cloud.connectors>${version.activiti.cloud}</version.activiti.cloud.connectors>
+    <version.activiti.cloud.process-model>${version.activiti.cloud}</version.activiti.cloud.process-model>
+    <version.activiti.cloud.org>${version.activiti.cloud}</version.activiti.cloud.org>
 
     <!--configuration properties-->
     <jdk.version>1.8</jdk.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Spring Boot / Cloud / Stream deps -->
-    <spring.boot.version>2.0.0.M6</spring.boot.version>
-    <spring.cloud.version>Finchley.M4</spring.cloud.version>
-    <spring.cloud.stream.version>Ditmars.RELEASE</spring.cloud.stream.version>
+    <spring.boot.version>2.0.0.M7</spring.boot.version>
+    <spring.cloud.version>Finchley.M5</spring.cloud.version>
+    <spring.cloud.stream.version>Elmhurst.M3</spring.cloud.stream.version>
 
     <h2.version>1.4.193</h2.version>
 
@@ -71,7 +73,7 @@
      https://github.com/keycloak/keycloak/pull/4279
      -->
     <keycloak.snapshot.version>3.4.0.CR1-SNAPSHOT</keycloak.snapshot.version>
-    <keycloak.version>3.3.0.CR2</keycloak.version>
+    <keycloak.version>3.4.0.Final</keycloak.version>
     <resteasy-client.version>3.0.21.Final</resteasy-client.version>
 
     <!-- plugins -->
@@ -95,6 +97,7 @@
     <directory.maven.plugin.version>0.1</directory.maven.plugin.version>
 
 
+
     <!-- configuration properties for tests-->
     <junit.version>4.12</junit.version>
     <assertj.version>3.8.0</assertj.version>
@@ -115,6 +118,8 @@
     <module>activiti-cloud-query-dependencies</module>
     <module>activiti-cloud-audit-dependencies</module>
     <module>activiti-cloud-connectors-dependencies</module>
+    <module>activiti-cloud-process-model-dependencies</module>
+    <module>activiti-cloud-org-dependencies</module>
   </modules>
 
   <distributionManagement>
@@ -247,6 +252,11 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-logging</artifactId>
+        <version>${version.activiti.cloud.service-common}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-security-policies</artifactId>
         <version>${version.activiti.cloud.runtime-bundle}</version>
       </dependency>
@@ -322,6 +332,50 @@
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-connector</artifactId>
         <version>${version.activiti.cloud.connectors}</version>
+      </dependency>
+
+      <!-- Activiti Cloud Process Model -->
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-starter-process-model</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-process-model-core</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-process-model-jpa</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-process-model-rest</artifactId>
+        <version>${version.activiti.cloud.process-model}</version>
+      </dependency>
+
+      <!-- Activiti Cloud Organization -->
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-starter-org</artifactId>
+        <version>${version.activiti.cloud.org}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-org-core</artifactId>
+        <version>${version.activiti.cloud.org}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-org-jpa</artifactId>
+        <version>${version.activiti.cloud.org}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-org-rest</artifactId>
+        <version>${version.activiti.cloud.org}</version>
       </dependency>
 
       <dependency>
@@ -479,6 +533,7 @@
         <artifactId>h2</artifactId>
         <version>${h2.version}</version>
       </dependency>
+
     </dependencies>
   </dependencyManagement>
 
@@ -617,6 +672,53 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <!-- 
+          This plugin's configuration is used to store Eclipse m2e settings only.
+          It has no influence on the Maven build itself. 
+        -->  
+        <plugin>  
+          <groupId>org.eclipse.m2e</groupId>  
+          <artifactId>lifecycle-mapping</artifactId>  
+          <version>1.0.0</version>  
+          <configuration>  
+            <lifecycleMappingMetadata>  
+              <pluginExecutions>  
+                <pluginExecution>  
+                  <pluginExecutionFilter>  
+                    <groupId>org.assertj</groupId>  
+                    <artifactId>  
+                      assertj-assertions-generator-maven-plugin  
+                    </artifactId>  
+                    <versionRange>[2.0.0,)</versionRange>  
+                    <goals>  
+                      <goal>generate-assertions</goal>  
+                    </goals>  
+                  </pluginExecutionFilter>  
+                  <action>  
+                    <execute> 
+                      <runOnIncremental>true</runOnIncremental> 
+                      <runOnConfiguration>true</runOnConfiguration> 
+                    </execute> 
+                  </action>  
+                </pluginExecution>  
+                <pluginExecution>  
+                  <pluginExecutionFilter>  
+                    <groupId>org.commonjava.maven.plugins</groupId>  
+                    <artifactId>directory-maven-plugin</artifactId>  
+                    <versionRange>[0.1,)</versionRange>  
+                    <goals>  
+                      <goal>highest-basedir</goal>  
+                    </goals>  
+                  </pluginExecutionFilter>  
+                  <action> 
+                    <ignore />  
+                  </action>  
+                </pluginExecution>  
+              </pluginExecutions>  
+            </lifecycleMappingMetadata>  
+          </configuration>  
+        </plugin>
+                
         <plugin>
           <groupId>com.mysema.maven</groupId>
           <artifactId>apt-maven-plugin</artifactId>
@@ -932,6 +1034,11 @@
               </configuration>
             </execution>
           </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-contract-maven-plugin</artifactId>
+          <extensions>true</extensions>
         </plugin>
       </plugins>
     </pluginManagement>
