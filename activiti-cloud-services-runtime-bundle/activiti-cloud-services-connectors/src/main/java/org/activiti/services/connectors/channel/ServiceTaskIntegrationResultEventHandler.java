@@ -62,7 +62,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         List<IntegrationContextEntity> integrationContexts = integrationContextService.findIntegrationContextByExecutionId(integrationResultEvent.getExecutionId());
 
         if(integrationContexts==null || integrationContexts.size()==0){
-            LOGGER.warn("No integration contexts found for execution Id "+integrationResultEvent.getExecutionId());
+            LOGGER.debug("No integration contexts found in this RB for execution Id "+integrationResultEvent.getExecutionId());
         }
 
         for(IntegrationContextEntity integrationContext:integrationContexts){
@@ -76,10 +76,10 @@ public class ServiceTaskIntegrationResultEventHandler {
             runtimeService.trigger(integrationResultEvent.getExecutionId(),
                     integrationResultEvent.getVariables());
         } else{
-            String message = "No task is waiting for integration result with execution id `" +
+            String message = "No task is in this RB is waiting for integration result with execution id `" +
                                         integrationResultEvent.getExecutionId() +
                                         "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored.";
-                        LOGGER.warn( message );
+                        LOGGER.debug( message );
         }
 
 
