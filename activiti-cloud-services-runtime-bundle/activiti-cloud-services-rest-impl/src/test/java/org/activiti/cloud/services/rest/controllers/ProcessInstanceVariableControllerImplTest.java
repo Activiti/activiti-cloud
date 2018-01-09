@@ -18,7 +18,7 @@ package org.activiti.cloud.services.rest.controllers;
 
 import java.util.HashMap;
 
-import org.activiti.cloud.services.rest.api.resources.assembler.ProcessVariableResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariablesResourceAssembler;
 import org.activiti.engine.RuntimeService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +54,7 @@ public class ProcessInstanceVariableControllerImplTest {
     @MockBean
     private RuntimeService runtimeService;
     @MockBean
-    private ProcessVariableResourceAssembler variableResourceAssembler;
+    private ProcessInstanceVariablesResourceAssembler variableResourceAssembler;
 
     @Test
     public void getVariables() throws Exception {

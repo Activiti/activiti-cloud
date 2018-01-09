@@ -17,7 +17,7 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.cloud.services.rest.api.resources.assembler.ProcessDefinitionMetaResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaResourceAssembler;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
 import org.activiti.engine.repository.ProcessDefinitionQuery;

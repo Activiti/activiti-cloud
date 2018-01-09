@@ -29,7 +29,7 @@ import org.activiti.cloud.services.api.model.converter.ProcessDefinitionConverte
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.core.pageable.PageableRepositoryService;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionMetaController;
-import org.activiti.cloud.services.rest.api.resources.assembler.ProcessDefinitionResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
 import org.activiti.engine.repository.ProcessDefinitionQuery;

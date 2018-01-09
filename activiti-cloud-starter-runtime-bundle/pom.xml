@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
-    <version>7-201711-EA</version>
+    <version>7-201712-EA</version>
   </parent>
 
   <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
@@ -32,6 +32,10 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-tracing</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-logging</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

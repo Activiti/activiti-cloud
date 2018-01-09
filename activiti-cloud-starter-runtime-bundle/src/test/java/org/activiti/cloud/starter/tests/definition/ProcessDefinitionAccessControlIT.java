@@ -66,7 +66,7 @@ public class ProcessDefinitionAccessControlIT {
                 "SimpleProcess",
                 "ProcessWithBoundarySignal");
 
-        keycloakSecurityContextClientRequestInterceptor.setKeycloaktestuser("hruser");
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
         //but hruser should see everything
         entity = getProcessDefinitions();

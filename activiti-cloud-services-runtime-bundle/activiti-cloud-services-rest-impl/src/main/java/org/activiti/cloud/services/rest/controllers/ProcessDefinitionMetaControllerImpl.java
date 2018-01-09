@@ -17,7 +17,7 @@ import org.activiti.cloud.services.api.model.ProcessDefinitionUserTask;
 import org.activiti.cloud.services.api.model.ProcessDefinitionVariable;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionMetaController;
 import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionMetaResource;
-import org.activiti.cloud.services.rest.api.resources.assembler.ProcessDefinitionMetaResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.springframework.beans.factory.annotation.Autowired;

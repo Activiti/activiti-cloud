@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.rest.api.resources.assembler;
+package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.cloud.services.api.model.TaskVariables;
-import org.activiti.cloud.services.rest.api.HomeController;
-import org.activiti.cloud.services.rest.api.TaskController;
-import org.activiti.cloud.services.rest.api.TaskVariableController;
 import org.activiti.cloud.services.rest.api.resources.VariablesResource;
+import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
+import org.activiti.cloud.services.rest.controllers.TaskControllerImpl;
+import org.activiti.cloud.services.rest.controllers.TaskVariableControllerImpl;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.stereotype.Component;
+
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Component
-public class TaskVariableResourceAssembler extends ResourceAssemblerSupport<TaskVariables, VariablesResource> {
+public class TaskVariablesResourceAssembler extends ResourceAssemblerSupport<TaskVariables, VariablesResource> {
 
-    public TaskVariableResourceAssembler() {
-        super(TaskVariableController.class,
+    public TaskVariablesResourceAssembler() {
+        super(TaskVariableControllerImpl.class,
               VariablesResource.class);
     }
 
@@ -40,12 +40,12 @@ public class TaskVariableResourceAssembler extends ResourceAssemblerSupport<Task
     public VariablesResource toResource(TaskVariables taskVariables) {
         Link selfRel;
         if (TaskVariables.TaskVariableScope.GLOBAL.equals(taskVariables.getScope())) {
-            selfRel = linkTo(methodOn(TaskVariableController.class).getVariables(taskVariables.getTaskId())).withSelfRel();
+            selfRel = linkTo(methodOn(TaskVariableControllerImpl.class).getVariables(taskVariables.getTaskId())).withSelfRel();
         } else {
-            selfRel = linkTo(methodOn(TaskVariableController.class).getVariablesLocal(taskVariables.getTaskId())).withSelfRel();
+            selfRel = linkTo(methodOn(TaskVariableControllerImpl.class).getVariablesLocal(taskVariables.getTaskId())).withSelfRel();
         }
-        Link taskRel = ControllerLinkBuilder.linkTo(methodOn(TaskController.class).getTaskById(taskVariables.getTaskId())).withRel("task");
-        Link homeLink = linkTo(HomeController.class).withRel("home");
+        Link taskRel = linkTo(methodOn(TaskControllerImpl.class).getTaskById(taskVariables.getTaskId())).withRel("task");
+        Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
         return new VariablesResource(taskVariables.getVariables(),
                                      selfRel,
                                      taskRel,

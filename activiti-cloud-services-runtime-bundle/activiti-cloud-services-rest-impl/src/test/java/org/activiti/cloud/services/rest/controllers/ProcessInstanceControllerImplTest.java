@@ -30,7 +30,7 @@ import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
-import org.activiti.cloud.services.rest.api.resources.assembler.ProcessInstanceResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.junit.Test;

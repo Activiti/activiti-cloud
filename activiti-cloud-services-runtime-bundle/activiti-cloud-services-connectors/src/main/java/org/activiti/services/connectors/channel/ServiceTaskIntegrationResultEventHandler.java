@@ -33,6 +33,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @EnableBinding(ProcessEngineIntegrationChannels.class)
 public class ServiceTaskIntegrationResultEventHandler {
@@ -57,22 +59,30 @@ public class ServiceTaskIntegrationResultEventHandler {
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
     public synchronized void receive(IntegrationResultEvent integrationResultEvent) {
-        IntegrationContextEntity integrationContext = integrationContextService.findIntegrationContextByExecutionId(integrationResultEvent.getExecutionId());
+        List<IntegrationContextEntity> integrationContexts = integrationContextService.findIntegrationContextByExecutionId(integrationResultEvent.getExecutionId());
 
-        if (integrationContext != null) {
-            integrationContextService.deleteIntegrationContext(integrationContext);
-            runtimeService.trigger(integrationContext.getExecutionId(),
-                                   integrationResultEvent.getVariables());
-
-            sendAuditMessage(integrationContext);
-        } else {
-            String message = "No task is waiting for integration result with execution id `" +
-                    integrationResultEvent.getExecutionId() +
-                    "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored.";
-            LOGGER.error( message );
-            // This needs to throw an exception so the message goes back to the queue in case of other node can pick it up.
-            throw new IllegalStateException(message);
+        if(integrationContexts==null || integrationContexts.size()==0){
+            LOGGER.debug("No integration contexts found in this RB for execution Id "+integrationResultEvent.getExecutionId());
         }
+
+        for(IntegrationContextEntity integrationContext:integrationContexts){
+            if (integrationContext != null) {
+                integrationContextService.deleteIntegrationContext(integrationContext);
+            }
+            sendAuditMessage(integrationContext);
+        }
+
+        if(runtimeService.createExecutionQuery().executionId(integrationResultEvent.getExecutionId()).list().size()>0) {
+            runtimeService.trigger(integrationResultEvent.getExecutionId(),
+                    integrationResultEvent.getVariables());
+        } else{
+            String message = "No task is in this RB is waiting for integration result with execution id `" +
+                                        integrationResultEvent.getExecutionId() +
+                                        "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored.";
+                        LOGGER.debug( message );
+        }
+
+
     }
 
     private void sendAuditMessage(IntegrationContextEntity integrationContext) {
