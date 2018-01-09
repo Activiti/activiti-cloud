@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-connectors-parent</artifactId>
-    <version>7-201711-EA</version>
+    <version>7-201712-EA</version>
   </parent>
 
   <artifactId>activiti-cloud-starter-connector</artifactId>
@@ -14,6 +14,10 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-monitoring</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
