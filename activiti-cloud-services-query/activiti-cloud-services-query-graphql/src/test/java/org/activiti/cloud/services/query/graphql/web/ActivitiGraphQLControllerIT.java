@@ -66,7 +66,7 @@ public class ActivitiGraphQLControllerIT {
             .isEqualTo(entity.getStatusCode());
 
         Result result = entity.getBody();
-        
+
         assertThat(result).isNotNull();
         assertThat(result.getErrors().isEmpty())
             .describedAs(result.getErrors().toString())
@@ -74,7 +74,7 @@ public class ActivitiGraphQLControllerIT {
 
         assertThat("{Tasks={select=[{id=1, assignee=assignee, priority=Normal}]}}")
             .isEqualTo(result.getData().toString());
-        
+
     }
 
     @Test
@@ -99,13 +99,13 @@ public class ActivitiGraphQLControllerIT {
        // @formatter:on
 
         ResponseEntity<Result> entity = rest.postForEntity("/graphql", new HttpEntity<>(query), Result.class);
-        
+
         assertThat(HttpStatus.OK)
             .describedAs(entity.toString())
             .isEqualTo(entity.getStatusCode());
 
         Result result = entity.getBody();
-        
+
         assertThat(result).isNotNull();
         assertThat(result.getErrors().isEmpty())
             .describedAs(result.getErrors().toString())
@@ -119,7 +119,7 @@ public class ActivitiGraphQLControllerIT {
 
         HashMap<String, Object> variables = new HashMap<>();
         variables.put("name", TASK_NAME);
-        
+
         query.setVariables(variables);
 
         ResponseEntity<Result> entity = rest.postForEntity("/graphql", new HttpEntity<>(query), Result.class);
@@ -129,12 +129,12 @@ public class ActivitiGraphQLControllerIT {
             .isEqualTo(entity.getStatusCode());
 
         Result result = entity.getBody();
-        
+
         assertThat(result).isNotNull();
         assertThat(result.getErrors().isEmpty())
             .describedAs(result.getErrors().toString())
             .isTrue();
-        
+
         assertThat("{Tasks={select=[{id=1, assignee=assignee, priority=Normal}]}}")
             .isEqualTo(result.getData().toString());
     }
@@ -186,5 +186,10 @@ class Result implements ExecutionResult {
     @Override
     public Map<Object, Object> getExtensions() {
         return extensions;
+    }
+
+    @Override
+    public Map<String, Object> toSpecification() {
+        return null;
     }
 }

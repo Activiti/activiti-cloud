@@ -35,30 +35,30 @@ import org.springframework.test.context.junit4.SpringRunner;
     webEnvironment = WebEnvironment.NONE
 )
 public class EnableActivitiGraphQLQueryServiceTest {
-    
-    @Autowired(required=false)
+
+    @Autowired
     private ActivitiGraphQLSchemaProperties graphQLProperties;
 
-    @Autowired(required=false)
+    @Autowired
     private GraphQLExecutor graphQLExecutor;
 
-    @Autowired(required=false)
+    @Autowired
     private GraphQLSchemaBuilder graphQLSchemaBuilder;
 
     @SpringBootApplication
     @EnableActivitiGraphQLQueryService
     static class Application {
     }
-    
+
     @Test
     public void contextIsConfigured() {
         assertThat(graphQLExecutor).isInstanceOf(GraphQLJpaExecutor.class);
         assertThat(graphQLSchemaBuilder).isInstanceOf(GraphQLJpaSchemaBuilder.class);
         assertThat(graphQLProperties).isNotNull();
-        
-        assertThat(graphQLProperties.getName()).isEqualTo("ActivitiGraphQLSchema");
+
+        assertThat(graphQLProperties.getName()).isEqualTo("Query");
         assertThat(graphQLProperties.getPath()).isEqualTo("/graphql");
         assertThat(graphQLProperties.isEnabled()).isEqualTo(true);
     }
-    
+
 }
