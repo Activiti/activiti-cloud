@@ -22,11 +22,11 @@ import org.activiti.cloud.services.audit.events.ProcessCompletedEventEntity;
 import org.activiti.cloud.services.audit.events.ProcessStartedEventEntity;
 import org.activiti.cloud.services.audit.events.SequenceFlowTakenEventEntity;
 import org.activiti.cloud.services.audit.events.TaskAssignedEventEntity;
+import org.activiti.cloud.services.audit.events.TaskCompletedEventEntity;
 import org.activiti.cloud.services.audit.events.TaskCreatedEventEntity;
 import org.activiti.cloud.services.audit.events.VariableCreatedEventEntity;
-import org.activiti.cloud.services.audit.events.VariableUpdatedEventEntity;
-import org.activiti.cloud.services.audit.events.TaskCompletedEventEntity;
 import org.activiti.cloud.services.audit.events.VariableDeletedEventEntity;
+import org.activiti.cloud.services.audit.events.VariableUpdatedEventEntity;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
@@ -35,10 +35,12 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapt
 @Configuration
 public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
 
+    public static final String API_VERSION = "/v1";
+
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
 
-        config.setBasePath("/v1");
+        config.setBasePath(API_VERSION);
         config.setRepositoryDetectionStrategy(RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
 
         config.exposeIdsFor(ActivityCompletedEventEntity.class);
