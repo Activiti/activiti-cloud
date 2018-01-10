@@ -58,7 +58,7 @@ public class ServiceTaskIntegrationResultEventHandler {
     }
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
-    public synchronized void receive(IntegrationResultEvent integrationResultEvent) {
+    public void receive(IntegrationResultEvent integrationResultEvent) {
         List<IntegrationContextEntity> integrationContexts = integrationContextService.findIntegrationContextByExecutionId(integrationResultEvent.getExecutionId());
 
         if(integrationContexts==null || integrationContexts.size()==0){

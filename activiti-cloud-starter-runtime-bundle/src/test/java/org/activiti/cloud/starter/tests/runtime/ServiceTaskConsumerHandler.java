@@ -38,7 +38,7 @@ public class ServiceTaskConsumerHandler {
     @StreamListener(
             value = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER,
             condition = "headers['connectorType']=='payment'")
-    public synchronized void receive(IntegrationRequestEvent integrationRequestEvent) {
+    public void receive(IntegrationRequestEvent integrationRequestEvent) {
         Map<String, Object> requestVariables = integrationRequestEvent.getVariables();
         String variableToUpdate = "age";
 
