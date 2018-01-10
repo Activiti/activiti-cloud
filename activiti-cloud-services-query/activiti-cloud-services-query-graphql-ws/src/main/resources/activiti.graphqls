@@ -1,0 +1,240 @@
+#
+# Schemas must have at least a query root type
+#
+schema {
+    query: Query
+    subscription : Subscription
+}
+
+type Query {
+    hello : String
+}
+
+type Subscription {
+    ProcessEngineNotification(applicationName : String, processDefinitionId : String, processInstanceId: String) : ProcessEngineNotification
+}
+
+type ProcessEngineNotification {
+    applicationName : String
+    processInstanceId : String
+    processDefinitionId : String
+	ProcessStartedEvent : [ProcessStartedEvent]
+	ProcessCompletedEvent : [ProcessCompletedEvent]
+	ProcessCancelledEvent : [ProcessCancelledEvent]
+	ActivityStartedEvent : [ActivityStartedEvent]
+	ActivityCancelledEvent : [ActivityCancelledEvent]
+	ActivityCompletedEvent : [ActivityCompletedEvent]
+	VariableCreatedEvent : [VariableCreatedEvent]
+	VariableUpdatedEvent : [VariableUpdatedEvent]
+	VariableDeletedEvent : [VariableDeletedEvent]
+	SequenceFlowTakenEvent : [SequenceFlowTakenEvent]
+	TaskCreatedEvent : [TaskCreatedEvent]
+	TaskStartedEvent : [TaskStartedEvent]
+	TaskAssignedEvent : [TaskAssignedEvent]
+	IntegrationRequestSentEvent : [IntegrationRequestSentEvent]
+	IntegrationResultReceivedEvent : [IntegrationResultReceivedEvent]
+}
+
+type ProcessStartedEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+    nestedProcessInstanceId : String
+    nestedProcessDefinition : String
+}
+
+type ProcessCompletedEvent {
+    applicationName : String
+    timestamp : Long
+    eventType : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+
+    processInstance : ProcessInstanceEventType
+}
+
+type ProcessCancelledEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+    cause : String
+}
+
+
+type ActivityCompletedEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+    activityId : String
+    activityType : String
+}
+
+
+type ActivityStartedEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+    activityId : String
+    activityType : String
+}
+
+type ActivityCancelledEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+    activityId : String
+    activityType : String
+    cause: String
+}
+
+type VariableCreatedEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+    
+	variableName : String
+    variableValue : String
+    variableType : String
+    taskId: String    
+}
+
+type VariableDeletedEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+    
+	variableName : String
+    variableType : String
+    taskId: String    
+}
+
+type VariableUpdatedEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+    
+	variableName : String
+    variableValue : String
+    variableType : String
+    taskId: String    
+}
+
+
+type SequenceFlowTakenEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+    
+	sequenceFlowId : String
+    sourceActivityId : String
+    sourceActivityType : String
+    targetActivityId : String
+    targetActivityName : String
+    targetActivityType : String
+}
+
+type ProcessInstanceEventType {
+    id : String
+    name : String
+    description : String
+    processDefinitionId : String
+    processDefinitionKey : String
+    initiator : String
+    startDate : String
+    businessKey : String
+    status : String
+}
+
+type TaskCreatedEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+    
+    task: TaskEventType
+}
+
+type TaskAssignedEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+    
+    task: TaskEventType
+}
+
+type TaskEventType {
+    id : String
+    name : String
+    createdDate : String
+    priority : Long
+    processDefinitionId : String
+    processInstanceId : String
+    status : String
+}
+
+type TaskStartedEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+
+    task: TaskEventType
+}
+
+type IntegrationRequestSentEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+
+	integrationContextId : String
+}
+
+type IntegrationResultReceivedEvent {
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long 
+    eventType : String
+
+	integrationContextId : String
+}
+
