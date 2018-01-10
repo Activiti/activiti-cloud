@@ -17,6 +17,7 @@
     <module>activiti-cloud-services-query-repo</module>
     <module>activiti-cloud-services-query-rest</module>
     <module>activiti-cloud-services-query-graphql</module>
+    <module>activiti-cloud-services-query-notifications</module>
   </modules>
 
 </project>
