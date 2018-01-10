@@ -306,6 +306,12 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-query-graphiql</artifactId>
+        <version>${version.activiti.cloud.query}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-query</artifactId>
         <version>${version.activiti.cloud.query}</version>
       </dependency>
