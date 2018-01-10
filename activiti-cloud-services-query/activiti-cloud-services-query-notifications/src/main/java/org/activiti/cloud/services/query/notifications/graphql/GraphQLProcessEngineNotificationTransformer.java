@@ -43,12 +43,19 @@ public class GraphQLProcessEngineNotificationTransformer implements ProcessEngin
     @Override
     public List<ProcessEngineNotification> transform(List<Map<String,Object>> events) {
         return events.stream()
+                .filter(this::isValid)
                 .collect(Collectors.groupingBy(this::processEngineEventAttributes, Collectors.groupingBy(this::eventType)))
-                .entrySet().stream()
+                .entrySet()
+                    .stream()
                     .map(entry -> Stream.of(entry.getKey(), entry.getValue())
                          .collect(GraphQLProcessEngineNotification::new, Map::putAll, Map::putAll)
                     )
                     .collect(Collectors.toList());
+    }
+
+    private boolean isValid(Map<String, Object> event) {
+        return  Stream.of(attributeKeys).allMatch(key -> event.get(key) != null)
+                && event.get(eventTypeKey) != null;
     }
 
     private String eventType(Map<String, Object> map) {

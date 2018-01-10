@@ -37,9 +37,12 @@ public class GraphQLProcessEngineNotificationTransformerTest {
     private static String engineEventAttributeKeys = "applicationName,processInstanceId,processDefinitionId";
     private static String eventTypeKey = "eventType";
 
+    ProcessEngineNotificationTransformer subject = new GraphQLProcessEngineNotificationTransformer(
+                                                          Arrays.asList(engineEventAttributeKeys.split(",")), eventTypeKey);
+
     @Test
     public void transform() throws JsonProcessingException {
-
+        // given
         List<Map<String, Object>> events = new ArrayList<Map<String, Object>>() {
             private static final long serialVersionUID = 1L;
         {
@@ -85,14 +88,12 @@ public class GraphQLProcessEngineNotificationTransformerTest {
 
         }};
 
-        ProcessEngineNotificationTransformer mapper = new GraphQLProcessEngineNotificationTransformer(
-                Arrays.asList(engineEventAttributeKeys.split(",")), eventTypeKey
-        );
-
-        List<ProcessEngineNotification> notifications = mapper.transform(events);
+        // when
+        List<ProcessEngineNotification> notifications = subject.transform(events);
 
         LOGGER.info("\n{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(notifications));
 
+        // then
         assertThat(notifications).hasSize(2);
         assertThat(notifications.get(0).get("applicationName")).isEqualTo("app");
         assertThat(notifications.get(0).keySet())
@@ -103,6 +104,134 @@ public class GraphQLProcessEngineNotificationTransformerTest {
         assertThat(notifications.get(1).keySet())
             .containsOnly("processInstanceId","applicationName","processDefinitionId","type1");
         assertThat(notifications.get(1).get("type1")).asList().hasSize(1);
+    }
+
+    @Test
+    public void transformFilterNullAttributes() throws JsonProcessingException {
+        // given
+        List<Map<String, Object>> events = new ArrayList<Map<String, Object>>() {
+            private static final long serialVersionUID = 1L;
+        {
+            add(new GraphQLProcessEngineNotification() {
+                private static final long serialVersionUID = 1L;
+            {
+                put("applicationName", null);
+                put("processInstanceId","p1");
+                put("processDefinitionId","pd1");
+                put("eventType","type1");
+                put("executionId","e1");
+            }});
+
+            add(new GraphQLProcessEngineNotification() {
+                private static final long serialVersionUID = 1L;
+            {
+                put("applicationName","app");
+                put("processInstanceId",null);
+                put("processDefinitionId","pd1");
+                put("eventType","type2");
+                put("executionId","e1");
+            }});
+
+            add(new GraphQLProcessEngineNotification() {
+                private static final long serialVersionUID = 1L;
+            {
+                put("applicationName","app");
+                put("processInstanceId","p1");
+                put("processDefinitionId","pd1");
+                put("eventType","type2");
+                put("executionId","e1");
+            }});
+
+            add(new GraphQLProcessEngineNotification() {
+                private static final long serialVersionUID = 1L;
+            {
+                put("applicationName","app1");
+                put("processInstanceId","p1");
+                put("processDefinitionId","pd1");
+                put("eventType","type1");
+                put("executionId","e1");
+            }});
+
+        }};
+
+        // when
+        List<ProcessEngineNotification> notifications = subject.transform(events);
+
+        LOGGER.info("\n{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(notifications));
+
+        // then
+        assertThat(notifications).hasSize(2);
+        assertThat(notifications.get(0).get("applicationName")).isEqualTo("app");
+        assertThat(notifications.get(0).keySet())
+            .containsOnly("processInstanceId","applicationName","processDefinitionId","type2");
+        assertThat(notifications.get(0).get("type2")).asList().hasSize(1);
+
+        assertThat(notifications.get(1).get("applicationName")).isEqualTo("app1");
+        assertThat(notifications.get(1).keySet())
+            .containsOnly("processInstanceId","applicationName","processDefinitionId","type1");
+        assertThat(notifications.get(1).get("type1")).asList().hasSize(1);
+
+    }
+
+    @Test
+    public void transformFilterMissingAttributes() throws JsonProcessingException {
+        // given
+        List<Map<String, Object>> events = new ArrayList<Map<String, Object>>() {
+            private static final long serialVersionUID = 1L;
+        {
+            add(new GraphQLProcessEngineNotification() {
+                private static final long serialVersionUID = 1L;
+            {
+                //put("applicationName", null);
+                put("processInstanceId","p1");
+                put("processDefinitionId","pd1");
+                put("eventType","type1");
+                put("executionId","e1");
+            }});
+
+            add(new GraphQLProcessEngineNotification() {
+                private static final long serialVersionUID = 1L;
+            {
+                put("applicationName","app");
+                //put("processInstanceId",null);
+                put("processDefinitionId","pd1");
+                put("eventType","type2");
+                put("executionId","e1");
+            }});
+
+            add(new GraphQLProcessEngineNotification() {
+                private static final long serialVersionUID = 1L;
+            {
+                put("applicationName","app");
+                put("processInstanceId","p1");
+                put("processDefinitionId","pd1");
+                put("eventType","type2");
+                put("executionId","e1");
+            }});
+
+            add(new GraphQLProcessEngineNotification() {
+                private static final long serialVersionUID = 1L;
+            {
+                put("applicationName","app1");
+                put("processInstanceId","p1");
+                put("processDefinitionId","pd1");
+                //put("eventType","type1");
+                put("executionId","e1");
+            }});
+
+        }};
+
+        // when
+        List<ProcessEngineNotification> notifications = subject.transform(events);
+
+        LOGGER.info("\n{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(notifications));
+
+        // then
+        assertThat(notifications).hasSize(1);
+        assertThat(notifications.get(0).get("applicationName")).isEqualTo("app");
+        assertThat(notifications.get(0).keySet())
+            .containsOnly("processInstanceId","applicationName","processDefinitionId","type2");
+        assertThat(notifications.get(0).get("type2")).asList().hasSize(1);
 
     }
 
