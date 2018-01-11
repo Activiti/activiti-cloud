@@ -31,9 +31,10 @@ public class QuerySwaggerConfig {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2).select()
-                                                      .apis(RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.controller"))
-                                                      .paths(PathSelectors.any())
-                                                      .build();
+          .apis(RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.controller"))
+          .paths(PathSelectors.regex("(?!/error).+"))
+          .paths(PathSelectors.regex("(?!/graphql).+"))
+          .build();
     }
 
 }
