@@ -29,7 +29,7 @@ type ProcessEngineNotification {
 	VariableDeletedEvent : [VariableDeletedEvent]
 	SequenceFlowTakenEvent : [SequenceFlowTakenEvent]
 	TaskCreatedEvent : [TaskCreatedEvent]
-	TaskStartedEvent : [TaskStartedEvent]
+	TaskCompletedEvent : [TaskCompletedEvent]
 	TaskAssignedEvent : [TaskAssignedEvent]
 	IntegrationRequestSentEvent : [IntegrationRequestSentEvent]
 	IntegrationResultReceivedEvent : [IntegrationResultReceivedEvent]
@@ -205,7 +205,7 @@ type TaskEventType {
     status : String
 }
 
-type TaskStartedEvent {
+type TaskCompletedEvent {
     applicationName : String
     executionId : String
     processDefinitionId : String
