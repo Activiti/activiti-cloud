@@ -59,7 +59,7 @@
 
     <!-- Swagger -->
     <swagger.version>1.5.10</swagger.version>
-    <springfox.version>2.7.0</springfox.version>
+    <springfox.version>2.6.1</springfox.version>
 
     <!-- Rest Easy -->
     <resteasy.version>3.0.21.Final</resteasy.version>
