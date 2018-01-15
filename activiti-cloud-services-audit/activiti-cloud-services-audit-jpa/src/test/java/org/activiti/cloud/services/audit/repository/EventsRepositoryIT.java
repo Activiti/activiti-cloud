@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.audit.repository;
 
+import org.activiti.cloud.services.audit.ProcessEngineEventsController;
 import org.activiti.cloud.services.audit.events.ActivityStartedEventEntity;
 import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
 import org.junit.Test;
@@ -27,7 +28,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.activiti.cloud.services.audit.config.RepositoryConfig.API_VERSION;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -55,7 +55,7 @@ public class EventsRepositoryIT {
     @Test
     public void getEvents() throws Exception {
         mockMvc.perform(get("{version}/events",
-                            API_VERSION)
+                            "/v1")
                                 .param("page",
                                        "0")
                                 .param("size",
@@ -68,16 +68,16 @@ public class EventsRepositoryIT {
                                 responseFields(
                                         subsectionWithPath("_embedded.events").description("A list of events "),
                                         subsectionWithPath("_links.self").description("Resource Self Link"),
-                                        subsectionWithPath("_links.profile").description("Resource Profile Link"),
+//                                        subsectionWithPath("_links.profile").description("Resource Profile Link"),
                                         subsectionWithPath("page").description("Pagination details."))));
     }
 
     @Test
     public void headEvents() throws Exception {
         mockMvc.perform(head("{version}/events",
-                             API_VERSION))
+                             "/v1"))
                 .andDo(print())
-                .andExpect(status().isNoContent())
+                .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/head/list"));
     }
 
@@ -86,7 +86,7 @@ public class EventsRepositoryIT {
         ProcessEngineEventEntity event = new ActivityStartedEventEntity();
         final ProcessEngineEventEntity activitiStartedEvent = eventsRepository.save(event);
         mockMvc.perform(get("{version}/events/{id}",
-                            API_VERSION,
+                            "/v1",
                             activitiStartedEvent.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -104,10 +104,10 @@ public class EventsRepositoryIT {
         ProcessEngineEventEntity event = new ActivityStartedEventEntity();
         final ProcessEngineEventEntity activitiStartedEvent = eventsRepository.save(event);
         mockMvc.perform(head("{version}/events/{id}",
-                             API_VERSION,
+                             "/v1",
                              activitiStartedEvent.getId()))
                 .andDo(print())
-                .andExpect(status().isNoContent())
+                .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/head"));
     }
 }

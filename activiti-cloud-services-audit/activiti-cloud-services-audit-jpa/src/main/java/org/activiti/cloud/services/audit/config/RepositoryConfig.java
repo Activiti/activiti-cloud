@@ -35,12 +35,9 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapt
 @Configuration
 public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
 
-    public static final String API_VERSION = "/v1";
-
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
 
-        config.setBasePath(API_VERSION);
         config.setRepositoryDetectionStrategy(RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
 
         config.exposeIdsFor(ActivityCompletedEventEntity.class);
