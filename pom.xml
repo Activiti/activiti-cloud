@@ -23,6 +23,7 @@
     <!--configuration properties-->
     <jdk.version>1.8</jdk.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- Spring Boot / Cloud / Stream deps -->
     <spring.boot.version>2.0.0.M7</spring.boot.version>
@@ -992,6 +993,20 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
           <version>${build-helper-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>add-generated-assertions-folder</id>
+              <phase>generate-test-sources</phase>
+              <goals>
+                <goal>add-test-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>${generated-assertions-folder}</source>
+                </sources>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.commonjava.maven.plugins</groupId>
