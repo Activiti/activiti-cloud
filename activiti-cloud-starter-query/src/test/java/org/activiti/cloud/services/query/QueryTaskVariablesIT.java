@@ -38,9 +38,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.activiti.cloud.services.query.CoreTaskBuilder.aTask;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskCreatedEvent;
-import static org.activiti.cloud.starters.test.VariableCreatedEventBuilder.aVariableCreatedEvent;
-import static org.activiti.cloud.starters.test.VariableDeletedEventBuilder.aVariableDeletedEvent;
-import static org.activiti.cloud.starters.test.VariableUpdatedEventBuilder.aVariableUpdatedEvent;
+import static org.activiti.cloud.starters.test.builder.VariableCreatedEventBuilder.aVariableCreatedEvent;
+import static org.activiti.cloud.starters.test.builder.VariableDeletedEventBuilder.aVariableDeletedEvent;
+import static org.activiti.cloud.starters.test.builder.VariableUpdatedEventBuilder.aVariableUpdatedEvent;
 import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
