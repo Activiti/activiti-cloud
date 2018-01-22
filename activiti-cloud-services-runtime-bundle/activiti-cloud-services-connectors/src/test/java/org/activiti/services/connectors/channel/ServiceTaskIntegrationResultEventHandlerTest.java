@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEvent;
 import org.activiti.engine.RuntimeService;
@@ -65,10 +64,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private IntegrationContextService integrationContextService;
 
     @Mock
-    private ProcessEngineChannels channels;
-
-    @Mock
-    private MessageChannel auditChannel;
+    private MessageChannel auditProducer;
 
     @Mock
     private RuntimeBundleProperties runtimeBundleProperties;
@@ -85,7 +81,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        when(channels.auditProducer()).thenReturn(auditChannel);
         when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
@@ -120,6 +115,25 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     }
 
     @Test
+    public void receiveShouldDoNothingWhenIntegrationContextsIsNull() throws Exception {
+        //given
+        given(integrationContextService.findIntegrationContextByExecutionId(EXECUTION_ID))
+                .willReturn(null);
+        given(executionQuery.list()).willReturn(Collections.singletonList(mock(Execution.class)));
+        Map<String, Object> variables = Collections.singletonMap("var1",
+                                                                 "v");
+
+        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
+                                                                                   variables);
+
+        //when
+        handler.receive(integrationResultEvent);
+
+        //then
+        verify(integrationContextService, never()).deleteIntegrationContext(any());
+    }
+
+    @Test
     public void receiveShouldSendIntegrationAuditEventWhenIntegrationAuditEventsAreEnabled() throws Exception {
         //given
         IntegrationContextEntityImpl integrationContext = new IntegrationContextEntityImpl();
@@ -142,7 +156,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         handler.receive(integrationResultEvent);
 
         //then
-        verify(auditChannel).send(messageCaptor.capture());
+        verify(auditProducer).send(messageCaptor.capture());
         Message<IntegrationResultReceivedEvent[]> message = messageCaptor.getValue();
         assertThat(message.getPayload()).hasSize(1);
         IntegrationResultReceivedEvent integrationResultReceivedEvent = message.getPayload()[0];
@@ -173,7 +187,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         handler.receive(integrationResultEvent);
 
         //then
-        verify(auditChannel,
+        verify(auditProducer,
                never()).send(any(Message.class));
     }
 }

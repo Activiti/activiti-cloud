@@ -2,77 +2,74 @@ package org.activiti.services.connectors;
 
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.integration.IntegrationRequestSentEventImpl;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
-import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
 import org.activiti.services.connectors.model.IntegrationRequestEvent;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 
 public class IntegrationRequestSender extends TransactionSynchronizationAdapter {
 
-    private static final String CONNECTOR_TYPE = "connectorType";
-    private final ProcessEngineIntegrationChannels integrationChannels;
+    protected static final String CONNECTOR_TYPE = "connectorType";
+    private final MessageChannel integrationEventsProducer;
     private final RuntimeBundleProperties runtimeBundleProperties;
-    private final ProcessEngineChannels processEngineChannels;
+    private final MessageChannel auditProducer;
     private final IntegrationContextEntity integrationContextEntity;
     private final DelegateExecution execution;
 
-    public IntegrationRequestSender(ProcessEngineIntegrationChannels processEngineIntegrationChannels,
+    public IntegrationRequestSender(MessageChannel integrationEventsProducer,
                                     RuntimeBundleProperties runtimeBundleProperties,
-                                    ProcessEngineChannels processEngineChannels,
+                                    MessageChannel auditProducer,
                                     IntegrationContextEntity integrationContextEntity,
                                     DelegateExecution execution) {
-        this.integrationChannels = processEngineIntegrationChannels;
+        this.integrationEventsProducer = integrationEventsProducer;
         this.runtimeBundleProperties = runtimeBundleProperties;
-        this.processEngineChannels = processEngineChannels;
+        this.auditProducer = auditProducer;
         this.integrationContextEntity = integrationContextEntity;
         this.execution = execution;
     }
 
     @Override
     public void afterCommit() {
+        Message<IntegrationRequestEvent> message = buildIntegrationRequestMessage(execution,
+                                                                                  integrationContextEntity);
 
-        Message message = buildMessage(execution,
-                integrationContextEntity);
-
-
-        if (message != null) {
-            integrationChannels.integrationEventsProducer().send(message);
-            sendIntegrationRequestSentEvent(message);
-        }
+        integrationEventsProducer.send(message);
+        sendIntegrationRequestSentEvent(message);
     }
 
     private void sendIntegrationRequestSentEvent(Message<IntegrationRequestEvent> message) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             IntegrationRequestEvent integrationRequestEvent = message.getPayload();
             IntegrationRequestSentEventImpl event = new IntegrationRequestSentEventImpl(runtimeBundleProperties.getName(),
-                    integrationRequestEvent.getExecutionId(),
-                    integrationRequestEvent.getProcessDefinitionId(),
-                    integrationRequestEvent.getProcessInstanceId(),
-                    integrationRequestEvent.getIntegrationContextId());
-            processEngineChannels.auditProducer().send(
+                                                                                        integrationRequestEvent.getExecutionId(),
+                                                                                        integrationRequestEvent.getProcessDefinitionId(),
+                                                                                        integrationRequestEvent.getProcessInstanceId(),
+                                                                                        integrationRequestEvent.getIntegrationContextId(),
+                                                                                        integrationRequestEvent.getFlowNodeId());
+            auditProducer.send(
                     MessageBuilder.withPayload(new ProcessEngineEvent[]{event}).build()
             );
         }
     }
 
-    private Message<IntegrationRequestEvent> buildMessage(DelegateExecution execution,
-                                                          IntegrationContextEntity integrationContext) {
+    private Message<IntegrationRequestEvent> buildIntegrationRequestMessage(DelegateExecution execution,
+                                                                            IntegrationContextEntity integrationContext) {
         IntegrationRequestEvent event = new IntegrationRequestEvent(execution.getProcessInstanceId(),
-                execution.getProcessDefinitionId(),
-                integrationContext.getExecutionId(),
-                integrationContext.getId(),
-                execution.getVariables());
+                                                                    execution.getProcessDefinitionId(),
+                                                                    integrationContext.getExecutionId(),
+                                                                    integrationContext.getId(),
+                                                                    integrationContext.getFlowNodeId(),
+                                                                    execution.getVariables());
 
         String implementation = ((ServiceTask) execution.getCurrentFlowElement()).getImplementation();
         return MessageBuilder.withPayload(event)
                 .setHeader(CONNECTOR_TYPE,
-                        implementation)
+                           implementation)
                 .build();
     }
 }

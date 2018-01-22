@@ -22,4 +22,6 @@ public interface IntegrationEvent extends ProcessEngineEvent {
 
     String getIntegrationContextId();
 
+    String getFlowNodeId();
+
 }

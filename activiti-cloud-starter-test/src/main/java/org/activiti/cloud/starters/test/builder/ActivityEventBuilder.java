@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,41 +14,29 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.starters.test;
+package org.activiti.cloud.starters.test.builder;
 
-public class ActivityEventBuilder {
+import org.activiti.cloud.starters.test.MockActivityEvent;
 
-    private MockActivityEvent mockActivityEvent;
+public class ActivityEventBuilder extends MockProcessEngineEventBuilder<MockActivityEvent, ActivityEventBuilder> {
 
     private ActivityEventBuilder(Long timestamp, String eventType) {
-        mockActivityEvent = new MockActivityEvent(timestamp, eventType);
+        super(timestamp, eventType);
     }
 
     public static ActivityEventBuilder aActivityStartedEvent(Long timestamp) {
         return new ActivityEventBuilder(timestamp, "ActivityStartedEvent");
     }
 
-    public ActivityEventBuilder withExecutionId(String executionId) {
-        mockActivityEvent.setExecutionId(executionId);
-        return this;
-    }
-
-    public ActivityEventBuilder withProcessDefinitionId(String processDefinitionId) {
-        mockActivityEvent.setProcessDefinitionId(processDefinitionId);
-        return this;
-    }
-
-    public ActivityEventBuilder withProcessInstanceId(String processInstanceId) {
-        mockActivityEvent.setProcessInstanceId(processInstanceId);
-        return this;
+    @Override
+    protected MockActivityEvent createInstance(Long timestamp,
+                                               String eventType) {
+        return new MockActivityEvent(timestamp, eventType);
     }
 
     public ActivityEventBuilder withName(String name) {
-        mockActivityEvent.setActivityName(name);
+        getEvent().setActivityName(name);
         return this;
     }
 
-    public MockActivityEvent build() {
-        return mockActivityEvent;
-    }
 }

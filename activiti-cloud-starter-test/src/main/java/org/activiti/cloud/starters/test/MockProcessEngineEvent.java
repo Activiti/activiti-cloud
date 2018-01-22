@@ -77,26 +77,6 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
         return events;
     }
 
-    public static ProcessEngineEvent anIntegrationRequestSentEvent(String executionId,
-                                                                   String processDefinitionId,
-                                                                   String processInstanceId) {
-        return new MockProcessEngineEvent(System.currentTimeMillis(),
-                                          "IntegrationRequestSentEvent",
-                                          executionId,
-                                          processDefinitionId,
-                                          processInstanceId);
-    }
-
-    public static ProcessEngineEvent anIntegrationResultRecievedEvent(String executionId,
-                                                                   String processDefinitionId,
-                                                                   String processInstanceId) {
-        return new MockProcessEngineEvent(System.currentTimeMillis(),
-                                          "IntegrationResultReceivedEvent",
-                                          executionId,
-                                          processDefinitionId,
-                                          processInstanceId);
-    }
-
     @Override
     public Long getTimestamp() {
         return timestamp;

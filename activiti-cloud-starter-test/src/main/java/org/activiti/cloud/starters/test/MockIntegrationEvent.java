@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,22 @@
 
 package org.activiti.cloud.starters.test;
 
-public class VariableDeletedEventBuilder extends VariableEventBuilder<MockVariableDeletedEvent, VariableDeletedEventBuilder> {
+public class MockIntegrationEvent extends MockProcessEngineEvent {
 
-    private final MockVariableDeletedEvent event;
+    private String flowNodeId;
 
-    private VariableDeletedEventBuilder(long timestamp) {
-        event = new MockVariableDeletedEvent(timestamp);
+    public MockIntegrationEvent(Long timestamp,
+                                String eventType) {
+        super(timestamp,
+              eventType);
     }
 
-    public static VariableDeletedEventBuilder aVariableDeletedEvent(long timestamp) {
-        return new VariableDeletedEventBuilder(timestamp);
+    public String getFlowNodeId() {
+        return flowNodeId;
     }
 
-
-    @Override
-    protected MockVariableDeletedEvent getEvent() {
-        return event;
+    public void setFlowNodeId(String flowNodeId) {
+        this.flowNodeId = flowNodeId;
     }
+
 }

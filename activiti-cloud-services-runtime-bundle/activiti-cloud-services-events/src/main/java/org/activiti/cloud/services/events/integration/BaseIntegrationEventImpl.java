@@ -21,6 +21,7 @@ import org.activiti.cloud.services.events.AbstractProcessEngineEvent;
 public abstract class BaseIntegrationEventImpl extends AbstractProcessEngineEvent implements IntegrationEvent {
 
     private String integrationContextId;
+    private String flowNodeId;
 
     //used to deserialize from json
     public BaseIntegrationEventImpl() {
@@ -30,17 +31,24 @@ public abstract class BaseIntegrationEventImpl extends AbstractProcessEngineEven
                                     String executionId,
                                     String processDefinitionId,
                                     String processInstanceId,
-                                    String integrationContextId) {
+                                    String integrationContextId,
+                                    String flowNodeId) {
         super(applicationName,
               executionId,
               processDefinitionId,
               processInstanceId);
         this.integrationContextId = integrationContextId;
+        this.flowNodeId = flowNodeId;
     }
 
     @Override
     public String getIntegrationContextId() {
         return integrationContextId;
     }
-    
+
+    @Override
+    public String getFlowNodeId() {
+        return flowNodeId;
+    }
+
 }
