@@ -29,7 +29,7 @@ import org.activiti.cloud.services.audit.events.TaskAssignedEventEntityAssert;
 import org.activiti.cloud.services.audit.repository.EventsRepository;
 import org.activiti.cloud.starters.test.MockEventsSamples;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +39,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.activiti.cloud.starters.test.ActivityEventBuilder.aActivityStartedEvent;
-import static org.assertj.core.api.Assertions.*;
+import static org.activiti.cloud.starters.test.builder.ActivityEventBuilder.aActivityStartedEvent;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -56,8 +57,8 @@ public class AuditServiceIT {
     @Autowired
     private MyProducer producer;
 
-    @Before
-    public void setUp() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         repository.deleteAll();
     }
 

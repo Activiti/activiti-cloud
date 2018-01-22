@@ -20,8 +20,13 @@ public abstract class IntegrationEventDocument extends ProcessEngineEventDocumen
 
     private String integrationContextId;
 
+    private String flowNodeId;
+
     public String getIntegrationContextId() {
         return integrationContextId;
     }
 
+    public String getFlowNodeId() {
+        return flowNodeId;
+    }
 }
