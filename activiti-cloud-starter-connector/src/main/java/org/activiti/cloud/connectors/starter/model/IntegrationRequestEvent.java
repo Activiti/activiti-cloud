@@ -33,6 +33,8 @@ public class IntegrationRequestEvent {
 
     private String executionId;
 
+    private String flowNodeId;
+
     private Map<String, Object> variables;
 
     //used by json deserialization
@@ -69,6 +71,10 @@ public class IntegrationRequestEvent {
 
     public Map<String, Object> getVariables() {
         return Collections.unmodifiableMap(variables);
+    }
+
+    public String getFlowNodeId() {
+        return flowNodeId;
     }
 
     @Override

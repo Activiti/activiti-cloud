@@ -18,7 +18,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.activiti.cloud.connectors.starter.model.IntegrationResultEventBuilder.resultFor;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootApplication
 @EnableActivitiCloudConnector
@@ -47,15 +48,15 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     public void mockTypeIntegrationRequestEvents(IntegrationRequestEvent event) {
         verifyEventAndCreateResults(event);
         Map<String, Object> resultVariables = createResultVariables(event);
-        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(event.getExecutionId(),
-                                                                                   resultVariables);
-        assertThat(integrationResultEvent.getId()).isNotEmpty();
+        IntegrationResultEvent integrationResultEvent = resultFor(event)
+                .withVariables(resultVariables)
+                .build();
         Message<IntegrationResultEvent> message = MessageBuilder.withPayload(integrationResultEvent).build();
         integrationResultsProducer.send(message);
     }
 
     /*
-     * A Cloud Connector reciving Integration Events is free to Start Process Instances and interact with different Runtime Bundles
+     * A Cloud Connector receiving Integration Events is free to Start Process Instances and interact with different Runtime Bundles
      */
     @StreamListener(value = CloudConnectorChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='MockProcessRuntime'")
     public void mockTypeIntegrationRequestEventsStartProcess(IntegrationRequestEvent event) {
@@ -67,9 +68,9 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
         runtimeCmdProducer.send(MessageBuilder.withPayload(startProcessInstanceCmd).build());
 
-        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(event.getExecutionId(),
-                                                                                   resultVariables);
-        assertThat(integrationResultEvent.getId()).isNotEmpty();
+        IntegrationResultEvent integrationResultEvent = resultFor(event)
+                .withVariables(resultVariables)
+                .build();
         Message<IntegrationResultEvent> message = MessageBuilder.withPayload(integrationResultEvent).build();
         integrationResultsProducer.send(message);
     }
@@ -83,7 +84,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     private Map<String, Object> createResultVariables(IntegrationRequestEvent event) {
-        Map<String, Object> resultVariables = new HashMap<String, Object>();
+        Map<String, Object> resultVariables = new HashMap<>();
         resultVariables.put("var1",
                             event.getVariables().get("var1"));
         resultVariables.put("var2",

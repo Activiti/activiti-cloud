@@ -28,6 +28,8 @@ public class IntegrationResultEvent {
 
     private String executionId;
 
+    private String flowNodeId;
+
     private Map<String, Object> variables;
 
     //used by json deserialization
@@ -50,8 +52,24 @@ public class IntegrationResultEvent {
         return executionId;
     }
 
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
+    }
+
     public Map<String, Object> getVariables() {
         return variables;
+    }
+
+    public void setVariables(Map<String, Object> variables) {
+        this.variables = variables;
+    }
+
+    public String getFlowNodeId() {
+        return flowNodeId;
+    }
+
+    public void setFlowNodeId(String flowNodeId) {
+        this.flowNodeId = flowNodeId;
     }
 
     @Override
