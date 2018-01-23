@@ -48,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs(outputDir = "target/snippets")
-public class TaskVariableControllerImplTest {
+public class TaskVariableControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "task-variable";
     @MockBean

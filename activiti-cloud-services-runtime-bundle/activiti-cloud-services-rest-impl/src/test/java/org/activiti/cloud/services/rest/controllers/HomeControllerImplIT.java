@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(HomeControllerImpl.class)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
-public class HomeControllerImplTest {
+public class HomeControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "home";
 
