@@ -51,6 +51,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
@@ -176,8 +177,7 @@ public class CommandEndpointIT {
         String cmdId = UUID.randomUUID().toString();
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(completeTaskCmd).setHeader("cmdId",
                                                                                  cmdId).build());
-        WaitUtil.waitFor(streamHandler.getCompletedTaskAck(),
-                         1000);
+        await("task to be completed").untilTrue(streamHandler.getCompletedTaskAck());
     }
 
     private void releaseTask(Task task) throws InterruptedException {
@@ -185,8 +185,7 @@ public class CommandEndpointIT {
         String cmdId = UUID.randomUUID().toString();
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(releaseTaskCmd).setHeader("cmdId",
                                                                                 cmdId).build());
-        WaitUtil.waitFor(streamHandler.getReleasedTaskAck(),
-                         1000);
+        await("task to be released").untilTrue(streamHandler.getReleasedTaskAck());
 
         assertThatTaskHasStatus(task.getId(),
                                 Task.TaskStatus.CREATED);
@@ -199,8 +198,7 @@ public class CommandEndpointIT {
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(claimTaskCmd).setHeader("cmdId",
                                                                               cmdId).build());
 
-        WaitUtil.waitFor(streamHandler.getClaimedTaskAck(),
-                         1000);
+        await("task to be claimed").untilTrue(streamHandler.getClaimedTaskAck());
 
         assertThatTaskHasStatus(task.getId(),
                                 Task.TaskStatus.ASSIGNED
@@ -222,8 +220,7 @@ public class CommandEndpointIT {
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(activateProcessInstanceCmd).setHeader("cmdId",
                                                                                             cmdId).build());
 
-        WaitUtil.waitFor(streamHandler.getActivatedProcessInstanceAck(),
-                         1000);
+        await("process to be activated").untilTrue(streamHandler.getActivatedProcessInstanceAck());
         //when
         ProcessInstance processInstance = executeGetProcessInstanceRequest(processInstanceId);
 
@@ -240,8 +237,7 @@ public class CommandEndpointIT {
 
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(suspendProcessInstanceCmd).build());
 
-        WaitUtil.waitFor(streamHandler.getSuspendedProcessInstanceAck(),
-                         3000);
+        await("process to be suspended").untilTrue(streamHandler.getSuspendedProcessInstanceAck());
         //when
         ProcessInstance processInstance = executeGetProcessInstanceRequest(suspendProcessInstanceCmd.getProcessInstanceId());
 
@@ -255,8 +251,8 @@ public class CommandEndpointIT {
         //given
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(startProcessInstanceCmd).build());
 
-        WaitUtil.waitFor(streamHandler.getStartedProcessInstanceAck(),
-                         3000);
+        await("process to be started")
+                .untilTrue(streamHandler.getStartedProcessInstanceAck());
         String processInstanceId = streamHandler.getProcessInstanceId();
 
         //when
