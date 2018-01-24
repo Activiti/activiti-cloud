@@ -29,7 +29,7 @@ import org.activiti.cloud.services.audit.events.TaskAssignedEventEntityAssert;
 import org.activiti.cloud.services.audit.repository.EventsRepository;
 import org.activiti.cloud.starters.test.MockEventsSamples;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +42,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.activiti.cloud.starters.test.builder.ActivityEventBuilder.aActivityStartedEvent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -57,8 +58,8 @@ public class AuditServiceIT {
     @Autowired
     private MyProducer producer;
 
-    @After
-    public void tearDown() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         repository.deleteAll();
     }
 
@@ -67,31 +68,28 @@ public class AuditServiceIT {
         //given
         List<ProcessEngineEvent> coveredEvents = MockEventsSamples.allSupportedEvents();
         producer.send(coveredEvents.toArray(new ProcessEngineEvent[coveredEvents.size()]));
-        waitForMessage();
 
-        //when
-        ResponseEntity<PagedResources<ProcessEngineEventEntity>> eventsPagedResources = eventsRestTemplate.executeFindAll();
+        await().untilAsserted(() -> {
 
-        //then
-        Collection<ProcessEngineEventEntity> retrievedEvents = eventsPagedResources.getBody().getContent();
-        assertThat(retrievedEvents).hasSameSizeAs(coveredEvents);
-        for (ProcessEngineEvent coveredEvent : coveredEvents) {
-            assertThat(retrievedEvents)
-                    .extracting(
-                            ProcessEngineEventEntity::getEventType,
-                            ProcessEngineEventEntity::getExecutionId,
-                            ProcessEngineEventEntity::getProcessDefinitionId,
-                            ProcessEngineEventEntity::getProcessInstanceId)
-                    .contains(tuple(coveredEvent.getEventType(),
-                                    coveredEvent.getExecutionId(),
-                                    coveredEvent.getProcessDefinitionId(),
-                                    coveredEvent.getProcessInstanceId()));
-        }
-    }
+            //when
+            ResponseEntity<PagedResources<ProcessEngineEventEntity>> eventsPagedResources = eventsRestTemplate.executeFindAll();
 
-    private void waitForMessage() throws InterruptedException {
-        //FIXME improve the waiting mechanism
-        Thread.sleep(500);
+            //then
+            Collection<ProcessEngineEventEntity> retrievedEvents = eventsPagedResources.getBody().getContent();
+            assertThat(retrievedEvents).hasSameSizeAs(coveredEvents);
+            for (ProcessEngineEvent coveredEvent : coveredEvents) {
+                assertThat(retrievedEvents)
+                        .extracting(
+                                ProcessEngineEventEntity::getEventType,
+                                ProcessEngineEventEntity::getExecutionId,
+                                ProcessEngineEventEntity::getProcessDefinitionId,
+                                ProcessEngineEventEntity::getProcessInstanceId)
+                        .contains(tuple(coveredEvent.getEventType(),
+                                        coveredEvent.getExecutionId(),
+                                        coveredEvent.getProcessDefinitionId(),
+                                        coveredEvent.getProcessInstanceId()));
+            }
+        });
     }
 
     @Test
@@ -99,20 +97,22 @@ public class AuditServiceIT {
         //given
         List<ProcessEngineEvent> coveredEvents = MockEventsSamples.allSupportedEvents();
         producer.send(coveredEvents.toArray(new ProcessEngineEvent[coveredEvents.size()]));
-        waitForMessage();
 
-        //when
-        ResponseEntity<PagedResources<ProcessEngineEventEntity>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("processInstanceId",
-                                                                                                                                                "4"));
+        await().untilAsserted(() -> {
 
-        //then
-        Collection<ProcessEngineEventEntity> retrievedEvents = eventsPagedResources.getBody().getContent();
-        assertThat(retrievedEvents).hasSize(1);
-        ActivityStartedEventEntityAssert.assertThat((ActivityStartedEventEntity) retrievedEvents.iterator().next())
-                .hasEventType("ActivityStartedEvent")
-                .hasExecutionId("2")
-                .hasProcessDefinitionId("3")
-                .hasProcessInstanceId("4");
+            //when
+            ResponseEntity<PagedResources<ProcessEngineEventEntity>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("processInstanceId",
+                                                                                                                                                    "4"));
+
+            //then
+            Collection<ProcessEngineEventEntity> retrievedEvents = eventsPagedResources.getBody().getContent();
+            assertThat(retrievedEvents).hasSize(1);
+            ActivityStartedEventEntityAssert.assertThat((ActivityStartedEventEntity) retrievedEvents.iterator().next())
+                    .hasEventType("ActivityStartedEvent")
+                    .hasExecutionId("2")
+                    .hasProcessDefinitionId("3")
+                    .hasProcessInstanceId("4");
+        });
     }
 
     @Test
@@ -120,20 +120,22 @@ public class AuditServiceIT {
         //given
         List<ProcessEngineEvent> coveredEvents = MockEventsSamples.allSupportedEvents();
         producer.send(coveredEvents.toArray(new ProcessEngineEvent[coveredEvents.size()]));
-        waitForMessage();
 
-        //when
-        ResponseEntity<PagedResources<ProcessEngineEventEntity>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
-                                                                                                                                                "TaskAssignedEvent"));
+        await().untilAsserted(() -> {
 
-        //then
-        Collection<ProcessEngineEventEntity> retrievedEvents = eventsPagedResources.getBody().getContent();
-        assertThat(retrievedEvents).hasSize(1);
-        TaskAssignedEventEntityAssert.assertThat((TaskAssignedEventEntity) retrievedEvents.iterator().next())
-                .hasEventType("TaskAssignedEvent")
-                .hasExecutionId("15")
-                .hasProcessDefinitionId("27")
-                .hasProcessInstanceId("46");
+            //when
+            ResponseEntity<PagedResources<ProcessEngineEventEntity>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
+                                                                                                                                                    "TaskAssignedEvent"));
+
+            //then
+            Collection<ProcessEngineEventEntity> retrievedEvents = eventsPagedResources.getBody().getContent();
+            assertThat(retrievedEvents).hasSize(1);
+            TaskAssignedEventEntityAssert.assertThat((TaskAssignedEventEntity) retrievedEvents.iterator().next())
+                    .hasEventType("TaskAssignedEvent")
+                    .hasExecutionId("15")
+                    .hasProcessDefinitionId("27")
+                    .hasProcessInstanceId("46");
+        });
     }
 
     @Test
@@ -148,23 +150,23 @@ public class AuditServiceIT {
                 .build();
         producer.send(events);
 
-        waitForMessage();
+        await().untilAsserted(() -> {
+            ResponseEntity<PagedResources<ProcessEngineEventEntity>> eventsPagedResources = eventsRestTemplate.executeFindAll();
+            assertThat(eventsPagedResources.getBody().getContent()).isNotEmpty();
+            ProcessEngineEventEntity event = eventsPagedResources.getBody().getContent().iterator().next();
 
-        ResponseEntity<PagedResources<ProcessEngineEventEntity>> eventsPagedResources = eventsRestTemplate.executeFindAll();
-        assertThat(eventsPagedResources.getBody().getContent()).isNotEmpty();
-        ProcessEngineEventEntity event = eventsPagedResources.getBody().getContent().iterator().next();
+            //when
+            ResponseEntity<ProcessEngineEventEntity> responseEntity = eventsRestTemplate.executeFindById(event.getId());
 
-        //when
-        ResponseEntity<ProcessEngineEventEntity> responseEntity = eventsRestTemplate.executeFindById(event.getId());
-
-        //then
-        assertThat(responseEntity.getBody()).isInstanceOf(ActivityStartedEventEntity.class);
-        ActivityStartedEventEntityAssert.assertThat((ActivityStartedEventEntity) responseEntity.getBody())
-                .hasId(event.getId())
-                .hasEventType("ActivityStartedEvent")
-                .hasExecutionId("2")
-                .hasProcessDefinitionId("3")
-                .hasProcessInstanceId("4")
-                .hasActivityName("first step");
+            //then
+            assertThat(responseEntity.getBody()).isInstanceOf(ActivityStartedEventEntity.class);
+            ActivityStartedEventEntityAssert.assertThat((ActivityStartedEventEntity) responseEntity.getBody())
+                    .hasId(event.getId())
+                    .hasEventType("ActivityStartedEvent")
+                    .hasExecutionId("2")
+                    .hasProcessDefinitionId("3")
+                    .hasProcessInstanceId("4")
+                    .hasActivityName("first step");
+        });
     }
 }
