@@ -103,6 +103,7 @@
     <junit.version>4.12</junit.version>
     <assertj.version>3.8.0</assertj.version>
     <jsonunit.version>1.24.0</jsonunit.version>
+    <awaitility.version>3.0.0</awaitility.version>
     <!-- configurations for Spring REST docs-->
     <asciidoc.filename>index.adoc</asciidoc.filename>
     <asciidoctor.version>1.5.6</asciidoctor.version>
@@ -541,6 +542,11 @@
         <artifactId>assertj-core</artifactId>
         <version>${assertj.version}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.awaitility</groupId>
+        <artifactId>awaitility</artifactId>
+        <version>${awaitility.version}</version>
       </dependency>
       <dependency>
         <groupId>net.javacrumbs.json-unit</groupId>
