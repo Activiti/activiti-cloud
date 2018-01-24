@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.starter.audit.tests.it;
+package org.activiti.cloud.services.audit;
 
-import org.activiti.cloud.services.audit.EventsRelProvider;
 import org.activiti.cloud.services.audit.events.ActivityCompletedEventEntity;
 import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class EventsRelProviderTest {
 
@@ -79,7 +77,7 @@ public class EventsRelProviderTest {
     @Test
     public void getItemResourceRelForShouldReturnLiteralEvent() throws Exception {
         //given
-        Class<ProcessEngineEvent> aClass = ProcessEngineEvent.class;
+        Class<ProcessEngineEventEntity> aClass = ProcessEngineEventEntity.class;
 
         //when
         String itemRel = relProvider.getItemResourceRelFor(aClass);
