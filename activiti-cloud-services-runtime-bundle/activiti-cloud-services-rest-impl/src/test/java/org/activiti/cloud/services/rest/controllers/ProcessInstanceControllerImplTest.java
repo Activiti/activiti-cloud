@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.starter.tests.services;
+package org.activiti.cloud.services.rest.controllers;
 
-import org.activiti.cloud.services.api.model.ProcessInstance;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
+import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
-import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
