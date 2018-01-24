@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.activiti.cloud.connectors.starter.model.IntegrationRequestEvent;
-import org.activiti.cloud.connectors.starter.test.WaitUtil;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -36,7 +35,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -89,12 +89,15 @@ public class ActivitiCloudConnectorServiceIT {
                 .build();
         integrationEventsProducer.send(message);
 
-        WaitUtil.waitFor(streamHandler.isStartProcessInstanceCmdArrived());
+        await("Command should arrive")
+                .untilAsserted(() ->
+                                       assertThat(streamHandler.isStartProcessInstanceCmdArrived()).isTrue()
+                );
 
-        assertThat(streamHandler.isStartProcessInstanceCmdArrived()).isTrue();
-
-        WaitUtil.waitForCounterGreaterThanThreshold(streamHandler.getIntegrationResultEventsCounter(),
-                                                    2);
+        await("Should receive at least 2 integration results")
+                .untilAsserted(() ->
+                                       assertThat(streamHandler.getIntegrationResultEventsCounter().get()).isGreaterThanOrEqualTo(2)
+                );
     }
 }
 
