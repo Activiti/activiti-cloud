@@ -19,11 +19,12 @@ package org.activiti.cloud.starter.tests.runtime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.services.connectors.model.IntegrationRequestEvent;
 import org.activiti.services.connectors.model.IntegrationResultEvent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
@@ -32,8 +33,13 @@ import org.springframework.stereotype.Component;
 @EnableBinding(ConnectorIntegrationChannels.class)
 public class ServiceTaskConsumerHandler {
 
-    @Autowired
-    private ConnectorIntegrationChannels consumerChannels;
+    private final BinderAwareChannelResolver resolver;
+    private final RuntimeBundleProperties runtimeBundleProperties;
+
+    public ServiceTaskConsumerHandler(BinderAwareChannelResolver resolver, RuntimeBundleProperties runtimeBundleProperties) {
+        this.resolver = resolver;
+        this.runtimeBundleProperties = runtimeBundleProperties;
+    }
 
     @StreamListener(value = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER)
     public void receive(IntegrationRequestEvent integrationRequestEvent) {
@@ -45,6 +51,6 @@ public class ServiceTaskConsumerHandler {
                             ((Integer) requestVariables.get(variableToUpdate)) + 1);
         Message<IntegrationResultEvent> message = MessageBuilder.withPayload(new IntegrationResultEvent(integrationRequestEvent.getExecutionId(),
                                                                                                         resultVariables)).build();
-        consumerChannels.integrationResultsProducer().send(message);
+        resolver.resolveDestination("integrationResult:" + runtimeBundleProperties.getName()).send(message);
     }
 }
