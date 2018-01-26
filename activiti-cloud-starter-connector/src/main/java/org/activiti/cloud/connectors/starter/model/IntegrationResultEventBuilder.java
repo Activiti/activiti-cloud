@@ -18,18 +18,25 @@ package org.activiti.cloud.connectors.starter.model;
 
 import java.util.Map;
 
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
+
 public class IntegrationResultEventBuilder {
+
+    private final IntegrationRequestEvent requestEvent;
 
     private IntegrationResultEvent integrationResultEvent;
 
-    private IntegrationResultEventBuilder() {
+    private IntegrationResultEventBuilder(IntegrationRequestEvent requestEvent) {
+        this.requestEvent = requestEvent;
         this.integrationResultEvent = new IntegrationResultEvent();
     }
 
     public static IntegrationResultEventBuilder resultFor(IntegrationRequestEvent requestEvent) {
-        return new IntegrationResultEventBuilder()
+        return new IntegrationResultEventBuilder(requestEvent)
                 .withExecutionId(requestEvent.getExecutionId())
-                .withFlowNodeId(requestEvent.getFlowNodeId());
+                .withFlowNodeId(requestEvent.getFlowNodeId())
+                .withTargetApplication(requestEvent.getApplicationName());
     }
 
     private IntegrationResultEventBuilder withExecutionId(String executionId) {
@@ -42,12 +49,26 @@ public class IntegrationResultEventBuilder {
         return this;
     }
 
+    private IntegrationResultEventBuilder withTargetApplication(String targetApplication) {
+        integrationResultEvent.setTargetApplication(targetApplication);
+        return this;
+    }
+
     public IntegrationResultEventBuilder withVariables(Map<String, Object> variables) {
         integrationResultEvent.setVariables(variables);
         return this;
     }
 
-    public IntegrationResultEvent build(){
+    public IntegrationResultEvent build() {
         return integrationResultEvent;
+    }
+
+    public Message<IntegrationResultEvent> buildMessage() {
+        return getMessageBuilder().build();
+    }
+
+    public MessageBuilder<IntegrationResultEvent> getMessageBuilder() {
+        return MessageBuilder.withPayload(integrationResultEvent).setHeader("targetApplication",
+                                                                            requestEvent.getApplicationName());
     }
 }

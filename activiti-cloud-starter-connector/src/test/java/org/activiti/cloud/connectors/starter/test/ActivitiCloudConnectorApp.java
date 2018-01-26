@@ -8,12 +8,12 @@ import org.activiti.cloud.connectors.starter.configuration.EnableActivitiCloudCo
 import org.activiti.cloud.connectors.starter.model.IntegrationRequestEvent;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultEvent;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -28,13 +28,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ComponentScan("org.activiti.cloud.connectors.starter")
 public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
-    @Autowired
-    private MessageChannel integrationResultsProducer;
+    private static final String CHANNEL_NAME = "notifications";
 
-    @Autowired
-    private MessageChannel runtimeCmdProducer;
+    private final MessageChannel runtimeCmdProducer;
+
+    private final BinderAwareChannelResolver resolver;
 
     private static final String OTHER_PROCESS_DEF = "MyOtherProcessDef";
+
+    public ActivitiCloudConnectorApp(MessageChannel runtimeCmdProducer,
+                                     BinderAwareChannelResolver resolver) {
+        this.runtimeCmdProducer = runtimeCmdProducer;
+        this.resolver = resolver;
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(ActivitiCloudConnectorApp.class,
@@ -54,7 +60,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
                 .withVariables(resultVariables)
                 .build();
         Message<IntegrationResultEvent> message = MessageBuilder.withPayload(integrationResultEvent).build();
-        integrationResultsProducer.send(message);
+        resolver.resolveDestination(CHANNEL_NAME).send(message);
     }
 
     /*
@@ -74,7 +80,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
                 .withVariables(resultVariables)
                 .build();
         Message<IntegrationResultEvent> message = MessageBuilder.withPayload(integrationResultEvent).build();
-        integrationResultsProducer.send(message);
+        resolver.resolveDestination(CHANNEL_NAME).send(message);
     }
 
     private void verifyEventAndCreateResults(IntegrationRequestEvent event) {
