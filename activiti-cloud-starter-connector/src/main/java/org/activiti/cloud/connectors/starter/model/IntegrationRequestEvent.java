@@ -35,6 +35,10 @@ public class IntegrationRequestEvent {
 
     private String flowNodeId;
 
+    private String applicationName;
+
+    private String connectorType;
+
     private Map<String, Object> variables;
 
     //used by json deserialization
@@ -75,6 +79,22 @@ public class IntegrationRequestEvent {
 
     public String getFlowNodeId() {
         return flowNodeId;
+    }
+
+    protected void setFlowNodeId(String flowNodeId) {
+        this.flowNodeId = flowNodeId;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    protected void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+
+    public String getConnectorType() {
+        return connectorType;
     }
 
     @Override

@@ -3,7 +3,7 @@ package org.activiti.cloud.connectors.starter.test;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.connectors.starter.channels.CloudConnectorChannels;
+import org.activiti.cloud.connectors.starter.channels.CloudConnectorConsumerChannels;
 import org.activiti.cloud.connectors.starter.configuration.EnableActivitiCloudConnector;
 import org.activiti.cloud.connectors.starter.model.IntegrationRequestEvent;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultEvent;
@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.messaging.Message;
@@ -23,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootApplication
 @EnableActivitiCloudConnector
+@EnableBinding(CloudConnectorConsumerChannels.class)
 @ComponentScan("org.activiti.cloud.connectors.starter")
 public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
@@ -44,7 +46,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
         assertThat(runtimeCmdProducer).isNotNull();
     }
 
-    @StreamListener(value = CloudConnectorChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Mock'")
+    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Mock'")
     public void mockTypeIntegrationRequestEvents(IntegrationRequestEvent event) {
         verifyEventAndCreateResults(event);
         Map<String, Object> resultVariables = createResultVariables(event);
@@ -58,7 +60,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     /*
      * A Cloud Connector receiving Integration Events is free to Start Process Instances and interact with different Runtime Bundles
      */
-    @StreamListener(value = CloudConnectorChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='MockProcessRuntime'")
+    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='MockProcessRuntime'")
     public void mockTypeIntegrationRequestEventsStartProcess(IntegrationRequestEvent event) {
         verifyEventAndCreateResults(event);
         Map<String, Object> resultVariables = createResultVariables(event);
