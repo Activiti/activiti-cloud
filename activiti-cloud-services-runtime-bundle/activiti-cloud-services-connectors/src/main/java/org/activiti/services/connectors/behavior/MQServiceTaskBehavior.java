@@ -25,40 +25,47 @@ import org.activiti.engine.impl.delegate.TriggerableActivityBehavior;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.services.connectors.IntegrationRequestSender;
-import org.springframework.messaging.MessageChannel;
+import org.activiti.services.connectors.model.IntegrationRequestEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implements TriggerableActivityBehavior {
 
     private final IntegrationContextManager integrationContextManager;
-    private final MessageChannel integrationEventsProducer;
-
     private final RuntimeBundleProperties runtimeBundleProperties;
-    private final MessageChannel auditProducer;
-
+    private final ApplicationEventPublisher eventPublisher;
 
     public MQServiceTaskBehavior(IntegrationContextManager integrationContextManager,
-                                 MessageChannel integrationEventsProducer,
                                  RuntimeBundleProperties runtimeBundleProperties,
-                                 MessageChannel auditProducer) {
+                                 ApplicationEventPublisher eventPublisher) {
         this.integrationContextManager = integrationContextManager;
-        this.integrationEventsProducer = integrationEventsProducer;
         this.runtimeBundleProperties = runtimeBundleProperties;
-        this.auditProducer = auditProducer;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
     public void execute(DelegateExecution execution) {
         IntegrationContextEntity integrationContext = storeIntegrationContext(execution);
 
-        IntegrationRequestSender integrationRequestSender = new IntegrationRequestSender(integrationEventsProducer, runtimeBundleProperties, auditProducer , integrationContext, execution);
-        registerTransactionSynchronization(integrationRequestSender);
+        publishSpringEvent(execution, integrationContext);
     }
 
-    protected void registerTransactionSynchronization(IntegrationRequestSender integrationRequestSender) {
-        TransactionSynchronizationManager.registerSynchronization(integrationRequestSender);
+    /**
+     * Publishes an custom event using the Spring {@link ApplicationEventPublisher}. This event will be caught by
+     * {@link IntegrationRequestSender#sendIntegrationRequest(IntegrationRequestEvent)} which is annotated with
+     * {@link TransactionalEventListener} on phase {@link TransactionPhase#AFTER_COMMIT}.
+     * @param execution the related execution
+     * @param integrationContext the related integration context
+     */
+    private void publishSpringEvent(DelegateExecution execution,
+                                      IntegrationContextEntity integrationContext) {
+        IntegrationRequestEvent event = new IntegrationRequestEvent(execution,
+                                                                    integrationContext, runtimeBundleProperties.getName());
+
+        eventPublisher.publishEvent(event);
     }
 
 

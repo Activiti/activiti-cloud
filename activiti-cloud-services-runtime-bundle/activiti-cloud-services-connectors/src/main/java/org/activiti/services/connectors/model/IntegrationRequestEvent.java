@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.activiti.bpmn.model.ServiceTask;
+import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IntegrationRequestEvent {
@@ -37,6 +40,10 @@ public class IntegrationRequestEvent {
 
     private String flowNodeId;
 
+    private String connectorType;
+
+    private String applicationName;
+
     private Map<String, Object> variables;
 
     //used by json deserialization
@@ -44,20 +51,20 @@ public class IntegrationRequestEvent {
         this.id = UUID.randomUUID().toString();
     }
 
-    public IntegrationRequestEvent(String processInstanceId,
-                                   String processDefinitionId,
-                                   String executionId,
-                                   String integrationContextId,
-                                   String flowNodeId,
-                                   Map<String, Object> variables) {
+    public IntegrationRequestEvent(DelegateExecution execution,
+                                   IntegrationContextEntity integrationContext,
+                                   String applicationName) {
         this();
-        this.processInstanceId = processInstanceId;
-        this.processDefinitionId = processDefinitionId;
-        this.executionId = executionId;
-        this.flowNodeId = flowNodeId;
-        this.variables = variables;
-        this.integrationContextId = integrationContextId;
+        this.processInstanceId = execution.getProcessInstanceId();
+        this.processDefinitionId = execution.getProcessDefinitionId();
+        this.executionId = integrationContext.getExecutionId();
+        this.flowNodeId = integrationContext.getFlowNodeId();
+        this.variables = execution.getVariables();
+        this.integrationContextId = integrationContext.getId();
+        this.applicationName = applicationName;
+        this.connectorType = ((ServiceTask) execution.getCurrentFlowElement()).getImplementation();
     }
+
 
     public String getId() {
         return id;
@@ -81,6 +88,14 @@ public class IntegrationRequestEvent {
 
     public String getFlowNodeId() {
         return flowNodeId;
+    }
+
+    public String getConnectorType() {
+        return connectorType;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
     }
 
     public Map<String, Object> getVariables() {

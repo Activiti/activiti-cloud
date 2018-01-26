@@ -13,10 +13,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -36,6 +38,9 @@ public class IntegrationRequestSenderTest {
     private IntegrationRequestSender integrationRequestSender;
 
     @Mock
+    private BinderAwareChannelResolver resolver;
+
+    @Mock
     private MessageChannel integrationProducer;
 
     @Mock
@@ -50,7 +55,6 @@ public class IntegrationRequestSenderTest {
     @Mock
     private IntegrationContextEntity integrationContextEntity;
 
-    @Mock
     private DelegateExecution delegateExecution;
 
     @Captor
@@ -59,54 +63,70 @@ public class IntegrationRequestSenderTest {
     @Captor
     private ArgumentCaptor<Message<IntegrationRequestEvent>> integrationRequestMessageCaptor;
 
+    private IntegrationRequestEvent integrationRequestEvent;
+
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
-        ServiceTask serviceTask = new ServiceTask();
-        serviceTask.setImplementation(CONNECTOR_TYPE);
-        when(delegateExecution.getCurrentFlowElement()).thenReturn(serviceTask);
-        integrationRequestSender = new IntegrationRequestSender(integrationProducer,
-                                                                runtimeBundleProperties,
-                                                                auditProducer,
-                                                                integrationContextEntity,
-                                                                delegateExecution);
 
-        when(delegateExecution.getProcessDefinitionId()).thenReturn(PROC_DEF_ID);
-        when(delegateExecution.getProcessInstanceId()).thenReturn(PROC_INST_ID);
+        integrationRequestSender = new IntegrationRequestSender(runtimeBundleProperties,
+                                                                auditProducer,
+                                                                resolver);
+
+        when(resolver.resolveDestination(CONNECTOR_TYPE)).thenReturn(integrationProducer);
+
+        configureProperties();
+        configureExecution();
+        configureIntegrationContext();
+
+        integrationRequestEvent = new IntegrationRequestEvent(delegateExecution,
+                                                              integrationContextEntity,
+                                                              APP_NAME);
+    }
+
+    private void configureIntegrationContext() {
         when(integrationContextEntity.getExecutionId()).thenReturn(EXECUTION_ID);
         when(integrationContextEntity.getId()).thenReturn(INTEGRATION_CONTEXT_ID);
         when(integrationContextEntity.getFlowNodeId()).thenReturn(FLOW_NODE_ID);
     }
 
+    private void configureExecution() {
+        ServiceTask serviceTask = new ServiceTask();
+        serviceTask.setImplementation(CONNECTOR_TYPE);
+
+        delegateExecution = anExecution()
+                .withServiceTask(serviceTask)
+                .withProcessDefinitionId(PROC_DEF_ID)
+                .withProcessInstanceId(PROC_INST_ID)
+                .build();
+    }
+
+    private void configureProperties() {
+        when(runtimeBundleProperties.getName()).thenReturn(APP_NAME);
+        when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
+    }
+
     @Test
-    public void afterCommitShouldSendIntegrationRequestMessage() throws Exception {
+    public void shouldSendIntegrationRequestMessage() throws Exception {
         //when
-        integrationRequestSender.afterCommit();
+        integrationRequestSender.sendIntegrationRequest(integrationRequestEvent);
 
         //then
         verify(integrationProducer).send(integrationRequestMessageCaptor.capture());
         Message<IntegrationRequestEvent> integrationRequestEventMessage = integrationRequestMessageCaptor.getValue();
 
-        IntegrationRequestEvent integrationRequestEvent = integrationRequestEventMessage.getPayload();
-        assertThat(integrationRequestEvent.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
-        assertThat(integrationRequestEvent.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
-        assertThat(integrationRequestEvent.getExecutionId()).isEqualTo(EXECUTION_ID);
-        assertThat(integrationRequestEvent.getIntegrationContextId()).isEqualTo(INTEGRATION_CONTEXT_ID);
-        assertThat(integrationRequestEvent.getFlowNodeId()).isEqualTo(FLOW_NODE_ID);
-
+        IntegrationRequestEvent sentIntegrationRequestEvent = integrationRequestEventMessage.getPayload();
+        assertThat(sentIntegrationRequestEvent).isEqualTo(integrationRequestEvent);
         assertThat(integrationRequestEventMessage.getHeaders().get(IntegrationRequestSender.CONNECTOR_TYPE)).isEqualTo(CONNECTOR_TYPE);
-
     }
 
     @Test
-    public void afterCommitShouldNotSendIntegrationAuditEventWhenIntegrationAuditEventsAreDisabled() throws Exception {
+    public void shouldNotSendIntegrationAuditEventWhenIntegrationAuditEventsAreDisabled() throws Exception {
         //given
-        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(false);
-        given(runtimeBundleProperties.getName()).willReturn(APP_NAME);
+        given(eventsProperties.isIntegrationAuditEventsEnabled()).willReturn(false);
 
         //when
-        integrationRequestSender.afterCommit();
+        integrationRequestSender.sendIntegrationRequest(integrationRequestEvent);
 
         //then
         verify(auditProducer,
@@ -114,16 +134,12 @@ public class IntegrationRequestSenderTest {
     }
 
     @Test
-    public void afterCommitShouldSendIntegrationAuditEventWhenIntegrationAuditEventsAreEnabled() throws Exception {
+    public void shouldSendIntegrationAuditEventWhenIntegrationAuditEventsAreEnabled() throws Exception {
         //given
-        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
-        given(runtimeBundleProperties.getName()).willReturn(APP_NAME);
-
-        ServiceTask serviceTask = new ServiceTask();
-        serviceTask.setImplementation(CONNECTOR_TYPE);
+        given(eventsProperties.isIntegrationAuditEventsEnabled()).willReturn(true);
 
         //when
-        integrationRequestSender.afterCommit();
+        integrationRequestSender.sendIntegrationRequest(integrationRequestEvent);
 
         //then
         verify(auditProducer).send(auditMessageArgumentCaptor.capture());
@@ -139,5 +155,4 @@ public class IntegrationRequestSenderTest {
         assertThat(integrationRequestSentEvent.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
         assertThat(integrationRequestSentEvent.getApplicationName()).isEqualTo(APP_NAME);
     }
-
 }

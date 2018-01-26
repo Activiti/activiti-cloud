@@ -25,17 +25,18 @@ import org.activiti.services.connectors.model.IntegrationRequestEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.springframework.messaging.Message;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
-import static org.assertj.core.api.Assertions.*;
+import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class MQServiceTaskBehaviorTest {
@@ -44,6 +45,9 @@ public class MQServiceTaskBehaviorTest {
     private static final String EXECUTION_ID = "execId";
     private static final String PROC_INST_ID = "procInstId";
     private static final String PROC_DEF_ID = "procDefId";
+    private static final String FLOW_NODE_ID = "flowNodeId";
+    private static final String INTEGRATION_CONTEXT_ID = "entityId";
+    private static final String APP_NAME = "myApp";
 
     @Spy
     @InjectMocks
@@ -52,12 +56,14 @@ public class MQServiceTaskBehaviorTest {
     @Mock
     private IntegrationContextManager integrationContextManager;
 
-
     @Mock
     private RuntimeBundleProperties runtimeBundleProperties;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     @Captor
-    private ArgumentCaptor<Message<IntegrationRequestEvent>> integrationRequestCaptor;
+    private ArgumentCaptor<IntegrationRequestEvent> integrationRequestCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -65,7 +71,7 @@ public class MQServiceTaskBehaviorTest {
     }
 
     @Test
-    public void executeShouldStoreTheIntegrationContextAndRegisterAMessage() throws Exception {
+    public void executeShouldStoreTheIntegrationContextAndPublishASpringEvent() throws Exception {
         //given
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setImplementation(CONNECTOR_TYPE);
@@ -75,23 +81,33 @@ public class MQServiceTaskBehaviorTest {
                 .withProcessInstanceId(PROC_INST_ID)
                 .withProcessDefinitionId(PROC_DEF_ID)
                 .withServiceTask(serviceTask)
+                .withFlowNodeId(FLOW_NODE_ID)
                 .build();
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getName()).willReturn(APP_NAME);
 
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
-        entity.setId("entityId");
+        entity.setId(INTEGRATION_CONTEXT_ID);
         given(integrationContextManager.create()).willReturn(entity);
-        doNothing().when(behavior).registerTransactionSynchronization(ArgumentMatchers.any());
 
         //when
         behavior.execute(execution);
 
         //then
-        verify(behavior).registerTransactionSynchronization(ArgumentMatchers.any());
-        assertThat(entity.getExecutionId()).isEqualTo(EXECUTION_ID);
-        assertThat(entity.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
-        assertThat(entity.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
+        assertThat(entity)
+                .hasExecutionId(EXECUTION_ID)
+                .hasProcessDefinitionId(PROC_DEF_ID)
+                .hasProcessInstanceId(PROC_INST_ID);
 
+        verify(eventPublisher).publishEvent(integrationRequestCaptor.capture());
+        IntegrationRequestEvent event = integrationRequestCaptor.getValue();
+        assertThat(event)
+                .hasApplicationName(APP_NAME)
+                .hasConnectorType(CONNECTOR_TYPE)
+                .hasExecutionId(EXECUTION_ID)
+                .hasProcessInstanceId(PROC_INST_ID)
+                .hasProcessDefinitionId(PROC_DEF_ID)
+                .hasIntegrationContextId(INTEGRATION_CONTEXT_ID)
+                .hasFlowNodeId(FLOW_NODE_ID);
     }
 
     @Test
