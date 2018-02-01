@@ -5,7 +5,7 @@
   <description>Activiti Cloud (Parent)</description>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-parent</artifactId>
-  <version>7-201712-EA</version>
+  <version>7-201801-EA</version>
 
   <packaging>pom</packaging>
 
@@ -23,11 +23,11 @@
     <!--configuration properties-->
     <jdk.version>1.8</jdk.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- Spring Boot / Cloud / Stream deps -->
     <spring.boot.version>2.0.0.M7</spring.boot.version>
     <spring.cloud.version>Finchley.M5</spring.cloud.version>
-    <spring.cloud.stream.version>Elmhurst.M3</spring.cloud.stream.version>
 
     <h2.version>1.4.193</h2.version>
 
@@ -39,7 +39,7 @@
     <docker.rabbitmq.start.timeout>15000</docker.rabbitmq.start.timeout>
 
     <!-- GRAPHQL Java Lib + Schema Generation -->
-    <graphql.jpa-query.version>0.3.0</graphql.jpa-query.version>
+    <graphql.jpa-query.version>0.3.1</graphql.jpa-query.version>
 
     <!-- using hibernate and JPA for the services -->
 
@@ -59,7 +59,7 @@
 
     <!-- Swagger -->
     <swagger.version>1.5.10</swagger.version>
-    <springfox.version>2.7.0</springfox.version>
+    <springfox.version>2.6.1</springfox.version>
 
     <!-- Rest Easy -->
     <resteasy.version>3.0.21.Final</resteasy.version>
@@ -102,6 +102,7 @@
     <junit.version>4.12</junit.version>
     <assertj.version>3.8.0</assertj.version>
     <jsonunit.version>1.24.0</jsonunit.version>
+    <awaitility.version>3.0.0</awaitility.version>
     <!-- configurations for Spring REST docs-->
     <asciidoc.filename>index.adoc</asciidoc.filename>
     <asciidoctor.version>1.5.6</asciidoctor.version>
@@ -296,6 +297,27 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-query-notifications</artifactId>
+        <version>${version.activiti.cloud.query}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-query-graphql-ws</artifactId>
+        <version>${version.activiti.cloud.query}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-query-stomp</artifactId>
+        <version>${version.activiti.cloud.query}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-query-graphiql</artifactId>
+        <version>${version.activiti.cloud.query}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-query</artifactId>
         <version>${version.activiti.cloud.query}</version>
       </dependency>
@@ -396,13 +418,6 @@
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
         <version>${spring.cloud.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-stream-dependencies</artifactId>
-        <version>${spring.cloud.stream.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -519,6 +534,11 @@
         <artifactId>assertj-core</artifactId>
         <version>${assertj.version}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.awaitility</groupId>
+        <artifactId>awaitility</artifactId>
+        <version>${awaitility.version}</version>
       </dependency>
       <dependency>
         <groupId>net.javacrumbs.json-unit</groupId>
@@ -971,6 +991,20 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
           <version>${build-helper-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>add-generated-assertions-folder</id>
+              <phase>generate-test-sources</phase>
+              <goals>
+                <goal>add-test-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>${generated-assertions-folder}</source>
+                </sources>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.commonjava.maven.plugins</groupId>
