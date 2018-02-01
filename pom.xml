@@ -25,7 +25,7 @@
 
 
   <artifactId>activiti-cloud-org-service-parent</artifactId>
-  <version>7-201801-EA-SNAPSHOT</version>
+  <version>7-201801-EA</version>
   <name>Activiti Cloud - Organization Services :: Parent</name>
   <description>Activiti Cloud Organization Services Parent</description>
   <packaging>pom</packaging>
