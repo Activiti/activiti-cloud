@@ -64,7 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs(outputDir = "target/snippets")
-public class ProcessDefinitionControllerImplTest {
+public class ProcessDefinitionControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "process-definition";
 

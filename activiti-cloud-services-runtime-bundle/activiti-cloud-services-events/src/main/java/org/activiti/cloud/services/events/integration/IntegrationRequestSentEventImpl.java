@@ -26,17 +26,18 @@ public class IntegrationRequestSentEventImpl extends BaseIntegrationEventImpl im
                                            String executionId,
                                            String processDefinitionId,
                                            String processInstanceId,
-                                           String integrationContextId) {
+                                           String integrationContextId,
+                                           String flowNodeId) {
         super(applicationName,
               executionId,
               processDefinitionId,
               processInstanceId,
-              integrationContextId);
+              integrationContextId,
+              flowNodeId);
     }
 
     @Override
     public String getEventType() {
         return "IntegrationRequestSentEvent";
     }
-
 }

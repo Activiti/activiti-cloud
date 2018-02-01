@@ -17,8 +17,6 @@
 package org.activiti.cloud.starter.tests.runtime;
 
 import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.Output;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface ConnectorIntegrationChannels {
@@ -27,8 +25,5 @@ public interface ConnectorIntegrationChannels {
 
     @Input(INTEGRATION_EVENTS_CONSUMER)
     SubscribableChannel integrationEventsConsumer();
-
-    @Output("integrationResultsProducer")
-    MessageChannel integrationResultsProducer();
 
 }

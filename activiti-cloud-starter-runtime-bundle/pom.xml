@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
-    <version>7-201712-EA</version>
+    <version>7-201801-EA</version>
   </parent>
 
   <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
@@ -142,6 +142,11 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

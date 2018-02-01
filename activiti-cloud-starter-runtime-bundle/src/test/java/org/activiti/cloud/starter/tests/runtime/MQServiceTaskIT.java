@@ -31,7 +31,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:application-test.properties")
@@ -48,28 +49,38 @@ public class MQServiceTaskIT {
     public void shouldContinueExecution() throws Exception {
         //given
         Map<String, Object> variables = new HashMap<>();
-        variables.put("firstName", "John");
-        variables.put("lastName", "Smith");
-        variables.put("age", 19);
+        variables.put("firstName",
+                      "John");
+        variables.put("lastName",
+                      "Smith");
+        variables.put("age",
+                      19);
 
         //when
-        ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskProcess", variables);
+        ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskProcess",
+                                                                            variables);
         assertThat(procInst).isNotNull();
 
-
         //then
-        // the execution should arrive in the human tasks which follows the service task
-        Thread.sleep(800);
+        await("the execution should arrive in the human tasks which follows the service task")
+                .untilAsserted(() -> {
+                                   List<Task> tasks = taskService.createTaskQuery().processInstanceId(procInst.getProcessInstanceId()).list();
+                                   assertThat(tasks).isNotNull();
+                                   assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");
+                               }
+                );
+
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(procInst.getProcessInstanceId()).list();
-        assertThat(tasks).isNotNull();
-        assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");
 
         // the variable "age" should be updated based on ServiceTaskConsumerHandler.receive
         Map<String, Object> updatedVariables = runtimeService.getVariables(procInst.getId());
         assertThat(updatedVariables)
-                .containsEntry("firstName", "John")
-                .containsEntry("lastName", "Smith")
-                .containsEntry("age", 20);
+                .containsEntry("firstName",
+                               "John")
+                .containsEntry("lastName",
+                               "Smith")
+                .containsEntry("age",
+                               20);
 
         //should be able to complete the process
         //when
@@ -100,7 +111,5 @@ public class MQServiceTaskIT {
         //the process should finish
         List<ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery().processInstanceId(procInst.getId()).list();
         assertThat(processInstances).isEmpty();
-
     }
-
 }

@@ -22,7 +22,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
@@ -32,7 +33,7 @@ import static org.assertj.core.api.Assertions.*;
 public class AuditProducerIT {
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
-    public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
+    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
     public static final String AUDIT_PRODUCER_IT = "AuditProducerIT";
 
     @Autowired
@@ -56,22 +57,19 @@ public class AuditProducerIT {
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
-            processDefinitionIds.put(pd.getName(), pd.getId());
+            processDefinitionIds.put(pd.getName(),
+                                     pd.getId());
         }
-
     }
 
     @Test
     public void shouldReceiveAuditMessage() throws Exception {
-        //given
-        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        waitForMessage();
+        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //then
-        assertThat(streamHandler.isMessageReceived()).isTrue();
-
+        await().untilAsserted(() -> assertThat(streamHandler.isMessageReceived()).isTrue());
     }
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
@@ -82,9 +80,5 @@ public class AuditProducerIT {
                                      HttpMethod.GET,
                                      null,
                                      responseType);
-    }
-
-    private void waitForMessage() throws InterruptedException {
-        Thread.sleep(500);
     }
 }

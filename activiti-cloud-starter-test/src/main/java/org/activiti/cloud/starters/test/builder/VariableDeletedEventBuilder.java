@@ -14,30 +14,25 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.api.commands;
+package org.activiti.cloud.starters.test.builder;
 
-import java.util.UUID;
+import org.activiti.cloud.starters.test.MockVariableDeletedEvent;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+public class VariableDeletedEventBuilder extends VariableEventBuilder<MockVariableDeletedEvent, VariableDeletedEventBuilder> {
 
-public class ReleaseTaskCmd implements Command {
+    private final MockVariableDeletedEvent event;
 
-    private final String id;
-    private String taskId;
-
-    @JsonCreator
-    public ReleaseTaskCmd(@JsonProperty("taskId") String taskId) {
-        this.id = UUID.randomUUID().toString();
-        this.taskId = taskId;
+    private VariableDeletedEventBuilder(long timestamp) {
+        event = new MockVariableDeletedEvent(timestamp);
     }
+
+    public static VariableDeletedEventBuilder aVariableDeletedEvent(long timestamp) {
+        return new VariableDeletedEventBuilder(timestamp);
+    }
+
 
     @Override
-    public String getId() {
-        return id;
-    }
-
-    public String getTaskId() {
-        return taskId;
+    protected MockVariableDeletedEvent getEvent() {
+        return event;
     }
 }

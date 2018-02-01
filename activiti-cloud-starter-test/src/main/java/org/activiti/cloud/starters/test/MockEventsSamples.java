@@ -21,8 +21,8 @@ import java.util.List;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.anIntegrationRequestSentEvent;
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.anIntegrationResultRecievedEvent;
+import static org.activiti.cloud.starters.test.builder.MockIntegrationEventBuilder.anIntegrationRequestSentEvent;
+import static org.activiti.cloud.starters.test.builder.MockIntegrationEventBuilder.anIntegrationResultRecievedEvent;
 
 public class MockEventsSamples {
 
@@ -93,12 +93,18 @@ public class MockEventsSamples {
                                                      "20",
                                                      "32",
                                                      "51"));
-        coveredEvents.add(anIntegrationRequestSentEvent("21",
-                                                        "33",
-                                                        "52"));
-        coveredEvents.add(anIntegrationResultRecievedEvent("22",
-                                                        "33",
-                                                        "52"));
+        coveredEvents.add(anIntegrationRequestSentEvent()
+                                  .withExecutionId("21")
+                                  .withProcessDefinitionId("33")
+                                  .withProcessInstanceId("52")
+                                  .withFlowNodeId("serviceTask")
+                                  .build());
+        coveredEvents.add(anIntegrationResultRecievedEvent()
+                                  .withExecutionId("22")
+                                  .withProcessDefinitionId("33")
+                                  .withProcessInstanceId("52")
+                                  .withFlowNodeId("serviceTask")
+                                  .build());
         return coveredEvents;
     }
 }

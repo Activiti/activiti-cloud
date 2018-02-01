@@ -18,7 +18,6 @@ package org.activiti.services.connectors.behavior;
 
 import java.util.Date;
 
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
@@ -26,42 +25,47 @@ import org.activiti.engine.impl.delegate.TriggerableActivityBehavior;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.services.connectors.IntegrationRequestSender;
-import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.activiti.services.connectors.model.IntegrationRequestEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implements TriggerableActivityBehavior {
 
     private final IntegrationContextManager integrationContextManager;
-    private final ProcessEngineIntegrationChannels integrationChannels;
-
     private final RuntimeBundleProperties runtimeBundleProperties;
-    private final ProcessEngineChannels processEngineChannels;
+    private final ApplicationEventPublisher eventPublisher;
 
-
-    @Autowired
     public MQServiceTaskBehavior(IntegrationContextManager integrationContextManager,
-                                 ProcessEngineIntegrationChannels processEngineIntegrationChannels,
                                  RuntimeBundleProperties runtimeBundleProperties,
-                                 ProcessEngineChannels processEngineChannels) {
+                                 ApplicationEventPublisher eventPublisher) {
         this.integrationContextManager = integrationContextManager;
-        this.integrationChannels = processEngineIntegrationChannels;
         this.runtimeBundleProperties = runtimeBundleProperties;
-        this.processEngineChannels = processEngineChannels;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
     public void execute(DelegateExecution execution) {
         IntegrationContextEntity integrationContext = storeIntegrationContext(execution);
 
-        IntegrationRequestSender integrationRequestSender = new IntegrationRequestSender( integrationChannels, runtimeBundleProperties, processEngineChannels, integrationContext, execution);
-        registerTransactionSynchronization(integrationRequestSender);
+        publishSpringEvent(execution, integrationContext);
     }
 
-    protected void registerTransactionSynchronization(IntegrationRequestSender integrationRequestSender) {
-        TransactionSynchronizationManager.registerSynchronization(integrationRequestSender);
+    /**
+     * Publishes an custom event using the Spring {@link ApplicationEventPublisher}. This event will be caught by
+     * {@link IntegrationRequestSender#sendIntegrationRequest(IntegrationRequestEvent)} which is annotated with
+     * {@link TransactionalEventListener} on phase {@link TransactionPhase#AFTER_COMMIT}.
+     * @param execution the related execution
+     * @param integrationContext the related integration context
+     */
+    private void publishSpringEvent(DelegateExecution execution,
+                                      IntegrationContextEntity integrationContext) {
+        IntegrationRequestEvent event = new IntegrationRequestEvent(execution,
+                                                                    integrationContext, runtimeBundleProperties.getName());
+
+        eventPublisher.publishEvent(event);
     }
 
 
@@ -76,6 +80,7 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
         integrationContext.setExecutionId(execution.getId());
         integrationContext.setProcessInstanceId(execution.getProcessInstanceId());
         integrationContext.setProcessDefinitionId(execution.getProcessDefinitionId());
+        integrationContext.setFlowNodeId(execution.getCurrentActivityId());
         integrationContext.setCreatedDate(new Date());
         return integrationContext;
     }

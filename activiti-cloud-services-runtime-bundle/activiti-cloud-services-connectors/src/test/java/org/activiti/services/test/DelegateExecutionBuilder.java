@@ -48,6 +48,11 @@ public class DelegateExecutionBuilder {
             return this;
         }
 
+        public DelegateExecutionBuilder withFlowNodeId(String flowNodeId) {
+            when(execution.getCurrentActivityId()).thenReturn(flowNodeId);
+            return this;
+        }
+
         public DelegateExecutionBuilder withServiceTask(ServiceTask serviceTask) {
             when(execution.getCurrentFlowElement()).thenReturn(serviceTask);
             return this;

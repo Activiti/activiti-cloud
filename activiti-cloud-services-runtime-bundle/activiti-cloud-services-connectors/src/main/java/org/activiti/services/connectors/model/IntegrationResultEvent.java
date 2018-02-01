@@ -28,6 +28,8 @@ public class IntegrationResultEvent {
 
     private String executionId;
 
+    private String flowNodeId;
+
     private Map<String, Object> variables;
 
     //used by json deserialization
@@ -48,6 +50,10 @@ public class IntegrationResultEvent {
 
     public String getExecutionId() {
         return executionId;
+    }
+
+    public String getFlowNodeId() {
+        return flowNodeId;
     }
 
     public Map<String, Object> getVariables() {
