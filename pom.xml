@@ -180,7 +180,7 @@
         <executions>
           <execution>
             <id>docker:build</id>
-            <phase>package</phase>
+            <phase>install</phase>
             <goals>
               <goal>build</goal>
             </goals>
