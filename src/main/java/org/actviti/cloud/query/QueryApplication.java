@@ -15,6 +15,9 @@
  */
 
 package org.actviti.cloud.query;
+import org.activiti.cloud.services.query.graphql.autoconfigure.EnableActivitiGraphQLQueryService;
+import org.activiti.cloud.services.query.notifications.config.EnableActivitiNotificationsGateway;
+import org.activiti.cloud.services.query.qraphql.ws.config.EnableActivitiGraphQLNotifications;
 import org.activiti.cloud.starter.configuration.EnableActivitiQuery;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,7 +25,11 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableActivitiQuery
-@ComponentScan("org.activiti")
+@EnableActivitiGraphQLNotifications
+@EnableActivitiNotificationsGateway
+@EnableActivitiGraphQLQueryService
+@ComponentScan({"org.activiti.cloud.services.query.app","org.activiti.cloud.services.query.events",
+        "org.activiti.cloud.services.query.rest","org.activiti.cloud.starters","org.activiti.cloud.starter","org.activiti.cloud.services.identity"})
 public class QueryApplication {
 
     public static void main(String[] args) {

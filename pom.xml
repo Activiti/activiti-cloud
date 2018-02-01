@@ -160,14 +160,50 @@
                 <cmd>java ${JAVA_OPTS} -jar maven/${project.artifactId}-${project.version}.jar</cmd>
               </build>
             </image>
+            <image>
+              <name>byteflair/rabbitmq-stomp</name>
+              <alias>activiti-rabbitmq</alias>
+              <run>
+                <ports>
+                  <port>5672:5672</port>
+                  <port>15672:15672</port>
+                  <port>61613:61613</port>
+                </ports>
+                <wait>
+                  <log>Server startup complete</log>
+                  <time>15000</time>
+                </wait>
+              </run>
+            </image>
           </images>
         </configuration>
         <executions>
           <execution>
             <id>docker:build</id>
-            <phase>install</phase>
+            <phase>package</phase>
             <goals>
               <goal>build</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>start</id>
+            <configuration>
+              <skip>${skipTests}</skip>
+            </configuration>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>stop</id>
+            <configuration>
+              <skip>${skipTests}</skip>
+            </configuration>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+              <goal>remove</goal>
             </goals>
           </execution>
         </executions>
