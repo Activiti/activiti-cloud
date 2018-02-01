@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.query.graphql.autoconfigure;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -27,13 +27,13 @@ public class ActivitiGraphQLSchemaProperties {
     /**
      * Provides the name of GraphQL schema. This is required attribute.
      */
-    @NotEmpty
+    @NotBlank
     private String name;
-    
+
     /**
      * Provides the description of GraphQL schema. Cannot be null.
      */
-    @NotEmpty
+    @NotBlank
     private String description;
 
     /**
@@ -41,16 +41,16 @@ public class ActivitiGraphQLSchemaProperties {
      */
     @NotNull
     private String type;
-    
+
     /**
      * Enable or disable graphql module services.
      */
     private boolean enabled;
-    
+
     /**
      * graphql query executor REST endpoint. Default value is /graphql
      */
-    @NotEmpty
+    @NotBlank
     private String path = "/graphql";
 
     /**

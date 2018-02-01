@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-query-service-parent</artifactId>
-    <version>7-201712-EA</version>
+    <version>7-201801-EA</version>
   </parent>
 
   <artifactId>activiti-cloud-starter-query</artifactId>
@@ -25,6 +25,22 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-logging</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-graphql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-notifications</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-graphql-ws</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-graphiql</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -76,6 +92,11 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -146,12 +167,13 @@
               </run>
             </image>
             <image>
-              <name>rabbitmq:management</name>
+              <name>byteflair/rabbitmq-stomp</name>
               <alias>activiti-rabbitmq</alias>
               <run>
                 <ports>
                   <port>5672:5672</port>
                   <port>15672:15672</port>
+                  <port>61613:61613</port>
                 </ports>
                 <wait>
                   <log>Server startup complete</log>

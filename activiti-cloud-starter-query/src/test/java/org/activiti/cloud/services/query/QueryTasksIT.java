@@ -41,7 +41,9 @@ import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessSt
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskAssignedEvent;
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskCompletedEvent;
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskCreatedEvent;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -116,25 +118,26 @@ public class QueryTasksIT {
                                                   .withName("Completed task")
                                                   .build()));
 
-        waitForMessage();
+        await().untilAsserted(() -> {
 
-        //when
-        ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
 
-        //then
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        Collection<Task> tasks = responseEntity.getBody().getContent();
-        assertThat(tasks)
-                .extracting(Task::getId,
-                            Task::getStatus)
-                .contains(tuple("2",
-                                "CREATED"),
-                          tuple("3",
-                                "ASSIGNED"),
-                          tuple("4",
-                                "COMPLETED"));
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId,
+                                Task::getStatus)
+                    .contains(tuple("2",
+                                    "CREATED"),
+                              tuple("3",
+                                    "ASSIGNED"),
+                              tuple("4",
+                                    "COMPLETED"));
+        });
     }
 
     @Test
@@ -173,26 +176,26 @@ public class QueryTasksIT {
                                                   .withName("Completed task")
                                                   .build()));
 
-        waitForMessage();
+        await().untilAsserted(() -> {
 
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
+                                                                                            HttpMethod.GET,
+                                                                                            null,
+                                                                                            PAGED_TASKS_RESPONSE_TYPE,
+                                                                                            "ASSIGNED");
 
-        //when
-        ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
-                                                                                        HttpMethod.GET,
-                                                                                        null,
-                                                                                        PAGED_TASKS_RESPONSE_TYPE,
-                                                                                        "ASSIGNED");
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        //then
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        Collection<Task> tasks = responseEntity.getBody().getContent();
-        assertThat(tasks)
-                .extracting(Task::getId,
-                            Task::getStatus)
-                .containsExactly(tuple("3",
-                                "ASSIGNED"));
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId,
+                                Task::getStatus)
+                    .containsExactly(tuple("3",
+                                           "ASSIGNED"));
+        });
     }
 
     private ResponseEntity<PagedResources<Task>> executeRequestGetTasks() {
@@ -200,9 +203,5 @@ public class QueryTasksIT {
                                          HttpMethod.GET,
                                          null,
                                          PAGED_TASKS_RESPONSE_TYPE);
-    }
-
-    private void waitForMessage() throws InterruptedException {
-        Thread.sleep(500);
     }
 }

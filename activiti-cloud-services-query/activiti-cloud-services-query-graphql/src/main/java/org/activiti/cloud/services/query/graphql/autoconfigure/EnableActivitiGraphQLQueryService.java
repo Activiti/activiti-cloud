@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,12 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.activiti.cloud.services.query.graphql.autoconfigure.ActivitiGraphQLAutoConfiguration.DefaultActivitiGraphQLJpaConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
 /**
- * Enables configuration of Activiti GraphQL Query Service components 
+ * Enables configuration of Activiti GraphQL Query Service components
  *
  */
 @Documented

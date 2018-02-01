@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,8 @@ public class QuerySwaggerConfig {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2).select()
-                                                      .apis(RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.controller"))
-                                                      .paths(PathSelectors.any())
-                                                      .build();
+                .apis(RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.controller"))
+                .paths(PathSelectors.any())
+                .build();
     }
-
 }

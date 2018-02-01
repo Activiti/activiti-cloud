@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-query-service-parent</artifactId>
-    <version>7-201712-EA</version>
+    <version>7-201801-EA</version>
   </parent>
 
   <artifactId>activiti-cloud-services-query</artifactId>
@@ -17,6 +17,10 @@
     <module>activiti-cloud-services-query-repo</module>
     <module>activiti-cloud-services-query-rest</module>
     <module>activiti-cloud-services-query-graphql</module>
+    <module>activiti-cloud-services-query-notifications</module>
+    <module>activiti-cloud-services-query-graphql-ws</module>
+    <module>activiti-cloud-services-query-stomp</module>
+    <module>activiti-cloud-services-query-graphiql</module>
   </modules>
 
 </project>

@@ -34,10 +34,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
-import static org.activiti.cloud.starters.test.VariableCreatedEventBuilder.aVariableCreatedEvent;
-import static org.activiti.cloud.starters.test.VariableDeletedEventBuilder.aVariableDeletedEvent;
-import static org.activiti.cloud.starters.test.VariableUpdatedEventBuilder.aVariableUpdatedEvent;
-import static org.assertj.core.api.Assertions.*;
+import static org.activiti.cloud.starters.test.builder.VariableCreatedEventBuilder.aVariableCreatedEvent;
+import static org.activiti.cloud.starters.test.builder.VariableDeletedEventBuilder.aVariableDeletedEvent;
+import static org.activiti.cloud.starters.test.builder.VariableUpdatedEventBuilder.aVariableUpdatedEvent;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -109,28 +111,29 @@ public class QueryProcessInstanceVariablesIT {
                               .withVariableType("string")
                               .build());
 
-        waitForMessage();
+        await().untilAsserted(() -> {
 
-        //when
-        ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
-                                                                                            HttpMethod.GET,
-                                                                                            null,
-                                                                                            PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                            processInstanceId);
+            //when
+            ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
+                                                                                                HttpMethod.GET,
+                                                                                                null,
+                                                                                                PAGED_VARIABLE_RESPONSE_TYPE,
+                                                                                                processInstanceId);
 
-        //then
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody().getContent())
-                .extracting(
-                        Variable::getName,
-                        Variable::getValue)
-                .containsExactly(
-                        tuple(
-                                "varCreated",
-                                "v1"),
-                        tuple(
-                                "varUpdated",
-                                "v2-up"));
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(
+                            Variable::getName,
+                            Variable::getValue)
+                    .containsExactly(
+                            tuple(
+                                    "varCreated",
+                                    "v1"),
+                            tuple(
+                                    "varUpdated",
+                                    "v2-up"));
+        });
     }
 
     @Test
@@ -163,27 +166,26 @@ public class QueryProcessInstanceVariablesIT {
                               .withProcessInstanceId(processInstanceId)
                               .build());
 
-        waitForMessage();
+        await().untilAsserted(() -> {
 
-        //when
-        ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "&name={name}",
-                                                                                            HttpMethod.GET,
-                                                                                            null,
-                                                                                            PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                            processInstanceId, "var2");
+            //when
+            ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "&name={name}",
+                                                                                                HttpMethod.GET,
+                                                                                                null,
+                                                                                                PAGED_VARIABLE_RESPONSE_TYPE,
+                                                                                                processInstanceId,
+                                                                                                "var2");
 
-        //then
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody().getContent())
-                .extracting(
-                        Variable::getName,
-                        Variable::getValue)
-                .containsExactly(
-                        tuple("var2", "v2")
-                );
-    }
-
-    private void waitForMessage() throws InterruptedException {
-        Thread.sleep(500);
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(
+                            Variable::getName,
+                            Variable::getValue)
+                    .containsExactly(
+                            tuple("var2",
+                                  "v2")
+                    );
+        });
     }
 }
