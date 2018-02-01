@@ -10,7 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = QueryApplication.class)
 @DirtiesContext
-public class ApplicationTest {
+public class ApplicationTestIT {
 
 	@Test
 	public void contextLoads() throws Exception {
