@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.starter.audit.tests.it.converter;
+package org.activiti.cloud.services.audit.converter;
 
 import java.util.Date;
 
-import org.activiti.cloud.services.audit.converter.ProcessInstanceJpaJsonConverter;
 import org.activiti.cloud.services.audit.events.model.ProcessInstance;
 import org.junit.Test;
 

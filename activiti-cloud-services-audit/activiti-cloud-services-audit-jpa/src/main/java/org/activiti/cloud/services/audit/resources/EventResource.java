@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.audit.mongo.events;
+package org.activiti.cloud.services.audit.resources;
 
-public class VariableDeletedEventDocument extends ProcessEngineEventDocument {
+import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 
-    protected static final String VARIABLE_DELETED_EVENT = "VariableDeletedEvent";
+public class EventResource extends Resource<ProcessEngineEventEntity> {
 
-    private String variableName;
-    private String variableType;
-    private String taskId;
-
-    public String getVariableName() {
-        return variableName;
+    public EventResource(ProcessEngineEventEntity content,
+                         Link... links) {
+        super(content,
+              links);
     }
 
-    public String getVariableType() {
-        return variableType;
-    }
-
-    public String getTaskId() {
-        return taskId;
-    }
 }

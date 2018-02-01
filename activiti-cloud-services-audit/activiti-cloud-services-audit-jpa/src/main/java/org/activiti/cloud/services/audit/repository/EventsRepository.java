@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.Description;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@RepositoryRestResource(path = EventsRelProvider.COLLECTION_RESOURCE_REL,
-        collectionResourceDescription = @Description("Collection of event resources"),
-        collectionResourceRel = EventsRelProvider.COLLECTION_RESOURCE_REL)
-public interface EventsRepository extends RestResourceRepository<ProcessEngineEventEntity, Long>,
-                                          PagingAndSortingRepository<ProcessEngineEventEntity, Long>,
+@RepositoryRestResource(exported = false)
+public interface EventsRepository extends PagingAndSortingRepository<ProcessEngineEventEntity, Long>,
                                           QuerydslPredicateExecutor<ProcessEngineEventEntity>,
                                           QuerydslBinderCustomizer<QProcessEngineEventEntity> {
 
