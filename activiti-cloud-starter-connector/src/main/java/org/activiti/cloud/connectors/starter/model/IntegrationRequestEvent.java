@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,12 @@ public class IntegrationRequestEvent {
     private String processDefinitionId;
 
     private String executionId;
+
+    private String flowNodeId;
+
+    private String applicationName;
+
+    private String connectorType;
 
     private Map<String, Object> variables;
 
@@ -69,6 +75,26 @@ public class IntegrationRequestEvent {
 
     public Map<String, Object> getVariables() {
         return Collections.unmodifiableMap(variables);
+    }
+
+    public String getFlowNodeId() {
+        return flowNodeId;
+    }
+
+    protected void setFlowNodeId(String flowNodeId) {
+        this.flowNodeId = flowNodeId;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    protected void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+
+    public String getConnectorType() {
+        return connectorType;
     }
 
     @Override

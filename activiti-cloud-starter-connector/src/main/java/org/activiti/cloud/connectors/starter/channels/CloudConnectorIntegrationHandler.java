@@ -4,7 +4,7 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.stereotype.Component;
 
 @Component
-@EnableBinding({CloudConnectorChannels.class, ProcessRuntimeChannels.class})
+@EnableBinding({ProcessRuntimeChannels.class})
 public class CloudConnectorIntegrationHandler {
 
 }

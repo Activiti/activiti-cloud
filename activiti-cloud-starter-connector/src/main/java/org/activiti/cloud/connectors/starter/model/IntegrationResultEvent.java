@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@ public class IntegrationResultEvent {
 
     private String executionId;
 
+    private String flowNodeId;
+
+    private String targetApplication;
+
     private Map<String, Object> variables;
 
     //used by json deserialization
@@ -50,8 +54,32 @@ public class IntegrationResultEvent {
         return executionId;
     }
 
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
+    }
+
     public Map<String, Object> getVariables() {
         return variables;
+    }
+
+    public void setVariables(Map<String, Object> variables) {
+        this.variables = variables;
+    }
+
+    public String getFlowNodeId() {
+        return flowNodeId;
+    }
+
+    public void setFlowNodeId(String flowNodeId) {
+        this.flowNodeId = flowNodeId;
+    }
+
+    public String getTargetApplication() {
+        return targetApplication;
+    }
+
+    public void setTargetApplication(String targetApplication) {
+        this.targetApplication = targetApplication;
     }
 
     @Override
