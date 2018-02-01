@@ -167,12 +167,13 @@
               </run>
             </image>
             <image>
-              <name>rabbitmq:management</name>
+              <name>byteflair/rabbitmq-stomp</name>
               <alias>activiti-rabbitmq</alias>
               <run>
                 <ports>
                   <port>5672:5672</port>
                   <port>15672:15672</port>
+                  <port>61613:61613</port>
                 </ports>
                 <wait>
                   <log>Server startup complete</log>

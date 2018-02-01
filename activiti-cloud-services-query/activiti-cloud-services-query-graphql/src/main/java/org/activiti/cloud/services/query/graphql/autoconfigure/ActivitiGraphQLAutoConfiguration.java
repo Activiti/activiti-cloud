@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  */
 @Configuration
 @ConditionalOnClass(GraphQL.class)
-@ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled")
+@ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
 @PropertySource("classpath:/org/activiti/cloud/services/query/graphql/default.properties")
 public class ActivitiGraphQLAutoConfiguration {
 
@@ -56,18 +56,21 @@ public class ActivitiGraphQLAutoConfiguration {
     @Import(ActivitiGraphQLController.class)
     @EntityScan(basePackageClasses = ProcessInstance.class)
     @EnableConfigurationProperties(ActivitiGraphQLSchemaProperties.class)
+    @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
     public static class DefaultActivitiGraphQLJpaConfiguration implements ImportAware {
 
         @Autowired
         private ActivitiGraphQLSchemaProperties properties;
 
         @Bean
+        @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
         @ConditionalOnMissingBean(GraphQLExecutor.class)
         public GraphQLExecutor graphQLExecutor(final GraphQLSchemaBuilder graphQLSchemaBuilder) {
             return new GraphQLJpaExecutor(graphQLSchemaBuilder.build());
         }
 
         @Bean
+        @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
         @ConditionalOnMissingBean(GraphQLSchemaBuilder.class)
         public GraphQLSchemaBuilder graphQLSchemaBuilder(final EntityManager entityManager) {
             Assert.notNull(properties.getName(), "GraphQL schema name cannot be null.");

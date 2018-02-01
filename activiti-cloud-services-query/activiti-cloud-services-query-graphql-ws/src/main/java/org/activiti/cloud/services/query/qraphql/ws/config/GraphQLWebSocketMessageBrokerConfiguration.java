@@ -42,8 +42,9 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 @Configuration
 @EnableWebSocket
 @EnableWebSocketMessageBroker
+@ConditionalOnGraphQLNotifications
 public class GraphQLWebSocketMessageBrokerConfiguration extends GraphQLWebSocketMessageBrokerConfigurationSupport
-												implements  WebSocketMessageBrokerConfigurer {
+        implements WebSocketMessageBrokerConfigurer {
 
     @Value("${spring.rabbitmq.host:rabbitmq}")
     private String relayHost;
@@ -67,62 +68,67 @@ public class GraphQLWebSocketMessageBrokerConfiguration extends GraphQLWebSocket
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry
-            .enableStompBrokerRelay()
-            .setRelayHost(relayHost)
-            .setClientLogin(login)
-            .setClientPasscode(passcode)
+                .enableStompBrokerRelay()
+                .setRelayHost(relayHost)
+                .setClientLogin(login)
+                .setClientPasscode(passcode)
         ;
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint(graphQLEndpoint)
-            .setHandshakeHandler(new DefaultHandshakeHandler())
-            .setAllowedOrigins(graphQLAllowedOrigins)
-            .addInterceptors(new HttpSessionHandshakeInterceptor())
-            ;
+                .setHandshakeHandler(new DefaultHandshakeHandler())
+                .setAllowedOrigins(graphQLAllowedOrigins)
+                .addInterceptors(new HttpSessionHandshakeInterceptor())
+        ;
     }
 
     @Bean
+    @ConditionalOnGraphQLNotifications
     public ReactorNettyTcpStompClient stompClient() {
-        ReactorNettyTcpStompClient stompClient = new ReactorNettyTcpStompClient(relayHost, relayPort);
+        ReactorNettyTcpStompClient stompClient = new ReactorNettyTcpStompClient(relayHost,
+                                                                                relayPort);
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
         return stompClient;
     }
 
     @Bean
+    @ConditionalOnGraphQLNotifications
     public StompRelayPublisherFactory stompRelayPublisherFactory(ReactorNettyTcpStompClient stompClient) {
         return new StompRelayPublisherFactory(stompClient)
-            .login(login)
-            .passcode(passcode)
-            .destinationResolver(new ProcessEngineNotificationStompRelayDataFetcherDestinationResolver())
-        ;
+                .login(login)
+                .passcode(passcode)
+                .destinationResolver(new ProcessEngineNotificationStompRelayDataFetcherDestinationResolver())
+                ;
     }
 
+    @Bean
+    @ConditionalOnGraphQLNotifications
+    public MessageHandler graphQLBrokerMessageHandler(SubscribableChannel clientInboundChannel,
+                                                      MessageChannel clientOutboundChannel,
+                                                      SubscribableChannel brokerChannel,
+                                                      TaskScheduler messageBrokerTaskScheduler,
+                                                      GraphQLExecutor graphQLSubscriptionExecutor) {
+        GraphQLBrokerMessageHandler messageHandler = new GraphQLBrokerMessageHandler(clientInboundChannel,
+                                                                                     clientOutboundChannel,
+                                                                                     brokerChannel,
+                                                                                     graphQLSubscriptionExecutor);
 
-	@Bean
-	public MessageHandler graphQLBrokerMessageHandler(SubscribableChannel clientInboundChannel,
-                                            			MessageChannel clientOutboundChannel,
-                                            			SubscribableChannel brokerChannel,
-                                            			TaskScheduler messageBrokerTaskScheduler,
-                                            			GraphQLExecutor graphQLSubscriptionExecutor)
-	{
-		GraphQLBrokerMessageHandler messageHandler = new GraphQLBrokerMessageHandler(clientInboundChannel,
-				clientOutboundChannel, brokerChannel, graphQLSubscriptionExecutor);
+        messageHandler.setTaskScheduler(messageBrokerTaskScheduler);
 
-		messageHandler.setTaskScheduler(messageBrokerTaskScheduler);
-
-		return messageHandler;
-	}
+        return messageHandler;
+    }
 
     @Override
-	@Bean
+    @Bean
+    @ConditionalOnGraphQLNotifications
     public WebSocketHandler subProtocolWebSocketHandler() {
-    	SubProtocolWebSocketHandler handler = new SubProtocolWebSocketHandler(clientInboundChannel(), clientOutboundChannel());
-    	handler.addProtocolHandler(new GraphQLBrokerSubProtocolHandler());
+        SubProtocolWebSocketHandler handler = new SubProtocolWebSocketHandler(clientInboundChannel(),
+                                                                              clientOutboundChannel());
+        handler.addProtocolHandler(new GraphQLBrokerSubProtocolHandler());
 
         return handler;
     }
-
 }

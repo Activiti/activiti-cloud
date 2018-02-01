@@ -31,18 +31,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(
-    properties={"spring.activiti.cloud.services.query.graphql.enabled=false"},
+    properties={"spring.activiti.cloud.services.query.graphql.enabled=true"},
     webEnvironment = WebEnvironment.NONE
 )
 public class EnableActivitiGraphQLQueryServiceTest {
 
-    @Autowired
+    @Autowired(required = false)
     private ActivitiGraphQLSchemaProperties graphQLProperties;
 
-    @Autowired
+    @Autowired(required = false)
     private GraphQLExecutor graphQLExecutor;
 
-    @Autowired
+    @Autowired(required = false)
     private GraphQLSchemaBuilder graphQLSchemaBuilder;
 
     @SpringBootApplication

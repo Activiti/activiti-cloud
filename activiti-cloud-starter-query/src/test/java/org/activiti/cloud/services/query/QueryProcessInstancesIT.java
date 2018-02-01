@@ -36,9 +36,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCompletedEvent;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
+import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -67,38 +65,37 @@ public class QueryProcessInstancesIT {
         //given
         // a completed process
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
-                                           "10",
-                                           "defId",
-                                           "15"));
+                "10",
+                "defId",
+                "15"));
         producer.send(aProcessCompletedEvent(System.currentTimeMillis(),
-                                             "10",
-                                             "defId",
-                                             "15"));
+                "10",
+                "defId",
+                "15"));
 
         // a running process
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
-                                           "11",
-                                           "defId",
-                                           "16"));
+                "11",
+                "defId",
+                "16"));
 
-        await().untilAsserted(() -> {
+        waitForMessage();
 
-            //when
-            ResponseEntity<PagedResources<ProcessInstance>> responseEntity = executeRequestGetProcInstances();
+        //when
+        ResponseEntity<PagedResources<ProcessInstance>> responseEntity = executeRequestGetProcInstances();
 
-            //then
-            assertThat(responseEntity).isNotNull();
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            Collection<ProcessInstance> processInstances = responseEntity.getBody().getContent();
-            assertThat(processInstances)
-                    .extracting(ProcessInstance::getProcessInstanceId,
-                                ProcessInstance::getStatus)
-                    .contains(tuple("15",
-                                    "COMPLETED"),
-                              tuple("16",
-                                    "RUNNING"));
-        });
+        Collection<ProcessInstance> processInstances = responseEntity.getBody().getContent();
+        assertThat(processInstances)
+                .extracting(ProcessInstance::getProcessInstanceId,
+                        ProcessInstance::getStatus)
+                .contains(tuple("15",
+                        "COMPLETED"),
+                        tuple("16",
+                                "RUNNING"));
     }
 
     @Test
@@ -106,45 +103,49 @@ public class QueryProcessInstancesIT {
         //given
         // a completed process
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
-                                           "10",
-                                           "defId",
-                                           "15"));
+                "10",
+                "defId",
+                "15"));
         producer.send(aProcessCompletedEvent(System.currentTimeMillis(),
-                                             "10",
-                                             "defId",
-                                             "15"));
+                "10",
+                "defId",
+                "15"));
 
         // a running process
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
-                                           "11",
-                                           "defId",
-                                           "16"));
+                "11",
+                "defId",
+                "16"));
 
-        await().untilAsserted(() -> {
-            //when
-            ResponseEntity<PagedResources<ProcessInstance>> responseEntity = testRestTemplate.exchange(PROC_URL + "?status={status}",
-                                                                                                       HttpMethod.GET,
-                                                                                                       null,
-                                                                                                       PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
-                                                                                                       "COMPLETED");
+        waitForMessage();
 
-            //then
-            assertThat(responseEntity).isNotNull();
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        //when
+        ResponseEntity<PagedResources<ProcessInstance>> responseEntity = testRestTemplate.exchange(PROC_URL + "?status={status}",
+                HttpMethod.GET,
+                null,
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
+                "COMPLETED");
 
-            Collection<ProcessInstance> processInstances = responseEntity.getBody().getContent();
-            assertThat(processInstances)
-                    .extracting(ProcessInstance::getProcessInstanceId,
-                                ProcessInstance::getStatus)
-                    .containsExactly(tuple("15",
-                                           "COMPLETED"));
-        });
+        //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        Collection<ProcessInstance> processInstances = responseEntity.getBody().getContent();
+        assertThat(processInstances)
+                .extracting(ProcessInstance::getProcessInstanceId,
+                        ProcessInstance::getStatus)
+                .containsExactly(tuple("15",
+                        "COMPLETED"));
     }
 
     private ResponseEntity<PagedResources<ProcessInstance>> executeRequestGetProcInstances() {
         return testRestTemplate.exchange(PROC_URL,
-                                         HttpMethod.GET,
-                                         null,
-                                         PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+                HttpMethod.GET,
+                null,
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+    }
+
+    private void waitForMessage() throws InterruptedException {
+        Thread.sleep(500);
     }
 }

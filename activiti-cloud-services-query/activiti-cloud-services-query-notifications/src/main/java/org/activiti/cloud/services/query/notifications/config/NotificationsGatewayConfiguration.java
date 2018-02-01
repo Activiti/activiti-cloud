@@ -39,17 +39,24 @@ import org.springframework.integration.annotation.IntegrationComponentScan;
 @EnableBinding(NotificationsGatewayChannels.class)
 @IntegrationComponentScan(basePackageClasses=NotificationsGateway.class)
 @EnableConfigurationProperties(ActivitiNotificationsGatewayProperties.class)
+@ConditionalOnGraphQLNotifications
 public class NotificationsGatewayConfiguration {
 
+    private final ActivitiNotificationsGatewayProperties properties;
+
     @Autowired
-    private ActivitiNotificationsGatewayProperties properties;
+    public NotificationsGatewayConfiguration(ActivitiNotificationsGatewayProperties properties) {
+        this.properties = properties;
+    }
 
     @Bean
+    @ConditionalOnGraphQLNotifications
     public RoutingKeyResolver routingKeyResolver() {
         return new SpELTemplateRoutingKeyResolver();
     }
 
     @Bean
+    @ConditionalOnGraphQLNotifications
     public ProcessEngineNotificationTransformer processEngineEventNotificationTransformer() {
         return new GraphQLProcessEngineNotificationTransformer(
             Arrays.asList(properties.getProcessEngineEventAttributeKeys().split(",")),
@@ -58,6 +65,7 @@ public class NotificationsGatewayConfiguration {
     }
 
     @Bean
+    @ConditionalOnGraphQLNotifications
     public NotificationsConsumerChannelHandler notificationsConsumerChannelHandler(
                NotificationsGateway notificationsGateway,
                ProcessEngineNotificationTransformer processEngineNotificationTransformer,

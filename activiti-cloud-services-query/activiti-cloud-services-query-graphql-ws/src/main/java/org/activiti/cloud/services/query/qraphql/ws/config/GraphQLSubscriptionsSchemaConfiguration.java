@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableActivitiGraphQLQueryService
+@ConditionalOnGraphQLNotifications
 public class GraphQLSubscriptionsSchemaConfiguration {
 
     private String graphQLSchemaFileName = "activiti.graphqls";
@@ -35,6 +36,7 @@ public class GraphQLSubscriptionsSchemaConfiguration {
     private String graphQLSchemaSubscriptionFieldName = "ProcessEngineNotification";
 
     @Bean
+    @ConditionalOnGraphQLNotifications
     public GraphQLSubscriptionSchemaBuilder graphqlSchemaBuilder(StompRelayPublisherFactory stompRelay) {
 
     	GraphQLSubscriptionSchemaBuilder schemaBuilder = new GraphQLSubscriptionSchemaBuilder(graphQLSchemaFileName);
@@ -45,6 +47,7 @@ public class GraphQLSubscriptionsSchemaConfiguration {
     }
 
     @Bean
+    @ConditionalOnGraphQLNotifications
     public GraphQLExecutor graphQLExecutor(GraphQLSchemaBuilder querySchemaBuilder,
                                            GraphQLSubscriptionSchemaBuilder subscriptionSchemaBuilder)
     {
