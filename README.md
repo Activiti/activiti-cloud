@@ -1,4 +1,18 @@
 # activiti-cloud-query-service 
+
+<p>Implements a query service that can be added to an application using starter. Supports either REST or GraphQL.</p>
+
+<p>Structure:</p>
+
+graphiql - A UI client for testing graphQL requests.
+graphql - This makes the graphql endpoint available - it has a dependency to model.<br/>
+graphqlws - Configures websockes for graphql and sets up schema with event for subscribing to - needed for subscribing to notifications.</br>
+model - Basic JPA entity model for querying.<br/>
+notifications - Transforms event stream for consumption by GraphQL - can be run as separate component (see module README).<br/>
+repo - Enables persistence for the core model.<br/>
+rest - Implementation for consuming event stream from runtime bundle and also provides REST endpoints (but not related to graphql). Uses spring data.<br/>
+stomp - Adds websocket dependency and /ws/stomp endpoint. Needed for subscribing to notifications.</br>
+
 [![Join the chat at https://gitter.im/Activiti/Activiti7](https://badges.gitter.im/Activiti/Activiti7.svg)](https://gitter.im/Activiti/Activiti7?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 <p>
