@@ -60,6 +60,7 @@ public class ProcessCompletedEventHandlerTest {
                                                                                 "10",
                                                                                 "100",
                                                                                 "200",
+                                                                                "runtime-bundle-a",
                                                                                 new ProcessInstance());
 
         ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
@@ -82,6 +83,7 @@ public class ProcessCompletedEventHandlerTest {
                                                                                 "10",
                                                                                 "100",
                                                                                 "200",
+                                                                                "runtime-bundle-a",
                                                                                 new ProcessInstance());
 
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());

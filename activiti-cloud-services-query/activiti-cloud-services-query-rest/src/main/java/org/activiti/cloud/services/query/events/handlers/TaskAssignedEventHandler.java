@@ -47,6 +47,7 @@ public class TaskAssignedEventHandler implements QueryEventHandler {
             task.setAssignee(eventTask.getAssignee());
             task.setStatus("ASSIGNED");
             task.setLastModified(new Date(taskAssignedEvent.getTimestamp()));
+            task.setApplicationName(taskAssignedEvent.getApplicationName());
             taskRepository.save(task);
         } else {
             throw new ActivitiException("Unable to find task with id: " + eventTask.getId());

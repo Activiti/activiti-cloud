@@ -44,7 +44,8 @@ public class ProcessStartedHandler implements QueryEventHandler {
         LOGGER.debug("Handling start of process Instance " + event.getProcessInstanceId());
 
         processInstanceRepository.save(
-                new ProcessInstance(event.getProcessInstanceId(),
+                new ProcessInstance(event.getApplicationName(),
+                                    event.getProcessInstanceId(),
                                     event.getProcessDefinitionId(),
                                     "RUNNING",
                                     new Date(event.getTimestamp())));

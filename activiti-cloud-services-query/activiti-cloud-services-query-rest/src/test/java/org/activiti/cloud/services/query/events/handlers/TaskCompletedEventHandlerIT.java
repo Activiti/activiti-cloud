@@ -84,6 +84,7 @@ public class TaskCompletedEventHandlerIT {
                                   "category",
                                   "process_definition_id",
                                   processInstanceId,
+                                  "runtime-bundle-a",
                                   "COMPLETED",
                                   new Date() /*lastModified*/
         );
@@ -92,6 +93,7 @@ public class TaskCompletedEventHandlerIT {
                                                             "10",
                                                             "process_definition_id",
                                                             processInstanceId,
+                                                               "runtime-bundle-a",
                                                             eventTask);
         //when
         handler.handle(givenEvent);

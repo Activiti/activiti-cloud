@@ -56,12 +56,14 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
                                       String eventType,
                                       String executionId,
                                       String processDefinitionId,
-                                      String processInstanceId) {
+                                      String processInstanceId,
+                                      String applicationName) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
+        this.applicationName = applicationName;
     }
 
 

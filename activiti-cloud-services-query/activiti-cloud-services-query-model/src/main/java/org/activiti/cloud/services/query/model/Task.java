@@ -19,10 +19,19 @@ package org.activiti.cloud.services.query.model;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
+import javax.persistence.ConstraintMode;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -52,6 +61,8 @@ public class Task implements Serializable {
     private String processDefinitionId;
     private String processInstanceId;
     private String status;
+    private String applicationName;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModified;
 
@@ -61,16 +72,16 @@ public class Task implements Serializable {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModifiedFrom;
 
-    @ManyToOne(optional=true)
-    @JoinColumn(name="processInstanceId", referencedColumnName="processInstanceId", insertable=false, updatable=false
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "processInstanceId", referencedColumnName = "processInstanceId", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private ProcessInstance processInstance;
-    
-    @OneToMany(fetch=FetchType.EAGER)
-    @JoinColumn(name="taskId", referencedColumnName="id", insertable=false, updatable=false
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
-    private Set<Variable> variables;    
-    
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private Set<Variable> variables;
+
     public Task() {
     }
 
@@ -85,6 +96,7 @@ public class Task implements Serializable {
                 @JsonProperty("category") String category,
                 @JsonProperty("processDefinitionId") String processDefinitionId,
                 @JsonProperty("processInstanceId") String processInstanceId,
+                @JsonProperty("applicationName") String applicationName,
                 @JsonProperty("status") String status,
                 @JsonProperty("lastModified") Date lastModified) {
         this.id = id;
@@ -97,6 +109,7 @@ public class Task implements Serializable {
         this.category = category;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
+        this.applicationName = applicationName;
         this.status = status;
         this.lastModified = lastModified;
     }
@@ -189,6 +202,14 @@ public class Task implements Serializable {
         this.processInstanceId = processInstanceId;
     }
 
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+
     public void setStatus(String status) {
         this.status = status;
     }
@@ -242,5 +263,4 @@ public class Task implements Serializable {
     public void setVariables(Set<Variable> variables) {
         this.variables = variables;
     }
-
 }

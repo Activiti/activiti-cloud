@@ -54,6 +54,7 @@ public class VariableUpdatedEventHandlerTest {
                                                               "10",
                                                               "20",
                                                               "30",
+                                                              "runtime-bundle-a",
                                                               "var",
                                                               "v1",
                                                               "string",
@@ -70,6 +71,7 @@ public class VariableUpdatedEventHandlerTest {
         Assertions.assertThat(variable)
                 .hasProcessInstanceId("30")
                 .hasName("var")
+                .hasApplicationName("runtime-bundle-a")
                 .hasValue("v1")
                 .hasType("string");
     }
@@ -82,6 +84,7 @@ public class VariableUpdatedEventHandlerTest {
                                                               "10",
                                                               "20",
                                                               "30",
+                                                              "runtime-bundle-a",
                                                               "var",
                                                               "v1",
                                                               "string",
@@ -99,6 +102,7 @@ public class VariableUpdatedEventHandlerTest {
                 .hasTaskId("40")
                 .hasName("var")
                 .hasValue("v1")
+                .hasApplicationName("runtime-bundle-a")
                 .hasType("string");
     }
 

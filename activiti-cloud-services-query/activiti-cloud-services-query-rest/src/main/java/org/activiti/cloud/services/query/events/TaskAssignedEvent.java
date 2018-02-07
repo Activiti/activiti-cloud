@@ -30,12 +30,14 @@ public class TaskAssignedEvent extends AbstractProcessEngineEvent {
                              String executionId,
                              String processDefinitionId,
                              String processInstanceId,
+                             String applicationName,
                              Task task) {
         super(timestamp,
               eventType,
               executionId,
               processDefinitionId,
-              processInstanceId);
+              processInstanceId,
+              applicationName);
         this.task = task;
     }
 

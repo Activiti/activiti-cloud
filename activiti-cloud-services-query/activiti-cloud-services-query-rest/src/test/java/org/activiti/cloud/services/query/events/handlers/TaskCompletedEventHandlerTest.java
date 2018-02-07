@@ -67,6 +67,7 @@ public class TaskCompletedEventHandlerTest {
                                               "10",
                                               "100",
                                               "200",
+                                              "runtime-bundle-a",
                                               eventTask));
 
         //then
@@ -93,6 +94,7 @@ public class TaskCompletedEventHandlerTest {
                                               "10",
                                               "100",
                                               "200",
+                                              "runtime-bundle-a",
                                               eventTask));
 
     }

@@ -53,7 +53,8 @@ public class ProcessStartedHandlerTest {
                                                             "100",
                                                             "200",
                                                             "101",
-                                                            "201");
+                                                            "201",
+                                                            "runtime-bundle-a");
 
         //when
         handler.handle(event);
@@ -66,6 +67,7 @@ public class ProcessStartedHandlerTest {
         Assertions.assertThat(processInstance)
                 .hasProcessInstanceId("200")
                 .hasProcessDefinitionId("100")
+                .hasApplicationName("runtime-bundle-a")
                 .hasStatus("RUNNING");
     }
 

@@ -50,6 +50,7 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
         ProcessInstance processInstance = entityManager
                 .getReference(ProcessInstance.class, taskCreatedEvent.getProcessInstanceId());
 
+        task.setApplicationName(event.getApplicationName());
         // Associate task with parent reference
         task.setProcessInstance(processInstance);
         

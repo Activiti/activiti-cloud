@@ -83,6 +83,7 @@ public class TaskCreatedEventHandlerIT {
                                   "category",
                                   "process_definition_id",
                                   processInstanceId,
+                                  "runtime-bundle-a",
                                   "CREATED",
                                   new Date() /*lastModified*/
         );
@@ -91,6 +92,7 @@ public class TaskCreatedEventHandlerIT {
                                                             "10",
                                                             "process_definition_id",
                                                             processInstanceId,
+                                                            "runtime-bundle-a",
                                                             eventTask);
         //when
         handler.handle(taskCreated);
@@ -100,6 +102,7 @@ public class TaskCreatedEventHandlerIT {
 
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getProcessInstance()).isNotNull();
+        assertThat(result.get().getApplicationName()).isEqualTo("runtime-bundle-a");
     }
 
     /* having to temporarily remove to resolve https://github.com/Activiti/Activiti/issues/1539
