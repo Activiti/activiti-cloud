@@ -4,7 +4,7 @@
 
 <p>Structure:</p>
 
-graphiql - A UI client for testing graphQL requests.
+graphiql - A UI client for testing graphQL requests.<br/>
 graphql - This makes the graphql endpoint available - it has a dependency to model.<br/>
 graphqlws - Configures websockes for graphql and sets up schema with event for subscribing to - needed for subscribing to notifications.</br>
 model - Basic JPA entity model for querying.<br/>
