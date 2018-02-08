@@ -7,5 +7,7 @@
 [![ASL 2.0](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/Activiti/activiti-cloud-runtime-bundle-service/blob/master/LICENSE.txt)
 [![CLA](https://cla-assistant.io/readme/badge/Activiti/activiti-cloud-runtime-bundle-service)](https://cla-assistant.io/Activiti/activiti-cloud-runtime-bundle-service)
 [![Known Vulnerabilities](https://snyk.io/test/github/Activiti/activiti-cloud-runtime-bundle-service/badge.svg)](https://snyk.io/test/github/Activiti/activiti-cloud-runtime-bundle-service)
+[![security status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-runtime-bundle-service/security)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-runtime-bundle-service)
+[![stability status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-runtime-bundle-service/stability)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-runtime-bundle-service)
 
 Activiti Cloud Runtime Bundle Services &amp; Starters
