@@ -5,5 +5,7 @@
 [![ASL 2.0](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/Activiti/activiti-cloud-org-service/blob/master/LICENSE.txt)
 [![CLA](https://cla-assistant.io/readme/badge/Activiti/activiti-cloud-org-service)](https://cla-assistant.io/Activiti/activiti-cloud-org-service)
 [![Known Vulnerabilities](https://snyk.io/test/github/Activiti/activiti-cloud-org-service/badge.svg)](https://snyk.io/test/github/Activiti/activiti-cloud-org-service)
+[![security status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-org-service/security)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-org-service)
+[![stability status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-org-service/stability)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-org-service)
 
 Organization, Units &amp; Projects Service
