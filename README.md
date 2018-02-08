@@ -7,6 +7,8 @@
 [![CLA](https://cla-assistant.io/readme/badge/Activiti/activiti-cloud-query)](https://cla-assistant.io/Activiti/activiti-cloud-query)
 [![Docker Build Status](https://img.shields.io/docker/build/activiti/activiti-cloud-query.svg)](https://hub.docker.com/r/activiti/activiti-cloud-query/)
 [![Known Vulnerabilities](https://snyk.io/test/github/Activiti/activiti-cloud-query/badge.svg)](https://snyk.io/test/github/Activiti/activiti-cloud-query)
+[![security status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-query/security)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-query)
+[![stability status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-query/stability)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-query)
 
 Activiti Cloud Query Service JPA Implementation. This service uses a Relational Database to store events emitted by Runtime Bundles in a performant way for reading and querying. This is our reference implementation, but we encourange you to modify and adapt to suit your domain specific needs.
 
