@@ -167,7 +167,7 @@
               </run>
             </image>
             <image>
-              <name>byteflair/rabbitmq-stomp</name>
+              <name>activiti/rabbitmq-stomp</name>
               <alias>activiti-rabbitmq</alias>
               <run>
                 <ports>
