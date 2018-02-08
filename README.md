@@ -7,6 +7,8 @@
 [![ASL 2.0](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/Activiti/activiti-cloud-service-common/blob/master/LICENSE.txt)
 [![CLA](https://cla-assistant.io/readme/badge/Activiti/activiti-cloud-service-common)](https://cla-assistant.io/Activiti/activiti-cloud-service-common)
 [![Known Vulnerabilities](https://snyk.io/test/github/Activiti/activiti-cloud-service-common/badge.svg)](https://snyk.io/test/github/Activiti/activiti-cloud-service-common)
+[![security status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-service-common/security)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-service-common)
+[![stability status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-service-common/stability)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-service-common)
 
 Activiti Cloud Shared Services &amp; APIs
 
@@ -14,5 +16,5 @@ This repository contains Services and Starters that are consumed by other starte
 
 Other repositories consuming these artifacts are:
 - [activiti-cloud-service-common](https://github.com/activiti/activiti-cloud-service-common)
-- [activiti-cloud-query-service](https://github.com/activiti/activiti-cloud-query-service)
+- [activiti-cloud-service-common](https://github.com/activiti/activiti-cloud-service-common)
 - [activiti-cloud-audit-service](https://github.com/activiti/activiti-cloud-audit-service)
