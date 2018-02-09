@@ -23,6 +23,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
@@ -51,11 +52,13 @@ public class ProcessInstance {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModifiedFrom;
 
+    @JsonIgnore
     @GraphQLDescription("Associated tasks entities")
     @OneToMany(mappedBy = "processInstance")
     @org.hibernate.annotations.ForeignKey(name = "none")
     private Set<Task> tasks;
 
+    @JsonIgnore
     @GraphQLDescription("Associated process instance variables")
     @OneToMany(mappedBy = "processInstance")
     @org.hibernate.annotations.ForeignKey(name = "none")

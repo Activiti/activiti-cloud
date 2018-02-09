@@ -20,6 +20,7 @@ import java.util.Date;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
@@ -47,11 +48,13 @@ public class Variable {
     private String executionId;
     private String value;
 
+    @JsonIgnore
     @ManyToOne(optional=true)
     @JoinColumn(name="taskId", referencedColumnName="id", insertable=false, updatable=false, nullable=true
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
     private Task task;
 
+    @JsonIgnore
     @ManyToOne(optional=true)
     @JoinColumn(name="processInstanceId", referencedColumnName="processInstanceId", insertable=false, updatable=false
     , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))

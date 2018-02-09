@@ -22,14 +22,11 @@ import org.activiti.cloud.services.query.model.Variable;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
-import org.springframework.data.rest.core.annotation.Description;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@RepositoryRestResource(path = "/variables",
-        collectionResourceDescription = @Description("Collection of variable instance resources"),
-        collectionResourceRel = "variables",
-        itemResourceRel = "variable")
-public interface VariableRepository extends RestResourceQueryRepository<Variable, Long>, QuerydslPredicateExecutor<Variable>, QuerydslBinderCustomizer<QVariable> {
+@RepositoryRestResource(exported = false)
+public interface VariableRepository extends PagingAndSortingRepository<Variable, Long>, QuerydslPredicateExecutor<Variable>, QuerydslBinderCustomizer<QVariable> {
 
     @Override
     default void customize(QuerydslBindings bindings,

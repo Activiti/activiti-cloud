@@ -22,14 +22,11 @@ import org.activiti.cloud.services.query.model.QProcessInstance;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
-import org.springframework.data.rest.core.annotation.Description;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@RepositoryRestResource(path = "/process-instances",
-        collectionResourceDescription = @Description("Collection of process instance resources"),
-        collectionResourceRel = "process-instances",
-        itemResourceRel = "process-instance")
-public interface ProcessInstanceRepository extends RestResourceQueryRepository<ProcessInstance, String>, QuerydslPredicateExecutor<ProcessInstance>, QuerydslBinderCustomizer<QProcessInstance> {
+@RepositoryRestResource(exported = false)
+public interface ProcessInstanceRepository extends PagingAndSortingRepository<ProcessInstance, String>, QuerydslPredicateExecutor<ProcessInstance>, QuerydslBinderCustomizer<QProcessInstance> {
 
     @Override
     default void customize(QuerydslBindings bindings,

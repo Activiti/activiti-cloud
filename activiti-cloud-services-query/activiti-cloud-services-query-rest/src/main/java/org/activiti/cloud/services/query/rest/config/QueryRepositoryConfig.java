@@ -29,8 +29,6 @@ public class QueryRepositoryConfig extends RepositoryRestConfigurerAdapter {
 
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
-    	// Configure base path for api endpoint
-    	config.setBasePath("/v1");
     	
     	// Expose only repositories annotated with @RepositoryRestResource
     	config.setRepositoryDetectionStrategy(RepositoryDetectionStrategies.ANNOTATED);
