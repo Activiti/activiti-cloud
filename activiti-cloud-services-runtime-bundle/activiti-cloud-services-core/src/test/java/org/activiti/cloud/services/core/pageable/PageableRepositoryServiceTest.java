@@ -1,6 +1,6 @@
 package org.activiti.cloud.services.core.pageable;
 
-import org.activiti.cloud.services.SecurityPolicy;
+import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.cloud.services.api.model.converter.ProcessDefinitionConverter;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.core.pageable.sort.ProcessDefinitionSortApplier;

@@ -1,6 +1,6 @@
 package org.activiti.cloud.services.core;
 
-import org.activiti.cloud.services.SecurityPolicy;
+import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;

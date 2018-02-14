@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.converter.ProcessDefinitionConverter;
-import org.activiti.cloud.services.SecurityPolicy;
+import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;

@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
-import org.activiti.cloud.services.SecurityPolicy;
+import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.converter.ProcessDefinitionConverter;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
