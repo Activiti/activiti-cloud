@@ -28,6 +28,7 @@
     <module>activiti-cloud-services-monitoring</module>
     <module>activiti-cloud-services-tracing</module>
     <module>activiti-cloud-services-logging</module>
+    <module>activiti-cloud-services-security-policies</module>
   </modules>
 
   <dependencyManagement>
