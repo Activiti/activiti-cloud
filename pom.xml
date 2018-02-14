@@ -22,6 +22,7 @@
     <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
     <jgitflow.plugin.version>1.0-m5.1</jgitflow.plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+    <maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
   </properties>
 
 
@@ -140,6 +141,23 @@
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
+        <configuration>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          <failIfNoTests>false</failIfNoTests>
+          <trimStackTrace>false</trimStackTrace>
+          <runOrder>alphabetical</runOrder>
+          <includes>
+            <include>**/*IT.java</include>
+            <include>**/Test*.java</include>
+            <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
+            <include>**/*TestCase.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring-boot-maven-plugin.version}</version>
@@ -167,21 +185,6 @@
                 <cmd>java ${JAVA_OPTS} -jar maven/${project.artifactId}-${project.version}.jar</cmd>
               </build>
             </image>
-            <image>
-              <name>byteflair/rabbitmq-stomp</name>
-              <alias>activiti-rabbitmq</alias>
-              <run>
-                <ports>
-                  <port>5672:5672</port>
-                  <port>15672:15672</port>
-                  <port>61613:61613</port>
-                </ports>
-                <wait>
-                  <log>Server startup complete</log>
-                  <time>15000</time>
-                </wait>
-              </run>
-            </image>
           </images>
         </configuration>
         <executions>
@@ -190,27 +193,6 @@
             <phase>install</phase>
             <goals>
               <goal>build</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>start</id>
-            <configuration>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>start</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>stop</id>
-            <configuration>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>stop</goal>
-              <goal>remove</goal>
             </goals>
           </execution>
         </executions>
