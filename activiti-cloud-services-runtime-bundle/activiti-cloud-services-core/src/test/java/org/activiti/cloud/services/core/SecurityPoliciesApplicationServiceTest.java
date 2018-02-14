@@ -75,6 +75,9 @@ public class SecurityPoliciesApplicationServiceTest {
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
 
         when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(Arrays.asList("hr"));
+        Map<String,Set<String>> map = new HashMap<String,Set<String>>();
+        map.put("rb1",new HashSet(Arrays.asList("key")));
+        when(securityPoliciesService.getProcessDefinitionKeys(any(),any(),any(SecurityPolicy.class))).thenReturn(map);
 
         securityPoliciesApplicationService.restrictProcessDefQuery(query, SecurityPolicy.READ);
 
