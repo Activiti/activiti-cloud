@@ -1,4 +1,4 @@
-package org.activiti.cloud.services;
+package org.activiti.cloud.services.security;
 
 public enum SecurityPolicy {
     READ,

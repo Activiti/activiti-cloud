@@ -1,52 +1,30 @@
-package org.activiti.cloud.services;
+package org.activiti.cloud.services.security;
 
-import org.activiti.conf.SecurityProperties;
-import org.junit.Before;
+import org.activiti.cloud.services.security.SecurityPoliciesService;
+import org.activiti.cloud.services.security.SecurityPolicy;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
-public class SecurityPoliciesServiceTest {
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@TestPropertySource("classpath:propstest.properties")
+public class SecurityPoliciesServiceIT {
 
-    @InjectMocks
+    private final String rb1 = "runtime-bundle";
+
+    @Autowired
     private SecurityPoliciesService securityPoliciesService;
-
-    @Mock
-    private SecurityProperties securityProperties;
-
-    private final String rb1 = "rb1";
-    private final String rb2 = "rb2";
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
-        HashMap<String,String> group = new HashMap<>();
-        group.put("finance."+rb1+".policy.read","SimpleProcess1,SimpleProcess2");
-        group.put("hr."+rb1+".policy.read","SimpleProcessYML1,SimpleProcessYML2");
-
-        HashMap<String,String> user = new HashMap<>();
-        user.put("jeff."+rb1+".policy.write","SimpleProcess");
-        user.put("jeff."+rb2+".policy.write","SimpleProcess");
-        user.put("fredslinehasanerror."+rb1+".policy.","SimpleProcess");
-        user.put("jimhasnothing."+rb1+".policy.read","");
-        user.put("bob."+rb1+".policy.read","TestProcess");
-
-        when(securityProperties.getGroup()).thenReturn(group);
-        when(securityProperties.getUser()).thenReturn(user);
-
-    }
 
     @Test
     public void shouldBePoliciesDefined() throws Exception {
@@ -61,8 +39,6 @@ public class SecurityPoliciesServiceTest {
 
         assertThat(keys.get(rb1)).hasSize(1);
         assertThat(keys.get(rb1)).contains("SimpleProcess");
-        assertThat(keys.get(rb2)).hasSize(1);
-        assertThat(keys.get(rb2)).contains("SimpleProcess");
     }
 
     @Test
@@ -72,7 +48,7 @@ public class SecurityPoliciesServiceTest {
 
         assertThat(keys.get(rb1)).hasSize(1);
         assertThat(keys.get(rb1)).contains("SimpleProcess");
-
+        
         //write as min policy should work too for this case
         keys = securityPoliciesService.getProcessDefinitionKeys("jEff",null, SecurityPolicy.WRITE);
 
@@ -133,5 +109,26 @@ public class SecurityPoliciesServiceTest {
 
         Map<String,Set<String>> keys = securityPoliciesService.getProcessDefinitionKeys("jimhasnothing", null, SecurityPolicy.READ);
         assertThat(keys.get(rb1)).isNullOrEmpty();
+    }
+
+    //cases from YAML
+    @Test
+    public void shouldGetProcessDefsByUserAndPoliciesYml() throws Exception {
+
+        Map<String,Set<String>> keys = securityPoliciesService.getProcessDefinitionKeys("bOb",null, Arrays.asList(SecurityPolicy.WRITE,SecurityPolicy.READ));
+
+        assertThat(keys.get(rb1)).hasSize(1);
+        assertThat(keys.get(rb1)).contains("TestProcess");
+    }
+
+
+    @Test
+    public void shouldGetProcessDefsByGroupAndPoliciesYml() throws Exception {
+
+        Map<String,Set<String>> keys = securityPoliciesService.getProcessDefinitionKeys(null,Arrays.asList("hr"), Arrays.asList(SecurityPolicy.READ));
+
+        assertThat(keys.get(rb1)).hasSize(2);
+        assertThat(keys.get(rb1)).contains("SimpleProcessYML1");
+        assertThat(keys.get(rb1)).contains("SimpleProcessYML2");
     }
 }

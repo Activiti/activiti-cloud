@@ -1,4 +1,4 @@
-package org.activiti.conf;
+package org.activiti.cloud.services.security.conf;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -1,11 +1,10 @@
-package org.activiti.cloud.services;
+package org.activiti.cloud.services.security;
 
-import org.activiti.conf.SecurityProperties;
+import org.activiti.cloud.services.security.conf.SecurityProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
