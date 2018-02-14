@@ -1,4 +1,4 @@
-package org.activiti.cloud.services.query.security;
+package org.activiti.cloud.services.security;
 
 public class ActivitiForbiddenException extends RuntimeException {
     private static final long serialVersionUID = 1L;

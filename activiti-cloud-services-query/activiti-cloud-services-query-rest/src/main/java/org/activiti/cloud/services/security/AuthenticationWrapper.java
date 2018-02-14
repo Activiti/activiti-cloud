@@ -1,4 +1,4 @@
-package org.activiti.cloud.services.query.security;
+package org.activiti.cloud.services.security;
 
 import org.activiti.engine.impl.identity.Authentication;
 import org.springframework.stereotype.Component;

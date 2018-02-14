@@ -22,11 +22,10 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
-import org.activiti.cloud.services.query.security.ActivitiForbiddenException;
-import org.activiti.cloud.services.query.security.AuthenticationWrapper;
-import org.activiti.cloud.services.query.security.SecurityPoliciesApplicationService;
-import org.activiti.cloud.services.SecurityPolicy;
-import org.activiti.engine.ActivitiObjectNotFoundException;
+import org.activiti.cloud.services.security.ActivitiForbiddenException;
+import org.activiti.cloud.services.security.AuthenticationWrapper;
+import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.security.SecurityPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

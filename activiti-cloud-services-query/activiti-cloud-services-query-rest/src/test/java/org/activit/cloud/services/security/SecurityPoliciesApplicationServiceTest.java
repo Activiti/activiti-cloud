@@ -1,12 +1,12 @@
-package org.activiti.cloud.services.query.security;
+package org.activit.cloud.services.security;
 
 import com.querydsl.core.types.Predicate;
+import org.activiti.cloud.services.security.AuthenticationWrapper;
+import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
 import org.activiti.engine.UserGroupLookupProxy;
 import org.activiti.engine.UserRoleLookupProxy;
-import org.activiti.engine.repository.ProcessDefinitionQuery;
-import org.activiti.engine.runtime.ProcessInstanceQuery;
-import org.activiti.cloud.services.SecurityPoliciesService;
-import org.activiti.cloud.services.SecurityPolicy;
+import org.activiti.cloud.services.security.SecurityPoliciesService;
+import org.activiti.cloud.services.security.SecurityPolicy;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

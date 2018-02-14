@@ -1,4 +1,4 @@
-package org.activiti.cloud.services.query.security;
+package org.activiti.cloud.services.security;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -9,8 +9,8 @@ import org.activiti.engine.UserGroupLookupProxy;
 import org.activiti.engine.UserRoleLookupProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.activiti.cloud.services.SecurityPoliciesService;
-import org.activiti.cloud.services.SecurityPolicy;
+import org.activiti.cloud.services.security.SecurityPoliciesService;
+import org.activiti.cloud.services.security.SecurityPolicy;
 
 import java.util.List;
 import java.util.Map;
