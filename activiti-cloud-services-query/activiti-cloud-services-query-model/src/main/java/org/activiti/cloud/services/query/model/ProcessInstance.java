@@ -41,6 +41,7 @@ public class ProcessInstance {
     @GraphQLDescription("Unique process instance identity attribute")
     private String processInstanceId;
     private String processDefinitionId;
+    private String processDefinitionKey;
     private String status;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -151,5 +152,13 @@ public class ProcessInstance {
 
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    public String getProcessDefinitionKey() {
+        return processDefinitionKey;
+    }
+
+    public void setProcessDefinitionKey(String processDefinitionKey) {
+        this.processDefinitionKey = processDefinitionKey;
     }
 }
