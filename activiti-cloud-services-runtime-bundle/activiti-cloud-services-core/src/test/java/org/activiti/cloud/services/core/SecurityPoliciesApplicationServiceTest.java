@@ -12,8 +12,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 import static org.assertj.core.api.Assertions.*;
@@ -22,6 +25,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class SecurityPoliciesApplicationServiceTest {
+
 
     @InjectMocks
     private SecurityPoliciesApplicationService securityPoliciesApplicationService;
@@ -87,8 +91,10 @@ public class SecurityPoliciesApplicationServiceTest {
         when(userRoleLookupProxy.isAdmin("bob")).thenReturn(false);
 
         when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(groups);
-        when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.WRITE)).thenReturn(new HashSet<>(Arrays.asList("key")));
-        when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.READ)).thenReturn(new HashSet<>(Arrays.asList("key")));
+        Map<String,Set<String>> map = new HashMap<String,Set<String>>();
+        map.put("rb1",new HashSet(Arrays.asList("key")));
+        when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.WRITE)).thenReturn(map);
+        when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.READ)).thenReturn(map);
 
         assertThat(securityPoliciesApplicationService.canWrite("key")).isTrue();
         assertThat(securityPoliciesApplicationService.canRead("key")).isTrue();
@@ -114,7 +120,9 @@ public class SecurityPoliciesApplicationServiceTest {
         when(userRoleLookupProxy.isAdmin("bob")).thenReturn(false);
 
         when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(groups);
-        when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.READ)).thenReturn(new HashSet<>(Arrays.asList("key")));
+        Map<String,Set<String>> map = new HashMap<String,Set<String>>();
+        map.put("rb1",new HashSet(Arrays.asList("key")));
+        when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.READ)).thenReturn(map);
 
         ProcessInstanceQuery query = mock(ProcessInstanceQuery.class);
         securityPoliciesApplicationService.restrictProcessInstQuery(query,SecurityPolicy.READ);
