@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import static org.activiti.cloud.services.events.converter.EventConverterContext.getPrefix;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -75,9 +76,9 @@ public class ActivityCancelledEventConverterTest {
     @Test
     public void handledTypeShouldReturnActivityCancelled() throws Exception {
         //when
-        ActivitiEventType activitiEventType = converter.handledType();
-
+        String activitiEventType = converter.handledType();
+        ActivitiActivityCancelledEvent activitiEvent = mock(ActivitiActivityCancelledEvent.class);
         //then
-        assertThat(activitiEventType).isEqualTo(ActivitiEventType.ACTIVITY_CANCELLED);
+        assertThat(activitiEventType).isEqualTo(getPrefix(activitiEvent) + ActivitiEventType.ACTIVITY_CANCELLED);
     }
 }

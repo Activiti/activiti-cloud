@@ -17,11 +17,12 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.events.ProcessCancelledEvent;
+import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
+import org.activiti.cloud.services.events.ProcessSuspendedEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
-import org.activiti.engine.delegate.event.impl.ActivitiProcessCancelledEventImpl;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,10 +35,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class ProcessCancelledEventConverterTest {
+public class ProcessSuspendedEventConverterTest {
 
     @InjectMocks
-    private ProcessCancelledEventConverter converter;
+    private ProcessSuspendedEventConverter processSuspendedEventConverter;
+
+    @Mock
+    private ProcessInstanceConverter processInstanceConverter;
 
     @Mock
     private RuntimeBundleProperties runtimeBundleProperties;
@@ -48,41 +52,48 @@ public class ProcessCancelledEventConverterTest {
     }
 
     @Test
-    public void fromShouldConvertInternalProcessCancelledEventToExternalEvent() throws Exception {
+    public void fromShouldConvertInternalProcessSuspendedEventToExternalEvent() throws Exception {
         //given
-        ActivitiProcessCancelledEventImpl activitiEvent = mock(ActivitiProcessCancelledEventImpl.class);
-        given(activitiEvent.getType()).willReturn(ActivitiEventType.PROCESS_CANCELLED);
+        ActivitiEntityEvent activitiEvent = mock(ActivitiEntityEvent.class);
+        given(activitiEvent.getType()).willReturn(ActivitiEventType.ENTITY_SUSPENDED);
         given(activitiEvent.getExecutionId()).willReturn("1");
         given(activitiEvent.getProcessInstanceId()).willReturn("1");
         given(activitiEvent.getProcessDefinitionId()).willReturn("myProcessDef");
-        given(activitiEvent.getCause()).willReturn("cause of the cancellation");
+        ExecutionEntityImpl executionEntity = mock(ExecutionEntityImpl.class);
+        ExecutionEntityImpl internalProcessInstance = mock(ExecutionEntityImpl.class);
+
+        given(activitiEvent.getEntity()).willReturn(executionEntity);
+        given(executionEntity.getProcessInstance()).willReturn(internalProcessInstance);
 
         given(runtimeBundleProperties.getName()).willReturn("myApp");
 
+        ProcessInstance externalProcessInstance = mock(ProcessInstance.class);
+        given(processInstanceConverter.from(internalProcessInstance)).willReturn(externalProcessInstance);
+
         //when
-        ProcessEngineEvent pee = converter.from(activitiEvent);
+        ProcessEngineEvent pee = processSuspendedEventConverter.from(activitiEvent);
 
         //then
-        assertThat(pee).isInstanceOf(ProcessCancelledEvent.class);
+        assertThat(pee).isInstanceOf(ProcessSuspendedEvent.class);
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
         assertThat(pee.getApplicationName()).isEqualTo("myApp");
-        assertThat(((ProcessCancelledEvent) pee).getCause()).isEqualTo("cause of the cancellation");
+        assertThat(((ProcessSuspendedEvent) pee).getProcessInstance()).isEqualTo(externalProcessInstance);
     }
 
     @Test
-    public void handledTypeShouldReturnProcessCancelled() throws Exception {
+    public void handledTypeShouldReturnProcessSuspended() throws Exception {
         //when
-        String activitiEventType = converter.handledType();
+        String activitiEventType = processSuspendedEventConverter.handledType();
         ActivitiEntityEvent activitiEvent = mock(ActivitiEntityEvent.class);
-        given(activitiEvent.getType()).willReturn(ActivitiEventType.PROCESS_CANCELLED);
+        given(activitiEvent.getType()).willReturn(ActivitiEventType.ENTITY_SUSPENDED);
         ExecutionEntityImpl executionEntity = mock(ExecutionEntityImpl.class);
         ExecutionEntityImpl internalProcessInstance = mock(ExecutionEntityImpl.class);
         given(activitiEvent.getEntity()).willReturn(executionEntity);
         given(executionEntity.getProcessInstance()).willReturn(internalProcessInstance);
-
+        given(executionEntity.isProcessInstanceType()).willReturn(true);
         //then
-        assertThat(activitiEventType).isEqualTo(getPrefix(activitiEvent) + ActivitiEventType.PROCESS_CANCELLED);
+        assertThat(activitiEventType).isEqualTo(getPrefix(activitiEvent) + ActivitiEventType.ENTITY_SUSPENDED);
     }
 }

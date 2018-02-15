@@ -16,14 +16,13 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
+import org.activiti.cloud.services.events.TaskCompletedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
-import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiEntityEventImpl;
 import org.activiti.engine.task.Task;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.events.TaskCompletedEventImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +34,8 @@ public class TaskCompletedEventConverter extends AbstractEventConverter {
     private final TaskConverter taskConverter;
 
     @Autowired
-    public TaskCompletedEventConverter(TaskConverter taskConverter, RuntimeBundleProperties runtimeBundleProperties) {
+    public TaskCompletedEventConverter(TaskConverter taskConverter,
+                                       RuntimeBundleProperties runtimeBundleProperties) {
         super(runtimeBundleProperties);
         this.taskConverter = taskConverter;
     }
@@ -50,7 +50,7 @@ public class TaskCompletedEventConverter extends AbstractEventConverter {
     }
 
     @Override
-    public ActivitiEventType handledType() {
-        return TASK_COMPLETED;
+    public String handledType() {
+        return "Task:" + TASK_COMPLETED.toString();
     }
 }

@@ -27,7 +27,8 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.activiti.cloud.services.events.converter.EventConverterContext.getPrefix;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -77,10 +78,10 @@ public class VariableCreatedEventConverterTest {
     @Test
     public void handledTypeShouldReturnVariableCreated() throws Exception {
         //when
-        ActivitiEventType handledType = converter.handledType();
+        String handledType = converter.handledType();
+        ActivitiVariableEventImpl activitiEvent = mock(ActivitiVariableEventImpl.class);
 
         //then
-        assertThat(handledType).isEqualTo(ActivitiEventType.VARIABLE_CREATED);
+        assertThat(handledType).isEqualTo(getPrefix(activitiEvent) + ActivitiEventType.VARIABLE_CREATED);
     }
-
 }

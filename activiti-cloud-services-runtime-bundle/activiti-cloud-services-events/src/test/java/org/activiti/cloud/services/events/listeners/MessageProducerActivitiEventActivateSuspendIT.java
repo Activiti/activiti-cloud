@@ -22,16 +22,19 @@ import java.io.InputStream;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ActivityCompletedEventImpl;
 import org.activiti.cloud.services.events.ActivityStartedEventImpl;
-import org.activiti.cloud.services.events.ProcessCompletedEventImpl;
+import org.activiti.cloud.services.events.ProcessActivatedEvent;
+import org.activiti.cloud.services.events.ProcessActivatedEventImpl;
 import org.activiti.cloud.services.events.ProcessStartedEventImpl;
 import org.activiti.cloud.services.events.ProcessSuspendedEventImpl;
 import org.activiti.cloud.services.events.SequenceFlowTakenEventImpl;
+import org.activiti.cloud.services.events.TaskActivatedEventImpl;
+import org.activiti.cloud.services.events.TaskCreatedEventImpl;
+import org.activiti.cloud.services.events.TaskSuspendedEventImpl;
 import org.activiti.cloud.services.events.tests.util.MockMessageChannel;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.runtime.ProcessInstance;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +47,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = MessageProducerActivitiEventListenerIT.ContextConfig.class)
+@ContextConfiguration(classes = MessageProducerActivitiEventActivateSuspendIT.ContextConfig.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
-        classes = {MessageProducerActivitiEventListenerIT.class, MessageProducerActivitiEventListener.class, MessageProducerCommandContextCloseListener.class})
-public class MessageProducerActivitiEventListenerIT {
+        classes = {MessageProducerActivitiEventActivateSuspendIT.class, MessageProducerActivitiEventListener.class, MessageProducerCommandContextCloseListener.class})
+public class MessageProducerActivitiEventActivateSuspendIT {
 
     @Autowired
     private MessageProducerActivitiEventListener eventListener;
@@ -61,57 +64,59 @@ public class MessageProducerActivitiEventListenerIT {
                     "org.activiti.cloud.services.events.listeners"
             })
     public class ContextConfig {
+
     }
 
     @Test
-    public void executeListener() throws Exception {
+    public void suspendAndActivate() throws Exception {
         ProcessEngine processEngine = ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration()
-                .setDatabaseSchemaUpdate(ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_DROP_CREATE).buildProcessEngine();
-        deploy("SimpleProcess", processEngine);
-        deploy("RollbackProcess", processEngine);
-        deploy("AsyncErrorProcess", processEngine);
+                .setDatabaseSchemaUpdate(ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_DROP_CREATE)
+                .buildProcessEngine();
+        deploy("SimpleUserTaskProcess",
+               processEngine);
+
         processEngine.getRuntimeService().addEventListener(eventListener);
-        processEngine.getRuntimeService().startProcessInstanceByKey("simpleProcess");
+
+        ProcessInstance processInstance = processEngine.getRuntimeService().startProcessInstanceByKey("simpleUserTaskProcess");
 
         ProcessEngineEvent[] events = (ProcessEngineEvent[]) MockMessageChannel.messageResult.getPayload();
-        assertThat(events.length).isEqualTo(7);
+
+        assertThat(events.length).isEqualTo(6);
         assertThat(events[0].getClass()).isEqualTo(ProcessStartedEventImpl.class);
         assertThat(events[1].getClass()).isEqualTo(ActivityStartedEventImpl.class);
         assertThat(events[2].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
         assertThat(events[3].getClass()).isEqualTo(SequenceFlowTakenEventImpl.class);
         assertThat(events[4].getClass()).isEqualTo(ActivityStartedEventImpl.class);
-        assertThat(events[5].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
-        assertThat(events[6].getClass()).isEqualTo(ProcessCompletedEventImpl.class);
+        assertThat(events[5].getClass()).isEqualTo(TaskCreatedEventImpl.class);
 
-        MockMessageChannel.messageResult = null;
-        try {
-            processEngine.getRuntimeService().startProcessInstanceByKey("rollbackProcess");
-        } catch (Exception e) {
-            //nothing to do
-        }
-        assertThat(MockMessageChannel.messageResult).isEqualTo(null);
 
-        MockMessageChannel.messageResult = null;
-        try {
-            processEngine.getRuntimeService().startProcessInstanceByKey("asyncErrorProcess");
-        } catch (Exception e) {
-            //nothing to do
-        }
-        assertThat(MockMessageChannel.messageResult).isNotNull();
+        processEngine.getRuntimeService().suspendProcessInstanceById(processInstance.getId());
         events = (ProcessEngineEvent[]) MockMessageChannel.messageResult.getPayload();
-        assertThat(events.length).isEqualTo(4);
-        assertThat(events[0].getClass()).isEqualTo(ProcessStartedEventImpl.class);
-        assertThat(events[1].getClass()).isEqualTo(ActivityStartedEventImpl.class);
-        assertThat(events[2].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
-        assertThat(events[3].getClass()).isEqualTo(SequenceFlowTakenEventImpl.class);
+        for (ProcessEngineEvent e : events) {
+            System.out.println(e);
+        }
+
+        assertThat(events.length).isEqualTo(2);
+        assertThat(events[0].getClass()).isEqualTo(ProcessSuspendedEventImpl.class);
+        assertThat(events[1].getClass()).isEqualTo(TaskSuspendedEventImpl.class);
+
+        processEngine.getRuntimeService().activateProcessInstanceById(processInstance.getId());
+        events = (ProcessEngineEvent[]) MockMessageChannel.messageResult.getPayload();
+
+        assertThat(events.length).isEqualTo(2);
+        assertThat(events[0].getClass()).isEqualTo(ProcessActivatedEventImpl.class);
+        assertThat(events[1].getClass()).isEqualTo(TaskActivatedEventImpl.class);
+
     }
 
-    public static void deploy(final String processDefinitionKey, ProcessEngine processEngine) throws IOException {
+    public static void deploy(final String processDefinitionKey,
+                              ProcessEngine processEngine) throws IOException {
         try (InputStream is = ClassLoader.getSystemResourceAsStream("processes/" + processDefinitionKey + ".bpmn")) {
             processEngine.getRepositoryService()
-                         .createDeployment()
-                         .addInputStream(processDefinitionKey + ".bpmn", is)
-                         .deploy();
+                    .createDeployment()
+                    .addInputStream(processDefinitionKey + ".bpmn",
+                                    is)
+                    .deploy();
         }
     }
 }
