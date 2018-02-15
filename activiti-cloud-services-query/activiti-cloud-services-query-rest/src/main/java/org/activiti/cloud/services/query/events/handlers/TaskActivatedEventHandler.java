@@ -52,6 +52,8 @@ public class TaskActivatedEventHandler implements QueryEventHandler {
                 task.setStatus("CREATED");
             }
             task.setLastModified(new Date(taskActivatedEvent.getTimestamp()));
+            task.setOwner(taskActivatedEvent.getTask().getOwner());
+            task.setClaimDate(taskActivatedEvent.getTask().getClaimDate());
             taskRepository.save(task);
         } else {
             throw new ActivitiException("Unable to find task with id: " + eventTask.getId());

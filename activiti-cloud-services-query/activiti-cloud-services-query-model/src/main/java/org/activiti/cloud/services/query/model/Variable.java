@@ -56,7 +56,7 @@ public class Variable {
 
     @JsonIgnore
     @ManyToOne(optional=true)
-    @JoinColumn(name="processInstanceId", referencedColumnName="processInstanceId", insertable=false, updatable=false
+    @JoinColumn(name="processInstanceId", referencedColumnName="id", insertable=false, updatable=false
     , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
     private ProcessInstance processInstance;
     

@@ -40,12 +40,17 @@ public class ProcessActivatedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(ProcessEngineEvent activatedEvent) {
+
         String processInstanceId = activatedEvent.getProcessInstanceId();
         Optional<ProcessInstance> findResult = processInstanceRepository.findById(processInstanceId);
         if (findResult.isPresent()) {
             ProcessInstance processInstance = findResult.get();
             processInstance.setStatus("RUNNING");
             processInstance.setLastModified(new Date(activatedEvent.getTimestamp()));
+            processInstance.setProcessDefinitionKey(((ProcessActivatedEvent)activatedEvent).getProcessInstance().getProcessDefinitionKey());
+            processInstance.setInitiator(((ProcessActivatedEvent)activatedEvent).getProcessInstance().getInitiator());
+            processInstance.setStartDate(((ProcessActivatedEvent)activatedEvent).getProcessInstance().getStartDate());
+            processInstance.setBusinessKey(((ProcessActivatedEvent)activatedEvent).getProcessInstance().getBusinessKey());
             processInstanceRepository.save(processInstance);
         } else {
             throw new ActivitiException("Unable to find process instance with the given id: " + processInstanceId);

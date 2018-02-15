@@ -86,7 +86,9 @@ public class TaskSuspendedEventHandlerIT {
                                   processInstanceId,
                                   "runtime-bundle-a",
                                   "ASSIGNED",
-                                  new Date() /*lastModified*/
+                                  new Date() /*lastModified*/,
+                                new Date(), /*claimDate*/
+                                "owner"
         );
         TaskSuspendedEvent givenEvent = new TaskSuspendedEvent(System.currentTimeMillis(),
                                                               "taskSuspended",

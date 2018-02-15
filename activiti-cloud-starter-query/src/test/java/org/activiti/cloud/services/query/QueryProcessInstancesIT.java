@@ -90,7 +90,7 @@ public class QueryProcessInstancesIT {
 
         Collection<ProcessInstance> processInstances = responseEntity.getBody().getContent();
         assertThat(processInstances)
-                .extracting(ProcessInstance::getProcessInstanceId,
+                .extracting(ProcessInstance::getId,
                         ProcessInstance::getStatus)
                 .contains(tuple("15",
                         "COMPLETED"),
@@ -132,7 +132,7 @@ public class QueryProcessInstancesIT {
 
         Collection<ProcessInstance> processInstances = responseEntity.getBody().getContent();
         assertThat(processInstances)
-                .extracting(ProcessInstance::getProcessInstanceId,
+                .extracting(ProcessInstance::getId,
                         ProcessInstance::getStatus)
                 .containsExactly(tuple("15",
                         "COMPLETED"));

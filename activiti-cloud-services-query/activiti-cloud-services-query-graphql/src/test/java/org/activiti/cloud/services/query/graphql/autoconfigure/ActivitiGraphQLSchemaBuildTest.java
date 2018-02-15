@@ -67,7 +67,7 @@ public class ActivitiGraphQLSchemaBuildTest {
         
         //then
         assertThat(schema.getQueryType().getFieldDefinition("ProcessInstance")
-            .getArgument("processInstanceId").getType())
+            .getArgument("id").getType())
             .isEqualTo(Scalars.GraphQLString);
 
         //then

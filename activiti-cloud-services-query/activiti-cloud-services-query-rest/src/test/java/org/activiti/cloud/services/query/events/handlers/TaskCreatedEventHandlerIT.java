@@ -85,7 +85,9 @@ public class TaskCreatedEventHandlerIT {
                                   processInstanceId,
                                   "runtime-bundle-a",
                                   "CREATED",
-                                  new Date() /*lastModified*/
+                                  new Date() /*lastModified*/,
+                                    new Date(), /*claimDate*/
+                                    "owner"
         );
         TaskCreatedEvent taskCreated = new TaskCreatedEvent(System.currentTimeMillis(),
                                                             "taskCreated",

@@ -86,7 +86,9 @@ public class TaskCompletedEventHandlerIT {
                                   processInstanceId,
                                   "runtime-bundle-a",
                                   "COMPLETED",
-                                  new Date() /*lastModified*/
+                                  new Date() /*lastModified*/,
+                                    new Date(),/*claimDate*/
+                                    "owner"
         );
         TaskCompletedEvent givenEvent = new TaskCompletedEvent(System.currentTimeMillis(),
                                                             "taskCompleted",
