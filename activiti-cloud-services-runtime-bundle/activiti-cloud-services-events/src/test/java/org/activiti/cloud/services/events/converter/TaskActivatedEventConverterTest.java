@@ -18,7 +18,7 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
-import org.activiti.cloud.services.events.TaskAssignedEvent;
+import org.activiti.cloud.services.events.TaskActivatedEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiEntityEventImpl;
@@ -34,10 +34,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class TaskAssignedEventConverterTest {
+public class TaskActivatedEventConverterTest {
 
     @InjectMocks
-    private TaskAssignedEventConverter taskAssignedEventConverter;
+    private TaskActivatedEventConverter taskActivatedEventConverter;
 
     @Mock
     private TaskConverter taskConverter;
@@ -51,10 +51,10 @@ public class TaskAssignedEventConverterTest {
     }
 
     @Test
-    public void fromShouldConvertInternalTaskAssignedEventToExternalEvent() throws Exception {
+    public void fromShouldConvertInternalTaskActivatedEventToExternalEvent() throws Exception {
         //given
         ActivitiEntityEventImpl activitiEvent = mock(ActivitiEntityEventImpl.class);
-        given(activitiEvent.getType()).willReturn(ActivitiEventType.TASK_ASSIGNED);
+        given(activitiEvent.getType()).willReturn(ActivitiEventType.ENTITY_ACTIVATED);
         given(activitiEvent.getExecutionId()).willReturn("1");
         given(activitiEvent.getProcessInstanceId()).willReturn("1");
         given(activitiEvent.getProcessDefinitionId()).willReturn("myProcessDef");
@@ -68,26 +68,26 @@ public class TaskAssignedEventConverterTest {
         given(runtimeBundleProperties.getName()).willReturn("myApp");
 
         //when
-        ProcessEngineEvent pee = taskAssignedEventConverter.from(activitiEvent);
+        ProcessEngineEvent pee = taskActivatedEventConverter.from(activitiEvent);
 
         //then
-        assertThat(pee).isInstanceOf(TaskAssignedEvent.class);
+        assertThat(pee).isInstanceOf(TaskActivatedEvent.class);
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
         assertThat(pee.getApplicationName()).isEqualTo("myApp");
-        assertThat(((TaskAssignedEvent) pee).getTask()).isEqualTo(externalTask);
+        assertThat(((TaskActivatedEvent) pee).getTask()).isEqualTo(externalTask);
     }
 
     @Test
-    public void handledTypeShouldReturnTaskAssigned() throws Exception {
+    public void handledTypeShouldReturnTaskCompleted() throws Exception {
         //when
-        String activitiEventType = taskAssignedEventConverter.handledType();
+        String activitiEventType = taskActivatedEventConverter.handledType();
         ActivitiEntityEventImpl activitiEvent = mock(ActivitiEntityEventImpl.class);
-        given(activitiEvent.getType()).willReturn(ActivitiEventType.TASK_ASSIGNED);
+        given(activitiEvent.getType()).willReturn(ActivitiEventType.ENTITY_ACTIVATED);
         Task internalTask = mock(Task.class);
         given(activitiEvent.getEntity()).willReturn(internalTask);
         //then
-        assertThat(activitiEventType).isEqualTo(getPrefix(activitiEvent) + ActivitiEventType.TASK_ASSIGNED);
+        assertThat(activitiEventType).isEqualTo(getPrefix(activitiEvent) + ActivitiEventType.ENTITY_ACTIVATED);
     }
 }

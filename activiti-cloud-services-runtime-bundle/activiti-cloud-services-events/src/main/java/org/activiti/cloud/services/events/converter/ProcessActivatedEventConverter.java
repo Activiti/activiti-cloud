@@ -17,34 +17,40 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.events.ProcessCancelledEventImpl;
+import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
+import org.activiti.cloud.services.events.ProcessActivatedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.engine.delegate.event.ActivitiCancelledEvent;
+import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.activiti.engine.delegate.event.ActivitiEventType.PROCESS_CANCELLED;
+import static org.activiti.engine.delegate.event.ActivitiEventType.ENTITY_ACTIVATED;
 
 @Component
-public class ProcessCancelledEventConverter extends AbstractEventConverter {
+public class ProcessActivatedEventConverter extends AbstractEventConverter {
+
+    private final ProcessInstanceConverter processInstanceConverter;
 
     @Autowired
-    public ProcessCancelledEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+    public ProcessActivatedEventConverter(ProcessInstanceConverter processInstanceConverter,
+                                          RuntimeBundleProperties runtimeBundleProperties) {
         super(runtimeBundleProperties);
+        this.processInstanceConverter = processInstanceConverter;
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new ProcessCancelledEventImpl(getApplicationName(),
+        return new ProcessActivatedEventImpl(getApplicationName(),
                                              event.getExecutionId(),
                                              event.getProcessDefinitionId(),
                                              event.getProcessInstanceId(),
-                                             ((ActivitiCancelledEvent) event).getCause().toString());
+                                             processInstanceConverter.from(((ExecutionEntityImpl) ((ActivitiEntityEvent) event).getEntity()).getProcessInstance()));
     }
 
     @Override
     public String handledType() {
-        return "ProcessInstance:" + PROCESS_CANCELLED.toString();
+        return "ProcessInstance:" + ENTITY_ACTIVATED.toString();
     }
 }
