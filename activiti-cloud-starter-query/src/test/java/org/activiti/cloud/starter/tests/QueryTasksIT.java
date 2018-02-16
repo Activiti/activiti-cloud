@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.query;
+package org.activiti.cloud.starter.tests;
 
 import java.util.Collection;
 
@@ -31,12 +31,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.activiti.cloud.services.query.CoreTaskBuilder.aTask;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskAssignedEvent;
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskCompletedEvent;
@@ -47,11 +49,15 @@ import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource("classpath:application-test.properties")
 public class QueryTasksIT {
 
     private static final String TASKS_URL = "/v1/tasks";
     private static final ParameterizedTypeReference<PagedResources<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Task>>() {
     };
+
+    @Autowired
+    private KeycloakTokenProducer keycloakTokenProducer;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -87,7 +93,7 @@ public class QueryTasksIT {
         //given
         // a created task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
+                                        CoreTaskBuilder.aTask()
                                                 .withId("2")
                                                 .withName("Created task")
                                                 .build(),
@@ -95,25 +101,25 @@ public class QueryTasksIT {
 
         // a assigned task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
+                                        CoreTaskBuilder.aTask()
                                                 .withId("3")
                                                 .withName("Assigned task")
                                                 .build(),
                                         PROCESS_INSTANCE_ID));
         producer.send(aTaskAssignedEvent(System.currentTimeMillis(),
-                                         aTask()
+                                         CoreTaskBuilder.aTask()
                                                  .withId("3")
                                                  .withName("Assigned task")
                                                  .build()));
         // a completed task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
+                                        CoreTaskBuilder.aTask()
                                                 .withId("4")
                                                 .withName("Completed task")
                                                 .build(),
                                         PROCESS_INSTANCE_ID));
         producer.send(aTaskCompletedEvent(System.currentTimeMillis(),
-                                          aTask()
+                                          CoreTaskBuilder.aTask()
                                                   .withId("4")
                                                   .withName("Completed task")
                                                   .build()));
@@ -145,7 +151,7 @@ public class QueryTasksIT {
         //given
         // a created task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
+                                        CoreTaskBuilder.aTask()
                                                 .withId("2")
                                                 .withName("Created task")
                                                 .build(),
@@ -153,25 +159,25 @@ public class QueryTasksIT {
 
         // a assigned task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
+                                        CoreTaskBuilder.aTask()
                                                 .withId("3")
                                                 .withName("Assigned task")
                                                 .build(),
                                         PROCESS_INSTANCE_ID));
         producer.send(aTaskAssignedEvent(System.currentTimeMillis(),
-                                         aTask()
+                                         CoreTaskBuilder.aTask()
                                                  .withId("3")
                                                  .withName("Assigned task")
                                                  .build()));
         // a completed task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
+                                        CoreTaskBuilder.aTask()
                                                 .withId("4")
                                                 .withName("Completed task")
                                                 .build(),
                                         PROCESS_INSTANCE_ID));
         producer.send(aTaskCompletedEvent(System.currentTimeMillis(),
-                                          aTask()
+                                          CoreTaskBuilder.aTask()
                                                   .withId("4")
                                                   .withName("Completed task")
                                                   .build()));
@@ -181,7 +187,7 @@ public class QueryTasksIT {
             //when
             ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
                                                                                             HttpMethod.GET,
-                                                                                            null,
+                    getHeaderEntity(),
                                                                                             PAGED_TASKS_RESPONSE_TYPE,
                                                                                             "ASSIGNED");
 
@@ -201,7 +207,14 @@ public class QueryTasksIT {
     private ResponseEntity<PagedResources<Task>> executeRequestGetTasks() {
         return testRestTemplate.exchange(TASKS_URL,
                                          HttpMethod.GET,
-                                         null,
+                getHeaderEntity(),
                                          PAGED_TASKS_RESPONSE_TYPE);
+    }
+
+    private HttpEntity getHeaderEntity(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", keycloakTokenProducer.getTokenString());
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+        return entity;
     }
 }
