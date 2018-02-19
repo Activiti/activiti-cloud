@@ -74,7 +74,17 @@ public class SecurityPoliciesApplicationService {
             securityExpression = addProcessDefRestrictionToExpression(processInstance, securityExpression, appName, defKeys);
         }
 
+        //policies are defined but none are applicable
+        if(securityExpression == null && securityPoliciesService.policiesDefined()){
+            //user should not see anything so give unsatisfiable condition
+            return getImpossiblePredicate(processInstance);
+        }
+
         return securityExpression != null ? securityExpression.and(predicate) : predicate;
+    }
+
+    public BooleanExpression getImpossiblePredicate(QProcessInstance processInstance) {
+        return processInstance.id.eq("1").and(processInstance.id.eq("2"));
     }
 
     public BooleanExpression addProcessDefRestrictionToExpression(QProcessInstance processInstance, BooleanExpression securityExpression, String appName, Set<String> defKeys) {

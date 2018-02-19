@@ -60,7 +60,7 @@ public class SecurityPoliciesApplicationServiceTest {
         when(securityPoliciesService.policiesDefined()).thenReturn(false);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
 
-        assertThat(securityPoliciesApplicationService.restrictProcessInstanceQuery(query, SecurityPolicy.READ)).isEqualTo(query);
+        verify(securityPoliciesApplicationService,times(0)).addProcessDefRestrictionToExpression(any(),any(),any(),any());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class SecurityPoliciesApplicationServiceTest {
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn(null);
 
-        assertThat(securityPoliciesApplicationService.restrictTaskQuery(query, SecurityPolicy.READ)).isEqualTo(query);
+        verify(securityPoliciesApplicationService,times(0)).addProcessDefRestrictionToExpression(any(),any(),any(),any());
     }
 
     @Test
@@ -140,5 +140,24 @@ public class SecurityPoliciesApplicationServiceTest {
         securityPoliciesApplicationService.restrictProcessInstanceQuery(query, SecurityPolicy.READ);
 
         verify(securityPoliciesApplicationService,times(1)).addProcessDefRestrictionToExpression(any(),any(),any(),any());
+    }
+
+
+    @Test
+    public void shouldRestrictQueryWhenPoliciesButNotForUser(){
+
+        when(securityPoliciesService.policiesDefined()).thenReturn(true);
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("intruder");
+        when(userRoleLookupProxy.isAdmin("intruder")).thenReturn(false);
+
+        when(userGroupLookupProxy.getGroupsForCandidateUser("intruder")).thenReturn(null);
+        Map<String,Set<String>> map = new HashMap<String,Set<String>>();
+
+        when(securityPoliciesService.getProcessDefinitionKeys("intruder",null,SecurityPolicy.READ)).thenReturn(map);
+
+        Predicate query = mock(Predicate.class);
+        securityPoliciesApplicationService.restrictProcessInstanceQuery(query, SecurityPolicy.READ);
+
+        verify(securityPoliciesApplicationService,times(1)).getImpossiblePredicate(any());
     }
 }
