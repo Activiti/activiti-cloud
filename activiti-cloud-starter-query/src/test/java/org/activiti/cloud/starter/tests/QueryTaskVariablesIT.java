@@ -158,7 +158,7 @@ public class QueryTaskVariablesIT {
             //when
             ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
                                                                                                 HttpMethod.GET,
-                                                                                                null,
+                                                                                                getHeaderEntity(),
                                                                                                 PAGED_VARIABLE_RESPONSE_TYPE,
                                                                                                 TASK_ID);
 
@@ -211,7 +211,7 @@ public class QueryTaskVariablesIT {
             //when
             ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "&name={name}",
                                                                                                 HttpMethod.GET,
-                                                                                                null,
+                                                                                                getHeaderEntity(),
                                                                                                 PAGED_VARIABLE_RESPONSE_TYPE,
                                                                                                 TASK_ID,
                                                                                                 "var2");

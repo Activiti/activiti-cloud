@@ -148,7 +148,7 @@ public class QueryProcessInstancesIT {
                 "16"));
 
         waitForMessage();
-        
+
 
         //when
         ResponseEntity<PagedResources<ProcessInstance>> responseEntity = testRestTemplate.exchange(PROC_URL + "?status={status}",
