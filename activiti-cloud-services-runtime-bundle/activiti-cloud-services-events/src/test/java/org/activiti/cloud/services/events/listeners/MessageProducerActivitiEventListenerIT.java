@@ -23,9 +23,11 @@ import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ActivityCompletedEventImpl;
 import org.activiti.cloud.services.events.ActivityStartedEventImpl;
 import org.activiti.cloud.services.events.ProcessCompletedEventImpl;
+import org.activiti.cloud.services.events.ProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessStartedEventImpl;
 import org.activiti.cloud.services.events.ProcessSuspendedEventImpl;
 import org.activiti.cloud.services.events.SequenceFlowTakenEventImpl;
+import org.activiti.cloud.services.events.TaskCreatedEventImpl;
 import org.activiti.cloud.services.events.tests.util.MockMessageChannel;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngineConfiguration;
@@ -74,14 +76,15 @@ public class MessageProducerActivitiEventListenerIT {
         processEngine.getRuntimeService().startProcessInstanceByKey("simpleProcess");
 
         ProcessEngineEvent[] events = (ProcessEngineEvent[]) MockMessageChannel.messageResult.getPayload();
-        assertThat(events.length).isEqualTo(7);
-        assertThat(events[0].getClass()).isEqualTo(ProcessStartedEventImpl.class);
-        assertThat(events[1].getClass()).isEqualTo(ActivityStartedEventImpl.class);
-        assertThat(events[2].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
-        assertThat(events[3].getClass()).isEqualTo(SequenceFlowTakenEventImpl.class);
-        assertThat(events[4].getClass()).isEqualTo(ActivityStartedEventImpl.class);
-        assertThat(events[5].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
-        assertThat(events[6].getClass()).isEqualTo(ProcessCompletedEventImpl.class);
+        assertThat(events.length).isEqualTo(8);
+        assertThat(events[0].getClass()).isEqualTo(ProcessCreatedEventImpl.class);
+        assertThat(events[1].getClass()).isEqualTo(ProcessStartedEventImpl.class);
+        assertThat(events[2].getClass()).isEqualTo(ActivityStartedEventImpl.class);
+        assertThat(events[3].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
+        assertThat(events[4].getClass()).isEqualTo(SequenceFlowTakenEventImpl.class);
+        assertThat(events[5].getClass()).isEqualTo(ActivityStartedEventImpl.class);
+        assertThat(events[6].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
+        assertThat(events[7].getClass()).isEqualTo(ProcessCompletedEventImpl.class);
 
         MockMessageChannel.messageResult = null;
         try {
@@ -99,11 +102,12 @@ public class MessageProducerActivitiEventListenerIT {
         }
         assertThat(MockMessageChannel.messageResult).isNotNull();
         events = (ProcessEngineEvent[]) MockMessageChannel.messageResult.getPayload();
-        assertThat(events.length).isEqualTo(4);
-        assertThat(events[0].getClass()).isEqualTo(ProcessStartedEventImpl.class);
-        assertThat(events[1].getClass()).isEqualTo(ActivityStartedEventImpl.class);
-        assertThat(events[2].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
-        assertThat(events[3].getClass()).isEqualTo(SequenceFlowTakenEventImpl.class);
+        assertThat(events.length).isEqualTo(5);
+        assertThat(events[0].getClass()).isEqualTo(ProcessCreatedEventImpl.class);
+        assertThat(events[1].getClass()).isEqualTo(ProcessStartedEventImpl.class);
+        assertThat(events[2].getClass()).isEqualTo(ActivityStartedEventImpl.class);
+        assertThat(events[3].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
+        assertThat(events[4].getClass()).isEqualTo(SequenceFlowTakenEventImpl.class);
     }
 
     public static void deploy(final String processDefinitionKey, ProcessEngine processEngine) throws IOException {
