@@ -36,7 +36,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class ProcessVariableDeletedHandlerTest {
 
     @InjectMocks
-    private ProcessVariableDeletedHandler handler;
+    private ProcessVariableDeletedEventHandler handler;
 
     @Mock
     private VariableRepository variableRepository;

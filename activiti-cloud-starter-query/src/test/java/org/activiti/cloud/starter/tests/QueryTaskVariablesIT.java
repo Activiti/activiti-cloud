@@ -35,9 +35,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.cloud.starter.tests.CoreTaskBuilder.aTask;
+import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskCreatedEvent;
 import static org.activiti.cloud.starters.test.builder.VariableCreatedEventBuilder.aVariableCreatedEvent;
@@ -50,6 +53,7 @@ import static org.awaitility.Awaitility.await;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
+@DirtiesContext
 public class QueryTaskVariablesIT {
 
     private static final String VARIABLES_URL = "/v1/variables?taskId={taskId}";
@@ -80,13 +84,17 @@ public class QueryTaskVariablesIT {
     @Before
     public void setUp() throws Exception {
         // start a process
+        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
+                                           "10",
+                                           "defId",
+                                           PROCESS_INSTANCE_ID));
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
                                            "10",
                                            "defId",
                                            PROCESS_INSTANCE_ID));
 
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        CoreTaskBuilder.aTask()
+                                        aTask()
                                                 .withId(TASK_ID)
                                                 .withName("Created task")
                                                 .build(),
@@ -150,7 +158,7 @@ public class QueryTaskVariablesIT {
             //when
             ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
                                                                                                 HttpMethod.GET,
-                    getHeaderEntity(),
+                                                                                                null,
                                                                                                 PAGED_VARIABLE_RESPONSE_TYPE,
                                                                                                 TASK_ID);
 
@@ -203,7 +211,7 @@ public class QueryTaskVariablesIT {
             //when
             ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "&name={name}",
                                                                                                 HttpMethod.GET,
-                    getHeaderEntity(),
+                                                                                                null,
                                                                                                 PAGED_VARIABLE_RESPONSE_TYPE,
                                                                                                 TASK_ID,
                                                                                                 "var2");

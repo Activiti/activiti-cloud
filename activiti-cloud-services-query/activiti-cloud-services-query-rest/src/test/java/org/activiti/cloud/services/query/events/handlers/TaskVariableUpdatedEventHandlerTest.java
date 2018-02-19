@@ -25,17 +25,17 @@ import org.mockito.Mock;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class ProcessVariableUpdateHandlerTest {
+public class TaskVariableUpdatedEventHandlerTest {
 
     @InjectMocks
-    private ProcessVariableUpdateHandler handler;
+    private TaskVariableUpdatedEventHandler handler;
 
     @Mock
     private VariableUpdater variableUpdater;
+
 
     @Before
     public void setUp() throws Exception {
@@ -43,17 +43,20 @@ public class ProcessVariableUpdateHandlerTest {
     }
 
     @Test
-    public void handleShouldUpdateVariable() throws Exception {
+    public void handleShouldUpdateVariableValue() throws Exception {
         //given
-        Variable variable = new Variable();
-        variable.setName("var");
-        variable.setValue("v1");
-        variable.setProcessInstanceId("10");
+        String taskId = "10";
+        Variable updatedVariable = new Variable();
+        updatedVariable.setName("var");
+        updatedVariable.setType("string");
+        updatedVariable.setValue("content");
+        updatedVariable.setTaskId(taskId);
 
         //when
-        handler.handle(variable);
+        handler.handle(updatedVariable);
 
         //then
-        verify(variableUpdater).update(eq(variable), any(Predicate.class), anyString());
+        verify(variableUpdater).update(eq(updatedVariable), any(Predicate.class), anyString());
     }
+
 }

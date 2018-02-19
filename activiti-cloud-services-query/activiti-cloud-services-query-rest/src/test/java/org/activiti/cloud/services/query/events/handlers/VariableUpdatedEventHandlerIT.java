@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 
-import org.activiti.engine.ActivitiException;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.events.VariableUpdatedEvent;
@@ -55,8 +54,8 @@ public class VariableUpdatedEventHandlerIT {
     @EntityScan(basePackageClasses = Variable.class)
     @Import({
         VariableUpdatedEventHandler.class, 
-        ProcessVariableUpdateHandler.class, 
-        TaskVariableUpdatedHandler.class,
+        ProcessVariableUpdateEventHandler.class,
+        TaskVariableUpdatedEventHandler.class,
         VariableUpdater.class,
         EntityFinder.class
     })

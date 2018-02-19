@@ -16,28 +16,37 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import java.util.Date;
+import java.util.Optional;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.events.ProcessStartedEvent;
+import org.activiti.cloud.services.query.events.ProcessCreatedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.test.Assertions;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-public class ProcessStartedHandlerTest {
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+public class ProcessCreatedEventHandlerTest {
 
     @InjectMocks
-    private ProcessStartedHandler handler;
+    private ProcessCreatedEventHandler handler;
 
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -45,21 +54,22 @@ public class ProcessStartedHandlerTest {
     }
 
     @Test
-    public void handleShouldStoreANewProcessInstanceInTheRepository() throws Exception {
+    public void handleShouldUpdateCurrentProcessInstanceStateToCreated() throws Exception {
         //given
-        ProcessStartedEvent event = new ProcessStartedEvent(System.currentTimeMillis(),
-                                                            "ProcessStartedEvent",
+        ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
+        given(currentProcessInstance.getProcessDefinitionKey()).willReturn("mykey");
+        ProcessCreatedEvent event = new ProcessCreatedEvent(System.currentTimeMillis(),
+                                                            "ProcessCreatedEvent",
                                                             "10",
                                                             "100",
                                                             "200",
-                                                            "101",
-                                                            "201",
-                                                            "runtime-bundle-a");
+                                                            "runtime-bundle-a",
+                                                            currentProcessInstance);
+
 
         //when
         handler.handle(event);
 
-        //then
         ArgumentCaptor<ProcessInstance> argumentCaptor = ArgumentCaptor.forClass(ProcessInstance.class);
         verify(processInstanceRepository).save(argumentCaptor.capture());
 
@@ -68,15 +78,16 @@ public class ProcessStartedHandlerTest {
                 .hasId("200")
                 .hasProcessDefinitionId("100")
                 .hasApplicationName("runtime-bundle-a")
-                .hasStatus("RUNNING");
+                .hasProcessDefinitionKey("mykey")
+                .hasStatus("CREATED");
     }
 
     @Test
-    public void getHandledEventClassShouldReturnProcessStartedEvent() throws Exception {
+    public void getHandledEventClassShouldReturnProcessCreatedEvent() throws Exception {
         //when
         Class<? extends ProcessEngineEvent> handledEventClass = handler.getHandledEventClass();
 
         //then
-        assertThat(handledEventClass).isEqualTo(ProcessStartedEvent.class);
+        assertThat(handledEventClass).isEqualTo(ProcessCreatedEvent.class);
     }
 }

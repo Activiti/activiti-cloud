@@ -20,6 +20,7 @@ type ProcessEngineNotification {
     processDefinitionId : String
 	ProcessStartedEvent : [ProcessStartedEvent]
 	ProcessCompletedEvent : [ProcessCompletedEvent]
+	ProcessCreatedEvent : [ProcessCreatedEvent]
 	ProcessCancelledEvent : [ProcessCancelledEvent]
 	ProcessActivatedEvent : [ProcessActivatedEvent]
 	ProcessSuspendedEvent : [ProcessSuspendedEvent]
@@ -71,6 +72,17 @@ type ProcessStartedEvent {
 }
 
 type ProcessCompletedEvent {
+    applicationName : String
+    timestamp : Long
+    eventType : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+
+    processInstance : ProcessInstanceEventType
+}
+
+type ProcessCreatedEvent {
     applicationName : String
     timestamp : Long
     eventType : String

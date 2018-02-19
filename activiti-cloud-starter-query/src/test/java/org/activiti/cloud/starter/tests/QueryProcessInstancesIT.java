@@ -17,9 +17,10 @@
 package org.activiti.cloud.starter.tests;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.engine.impl.identity.Authentication;
 import org.junit.After;
@@ -35,18 +36,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCompletedEvent;
+import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessSuspendedEvent;
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessActivatedEvent;
 import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
+@DirtiesContext
 public class QueryProcessInstancesIT {
 
     private static final String PROC_URL = "/v1/process-instances";
@@ -73,32 +75,26 @@ public class QueryProcessInstancesIT {
     @Test
     public void shouldGetAvailableProcInstances() throws Exception {
         //given
-        ProcessInstance processInstance = new ProcessInstance("15","name","desc","defId","initiator",null,"busKey",null,"defKey1");
 
         // a completed process
+        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
+                                           "10",
+                                           "defId",
+                                           "15"));
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
                 "10",
                 "defId",
                 "15"));
-
-        producer.send(aProcessSuspendedEvent(System.currentTimeMillis(),
-                "10",
-                "defId",
-                "15",
-                processInstance));
-
-        producer.send(aProcessActivatedEvent(System.currentTimeMillis(),
-                "10",
-                "defId",
-                "15",
-                processInstance));
-
         producer.send(aProcessCompletedEvent(System.currentTimeMillis(),
                 "10",
                 "defId",
                 "15"));
 
         // a running process
+        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
+                                           "11",
+                                           "defId",
+                                           "16"));
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
                 "11",
                 "defId",
@@ -125,40 +121,13 @@ public class QueryProcessInstancesIT {
 
 
     @Test
-    public void shouldNotGetUnavailableProcInstances() throws Exception {
-        Authentication.setAuthenticatedUserId("testuser");
-        //given
-        ProcessInstance processInstance = new ProcessInstance("15","name","desc","defId","initiator",null,"busKey",null,"defKey2");
-
-        // a completed process
-        producer.send(aProcessStartedEvent(System.currentTimeMillis(),
-                "10",
-                "defId",
-                "15"));
-
-        producer.send(aProcessSuspendedEvent(System.currentTimeMillis(),
-                "10",
-                "defId",
-                "15",
-                processInstance));
-
-        waitForMessage();
-
-        //when
-        ResponseEntity<PagedResources<ProcessInstance>> responseEntity = executeRequestGetProcInstances();
-
-        //then
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        Collection<ProcessInstance> processInstances = responseEntity.getBody().getContent();
-        assertThat(processInstances).isNullOrEmpty();
-    }
-
-    @Test
     public void shouldFilterOnStatus() throws Exception {
         //given
         // a completed process
+        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
+                                           "10",
+                                           "defId",
+                                           "15"));
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
                 "10",
                 "defId",
@@ -169,12 +138,17 @@ public class QueryProcessInstancesIT {
                 "15"));
 
         // a running process
+        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
+                                           "11",
+                                           "defId",
+                                           "16"));
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
                 "11",
                 "defId",
                 "16"));
 
         waitForMessage();
+        
 
         //when
         ResponseEntity<PagedResources<ProcessInstance>> responseEntity = testRestTemplate.exchange(PROC_URL + "?status={status}",

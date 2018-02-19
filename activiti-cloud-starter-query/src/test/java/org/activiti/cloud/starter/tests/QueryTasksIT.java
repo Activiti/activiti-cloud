@@ -36,9 +36,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.cloud.starter.tests.CoreTaskBuilder.aTask;
+import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskAssignedEvent;
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskCompletedEvent;
@@ -50,6 +53,7 @@ import static org.awaitility.Awaitility.await;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
+@DirtiesContext
 public class QueryTasksIT {
 
     private static final String TASKS_URL = "/v1/tasks";
@@ -76,6 +80,10 @@ public class QueryTasksIT {
     @Before
     public void setUp() throws Exception {
         // start a process
+        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
+                                           "10",
+                                           "defId",
+                                           PROCESS_INSTANCE_ID));
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
                                            "10",
                                            "defId",
@@ -93,7 +101,7 @@ public class QueryTasksIT {
         //given
         // a created task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        CoreTaskBuilder.aTask()
+                                        aTask()
                                                 .withId("2")
                                                 .withName("Created task")
                                                 .build(),
@@ -101,25 +109,25 @@ public class QueryTasksIT {
 
         // a assigned task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        CoreTaskBuilder.aTask()
+                                        aTask()
                                                 .withId("3")
                                                 .withName("Assigned task")
                                                 .build(),
                                         PROCESS_INSTANCE_ID));
         producer.send(aTaskAssignedEvent(System.currentTimeMillis(),
-                                         CoreTaskBuilder.aTask()
+                                         aTask()
                                                  .withId("3")
                                                  .withName("Assigned task")
                                                  .build()));
         // a completed task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        CoreTaskBuilder.aTask()
+                                        aTask()
                                                 .withId("4")
                                                 .withName("Completed task")
                                                 .build(),
                                         PROCESS_INSTANCE_ID));
         producer.send(aTaskCompletedEvent(System.currentTimeMillis(),
-                                          CoreTaskBuilder.aTask()
+                                          aTask()
                                                   .withId("4")
                                                   .withName("Completed task")
                                                   .build()));
@@ -151,7 +159,7 @@ public class QueryTasksIT {
         //given
         // a created task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        CoreTaskBuilder.aTask()
+                                        aTask()
                                                 .withId("2")
                                                 .withName("Created task")
                                                 .build(),
@@ -159,25 +167,25 @@ public class QueryTasksIT {
 
         // a assigned task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        CoreTaskBuilder.aTask()
+                                        aTask()
                                                 .withId("3")
                                                 .withName("Assigned task")
                                                 .build(),
                                         PROCESS_INSTANCE_ID));
         producer.send(aTaskAssignedEvent(System.currentTimeMillis(),
-                                         CoreTaskBuilder.aTask()
+                                         aTask()
                                                  .withId("3")
                                                  .withName("Assigned task")
                                                  .build()));
         // a completed task
         producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        CoreTaskBuilder.aTask()
+                                        aTask()
                                                 .withId("4")
                                                 .withName("Completed task")
                                                 .build(),
                                         PROCESS_INSTANCE_ID));
         producer.send(aTaskCompletedEvent(System.currentTimeMillis(),
-                                          CoreTaskBuilder.aTask()
+                                          aTask()
                                                   .withId("4")
                                                   .withName("Completed task")
                                                   .build()));

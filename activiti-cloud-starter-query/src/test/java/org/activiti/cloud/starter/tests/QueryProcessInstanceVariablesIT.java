@@ -34,8 +34,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
 import static org.activiti.cloud.starters.test.builder.VariableCreatedEventBuilder.aVariableCreatedEvent;
 import static org.activiti.cloud.starters.test.builder.VariableDeletedEventBuilder.aVariableDeletedEvent;
@@ -47,6 +49,7 @@ import static org.awaitility.Awaitility.await;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
+@DirtiesContext
 public class QueryProcessInstanceVariablesIT {
 
     private static final String VARIABLES_URL = "/v1/variables?processInstanceId={processInstanceId}";
@@ -79,6 +82,11 @@ public class QueryProcessInstanceVariablesIT {
         //given
         String processInstanceId = "20";
         long timestamp = System.currentTimeMillis();
+
+        producer.send(aProcessCreatedEvent(timestamp,
+                                           "10",
+                                           "defId",
+                                           processInstanceId));
         producer.send(aProcessStartedEvent(timestamp,
                                            "10",
                                            "defId",
@@ -148,6 +156,11 @@ public class QueryProcessInstanceVariablesIT {
         //given
         String processInstanceId = "20";
         long timestamp = System.currentTimeMillis();
+
+        producer.send(aProcessCreatedEvent(timestamp,
+                                           "10",
+                                           "defId",
+                                           processInstanceId));
         producer.send(aProcessStartedEvent(timestamp,
                                            "10",
                                            "defId",
