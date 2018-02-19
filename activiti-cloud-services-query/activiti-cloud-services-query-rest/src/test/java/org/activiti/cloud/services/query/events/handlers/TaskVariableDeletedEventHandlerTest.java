@@ -34,10 +34,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class TaskVariableDeletedHandlerTest {
+public class TaskVariableDeletedEventHandlerTest {
 
     @InjectMocks
-    private TaskVariableDeletedHandler handler;
+    private TaskVariableDeletedEventHandler handler;
 
     @Mock
     private VariableRepository variableRepository;

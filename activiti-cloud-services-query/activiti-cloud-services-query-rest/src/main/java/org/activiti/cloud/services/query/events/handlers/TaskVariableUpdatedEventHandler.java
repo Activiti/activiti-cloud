@@ -23,24 +23,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProcessVariableUpdateHandler {
+public class TaskVariableUpdatedEventHandler {
 
     private final VariableUpdater variableUpdater;
 
     @Autowired
-    public ProcessVariableUpdateHandler(VariableUpdater variableUpdater) {
+    public TaskVariableUpdatedEventHandler(VariableUpdater variableUpdater) {
         this.variableUpdater = variableUpdater;
     }
 
     public void handle(Variable updatedVariable) {
         String variableName = updatedVariable.getName();
-        String processInstanceId = updatedVariable.getProcessInstanceId();
+        String taskId = updatedVariable.getTaskId();
         BooleanExpression predicate = QVariable.variable.name.eq(variableName)
                 .and(
-                        QVariable.variable.processInstanceId.eq(String.valueOf(processInstanceId))
+                        QVariable.variable.taskId.eq(String.valueOf(taskId))
                 );
         variableUpdater.update(updatedVariable,
                                predicate,
-                               "Unable to find variable named '" + variableName + "' for process instance '" + processInstanceId + "'");
+                               "Unable to find variable named '" + variableName + "' for task '" + taskId + "'");
     }
 }

@@ -26,15 +26,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProcessVariableDeletedHandler {
+public class ProcessVariableDeletedEventHandler {
 
     private final VariableRepository variableRepository;
 
     private final EntityFinder entityFinder;
 
     @Autowired
-    public ProcessVariableDeletedHandler(VariableRepository variableRepository,
-                                         EntityFinder entityFinder) {
+    public ProcessVariableDeletedEventHandler(VariableRepository variableRepository,
+                                              EntityFinder entityFinder) {
         this.variableRepository = variableRepository;
         this.entityFinder = entityFinder;
     }

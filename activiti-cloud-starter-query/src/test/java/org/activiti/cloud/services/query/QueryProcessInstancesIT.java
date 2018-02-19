@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query;
 
 import java.util.Collection;
 
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.cloud.starters.test.MyProducer;
@@ -32,14 +33,15 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCompletedEvent;
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
+import static org.activiti.cloud.starters.test.MockProcessEngineEvent.*;
 import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext
 public class QueryProcessInstancesIT {
 
     private static final String PROC_URL = "/v1/process-instances";
@@ -64,6 +66,10 @@ public class QueryProcessInstancesIT {
     public void shouldGetAvailableProcInstances() throws Exception {
         //given
         // a completed process
+        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
+                                           "10",
+                                           "defId",
+                                           "15"));
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
                 "10",
                 "defId",
@@ -74,6 +80,10 @@ public class QueryProcessInstancesIT {
                 "15"));
 
         // a running process
+        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
+                                           "11",
+                                           "defId",
+                                           "16"));
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
                 "11",
                 "defId",
@@ -102,6 +112,10 @@ public class QueryProcessInstancesIT {
     public void shouldFilterOnStatus() throws Exception {
         //given
         // a completed process
+        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
+                                           "10",
+                                           "defId",
+                                           "15"));
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
                 "10",
                 "defId",
@@ -112,6 +126,10 @@ public class QueryProcessInstancesIT {
                 "15"));
 
         // a running process
+        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
+                                           "11",
+                                           "defId",
+                                           "16"));
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
                 "11",
                 "defId",

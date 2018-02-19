@@ -31,18 +31,20 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
 import static org.activiti.cloud.starters.test.builder.VariableCreatedEventBuilder.aVariableCreatedEvent;
 import static org.activiti.cloud.starters.test.builder.VariableDeletedEventBuilder.aVariableDeletedEvent;
 import static org.activiti.cloud.starters.test.builder.VariableUpdatedEventBuilder.aVariableUpdatedEvent;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext
 public class QueryProcessInstanceVariablesIT {
 
     private static final String VARIABLES_URL = "/v1/variables?processInstanceId={processInstanceId}";
@@ -72,6 +74,11 @@ public class QueryProcessInstanceVariablesIT {
         //given
         String processInstanceId = "20";
         long timestamp = System.currentTimeMillis();
+
+        producer.send(aProcessCreatedEvent(timestamp,
+                                           "10",
+                                           "defId",
+                                           processInstanceId));
         producer.send(aProcessStartedEvent(timestamp,
                                            "10",
                                            "defId",
@@ -141,6 +148,11 @@ public class QueryProcessInstanceVariablesIT {
         //given
         String processInstanceId = "20";
         long timestamp = System.currentTimeMillis();
+
+        producer.send(aProcessCreatedEvent(timestamp,
+                                           "10",
+                                           "defId",
+                                           processInstanceId));
         producer.send(aProcessStartedEvent(timestamp,
                                            "10",
                                            "defId",

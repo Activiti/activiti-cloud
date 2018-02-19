@@ -33,9 +33,11 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.activiti.cloud.services.query.CoreTaskBuilder.aTask;
+import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskCreatedEvent;
 import static org.activiti.cloud.starters.test.builder.VariableCreatedEventBuilder.aVariableCreatedEvent;
@@ -47,6 +49,7 @@ import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext
 public class QueryTaskVariablesIT {
 
     private static final String VARIABLES_URL = "/v1/variables?taskId={taskId}";
@@ -74,6 +77,10 @@ public class QueryTaskVariablesIT {
     @Before
     public void setUp() throws Exception {
         // start a process
+        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
+                                           "10",
+                                           "defId",
+                                           PROCESS_INSTANCE_ID));
         producer.send(aProcessStartedEvent(System.currentTimeMillis(),
                                            "10",
                                            "defId",
