@@ -19,6 +19,7 @@ package org.activiti.cloud.starters.test;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.ProcessInstance;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -30,6 +31,8 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
+
+    private ProcessInstance processInstance;
 
     public MockProcessEngineEvent() {
     }
@@ -47,10 +50,20 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
                                   String processDefinitionId,
                                   String processInstanceId) {
         this(timestamp,
-             eventType);
+                eventType);
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
+    }
+
+    public MockProcessEngineEvent(Long timestamp,
+                                  String eventType,
+                                  String executionId,
+                                  String processDefinitionId,
+                                  String processInstanceId,
+                                  ProcessInstance processInstance) {
+        this(timestamp, eventType,executionId,processDefinitionId,processInstanceId);
+        this.processInstance = processInstance;
     }
 
     public static ProcessEngineEvent[] aProcessStartedEvent(Long timestamp,
@@ -74,6 +87,34 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
                                                                   executionId,
                                                                   processDefinitionId,
                                                                   processInstanceId)};
+        return events;
+    }
+
+    public static ProcessEngineEvent[] aProcessSuspendedEvent(Long timestamp,
+                                                              String executionId,
+                                                              String processDefinitionId,
+                                                              String processInstanceId,
+                                                              ProcessInstance processInstance) {
+        ProcessEngineEvent[] events = {new MockProcessEngineEvent(timestamp,
+                "ProcessSuspendedEvent",
+                executionId,
+                processDefinitionId,
+                processInstanceId,
+                processInstance)};
+        return events;
+    }
+
+    public static ProcessEngineEvent[] aProcessActivatedEvent(Long timestamp,
+                                                              String executionId,
+                                                              String processDefinitionId,
+                                                              String processInstanceId,
+                                                              ProcessInstance processInstance) {
+        ProcessEngineEvent[] events = {new MockProcessEngineEvent(timestamp,
+                "ProcessActivatedEvent",
+                executionId,
+                processDefinitionId,
+                processInstanceId,
+                processInstance)};
         return events;
     }
 
