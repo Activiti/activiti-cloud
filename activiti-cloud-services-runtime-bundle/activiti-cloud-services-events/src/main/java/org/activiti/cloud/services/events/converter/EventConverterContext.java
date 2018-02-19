@@ -72,7 +72,9 @@ public class EventConverterContext {
             Object entity = ((ActivitiEntityEvent) activitiEvent).getEntity();
             if (entity != null) {
                 if (ProcessInstance.class.isAssignableFrom(entity.getClass())) {
-                    if (activitiEvent.getType().equals(ActivitiEventType.ENTITY_SUSPENDED) || activitiEvent.getType().equals(ActivitiEventType.ENTITY_ACTIVATED)) {
+                    if (activitiEvent.getType().equals(ActivitiEventType.ENTITY_SUSPENDED) ||
+                            activitiEvent.getType().equals(ActivitiEventType.ENTITY_ACTIVATED) ||
+                            activitiEvent.getType().equals(ActivitiEventType.ENTITY_CREATED)) {
                         ExecutionEntity executionEntity = (ExecutionEntity) entity;
                         if (executionEntity.isProcessInstanceType()) {
                             return "ProcessInstance:";

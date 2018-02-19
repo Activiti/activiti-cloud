@@ -65,6 +65,7 @@ public class EventConverterContextIT {
                                                            "ProcessInstance:" + ActivitiEventType.PROCESS_STARTED.toString(),
                                                            "ProcessInstance:" + ActivitiEventType.PROCESS_CANCELLED.toString(),
                                                            "ProcessInstance:" + ActivitiEventType.PROCESS_COMPLETED.toString(),
+                                                           "ProcessInstance:" + ActivitiEventType.ENTITY_CREATED.toString(),
                                                            "ProcessInstance:" + ActivitiEventType.ENTITY_SUSPENDED.toString(),
                                                            "ProcessInstance:" + ActivitiEventType.ENTITY_ACTIVATED.toString(),
                                                            "Task:" + ActivitiEventType.ENTITY_SUSPENDED.toString(),

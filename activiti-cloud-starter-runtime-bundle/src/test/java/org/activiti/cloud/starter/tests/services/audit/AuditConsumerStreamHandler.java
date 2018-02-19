@@ -35,13 +35,14 @@ public class AuditConsumerStreamHandler {
     @StreamListener(AuditConsumer.AUDIT_CONSUMER)
     public void recieve(MockProcessEngineEvent[] events) {
         assertThat(events).isNotNull();
-        assertThat(events.length).isEqualTo(6);
-        assertThat(events[0].getEventType()).isEqualTo("ProcessStartedEvent");
-        assertThat(events[1].getEventType()).isEqualTo("ActivityStartedEvent");
-        assertThat(events[2].getEventType()).isEqualTo("ActivityCompletedEvent");
-        assertThat(events[3].getEventType()).isEqualTo("SequenceFlowTakenEvent");
-        assertThat(events[4].getEventType()).isEqualTo("ActivityStartedEvent");
-        assertThat(events[5].getEventType()).isEqualTo("TaskCreatedEvent");
+        assertThat(events.length).isEqualTo(7);
+        assertThat(events[0].getEventType()).isEqualTo("ProcessCreatedEvent");
+        assertThat(events[1].getEventType()).isEqualTo("ProcessStartedEvent");
+        assertThat(events[2].getEventType()).isEqualTo("ActivityStartedEvent");
+        assertThat(events[3].getEventType()).isEqualTo("ActivityCompletedEvent");
+        assertThat(events[4].getEventType()).isEqualTo("SequenceFlowTakenEvent");
+        assertThat(events[5].getEventType()).isEqualTo("ActivityStartedEvent");
+        assertThat(events[6].getEventType()).isEqualTo("TaskCreatedEvent");
         messageReceived = true;
     }
 

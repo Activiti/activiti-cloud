@@ -24,6 +24,7 @@ import org.activiti.cloud.services.events.ActivityCompletedEventImpl;
 import org.activiti.cloud.services.events.ActivityStartedEventImpl;
 import org.activiti.cloud.services.events.ProcessActivatedEvent;
 import org.activiti.cloud.services.events.ProcessActivatedEventImpl;
+import org.activiti.cloud.services.events.ProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessStartedEventImpl;
 import org.activiti.cloud.services.events.ProcessSuspendedEventImpl;
 import org.activiti.cloud.services.events.SequenceFlowTakenEventImpl;
@@ -81,13 +82,14 @@ public class MessageProducerActivitiEventActivateSuspendIT {
 
         ProcessEngineEvent[] events = (ProcessEngineEvent[]) MockMessageChannel.messageResult.getPayload();
 
-        assertThat(events.length).isEqualTo(6);
-        assertThat(events[0].getClass()).isEqualTo(ProcessStartedEventImpl.class);
-        assertThat(events[1].getClass()).isEqualTo(ActivityStartedEventImpl.class);
-        assertThat(events[2].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
-        assertThat(events[3].getClass()).isEqualTo(SequenceFlowTakenEventImpl.class);
-        assertThat(events[4].getClass()).isEqualTo(ActivityStartedEventImpl.class);
-        assertThat(events[5].getClass()).isEqualTo(TaskCreatedEventImpl.class);
+        assertThat(events.length).isEqualTo(7);
+        assertThat(events[0].getClass()).isEqualTo(ProcessCreatedEventImpl.class);
+        assertThat(events[1].getClass()).isEqualTo(ProcessStartedEventImpl.class);
+        assertThat(events[2].getClass()).isEqualTo(ActivityStartedEventImpl.class);
+        assertThat(events[3].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
+        assertThat(events[4].getClass()).isEqualTo(SequenceFlowTakenEventImpl.class);
+        assertThat(events[5].getClass()).isEqualTo(ActivityStartedEventImpl.class);
+        assertThat(events[6].getClass()).isEqualTo(TaskCreatedEventImpl.class);
 
 
         processEngine.getRuntimeService().suspendProcessInstanceById(processInstance.getId());
