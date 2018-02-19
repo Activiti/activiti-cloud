@@ -130,6 +130,24 @@ public class SecurityPoliciesApplicationServiceTest {
         ProcessInstanceQuery query = mock(ProcessInstanceQuery.class);
         securityPoliciesApplicationService.restrictProcessInstQuery(query,SecurityPolicy.READ);
 
-        verify(query).processDefinitionKeys(anySet());
+        verify(query,times(1)).processDefinitionKeys(anySet());
+    }
+
+    @Test
+    public void shouldRestrictQueryWhenPoliciesButNotForUser(){
+
+        when(securityPoliciesService.policiesDefined()).thenReturn(true);
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("intruder");
+        when(userRoleLookupProxy.isAdmin("intruder")).thenReturn(false);
+
+        when(userGroupLookupProxy.getGroupsForCandidateUser("intruder")).thenReturn(null);
+        Map<String,Set<String>> map = new HashMap<String,Set<String>>();
+        when(securityPoliciesService.getProcessDefinitionKeys("intruder",null,SecurityPolicy.READ)).thenReturn(map);
+
+        ProcessInstanceQuery query = mock(ProcessInstanceQuery.class);
+        when(query.processDefinitionId(any())).thenReturn(query);
+        securityPoliciesApplicationService.restrictProcessInstQuery(query,SecurityPolicy.READ);
+
+        verify(query,times(2)).processDefinitionId(any());
     }
 }

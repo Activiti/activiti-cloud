@@ -77,9 +77,15 @@ public class SecurityPoliciesApplicationService {
 
         Set<String> keys = definitionKeysAllowedForRBPolicy(securityPolicy);
 
-        if(keys != null){
+        if(keys != null && !keys.isEmpty()){
             return query.processDefinitionKeys(keys);
         }
+
+        if((keys != null || !keys.isEmpty()) && securityPoliciesService.policiesDefined()){
+            //user should not see anything so give unsatisfiable condition
+            query.processDefinitionId("1").processDefinitionId("2");
+        }
+
         return query;
     }
 
