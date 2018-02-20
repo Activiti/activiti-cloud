@@ -1,70 +1,78 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
-    <groupId>org.activiti.cloud</groupId>
-    <artifactId>activiti-cloud-parent</artifactId>
+    <groupId>org.activiti</groupId>
+    <artifactId>activiti-dependencies</artifactId>
     <version>7-201802-EA-SNAPSHOT</version>
+    <relativePath/>
   </parent>
-
+  <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-dependencies</artifactId>
+  <version>7-201802-EA-SNAPSHOT</version>
   <packaging>pom</packaging>
-
-  <name>Activiti Cloud Dependencies - BOM (Bill Of Materials)</name>
-  <description>Activiti Cloud Dependencies - BOM(Bill Of Materials)</description>
-
+  <name>Activiti Cloud :: Dependencies BOM (Bill Of Materials)</name>
+  <properties>
+    <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
+    <activiti-cloud-runtime-bundle.version>${project.version}</activiti-cloud-runtime-bundle.version>
+    <activiti-cloud-audit.version>${project.version}</activiti-cloud-audit.version>
+    <activiti-cloud-query.version>${project.version}</activiti-cloud-query.version>
+    <activiti-cloud-connectors.version>${project.version}</activiti-cloud-connectors.version>
+    <activiti-cloud-process-model.version>${project.version}</activiti-cloud-process-model.version>
+    <activiti-cloud-org.version>${project.version}</activiti-cloud-org.version>
+  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-service-common.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-query-dependencies</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-query.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-audit-dependencies</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-audit.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-connectors-dependencies</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-connectors.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-process-model-dependencies</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-process-model.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-org-dependencies</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-org.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
-
 </project>
