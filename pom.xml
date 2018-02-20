@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.activiti</groupId>
-  <artifactId>maven-runtime-bundle</artifactId>
-
-  <packaging>jar</packaging>
-  <name>Activiti Cloud :: Runtime Bundle</name>
+  <artifactId>example-runtime-bundle</artifactId>
   <version>7-201802-EA-SNAPSHOT</version>
 
+  <name>Activiti Cloud :: Runtime Bundle</name>
+
   <properties>
-    <version.activiti.cloud>7-201802-EA-SNAPSHOT</version.activiti.cloud>
-    <postgres.version>9.4.1212.jre7</postgres.version>
-    <spring.boot.version>2.0.0.M7</spring.boot.version>
-    <junit.version>4.12</junit.version>
+    <!-- dependencies -->
+    <activiti-cloud.version>7-201802-EA-SNAPSHOT</activiti-cloud.version>
+    <spring-boot.version>2.0.0.M7</spring-boot.version>
 
     <!-- plugins -->
+    <docker-maven-plugin.version>0.21.0</docker-maven-plugin.version>
     <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
-    <spring-boot-maven-plugin.version>1.5.4.RELEASE</spring-boot-maven-plugin.version>
-    <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
-    <jgitflow.plugin.version>1.0-m5.1</jgitflow.plugin.version>
+    <jgitflow-maven-plugin.version>1.0-m5.1</jgitflow-maven-plugin.version>
+    <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -28,36 +27,26 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-dependencies</artifactId>
-        <version>${version.activiti.cloud}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-      <!-- Spring Boot -->
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>${spring.boot.version}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
 
-
   <distributionManagement>
     <repository>
       <id>activiti-enterprise-snapshots</id>
       <name>Alfresco internal repo</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
     </repository>
     <snapshotRepository>
       <id>activiti-enterprise-snapshots</id>
       <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -70,7 +59,6 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>${postgres.version}</version>
       <scope>runtime</scope>
     </dependency>
 
@@ -120,7 +108,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>${spring-boot-maven-plugin.version}</version>
+        <version>${spring-boot.version}</version>
         <executions>
           <execution>
             <goals>
@@ -132,6 +120,7 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
+        <version>${docker-maven-plugin.version}</version>
         <configuration>
           <images>
             <image>
@@ -158,7 +147,9 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
         <configuration>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <failIfNoTests>false</failIfNoTests>
@@ -176,16 +167,15 @@
       <plugin>
         <groupId>external.atlassian.jgitflow</groupId>
         <artifactId>jgitflow-maven-plugin</artifactId>
-        <version>${jgitflow.plugin.version}</version>
+        <version>${jgitflow-maven-plugin.version}</version>
         <configuration>
           <enableFeatureVersions>true</enableFeatureVersions>
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <allowSnapshots>true</allowSnapshots>
           <noDeploy>true</noDeploy>
-          <useReleaseProfile>true</useReleaseProfile> <!-- Do not generate javadoc when releaseing -->
+          <useReleaseProfile>true</useReleaseProfile> <!-- Do not generate javadoc when releasing -->
           <pushReleases>true</pushReleases>
           <squash>false</squash>
-          <versionTagPrefix>activiti-</versionTagPrefix>
           <keepBranch>true</keepBranch>
           <noFeatureBuild>true</noFeatureBuild>
           <noFeatureMerge>true</noFeatureMerge>
@@ -210,7 +200,7 @@
     <repository> <!-- Using snapshot repo to temporarily keep keycloak adapter -->
       <id>activiti-snapshots</id>
       <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
       <releases>
         <enabled>false</enabled>
       </releases>
@@ -229,7 +219,7 @@
     <repository>
       <id>jboss-thirdparty-releases</id>
       <name>JBOSS Maven Repository</name>
-      <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/</url>
+      <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
@@ -254,6 +244,5 @@
       </snapshots>
     </pluginRepository>
   </pluginRepositories>
-
 
 </project>
