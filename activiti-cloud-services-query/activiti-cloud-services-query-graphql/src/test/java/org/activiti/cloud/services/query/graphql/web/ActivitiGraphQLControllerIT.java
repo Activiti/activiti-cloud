@@ -84,7 +84,7 @@ public class ActivitiGraphQLControllerIT {
                 "query {"
                 + "ProcessInstances {"
                 + "    select {"
-                + "      processInstanceId"
+                + "      id"
                 + "      tasks {"
                 + "        id"
                 + "        name"

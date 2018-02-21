@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.query;
+package org.activiti.cloud.starter.tests;
 
 import java.util.Collection;
+import java.util.Optional;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.cloud.starters.test.MyProducer;
+import org.activiti.engine.impl.identity.Authentication;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,23 +31,32 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.*;
+import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCompletedEvent;
+import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
+import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
 import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
 public class QueryProcessInstancesIT {
 
     private static final String PROC_URL = "/v1/process-instances";
     private static final ParameterizedTypeReference<PagedResources<ProcessInstance>> PAGED_PROCESS_INSTANCE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
     };
+
+    @Autowired
+    private KeycloakTokenProducer keycloakTokenProducer;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -65,6 +75,7 @@ public class QueryProcessInstancesIT {
     @Test
     public void shouldGetAvailableProcInstances() throws Exception {
         //given
+
         // a completed process
         producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
                                            "10",
@@ -100,13 +111,14 @@ public class QueryProcessInstancesIT {
 
         Collection<ProcessInstance> processInstances = responseEntity.getBody().getContent();
         assertThat(processInstances)
-                .extracting(ProcessInstance::getProcessInstanceId,
+                .extracting(ProcessInstance::getId,
                         ProcessInstance::getStatus)
                 .contains(tuple("15",
                         "COMPLETED"),
                         tuple("16",
                                 "RUNNING"));
     }
+
 
     @Test
     public void shouldFilterOnStatus() throws Exception {
@@ -137,10 +149,11 @@ public class QueryProcessInstancesIT {
 
         waitForMessage();
 
+
         //when
         ResponseEntity<PagedResources<ProcessInstance>> responseEntity = testRestTemplate.exchange(PROC_URL + "?status={status}",
                 HttpMethod.GET,
-                null,
+                getHeaderEntity(),
                 PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
                 "COMPLETED");
 
@@ -150,17 +163,25 @@ public class QueryProcessInstancesIT {
 
         Collection<ProcessInstance> processInstances = responseEntity.getBody().getContent();
         assertThat(processInstances)
-                .extracting(ProcessInstance::getProcessInstanceId,
+                .extracting(ProcessInstance::getId,
                         ProcessInstance::getStatus)
                 .containsExactly(tuple("15",
                         "COMPLETED"));
     }
 
     private ResponseEntity<PagedResources<ProcessInstance>> executeRequestGetProcInstances() {
+
         return testRestTemplate.exchange(PROC_URL,
                 HttpMethod.GET,
-                null,
+                getHeaderEntity(),
                 PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+    }
+
+    private HttpEntity getHeaderEntity(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", keycloakTokenProducer.getTokenString());
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+        return entity;
     }
 
     private void waitForMessage() throws InterruptedException {

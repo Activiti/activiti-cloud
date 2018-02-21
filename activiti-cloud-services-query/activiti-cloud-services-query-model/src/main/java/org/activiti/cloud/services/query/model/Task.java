@@ -57,12 +57,15 @@ public class Task implements Serializable {
     private Date createTime;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date dueDate;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Date claimDate;
     private String priority;
     private String category;
     private String processDefinitionId;
     private String processInstanceId;
     private String status;
     private String applicationName;
+    private String owner;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModified;
@@ -75,7 +78,7 @@ public class Task implements Serializable {
 
     @JsonIgnore
     @ManyToOne(optional = true)
-    @JoinColumn(name = "processInstanceId", referencedColumnName = "processInstanceId", insertable = false, updatable = false
+    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private ProcessInstance processInstance;
 
@@ -101,7 +104,9 @@ public class Task implements Serializable {
                 @JsonProperty("processInstanceId") String processInstanceId,
                 @JsonProperty("applicationName") String applicationName,
                 @JsonProperty("status") String status,
-                @JsonProperty("lastModified") Date lastModified) {
+                @JsonProperty("lastModified") Date lastModified,
+                @JsonProperty("claimDate") Date claimDate,
+                @JsonProperty("owner") String owner) {
         this.id = id;
         this.assignee = assignee;
         this.name = name;
@@ -115,6 +120,8 @@ public class Task implements Serializable {
         this.applicationName = applicationName;
         this.status = status;
         this.lastModified = lastModified;
+        this.claimDate = claimDate;
+        this.owner = owner;
     }
 
     public String getId() {
@@ -233,6 +240,22 @@ public class Task implements Serializable {
     @Transient
     public Date getLastModifiedFrom() {
         return lastModifiedFrom;
+    }
+
+    public Date getClaimDate() {
+        return claimDate;
+    }
+
+    public void setClaimDate(Date claimDate) {
+        this.claimDate = claimDate;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public void setLastModifiedFrom(Date lastModifiedFrom) {

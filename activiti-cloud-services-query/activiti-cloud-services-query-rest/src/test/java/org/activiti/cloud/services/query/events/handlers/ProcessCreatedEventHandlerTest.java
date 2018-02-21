@@ -75,7 +75,7 @@ public class ProcessCreatedEventHandlerTest {
 
         ProcessInstance processInstance = argumentCaptor.getValue();
         Assertions.assertThat(processInstance)
-                .hasProcessInstanceId("200")
+                .hasId("200")
                 .hasProcessDefinitionId("100")
                 .hasApplicationName("runtime-bundle-a")
                 .hasProcessDefinitionKey("mykey")

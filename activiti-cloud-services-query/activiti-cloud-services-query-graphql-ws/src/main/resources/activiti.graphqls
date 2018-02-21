@@ -20,7 +20,10 @@ type ProcessEngineNotification {
     processDefinitionId : String
 	ProcessStartedEvent : [ProcessStartedEvent]
 	ProcessCompletedEvent : [ProcessCompletedEvent]
+	ProcessCreatedEvent : [ProcessCreatedEvent]
 	ProcessCancelledEvent : [ProcessCancelledEvent]
+	ProcessActivatedEvent : [ProcessActivatedEvent]
+	ProcessSuspendedEvent : [ProcessSuspendedEvent]
 	ActivityStartedEvent : [ActivityStartedEvent]
 	ActivityCancelledEvent : [ActivityCancelledEvent]
 	ActivityCompletedEvent : [ActivityCompletedEvent]
@@ -31,8 +34,30 @@ type ProcessEngineNotification {
 	TaskCreatedEvent : [TaskCreatedEvent]
 	TaskCompletedEvent : [TaskCompletedEvent]
 	TaskAssignedEvent : [TaskAssignedEvent]
+	TaskActivatedEvent : [TaskActivatedEvent]
+	TaskSuspendedEvent : [TaskSuspendedEvent]
 	IntegrationRequestSentEvent : [IntegrationRequestSentEvent]
 	IntegrationResultReceivedEvent : [IntegrationResultReceivedEvent]
+}
+
+type ProcessActivatedEvent {
+    processInstance : ProcessInstanceEventType
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long
+    eventType : String
+}
+
+type ProcessSuspendedEvent {
+    processInstance : ProcessInstanceEventType
+    applicationName : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+    timestamp : Long
+    eventType : String
 }
 
 type ProcessStartedEvent {
@@ -47,6 +72,17 @@ type ProcessStartedEvent {
 }
 
 type ProcessCompletedEvent {
+    applicationName : String
+    timestamp : Long
+    eventType : String
+    executionId : String
+    processDefinitionId : String
+    processInstanceId : String
+
+    processInstance : ProcessInstanceEventType
+}
+
+type ProcessCreatedEvent {
     applicationName : String
     timestamp : Long
     eventType : String
@@ -173,6 +209,26 @@ type ProcessInstanceEventType {
     status : String
 }
 
+type TaskActivatedEvent {
+    timestamp : Long
+    eventType : String
+    executionId : String
+    processDefinitionId : String
+    applicationName : String
+    processInstanceId : String
+    task : TaskEventType
+}
+
+type TaskSuspendedEvent {
+    timestamp : Long
+    eventType : String
+    executionId : String
+    processDefinitionId : String
+    applicationName : String
+    processInstanceId : String
+    task : TaskEventType
+}
+
 type TaskCreatedEvent {
     applicationName : String
     executionId : String
@@ -203,6 +259,8 @@ type TaskEventType {
     processDefinitionId : String
     processInstanceId : String
     status : String
+    description : String
+    assignee : String
 }
 
 type TaskCompletedEvent {

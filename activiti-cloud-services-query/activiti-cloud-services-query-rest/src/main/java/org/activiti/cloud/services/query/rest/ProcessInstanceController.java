@@ -22,15 +22,24 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
+import org.activiti.cloud.services.security.ActivitiForbiddenException;
+import org.activiti.cloud.services.security.AuthenticationWrapper;
+import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.security.SecurityPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -43,22 +52,48 @@ public class ProcessInstanceController {
 
     private PagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler;
 
+    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+
+    private final AuthenticationWrapper authenticationWrapper;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceController.class);
+
     private EntityFinder entityFinder;
+
+    @ExceptionHandler(ActivitiForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleAppException(ActivitiForbiddenException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleAppException(IllegalStateException ex) {
+        return ex.getMessage();
+    }
+
 
     @Autowired
     public ProcessInstanceController(ProcessInstanceRepository processInstanceRepository,
                                      ProcessInstanceResourceAssembler processInstanceResourceAssembler,
                                      PagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler,
-                                     EntityFinder entityFinder) {
+                                     EntityFinder entityFinder,
+                                     SecurityPoliciesApplicationService securityPoliciesApplicationService,
+                                     AuthenticationWrapper authenticationWrapper) {
         this.processInstanceRepository = processInstanceRepository;
         this.processInstanceResourceAssembler = processInstanceResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.entityFinder = entityFinder;
+        this.securityPoliciesApplicationService = securityPoliciesApplicationService;
+        this.authenticationWrapper = authenticationWrapper;
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public PagedResources<ProcessInstanceResource> findAll(@QuerydslPredicate(root = ProcessInstance.class) Predicate predicate,
                                                            Pageable pageable) {
+
+        predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(predicate, SecurityPolicy.READ);
+
         return pagedResourcesAssembler.toResource(processInstanceRepository.findAll(predicate,
                                                                                     pageable),
                                                   processInstanceResourceAssembler);
@@ -66,8 +101,17 @@ public class ProcessInstanceController {
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     public ProcessInstanceResource findById(@PathVariable String processInstanceId) {
-        return processInstanceResourceAssembler.toResource(entityFinder.findById(processInstanceRepository,
-                                                                                 processInstanceId,
-                                                                                 "Unable to find task for the given id:'" + processInstanceId + "'"));
+
+        ProcessInstance processInstance = entityFinder.findById(processInstanceRepository,
+                processInstanceId,
+                "Unable to find task for the given id:'" + processInstanceId + "'");
+
+
+        if(!securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionKey(),processInstance.getApplicationName())){
+            LOGGER.debug("User "+authenticationWrapper.getAuthenticatedUserId()+" not permitted to access definition "+processInstance.getProcessDefinitionKey());
+            throw new ActivitiForbiddenException("Operation not permitted for "+processInstance.getProcessDefinitionKey());
+        }
+
+        return processInstanceResourceAssembler.toResource(processInstance);
     }
 }

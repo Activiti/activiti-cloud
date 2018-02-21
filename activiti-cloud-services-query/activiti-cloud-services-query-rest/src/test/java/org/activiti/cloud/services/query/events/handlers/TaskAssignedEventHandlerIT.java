@@ -86,7 +86,9 @@ public class TaskAssignedEventHandlerIT {
                                   processInstanceId,
                                   "runtime-bundle-a",
                                   "ASSIGNED",
-                                  new Date() /*lastModified*/
+                                  new Date() /*lastModified*/,
+                                    new Date(),
+                                    "owner"
         );
         TaskAssignedEvent givenEvent = new TaskAssignedEvent(System.currentTimeMillis(),
                                                             "taskAssigned",

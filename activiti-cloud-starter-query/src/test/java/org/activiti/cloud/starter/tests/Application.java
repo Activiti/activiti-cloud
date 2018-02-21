@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.query;
+package org.activiti.cloud.starter.tests;
 
 import org.activiti.cloud.services.query.graphql.autoconfigure.EnableActivitiGraphQLQueryService;
 import org.activiti.cloud.services.query.notifications.config.EnableActivitiNotificationsGateway;
@@ -30,11 +30,11 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableActivitiNotificationsGateway
 @EnableActivitiGraphQLQueryService
 @ComponentScan({"org.activiti.cloud.services.query.app","org.activiti.cloud.services.query.events",
-"org.activiti.cloud.services.query.rest","org.activiti.cloud.starters","org.activiti.cloud.starter","org.activiti.cloud.services.identity"})
-public class QueryApplication {
+"org.activiti.cloud.services.query.rest","org.activiti.cloud.services.security","org.activiti.cloud.starters","org.activiti.cloud.starter","org.activiti.cloud.services.identity"})
+public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(QueryApplication.class,
+        SpringApplication.run(Application.class,
                               args);
     }
 

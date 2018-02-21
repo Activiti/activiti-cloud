@@ -86,7 +86,9 @@ public class TaskActivatedEventHandlerIT {
                                   processInstanceId,
                                   "runtime-bundle-a",
                                   "SUSPENDED",
-                                  new Date() /*lastModified*/
+                                  new Date() /*lastModified*/,
+                                    new Date(),
+                                    "owner"
         );
         TaskActivatedEvent givenEvent = new TaskActivatedEvent(System.currentTimeMillis(),
                                                               "taskActivated",
@@ -125,7 +127,9 @@ public class TaskActivatedEventHandlerIT {
                 processInstanceId,
                 "runtime-bundle-a",
                 "SUSPENDED",
-                new Date() /*lastModified*/
+                new Date() /*lastModified*/,
+                new Date(), /*claimDate*/
+                "owner"
         );
         TaskActivatedEvent givenEvent = new TaskActivatedEvent(System.currentTimeMillis(),
                                                                "taskActivated",

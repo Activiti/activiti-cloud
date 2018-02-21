@@ -33,9 +33,9 @@ public class ProcessInstanceResourceAssembler implements ResourceAssembler<Proce
 
     @Override
     public ProcessInstanceResource toResource(ProcessInstance entity) {
-        Link selfRel = linkTo(methodOn(ProcessInstanceController.class).findById(entity.getProcessInstanceId())).withSelfRel();
-        Link tasksRel = linkTo(methodOn(ProcessInstanceTasksController.class).getTasks(entity.getProcessInstanceId(), null, null)).withRel("tasks");
-        Link variablesRel = linkTo(methodOn(ProcessInstanceVariableController.class).getVariables(entity.getProcessInstanceId(),null,null)).withRel("variables");
+        Link selfRel = linkTo(methodOn(ProcessInstanceController.class).findById(entity.getId())).withSelfRel();
+        Link tasksRel = linkTo(methodOn(ProcessInstanceTasksController.class).getTasks(entity.getId(), null, null)).withRel("tasks");
+        Link variablesRel = linkTo(methodOn(ProcessInstanceVariableController.class).getVariables(entity.getId(),null,null)).withRel("variables");
         return new ProcessInstanceResource(entity, selfRel, tasksRel, variablesRel);
     }
 

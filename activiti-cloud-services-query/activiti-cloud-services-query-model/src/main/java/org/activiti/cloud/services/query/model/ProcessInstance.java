@@ -39,9 +39,14 @@ public class ProcessInstance {
     private String applicationName;
     @Id
     @GraphQLDescription("Unique process instance identity attribute")
-    private String processInstanceId;
+    private String id;
+    private String name;
+    private String description;
     private String processDefinitionId;
     private String processDefinitionKey;
+    private String initiator;
+    private Date startDate;
+    private String businessKey;
     private String status;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -71,19 +76,13 @@ public class ProcessInstance {
     public ProcessInstance(String applicationName,
                            String processInstanceId,
                            String processDefinitionId,
-                           String processDefinitionKey,
                            String status,
                            Date lastModified) {
         this.applicationName = applicationName;
-        this.processInstanceId = processInstanceId;
+        this.id = processInstanceId;
         this.processDefinitionId = processDefinitionId;
-        this.processDefinitionKey = processDefinitionKey;
         this.status = status;
         this.lastModified = lastModified;
-    }
-
-    public String getProcessInstanceId() {
-        return processInstanceId;
     }
 
     public String getProcessDefinitionId() {
@@ -98,20 +97,8 @@ public class ProcessInstance {
         return lastModified;
     }
 
-    public void setProcessInstanceId(String processInstanceId) {
-        this.processInstanceId = processInstanceId;
-    }
-
     public void setProcessDefinitionId(String processDefinitionId) {
         this.processDefinitionId = processDefinitionId;
-    }
-
-    public String getProcessDefinitionKey() {
-        return processDefinitionKey;
-    }
-
-    public void setProcessDefinitionKey(String processDefinitionKey) {
-        this.processDefinitionKey = processDefinitionKey;
     }
 
     public void setStatus(String status) {
@@ -162,5 +149,61 @@ public class ProcessInstance {
 
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    public String getProcessDefinitionKey() {
+        return processDefinitionKey;
+    }
+
+    public void setProcessDefinitionKey(String processDefinitionKey) {
+        this.processDefinitionKey = processDefinitionKey;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getInitiator() {
+        return initiator;
+    }
+
+    public void setInitiator(String initiator) {
+        this.initiator = initiator;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getBusinessKey() {
+        return businessKey;
+    }
+
+    public void setBusinessKey(String businessKey) {
+        this.businessKey = businessKey;
     }
 }

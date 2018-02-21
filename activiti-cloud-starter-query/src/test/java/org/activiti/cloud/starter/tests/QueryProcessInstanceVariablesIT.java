@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.query;
+package org.activiti.cloud.starter.tests;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.Variable;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +28,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.activiti.cloud.services.query.CoreTaskBuilder.aTask;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
-import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskCreatedEvent;
 import static org.activiti.cloud.starters.test.builder.VariableCreatedEventBuilder.aVariableCreatedEvent;
 import static org.activiti.cloud.starters.test.builder.VariableDeletedEventBuilder.aVariableDeletedEvent;
 import static org.activiti.cloud.starters.test.builder.VariableUpdatedEventBuilder.aVariableUpdatedEvent;
@@ -49,67 +48,52 @@ import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-public class QueryTaskVariablesIT {
+public class QueryProcessInstanceVariablesIT {
 
-    private static final String VARIABLES_URL = "/v1/variables?taskId={taskId}";
+    private static final String VARIABLES_URL = "/v1/variables?processInstanceId={processInstanceId}";
     private static final ParameterizedTypeReference<PagedResources<Variable>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Variable>>() {
     };
+
+    @Autowired
+    private KeycloakTokenProducer keycloakTokenProducer;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
 
     @Autowired
-    private VariableRepository variableRepository;
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
     private ProcessInstanceRepository processInstanceRepository;
+
+    @Autowired
+    private VariableRepository variableRepository;
 
     @Autowired
     private MyProducer producer;
 
-    private static final String PROCESS_INSTANCE_ID = "15";
-    private static final String TASK_ID = "30";
-
-    @Before
-    public void setUp() throws Exception {
-        // start a process
-        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
-                                           "10",
-                                           "defId",
-                                           PROCESS_INSTANCE_ID));
-        producer.send(aProcessStartedEvent(System.currentTimeMillis(),
-                                           "10",
-                                           "defId",
-                                           PROCESS_INSTANCE_ID));
-
-        producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
-                                                .withId(TASK_ID)
-                                                .withName("Created task")
-                                                .build(),
-                                        PROCESS_INSTANCE_ID));
-    }
-
     @After
     public void tearDown() throws Exception {
         variableRepository.deleteAll();
-        taskRepository.deleteAll();
         processInstanceRepository.deleteAll();
     }
 
     @Test
-    public void shouldRetrieveAllTaskVariables() throws Exception {
+    public void shouldRetrieveAllProcessVariable() throws Exception {
         //given
+        String processInstanceId = "20";
         long timestamp = System.currentTimeMillis();
 
+        producer.send(aProcessCreatedEvent(timestamp,
+                                           "10",
+                                           "defId",
+                                           processInstanceId));
+        producer.send(aProcessStartedEvent(timestamp,
+                                           "10",
+                                           "defId",
+                                           processInstanceId));
         // a variable created
         producer.send(aVariableCreatedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                              .withProcessInstanceId(processInstanceId)
                               .withVariableName("varCreated")
                               .withVariableValue("v1")
                               .withVariableType("string")
@@ -117,15 +101,13 @@ public class QueryTaskVariablesIT {
 
         // a variable created and updated
         producer.send(aVariableCreatedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                              .withProcessInstanceId(processInstanceId)
                               .withVariableName("varUpdated")
                               .withVariableValue("v2")
                               .withVariableType("string")
                               .build());
         producer.send(aVariableUpdatedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                              .withProcessInstanceId(processInstanceId)
                               .withVariableName("varUpdated")
                               .withVariableValue("v2-up")
                               .withVariableType("string")
@@ -136,12 +118,10 @@ public class QueryTaskVariablesIT {
                               .withVariableName("varDeleted")
                               .withVariableValue("v1")
                               .withVariableType("string")
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                              .withProcessInstanceId(processInstanceId)
                               .build());
         producer.send(aVariableDeletedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                              .withProcessInstanceId(processInstanceId)
                               .withVariableName("varDeleted")
                               .withVariableType("string")
                               .build());
@@ -151,9 +131,9 @@ public class QueryTaskVariablesIT {
             //when
             ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
                                                                                                 HttpMethod.GET,
-                                                                                                null,
+                    getHeaderEntity(),
                                                                                                 PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                                TASK_ID);
+                                                                                                processInstanceId);
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -174,18 +154,26 @@ public class QueryTaskVariablesIT {
     @Test
     public void shouldFilterOnVariableName() throws Exception {
         //given
+        String processInstanceId = "20";
         long timestamp = System.currentTimeMillis();
+
+        producer.send(aProcessCreatedEvent(timestamp,
+                                           "10",
+                                           "defId",
+                                           processInstanceId));
+        producer.send(aProcessStartedEvent(timestamp,
+                                           "10",
+                                           "defId",
+                                           processInstanceId));
         producer.send(aVariableCreatedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                              .withProcessInstanceId(processInstanceId)
                               .withVariableName("var1")
                               .withVariableValue("v1")
                               .withVariableType("string")
                               .build());
 
         producer.send(aVariableCreatedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                              .withProcessInstanceId(processInstanceId)
                               .withVariableName("var2")
                               .withVariableValue("v2")
                               .withVariableType("string")
@@ -195,8 +183,7 @@ public class QueryTaskVariablesIT {
                               .withVariableName("var3")
                               .withVariableValue("v3")
                               .withVariableType("string")
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                              .withProcessInstanceId(processInstanceId)
                               .build());
 
         await().untilAsserted(() -> {
@@ -204,9 +191,9 @@ public class QueryTaskVariablesIT {
             //when
             ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "&name={name}",
                                                                                                 HttpMethod.GET,
-                                                                                                null,
+                    getHeaderEntity(),
                                                                                                 PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                                TASK_ID,
+                                                                                                processInstanceId,
                                                                                                 "var2");
 
             //then
@@ -220,5 +207,13 @@ public class QueryTaskVariablesIT {
                                   "v2")
                     );
         });
+    }
+
+
+    private HttpEntity getHeaderEntity(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", keycloakTokenProducer.getTokenString());
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+        return entity;
     }
 }

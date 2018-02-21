@@ -45,13 +45,17 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
         ProcessInstance createdProcessInstance = new ProcessInstance();
         createdProcessInstance.setApplicationName(createdEvent.getApplicationName());
         createdProcessInstance.setProcessDefinitionId(createdEvent.getProcessDefinitionId());
-        createdProcessInstance.setProcessInstanceId(createdEvent.getProcessInstanceId());
+        createdProcessInstance.setId(createdEvent.getProcessInstanceId());
         createdProcessInstance.setStatus("CREATED");
         createdProcessInstance.setLastModified(new Date(createdEvent.getTimestamp()));
 
         // Augment Query Process Instance with internal Process Instance from event
         if (((ProcessCreatedEvent) createdEvent).getProcessInstance() != null) {
             createdProcessInstance.setProcessDefinitionKey(((ProcessCreatedEvent) createdEvent).getProcessInstance().getProcessDefinitionKey());
+            createdProcessInstance.setInitiator(((ProcessCreatedEvent) createdEvent).getProcessInstance().getInitiator());
+            createdProcessInstance.setBusinessKey(((ProcessCreatedEvent) createdEvent).getProcessInstance().getBusinessKey());
+            createdProcessInstance.setDescription(((ProcessCreatedEvent) createdEvent).getProcessInstance().getDescription());
+            createdProcessInstance.setStartDate(((ProcessCreatedEvent) createdEvent).getProcessInstance().getStartDate());
         }
 
         processInstanceRepository.save(createdProcessInstance);

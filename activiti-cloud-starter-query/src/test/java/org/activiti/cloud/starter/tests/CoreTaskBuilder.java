@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.query;
+package org.activiti.cloud.starter.tests;
 
 import org.activiti.cloud.services.api.model.Task;
 
