@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-connectors-parent</artifactId>
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
-
   <artifactId>activiti-cloud-starter-connector</artifactId>
-
   <dependencies>
-
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-api</artifactId>
@@ -62,16 +60,11 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-
-
   <build>
     <plugins>
-
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>${maven.docker.plugin.version}</version>
         <configuration>
           <images>
             <image>
@@ -88,10 +81,8 @@
                 </wait>
               </run>
             </image>
-
           </images>
         </configuration>
-
         <!-- Connect start/stop to pre- and
              post-integration-test phase, respectively if you want to start
              your docker containers during integration tests -->
@@ -133,7 +124,6 @@
       <plugin>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
-
         <executions>
           <execution>
             <goals>
@@ -141,9 +131,7 @@
             </goals>
           </execution>
         </executions>
-
         <configuration>
-
           <packages>
             <package>org.activiti.cloud.connectors.starter.model</package>
           </packages>
@@ -159,10 +147,8 @@
           <generateBddAssertions>false</generateBddAssertions>
           <generateSoftAssertions>false</generateSoftAssertions>
           <generateJUnitSoftAssertions>false</generateJUnitSoftAssertions>
-
         </configuration>
       </plugin>
     </plugins>
   </build>
-
 </project>
