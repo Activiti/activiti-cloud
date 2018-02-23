@@ -1,17 +1,13 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-org</artifactId>
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
-
   <artifactId>activiti-cloud-services-org-jpa</artifactId>
   <name>Activiti Cloud Services :: Organization JPA</name>
-  <description>Activiti Services Organization JPA</description>
-
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -25,8 +21,6 @@
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-rest-core</artifactId>
     </dependency>
-
-    <!-- Tests -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
