@@ -34,7 +34,6 @@ public class ActivitiProperties {
   private boolean mailServerUseTls;
   private String databaseSchemaUpdate = "true";
   private String databaseSchema;
-  private boolean isDbIdentityUsed = false;
   private boolean isDbHistoryUsed = false;
   private HistoryLevel historyLevel = HistoryLevel.NONE;
   private String processDefinitionLocationPrefix = "classpath:/processes/";
@@ -81,14 +80,6 @@ public class ActivitiProperties {
 
   public void setDatabaseSchema(String databaseSchema) {
     this.databaseSchema = databaseSchema;
-  }
-
-  public boolean isDbIdentityUsed() {
-    return isDbIdentityUsed;
-  }
-
-  public void setDbIdentityUsed(boolean isDbIdentityUsed) {
-    this.isDbIdentityUsed = isDbIdentityUsed;
   }
 
   public boolean isDbHistoryUsed() {
