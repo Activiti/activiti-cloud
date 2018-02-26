@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.qa.story;
 
+import java.util.UUID;
+
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.qa.steps.AuthenticationSteps;
 import org.activiti.cloud.qa.steps.ModelingSteps;
@@ -40,14 +42,14 @@ public class ModelingGroups {
         authenticater.ensureUserIsAuthenticated();
     }
 
-    @When("the user creates a group")
-    public void createTopLevelGroup() {
-        modeler.createGroup("group1",
-                            "Group1");
+    @When("the user creates a group '$groupName'")
+    public void createTopLevelGroup(String groupName) {
+        modeler.createGroup(UUID.randomUUID().toString(),
+                            groupName);
     }
 
-    @Then("the group is created")
-    public void checkGroupExists() {
-        modeler.checkGroupExists("Group1");
+    @Then("the group '$groupName' is created")
+    public void checkGroupExists(String groupName) {
+        modeler.checkGroupExists(groupName);
     }
 }

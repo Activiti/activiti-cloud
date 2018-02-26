@@ -6,6 +6,6 @@ I want to create a group
 
 Scenario: create a group
 Given any authenticated user
-When the user creates a group
-Then the group is created
+When the user creates a group 'HR Department'
+Then the group 'HR Department' is created
 
