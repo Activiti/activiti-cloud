@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.client;
+package org.activiti.cloud.qa.rest.httpclient;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.activiti.cloud.qa.model.AuthToken;
-import org.activiti.cloud.qa.serialization.Serializer;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;

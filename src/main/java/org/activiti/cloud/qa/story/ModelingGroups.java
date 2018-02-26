@@ -14,32 +14,30 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.modeling;
-
-import java.io.IOException;
+package org.activiti.cloud.qa.story;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.modeling.model.Group;
-import org.activiti.cloud.qa.user.UserSessionSteps;
+import org.activiti.cloud.qa.steps.AuthenticationSteps;
+import org.activiti.cloud.qa.steps.ModelingSteps;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
 /**
- * User modeling actions
+ * Modeling groups scenarios
  */
-public class ModelingActions {
+public class ModelingGroups {
 
     @Steps
-    private UserSessionSteps userSessionSteps;
+    private AuthenticationSteps authenticater;
 
     @Steps
     private ModelingSteps modeler;
 
     @Given("any authenticated user")
-    public void authenticate() throws IOException {
-        userSessionSteps.authenticateDefaultUser();
-        userSessionSteps.ensureUserIsAuthenticated();
+    public void authenticate() throws Exception {
+        authenticater.authenticateDefaultUser();
+        authenticater.ensureUserIsAuthenticated();
     }
 
     @When("the user creates a group")
@@ -50,7 +48,6 @@ public class ModelingActions {
 
     @Then("the group is created")
     public void checkGroupExists() {
-        Group group = modeler.findGroupById("group1");
-        modeler.checkGroupIsExpectedOne(group, "Group1");
+        modeler.checkGroupExists("Group1");
     }
 }

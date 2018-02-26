@@ -19,19 +19,26 @@ package org.activiti.cloud.qa.service;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import org.activiti.cloud.qa.model.AuthToken;
+import org.activiti.cloud.qa.model.Group;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.stereotype.Service;
 
 /**
- * Authentication service
+ * Modeling REST service
  */
 @Service
-public interface AuthenticationService {
+public interface ModelingService {
 
-    @RequestLine("POST")
-    @Headers("Content-Type: application/x-www-form-urlencoded")
-    AuthToken authenticate(@Param("client_id") String clientId,
-                           @Param("grant_type") String grantType,
-                           @Param("username") String username,
-                           @Param("password") String password);
+    @RequestLine("POST /v1/groups")
+    @Headers("Content-Type: application/json")
+    void create(Group group);
+
+    @RequestLine("GET /v1/groups")
+    @Headers("Content-Type: application/json")
+    PagedResources<Group> findAll();
+
+    @RequestLine("GET /v1/groups/{id}")
+    @Headers("Content-Type: application/json")
+    Group findById(@Param("id") String id);
+
 }

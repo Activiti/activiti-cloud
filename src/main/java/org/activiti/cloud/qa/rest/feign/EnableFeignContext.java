@@ -14,29 +14,22 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa;
+package org.activiti.cloud.qa.rest.feign;
 
-import java.util.Properties;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class Config {
+import org.activiti.cloud.qa.config.TestsConfigurationProperties;
+import org.springframework.test.context.ContextConfiguration;
 
-    private Properties properties = new Properties();
+/**
+ * Allow Feign clients autowiring
+ */
+@ContextConfiguration(classes = {TestsConfigurationProperties.class, FeignConfiguration.class})
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface EnableFeignContext {
 
-    private static Config instance = null;
-
-    private Config() {}
-
-    public static Config getInstance() {
-        if (instance == null)
-            instance = new Config();
-        return instance;
-    }
-
-    public void put(String key, String value) {
-        properties.setProperty(key, value);
-    }
-
-    public Properties getProperties() {
-        return properties;
-    }
 }

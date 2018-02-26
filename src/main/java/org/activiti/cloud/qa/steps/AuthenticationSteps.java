@@ -14,25 +14,41 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.user;
+package org.activiti.cloud.qa.steps;
 
 import java.io.IOException;
 
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.AuthToken;
+import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
 import org.activiti.cloud.qa.service.AuthenticationService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
- * User session steps
+ * User authentication steps
  */
-public class UserSessionSteps {
+@EnableFeignContext
+public class AuthenticationSteps {
+
+    private static final String AUTH_CLIENT_ID = "activiti";
+    private static final String AUTH_GRANT_TYPE = "password";
+    private static final String AUTH_USERNAME = "hruser";
+    private static final String AUTH_PASSWORD = "password";
+
+    @Autowired
+    private AuthenticationService authenticationService;
+
 
     @Step
     public void authenticateDefaultUser() throws IOException {
-        AuthToken authToken = AuthenticationService.authenticate();
+        AuthToken authToken = authenticationService
+                .authenticate(AUTH_CLIENT_ID,
+                              AUTH_GRANT_TYPE,
+                              AUTH_USERNAME,
+                              AUTH_PASSWORD);
         Serenity.setSessionVariable("authToken").to(authToken);
     }
 
@@ -42,5 +58,4 @@ public class UserSessionSteps {
         assertThat(authToken).isNotNull();
         assertThat(authToken.getAccess_token()).isNotNull();
     }
-
 }

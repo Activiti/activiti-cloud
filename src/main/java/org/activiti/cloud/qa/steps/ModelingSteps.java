@@ -14,38 +14,43 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.modeling;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+package org.activiti.cloud.qa.steps;
 
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.qa.modeling.model.Group;
+import org.activiti.cloud.qa.model.Group;
+import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
+import org.activiti.cloud.qa.service.ModelingService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.junit.Assert.*;
 
 /**
  * Modeling steps
  */
+@EnableFeignContext
 public class ModelingSteps {
+
+    @Autowired
+    private ModelingService modelingService;
 
     @Step
     public void createGroup(String groupId,
                             String groupName) {
-        ModelingClient
-                .get()
+        modelingService
                 .create(new Group(groupId,
                                   groupName));
     }
 
     @Step
-    public Group findGroupById(String groupId) {
-        return ModelingClient
-                .get()
-                .findById(groupId);
+    public void checkGroupExists(String groupName) {
+        assertTrue(modelingService
+                .findAll()
+                .getContent()
+                .stream()
+                .map(Group::getName)
+                .filter(name -> name.equals(groupName))
+                .findFirst()
+                .isPresent());
     }
 
-    @Step
-    public void checkGroupIsExpectedOne(Group groupToCheck, String expectedGroupName) {
-        assertNotNull(groupToCheck);
-        assertEquals(expectedGroupName, groupToCheck.getName());
-    }
 }

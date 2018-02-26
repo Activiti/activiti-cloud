@@ -18,14 +18,46 @@ package org.activiti.cloud.qa.model;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+/**
+ * Model for modeling group
+ */
+public class Group {
 
-public class Tasks {
+    private String id;
 
-    @JsonProperty(value = "taskList")
-    private List<Task> tasks;
+    private String name;
 
-    public List<Task> getTasks() {
-        return tasks;
+    private List<Group> subgroups;
+
+    public Group() {
+    }
+
+    public Group(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Group> getSubgroups() {
+        return subgroups;
+    }
+
+    public void setSubgroups(List<Group> subgroups) {
+        this.subgroups = subgroups;
     }
 }

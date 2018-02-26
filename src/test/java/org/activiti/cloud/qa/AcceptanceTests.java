@@ -16,37 +16,8 @@
 
 package org.activiti.cloud.qa;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.Enumeration;
-import java.util.Properties;
-
 import net.serenitybdd.jbehave.SerenityStories;
-import org.jbehave.core.annotations.BeforeStories;
 
 public class AcceptanceTests extends SerenityStories {
-
-    @BeforeStories
-    public void storiesInit() throws Exception {
-        String ingress = System.getenv("HOST");
-        System.out.println("Found host from env variable: " + ingress);
-
-        File file = new File(getClass().getClassLoader().getResource("config.properties").getFile());
-        FileInputStream fileInput = new FileInputStream(file);
-        Properties properties = new Properties();
-        properties.load(fileInput);
-        fileInput.close();
-
-        Enumeration enuKeys = properties.keys();
-        while (enuKeys.hasMoreElements()) {
-            String key = (String) enuKeys.nextElement();
-            String value = properties.getProperty(key);
-            if(value.contains("${HOST}")){
-                value = value.replace("${HOST}", ingress);
-            }
-            System.out.println(key + ": " + value);
-            Config.getInstance().put(key, value);
-        }
-    }
 }
 
