@@ -2,28 +2,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-  <groupId>org.activiti</groupId>
+  <groupId>org.activiti.cloud.examples</groupId>
   <artifactId>example-runtime-bundle</artifactId>
   <version>7-201802-EA-SNAPSHOT</version>
-
   <name>Activiti Cloud :: Runtime Bundle</name>
-
+  <description>${project.name}</description>
   <properties>
+    <!-- configuration properties -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>1.8</java.version>
     <!-- dependencies -->
     <activiti-cloud.version>7-201802-EA-SNAPSHOT</activiti-cloud.version>
-    <spring-boot.version>2.0.0.M7</spring-boot.version>
-
+    <spring-boot.version>2.0.0.RC2</spring-boot.version>
     <!-- plugins -->
     <docker-maven-plugin.version>0.21.0</docker-maven-plugin.version>
     <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
     <jgitflow-maven-plugin.version>1.0-m5.1</jgitflow-maven-plugin.version>
+    <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
   </properties>
-
   <dependencyManagement>
     <dependencies>
-      <!-- Spring Boot -->
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-dependencies</artifactId>
@@ -33,7 +34,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
   <distributionManagement>
     <repository>
       <id>activiti-enterprise-snapshots</id>
@@ -46,7 +46,6 @@
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -61,8 +60,6 @@
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
-
-    <!-- Test deps -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
@@ -84,9 +81,20 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <showDeprecation>true</showDeprecation>
+          <showWarnings>true</showWarnings>
+          <optimize>true</optimize>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
@@ -184,12 +192,11 @@
       </plugin>
     </plugins>
   </build>
-
   <repositories>
     <repository>
       <id>spring-milestones</id>
       <name>Spring Milestones</name>
-      <url>https://repo.spring.io/libs-milestone</url>
+      <url>https://repo.spring.io/milestone/</url>
       <releases>
         <enabled>true</enabled>
       </releases>
@@ -211,7 +218,7 @@
     <repository>
       <id>spring-snapshots</id>
       <name>Spring Snapshots</name>
-      <url>https://repo.spring.io/libs-snapshot</url>
+      <url>https://repo.spring.io/snapshot/</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -225,7 +232,6 @@
       </snapshots>
     </repository>
   </repositories>
-
   <pluginRepositories>
     <pluginRepository>
       <id>spring-snapshots</id>
@@ -244,5 +250,4 @@
       </snapshots>
     </pluginRepository>
   </pluginRepositories>
-
 </project>
