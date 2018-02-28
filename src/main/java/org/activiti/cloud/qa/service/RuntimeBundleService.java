@@ -30,9 +30,8 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.stereotype.Service;
 
 /**
- * Runtime Bundle REST Client
+ * Runtime Bundle service
  */
-@Service
 public interface RuntimeBundleService {
 
     @RequestLine("POST /v1/process-instances")

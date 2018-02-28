@@ -16,14 +16,18 @@
 
 package org.activiti.cloud.qa.story;
 
-import java.util.UUID;
+import java.util.Collection;
+import java.util.List;
 
 import net.thucydides.core.annotations.Steps;
+import org.activiti.cloud.qa.model.Group;
 import org.activiti.cloud.qa.steps.AuthenticationSteps;
 import org.activiti.cloud.qa.steps.ModelingSteps;
+import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.springframework.hateoas.Resource;
 
 /**
  * Modeling groups scenarios
@@ -42,14 +46,40 @@ public class ModelingGroups {
         authenticater.ensureUserIsAuthenticated();
     }
 
+    @When("the group '$groupName' does't exists")
+    public void deleteGroup(String groupName) {
+        modeler.deleteGroup(groupName);
+    }
+
+    @Given("an existing group '$groupName'")
+    public void ensureGroupExists(String groupName) {
+        modeler.ensureGroupExists(groupName);
+    }
+
     @When("the user creates a group '$groupName'")
-    public void createTopLevelGroup(String groupName) {
-        modeler.createGroup(UUID.randomUUID().toString(),
-                            groupName);
+    @Alias("creates a group '$groupName'")
+    public void createGroup(String groupName) {
+        modeler.createGroup(groupName);
+    }
+
+    @When("the user opens the group '$groupName'")
+    public void openGroup(String groupName) {
+        modeler.openGroup(groupName,
+                          modeler.getAllGroups());
     }
 
     @Then("the group '$groupName' is created")
     public void checkGroupExists(String groupName) {
         modeler.checkGroupExists(groupName);
+    }
+
+    @Then("the subgroup '$subGroupName' is created in the current '$currentGroupName' group")
+    public void checkSubGroupExistsInCurrentGroup(String subGroupName, String currentGroupName) {
+        modeler.checkSubGroupExistsInCurrentGroup(subGroupName, currentGroupName);
+    }
+
+    @Then("delete groups '$groupNames'")
+    public void deleteGroups(List<String> groupNames) {
+        modeler.deleteGroups(groupNames);
     }
 }

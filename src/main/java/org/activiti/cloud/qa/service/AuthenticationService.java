@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 /**
  * Authentication service
  */
-@Service
 public interface AuthenticationService {
 
     @RequestLine("POST")

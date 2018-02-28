@@ -33,6 +33,8 @@ import static org.assertj.core.api.Assertions.*;
 @EnableFeignContext
 public class AuthenticationSteps {
 
+    private static final String AUTH_TOKEN = "authToken";
+
     private static final String AUTH_CLIENT_ID = "activiti";
     private static final String AUTH_GRANT_TYPE = "password";
     private static final String AUTH_USERNAME = "hruser";
@@ -49,12 +51,12 @@ public class AuthenticationSteps {
                               AUTH_GRANT_TYPE,
                               AUTH_USERNAME,
                               AUTH_PASSWORD);
-        Serenity.setSessionVariable("authToken").to(authToken);
+        Serenity.setSessionVariable(AUTH_TOKEN).to(authToken);
     }
 
     @Step
     public void ensureUserIsAuthenticated() {
-        AuthToken authToken = Serenity.sessionVariableCalled("authToken");
+        AuthToken authToken = Serenity.sessionVariableCalled(AUTH_TOKEN);
         assertThat(authToken).isNotNull();
         assertThat(authToken.getAccess_token()).isNotNull();
     }

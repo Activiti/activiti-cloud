@@ -20,11 +20,10 @@ import feign.Feign;
 import feign.Logger;
 import feign.form.FormEncoder;
 import feign.gson.GsonDecoder;
-import feign.gson.GsonEncoder;
 import org.activiti.cloud.qa.config.TestsConfigurationProperties;
 import org.activiti.cloud.qa.service.AuditService;
 import org.activiti.cloud.qa.service.AuthenticationService;
-import org.activiti.cloud.qa.service.ModelingService;
+import org.activiti.cloud.qa.service.ModelingGroupsService;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
  * Feign Configuration
  */
 @Configuration
-public class  FeignConfiguration {
+public class FeignConfiguration {
 
     @Autowired
     private TestsConfigurationProperties acceptanceTestsConfiguration;
@@ -51,32 +50,24 @@ public class  FeignConfiguration {
     }
 
     @Bean
-    public ModelingService modelingService() {
-        return build(ModelingService.class,
-                     acceptanceTestsConfiguration.getModelingUrl());
-    }
-
-    @Bean
     public RuntimeBundleService runtimeBundleService() {
-        return build(RuntimeBundleService.class,
-                     acceptanceTestsConfiguration.getRuntimeBundleUrl());
+        return FeignRestDataClient
+                .builder()
+                .target(RuntimeBundleService.class,
+                        acceptanceTestsConfiguration.getRuntimeBundleUrl());
     }
 
     @Bean
     public AuditService auditClient() {
-        return build(AuditService.class,
-                     acceptanceTestsConfiguration.getAuditEventUrl());
+        return FeignRestDataClient
+                .builder()
+                .target(AuditService.class,
+                        acceptanceTestsConfiguration.getAuditEventUrl());
     }
 
-    private <T> T build(Class<T> serviceClass,
-                        String serviceUrl) {
-        return Feign.builder()
-                .encoder(new GsonEncoder())
-                .decoder(new HalDecoder())
-                .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.FULL)
-                .requestInterceptor(new OAuth2FeignRequestInterceptor())
-                .target(serviceClass,
-                        serviceUrl);
+    @Bean
+    public ModelingGroupsService modelingGroupsService() {
+        return ModelingGroupsService
+                .build(acceptanceTestsConfiguration.getModelingUrl());
     }
 }

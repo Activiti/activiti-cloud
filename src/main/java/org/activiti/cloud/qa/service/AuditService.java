@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 /**
  * Audit service
  */
-@Service
 public interface AuditService {
 
     @RequestLine("GET /v1/events?processInstanceId={processInstanceId}&eventType={eventType}")

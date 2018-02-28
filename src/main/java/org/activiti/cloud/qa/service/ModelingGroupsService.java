@@ -16,29 +16,26 @@
 
 package org.activiti.cloud.qa.service;
 
-import feign.Headers;
-import feign.Param;
-import feign.RequestLine;
 import org.activiti.cloud.qa.model.Group;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.stereotype.Service;
+import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
 
 /**
- * Modeling REST service
+ * Modeling groups service
  */
-@Service
-public interface ModelingService {
+public interface ModelingGroupsService extends FeignRestDataClient<ModelingGroupsService, Group> {
 
-    @RequestLine("POST /v1/groups")
-    @Headers("Content-Type: application/json")
-    void create(Group group);
+    String PATH = "/v1/groups";
 
-    @RequestLine("GET /v1/groups")
-    @Headers("Content-Type: application/json")
-    PagedResources<Group> findAll();
+    @Override
+    default Class<ModelingGroupsService> getType() {
+        return ModelingGroupsService.class;
+    }
 
-    @RequestLine("GET /v1/groups/{id}")
-    @Headers("Content-Type: application/json")
-    Group findById(@Param("id") String id);
+    static ModelingGroupsService build(String baseUrl) {
+        return FeignRestDataClient
+                .builder()
+                .target(ModelingGroupsService.class,
+                        baseUrl + PATH);
+    }
 
 }
