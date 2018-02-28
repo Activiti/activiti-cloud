@@ -32,7 +32,7 @@
     <keycloak-spring-boot.version>3.4.0.CR1-SNAPSHOT</keycloak-spring-boot.version>
     <querydsl.version>4.1.4</querydsl.version>
     <resteasy.version>3.0.21.Final</resteasy.version>
-    <spring-cloud.version>Finchley.M5</spring-cloud.version>
+    <spring-cloud.version>Finchley.M7</spring-cloud.version>
     <springfox.version>2.8.0</springfox.version>
     <swagger.version>1.5.10</swagger.version>
   </properties>

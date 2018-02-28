@@ -18,7 +18,7 @@
     <!-- plugin versions -->
     <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
     <docker-maven-plugin.version>0.21.0</docker-maven-plugin.version>
-    <spring-cloud-contract.version>2.0.0.M6</spring-cloud-contract.version>
+    <spring-cloud-contract.version>2.0.0.M7</spring-cloud-contract.version>
   </properties>
   <build>
     <pluginManagement>
