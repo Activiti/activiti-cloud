@@ -1,172 +1,28 @@
-<!--
-  ~ Copyright 2018 Alfresco, Inc. and/or its affiliates.
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~       http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
-
-
   <artifactId>activiti-cloud-org-service-parent</artifactId>
-  <version>7-201802-EA-SNAPSHOT</version>
-  <name>Activiti Cloud - Organization Services :: Parent</name>
-  <description>Activiti Cloud Organization Services Parent</description>
   <packaging>pom</packaging>
-
-  <properties>
-    <version.activiti.cloud.org>${project.version}</version.activiti.cloud.org>
-  </properties>
-
+  <name>Activiti Cloud :: Organization Services :: Parent</name>
+  <url>http://activiti.org</url>
   <modules>
     <module>activiti-cloud-services-org</module>
     <module>activiti-cloud-starter-org</module>
   </modules>
-
-  <repositories>
-    <repository>
-      <id>spring-milestones</id>
-      <name>Spring Milestones</name>
-      <url>https://repo.spring.io/libs-milestone</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>spring-snapshots</id>
-      <name>Spring Snapshots</name>
-      <url>https://repo.spring.io/libs-snapshot</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>jboss-thirdparty-releases</id>
-      <name>JBOSS Maven Repository</name>
-      <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>activiti-snapshots</id>
-      <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
-  <profiles>
-    <!-- Profile to sign artifacts, triggered when releasing -->
-    <profile>
-      <id>sign</id>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>${maven-gpg-plugin.version}</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <!-- option to publish to alfresco-->
-    <profile>
-      <id>distroAlfresco</id>
-      <distributionManagement>
-        <repository>
-          <id>activiti-enterprise-snapshots</id>
-          <name>Activiti Snapshots</name>
-          <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
-        </repository>
-      </distributionManagement>
-    </profile>
-
-  </profiles>
-
-
-  <!-- Various information, not used by the build -->
-
-  <url>http://activiti.org</url>
-  <licenses>
-    <license>
-      <name>Apache v2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-    </license>
-  </licenses>
-  <organization>
-    <name>Alfresco</name>
-    <url>http://www.alfresco.com</url>
-  </organization>
-  <inceptionYear>2010</inceptionYear>
-  <issueManagement>
-    <system>GitHub</system>
-    <url>https://github.com/Activiti/Activiti/issues</url>
-  </issueManagement>
-  <ciManagement>
-    <system>Travis</system>
-    <url>http://bamboo.ci.codehaus.org/browse/ACT</url>
-  </ciManagement>
   <scm>
-    <url>https://github.com/Activiti/activiti-build</url>
-    <connection>scm:git:https://github.com/Activiti/activiti-build.git</connection>
-    <developerConnection>scm:git:https://github.com/Activiti/activiti-build.git</developerConnection>
+    <url>https://github.com/Activiti/activiti-cloud-org-service</url>
+    <connection>scm:git:https://github.com/Activiti/activiti-cloud-org-service.git</connection>
+    <developerConnection>scm:git:https://github.com/Activiti/activiti-cloud-org-service.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
-  <developers>
-    <developer>
-      <id>salaboy</id>
-      <name>Mauricio Salatino</name>
-      <email>mauricio.salatino@alfresco.com</email>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
-    </developer>
-    <developer>
-      <id>erdemedeiros</id>
-      <name>Elias De Medeiros</name>
-      <email>elias.demedeiros@alfresco.com</email>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
-    </developer>
-    <developer>
-      <id>ryandawsonuk</id>
-      <name>Ryan Dawson</name>
-      <email>ryan.dawson@alfresco.com</email>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
-    </developer>
-  </developers>
-
+  <ciManagement>
+    <system>Travis</system>
+    <url>https://travis-ci/Activiti/activiti-cloud-org-service</url>
+  </ciManagement>
 </project>
