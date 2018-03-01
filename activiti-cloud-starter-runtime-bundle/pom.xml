@@ -1,16 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
-
   <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
   <name>Activiti Cloud Starter :: Runtime Bundle</name>
   <dependencies>
-
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-engine</artifactId>
@@ -108,7 +107,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-
       <!--exclude tomcat and use embedded jetty, see root pom-->
       <exclusions>
         <exclusion>
@@ -117,22 +115,18 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-jetty</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-
     <!-- Test deps -->
     <dependency>
       <groupId>junit</groupId>
@@ -178,8 +172,8 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${maven-surefire-plugin.version}</version>
         <configuration>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <failIfNoTests>false</failIfNoTests>
@@ -191,16 +185,9 @@
           <runOrder>alphabetical</runOrder>
         </configuration>
       </plugin>
-
-      <plugin>
-        <groupId>org.commonjava.maven.plugins</groupId>
-        <artifactId>directory-maven-plugin</artifactId>
-      </plugin>
-
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>${maven.docker.plugin.version}</version>
         <configuration>
           <images>
             <!-- A single's image configuration -->
@@ -231,10 +218,8 @@
                 </wait>
               </run>
             </image>
-
           </images>
         </configuration>
-
         <!-- Connect start/stop to pre- and
              post-integration-test phase, respectively if you want to start
              your docker containers during integration tests -->
@@ -271,5 +256,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
