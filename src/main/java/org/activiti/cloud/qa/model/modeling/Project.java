@@ -14,29 +14,35 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.model;
+package org.activiti.cloud.qa.model.modeling;
 
 import java.util.List;
 
 /**
- * Model for modeling group
+ * Model for modeling project
  */
-public class Group {
+public class Project implements ModelingContext {
+
+    public static final String GROUP_PROJECTS_REL = "projects";
 
     private String id;
 
     private String name;
 
-    private List<Group> subgroups;
+    private Group group;
 
-    public Group() {
+    private List<Model> models;
+
+    public Project() {
+
     }
 
-    public Group(String id, String name) {
+    public Project(String id, String name) {
         this.id = id;
         this.name = name;
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -45,6 +51,7 @@ public class Group {
         this.id = id;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -53,11 +60,24 @@ public class Group {
         this.name = name;
     }
 
-    public List<Group> getSubgroups() {
-        return subgroups;
+    public Group getGroup() {
+        return group;
     }
 
-    public void setSubgroups(List<Group> subgroups) {
-        this.subgroups = subgroups;
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
+    public List<Model> getModels() {
+        return models;
+    }
+
+    public void setModels(List<Model> models) {
+        this.models = models;
+    }
+
+    @Override
+    public String getRel() {
+        return GROUP_PROJECTS_REL;
     }
 }

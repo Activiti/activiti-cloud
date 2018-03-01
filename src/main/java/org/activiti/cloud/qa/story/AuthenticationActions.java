@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.service;
+package org.activiti.cloud.qa.story;
 
-import org.activiti.cloud.qa.model.modeling.Group;
-import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
+import net.thucydides.core.annotations.Steps;
+import org.activiti.cloud.qa.steps.AuthenticationSteps;
+import org.jbehave.core.annotations.Alias;
+import org.jbehave.core.annotations.Given;
 
 /**
- * Modeling groups service
+ * Authentication actions
  */
-public interface ModelingGroupsService extends FeignRestDataClient<ModelingGroupsService, Group> {
+public class AuthenticationActions {
 
-    String PATH = "/v1/groups";
+    @Steps
+    private AuthenticationSteps authenticationSteps;
 
-    @Override
-    default Class<ModelingGroupsService> getType() {
-        return ModelingGroupsService.class;
-    }
-
-    static ModelingGroupsService build(String baseUrl) {
-        return FeignRestDataClient
-                .builder()
-                .target(ModelingGroupsService.class,
-                        baseUrl + PATH);
+    @Given("any authenticated user")
+    @Alias("the user is authenticated")
+    public void authenticate() throws Exception {
+        authenticationSteps.authenticateDefaultUser();
+        authenticationSteps.ensureUserIsAuthenticated();
     }
 
 }

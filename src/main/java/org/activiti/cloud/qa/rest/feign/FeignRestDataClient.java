@@ -45,6 +45,10 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
     @Headers("Content-Type: application/json")
     PagedResources<Resource<R>> findAll();
 
+    @RequestLine("PUT /{id}")
+    @Headers("Content-Type: application/json")
+    void updateById(@Param("id") String id, R resource);
+
     @RequestLine("PUT")
     @Headers("Content-Type: application/json")
     void update(R resource);
@@ -85,6 +89,10 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
     default void addRelationByUri(String uri,
                                   List<String> relationUriList) {
         buildByUri(uri).addRelation(relationUriList);
+    }
+
+    default void updateByUri(String uri, R resource) {
+        buildByUri(uri).update(resource);
     }
 
     default void deleteByUri(String uri) {

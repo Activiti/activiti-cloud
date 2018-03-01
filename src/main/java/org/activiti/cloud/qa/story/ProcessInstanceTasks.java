@@ -26,17 +26,12 @@ import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
-import org.activiti.cloud.qa.steps.AuthenticationSteps;
-import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
 import static org.assertj.core.api.Assertions.*;
 
 public class ProcessInstanceTasks {
-
-    @Steps
-    private AuthenticationSteps authenticationSteps;
 
     @Steps
     private RuntimeBundleSteps runtimeBundleSteps;
@@ -46,12 +41,6 @@ public class ProcessInstanceTasks {
 
     private ProcessInstance processInstance;
     private Task currentTask;
-
-    @Given("the user is authenticated")
-    public void runningProcess() throws Exception {
-        authenticationSteps.authenticateDefaultUser();
-        authenticationSteps.ensureUserIsAuthenticated();
-    }
 
     @When("the user starts a random process")
     public void startProcess() throws Exception {

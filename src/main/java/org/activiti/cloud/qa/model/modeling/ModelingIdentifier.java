@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa;
+package org.activiti.cloud.qa.model.modeling;
 
-import net.serenitybdd.jbehave.SerenityStories;
+import java.util.function.Predicate;
 
-public class AcceptanceTests extends SerenityStories {
+/**
+ * Model identifier
+ */
+public interface ModelingIdentifier extends Predicate<ModelingContext> {
 
 }
-

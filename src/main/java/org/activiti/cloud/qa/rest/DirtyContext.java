@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa;
+package org.activiti.cloud.qa.rest;
 
-import net.serenitybdd.jbehave.SerenityStories;
+/**
+ * Dirty context interface
+ */
+public interface DirtyContext {
 
-public class AcceptanceTests extends SerenityStories {
+    void clearDirtyContext();
 
 }
-

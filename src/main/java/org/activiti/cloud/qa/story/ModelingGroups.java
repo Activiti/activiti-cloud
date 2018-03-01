@@ -16,18 +16,18 @@
 
 package org.activiti.cloud.qa.story;
 
-import java.util.Collection;
 import java.util.List;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.model.Group;
-import org.activiti.cloud.qa.steps.AuthenticationSteps;
-import org.activiti.cloud.qa.steps.ModelingSteps;
+import org.activiti.cloud.qa.model.modeling.Group;
+import org.activiti.cloud.qa.steps.ModelingGroupsSteps;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.Resource;
+
+import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.named;
 
 /**
  * Modeling groups scenarios
@@ -35,51 +35,45 @@ import org.springframework.hateoas.Resource;
 public class ModelingGroups {
 
     @Steps
-    private AuthenticationSteps authenticater;
-
-    @Steps
-    private ModelingSteps modeler;
-
-    @Given("any authenticated user")
-    public void authenticate() throws Exception {
-        authenticater.authenticateDefaultUser();
-        authenticater.ensureUserIsAuthenticated();
-    }
-
-    @When("the group '$groupName' does't exists")
-    public void deleteGroup(String groupName) {
-        modeler.deleteGroup(groupName);
-    }
-
-    @Given("an existing group '$groupName'")
-    public void ensureGroupExists(String groupName) {
-        modeler.ensureGroupExists(groupName);
-    }
+    private ModelingGroupsSteps modelingGroupsSteps;
 
     @When("the user creates a group '$groupName'")
     @Alias("creates a group '$groupName'")
     public void createGroup(String groupName) {
-        modeler.createGroup(groupName);
+        Resource<Group> createdGroup = modelingGroupsSteps.create(groupName);
+        modelingGroupsSteps.addToCurrentContext(createdGroup);
+    }
+
+    @Given("an existing group '$groupName'")
+    public void ensureGroupExists(String groupName) {
+        if (!modelingGroupsSteps.exists(named(groupName))) {
+            modelingGroupsSteps.create(groupName);
+        }
     }
 
     @When("the user opens the group '$groupName'")
     public void openGroup(String groupName) {
-        modeler.openGroup(groupName,
-                          modeler.getAllGroups());
+        modelingGroupsSteps.openModelingObject(named(groupName));
     }
 
     @Then("the group '$groupName' is created")
     public void checkGroupExists(String groupName) {
-        modeler.checkGroupExists(groupName);
+        modelingGroupsSteps.checkExists(named(groupName));
     }
 
-    @Then("the subgroup '$subGroupName' is created in the current '$currentGroupName' group")
-    public void checkSubGroupExistsInCurrentGroup(String subGroupName, String currentGroupName) {
-        modeler.checkSubGroupExistsInCurrentGroup(subGroupName, currentGroupName);
+    @Then("the subgroup '$subGroupName' is created")
+    public void checkSubGroupExistsInCurrentGroup(String subGroupName) {
+        modelingGroupsSteps.checkExistsInCurrentContext(named(subGroupName));
+    }
+
+    @When("the group '$groupName' does't exists")
+    @Then("delete group '$groupName'")
+    public void deleteGroup(String groupName) {
+        modelingGroupsSteps.deleteAll(named(groupName));
     }
 
     @Then("delete groups '$groupNames'")
     public void deleteGroups(List<String> groupNames) {
-        modeler.deleteGroups(groupNames);
+        modelingGroupsSteps.deleteAll(named(groupNames));
     }
 }
