@@ -168,7 +168,7 @@
     <repository>
       <id>activiti-releases</id>
       <name>Activiti Releases</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
@@ -176,10 +176,13 @@
     <repository>
       <id>activiti-snapshots</id>
       <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
       <releases>
         <enabled>false</enabled>
       </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
 </project>
