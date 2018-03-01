@@ -1,14 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-service-common-parent</artifactId>
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
-
   <artifactId>activiti-cloud-services-identity-basic</artifactId>
   <name>Activiti Cloud Services :: Identity Basic</name>
-  <description>Activiti Cloud Services Identity Basic</description>
   <dependencies>
     <dependency>
       <groupId>org.activiti</groupId>
@@ -17,7 +17,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-
       <!--exclude tomcat and use embedded jetty, see root pom-->
       <exclusions>
         <exclusion>
@@ -26,7 +25,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-jetty</artifactId>
@@ -79,8 +77,5 @@
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
-
-
 </project>
