@@ -21,11 +21,13 @@ import java.util.List;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
 import org.activiti.cloud.alfresco.converter.json.AlfrescoJackson2HttpMessageConverter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@PropertySource("classpath:config/alfresco-rest-config.properties")
 public class AlfrescoWebConfigurer implements WebMvcConfigurer {
 
     private final AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver;
