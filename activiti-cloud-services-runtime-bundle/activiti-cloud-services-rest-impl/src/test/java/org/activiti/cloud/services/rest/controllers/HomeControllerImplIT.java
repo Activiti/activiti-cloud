@@ -26,6 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.halLinks;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -52,12 +53,12 @@ public class HomeControllerImplIT {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Welcome to an instance of the Activiti Process Engine")))
                 .andDo(document(DOCUMENTATION_IDENTIFIER,
-                                links(
+                                links(halLinks(),
                                         linkWithRel("process-definitions").description("The process-definitions"),
                                         linkWithRel("process-instances").description("The process-instances"),
                                         linkWithRel("tasks").description("Tasks")),
                                 responseFields(
                                         fieldWithPath("welcome").type(JsonFieldType.STRING).description("The welcome message"),
-                                        subsectionWithPath("links").description("Other resources"))));
+                                        subsectionWithPath("_links").description("Other resources"))));
     }
 }

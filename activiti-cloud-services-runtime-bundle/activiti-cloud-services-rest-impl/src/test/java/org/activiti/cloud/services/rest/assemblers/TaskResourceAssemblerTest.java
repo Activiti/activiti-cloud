@@ -5,8 +5,9 @@ import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.junit.Test;
 import org.springframework.hateoas.Link;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TaskResourceAssemblerTest {
 

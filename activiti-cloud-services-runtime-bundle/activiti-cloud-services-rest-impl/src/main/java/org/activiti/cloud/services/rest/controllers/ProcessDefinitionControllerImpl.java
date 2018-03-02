@@ -21,10 +21,15 @@ import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.converter.ProcessDefinitionConverter;
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.core.pageable.PageableRepositoryService;
+import org.activiti.cloud.services.rest.api.ProcessDefinitionController;
+import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
@@ -32,14 +37,9 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.image.ProcessDiagramGenerator;
-import org.activiti.cloud.services.core.pageable.PageableRepositoryService;
-import org.activiti.cloud.services.rest.api.ProcessDefinitionController;
-import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
-import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -62,6 +62,8 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
 
     private final SecurityPoliciesApplicationService securityService;
 
+    private final AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler;
+
     @ExceptionHandler(ActivitiObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleAppException(ActivitiObjectNotFoundException ex) {
@@ -74,20 +76,21 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
                                            ProcessDefinitionConverter processDefinitionConverter,
                                            ProcessDefinitionResourceAssembler resourceAssembler,
                                            PageableRepositoryService pageableRepositoryService,
-                                           SecurityPoliciesApplicationService securityPoliciesApplicationService) {
+                                           SecurityPoliciesApplicationService securityPoliciesApplicationService,
+                                           AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.processDefinitionConverter = processDefinitionConverter;
         this.resourceAssembler = resourceAssembler;
         this.pageableRepositoryService = pageableRepositoryService;
         this.securityService = securityPoliciesApplicationService;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @Override
-    public PagedResources<ProcessDefinitionResource> getProcessDefinitions(Pageable pageable,
-                                                                           PagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler) {
+    public PagedResources<ProcessDefinitionResource> getProcessDefinitions(Pageable pageable) {
         Page<ProcessDefinition> page = pageableRepositoryService.getProcessDefinitions(pageable);
-        return pagedResourcesAssembler.toResource(page,
+        return pagedResourcesAssembler.toResource(pageable, page,
                                                   resourceAssembler);
     }
 

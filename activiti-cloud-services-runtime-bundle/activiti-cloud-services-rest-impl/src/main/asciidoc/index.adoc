@@ -1,6 +1,38 @@
 = Activiti Cloud Services Runtime Bundle REST docs
 
-== Home 
+== Alfresco API (application/json)
+
+=== Process definition
+
+==== Get process definitions
+.Request
+include::{snippets}/process-definition-alfresco/list/http-request.adoc[]
+
+.Query parameters
+include::{snippets}/process-definition-alfresco/list/request-parameters.adoc[]
+
+.Response
+include::{snippets}/process-definition-alfresco/list/http-response.adoc[]
+
+.Response fields
+include::{snippets}/process-definition-alfresco/list/response-fields.adoc[]
+
+==== Get a process definition by id
+.Request
+include::{snippets}/process-definition-alfresco/get/http-request.adoc[]
+
+.Path parameters
+include::{snippets}/process-definition-alfresco/get/path-parameters.adoc[]
+
+.Response
+include::{snippets}/process-definition-alfresco/get/http-response.adoc[]
+
+.Response fields
+include::{snippets}/process-definition-alfresco/get/response-fields.adoc[]
+
+== HAL (application/hal+json)
+
+=== Home
 
 .Request
 include::{snippets}/home/http-request.adoc[]
@@ -11,30 +43,30 @@ include::{snippets}/home/http-response.adoc[]
 .Links
 include::{snippets}/home/links.adoc[]
 
-== Process definition
+=== Process definition
 
-=== Get process definitions
+==== Get process definitions
 .Request
 include::{snippets}/process-definition/list/http-request.adoc[]
 
 .Response
 include::{snippets}/process-definition/list/http-response.adoc[]
 
-=== Get a process definition by id
+==== Get a process definition by id
 .Request
 include::{snippets}/process-definition/get/http-request.adoc[]
 
 .Response
 include::{snippets}/process-definition/get/http-response.adoc[]
 
-=== Get a process model by id
+==== Get a process model by id
 .Request
 include::{snippets}/process-definition/model/get/http-request.adoc[]
 
 .Response
 include::{snippets}/process-definition/model/get/http-response.adoc[]
 
-=== Get a BPMN model by id
+==== Get a BPMN model by id
 .Request
 include::{snippets}/process-definition/bpmn-model/get/http-request.adoc[]
 
@@ -43,7 +75,7 @@ include::{snippets}/process-definition/bpmn-model/get/http-response.adoc[]
 
 include::{snippets}/process-definition/bpmn-model/get/path-parameters.adoc[]
 
-=== Generate process diagram
+==== Generate process diagram
 .Request
 include::{snippets}/process-definition/diagram/http-request.adoc[]
 
@@ -51,145 +83,145 @@ include::{snippets}/process-definition/diagram/http-request.adoc[]
 include::{snippets}/process-definition/diagram/http-response.adoc[]
 
 
-== Process definition metadata
+=== Process definition metadata
 
-=== Get a process definition metadata
+==== Get a process definition metadata
 .Request
 include::{snippets}/process-definition-meta/get/http-request.adoc[]
 
 .Response
 include::{snippets}/process-definition-meta/get/http-response.adoc[]
 
-== Process instance 
+=== Process instance
 
-=== Get a list of process instances
+==== Get a list of process instances
 .Request
 include::{snippets}/process-instance/list/http-request.adoc[]
 
 .Response
 include::{snippets}/process-instance/list/http-response.adoc[]
 
-=== Start a process instance
+==== Start a process instance
 .Request
 include::{snippets}/process-instance/start/http-request.adoc[]
 
 .Response
 include::{snippets}/process-instance/start/http-response.adoc[]
 
-=== Get a process instance by id
+==== Get a process instance by id
 .Request
 include::{snippets}/process-instance/get/http-request.adoc[]
 
 .Response
 include::{snippets}/process-instance/get/http-response.adoc[]
 
-=== Generate a diagram for a process instance
+==== Generate a diagram for a process instance
 .Request
 include::{snippets}/process-instance/diagram/http-request.adoc[]
 
 .Response
 include::{snippets}/process-instance/diagram/http-response.adoc[]
 
-=== Signal process instance
+==== Signal process instance
 .Request
 include::{snippets}/process-instance/signal/http-request.adoc[]
 
 .Response
 include::{snippets}/process-instance/signal/http-response.adoc[]
 
-=== Suspend process instance
+==== Suspend process instance
 .Request
 include::{snippets}/process-instance/suspend/http-request.adoc[]
 
 .Response
 include::{snippets}/process-instance/suspend/http-response.adoc[]
 
-=== Activate process instance
+==== Activate process instance
 .Request
 include::{snippets}/process-instance/activate/http-request.adoc[]
 
 .Response
 include::{snippets}/process-instance/activate/http-response.adoc[]
 
-== Process instance tasks
+=== Process instance tasks
 
-=== List process instance tasks
+==== List process instance tasks
 .Request
 include::{snippets}/process-instance-tasks/list/http-request.adoc[]
 
 .Response
 include::{snippets}/process-instance-tasks/list/http-response.adoc[]
 
-== Process instance variables
+=== Process instance variables
 
-=== Get all variables for a process instance
+==== Get all variables for a process instance
 .Request
 include::{snippets}/process-instance-variables/list/http-request.adoc[]
 
 .Response
 include::{snippets}/process-instance-variables/list/http-response.adoc[]
 
-== Task
+=== Task
 
-=== List tasks
+==== List tasks
 .Request
 include::{snippets}/task/list/http-request.adoc[]
 
 .Response
 include::{snippets}/task/list/http-response.adoc[]
 
-=== Get a task by id
+==== Get a task by id
 .Request
 include::{snippets}/task/get/http-request.adoc[]
 
 .Response
 include::{snippets}/task/get/http-response.adoc[]
 
-=== Claim a task
+==== Claim a task
 .Request
 include::{snippets}/task/claim/http-request.adoc[]
 
 .Response
 include::{snippets}/task/claim/http-response.adoc[]
 
-=== Release a task
+==== Release a task
 .Request
 include::{snippets}/task/release/http-request.adoc[]
 
 .Response
 include::{snippets}/task/release/http-response.adoc[]
 
-=== Complete a task
+==== Complete a task
 .Request
 include::{snippets}/task/complete/http-request.adoc[]
 
 .Response
 include::{snippets}/task/complete/http-response.adoc[]
 
-== Task variable
+=== Task variable
 
-=== List task variables
+==== List task variables
 .Request
 include::{snippets}/task-variable/list/http-request.adoc[]
 
 .Response
 include::{snippets}/task-variable/list/http-response.adoc[]
 
-=== List task local variables
+==== List task local variables
 .Request
 include::{snippets}/task-variable/list/local/http-request.adoc[]
 
 .Response
 include::{snippets}/task-variable/list/local/http-response.adoc[]
 
-=== Set task variables
+==== Set task variables
 .Request
 include::{snippets}/task-variable/set/http-request.adoc[]
 
 .Response
 include::{snippets}/task-variable/set/http-response.adoc[]
 
-=== Set task local variables
+==== Set task local variables
 .Request
 include::{snippets}/task-variable/set/local/http-request.adoc[]
 

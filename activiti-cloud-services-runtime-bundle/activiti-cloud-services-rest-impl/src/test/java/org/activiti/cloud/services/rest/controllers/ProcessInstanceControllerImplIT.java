@@ -20,7 +20,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.bpmn.model.BpmnModel;
@@ -30,7 +32,6 @@ import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
-import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.junit.Test;
@@ -41,6 +42,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -49,7 +51,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -57,6 +61,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -64,30 +69,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs(outputDir = "target/snippets")
+@ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 public class ProcessInstanceControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "process-instance";
+
+    private static final String DOCUMENTATION_IDENTIFIER_ALFRESCO = "process-instance-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityPoliciesApplicationService securityService;
     @MockBean
     private ProcessEngineWrapper processEngine;
     @MockBean
     private RepositoryService repositoryService;
     @MockBean
     private ProcessDiagramGenerator processDiagramGenerator;
-    @MockBean
-    private ProcessInstanceResourceAssembler resourceAssembler;
     @SpyBean
     private ObjectMapper mapper;
 
     @Test
     public void getProcessInstances() throws Exception {
 
-        List<ProcessInstance> processInstanceList = new ArrayList<>();
+        List<ProcessInstance> processInstanceList = Collections.singletonList(buildDefaultProcessInstance());
         Page<ProcessInstance> processInstances = new PageImpl<>(processInstanceList,
                                                                 PageRequest.of(0,
                                                                                10),
@@ -98,16 +104,66 @@ public class ProcessInstanceControllerImplIT {
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 responseFields(subsectionWithPath("page").description("Pagination details."),
-                                               subsectionWithPath("links").description("The hypermedia links."),
-                                               subsectionWithPath("content").description("The process definitions."))));
+                                               subsectionWithPath("_links").description("The hypermedia links."),
+                                               subsectionWithPath("_embedded").description("The process definitions."))));
+    }
+
+    @Test
+    public void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+
+        List<ProcessInstance> processInstanceList = Collections.singletonList(buildDefaultProcessInstance());
+        Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList,
+                                                                PageRequest.of(1,
+                                                                               10),
+                                                                processInstanceList.size());
+        when(processEngine.getProcessInstances(any())).thenReturn(processInstancePage);
+
+        this.mockMvc.perform(get("/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
+                                requestParameters(
+                                        parameterWithName("skipCount")
+                                                .description("How many entities exist in the entire addressed collection before those included in this list."),
+                                        parameterWithName("maxItems")
+                                                .description("The max number of entities that can be included in the result.")
+                                ),
+                                responseFields(
+                                        subsectionWithPath("list").ignored(),
+                                        subsectionWithPath("list.entries").description("List of results."),
+                                        subsectionWithPath("list.entries[].entry").description("Wrapper for each entry in the list of results."),
+                                        subsectionWithPath("list.pagination").description("Pagination metadata."),
+                                        subsectionWithPath("list.pagination.skipCount")
+                                                .description("How many entities exist in the entire addressed collection before those included in this list."),
+                                        subsectionWithPath("list.pagination.maxItems")
+                                                .description("The maxItems parameter used to generate this list."),
+                                        subsectionWithPath("list.pagination.count")
+                                                .description("The number of entities included in this list. This number must correspond to the number of objects in the \"entries\" array."),
+                                        subsectionWithPath("list.pagination.hasMoreItems")
+                                                .description("A boolean value that indicates whether there are further entities in the addressed collection beyond those returned " +
+                                                                     "in this response. If true then a request with a larger value for either the skipCount or the maxItems " +
+                                                                     "parameter is expected to return further results."),
+                                        subsectionWithPath("list.pagination.totalItems")
+                                                .description("An integer value that indicates the total number of entities in the addressed collection.")
+                                )));
+    }
+
+    private ProcessInstance buildDefaultProcessInstance() {
+        return new ProcessInstance(UUID.randomUUID().toString(),
+                                   "My process instance",
+                                   "This is my process instance",
+                                   UUID.randomUUID().toString(),
+                                   "user",
+                                   new Date(),
+                                   "my business key",
+                                   ProcessInstance.ProcessInstanceStatus.RUNNING.name(),
+                                   "my-proc-def");
     }
 
     @Test
     public void startProcess() throws Exception {
-        ProcessInstance processInstance = mock(ProcessInstance.class);
         StartProcessInstanceCmd cmd = new StartProcessInstanceCmd("1");
 
-        when(processEngine.startProcess(cmd)).thenReturn(processInstance);
+        when(processEngine.startProcess(any())).thenReturn(buildDefaultProcessInstance());
 
         this.mockMvc.perform(post("/v1/process-instances")
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -131,9 +187,9 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void getProcessInstanceById() throws Exception {
-        ProcessInstance processInstance = mock(ProcessInstance.class);
+        ProcessInstance processInstance = buildDefaultProcessInstance();
         when(processEngine.getProcessInstanceById("1")).thenReturn(processInstance);
-        when(securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionId())).thenReturn(true);
+        when(securityService.canRead(processInstance.getProcessDefinitionKey())).thenReturn(true);
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}",
                                  1))
@@ -150,7 +206,7 @@ public class ProcessInstanceControllerImplIT {
         InputStream diagram = new ByteArrayInputStream("diagram".getBytes());
         BpmnModel bpmnModel = mock(BpmnModel.class);
         when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId())).thenReturn(bpmnModel);
-        when(securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionId())).thenReturn(true);
+        when(securityService.canRead(processInstance.getProcessDefinitionId())).thenReturn(true);
         List<String> activitiIds = new ArrayList<>();
         when(processEngine.getActiveActivityIds("1")).thenReturn(activitiIds);
 
