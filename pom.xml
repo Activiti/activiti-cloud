@@ -1,31 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-  <groupId>org.activiti.cloud</groupId>
+  <groupId>org.activiti.cloud.examples</groupId>
   <artifactId>activiti-cloud-query</artifactId>
   <version>7-201802-EA-SNAPSHOT</version>
-
-  <packaging>jar</packaging>
   <name>Activiti Cloud :: Query</name>
- 
+  <description>${project.name}</description>
   <properties>
-    <version.activiti.cloud>7-201802-EA-SNAPSHOT</version.activiti.cloud>
-
-    <junit.version>4.12</junit.version>
-    <h2.version>1.4.193</h2.version>
-    <postgres.version>9.4.1212.jre7</postgres.version>
-
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>1.8</java.version>
+    <!-- dependencies -->
+    <activiti-cloud.version>7-201802-EA-SNAPSHOT</activiti-cloud.version>
+    <spring-boot.version>2.0.0.RC2</spring-boot.version>
     <!-- plugins -->
-    <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
-    <spring-boot-maven-plugin.version>2.0.0.M7</spring-boot-maven-plugin.version>
+    <docker-maven-plugin.version>0.21.0</docker-maven-plugin.version>
     <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
-    <jgitflow.plugin.version>1.0-m5.1</jgitflow.plugin.version>
+    <jgitflow-maven-plugin.version>1.0-m5.1</jgitflow-maven-plugin.version>
+    <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-    <maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
   </properties>
-
-
   <repositories>
     <repository>
       <id>spring-milestones</id>
@@ -49,7 +45,7 @@
     <repository>
       <id>activiti-snapshots</id>
       <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
       <releases>
         <enabled>false</enabled>
       </releases>
@@ -58,7 +54,6 @@
       </snapshots>
     </repository>
   </repositories>
-
   <pluginRepositories>
     <pluginRepository>
       <id>spring-milestones</id>
@@ -69,20 +64,17 @@
       </snapshots>
     </pluginRepository>
   </pluginRepositories>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-dependencies</artifactId>
-        <version>${version.activiti.cloud}</version>
+        <version>${activiti-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -95,18 +87,17 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>${postgres.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>${h2.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -119,9 +110,20 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <showDeprecation>true</showDeprecation>
+          <showWarnings>true</showWarnings>
+          <optimize>true</optimize>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
@@ -141,6 +143,7 @@
         </configuration>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
         <configuration>
@@ -160,7 +163,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>${spring-boot-maven-plugin.version}</version>
+        <version>${spring-boot.version}</version>
         <executions>
           <execution>
             <goals>
@@ -172,6 +175,7 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
+        <version>${docker-maven-plugin.version}</version>
         <configuration>
           <images>
             <image>
@@ -200,16 +204,15 @@
       <plugin>
         <groupId>external.atlassian.jgitflow</groupId>
         <artifactId>jgitflow-maven-plugin</artifactId>
-        <version>${jgitflow.plugin.version}</version>
+        <version>${jgitflow-maven-plugin.version}</version>
         <configuration>
           <enableFeatureVersions>true</enableFeatureVersions>
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <allowSnapshots>true</allowSnapshots>
           <noDeploy>true</noDeploy>
-          <useReleaseProfile>true</useReleaseProfile> <!-- Do not generate javadoc when releaseing -->
+          <useReleaseProfile>true</useReleaseProfile> <!-- Do not generate javadoc when releasing -->
           <pushReleases>true</pushReleases>
           <squash>false</squash>
-          <versionTagPrefix>activiti-</versionTagPrefix>
           <keepBranch>true</keepBranch>
           <noFeatureBuild>true</noFeatureBuild>
           <noFeatureMerge>true</noFeatureMerge>
@@ -218,9 +221,6 @@
       </plugin>
     </plugins>
   </build>
-
-
-
   <profiles>
     <!-- Profile to sign artifacts, triggered when releasing -->
     <profile>
@@ -228,6 +228,7 @@
       <build>
         <plugins>
           <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>${maven-gpg-plugin.version}</version>
             <executions>
@@ -243,22 +244,19 @@
       </build>
     </profile>
   </profiles>
-
   <distributionManagement>
     <repository>
       <id>activiti-enterprise-snapshots</id>
       <name>Alfresco internal repo</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
     </repository>
     <snapshotRepository>
       <id>activiti-enterprise-snapshots</id>
       <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-
   <!-- Various information, not used by the build -->
-
   <url>http://activiti.org</url>
   <licenses>
     <license>
@@ -275,16 +273,16 @@
     <system>GitHub</system>
     <url>https://github.com/Activiti/Activiti/issues</url>
   </issueManagement>
-  <ciManagement>
-    <system>Travis</system>
-    <url>http://bamboo.ci.codehaus.org/browse/ACT</url>
-  </ciManagement>
   <scm>
     <url>https://github.com/Activiti/activiti-cloud-query</url>
     <connection>scm:git:https://github.com/Activiti/activiti-cloud-query.git</connection>
     <developerConnection>scm:git:https://github.com/Activiti/activiti-cloud-query.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
+  <ciManagement>
+    <system>Travis</system>
+    <url>https://travis-ci/Activiti/activiti-cloud-query</url>
+  </ciManagement>
   <developers>
     <developer>
       <id>salaboy</id>
@@ -308,5 +306,4 @@
       <organizationUrl>http://alfresco.com</organizationUrl>
     </developer>
   </developers>
-
 </project>
