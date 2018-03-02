@@ -8,7 +8,7 @@
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-starter-audit</artifactId>
-  <name>Activiti Cloud Audit - Starter - Audit</name>
+  <name>Activiti Cloud Audit :: Starter :: Audit</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

@@ -8,7 +8,7 @@
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
-  <name>Activiti Cloud Audit - Starter - Audit with MongoDB</name>
+  <name>Activiti Cloud Audit :: Starter :: Audit MongoDB</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

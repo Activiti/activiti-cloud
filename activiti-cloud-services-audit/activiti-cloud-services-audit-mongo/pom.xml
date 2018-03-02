@@ -8,7 +8,7 @@
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-audit-mongo</artifactId>
-  <name>Activiti Cloud Audit - Services - Audit MongoDB</name>
+  <name>Activiti Cloud Audit :: Services :: Audit MongoDB</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -77,7 +77,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <!--exclude tomcat and use embedded jetty, see root pom-->
+      <!-- exclude tomcat and use embedded jetty, see root pom -->
       <exclusions>
         <exclusion>
           <groupId>org.springframework.boot</groupId>
