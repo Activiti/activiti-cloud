@@ -8,7 +8,7 @@
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-query</artifactId>
-  <name>Activiti Services :: Query</name>
+  <name>Activiti Cloud Query :: Services :: Parent</name>
   <packaging>pom</packaging>
   <modules>
     <module>activiti-cloud-services-query-model</module>

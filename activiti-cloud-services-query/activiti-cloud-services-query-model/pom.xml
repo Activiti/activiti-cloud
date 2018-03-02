@@ -8,7 +8,7 @@
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-query-model</artifactId>
-  <name>Activiti - Services :: Query Model</name>
+  <name>Activiti Cloud Query :: Services :: Query Model</name>
   <dependencies>
     <dependency>
       <groupId>com.introproventures</groupId>

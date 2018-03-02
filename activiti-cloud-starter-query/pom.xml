@@ -8,7 +8,7 @@
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-starter-query</artifactId>
-  <name>Activiti Cloud Starter :: Query</name>
+  <name>Activiti Cloud Query :: Starter :: Query</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

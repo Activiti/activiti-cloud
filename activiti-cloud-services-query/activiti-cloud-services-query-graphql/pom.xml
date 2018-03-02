@@ -8,7 +8,7 @@
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-query-graphql</artifactId>
-  <name>Activiti - Services :: Query GraphQL</name>
+  <name>Activiti Cloud Query :: Services :: Query GraphQL</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

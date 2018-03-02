@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-query</artifactId>
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-
   <artifactId>activiti-cloud-services-query-rest</artifactId>
-  <name>Activiti - Services :: Query REST</name>
-  <description>Activiti Services Query REST</description>
+  <name>Activiti Cloud Query :: Services :: Query REST</name>
   <dependencies>
     <!-- keycloak included as default identity provider to be excluded if overridden -->
     <dependency>
@@ -164,7 +163,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
@@ -185,11 +183,9 @@
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
-
         <executions>
           <execution>
             <goals>
@@ -197,25 +193,19 @@
             </goals>
           </execution>
         </executions>
-
         <configuration>
-
           <packages>
             <package>org.activiti.cloud.services.query.model</package>
           </packages>
-
           <!-- whether generated assertions classes can be inherited with consistent assertion chaining -->
           <hierarchical>true</hierarchical>
-
           <!-- where to generate assertions entry point classes -->
           <entryPointClassPackage>${generated-assertions-package}</entryPointClassPackage>
-
           <targetDir>${generated-assertions-folder}</targetDir>
           <generateAssertions>true</generateAssertions>
           <generateBddAssertions>false</generateBddAssertions>
           <generateSoftAssertions>false</generateSoftAssertions>
           <generateJUnitSoftAssertions>false</generateJUnitSoftAssertions>
-
         </configuration>
       </plugin>
     </plugins>

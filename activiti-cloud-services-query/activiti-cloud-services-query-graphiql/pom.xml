@@ -8,5 +8,5 @@
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-query-graphiql</artifactId>
-  <name>Activiti - Services :: Query GraphiQL Client</name>
+  <name>Activiti Cloud Query :: Services :: Query GraphiQL Client</name>
 </project>
