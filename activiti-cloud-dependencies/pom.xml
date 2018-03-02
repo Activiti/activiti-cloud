@@ -3,12 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti</groupId>
-    <artifactId>activiti-dependencies</artifactId>
+    <groupId>org.activiti.cloud</groupId>
+    <artifactId>activiti-cloud-build</artifactId>
     <version>7-201802-EA-SNAPSHOT</version>
-    <relativePath/>
   </parent>
-  <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-dependencies</artifactId>
   <version>7-201802-EA-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -75,14 +73,4 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <repositories>
-    <repository>
-      <id>activiti-snapshots</id>
-      <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
 </project>

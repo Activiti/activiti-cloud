@@ -2,18 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build</artifactId>
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
-
   <artifactId>activiti-cloud-audit-dependencies</artifactId>
   <packaging>pom</packaging>
-
   <name>Activiti Cloud :: Audit Dependencies BOM (Bill Of Materials)</name>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -43,5 +39,4 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
 </project>
