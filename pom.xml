@@ -21,7 +21,14 @@
     <docker.rabbitmq.tcp.port>5672</docker.rabbitmq.tcp.port>
     <docker.rabbitmq.cli.port>15672</docker.rabbitmq.cli.port>
     <docker.rabbitmq.start.timeout>15000</docker.rabbitmq.start.timeout>
-    <!-- deps -->
+    <!-- dependencies -->
+    <activiti-cloud-service-common.version>7-201802-EA-SNAPSHOT</activiti-cloud-service-common.version>
+    <activiti-cloud-runtime-bundle.version>7-201802-EA-SNAPSHOT</activiti-cloud-runtime-bundle.version>
+    <activiti-cloud-audit.version>7-201802-EA-SNAPSHOT</activiti-cloud-audit.version>
+    <activiti-cloud-query.version>7-201802-EA-SNAPSHOT</activiti-cloud-query.version>
+    <activiti-cloud-connectors.version>7-201802-EA-SNAPSHOT</activiti-cloud-connectors.version>
+    <activiti-cloud-process-model.version>7-201802-EA-SNAPSHOT</activiti-cloud-process-model.version>
+    <activiti-cloud-org.version>7-201802-EA-SNAPSHOT</activiti-cloud-org.version>
     <awaitility.version>3.0.0</awaitility.version>
     <graphql-jpa-query.version>0.3.3</graphql-jpa-query.version>
     <keycloak.version>3.4.0.Final</keycloak.version>

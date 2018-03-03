@@ -8,6 +8,7 @@
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-connectors-dependencies</artifactId>
+  <version>7-201802-EA-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Connectors Dependencies BOM (Bill Of Materials)</name>
   <dependencyManagement>
@@ -15,7 +16,7 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-connector</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-connectors.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

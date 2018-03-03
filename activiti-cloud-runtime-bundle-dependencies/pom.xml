@@ -8,6 +8,7 @@
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
+  <version>7-201802-EA-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Runtime Bundle Dependencies BOM (Bill Of Materials)</name>
   <dependencyManagement>
@@ -15,48 +16,48 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-api</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-connectors</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-core</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-events</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-rest-api</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-rest-impl</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-test</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-configure</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

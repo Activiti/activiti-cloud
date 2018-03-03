@@ -11,15 +11,6 @@
   <version>7-201802-EA-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies BOM (Bill Of Materials)</name>
-  <properties>
-    <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
-    <activiti-cloud-runtime-bundle.version>${project.version}</activiti-cloud-runtime-bundle.version>
-    <activiti-cloud-audit.version>${project.version}</activiti-cloud-audit.version>
-    <activiti-cloud-query.version>${project.version}</activiti-cloud-query.version>
-    <activiti-cloud-connectors.version>${project.version}</activiti-cloud-connectors.version>
-    <activiti-cloud-process-model.version>${project.version}</activiti-cloud-process-model.version>
-    <activiti-cloud-org.version>${project.version}</activiti-cloud-org.version>
-  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>

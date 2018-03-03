@@ -8,6 +8,7 @@
     <version>7-201802-EA-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-audit-dependencies</artifactId>
+  <version>7-201802-EA-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Audit Dependencies BOM (Bill Of Materials)</name>
   <dependencyManagement>
@@ -15,27 +16,27 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-audit-parent</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-audit.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-audit-jpa</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-audit.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-audit-mongo</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-audit.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-audit</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-audit.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-audit.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
