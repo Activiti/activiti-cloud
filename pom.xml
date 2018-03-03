@@ -2,50 +2,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.activiti.cloud</groupId>
+    <artifactId>activiti-cloud-spring-boot-parent</artifactId>
+    <version>7-201802-EA-SNAPSHOT</version>
+  </parent>
   <groupId>org.activiti.cloud.examples</groupId>
   <artifactId>example-runtime-bundle</artifactId>
-  <version>7-201802-EA-SNAPSHOT</version>
   <name>Activiti Cloud :: Runtime Bundle</name>
-  <description>${project.name}</description>
-  <properties>
-    <!-- configuration properties -->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>1.8</java.version>
-    <!-- dependencies -->
-    <activiti-cloud.version>7-201802-EA-SNAPSHOT</activiti-cloud.version>
-    <spring-boot.version>2.0.0.RC2</spring-boot.version>
-    <!-- plugins -->
-    <docker-maven-plugin.version>0.21.0</docker-maven-plugin.version>
-    <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
-    <jgitflow-maven-plugin.version>1.0-m5.1</jgitflow-maven-plugin.version>
-    <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
-    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-    <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
-  </properties>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-dependencies</artifactId>
-        <version>${activiti-cloud.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-  <distributionManagement>
-    <repository>
-      <id>activiti-enterprise-snapshots</id>
-      <name>Alfresco internal repo</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>activiti-enterprise-snapshots</id>
-      <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
+  <url>http://activiti.org</url>
+  <scm>
+    <url>https://github.com/Activiti/${project.artifactId}</url>
+    <connection>scm:git:https://github.com/Activiti/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:https://github.com/Activiti/${project.artifactId}.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -84,170 +55,9 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven-compiler-plugin.version}</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <showDeprecation>true</showDeprecation>
-          <showWarnings>true</showWarnings>
-          <optimize>true</optimize>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>pl.project13.maven</groupId>
-        <artifactId>git-commit-id-plugin</artifactId>
-        <version>${git-commit-id-plugin.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>revision</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <verbose>true</verbose>
-          <dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
-          <generateGitPropertiesFile>true</generateGitPropertiesFile>
-          <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>${spring-boot.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>repackage</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>${docker-maven-plugin.version}</version>
-        <configuration>
-          <images>
-            <image>
-              <name>activiti/example-runtime-bundle</name>
-              <alias>example-runtime-bundle</alias>
-              <build>
-                <from>openjdk:alpine</from>
-                <assembly>
-                  <descriptorRef>artifact</descriptorRef>
-                </assembly>
-                <cmd>java ${JAVA_OPTS} -jar maven/${project.artifactId}-${project.version}.jar</cmd>
-              </build>
-            </image>
-          </images>
-        </configuration>
-        <executions>
-          <execution>
-            <id>docker:build</id>
-            <phase>install</phase>
-            <goals>
-              <goal>build</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${maven-surefire-plugin.version}</version>
-        <configuration>
-          <redirectTestOutputToFile>true</redirectTestOutputToFile>
-          <failIfNoTests>false</failIfNoTests>
-          <trimStackTrace>false</trimStackTrace>
-          <excludes>
-            <exclude>**/*TestCase.java</exclude>
-            <exclude>**/*IT.java</exclude>
-          </excludes>
-          <runOrder>alphabetical</runOrder>
-          <environmentVariables>
-            <ACT_RB_PROCESSES_PATH>${project.basedir}/src/test/resources/processes/</ACT_RB_PROCESSES_PATH>
-          </environmentVariables>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>external.atlassian.jgitflow</groupId>
-        <artifactId>jgitflow-maven-plugin</artifactId>
-        <version>${jgitflow-maven-plugin.version}</version>
-        <configuration>
-          <enableFeatureVersions>true</enableFeatureVersions>
-          <autoVersionSubmodules>true</autoVersionSubmodules>
-          <allowSnapshots>true</allowSnapshots>
-          <noDeploy>true</noDeploy>
-          <useReleaseProfile>true</useReleaseProfile> <!-- Do not generate javadoc when releasing -->
-          <pushReleases>true</pushReleases>
-          <squash>false</squash>
-          <keepBranch>true</keepBranch>
-          <noFeatureBuild>true</noFeatureBuild>
-          <noFeatureMerge>true</noFeatureMerge>
-          <noReleaseBuild>true</noReleaseBuild>
-        </configuration>
       </plugin>
     </plugins>
   </build>
-  <repositories>
-    <repository>
-      <id>spring-milestones</id>
-      <name>Spring Milestones</name>
-      <url>https://repo.spring.io/milestone/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository> <!-- Using snapshot repo to temporarily keep keycloak adapter -->
-      <id>activiti-snapshots</id>
-      <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>spring-snapshots</id>
-      <name>Spring Snapshots</name>
-      <url>https://repo.spring.io/snapshot/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>jboss-thirdparty-releases</id>
-      <name>JBOSS Maven Repository</name>
-      <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>spring-snapshots</id>
-      <name>Spring Snapshots</name>
-      <url>http://repo.spring.io/snapshot</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-    <pluginRepository>
-      <id>spring-milestones</id>
-      <name>Spring Milestones</name>
-      <url>http://repo.spring.io/milestone</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
 </project>
