@@ -18,6 +18,8 @@
     <!-- plugin versions -->
     <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
     <docker-maven-plugin.version>0.21.0</docker-maven-plugin.version>
+    <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
+    <jgitflow-maven-plugin.version>1.0-m5.1</jgitflow-maven-plugin.version>
     <spring-cloud-contract.version>2.0.0.M7</spring-cloud-contract.version>
   </properties>
   <build>
@@ -41,11 +43,6 @@
           </executions>
         </plugin>
         <plugin>
-          <groupId>io.fabric8</groupId>
-          <artifactId>docker-maven-plugin</artifactId>
-          <version>${docker-maven-plugin.version}</version>
-        </plugin>
-        <plugin>
           <groupId>org.asciidoctor</groupId>
           <artifactId>asciidoctor-maven-plugin</artifactId>
           <version>${asciidoctor.version}</version>
@@ -64,6 +61,83 @@
                   <snippets>${project.basedir}/target/snippets</snippets>
                 </attributes>
               </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>io.fabric8</groupId>
+          <artifactId>docker-maven-plugin</artifactId>
+          <version>${docker-maven-plugin.version}</version>
+          <configuration>
+            <images>
+              <image>
+                <name>activiti/${project.artifactId}</name>
+                <alias>${project.artifactId}</alias>
+                <build>
+                  <from>openjdk:alpine</from>
+                  <assembly>
+                    <descriptorRef>artifact</descriptorRef>
+                  </assembly>
+                  <cmd>java ${JAVA_OPTS} -jar maven/${project.artifactId}-${project.version}.jar</cmd>
+                </build>
+              </image>
+            </images>
+          </configuration>
+          <executions>
+            <execution>
+              <id>docker:build</id>
+              <phase>install</phase>
+              <goals>
+                <goal>build</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>pl.project13.maven</groupId>
+          <artifactId>git-commit-id-plugin</artifactId>
+          <version>${git-commit-id-plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>revision</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <verbose>true</verbose>
+            <dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
+            <generateGitPropertiesFile>true</generateGitPropertiesFile>
+            <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>external.atlassian.jgitflow</groupId>
+          <artifactId>jgitflow-maven-plugin</artifactId>
+          <version>${jgitflow-maven-plugin.version}</version>
+          <configuration>
+            <enableFeatureVersions>true</enableFeatureVersions>
+            <autoVersionSubmodules>true</autoVersionSubmodules>
+            <allowSnapshots>true</allowSnapshots>
+            <noDeploy>true</noDeploy>
+            <useReleaseProfile>true</useReleaseProfile> <!-- Do not generate javadoc when releasing -->
+            <pushReleases>true</pushReleases>
+            <squash>false</squash>
+            <keepBranch>true</keepBranch>
+            <noFeatureBuild>true</noFeatureBuild>
+            <noFeatureMerge>true</noFeatureMerge>
+            <noReleaseBuild>true</noReleaseBuild>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring-boot.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>repackage</goal>
+              </goals>
             </execution>
           </executions>
         </plugin>
