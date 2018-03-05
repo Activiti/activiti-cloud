@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.model;
+package org.activiti.cloud.qa.rest.feign;
 
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.activiti.cloud.qa.config.TestsConfigurationProperties;
+import org.springframework.test.context.ContextConfiguration;
 
-public class Tasks {
+/**
+ * Allow Feign clients autowiring
+ */
+@ContextConfiguration(classes = {TestsConfigurationProperties.class, FeignConfiguration.class})
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface EnableFeignContext {
 
-    @JsonProperty(value = "taskList")
-    private List<Task> tasks;
-
-    public List<Task> getTasks() {
-        return tasks;
-    }
 }

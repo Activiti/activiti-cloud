@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.model;
+package org.activiti.cloud.qa.service;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import feign.Headers;
+import feign.Param;
+import feign.RequestLine;
+import org.activiti.cloud.qa.model.Event;
+import org.springframework.hateoas.PagedResources;
+import org.springframework.stereotype.Service;
 
-public class TasksResponse {
+/**
+ * Audit service
+ */
+public interface AuditService {
 
-    @JsonProperty(value = "_embedded")
-    private EmbeddedTasks embedded;
-
-    public EmbeddedTasks getEmbedded() {
-        return embedded;
-    }
+    @RequestLine("GET /v1/events?processInstanceId={processInstanceId}&eventType={eventType}")
+    @Headers("Content-Type: application/json")
+    PagedResources<Event> getEvents(@Param("processInstanceId") String processInstanceId,
+                                    @Param("eventType") String eventType);
 }

@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa;
+package org.activiti.cloud.qa.service;
 
-import java.util.Properties;
+import org.activiti.cloud.qa.model.modeling.Group;
+import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
 
-public class Config {
+/**
+ * Modeling groups service
+ */
+public interface ModelingGroupsService extends FeignRestDataClient<ModelingGroupsService, Group> {
 
-    private Properties properties = new Properties();
+    String PATH = "/v1/groups";
 
-    private static Config instance = null;
-
-    private Config() {}
-
-    public static Config getInstance() {
-        if (instance == null)
-            instance = new Config();
-        return instance;
+    @Override
+    default Class<ModelingGroupsService> getType() {
+        return ModelingGroupsService.class;
     }
 
-    public void put(String key, String value) {
-        properties.setProperty(key, value);
+    static ModelingGroupsService build(String baseUrl) {
+        return FeignRestDataClient
+                .builder()
+                .target(ModelingGroupsService.class,
+                        baseUrl + PATH);
     }
 
-    public Properties getProperties() {
-        return properties;
-    }
 }

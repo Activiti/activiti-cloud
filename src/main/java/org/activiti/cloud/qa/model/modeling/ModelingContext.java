@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.model;
+package org.activiti.cloud.qa.model.modeling;
 
-import java.util.List;
+/**
+ * Modeling context
+ */
+public interface ModelingContext {
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+    String getId();
 
-public class EmbeddedTasks {
+    String getName();
 
-    @JsonProperty(value = "taskList")
-    private List<Task> tasks;
-
-    public List<Task> getTasks() {
-        return tasks;
-    }
+    String getRel();
 
 }

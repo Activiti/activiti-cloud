@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.model;
+package org.activiti.cloud.qa.rest;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+/**
+ * Dirty context interface
+ */
+public interface DirtyContext {
 
-public class EventsResponse {
+    void clearDirtyContext();
 
-    @JsonProperty(value = "_embedded")
-    private EmbeddedEvents embeddedEvents;
-
-    public EmbeddedEvents getEmbeddedEvents() {
-        return embeddedEvents;
-    }
 }

@@ -14,32 +14,28 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.model;
+package org.activiti.cloud.qa.service;
 
-public class ProcessInstanceResponse {
+import org.activiti.cloud.qa.model.modeling.Model;
+import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
 
-    private String id;
+/**
+ * Modeling groups service
+ */
+public interface ModelingModelsService extends FeignRestDataClient<ModelingModelsService, Model> {
 
-    private String processDefinitionId;
+    String PATH = "/v1/models";
 
-    private String processDefinitionKey;
-
-    private String initiator;
-
-    public String getId() {
-        return id;
+    @Override
+    default Class<ModelingModelsService> getType() {
+        return ModelingModelsService.class;
     }
 
-    public String getProcessDefinitionId() {
-        return processDefinitionId;
-    }
-
-    public String getProcessDefinitionKey() {
-        return processDefinitionKey;
-    }
-
-    public String getInitiator() {
-        return initiator;
+    static ModelingModelsService build(String baseUrl) {
+        return FeignRestDataClient
+                .builder()
+                .target(ModelingModelsService.class,
+                        baseUrl + PATH);
     }
 
 }

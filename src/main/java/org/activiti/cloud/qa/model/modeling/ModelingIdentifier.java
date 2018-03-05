@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.model;
+package org.activiti.cloud.qa.model.modeling;
 
-public class AuthToken {
+import java.util.function.Predicate;
 
-    private String access_token;
+/**
+ * Model identifier
+ */
+public interface ModelingIdentifier extends Predicate<ModelingContext> {
 
-    public String getAccess_token() {
-        return access_token;
-    }
-
-    @Override
-    public String toString() {
-        return access_token;
-    }
 }

@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.qa.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class Event {
 
     private long id;

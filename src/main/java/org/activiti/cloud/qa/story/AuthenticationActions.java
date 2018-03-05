@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.model;
+package org.activiti.cloud.qa.story;
 
-import java.util.List;
+import net.thucydides.core.annotations.Steps;
+import org.activiti.cloud.qa.steps.AuthenticationSteps;
+import org.jbehave.core.annotations.Alias;
+import org.jbehave.core.annotations.Given;
 
-public class EmbeddedEvents {
+/**
+ * Authentication actions
+ */
+public class AuthenticationActions {
 
-    private List<Event> events;
+    @Steps
+    private AuthenticationSteps authenticationSteps;
 
-    public List<Event> getEvents() {
-        return events;
+    @Given("any authenticated user")
+    @Alias("the user is authenticated")
+    public void authenticate() throws Exception {
+        authenticationSteps.authenticateDefaultUser();
+        authenticationSteps.ensureUserIsAuthenticated();
     }
 
 }

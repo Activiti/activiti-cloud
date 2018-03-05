@@ -16,21 +16,26 @@
 
 package org.activiti.cloud.qa.service;
 
-import feign.Headers;
-import feign.Param;
-import feign.RequestLine;
-import org.activiti.cloud.qa.model.AuthToken;
-import org.springframework.stereotype.Service;
+import org.activiti.cloud.qa.model.modeling.Project;
+import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
 
 /**
- * Authentication service
+ * Modeling groups service
  */
-public interface AuthenticationService {
+public interface ModelingProjectsService extends FeignRestDataClient<ModelingProjectsService, Project> {
 
-    @RequestLine("POST")
-    @Headers("Content-Type: application/x-www-form-urlencoded")
-    AuthToken authenticate(@Param("client_id") String clientId,
-                           @Param("grant_type") String grantType,
-                           @Param("username") String username,
-                           @Param("password") String password);
+    String PATH = "/v1/projects";
+
+    @Override
+    default Class<ModelingProjectsService> getType() {
+        return ModelingProjectsService.class;
+    }
+
+    static ModelingProjectsService build(String baseUrl) {
+        return FeignRestDataClient
+                .builder()
+                .target(ModelingProjectsService.class,
+                        baseUrl + PATH);
+    }
+
 }

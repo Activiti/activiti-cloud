@@ -16,13 +16,32 @@
 
 package org.activiti.cloud.qa.model;
 
-public class ProcessInstanceRequest {
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(NON_NULL)
+public class ProcessInstance {
+
+    private String id;
 
     private String processDefinitionId;
 
     private String processDefinitionKey;
 
     private String commandType;
+
+    private String initiator;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getProcessDefinitionId() {
         return processDefinitionId;
@@ -47,4 +66,13 @@ public class ProcessInstanceRequest {
     public void setCommandType(String commandType) {
         this.commandType = commandType;
     }
+
+    public String getInitiator() {
+        return initiator;
+    }
+
+    public void setInitiator(String initiator) {
+        this.initiator = initiator;
+    }
+
 }
