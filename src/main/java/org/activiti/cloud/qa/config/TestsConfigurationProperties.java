@@ -41,6 +41,9 @@ public class TestsConfigurationProperties {
     @Value("${modeling.url}")
     private String modelingUrl;
 
+    @Value("${query.url}")
+    private String queryUrl;
+
     public String getAuthUrl() {
         return authUrl;
     }
@@ -55,6 +58,10 @@ public class TestsConfigurationProperties {
 
     public String getModelingUrl() {
         return modelingUrl;
+    }
+
+    public String getQueryUrl() {
+        return queryUrl;
     }
 
     @Bean

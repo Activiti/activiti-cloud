@@ -26,6 +26,7 @@ import org.activiti.cloud.qa.service.AuthenticationService;
 import org.activiti.cloud.qa.service.ModelingGroupsService;
 import org.activiti.cloud.qa.service.ModelingModelsService;
 import org.activiti.cloud.qa.service.ModelingProjectsService;
+import org.activiti.cloud.qa.service.QueryService;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -79,10 +80,17 @@ public class FeignConfiguration {
                 .build(acceptanceTestsConfiguration.getModelingUrl());
     }
 
-
     @Bean
     public ModelingModelsService modelingModelsService() {
         return ModelingModelsService
                 .build(acceptanceTestsConfiguration.getModelingUrl());
+    }
+
+    @Bean
+    public QueryService queryService() {
+        return FeignRestDataClient
+                .builder()
+                .target(QueryService.class,
+                        acceptanceTestsConfiguration.getQueryUrl());
     }
 }

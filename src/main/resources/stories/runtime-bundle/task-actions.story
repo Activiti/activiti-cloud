@@ -11,4 +11,5 @@ When the user starts a random process
 And the user claims a task
 And the user completes the task
 Then the status of the process is changed to completed
+And the status of the process is changed to completed by querying
 

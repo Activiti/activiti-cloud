@@ -25,9 +25,12 @@ import org.activiti.cloud.qa.model.EventType;
 import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.steps.AuditSteps;
+import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+
+import static org.activiti.cloud.qa.model.QueryStatus.COMPLETED;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -38,6 +41,9 @@ public class ProcessInstanceTasks {
 
     @Steps
     private AuditSteps auditSteps;
+
+    @Steps
+    private QuerySteps querySteps;
 
     private ProcessInstance processInstance;
     private Task currentTask;
@@ -79,4 +85,13 @@ public class ProcessInstanceTasks {
         assertThat(resultingEvent.getEventType()).isEqualTo(EventType.TASK_COMPLETED);
         assertThat(resultingEvent.getTask().getId()).isEqualTo(currentTask.getId());
     }
+
+    @Then("the status of the process is changed to completed by querying")
+    public void verifyProcessStatusByQuery() throws Exception {
+        ProcessInstance instance = querySteps.getProcessInstance(processInstance.getId());
+
+        assertThat(instance).isNotNull();
+        assertThat(instance.getStatus()).isEqualTo(COMPLETED);
+    }
+
 }
