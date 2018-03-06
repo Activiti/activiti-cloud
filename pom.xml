@@ -31,12 +31,14 @@
     <activiti-cloud-org.version>7-201802-EA-SNAPSHOT</activiti-cloud-org.version>
     <awaitility.version>3.0.0</awaitility.version>
     <graphql-jpa-query.version>0.3.3</graphql-jpa-query.version>
+    <java-semver.version>0.9.0</java-semver.version>
     <keycloak.version>3.4.0.Final</keycloak.version>
     <!-- keycloak snapshot that was used to build boot2 adapter
      the original snapshot doesn't contain the boot2 adapter, just this particular build
      see https://github.com/keycloak/keycloak/pull/4976
      -->
     <keycloak-spring-boot.version>3.4.0.CR1-SNAPSHOT</keycloak-spring-boot.version>
+    <logstash.version>4.11</logstash.version>
     <querydsl.version>4.1.4</querydsl.version>
     <resteasy.version>3.0.21.Final</resteasy.version>
     <spring-cloud.version>Finchley.M7</spring-cloud.version>
@@ -57,6 +59,13 @@
   </modules>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
@@ -163,6 +172,16 @@
         <groupId>org.awaitility</groupId>
         <artifactId>awaitility</artifactId>
         <version>${awaitility.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.zafarkhaja</groupId>
+        <artifactId>java-semver</artifactId>
+        <version>${java-semver.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.logstash.logback</groupId>
+        <artifactId>logstash-logback-encoder</artifactId>
+        <version>${logstash.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
