@@ -68,30 +68,6 @@
           <groupId>io.fabric8</groupId>
           <artifactId>docker-maven-plugin</artifactId>
           <version>${docker-maven-plugin.version}</version>
-          <configuration>
-            <images>
-              <image>
-                <name>activiti/${project.artifactId}</name>
-                <alias>${project.artifactId}</alias>
-                <build>
-                  <from>openjdk:alpine</from>
-                  <assembly>
-                    <descriptorRef>artifact</descriptorRef>
-                  </assembly>
-                  <cmd>java ${JAVA_OPTS} -jar maven/${project.artifactId}-${project.version}.jar</cmd>
-                </build>
-              </image>
-            </images>
-          </configuration>
-          <executions>
-            <execution>
-              <id>docker:build</id>
-              <phase>install</phase>
-              <goals>
-                <goal>build</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>pl.project13.maven</groupId>
@@ -150,4 +126,47 @@
       </plugins>
     </pluginManagement>
   </build>
+  <profiles>
+    <profile>
+      <id>docker</id>
+      <activation>
+        <property>
+          <name>docker.build</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <configuration>
+              <images>
+                <image>
+                  <name>activiti/${project.artifactId}</name>
+                  <alias>${project.artifactId}</alias>
+                  <build>
+                    <from>openjdk:alpine</from>
+                    <assembly>
+                      <descriptorRef>artifact</descriptorRef>
+                    </assembly>
+                    <cmd>java ${JAVA_OPTS} -jar maven/${project.artifactId}-${project.version}.jar</cmd>
+                  </build>
+                </image>
+              </images>
+            </configuration>
+            <executions>
+              <execution>
+                <id>docker:build</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>build</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
