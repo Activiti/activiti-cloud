@@ -19,7 +19,6 @@ package org.activiti.cloud.alfresco.converter.json;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.List;
 
 import org.activiti.cloud.alfresco.rest.model.AlfrescoContentEntry;
 import org.springframework.hateoas.PagedResources;
@@ -38,6 +37,7 @@ public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2Http
 
     public AlfrescoJackson2HttpMessageConverter(PagedResourcesConverter pagedResourcesConverter) {
         this.pagedResourcesConverter = pagedResourcesConverter;
+        setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
     }
 
     @Override
@@ -63,7 +63,12 @@ public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2Http
     }
 
     @Override
-    public List<MediaType> getSupportedMediaTypes() {
-        return Collections.singletonList(MediaType.APPLICATION_JSON);
+    public boolean canWrite(Type type,
+                            Class<?> clazz,
+                            MediaType mediaType) {
+        return !String.class.equals(type) && super.canWrite(type,
+                                                            clazz,
+                                                            mediaType);
     }
+
 }

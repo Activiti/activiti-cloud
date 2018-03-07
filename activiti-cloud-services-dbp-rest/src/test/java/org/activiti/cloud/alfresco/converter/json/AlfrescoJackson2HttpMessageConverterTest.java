@@ -118,4 +118,29 @@ public class AlfrescoJackson2HttpMessageConverterTest {
         //then
         assertThat(supportedMediaTypes).containsExactly(MediaType.APPLICATION_JSON);
     }
+
+    @Test
+    public void canWriteShouldFalseWhenTypeIsString() throws Exception {
+        //given
+        Class<String> clazz = String.class;
+
+        //when
+        boolean canWrite = httpMessageConverter.canWrite(clazz, clazz, MediaType.APPLICATION_JSON);
+
+        //then
+        assertThat(canWrite).isFalse();
+    }
+
+    @Test
+    public void canWriteShouldReturnTrueWhenTypeIsNotStringAndMediaTypeIsApplicationJson() throws Exception {
+        //given
+        Class<Resource> clazz = Resource.class;
+
+        //when
+        boolean canWrite = httpMessageConverter.canWrite(clazz, clazz, MediaType.APPLICATION_JSON);
+
+        //then
+        assertThat(canWrite).isTrue();
+    }
+
 }

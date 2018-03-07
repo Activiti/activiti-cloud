@@ -19,10 +19,8 @@ package org.activiti.cloud.alfresco.config;
 import java.util.List;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
-import org.activiti.cloud.alfresco.converter.json.AlfrescoJackson2HttpMessageConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -31,18 +29,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class AlfrescoWebConfigurer implements WebMvcConfigurer {
 
     private final AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver;
-    private final AlfrescoJackson2HttpMessageConverter<?> converter;
 
-    public AlfrescoWebConfigurer(AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver,
-                                 AlfrescoJackson2HttpMessageConverter<?> converter) {
+    public AlfrescoWebConfigurer(AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver) {
         this.alfrescoPageArgumentMethodResolver = alfrescoPageArgumentMethodResolver;
-        this.converter = converter;
-    }
-
-    @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(0,
-                       converter);
     }
 
     @Override

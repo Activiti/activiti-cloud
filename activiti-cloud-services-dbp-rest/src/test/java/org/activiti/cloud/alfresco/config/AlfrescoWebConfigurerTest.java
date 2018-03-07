@@ -20,13 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
-import org.activiti.cloud.alfresco.converter.json.AlfrescoJackson2HttpMessageConverter;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,25 +38,9 @@ public class AlfrescoWebConfigurerTest {
     @Mock
     private AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver;
 
-    @Mock
-    private AlfrescoJackson2HttpMessageConverter<?> converter;
-
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-    }
-
-    @Test
-    public void extendMessageConvertersShouldAddAlfrescoJackson2HttpMessageConverterAtFirstPositionAtTheList() throws Exception {
-        //given
-        List<HttpMessageConverter<?>> converters = new ArrayList<>();
-        converters.add(new MappingJackson2HttpMessageConverter());
-
-        //when
-        configurer.extendMessageConverters(converters);
-
-        //then
-        assertThat(converters.get(0)).isInstanceOf(AlfrescoJackson2HttpMessageConverter.class);
     }
 
     @Test
@@ -72,7 +53,7 @@ public class AlfrescoWebConfigurerTest {
         configurer.addArgumentResolvers(resolvers);
 
         //then
-        assertThat(resolvers.get(0)).isInstanceOf(AlfrescoPageArgumentMethodResolver.class);
+        assertThat(resolvers.get(0)).isEqualTo(alfrescoPageArgumentMethodResolver);
     }
 
 }
