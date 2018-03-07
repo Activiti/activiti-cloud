@@ -16,17 +16,20 @@
 
 package org.activiti.cloud.starter.tests.definition;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Iterator;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
-import org.activiti.bpmn.converter.util.InputStreamProvider;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
+import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
-import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,19 +37,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.ResponseExtractor;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -87,7 +84,7 @@ public class ProcessDefinitionIT {
     private ProcessDefinition getProcessDefinition(String name) {
         ResponseEntity<PagedResources<ProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
         Iterator<ProcessDefinition> it = processDefinitionsEntity.getBody().getContent().iterator();
-        ProcessDefinition aProcessDefinition = null;
+        ProcessDefinition aProcessDefinition;
         do {
             aProcessDefinition = it.next();
         } while (!aProcessDefinition.getName().equals(name));
@@ -99,10 +96,9 @@ public class ProcessDefinitionIT {
         ParameterizedTypeReference<PagedResources<ProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<ProcessDefinition>>() {
         };
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,
-                HttpMethod.GET,
-                null,
-                responseType);
-
+                                     HttpMethod.GET,
+                                     null,
+                                     responseType);
     }
 
     @Test
@@ -119,9 +115,9 @@ public class ProcessDefinitionIT {
 
         //when
         ResponseEntity<ProcessDefinition> entity = restTemplate.exchange(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId(),
-                HttpMethod.GET,
-                null,
-                responseType);
+                                                                         HttpMethod.GET,
+                                                                         null,
+                                                                         responseType);
 
         //then
         assertThat(entity).isNotNull();
@@ -139,9 +135,9 @@ public class ProcessDefinitionIT {
 
         //when
         ResponseEntity<ProcessDefinitionMeta> entity = restTemplate.exchange(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/meta",
-                HttpMethod.GET,
-                null,
-                responseType);
+                                                                             HttpMethod.GET,
+                                                                             null,
+                                                                             responseType);
         //then
         assertThat(entity).isNotNull();
         assertThat(entity.getBody()).isNotNull();
@@ -162,9 +158,9 @@ public class ProcessDefinitionIT {
 
         //when
         ResponseEntity<ProcessDefinitionMeta> entity = restTemplate.exchange(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/meta",
-                HttpMethod.GET,
-                null,
-                responseType);
+                                                                             HttpMethod.GET,
+                                                                             null,
+                                                                             responseType);
         //then
         assertThat(entity).isNotNull();
         assertThat(entity.getBody()).isNotNull();
@@ -182,13 +178,12 @@ public class ProcessDefinitionIT {
 
         //when
         String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/model",
-                HttpMethod.GET,
-                "application/xml");
+                                             HttpMethod.GET,
+                                             "application/xml");
 
         //then
         assertThat(responseData).isNotNull();
         assertThat(responseData).isEqualTo(TestResourceUtil.getProcessXml(aProcessDefinition.getId().split(":")[0]));
-
     }
 
     @Test
@@ -198,82 +193,65 @@ public class ProcessDefinitionIT {
 
         //when
         String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/model",
-                HttpMethod.GET,
-                "application/json");
+                                             HttpMethod.GET,
+                                             "application/json");
 
         //then
         assertThat(responseData).isNotNull();
 
         BpmnModel targetModel = new BpmnJsonConverter().convertToBpmnModel(new ObjectMapper().readTree(responseData));
         final InputStream byteArrayInputStream = new ByteArrayInputStream(TestResourceUtil.getProcessXml(aProcessDefinition.getId()
-                .split(":")[0]).getBytes());
-        BpmnModel sourceModel = new BpmnXMLConverter().convertToBpmnModel(new InputStreamProvider() {
-
-            @Override
-            public InputStream getInputStream() {
-                return byteArrayInputStream;
-            }
-        }, false, false);
+                                                                                                                 .split(":")[0]).getBytes());
+        BpmnModel sourceModel = new BpmnXMLConverter().convertToBpmnModel(() -> byteArrayInputStream,
+                                                                          false,
+                                                                          false);
         assertThat(targetModel.getMainProcess().getId().equals(sourceModel.getMainProcess().getId()));
         for (FlowElement element : targetModel.getMainProcess().getFlowElements()) {
             assertThat(sourceModel.getFlowElement(element.getId()) != null);
         }
-
-
     }
 
     @Test
-    public void shouldRetriveDiagram() throws Exception {
+    public void shouldRetrieveDiagram() throws Exception {
 
         ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_POOL_LANE);
 
         //when
         String responseData = executeRequest(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/model",
-                HttpMethod.GET,
-                "image/svg+xml");
+                                             HttpMethod.GET,
+                                             "image/svg+xml");
 
         //then
         assertThat(responseData).isNotNull();
         final InputStream byteArrayInputStream = new ByteArrayInputStream(TestResourceUtil.getProcessXml(aProcessDefinition.getId()
-                .split(":")[0]).getBytes());
-        BpmnModel sourceModel = new BpmnXMLConverter().convertToBpmnModel(new InputStreamProvider() {
-
-            @Override
-            public InputStream getInputStream() {
-                return byteArrayInputStream;
-            }
-        }, false, false);
+                                                                                                                 .split(":")[0]).getBytes());
+        BpmnModel sourceModel = new BpmnXMLConverter().convertToBpmnModel(() -> byteArrayInputStream,
+                                                                          false,
+                                                                          false);
         String activityFontName = processDiagramGenerator.getDefaultActivityFontName();
         String labelFontName = processDiagramGenerator.getDefaultLabelFontName();
         String annotationFontName = processDiagramGenerator.getDefaultAnnotationFontName();
         try (InputStream is = processDiagramGenerator.generateDiagram(sourceModel,
-                activityFontName,
-                labelFontName,
-                annotationFontName)) {
-            String sourceSvg = new String(IoUtil.readInputStream(is, null), "UTF-8");
+                                                                      activityFontName,
+                                                                      labelFontName,
+                                                                      annotationFontName)) {
+            String sourceSvg = new String(IoUtil.readInputStream(is,
+                                                                 null),
+                                          "UTF-8");
             assertThat(responseData).isEqualTo(sourceSvg);
         }
     }
 
-    private String executeRequest(String url, HttpMethod method, String contentType) {
-        return restTemplate.execute(url,
-                method,
-                new RequestCallback() {
-                    @Override
-                    public void doWithRequest(ClientHttpRequest request) throws IOException {
-                        if (contentType != null && !contentType.isEmpty()) {
-                            request.getHeaders().add("Content-Type", contentType);
-                        }
-                    }
-                },
-                new ResponseExtractor<String>() {
-
-                    @Override
-                    public String extractData(ClientHttpResponse response)
-                            throws IOException {
-                        return new String(IoUtil.readInputStream(response.getBody(),
-                                null), "UTF-8");
-                    }
-                });
+    private String executeRequest(String url,
+                                  HttpMethod method,
+                                  String contentType) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", contentType);
+        ResponseEntity<String> response = restTemplate.exchange(url,
+                                                                method,
+                                                                new HttpEntity<>(headers),
+                                                                String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return response.getBody();
     }
 }
