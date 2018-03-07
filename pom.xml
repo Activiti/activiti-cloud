@@ -17,9 +17,6 @@
     <developerConnection>scm:git:https://github.com/Activiti/${project.artifactId}.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
-  <properties>
-    <docker.build>true</docker.build>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
