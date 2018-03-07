@@ -148,7 +148,6 @@
         <artifactId>docker-maven-plugin</artifactId>
         <configuration>
           <images>
-            <!-- A single's image configuration -->
             <image>
               <name>activiti/activiti-cloud-sso-idm</name>
               <alias>activiti-cloud-sso-idm</alias>
@@ -178,35 +177,13 @@
               </run>
             </image>
           </images>
+          <skip>${skipTests}</skip>
         </configuration>
-        <!-- Connect start/stop to pre- and
-             post-integration-test phase, respectively if you want to start
-             your docker containers during integration tests -->
         <executions>
           <execution>
-            <id>build</id>
-            <phase>package</phase>
             <goals>
               <goal>build</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>start</id>
-            <configuration>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <phase>pre-integration-test</phase>
-            <goals>
               <goal>start</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>stop</id>
-            <configuration>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <phase>post-integration-test</phase>
-            <goals>
               <goal>stop</goal>
               <goal>remove</goal>
             </goals>
