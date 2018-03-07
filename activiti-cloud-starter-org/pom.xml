@@ -9,9 +9,6 @@
   </parent>
   <artifactId>activiti-cloud-starter-org</artifactId>
   <name>Activiti Cloud Starter :: Organization</name>
-  <properties>
-    <docker.build>true</docker.build>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
