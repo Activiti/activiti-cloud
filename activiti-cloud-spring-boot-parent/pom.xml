@@ -36,4 +36,22 @@
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
     </repository>
   </distributionManagement>
+  <profiles>
+    <profile>
+      <id>docker</id>
+      <activation>
+        <file>
+          <exists>Dockerfile</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
