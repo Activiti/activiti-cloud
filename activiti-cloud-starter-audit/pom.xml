@@ -186,7 +186,6 @@
         <executions>
           <execution>
             <goals>
-              <goal>build</goal>
               <goal>start</goal>
               <goal>stop</goal>
               <goal>remove</goal>
