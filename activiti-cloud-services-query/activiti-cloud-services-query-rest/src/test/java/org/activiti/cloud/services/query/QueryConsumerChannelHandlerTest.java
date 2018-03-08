@@ -22,6 +22,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.events.AbstractProcessEngineEvent;
+import org.activiti.cloud.services.query.events.ProcessCancelledEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +46,20 @@ public class QueryConsumerChannelHandlerTest {
     public void receiveShouldHandleReceivedEvent() throws Exception {
         //given
         AbstractProcessEngineEvent event = mock(AbstractProcessEngineEvent.class);
+
+        //when
+        AbstractProcessEngineEvent[] events = {event};
+        consumer.receive(events);
+
+        //then
+        verify(eventHandlerContext).handle(events);
+    }
+
+
+    @Test
+    public void testHandleProcessCancelledEvent() throws Exception {
+        //given
+        AbstractProcessEngineEvent event = mock(ProcessCancelledEvent.class);
 
         //when
         AbstractProcessEngineEvent[] events = {event};

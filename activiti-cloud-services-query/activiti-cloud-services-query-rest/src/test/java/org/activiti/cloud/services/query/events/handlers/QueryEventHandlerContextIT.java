@@ -88,6 +88,7 @@ public class QueryEventHandlerContextIT {
                 ProcessCompletedEvent.class,
                 ProcessSuspendedEvent.class,
                 ProcessActivatedEvent.class,
+                ProcessCancelledEvent.class,
                 TaskCreatedEvent.class,
                 TaskAssignedEvent.class,
                 TaskSuspendedEvent.class,
@@ -106,6 +107,7 @@ public class QueryEventHandlerContextIT {
         assertThat(handlers.get(ProcessCompletedEvent.class)).isInstanceOf(ProcessCompletedEventHandler.class);
         assertThat(handlers.get(ProcessActivatedEvent.class)).isInstanceOf(ProcessActivatedEventHandler.class);
         assertThat(handlers.get(ProcessSuspendedEvent.class)).isInstanceOf(ProcessSuspendedEventHandler.class);
+        assertThat(handlers.get(ProcessCancelledEvent.class)).isInstanceOf(ProcessCancelledEventHandler.class);
         assertThat(handlers.get(TaskCreatedEvent.class)).isInstanceOf(TaskCreatedEventHandler.class);
         assertThat(handlers.get(TaskAssignedEvent.class)).isInstanceOf(TaskAssignedEventHandler.class);
         assertThat(handlers.get(TaskSuspendedEvent.class)).isInstanceOf(TaskSuspendedEventHandler.class);
