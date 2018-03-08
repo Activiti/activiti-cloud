@@ -218,6 +218,7 @@
               </run>
             </image>
           </images>
+          <skip>${skipTests}</skip>
         </configuration>
         <executions>
           <execution>
