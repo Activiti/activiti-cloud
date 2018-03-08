@@ -80,11 +80,27 @@ public class ProcessInstanceTasks {
 
     @Then("the status of the process is changed to completed")
     public void verifyProcessStatus() throws Exception {
+        runtimeBundleSteps.waitForMessagesToBeConsumed();
         querySteps.checkProcessInstanceStatus(processInstance.getId(),
                                               QueryStatus.COMPLETED);
         auditSteps.checkProcessInstanceTaskEvent(processInstance.getId(),
                                                  currentTask.getId(),
                                                  EventType.TASK_COMPLETED);
+    }
+
+    @When("cancel the process")
+    public void cancelProcessInstance() throws Exception {
+        runtimeBundleSteps.deleteProcessInstance(processInstance.getId());
+    }
+
+    @Then("the process instance is cancelled")
+    public void verifyProcessInstanceIsDeleted() throws Exception {
+        runtimeBundleSteps.checkProcessInstanceNotFound(processInstance.getId());
+        runtimeBundleSteps.waitForMessagesToBeConsumed();
+        querySteps.checkProcessInstanceStatus(processInstance.getId(),
+                                              QueryStatus.CANCELLED);
+        auditSteps.checkProcessInstanceEvent(processInstance.getId(),
+                                             EventType.PROCESS_CANCELLED);
     }
 
     private boolean isServiceUp(Map<String, Object> appInfo) {
@@ -96,4 +112,5 @@ public class ProcessInstanceTasks {
         }
         return false;
     }
+
 }

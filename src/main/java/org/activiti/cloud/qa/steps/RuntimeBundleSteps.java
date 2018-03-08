@@ -27,6 +27,8 @@ import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.assertj.core.api.Assertions.*;
+
 /**
  * Runtime bundle steps
  */
@@ -77,5 +79,22 @@ public class RuntimeBundleSteps {
 
         runtimeBundleService
                 .completeTask(id);
+    }
+
+    @Step
+    public void deleteProcessInstance(String id) throws IOException {
+        runtimeBundleService.deleteProcess(id);
+    }
+
+    @Step
+    public void checkProcessInstanceNotFound(String processInstanceId) {
+        assertThatExceptionOfType(Exception.class).isThrownBy(
+                () -> runtimeBundleService.getProcessInstance(processInstanceId)
+        ).withMessageContaining("Unable to find process definition for the given id:");
+    }
+
+    @Step
+    public void waitForMessagesToBeConsumed() throws InterruptedException {
+        Thread.sleep(200);
     }
 }

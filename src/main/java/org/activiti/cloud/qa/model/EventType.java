@@ -21,7 +21,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum EventType {
 
     TASK_COMPLETED("TaskCompletedEvent"),
-    PROCESS_COMPLETED("ProcessCompletedEvent");
+    PROCESS_COMPLETED("ProcessCompletedEvent"),
+    PROCESS_CANCELLED("ProcessCancelledEvent");
 
     private final String type;
 

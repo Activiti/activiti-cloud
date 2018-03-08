@@ -47,4 +47,13 @@ public interface RuntimeBundleService extends BaseService {
     @RequestLine("POST /v1/tasks/{id}/complete")
     @Headers("Content-Type: application/json")
     void completeTask(@Param("id") String id);
+
+    @RequestLine("DELETE /v1/process-instances/{id}")
+    @Headers("Content-Type: application/json")
+    void deleteProcess(@Param("id") String id);
+
+    @RequestLine("GET /v1/process-instances/{id}")
+    @Headers("Content-Type: application/json")
+    ProcessInstance getProcessInstance(@Param("id") String id);
+
 }
