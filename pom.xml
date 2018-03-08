@@ -17,9 +17,6 @@
     <developerConnection>scm:git:https://github.com/Activiti/${project.artifactId}.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
-  <properties>
-    <docker.build>true</docker.build>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -65,4 +62,17 @@
       </releases>
     </repository>
   </repositories>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <environmentVariables>
+            <ACT_RB_PROCESSES_PATH>${project.basedir}/src/test/resources/processes/</ACT_RB_PROCESSES_PATH>
+          </environmentVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
