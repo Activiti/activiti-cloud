@@ -9,4 +9,3 @@ Given any authenticated user
 When the user starts a random process
 And cancel the process
 Then the process instance is cancelled
-
