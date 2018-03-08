@@ -68,8 +68,8 @@
         <configuration>
           <images>
             <image>
-              <name>rabbitmq</name>
-              <alias>rabbitmq</alias>
+              <name>rabbitmq:management</name>
+              <alias>activiti-rabbitmq</alias>
               <run>
                 <ports>
                   <port>5672:5672</port>
