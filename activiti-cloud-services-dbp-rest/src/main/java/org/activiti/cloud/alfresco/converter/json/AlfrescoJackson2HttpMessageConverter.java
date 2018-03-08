@@ -44,12 +44,13 @@ public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2Http
     protected void writeInternal(Object object,
                                  @Nullable Type type,
                                  HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+        Object transformedObject = object;
         if (object instanceof PagedResources) {
-            object = pagedResourcesConverter.toAlfrescoContentListWrapper((PagedResources<Resource<T>>) object);
+            transformedObject = pagedResourcesConverter.toAlfrescoContentListWrapper((PagedResources<Resource<T>>) object);
         } else if (object instanceof Resource) {
-            object = new AlfrescoContentEntry<>(((Resource<T>) object).getContent());
+            transformedObject = new AlfrescoContentEntry<>(((Resource<T>) object).getContent());
         }
-        defaultWriteInternal(object,
+        defaultWriteInternal(transformedObject,
                              type,
                              outputMessage);
     }

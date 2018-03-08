@@ -16,9 +16,7 @@
 
 package org.activiti.cloud.test;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -46,7 +44,8 @@ public class TestConfiguration {
     @Bean
     public RestTemplateBuilder restTemplateBuilder() {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                         false);
         mapper.registerModule(new Jackson2HalModule());
 
         MappingJackson2HttpMessageConverter jackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
@@ -57,5 +56,4 @@ public class TestConfiguration {
                 jackson2HttpMessageConverter,
                 new StringHttpMessageConverter(StandardCharsets.UTF_8)).additionalInterceptors(keycloakSecurityContextClientRequestInterceptor);
     }
-
 }
