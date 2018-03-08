@@ -43,4 +43,8 @@ public interface ProcessInstanceController {
 
     @RequestMapping(value = "{processInstanceId}/activate")
     ResponseEntity<Void> activate(@PathVariable String processInstanceId);
+
+    @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.DELETE)
+    void deleteProcessInstance(@PathVariable String processInstanceId);
+
 }

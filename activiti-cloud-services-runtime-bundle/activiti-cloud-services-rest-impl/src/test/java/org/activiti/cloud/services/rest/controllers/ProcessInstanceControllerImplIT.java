@@ -57,6 +57,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -234,6 +235,18 @@ public class ProcessInstanceControllerImplIT {
                                  1))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/activate",
+                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+    }
+
+
+    @Test
+    public void deleteProcessInstance() throws Exception {
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processEngine.getProcessInstanceById("1")).thenReturn(processInstance);
+
+        this.mockMvc.perform(delete("/v1/process-instances/{processInstanceId}", 1))
+                .andExpect(status().isOk())
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
                                 pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
 }
