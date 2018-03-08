@@ -16,16 +16,14 @@
 
 package org.activiti.cloud.qa.steps;
 
-import java.util.Collection;
-
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.qa.model.Event;
-import org.activiti.cloud.qa.model.EventType;
 import org.activiti.cloud.qa.model.ProcessInstance;
+import org.activiti.cloud.qa.model.QueryStatus;
 import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
-import org.activiti.cloud.qa.service.AuditService;
 import org.activiti.cloud.qa.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Query steps
@@ -38,6 +36,15 @@ public class QuerySteps {
 
     @Step
     public ProcessInstance getProcessInstance(String processInstanceId) throws Exception {
-        return queryService.getProcessInstance(processInstanceId).getContent();
+        return queryService.getProcessInstance(processInstanceId);
+    }
+
+    @Step
+    public void checkProcessInstanceStatus(String processInstanceId, QueryStatus expectedStatus) throws Exception {
+        assertThat(expectedStatus).isNotNull();
+
+        ProcessInstance processInstance = getProcessInstance(processInstanceId);
+        assertThat(processInstance).isNotNull();
+        assertThat(processInstance.getStatus()).isEqualTo(expectedStatus);
     }
 }

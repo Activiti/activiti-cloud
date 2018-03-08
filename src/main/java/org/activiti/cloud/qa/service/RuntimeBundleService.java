@@ -16,18 +16,12 @@
 
 package org.activiti.cloud.qa.service;
 
-import feign.Feign;
 import feign.Headers;
-import feign.Logger;
 import feign.Param;
 import feign.RequestLine;
-import feign.gson.GsonEncoder;
 import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.Task;
-import org.activiti.cloud.qa.rest.feign.HalDecoder;
-import org.activiti.cloud.qa.rest.feign.OAuth2FeignRequestInterceptor;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.stereotype.Service;
 
 /**
  * Runtime Bundle service
@@ -47,9 +41,9 @@ public interface RuntimeBundleService {
 
     @RequestLine("POST /v1/tasks/{id}/claim")
     @Headers("Content-Type: application/x-www-form-urlencoded")
-    void assignTaskToUser(@Param("id") String id, @Param("assignee") String user);
+    void assignTaskToUser(@Param("id") String id,
+                          @Param("assignee") String user);
 
     @RequestLine("POST /v1/tasks/{id}/complete")
     void completeTask(@Param("id") String id);
-
 }

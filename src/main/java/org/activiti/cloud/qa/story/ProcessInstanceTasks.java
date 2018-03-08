@@ -20,17 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.model.Event;
 import org.activiti.cloud.qa.model.EventType;
 import org.activiti.cloud.qa.model.ProcessInstance;
+import org.activiti.cloud.qa.model.QueryStatus;
 import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-
-import static org.activiti.cloud.qa.model.QueryStatus.COMPLETED;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -74,24 +72,10 @@ public class ProcessInstanceTasks {
 
     @Then("the status of the process is changed to completed")
     public void verifyProcessStatus() throws Exception {
-        List<Event> events = new ArrayList<>(
-                auditSteps.getEventsByProcessInstanceIdAndEventType(processInstance.getId(),
-                                                                    EventType.TASK_COMPLETED));
-
-        assertThat(events).isNotEmpty();
-        Event resultingEvent = events.get(0);
-        assertThat(resultingEvent).isNotNull();
-        assertThat(resultingEvent.getProcessInstanceId()).isEqualTo(processInstance.getId());
-        assertThat(resultingEvent.getEventType()).isEqualTo(EventType.TASK_COMPLETED);
-        assertThat(resultingEvent.getTask().getId()).isEqualTo(currentTask.getId());
+        querySteps.checkProcessInstanceStatus(processInstance.getId(),
+                                              QueryStatus.COMPLETED);
+        auditSteps.checkProcessInstanceTaskEvent(processInstance.getId(),
+                                                 currentTask.getId(),
+                                                 EventType.TASK_COMPLETED);
     }
-
-    @Then("the status of the process is changed to completed by querying")
-    public void verifyProcessStatusByQuery() throws Exception {
-        ProcessInstance instance = querySteps.getProcessInstance(processInstance.getId());
-
-        assertThat(instance).isNotNull();
-        assertThat(instance.getStatus()).isEqualTo(COMPLETED);
-    }
-
 }

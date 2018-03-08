@@ -26,7 +26,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
  * Config properties
  */
 @Configuration
-@PropertySource("classpath:config-${profile:docker}.properties")
+@PropertySource("classpath:config-${profile:env}.properties")
 public class TestsConfigurationProperties {
 
     @Value("${auth.url}")

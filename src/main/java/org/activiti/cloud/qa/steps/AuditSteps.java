@@ -25,6 +25,8 @@ import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
 import org.activiti.cloud.qa.service.AuditService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.assertj.core.api.Assertions.*;
+
 /**
  * Audit steps
  */
@@ -39,5 +41,27 @@ public class AuditSteps {
                                                                       EventType eventType) throws Exception {
         return auditService.getEvents(processInstanceId,
                                       eventType.getType()).getContent();
+    }
+
+    @Step
+    public void checkProcessInstanceEvent(String processInstanceId,
+                                          EventType eventType) throws Exception {
+
+        assertThat(getEventsByProcessInstanceIdAndEventType(processInstanceId,
+                                                            eventType)).isNotEmpty();
+    }
+
+    @Step
+    public void checkProcessInstanceTaskEvent(String processInstanceId,
+                                              String taskId,
+                                              EventType eventType) throws Exception {
+
+        Collection<Event> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
+                                                                            eventType);
+
+        assertThat(events).isNotEmpty();
+        Event resultingEvent = events.iterator().next();
+        assertThat(resultingEvent).isNotNull();
+        assertThat(resultingEvent.getTask().getId()).isEqualTo(taskId);
     }
 }

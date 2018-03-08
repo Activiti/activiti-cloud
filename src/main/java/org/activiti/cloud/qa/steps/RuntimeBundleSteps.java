@@ -62,7 +62,8 @@ public class RuntimeBundleSteps {
                                  String user) throws IOException {
 
         runtimeBundleService
-                .assignTaskToUser(id, user);
+                .assignTaskToUser(id,
+                                  user);
     }
 
     @Step
@@ -71,5 +72,4 @@ public class RuntimeBundleSteps {
         runtimeBundleService
                 .completeTask(id);
     }
-
 }

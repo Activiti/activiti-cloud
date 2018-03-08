@@ -29,5 +29,5 @@ public interface QueryService {
 
     @RequestLine("GET /v1/process-instances/{processInstanceId}")
     @Headers("Content-Type: application/json")
-    Resource<ProcessInstance> getProcessInstance(@Param("processInstanceId") String processInstanceId);
+    ProcessInstance getProcessInstance(@Param("processInstanceId") String processInstanceId);
 }
