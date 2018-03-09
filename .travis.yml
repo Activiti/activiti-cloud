@@ -15,6 +15,11 @@ notifications:
 before_script:
   - echo MAVEN_OPTS=-Xmx1536m > ~/.mavenrc
 
+# Enable integration tests
+script:
+  - mvn verify -B
+
+
 # Send coverage data
 after_success:
   bash <(curl -s https://codecov.io/bash)
