@@ -31,6 +31,7 @@
     <activiti-cloud-org.version>7-201802-EA-SNAPSHOT</activiti-cloud-org.version>
     <awaitility.version>3.0.0</awaitility.version>
     <graphql-jpa-query.version>0.3.3</graphql-jpa-query.version>
+    <graphql-java.version>6.0</graphql-java.version>
     <java-semver.version>0.9.0</java-semver.version>
     <keycloak.version>3.4.0.Final</keycloak.version>
     <!-- keycloak snapshot that was used to build boot2 adapter
@@ -44,6 +45,7 @@
     <spring-cloud.version>Finchley.M8</spring-cloud.version>
     <springfox.version>2.8.0</springfox.version>
     <swagger.version>1.5.10</swagger.version>
+    <hibernate-jpa-2.1-api.version>1.0.2.Final</hibernate-jpa-2.1-api.version>
   </properties>
   <modules>
     <module>activiti-cloud-service-common-dependencies</module>
@@ -109,6 +111,16 @@
         <groupId>com.introproventures</groupId>
         <artifactId>graphql-jpa-query-annotations</artifactId>
         <version>${graphql-jpa-query.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.graphql-java</groupId>
+        <artifactId>graphql-java</artifactId>
+        <version>${graphql-java.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate.javax.persistence</groupId>
+        <artifactId>hibernate-jpa-2.1-api</artifactId>
+        <version>${hibernate-jpa-2.1-api.version}</version>
       </dependency>
       <!-- Querydsl dependencies http://www.querydsl.com -->
       <dependency>
