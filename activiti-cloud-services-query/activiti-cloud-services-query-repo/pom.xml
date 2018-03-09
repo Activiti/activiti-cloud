@@ -19,6 +19,10 @@
       <artifactId>spring-data-commons</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-rest-core</artifactId>
     </dependency>
