@@ -30,6 +30,8 @@
     <activiti-cloud-process-model.version>7-201802-EA-SNAPSHOT</activiti-cloud-process-model.version>
     <activiti-cloud-org.version>7-201802-EA-SNAPSHOT</activiti-cloud-org.version>
     <awaitility.version>3.0.0</awaitility.version>
+    <commons-configuration.version>1.8</commons-configuration.version>
+    <commons-lang.version>2.6</commons-lang.version>
     <graphql-jpa-query.version>0.3.3</graphql-jpa-query.version>
     <graphql-java.version>6.0</graphql-java.version>
     <java-semver.version>0.9.0</java-semver.version>
@@ -61,6 +63,25 @@
   </modules>
   <dependencyManagement>
     <dependencies>
+      <!-- avoid older commons dependencies used by Eureka being available for compilation -->
+      <dependency>
+        <groupId>commons-configuration</groupId>
+        <artifactId>commons-configuration</artifactId>
+        <version>${commons-configuration.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>${commons-lang.version}</artifactId>
+        <version>2.6</version>
+        <scope>runtime</scope>
+      </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
@@ -141,33 +162,13 @@
       </dependency>
       <dependency>
         <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-core</artifactId>
-        <version>${keycloak.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-adapter-core</artifactId>
-        <version>${keycloak.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-spring-security-adapter</artifactId>
+        <artifactId>keycloak-jetty94-adapter</artifactId>
         <version>${keycloak.version}</version>
       </dependency>
       <dependency>
         <groupId>org.keycloak</groupId>
         <artifactId>keycloak-spring-boot-adapter-core</artifactId>
         <version>${keycloak-spring-boot.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-spring-boot-2-adapter</artifactId>
-        <version>${keycloak-spring-boot.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-jetty94-adapter</artifactId>
-        <version>${keycloak.version}</version>
       </dependency>
       <!-- addresses https://issues.jboss.org/browse/KEYCLOAK-2009 , may not be needed on servers other than embedded jetty -->
       <dependency>
@@ -179,6 +180,18 @@
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-jackson2-provider</artifactId>
         <version>${resteasy.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-spring-boot-2-adapter</artifactId>
+        <version>${keycloak-spring-boot.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak.bom</groupId>
+        <artifactId>keycloak-adapter-bom</artifactId>
+        <version>${keycloak.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.awaitility</groupId>
