@@ -10,6 +10,9 @@
   <artifactId>activiti-cloud-services-audit</artifactId>
   <packaging>pom</packaging>
   <name>Activiti Cloud Audit :: Services :: Parent</name>
+  <properties>
+    <suppressionFile>${basedir}/../../dependency-check-suppression.xml</suppressionFile>
+  </properties>
   <modules>
     <module>activiti-cloud-services-audit-jpa</module>
     <module>activiti-cloud-services-audit-mongo</module>

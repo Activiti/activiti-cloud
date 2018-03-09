@@ -9,6 +9,9 @@
   </parent>
   <artifactId>activiti-cloud-services-audit-jpa</artifactId>
   <name>Activiti Cloud Audit :: Services :: Audit JPA</name>
+  <properties>
+    <suppressionFile>${basedir}/../../dependency-check-suppression.xml</suppressionFile>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
