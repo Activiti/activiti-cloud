@@ -9,6 +9,9 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>activiti-cloud-services-query-rest</artifactId>
   <name>Activiti Cloud Query :: Services :: Query REST</name>
+  <properties>
+    <suppressionFile>${basedir}/../../dependency-check-suppression.xml</suppressionFile>
+  </properties>
   <dependencies>
     <!-- keycloak included as default identity provider to be excluded if overridden -->
     <dependency>

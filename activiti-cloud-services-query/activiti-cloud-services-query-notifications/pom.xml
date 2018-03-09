@@ -9,6 +9,9 @@
   </parent>
   <artifactId>activiti-cloud-services-query-notifications</artifactId>
   <name>Activiti Cloud Query :: Services :: Query Notifications</name>
+  <properties>
+    <suppressionFile>${basedir}/../../dependency-check-suppression.xml</suppressionFile>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.springframework</groupId>
