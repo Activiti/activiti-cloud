@@ -9,6 +9,9 @@
   </parent>
   <artifactId>activiti-cloud-starter-test</artifactId>
   <name>Activiti Cloud Starter :: Test</name>
+  <properties>
+    <suppressionFile>${basedir}/../dependency-check-suppression.xml</suppressionFile>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
