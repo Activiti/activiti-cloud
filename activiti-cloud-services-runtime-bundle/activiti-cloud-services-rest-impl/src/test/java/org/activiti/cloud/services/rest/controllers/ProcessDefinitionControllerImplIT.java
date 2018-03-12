@@ -261,7 +261,7 @@ public class ProcessDefinitionControllerImplIT {
 
         this.mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
-                    1).contentType(MediaType.APPLICATION_XML))
+                    1).accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/model/get",
                                 pathParameters(parameterWithName("id").description("The process model id"))));
@@ -284,7 +284,7 @@ public class ProcessDefinitionControllerImplIT {
 
         this.mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
-                    1).contentType(MediaType.APPLICATION_JSON))
+                    1).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/bpmn-model/get",
                                 pathParameters(parameterWithName("id").description("The BPMN model id"))));
@@ -309,7 +309,7 @@ public class ProcessDefinitionControllerImplIT {
 
         this.mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
-                    1).contentType("image/svg+xml"))
+                    1).accept("image/svg+xml"))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/diagram",
                                 pathParameters(parameterWithName("id").description("The BPMN model id"))));
