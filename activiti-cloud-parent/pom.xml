@@ -48,7 +48,7 @@
           <executions>
             <execution>
               <id>generate-docs</id>
-              <phase>prepare-package</phase>
+              <phase>post-integration-test</phase>
               <goals>
                 <goal>process-asciidoc</goal>
               </goals>
