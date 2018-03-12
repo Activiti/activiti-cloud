@@ -17,19 +17,19 @@ package org.activiti.cloud.services.rest.controllers;
 
 import java.util.Map;
 
-import org.activiti.cloud.services.api.model.Task;
-import org.activiti.cloud.services.rest.api.resources.TaskResource;
-import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
+import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.core.AuthenticationWrapper;
+import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.rest.api.TaskController;
+import org.activiti.cloud.services.rest.api.resources.TaskResource;
+import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
@@ -47,20 +47,23 @@ public class TaskControllerImpl implements TaskController {
 
     private AuthenticationWrapper authenticationWrapper;
 
+    private final AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
+
     @Autowired
     public TaskControllerImpl(ProcessEngineWrapper processEngine,
                               TaskResourceAssembler taskResourceAssembler,
-                              AuthenticationWrapper authenticationWrapper) {
+                              AuthenticationWrapper authenticationWrapper,
+                              AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler) {
         this.authenticationWrapper = authenticationWrapper;
         this.processEngine = processEngine;
         this.taskResourceAssembler = taskResourceAssembler;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @Override
-    public PagedResources<TaskResource> getTasks(Pageable pageable,
-                                                 PagedResourcesAssembler<Task> pagedResourcesAssembler) {
+    public PagedResources<TaskResource> getTasks(Pageable pageable) {
         Page<Task> page = processEngine.getTasks(pageable);
-        return pagedResourcesAssembler.toResource(page,
+        return pagedResourcesAssembler.toResource(pageable, page,
                                                   taskResourceAssembler);
     }
 
