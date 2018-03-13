@@ -9,9 +9,6 @@
   </parent>
   <artifactId>activiti-cloud-services-core</artifactId>
   <name>Activiti Cloud Services :: Core</name>
-  <properties>
-    <suppressionFile>${basedir}/../../dependency-check-suppression.xml</suppressionFile>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
