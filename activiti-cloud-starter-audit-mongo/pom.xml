@@ -9,9 +9,6 @@
   </parent>
   <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
   <name>Activiti Cloud Audit :: Starter :: Audit MongoDB</name>
-  <properties>
-    <suppressionFile>${basedir}/../dependency-check-suppression.xml</suppressionFile>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
