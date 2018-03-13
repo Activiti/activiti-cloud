@@ -14,4 +14,11 @@
     <gav regex="true">^com\.sun\.jersey\.contribs:jersey-apache-client4:.*$</gav>
     <cve>CVE-2006-0550</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+   false positive on Spring Boot 2.0.0.RELEASE
+   ]]></notes>
+    <gav regex="true">^org\.springframework\.boot:.*:.*$</gav>
+    <cve>CVE-2017-8046</cve>
+  </suppress>
 </suppressions>
