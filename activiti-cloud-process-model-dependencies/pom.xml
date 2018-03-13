@@ -36,7 +36,7 @@
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-process-model-services</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-process-model.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
