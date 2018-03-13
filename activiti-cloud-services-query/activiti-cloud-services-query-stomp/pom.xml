@@ -9,9 +9,6 @@
   </parent>
   <artifactId>activiti-cloud-services-query-stomp</artifactId>
   <name>Activiti Cloud Query :: Services :: Query Stomp</name>
-  <properties>
-    <suppressionFile>${basedir}/../../dependency-check-suppression.xml</suppressionFile>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
