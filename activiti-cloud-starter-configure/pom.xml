@@ -9,6 +9,9 @@
   </parent>
   <artifactId>activiti-cloud-starter-configure</artifactId>
   <name>Activiti Cloud Starter :: Runtime Bundle Configure</name>
+  <properties>
+    <suppressionFile>${basedir}/../dependency-check-suppression.xml</suppressionFile>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti</groupId>
