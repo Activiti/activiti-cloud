@@ -16,14 +16,20 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.model.Task;
+import org.activiti.cloud.services.api.model.converter.ListConverter;
+import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.core.AuthenticationWrapper;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
+import org.activiti.engine.impl.persistence.entity.TaskEntityImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +37,7 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -43,8 +50,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -67,6 +75,13 @@ public class TaskControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @SpyBean
+    private ObjectMapper mapper;
+    @SpyBean
+    private TaskConverter taskConverter;
+    @SpyBean
+    private ListConverter listConverter;
 
     @MockBean
     private ProcessEngineWrapper processEngine;
@@ -168,9 +183,37 @@ public class TaskControllerImplIT {
 
         this.mockMvc.perform(post("/v1/tasks/{taskId}/complete",
                                   1))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/complete",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
+    }
+
+    @Test
+    public void createNewStandaloneTask() throws Exception {
+        final org.activiti.engine.task.Task task = new TaskEntityImpl();
+        task.setName("new-task");
+        task.setDescription("description");
+
+        final Task taskConverted = taskConverter.from(task);
+        when(processEngine.createNewTask(any())).thenReturn(taskConverted);
+
+        this.mockMvc.perform(post("/v1/tasks/",
+                                  1).contentType(MediaType.APPLICATION_JSON)
+                                     .content(mapper.writeValueAsString(new CreateTaskCmd("new-task",
+                                                                                          "description",
+                                                                                          null))))
+                .andExpect(status().isOk())
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/new",
+                                links(linkWithRel("self").ignored(),
+                                      linkWithRel("claim").description("Link to the claim task resource"),
+                                      linkWithRel("home").description("Link to the home resource")
+                                ),
+                                responseFields(
+                                        subsectionWithPath("name").description("The task name."),
+                                        subsectionWithPath("description").description("Task description."),
+                                        subsectionWithPath("priority").description("Task priority. Can have values between 0 and 100."),
+                                        subsectionWithPath("status").description("Task status (can be " + Arrays.asList(Task.TaskStatus.values()) + ")"),
+                                        subsectionWithPath("_links").ignored()
+                                )));
     }
 }

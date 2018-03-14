@@ -5,6 +5,7 @@ import java.util.List;
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
+import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
@@ -16,10 +17,10 @@ import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.core.pageable.PageableProcessInstanceService;
 import org.activiti.cloud.services.core.pageable.PageableTaskService;
+import org.activiti.cloud.services.events.listeners.MessageProducerActivitiEventListener;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
-import org.activiti.cloud.services.events.listeners.MessageProducerActivitiEventListener;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.repository.ProcessDefinition;
@@ -197,5 +198,16 @@ public class ProcessEngineWrapper {
     public void setTaskVariablesLocal(SetTaskVariablesCmd setTaskVariablesCmd) {
         taskService.setVariablesLocal(setTaskVariablesCmd.getTaskId(),
                                       setTaskVariablesCmd.getVariables());
+    }
+
+    public Task createNewTask(CreateTaskCmd createTaskCmd) {
+        final org.activiti.engine.task.Task task = taskService.newTask();
+        task.setName(createTaskCmd.getName());
+        task.setDescription(createTaskCmd.getDescription());
+        task.setCategory(createTaskCmd.getCategory());
+        task.setAssignee(authenticationWrapper.getAuthenticatedUserId());
+        taskService.saveTask(task);
+
+        return taskConverter.from(taskService.createTaskQuery().taskId(task.getId()).singleResult());
     }
 }
