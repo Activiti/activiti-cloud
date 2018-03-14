@@ -6,7 +6,7 @@
         <modeler:editor-resource-id><![CDATA[startEvent1]]></modeler:editor-resource-id>
       </extensionElements>
     </startEvent>
-    <userTask id="sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94" name="Perform action" activiti:candidateGroups="hr">
+    <userTask id="sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94" name="Perform action" activiti:candidateGroups="hr" activiti:candidateUsers="hruser">
       <extensionElements>
         <modeler:allow-send-email><![CDATA[true]]></modeler:allow-send-email>
         <modeler:initiator-can-complete><![CDATA[false]]></modeler:initiator-can-complete>

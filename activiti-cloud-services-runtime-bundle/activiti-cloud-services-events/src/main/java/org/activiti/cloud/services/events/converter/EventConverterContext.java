@@ -28,6 +28,8 @@ import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.IdentityLink;
+import org.activiti.engine.task.IdentityLinkType;
 import org.activiti.engine.task.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +87,15 @@ public class EventConverterContext {
                     return "ProcessInstance:";
                 } else if (entity instanceof Task) {
                     return "Task:";
+                } else if (entity instanceof IdentityLink){
+                    IdentityLink identityLink = (IdentityLink)entity;
+                    if (IdentityLinkType.CANDIDATE.equalsIgnoreCase(identityLink.getType()) && identityLink.getUserId() != null) {
+                        return "TaskCandidateUser:";
+                    } else if (IdentityLinkType.CANDIDATE.equalsIgnoreCase(identityLink.getType()) && identityLink.getGroupId() != null) {
+                        return "TaskCandidateGroup:";
+                    } else {
+                        return "";
+                    }
                 }
             }
         }

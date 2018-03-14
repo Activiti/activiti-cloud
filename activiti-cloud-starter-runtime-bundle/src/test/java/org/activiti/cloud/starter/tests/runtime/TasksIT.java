@@ -52,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TasksIT  {
 
     private static final String TASKS_URL = "/v1/tasks/";
+    private static final String ADMIN_TASKS_URL = "/admin/v1/tasks/";
     private static final String SIMPLE_PROCESS = "SimpleProcess";
     private static final ParameterizedTypeReference<Task> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {
     };
@@ -124,8 +125,29 @@ public class TasksIT  {
 
     }
 
+    @Test
+    public void shouldNotSeeAdminTasks() throws Exception {
+
+        //given
+        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+
+        //when
+        ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetAdminTasks();
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
     private ResponseEntity<PagedResources<Task>> executeRequestGetTasks() {
         return testRestTemplate.exchange(TASKS_URL,
+                HttpMethod.GET,
+                null,
+                PAGED_TASKS_RESPONSE_TYPE);
+    }
+
+    private ResponseEntity<PagedResources<Task>> executeRequestGetAdminTasks() {
+        return testRestTemplate.exchange(ADMIN_TASKS_URL,
                 HttpMethod.GET,
                 null,
                 PAGED_TASKS_RESPONSE_TYPE);

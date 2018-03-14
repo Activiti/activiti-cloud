@@ -73,6 +73,16 @@ public class PageableTaskService {
                                       taskConverter);
     }
 
+    public Page<Task> getAllTasks(Pageable pageable) {
+
+        TaskQuery query = taskService.createTaskQuery();
+        sortApplier.applySort(query,
+                pageable);
+        return pageRetriever.loadPage(query,
+                pageable,
+                taskConverter);
+    }
+
     public Page<Task> getTasks(String processInstanceId,
                                Pageable pageable) {
         TaskQuery query = taskService.createTaskQuery().processInstanceId(processInstanceId);
