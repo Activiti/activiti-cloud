@@ -15,6 +15,7 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.rest.api.AdminController;
@@ -34,19 +35,22 @@ public class AdminControllerImpl implements AdminController {
 
     private final TaskResourceAssembler taskResourceAssembler;
 
+    private final AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
+
     @Autowired
     public AdminControllerImpl(ProcessEngineWrapper processEngine,
-                               TaskResourceAssembler taskResourceAssembler) {
+                               TaskResourceAssembler taskResourceAssembler,
+                               AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler) {
         this.processEngine = processEngine;
         this.taskResourceAssembler = taskResourceAssembler;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @Override
-    public PagedResources<TaskResource> getAllTasks(Pageable pageable,
-                                                    PagedResourcesAssembler<Task> pagedResourcesAssembler) {
+    public PagedResources<TaskResource> getAllTasks(Pageable pageable) {
         Page<Task> page = processEngine.getAllTasks(pageable);
-        return pagedResourcesAssembler.toResource(page,
-                                                  taskResourceAssembler);
+        return pagedResourcesAssembler.toResource(pageable, page,
+                taskResourceAssembler);
     }
 
 }
