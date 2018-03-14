@@ -21,6 +21,7 @@
     <module>activiti-cloud-services-logging</module>
     <module>activiti-cloud-services-security-policies</module>
     <module>activiti-cloud-services-dbp-rest</module>
+    <module>activiti-cloud-services-rest-docs</module>
   </modules>
   <scm>
     <url>https://github.com/Activiti/activiti-cloud-service-common</url>
