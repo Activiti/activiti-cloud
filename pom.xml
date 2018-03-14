@@ -47,6 +47,7 @@
     <spring-cloud.version>Finchley.M8</spring-cloud.version>
     <springfox.version>2.8.0</springfox.version>
     <swagger.version>1.5.10</swagger.version>
+    <xstream.version>1.4.10</xstream.version>
   </properties>
   <modules>
     <module>activiti-cloud-service-common-dependencies</module>
@@ -62,6 +63,12 @@
   </modules>
   <dependencyManagement>
     <dependencies>
+      <!-- fix for https://github.com/spring-cloud/spring-cloud-netflix/issues/2779 -->
+      <dependency>
+        <groupId>com.thoughtworks.xstream</groupId>
+        <artifactId>xstream</artifactId>
+        <version>${xstream.version}</version>
+      </dependency>
       <!-- avoid older commons dependencies used by Eureka being available for compilation -->
       <dependency>
         <groupId>commons-configuration</groupId>
