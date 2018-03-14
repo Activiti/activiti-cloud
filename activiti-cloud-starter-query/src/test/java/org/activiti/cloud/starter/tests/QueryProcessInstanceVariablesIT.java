@@ -34,8 +34,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
@@ -49,10 +53,9 @@ import static org.awaitility.Awaitility.await;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext
 public class QueryProcessInstanceVariablesIT {
 
-    private static final String VARIABLES_URL = "/v1/variables?processInstanceId={processInstanceId}";
+    private static final String VARIABLES_URL = "/v1/process-instances/{processInstanceId}/variables";
     private static final ParameterizedTypeReference<PagedResources<Variable>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Variable>>() {
     };
 
@@ -126,7 +129,7 @@ public class QueryProcessInstanceVariablesIT {
                               .withVariableType("string")
                               .build());
 
-        await().untilAsserted(() -> {
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
 
             //when
             ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
@@ -150,6 +153,7 @@ public class QueryProcessInstanceVariablesIT {
                                     "v2-up"));
         });
     }
+
 
     @Test
     public void shouldFilterOnVariableName() throws Exception {
@@ -188,13 +192,19 @@ public class QueryProcessInstanceVariablesIT {
 
         await().untilAsserted(() -> {
 
+            Map<String, String> uriParams = new HashMap<String, String>();
+            uriParams.put("processInstanceId", processInstanceId);
+
+            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(VARIABLES_URL)
+                    // Add query parameter
+                    .queryParam("name", "var2");
+
+
             //when
-            ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "&name={name}",
+            ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(builder.buildAndExpand(uriParams).toUri(),
                                                                                                 HttpMethod.GET,
                     getHeaderEntity(),
-                                                                                                PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                                processInstanceId,
-                                                                                                "var2");
+                                                                                                PAGED_VARIABLE_RESPONSE_TYPE);
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);

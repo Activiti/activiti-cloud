@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.services.query.rest;
 
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.QVariable;
 import org.activiti.cloud.services.query.model.Variable;
@@ -24,6 +26,7 @@ import org.activiti.cloud.services.query.rest.assembler.VariableResourceAssemble
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
@@ -49,10 +52,22 @@ public class ProcessInstanceVariableController {
 
     @RequestMapping(value = "/variables", method = RequestMethod.GET)
     public PagedResources<VariableResource> getVariables(@PathVariable String processInstanceId,
+                                                         @QuerydslPredicate(root = Variable.class) Predicate predicate,
                                                          Pageable pageable,
                                                          PagedResourcesAssembler<Variable> pagedResourcesAssembler) {
-        Page<Variable> variables = variableRepository.findAll(QVariable.variable.processInstanceId.eq(processInstanceId), pageable);
 
-        return pagedResourcesAssembler.toResource(variables, variableResourceAssembler);
+        QVariable variable = QVariable.variable;
+        BooleanExpression expression = variable.processInstanceId.eq(processInstanceId);
+
+        Predicate extendedPredicate = expression;
+        if(predicate != null){
+            extendedPredicate = expression.and(predicate);
+        }
+
+        Page<Variable> variables = variableRepository.findAll(extendedPredicate,
+                pageable);
+
+        return pagedResourcesAssembler.toResource(variables,
+                                                  variableResourceAssembler);
     }
 }

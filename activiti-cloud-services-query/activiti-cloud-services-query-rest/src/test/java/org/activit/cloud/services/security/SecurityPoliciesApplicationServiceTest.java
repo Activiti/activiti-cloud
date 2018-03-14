@@ -88,7 +88,7 @@ public class SecurityPoliciesApplicationServiceTest {
         when(securityPoliciesService.getProcessDefinitionKeys(anyString(),
                 anyCollection(), any(SecurityPolicy.class))).thenReturn(policies);
 
-        securityPoliciesApplicationService.restrictVariableQuery(query, SecurityPolicy.READ);
+        securityPoliciesApplicationService.restrictProcessInstanceVariableQuery(query, SecurityPolicy.READ);
 
         verify(securityPoliciesApplicationService,times(1)).addProcessDefRestrictionToExpression(any(),any(),any(),any());
 

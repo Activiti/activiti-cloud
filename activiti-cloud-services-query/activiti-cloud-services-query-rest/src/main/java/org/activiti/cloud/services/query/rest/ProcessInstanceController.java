@@ -56,6 +56,7 @@ public class ProcessInstanceController {
 
     private final AuthenticationWrapper authenticationWrapper;
 
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceController.class);
 
     private EntityFinder entityFinder;
@@ -95,8 +96,8 @@ public class ProcessInstanceController {
         predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(predicate, SecurityPolicy.READ);
 
         return pagedResourcesAssembler.toResource(processInstanceRepository.findAll(predicate,
-                                                                                    pageable),
-                                                  processInstanceResourceAssembler);
+                pageable),
+                processInstanceResourceAssembler);
     }
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)

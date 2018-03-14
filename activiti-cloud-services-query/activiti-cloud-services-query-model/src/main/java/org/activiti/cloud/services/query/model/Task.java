@@ -86,6 +86,18 @@ public class Task implements Serializable {
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private Set<TaskCandidateUser> taskCandidateUsers;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private Set<TaskCandidateGroup> taskCandidateGroups;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private Set<Variable> variables;
 
     public Task() {
@@ -288,5 +300,33 @@ public class Task implements Serializable {
      */
     public void setVariables(Set<Variable> variables) {
         this.variables = variables;
+    }
+
+    /**
+     * @return the taskCandidateUsers
+     */
+    public Set<TaskCandidateUser> getTaskCandidateUsers() {
+        return this.taskCandidateUsers;
+    }
+
+    /**
+     * @param taskCandidateUsers the taskCandidateUsers to set
+     */
+    public void setTaskCandidateUsers(Set<TaskCandidateUser> taskCandidateUsers) {
+        this.taskCandidateUsers = taskCandidateUsers;
+    }
+
+    /**
+     * @return the taskCandidateUsers
+     */
+    public Set<TaskCandidateGroup> getTaskCandidateGroups() {
+        return this.taskCandidateGroups;
+    }
+
+    /**
+     * @param taskCandidateGroups the taskCandidateGroups to set
+     */
+    public void setTaskCandidateGroups(Set<TaskCandidateGroup> taskCandidateGroups) {
+        this.taskCandidateGroups = taskCandidateGroups;
     }
 }

@@ -16,9 +16,14 @@
 
 package org.activiti.cloud.starter.tests;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.Task;
 import org.activiti.cloud.starters.test.MyProducer;
@@ -36,7 +41,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -46,6 +50,7 @@ import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessSt
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskAssignedEvent;
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskCompletedEvent;
 import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskCreatedEvent;
+import static org.activiti.cloud.starters.test.MockTaskCandidateUserEvent.aTaskCandidateUserAddedEvent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -53,7 +58,6 @@ import static org.awaitility.Awaitility.await;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext
 public class QueryTasksIT {
 
     private static final String TASKS_URL = "/v1/tasks";
@@ -70,6 +74,9 @@ public class QueryTasksIT {
     private TaskRepository taskRepository;
 
     @Autowired
+    private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    @Autowired
     private ProcessInstanceRepository processInstanceRepository;
 
     @Autowired
@@ -80,57 +87,63 @@ public class QueryTasksIT {
     @Before
     public void setUp() throws Exception {
         // start a process
-        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
-                                           "10",
-                                           "defId",
-                                           PROCESS_INSTANCE_ID));
-        producer.send(aProcessStartedEvent(System.currentTimeMillis(),
-                                           "10",
-                                           "defId",
-                                           PROCESS_INSTANCE_ID));
+
+        List<ProcessEngineEvent> createProcess = new ArrayList<ProcessEngineEvent>();
+        createProcess.addAll(Arrays.asList(aProcessCreatedEvent(System.currentTimeMillis(),
+                "10",
+                "defId",
+                PROCESS_INSTANCE_ID)));
+        createProcess.addAll(Arrays.asList(aProcessStartedEvent(System.currentTimeMillis(),
+                "10",
+                "defId",
+                PROCESS_INSTANCE_ID)));
+        producer.send(createProcess.toArray(new ProcessEngineEvent[]{}));
     }
 
     @After
     public void tearDown() throws Exception {
+        taskCandidateUserRepository.deleteAll();
         taskRepository.deleteAll();
         processInstanceRepository.deleteAll();
+
     }
 
     @Test
-    public void shouldGetAvailableTasks() throws Exception {
+    public void shouldGetAvailableTasksAndFilterOnStatus() throws Exception {
         //given
-        // a created task
-        producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
-                                                .withId("2")
-                                                .withName("Created task")
-                                                .build(),
-                                        PROCESS_INSTANCE_ID));
+        List<ProcessEngineEvent> createAndCompleteTasks = new ArrayList<>();
+        createAndCompleteTasks.addAll(Arrays.asList(aTaskCreatedEvent(System.currentTimeMillis(),
+                aTask()
+                        .withId("2")
+                        .withName("Created task")
+                        .build(),
+                PROCESS_INSTANCE_ID)));
+        createAndCompleteTasks.addAll(Arrays.asList(aTaskCreatedEvent(System.currentTimeMillis(),
+                aTask()
+                        .withId("3")
+                        .withName("Assigned task")
+                        .build(),
+                PROCESS_INSTANCE_ID)));
+        createAndCompleteTasks.addAll(Arrays.asList(aTaskAssignedEvent(System.currentTimeMillis(),
+                aTask()
+                        .withId("3")
+                        .withName("Assigned task")
+                        .build())));
+        createAndCompleteTasks.addAll(Arrays.asList(aTaskCreatedEvent(System.currentTimeMillis(),
+                aTask()
+                        .withId("4")
+                        .withName("Completed task")
+                        .build(),
+                PROCESS_INSTANCE_ID)));
+        createAndCompleteTasks.addAll(Arrays.asList(aTaskCompletedEvent(System.currentTimeMillis(),
+                aTask()
+                        .withId("4")
+                        .withName("Completed task")
+                        .build())));
 
-        // a assigned task
-        producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
-                                                .withId("3")
-                                                .withName("Assigned task")
-                                                .build(),
-                                        PROCESS_INSTANCE_ID));
-        producer.send(aTaskAssignedEvent(System.currentTimeMillis(),
-                                         aTask()
-                                                 .withId("3")
-                                                 .withName("Assigned task")
-                                                 .build()));
-        // a completed task
-        producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
-                                                .withId("4")
-                                                .withName("Completed task")
-                                                .build(),
-                                        PROCESS_INSTANCE_ID));
-        producer.send(aTaskCompletedEvent(System.currentTimeMillis(),
-                                          aTask()
-                                                  .withId("4")
-                                                  .withName("Completed task")
-                                                  .build()));
+
+        producer.send(createAndCompleteTasks.toArray(new ProcessEngineEvent[]{}));
+
 
         await().untilAsserted(() -> {
 
@@ -152,52 +165,15 @@ public class QueryTasksIT {
                               tuple("4",
                                     "COMPLETED"));
         });
-    }
-
-    @Test
-    public void shouldFilterOnStatusTasks() throws Exception {
-        //given
-        // a created task
-        producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
-                                                .withId("2")
-                                                .withName("Created task")
-                                                .build(),
-                                        PROCESS_INSTANCE_ID));
-
-        // a assigned task
-        producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
-                                                .withId("3")
-                                                .withName("Assigned task")
-                                                .build(),
-                                        PROCESS_INSTANCE_ID));
-        producer.send(aTaskAssignedEvent(System.currentTimeMillis(),
-                                         aTask()
-                                                 .withId("3")
-                                                 .withName("Assigned task")
-                                                 .build()));
-        // a completed task
-        producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
-                                                .withId("4")
-                                                .withName("Completed task")
-                                                .build(),
-                                        PROCESS_INSTANCE_ID));
-        producer.send(aTaskCompletedEvent(System.currentTimeMillis(),
-                                          aTask()
-                                                  .withId("4")
-                                                  .withName("Completed task")
-                                                  .build()));
 
         await().untilAsserted(() -> {
 
             //when
             ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
-                                                                                            HttpMethod.GET,
+                    HttpMethod.GET,
                     getHeaderEntity(),
-                                                                                            PAGED_TASKS_RESPONSE_TYPE,
-                                                                                            "ASSIGNED");
+                    PAGED_TASKS_RESPONSE_TYPE,
+                    "ASSIGNED");
 
             //then
             assertThat(responseEntity).isNotNull();
@@ -206,11 +182,88 @@ public class QueryTasksIT {
             Collection<Task> tasks = responseEntity.getBody().getContent();
             assertThat(tasks)
                     .extracting(Task::getId,
-                                Task::getStatus)
+                            Task::getStatus)
                     .containsExactly(tuple("3",
-                                           "ASSIGNED"));
+                            "ASSIGNED"));
         });
     }
+
+
+    @Test
+    public void shouldGetRestrictedTasksWithPermission() throws Exception {
+        //given
+        // a created task
+        List<ProcessEngineEvent> createTaskAndCandidate = new ArrayList<>();
+        createTaskAndCandidate.addAll(        Arrays.asList(aTaskCreatedEvent(System.currentTimeMillis(),
+                aTask()
+                        .withId("2")
+                        .withName("Created task")
+                        .build(),
+                PROCESS_INSTANCE_ID))
+        );
+        createTaskAndCandidate.addAll(Arrays.asList(aTaskCandidateUserAddedEvent(System.currentTimeMillis(),
+                new org.activiti.cloud.services.api.model.TaskCandidateUser("testuser","2"),
+                PROCESS_INSTANCE_ID)));
+
+
+        producer.send(createTaskAndCandidate.toArray(new ProcessEngineEvent[]{}));
+
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId,
+                            Task::getStatus)
+                    .contains(tuple("2",
+                            "CREATED"));
+        });
+    }
+
+    @Test
+    public void shouldNotGetRestrictedTasksWithoutPermission() throws Exception {
+        //given
+        // a created task
+        List<ProcessEngineEvent> createTaskAndCandidate = new ArrayList<>();
+        createTaskAndCandidate.addAll(        Arrays.asList(aTaskCreatedEvent(System.currentTimeMillis(),
+                aTask()
+                        .withId("3")
+                        .withName("Created task")
+                        .build(),
+                PROCESS_INSTANCE_ID))
+        );
+        createTaskAndCandidate.addAll(Arrays.asList(aTaskCandidateUserAddedEvent(System.currentTimeMillis(),
+                new org.activiti.cloud.services.api.model.TaskCandidateUser("specialUser","3"),
+                PROCESS_INSTANCE_ID)));
+
+        producer.send(createTaskAndCandidate.toArray(new ProcessEngineEvent[]{}));
+
+        Thread.sleep(300);
+
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            //don't see the task as not for me
+            for(Task task:tasks){
+                assertThat(task.getId()).isNotEqualToIgnoringCase("3");
+            }
+
+    }
+
+
+
 
     private ResponseEntity<PagedResources<Task>> executeRequestGetTasks() {
         return testRestTemplate.exchange(TASKS_URL,
@@ -225,4 +278,5 @@ public class QueryTasksIT {
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
         return entity;
     }
+
 }

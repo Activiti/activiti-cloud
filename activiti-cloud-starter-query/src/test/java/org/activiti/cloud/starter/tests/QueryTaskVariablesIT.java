@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.starter.tests;
 
+import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -35,9 +36,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.activiti.cloud.starter.tests.CoreTaskBuilder.aTask;
 import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
@@ -53,10 +61,11 @@ import static org.awaitility.Awaitility.await;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext
 public class QueryTaskVariablesIT {
 
-    private static final String VARIABLES_URL = "/v1/variables?taskId={taskId}";
+    private static final String VARIABLES_URL = "/v1/tasks/{taskId}/variables";
+    private static final String ADMIN_VARIABLES_URL = "/admin/v1/variables";
+
     private static final ParameterizedTypeReference<PagedResources<Variable>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Variable>>() {
     };
 
@@ -113,47 +122,52 @@ public class QueryTaskVariablesIT {
         //given
         long timestamp = System.currentTimeMillis();
 
-        // a variable created
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                              .withVariableName("varCreated")
-                              .withVariableValue("v1")
-                              .withVariableType("string")
-                              .build());
-
-        // a variable created and updated
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                              .withVariableName("varUpdated")
-                              .withVariableValue("v2")
-                              .withVariableType("string")
-                              .build());
-        producer.send(aVariableUpdatedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                              .withVariableName("varUpdated")
-                              .withVariableValue("v2-up")
-                              .withVariableType("string")
-                              .build());
+        List<ProcessEngineEvent> createAndUpdateVariable = new ArrayList<ProcessEngineEvent>();
+        createAndUpdateVariable.addAll(Arrays.asList(aVariableCreatedEvent(timestamp)
+                .withTaskId(TASK_ID)
+                .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                .withVariableName("varCreated")
+                .withVariableValue("v1")
+                .withVariableType("string")
+                .build()));
+        createAndUpdateVariable.addAll(Arrays.asList(aVariableCreatedEvent(timestamp)
+                .withTaskId(TASK_ID)
+                .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                .withVariableName("varUpdated")
+                .withVariableValue("v2")
+                .withVariableType("string")
+                .build()));
+        createAndUpdateVariable.addAll(Arrays.asList(aVariableUpdatedEvent(timestamp)
+                .withTaskId(TASK_ID)
+                .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                .withVariableName("varUpdated")
+                .withVariableValue("v2-up")
+                .withVariableType("string")
+                .build()));
 
         // a variable created and deleted
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withVariableName("varDeleted")
-                              .withVariableValue("v1")
-                              .withVariableType("string")
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                              .build());
-        producer.send(aVariableDeletedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                              .withVariableName("varDeleted")
-                              .withVariableType("string")
-                              .build());
+        List<ProcessEngineEvent> createAndDeleteVariable = new ArrayList<ProcessEngineEvent>();
+        createAndDeleteVariable.addAll(Arrays.asList(aVariableCreatedEvent(timestamp)
+                .withVariableName("varDeleted")
+                .withVariableValue("v1")
+                .withVariableType("string")
+                .withTaskId(TASK_ID)
+                .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                .build()));
+        createAndDeleteVariable.addAll(Arrays.asList(aVariableDeletedEvent(timestamp)
+                .withTaskId(TASK_ID)
+                .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                .withVariableName("varDeleted")
+                .withVariableType("string")
+                .build()));
 
-        await().untilAsserted(() -> {
+        List<ProcessEngineEvent> createUpdateAndDeleteSequences = new ArrayList<ProcessEngineEvent>();
+        createUpdateAndDeleteSequences.addAll(createAndUpdateVariable);
+        createUpdateAndDeleteSequences.addAll(createAndDeleteVariable);
+        producer.send(createUpdateAndDeleteSequences.toArray(new ProcessEngineEvent[]{}));
+
+
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
 
             //when
             ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
@@ -182,51 +196,66 @@ public class QueryTaskVariablesIT {
     public void shouldFilterOnVariableName() throws Exception {
         //given
         long timestamp = System.currentTimeMillis();
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                              .withVariableName("var1")
-                              .withVariableValue("v1")
-                              .withVariableType("string")
-                              .build());
 
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                              .withVariableName("var2")
-                              .withVariableValue("v2")
-                              .withVariableType("string")
-                              .build());
+        List<ProcessEngineEvent> createVariables = new ArrayList<ProcessEngineEvent>();
+        createVariables.addAll(Arrays.asList(aVariableCreatedEvent(timestamp)
+                .withTaskId(TASK_ID)
+                .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                .withVariableName("var1")
+                .withVariableValue("v1")
+                .withVariableType("string")
+                .build()));
+        createVariables.addAll(Arrays.asList(aVariableCreatedEvent(timestamp)
+                .withTaskId(TASK_ID)
+                .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                .withVariableName("var2")
+                .withVariableValue("v2")
+                .withVariableType("string")
+                .build()));
 
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withVariableName("var3")
-                              .withVariableValue("v3")
-                              .withVariableType("string")
-                              .withTaskId(TASK_ID)
-                              .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                              .build());
+        producer.send(createVariables.toArray(new ProcessEngineEvent[]{}));
 
-        await().untilAsserted(() -> {
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+
+                    //need to handle path and request params separately
+                    Map<String, String> uriParams = new HashMap<String, String>();
+                    uriParams.put("taskId", TASK_ID);
+
+                    UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(VARIABLES_URL)
+                            // Add query parameter
+                            .queryParam("name", "var2");
+
+
+                    //when
+                    ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(builder.buildAndExpand(uriParams).toUri(),
+                            HttpMethod.GET,
+                            getHeaderEntity(),
+                            PAGED_VARIABLE_RESPONSE_TYPE);
+
+                    //then
+                    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                    assertThat(responseEntity.getBody().getContent())
+                            .extracting(
+                                    Variable::getName,
+                                    Variable::getValue)
+                            .containsExactly(
+                                    tuple("var2",
+                                            "v2")
+                            );
+
+        });
+    }
+
+    @Test
+    public void shouldNotSeeAdminVariables() throws Exception {
 
             //when
-            ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "&name={name}",
-                                                                                                HttpMethod.GET,
-                                                                                                getHeaderEntity(),
-                                                                                                PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                                TASK_ID,
-                                                                                                "var2");
+            ResponseEntity<String> responseEntity = testRestTemplate.exchange(ADMIN_VARIABLES_URL,
+                    HttpMethod.GET,
+                    getHeaderEntity(),String.class);
 
             //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody().getContent())
-                    .extracting(
-                            Variable::getName,
-                            Variable::getValue)
-                    .containsExactly(
-                            tuple("var2",
-                                  "v2")
-                    );
-        });
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     private HttpEntity getHeaderEntity(){

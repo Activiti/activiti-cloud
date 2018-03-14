@@ -91,7 +91,7 @@ public class ActivitiGraphQLControllerTest {
     }
 
     private ResultActions perform(final String json) throws Exception {
-        return mockmvc.perform(post("/graphql")
+        return mockmvc.perform(post("/admin/graphql")
            .content(json)
            .contentType(MediaType.APPLICATION_JSON)
            .accept(MediaType.APPLICATION_JSON));
@@ -99,7 +99,7 @@ public class ActivitiGraphQLControllerTest {
 
     @Test
     public void testGraphqlGetQueryNoVariables() throws Exception {
-        mockmvc.perform(get("/graphql")
+        mockmvc.perform(get("/admin/graphql")
                .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
                .contentType(ActivitiGraphQLController.APPLICATION_GRAPHQL_VALUE)               
                .accept(MediaType.APPLICATION_JSON))
@@ -113,7 +113,7 @@ public class ActivitiGraphQLControllerTest {
     
     @Test
     public void testGraphqlPostQuery() throws Exception {
-        mockmvc.perform(post("/graphql")
+        mockmvc.perform(post("/admin/graphql")
                .content("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
                .contentType(ActivitiGraphQLController.APPLICATION_GRAPHQL_VALUE)               
                .accept(MediaType.APPLICATION_JSON))
@@ -128,7 +128,7 @@ public class ActivitiGraphQLControllerTest {
     
     @Test
     public void testGraphqlQueryGetWithNullVariables() throws Exception {
-        mockmvc.perform(get("/graphql")
+        mockmvc.perform(get("/admin/graphql")
                 .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
                 .param("variables", (String) null)
                 .contentType(ActivitiGraphQLController.APPLICATION_GRAPHQL_VALUE)
@@ -147,7 +147,7 @@ public class ActivitiGraphQLControllerTest {
         args.put("title", "value");
         String variablesStr = mapper.writeValueAsString(args);
         
-        mockmvc.perform(get("/graphql")
+        mockmvc.perform(get("/admin/graphql")
                 .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
                 .param("variables", variablesStr)
                 .contentType(ActivitiGraphQLController.APPLICATION_GRAPHQL_VALUE)
@@ -162,7 +162,7 @@ public class ActivitiGraphQLControllerTest {
 
     @Test
     public void testGraphqlQueryGetWithEmptyVariables() throws Exception {
-        mockmvc.perform(get("/graphql")
+        mockmvc.perform(get("/admin/graphql")
                 .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
                 .param("variables", "")
                 .contentType(ActivitiGraphQLController.APPLICATION_GRAPHQL_VALUE))
@@ -176,7 +176,7 @@ public class ActivitiGraphQLControllerTest {
     
     @Test
     public void testGraphqlQueryGetUnsupportedMediaType() throws Exception {
-        mockmvc.perform(get("/graphql")
+        mockmvc.perform(get("/admin/graphql")
                .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
                .contentType(MediaType.TEXT_HTML))
             .andExpect(status().is(415))
@@ -188,7 +188,7 @@ public class ActivitiGraphQLControllerTest {
 
     @Test
     public void testGraphqlQueryPostUnsupportedMediaType() throws Exception {
-        mockmvc.perform(post("/graphql")
+        mockmvc.perform(post("/admin/graphql")
                .contentType(MediaType.TEXT_HTML))
             .andExpect(status().is(415))
             ;
@@ -269,7 +269,7 @@ public class ActivitiGraphQLControllerTest {
     public void testGraphqlArgumentsParams() throws Exception {
         String query = "{Tasks(title: \"title\"){title genre}}";
         
-        mockmvc.perform(post("/graphql")
+        mockmvc.perform(post("/admin/graphql")
                .param("query", query)
                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                .andExpect(status().isOk());
@@ -284,7 +284,7 @@ public class ActivitiGraphQLControllerTest {
         args.put("title", "value");
         String argsStr = mapper.writeValueAsString(args);
         
-        mockmvc.perform(post("/graphql")
+        mockmvc.perform(post("/admin/graphql")
             .param("query", query)
             .param("variables", argsStr)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -297,7 +297,7 @@ public class ActivitiGraphQLControllerTest {
     public void testGraphqlArgumentsParamsVariablesEmpty() throws Exception {
         String query = "{Tasks(name: \"title\"){id name}}";
         
-        mockmvc.perform(post("/graphql")
+        mockmvc.perform(post("/admin/graphql")
             .param("query", query)
             .param("variables", "")
             .contentType(MediaType.APPLICATION_FORM_URLENCODED))

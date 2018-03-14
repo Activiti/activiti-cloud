@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.services.query.rest;
 
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.QVariable;
 import org.activiti.cloud.services.query.model.Variable;
@@ -24,6 +26,7 @@ import org.activiti.cloud.services.query.rest.assembler.VariableResourceAssemble
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
@@ -49,10 +52,19 @@ public class TaskVariableController {
 
     @RequestMapping(value = "/variables", method = RequestMethod.GET)
     public PagedResources<VariableResource> getVariables(@PathVariable String taskId,
+                                                         @QuerydslPredicate(root = Variable.class) Predicate predicate,
                                                          Pageable pageable,
                                                          PagedResourcesAssembler<Variable> pagedResourcesAssembler) {
 
-        Page<Variable> variables = variableRepository.findAll(QVariable.variable.taskId.eq(taskId),
+        QVariable variable = QVariable.variable;
+        BooleanExpression expression = variable.taskId.eq(taskId);
+
+        Predicate extendedPredicated = expression;
+        if (predicate != null) {
+            extendedPredicated = expression.and(predicate);
+        }
+
+        Page<Variable> variables = variableRepository.findAll(extendedPredicated,
                                                               pageable);
 
         return pagedResourcesAssembler.toResource(variables,

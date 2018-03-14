@@ -59,7 +59,7 @@ public class ActivitiGraphQLControllerIT {
     public void testGraphql() {
         GraphQLQueryRequest query = new GraphQLQueryRequest("{Tasks(where:{name:{EQ: \"" + TASK_NAME + "\"}}){select{id assignee priority}}}");
 
-        ResponseEntity<Result> entity = rest.postForEntity("/graphql", new HttpEntity<>(query), Result.class);
+        ResponseEntity<Result> entity = rest.postForEntity("/admin/graphql", new HttpEntity<>(query), Result.class);
 
         assertThat(HttpStatus.OK)
             .describedAs(entity.toString())
@@ -98,7 +98,7 @@ public class ActivitiGraphQLControllerIT {
                 + "}");
        // @formatter:on
 
-        ResponseEntity<Result> entity = rest.postForEntity("/graphql", new HttpEntity<>(query), Result.class);
+        ResponseEntity<Result> entity = rest.postForEntity("/admin/graphql", new HttpEntity<>(query), Result.class);
 
         assertThat(HttpStatus.OK)
             .describedAs(entity.toString())
@@ -122,7 +122,7 @@ public class ActivitiGraphQLControllerIT {
 
         query.setVariables(variables);
 
-        ResponseEntity<Result> entity = rest.postForEntity("/graphql", new HttpEntity<>(query), Result.class);
+        ResponseEntity<Result> entity = rest.postForEntity("/admin/graphql", new HttpEntity<>(query), Result.class);
 
         assertThat(HttpStatus.OK)
             .describedAs(entity.toString())

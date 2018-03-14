@@ -21,12 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Date;
 import java.util.Optional;
 
-import org.activiti.engine.ActivitiException;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.events.TaskAssignedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.Task;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -46,7 +45,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest(showSql = true)
 @Sql(value = "classpath:/jpa-test.sql")
-@DirtiesContext
 public class TaskAssignedEventHandlerIT {
 
     @Autowired
@@ -65,6 +63,12 @@ public class TaskAssignedEventHandlerIT {
     @Test
     public void contextLoads() {
         // Should pass
+    }
+
+
+    @After
+    public void tearDown() throws Exception {
+        repository.deleteAll();
     }
 
     @Test
