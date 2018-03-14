@@ -40,6 +40,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
@@ -49,7 +52,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -107,31 +109,9 @@ public class ProcessInstanceTasksControllerImplIT {
                                  1).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
-                                pathParameters(parameterWithName("processInstanceId").description("The process instance id.")),
-                                requestParameters(
-                                        parameterWithName("skipCount")
-                                                .description("How many entities exist in the entire addressed collection before those included in this list."),
-                                        parameterWithName("maxItems")
-                                                .description("The max number of entities that can be included in the result.")
-                                ),
-                                responseFields(
-                                        subsectionWithPath("list").ignored(),
-                                        subsectionWithPath("list.entries").description("List of results."),
-                                        subsectionWithPath("list.entries[].entry").description("Wrapper for each entry in the list of results."),
-                                        subsectionWithPath("list.pagination").description("Pagination metadata."),
-                                        subsectionWithPath("list.pagination.skipCount")
-                                                .description("How many entities exist in the entire addressed collection before those included in this list."),
-                                        subsectionWithPath("list.pagination.maxItems")
-                                                .description("The maxItems parameter used to generate this list."),
-                                        subsectionWithPath("list.pagination.count")
-                                                .description("The number of entities included in this list. This number must correspond to the number of objects in the \"entries\" array."),
-                                        subsectionWithPath("list.pagination.hasMoreItems")
-                                                .description("A boolean value that indicates whether there are further entities in the addressed collection beyond those returned " +
-                                                                     "in this response. If true then a request with a larger value for either the skipCount or the maxItems " +
-                                                                     "parameter is expected to return further results."),
-                                        subsectionWithPath("list.pagination.totalItems")
-                                                .description("An integer value that indicates the total number of entities in the addressed collection.")
-                                )));
+                                processInstanceIdParameter(),
+                                pageRequestParameters(),
+                                pagedResourcesResponseFields()));
     }
 
     private Task buildDefaultTaskTask() {

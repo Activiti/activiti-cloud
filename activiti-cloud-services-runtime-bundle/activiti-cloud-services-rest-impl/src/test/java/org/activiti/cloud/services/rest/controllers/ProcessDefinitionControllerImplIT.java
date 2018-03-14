@@ -53,6 +53,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processDefinitionFields;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processDefinitionIdParameter;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -64,9 +68,6 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -148,30 +149,8 @@ public class ProcessDefinitionControllerImplIT {
         MvcResult result = this.mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
-                                requestParameters(
-                                        parameterWithName("skipCount")
-                                                .description("How many entities exist in the entire addressed collection before those included in this list."),
-                                        parameterWithName("maxItems")
-                                                .description("The max number of entities that can be included in the result.")
-                                ),
-                                responseFields(
-                                        subsectionWithPath("list").ignored(),
-                                        subsectionWithPath("list.entries").description("List of results."),
-                                        subsectionWithPath("list.entries[].entry").description("Wrapper for each entry in the list of results."),
-                                        subsectionWithPath("list.pagination").description("Pagination metadata."),
-                                        subsectionWithPath("list.pagination.skipCount")
-                                                .description("How many entities exist in the entire addressed collection before those included in this list."),
-                                        subsectionWithPath("list.pagination.maxItems")
-                                                .description("The maxItems parameter used to generate this list."),
-                                        subsectionWithPath("list.pagination.count")
-                                                .description("The number of entities included in this list. This number must correspond to the number of objects in the \"entries\" array."),
-                                        subsectionWithPath("list.pagination.hasMoreItems")
-                                                .description("A boolean value that indicates whether there are further entities in the addressed collection beyond those returned " +
-                                                                     "in this response. If true then a request with a larger value for either the skipCount or the maxItems " +
-                                                                     "parameter is expected to return further results."),
-                                        subsectionWithPath("list.pagination.totalItems")
-                                                .description("An integer value that indicates the total number of entities in the addressed collection.")
-                                )))
+                                pageRequestParameters(),
+                                pagedResourcesResponseFields()))
                 .andReturn();
 
         //then
@@ -207,7 +186,7 @@ public class ProcessDefinitionControllerImplIT {
                                  1).accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/get",
-                                pathParameters(parameterWithName("id").description("The process definition id"))));
+                                processDefinitionIdParameter()));
     }
 
     @Test
@@ -229,14 +208,8 @@ public class ProcessDefinitionControllerImplIT {
                                                     procDefId).accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/get",
-                                pathParameters(parameterWithName("id").description("The process definition id.")),
-                                responseFields(
-                                        subsectionWithPath("entry").ignored(),
-                                        subsectionWithPath("entry.id").description("The process definition id."),
-                                        subsectionWithPath("entry.name").description("The process definition name."),
-                                        subsectionWithPath("entry.description").description("The process definition description."),
-                                        subsectionWithPath("entry.version").description("The process definition version.")
-                                )
+                                processDefinitionIdParameter(),
+                                processDefinitionFields()
                        )
                 ).andReturn();
 
@@ -264,7 +237,7 @@ public class ProcessDefinitionControllerImplIT {
                     1).accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/model/get",
-                                pathParameters(parameterWithName("id").description("The process model id"))));
+                                processDefinitionIdParameter()));
     }
 
     @Test
@@ -287,7 +260,7 @@ public class ProcessDefinitionControllerImplIT {
                     1).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/bpmn-model/get",
-                                pathParameters(parameterWithName("id").description("The BPMN model id"))));
+                                processDefinitionIdParameter()));
     }
 
     @Test
@@ -312,6 +285,6 @@ public class ProcessDefinitionControllerImplIT {
                     1).accept("image/svg+xml"))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/diagram",
-                                pathParameters(parameterWithName("id").description("The BPMN model id"))));
+                                processDefinitionIdParameter()));
     }
 }
