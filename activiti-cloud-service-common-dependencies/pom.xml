@@ -48,10 +48,15 @@
         <artifactId>activiti-cloud-services-security-policies</artifactId>
         <version>${activiti-cloud-service-common.version}</version>
       </dependency>
-	  <dependency>
+      <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-dbp-rest</artifactId>
-        <version>${project.version}</version>
+        <version>${activiti-cloud-service-common.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-rest-docs</artifactId>
+        <version>${activiti-cloud-service-common.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
