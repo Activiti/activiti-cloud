@@ -24,8 +24,10 @@ import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.modeling.ModelingContext;
 import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
-import org.activiti.cloud.qa.rest.DirtyContext;
+import org.activiti.cloud.qa.rest.DirtyContextHandler;
+import org.activiti.cloud.qa.rest.EnableDirtyContext;
 import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
@@ -35,13 +37,13 @@ import static org.springframework.hateoas.Link.REL_SELF;
 /**
  * Modeling context steps
  */
-public abstract class ModelingContextSteps<M extends ModelingContext> implements DirtyContext {
+@EnableDirtyContext
+public abstract class ModelingContextSteps<M extends ModelingContext> {
 
     private static final String MODELING_CURRENT_CONTEXT = "modelingCurrentContext";
 
-    private static final String DIRTY_CONTEXT = "dirtyContext";
-
-    private static final String DIRTY_CONTEXT_DELIMITER = ";";
+    @Autowired
+    private DirtyContextHandler dirtyContextHandler;
 
     protected Resource<M> create(M m) {
         service().create(m);
@@ -52,9 +54,12 @@ public abstract class ModelingContextSteps<M extends ModelingContext> implements
     public void addToCurrentContext(Resource<? extends ModelingContext> objectToAdd) {
         Resource<? extends ModelingContext> currentContext = getCurrentModelingContext();
         if (currentContext != null) {
-            service().addRelationByUri(
-                    currentContext.getLink(objectToAdd.getContent().getRel()).getHref(),
-                    objectToAdd.getLink(REL_SELF).getHref());
+            String parentUri = currentContext.getLink(objectToAdd.getContent().getRel()).getHref();
+            String childUri = objectToAdd.getLink(REL_SELF).getHref();
+            service().addRelationByUri(parentUri,
+                                       childUri);
+            dirtyRelation(parentUri,
+                          childUri);
         }
     }
 
@@ -151,32 +156,18 @@ public abstract class ModelingContextSteps<M extends ModelingContext> implements
                 .isPresent();
     }
 
-    private Resource<M> dirty(Resource<M> resource) {
-        String resourceUri = resource.getLink(REL_SELF).getHref();
-        Serenity.setSessionVariable(DIRTY_CONTEXT)
-                .to(Serenity.hasASessionVariableCalled(DIRTY_CONTEXT) ?
-                            String.join(DIRTY_CONTEXT_DELIMITER,
-                                        resourceUri,
-                                        Serenity.sessionVariableCalled(DIRTY_CONTEXT)) :
-                            resourceUri);
-        return resource;
+    protected Resource<M> dirty(Resource<M> resource) {
+        return dirtyContextHandler.dirty(resource);
     }
 
-    public void clearDirtyContext() {
-        if (Serenity.hasASessionVariableCalled(DIRTY_CONTEXT)) {
-            String dirtyContext = Serenity.sessionVariableCalled(DIRTY_CONTEXT);
-            String[] dirtyUris = dirtyContext.split(DIRTY_CONTEXT_DELIMITER);
-            for (String uri : dirtyUris) {
-                try {
-                    service().deleteByUri(uri);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    //ignore any error during cleaning dirty context and go further
-                }
-            }
+    protected String dirtyRelation(String dirtyRelation,
+                                   String childUri) {
+        return dirtyContextHandler.dirtyRelation(dirtyRelation,
+                                                 childUri);
+    }
 
-            Serenity.setSessionVariable(DIRTY_CONTEXT).to(null);
-        }
+    protected String dirty(String uri) {
+        return dirtyContextHandler.dirty(uri);
     }
 
     public static void resetCurrentModelingObject() {

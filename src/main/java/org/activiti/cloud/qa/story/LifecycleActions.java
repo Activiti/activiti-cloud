@@ -16,27 +16,21 @@
 
 package org.activiti.cloud.qa.story;
 
-import net.thucydides.core.annotations.Steps;
+import org.activiti.cloud.qa.rest.DirtyContextHandler;
+import org.activiti.cloud.qa.rest.EnableDirtyContext;
 import org.activiti.cloud.qa.steps.ModelingContextSteps;
-import org.activiti.cloud.qa.steps.ModelingGroupsSteps;
-import org.activiti.cloud.qa.steps.ModelingModelsSteps;
-import org.activiti.cloud.qa.steps.ModelingProjectsSteps;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeScenario;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Lifecycle steps
  */
+@EnableDirtyContext
 public class LifecycleActions {
 
-    @Steps
-    private ModelingGroupsSteps modelingGroupsSteps;
-
-    @Steps
-    private ModelingProjectsSteps modelingProjectsSteps;
-
-    @Steps
-    private ModelingModelsSteps modelingModelsSteps;
+    @Autowired
+    private DirtyContextHandler dirtyContextHandler;
 
     @BeforeScenario
     public void resetCurrentModelingObject() {
@@ -44,9 +38,7 @@ public class LifecycleActions {
     }
 
     @AfterScenario
-    public void crearDirtyContext() {
-        modelingGroupsSteps.clearDirtyContext();
-        modelingProjectsSteps.clearDirtyContext();
-        modelingModelsSteps.clearDirtyContext();
+    public void creanup() {
+        dirtyContextHandler.cleanup();
     }
 }

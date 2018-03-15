@@ -16,11 +16,17 @@
 
 package org.activiti.cloud.qa.rest;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 /**
- * Dirty context interface
+ * Dirty context configuration
  */
-public interface DirtyContext {
+@Configuration
+public class DirtyContextConfiguration {
 
-    void clearDirtyContext();
-
+    @Bean
+    public DirtyContextHandler dirtyContextHandler() {
+        return new DirtyContextHandler();
+    }
 }
