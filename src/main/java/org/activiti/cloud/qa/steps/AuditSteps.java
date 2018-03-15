@@ -17,6 +17,7 @@
 package org.activiti.cloud.qa.steps;
 
 import java.util.Collection;
+import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.Event;
@@ -35,6 +36,11 @@ public class AuditSteps {
 
     @Autowired
     private AuditService auditService;
+
+    @Step
+    public Map<String, Object> health() {
+        return auditService.health();
+    }
 
     @Step
     public Collection<Event> getEventsByProcessInstanceIdAndEventType(String processInstanceId,

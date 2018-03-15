@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 /**
  * Audit service
  */
-public interface AuditService {
+public interface AuditService extends BaseService {
 
     @RequestLine("GET /v1/events?processInstanceId={processInstanceId}&eventType={eventType}")
     @Headers("Content-Type: application/json")

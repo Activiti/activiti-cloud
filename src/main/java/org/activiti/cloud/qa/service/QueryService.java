@@ -20,12 +20,11 @@ import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import org.activiti.cloud.qa.model.ProcessInstance;
-import org.springframework.hateoas.Resource;
 
 /**
  * Query Service
  */
-public interface QueryService {
+public interface QueryService extends BaseService {
 
     @RequestLine("GET /v1/process-instances/{processInstanceId}")
     @Headers("Content-Type: application/json")

@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.qa.steps;
 
+import java.util.Map;
+
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.QueryStatus;
@@ -35,12 +37,18 @@ public class QuerySteps {
     private QueryService queryService;
 
     @Step
+    public Map<String, Object> health() {
+        return queryService.health();
+    }
+
+    @Step
     public ProcessInstance getProcessInstance(String processInstanceId) throws Exception {
         return queryService.getProcessInstance(processInstanceId);
     }
 
     @Step
-    public void checkProcessInstanceStatus(String processInstanceId, QueryStatus expectedStatus) throws Exception {
+    public void checkProcessInstanceStatus(String processInstanceId,
+                                           QueryStatus expectedStatus) throws Exception {
         assertThat(expectedStatus).isNotNull();
 
         ProcessInstance processInstance = getProcessInstance(processInstanceId);

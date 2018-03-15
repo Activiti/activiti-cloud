@@ -169,7 +169,7 @@ public abstract class ModelingContextSteps<M extends ModelingContext> implements
             for (String uri : dirtyUris) {
                 try {
                     service().deleteByUri(uri);
-                } catch(Exception ex) {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                     //ignore any error during cleaning dirty context and go further
                 }

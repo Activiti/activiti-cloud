@@ -56,7 +56,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         model.setContent("updated content");
 
         modelingModelsService.updateByUri(currentModel.getLink(REL_SELF).getHref(),
-                            model);
+                                          model);
         updateCurrentModelingObject();
     }
 

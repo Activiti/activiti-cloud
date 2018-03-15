@@ -17,6 +17,7 @@
 package org.activiti.cloud.qa.rest.feign;
 
 import java.util.List;
+import java.util.Map;
 
 import feign.Body;
 import feign.Feign;
@@ -25,6 +26,7 @@ import feign.Logger;
 import feign.Param;
 import feign.RequestLine;
 import feign.gson.GsonEncoder;
+import org.activiti.cloud.qa.service.BaseService;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 

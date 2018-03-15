@@ -37,5 +37,4 @@ public interface ModelingGroupsService extends FeignRestDataClient<ModelingGroup
                 .target(ModelingGroupsService.class,
                         baseUrl + PATH);
     }
-
 }

@@ -21,7 +21,6 @@ import java.util.UUID;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.modeling.Project;
 import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
-import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.qa.service.ModelingProjectsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;

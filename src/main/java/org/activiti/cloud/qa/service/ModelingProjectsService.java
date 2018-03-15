@@ -37,5 +37,4 @@ public interface ModelingProjectsService extends FeignRestDataClient<ModelingPro
                 .target(ModelingProjectsService.class,
                         baseUrl + PATH);
     }
-
 }

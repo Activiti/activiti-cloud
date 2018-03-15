@@ -26,7 +26,7 @@ import org.springframework.hateoas.PagedResources;
 /**
  * Runtime Bundle service
  */
-public interface RuntimeBundleService {
+public interface RuntimeBundleService extends BaseService {
 
     @RequestLine("POST /v1/process-instances")
     @Headers("Content-Type: application/json")
@@ -45,5 +45,6 @@ public interface RuntimeBundleService {
                           @Param("assignee") String user);
 
     @RequestLine("POST /v1/tasks/{id}/complete")
+    @Headers("Content-Type: application/json")
     void completeTask(@Param("id") String id);
 }

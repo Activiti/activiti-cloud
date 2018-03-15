@@ -18,6 +18,7 @@ package org.activiti.cloud.qa.steps;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.ProcessInstance;
@@ -38,6 +39,11 @@ public class RuntimeBundleSteps {
 
     @Autowired
     private RuntimeBundleService runtimeBundleService;
+
+    @Step
+    public Map<String, Object> health() {
+        return runtimeBundleService.health();
+    }
 
     @Step
     public ProcessInstance startProcess() throws IOException {

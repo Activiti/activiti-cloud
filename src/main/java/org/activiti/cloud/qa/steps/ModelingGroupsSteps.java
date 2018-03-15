@@ -16,7 +16,10 @@
 
 package org.activiti.cloud.qa.steps;
 
+import java.util.Map;
 import java.util.UUID;
+
+import javax.annotation.PostConstruct;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.modeling.Group;
