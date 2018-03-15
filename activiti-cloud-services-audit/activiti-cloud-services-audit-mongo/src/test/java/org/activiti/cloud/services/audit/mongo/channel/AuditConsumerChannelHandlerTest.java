@@ -16,18 +16,19 @@
 
 package org.activiti.cloud.services.audit.mongo.channel;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import java.util.Arrays;
 
+import org.activiti.cloud.services.audit.mongo.events.IgnoredProcessEngineEvent;
 import org.activiti.cloud.services.audit.mongo.events.ProcessEngineEventDocument;
 import org.activiti.cloud.services.audit.mongo.repository.EventsRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class AuditConsumerChannelHandlerTest {
 
@@ -47,12 +48,13 @@ public class AuditConsumerChannelHandlerTest {
         //given
         ProcessEngineEventDocument firstEvent = mock(ProcessEngineEventDocument.class);
         ProcessEngineEventDocument secondEvent = mock(ProcessEngineEventDocument.class);
-        ProcessEngineEventDocument[] events = {firstEvent, secondEvent};
+        IgnoredProcessEngineEvent ignoredEvent = new IgnoredProcessEngineEvent();
+        ProcessEngineEventDocument[] allEvents = {firstEvent, secondEvent, ignoredEvent};
 
         //when
-        handler.receive(events);
+        handler.receive(allEvents);
 
-        //then
-        verify(eventsRepository).saveAll(Arrays.asList(events));
+        //then only non ignored events should be stored
+        verify(eventsRepository).saveAll(Arrays.asList(firstEvent, secondEvent));
     }
 }

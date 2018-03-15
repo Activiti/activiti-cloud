@@ -16,8 +16,9 @@
 
 package org.activiti.cloud.services.audit.mongo.channel;
 
-import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.activiti.cloud.services.audit.mongo.events.ProcessEngineEventDocument;
 import org.activiti.cloud.services.audit.mongo.repository.EventsRepository;
@@ -38,7 +39,9 @@ public class AuditConsumerChannelHandler {
     }
 
     @StreamListener(AuditConsumerChannels.AUDIT_CONSUMER)
-    public synchronized void receive(ProcessEngineEventDocument[] events) throws IOException {
-        eventsRepository.saveAll(Arrays.asList(events));
+    public synchronized void receive(ProcessEngineEventDocument[] events) {
+        List<ProcessEngineEventDocument> incomingEvents = Arrays.asList(events);
+        List<ProcessEngineEventDocument> nonIgnoredEvents = incomingEvents.stream().filter(event -> !event.isIgnored()).collect(Collectors.toList());
+        eventsRepository.saveAll(nonIgnoredEvents);
     }
 }

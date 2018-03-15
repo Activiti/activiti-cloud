@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.audit.channel;
 
+import org.activiti.cloud.services.audit.events.IgnoredProcessEngineEvent;
 import org.activiti.cloud.services.audit.repository.EventsRepository;
 import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
 import org.junit.Before;
@@ -40,11 +41,12 @@ public class AuditConsumerChannelHandlerTest {
     }
 
     @Test
-    public void receiveShouldStoreAllReceivedEvents() throws Exception {
+    public void receiveShouldStoreAllReceivedEventsThatAreNotIgnored() throws Exception {
         //given
         ProcessEngineEventEntity firstEvent = mock(ProcessEngineEventEntity.class);
         ProcessEngineEventEntity secondEvent = mock(ProcessEngineEventEntity.class);
-        ProcessEngineEventEntity[] events = {firstEvent, secondEvent};
+        IgnoredProcessEngineEvent ignoredProcessEngineEvent = new IgnoredProcessEngineEvent();
+        ProcessEngineEventEntity[] events = {firstEvent, secondEvent, ignoredProcessEngineEvent};
 
         //when
         handler.receive(events);
@@ -52,5 +54,6 @@ public class AuditConsumerChannelHandlerTest {
         //then
         verify(eventsRepository).save(firstEvent);
         verify(eventsRepository).save(secondEvent);
+        verify(eventsRepository, never()).save(ignoredProcessEngineEvent);
     }
 }
