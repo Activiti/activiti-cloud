@@ -31,13 +31,18 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 @EnableActivitiNotificationsGateway
 @EnableActivitiGraphQLQueryService
 @EnableSpringDataWebSupport
-@ComponentScan({"org.activiti.cloud.services.query.app","org.activiti.cloud.services.query.events",
-"org.activiti.cloud.services.query.rest","org.activiti.cloud.services.security","org.activiti.cloud.starters","org.activiti.cloud.starter","org.activiti.cloud.services.identity"})
+@ComponentScan({"org.activiti.cloud.services.query.app",
+        "org.activiti.cloud.services.query.events",
+        "org.activiti.cloud.services.query.rest",
+        "org.activiti.cloud.services.security",
+        "org.activiti.cloud.starters",
+        "org.activiti.cloud.starter",
+        "org.activiti.cloud.services.identity",
+        "org.activiti.cloud.alfresco"})
 public class Application {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class,
                               args);
     }
-
 }
