@@ -8,9 +8,9 @@
     <version>7-201802-EA-SNAPSHOT</version>
     <relativePath>../activiti-cloud-parent</relativePath>
   </parent>
-  <artifactId>activiti-cloud-spring-boot-parent</artifactId>
+  <artifactId>activiti-cloud-uservices-parent</artifactId>
   <packaging>pom</packaging>
-  <name>Activiti Cloud :: Spring Boot Parent</name>
+  <name>Activiti Cloud :: uServices Parent</name>
   <url>http://activiti.org/</url>
   <build>
     <plugins>

@@ -59,7 +59,7 @@
     <module>activiti-cloud-org-dependencies</module>
     <module>activiti-cloud-dependencies</module>
     <module>activiti-cloud-parent</module>
-    <module>activiti-cloud-spring-boot-parent</module>
+    <module>activiti-cloud-uservices-parent</module>
   </modules>
   <dependencyManagement>
     <dependencies>
