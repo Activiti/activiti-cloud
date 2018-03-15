@@ -50,7 +50,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = VariableDeletedEventEntity.class, name = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT),
         @JsonSubTypes.Type(value = SequenceFlowTakenEventEntity.class, name = SequenceFlowTakenEventEntity.SEQUENCE_FLOW_TAKEN_EVENT),
         @JsonSubTypes.Type(value = IntegrationRequestSentEventEntity.class, name = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT),
-        @JsonSubTypes.Type(value = IntegrationResultReceivedEventEntity.class, name = IntegrationResultReceivedEventEntity.INTEGRATION_RESULT_RECEIVED_EVENT)
+        @JsonSubTypes.Type(value = IntegrationResultReceivedEventEntity.class, name = IntegrationResultReceivedEventEntity.INTEGRATION_RESULT_RECEIVED_EVENT),
+        @JsonSubTypes.Type(value = TaskCandidateUserAddedEventEntity.class, name = TaskCandidateUserAddedEventEntity.TASK_CANDIDATE_USER_ADDED_EVENT),
+        @JsonSubTypes.Type(value = TaskCandidateGroupAddedEventEntity.class, name = TaskCandidateGroupAddedEventEntity.TASK_CANDIDATE_GROUP_ADDED_EVENT),
+        @JsonSubTypes.Type(value = TaskCandidateUserRemovedEventEntity.class, name = TaskCandidateUserRemovedEventEntity.TASK_CANDIDATE_USER_REMOVED_EVENT),
+        @JsonSubTypes.Type(value = TaskCandidateGroupRemovedEventEntity.class, name = TaskCandidateGroupRemovedEventEntity.TASK_CANDIDATE_GROUP_REMOVED_EVENT),
 })
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
