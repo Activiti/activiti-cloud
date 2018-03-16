@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-org</artifactId>
-    <version>7-201802-EA-SNAPSHOT</version>
+    <version>7-201802-EA</version>
   </parent>
   <artifactId>activiti-cloud-services-org-jpa</artifactId>
   <name>Activiti Cloud Services :: Organization JPA</name>
