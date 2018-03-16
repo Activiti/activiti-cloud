@@ -158,6 +158,10 @@ public class ProcessEngineWrapper {
         return pageableTaskService.getTasks(pageable);
     }
 
+    public Page<Task> getAllTasks(Pageable pageable) {
+        return pageableTaskService.getAllTasks(pageable);
+    }
+
     public Task getTaskById(String taskId) {
         org.activiti.engine.task.Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         return taskConverter.from(task);

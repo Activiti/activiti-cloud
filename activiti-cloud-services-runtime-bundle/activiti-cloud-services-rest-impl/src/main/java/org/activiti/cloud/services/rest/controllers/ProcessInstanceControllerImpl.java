@@ -22,26 +22,25 @@ import java.util.Collections;
 import java.util.List;
 
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
+import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
-
-import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
-import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
-import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
@@ -65,6 +64,8 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     private final SecurityPoliciesApplicationService securityService;
 
+    private final AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler;
+
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String handleAppException(ActivitiForbiddenException ex) {
@@ -83,18 +84,19 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
                                          RepositoryService repositoryService,
                                          ProcessDiagramGenerator processDiagramGenerator,
                                          ProcessInstanceResourceAssembler resourceAssembler,
-                                         SecurityPoliciesApplicationService securityService) {
+                                         SecurityPoliciesApplicationService securityService,
+                                         AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler) {
         this.processEngine = processEngine;
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.resourceAssembler = resourceAssembler;
         this.securityService = securityService;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @Override
-    public PagedResources<ProcessInstanceResource> getProcessInstances(Pageable pageable,
-                                                                       PagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler) {
-        return pagedResourcesAssembler.toResource(processEngine.getProcessInstances(pageable),
+    public PagedResources<ProcessInstanceResource> getProcessInstances(Pageable pageable) {
+        return pagedResourcesAssembler.toResource(pageable, processEngine.getProcessInstances(pageable),
                                                   resourceAssembler);
     }
 

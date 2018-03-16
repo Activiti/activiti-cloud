@@ -19,21 +19,21 @@ package org.activiti.cloud.services.events.converter;
 import java.util.Map;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.ActivitiProcessStartedEvent;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.cloud.services.events.converter.EventConverterContext.getPrefix;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -56,35 +56,49 @@ public class EventConverterContextIT {
     @Test
     public void shouldHandleAllSupportedEvents() throws Exception {
         //when
-        Map<ActivitiEventType, EventConverter> converters = converterContext.getConvertersMap();
+        Map<String, EventConverter> converters = converterContext.getConvertersMap();
 
         //then
-        Assertions.assertThat(converters).containsOnlyKeys(ActivitiEventType.ACTIVITY_CANCELLED,
-                                                           ActivitiEventType.ACTIVITY_COMPLETED,
-                                                           ActivitiEventType.ACTIVITY_STARTED,
-                                                           ActivitiEventType.PROCESS_CANCELLED,
-                                                           ActivitiEventType.PROCESS_COMPLETED,
-                                                           ActivitiEventType.PROCESS_STARTED,
-                                                           ActivitiEventType.SEQUENCEFLOW_TAKEN,
-                                                           ActivitiEventType.TASK_ASSIGNED,
-                                                           ActivitiEventType.TASK_COMPLETED,
-                                                           ActivitiEventType.TASK_CREATED,
-                                                           ActivitiEventType.VARIABLE_CREATED,
-                                                           ActivitiEventType.VARIABLE_DELETED,
-                                                           ActivitiEventType.VARIABLE_UPDATED);
+        Assertions.assertThat(converters).containsOnlyKeys(ActivitiEventType.ACTIVITY_CANCELLED.toString(),
+                                                           ActivitiEventType.ACTIVITY_COMPLETED.toString(),
+                                                           ActivitiEventType.ACTIVITY_STARTED.toString(),
+                                                           "ProcessInstance:" + ActivitiEventType.PROCESS_STARTED.toString(),
+                                                           "ProcessInstance:" + ActivitiEventType.PROCESS_CANCELLED.toString(),
+                                                           "ProcessInstance:" + ActivitiEventType.PROCESS_COMPLETED.toString(),
+                                                           "ProcessInstance:" + ActivitiEventType.ENTITY_CREATED.toString(),
+                                                           "ProcessInstance:" + ActivitiEventType.ENTITY_SUSPENDED.toString(),
+                                                           "ProcessInstance:" + ActivitiEventType.ENTITY_ACTIVATED.toString(),
+                                                           "Task:" + ActivitiEventType.ENTITY_SUSPENDED.toString(),
+                                                           "Task:" + ActivitiEventType.ENTITY_ACTIVATED.toString(),
+                                                           "Task:" + ActivitiEventType.TASK_ASSIGNED.toString(),
+                                                           "Task:" + ActivitiEventType.TASK_COMPLETED.toString(),
+                                                           "Task:" + ActivitiEventType.TASK_CREATED.toString(),
+                                                           "TaskCandidateUser:" + ActivitiEventType.ENTITY_CREATED.toString(),
+                                                           "TaskCandidateUser:" + ActivitiEventType.ENTITY_DELETED.toString(),
+                                                           "TaskCandidateGroup:" + ActivitiEventType.ENTITY_CREATED.toString(),
+                                                           "TaskCandidateGroup:" + ActivitiEventType.ENTITY_DELETED.toString(),
+                                                           ActivitiEventType.SEQUENCEFLOW_TAKEN.toString(),
+                                                           ActivitiEventType.VARIABLE_CREATED.toString(),
+                                                           ActivitiEventType.VARIABLE_DELETED.toString(),
+                                                           ActivitiEventType.VARIABLE_UPDATED.toString());
     }
 
     @Test
     public void shouldIncludeApplicationNameInConvertedEvents() throws Exception {
 
         //when
-        Map<ActivitiEventType, EventConverter> converters = converterContext.getConvertersMap();
+        Map<String, EventConverter> converters = converterContext.getConvertersMap();
 
         //then
-        Assertions.assertThat(converters).containsKey(ActivitiEventType.PROCESS_STARTED);
+        Assertions.assertThat(converters).containsKey("ProcessInstance:" + ActivitiEventType.PROCESS_STARTED.toString());
         ActivitiProcessStartedEvent activitiEvent = mock(ActivitiProcessStartedEvent.class);
+        given(activitiEvent.getType()).willReturn(ActivitiEventType.PROCESS_STARTED);
+        ExecutionEntityImpl executionEntity = mock(ExecutionEntityImpl.class);
+        ExecutionEntityImpl internalProcessInstance = mock(ExecutionEntityImpl.class);
+        given(activitiEvent.getEntity()).willReturn(executionEntity);
+        given(executionEntity.getProcessInstance()).willReturn(internalProcessInstance);
 
-        ProcessEngineEvent processEngineEvent = converters.get(ActivitiEventType.PROCESS_STARTED).from(activitiEvent);
+        ProcessEngineEvent processEngineEvent = converters.get(getPrefix(activitiEvent) + ActivitiEventType.PROCESS_STARTED).from(activitiEvent);
 
         assertThat(processEngineEvent).isNotNull();
         // this comes from the application.properties (test-application.properties) spring app name configuration

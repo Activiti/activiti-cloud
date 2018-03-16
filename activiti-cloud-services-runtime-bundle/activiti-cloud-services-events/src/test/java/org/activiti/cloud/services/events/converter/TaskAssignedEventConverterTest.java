@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import static org.activiti.cloud.services.events.converter.EventConverterContext.getPrefix;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -81,10 +82,12 @@ public class TaskAssignedEventConverterTest {
     @Test
     public void handledTypeShouldReturnTaskAssigned() throws Exception {
         //when
-        ActivitiEventType activitiEventType = taskAssignedEventConverter.handledType();
-
+        String activitiEventType = taskAssignedEventConverter.handledType();
+        ActivitiEntityEventImpl activitiEvent = mock(ActivitiEntityEventImpl.class);
+        given(activitiEvent.getType()).willReturn(ActivitiEventType.TASK_ASSIGNED);
+        Task internalTask = mock(Task.class);
+        given(activitiEvent.getEntity()).willReturn(internalTask);
         //then
-        assertThat(activitiEventType).isEqualTo(ActivitiEventType.TASK_ASSIGNED);
+        assertThat(activitiEventType).isEqualTo(getPrefix(activitiEvent) + ActivitiEventType.TASK_ASSIGNED);
     }
-
 }

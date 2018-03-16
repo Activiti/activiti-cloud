@@ -29,13 +29,13 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import static org.activiti.cloud.services.events.converter.EventConverterContext.getPrefix;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessCompletedEventConverterTest {
-
 
     @InjectMocks
     private ProcessCompletedEventConverter processCompletedEventConverter;
@@ -85,10 +85,14 @@ public class ProcessCompletedEventConverterTest {
     @Test
     public void handledTypeShouldReturnProcessCompleted() throws Exception {
         //when
-        ActivitiEventType activitiEventType = processCompletedEventConverter.handledType();
-
+        String activitiEventType = processCompletedEventConverter.handledType();
+        ActivitiEntityEvent activitiEvent = mock(ActivitiEntityEvent.class);
+        given(activitiEvent.getType()).willReturn(ActivitiEventType.PROCESS_COMPLETED);
+        ExecutionEntityImpl executionEntity = mock(ExecutionEntityImpl.class);
+        ExecutionEntityImpl internalProcessInstance = mock(ExecutionEntityImpl.class);
+        given(activitiEvent.getEntity()).willReturn(executionEntity);
+        given(executionEntity.getProcessInstance()).willReturn(internalProcessInstance);
         //then
-        assertThat(activitiEventType).isEqualTo(ActivitiEventType.PROCESS_COMPLETED);
+        assertThat(activitiEventType).isEqualTo(getPrefix(activitiEvent) + ActivitiEventType.PROCESS_COMPLETED);
     }
-
 }

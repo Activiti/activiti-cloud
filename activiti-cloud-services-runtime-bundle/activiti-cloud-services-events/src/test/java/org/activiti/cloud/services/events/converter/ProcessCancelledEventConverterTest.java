@@ -19,13 +19,16 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ProcessCancelledEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiProcessCancelledEventImpl;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import static org.activiti.cloud.services.events.converter.EventConverterContext.getPrefix;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -71,10 +74,15 @@ public class ProcessCancelledEventConverterTest {
     @Test
     public void handledTypeShouldReturnProcessCancelled() throws Exception {
         //when
-        ActivitiEventType activitiEventType = converter.handledType();
+        String activitiEventType = converter.handledType();
+        ActivitiEntityEvent activitiEvent = mock(ActivitiEntityEvent.class);
+        given(activitiEvent.getType()).willReturn(ActivitiEventType.PROCESS_CANCELLED);
+        ExecutionEntityImpl executionEntity = mock(ExecutionEntityImpl.class);
+        ExecutionEntityImpl internalProcessInstance = mock(ExecutionEntityImpl.class);
+        given(activitiEvent.getEntity()).willReturn(executionEntity);
+        given(executionEntity.getProcessInstance()).willReturn(internalProcessInstance);
 
         //then
-        assertThat(activitiEventType).isEqualTo(ActivitiEventType.PROCESS_CANCELLED);
+        assertThat(activitiEventType).isEqualTo(getPrefix(activitiEvent) + ActivitiEventType.PROCESS_CANCELLED);
     }
-
 }
