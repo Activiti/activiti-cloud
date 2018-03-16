@@ -8,10 +8,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @ActivitiRuntimeBundle
-public class Application {
+public class RuntimeBundleApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+		SpringApplication.run(RuntimeBundleApplication.class, args);
 	}
 
 }

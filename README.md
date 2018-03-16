@@ -1,5 +1,4 @@
 # example-runtime-bundle
-[![Join Us in Gitter](https://badges.gitter.im/Activiti/Activiti7.svg)](https://gitter.im/Activiti/Activiti7?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status Travis](https://travis-ci.org/Activiti/activiti-cloud-runtime-bundle.svg?branch=master)](https://travis-ci.org/Activiti/activiti-cloud-runtime-bundle) [![Coverage Status](http://img.shields.io/codecov/c/github/Activiti/activiti-cloud-runtime-bundle/master.svg?maxAge=86400)](https://codecov.io/gh/Activiti/activiti-cloud-runtime-bundle) [![ASL 2.0](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/Activiti/activiti-cloud-runtime-bundle/blob/master/LICENSE.txt)  [![CLA](https://cla-assistant.io/readme/badge/Activiti/activiti-cloud-runtime-bundle)](https://cla-assistant.io/Activiti/activiti-cloud-audit)  [![Docker Build Status](https://img.shields.io/docker/build/activiti/activiti-cloud-runtime-bundle.svg)](https://hub.docker.com/r/activiti/activiti-cloud-runtime-bundle/)
 
 Example Runtime Bundle
 This repository contains an Example Runtime Bundle used by the Activiti Cloud Examples.
