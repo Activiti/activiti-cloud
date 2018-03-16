@@ -58,7 +58,7 @@ public class ActivitiGraphQLAutoConfigurationTest {
         assertThat(graphQLProperties).isNotNull();
 
         assertThat(graphQLProperties.getName()).isEqualTo("Query");
-        assertThat(graphQLProperties.getPath()).isEqualTo("/graphql");
+        assertThat(graphQLProperties.getPath()).isEqualTo("/admin/graphql");
         assertThat(graphQLProperties.isEnabled()).isEqualTo(true);
 
     }

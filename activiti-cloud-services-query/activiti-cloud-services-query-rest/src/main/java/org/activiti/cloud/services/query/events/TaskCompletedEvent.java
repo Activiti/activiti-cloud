@@ -29,12 +29,14 @@ public class TaskCompletedEvent extends AbstractProcessEngineEvent {
                               String eventType,
                               String executionId,
                               String processDefinitionId,
+                              String applicationName,
                               String processInstanceId,
                               Task task) {
         super(timestamp,
               eventType,
               executionId,
               processDefinitionId,
+              applicationName,
               processInstanceId);
         this.task = task;
     }

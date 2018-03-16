@@ -20,6 +20,7 @@ import java.util.Date;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
@@ -38,6 +39,7 @@ public class Variable {
     private String type;
     private String name;
     private String processInstanceId;
+    private String applicationName;
     private String taskId;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date createTime;
@@ -46,13 +48,15 @@ public class Variable {
     private String executionId;
     private String value;
 
+    @JsonIgnore
     @ManyToOne(optional=true)
     @JoinColumn(name="taskId", referencedColumnName="id", insertable=false, updatable=false, nullable=true
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
     private Task task;
 
+    @JsonIgnore
     @ManyToOne(optional=true)
-    @JoinColumn(name="processInstanceId", referencedColumnName="processInstanceId", insertable=false, updatable=false
+    @JoinColumn(name="processInstanceId", referencedColumnName="id", insertable=false, updatable=false
     , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
     private ProcessInstance processInstance;
     
@@ -62,6 +66,7 @@ public class Variable {
     public Variable(String type,
                     String name,
                     String processInstanceId,
+                    String applicationName,
                     String taskId,
                     Date createTime,
                     Date lastUpdatedTime,
@@ -70,6 +75,7 @@ public class Variable {
         this.type = type;
         this.name = name;
         this.processInstanceId = processInstanceId;
+        this.applicationName = applicationName;
         this.taskId = taskId;
         this.createTime = createTime;
         this.lastUpdatedTime = lastUpdatedTime;
@@ -103,6 +109,14 @@ public class Variable {
 
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 
     public String getTaskId() {
@@ -160,5 +174,5 @@ public class Variable {
     public void setTask(Task task) {
         this.task = task;
     }
-    
+
 }

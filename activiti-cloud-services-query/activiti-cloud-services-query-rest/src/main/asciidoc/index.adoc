@@ -1,0 +1,17 @@
+= Activiti Cloud Query Services REST docs
+
+== Process instance 
+
+=== Get a list of process instances
+.Request
+include::{snippets}/process-instance-alfresco/list/http-request.adoc[]
+
+.Request parameters
+include::{snippets}/process-instance-alfresco/list/request-parameters.adoc[]
+
+.Response
+include::{snippets}/process-instance-alfresco/list/http-response.adoc[]
+
+.Response fields
+include::{snippets}/process-instance-alfresco/list/response-fields.adoc[]
+

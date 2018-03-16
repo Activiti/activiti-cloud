@@ -30,12 +30,14 @@ public class ProcessCompletedEvent extends AbstractProcessEngineEvent {
                                  String executionId,
                                  String processDefinitionId,
                                  String processInstanceId,
+                                 String applicationName,
                                  ProcessInstance processInstance) {
         super(timestamp,
               eventType,
               executionId,
               processDefinitionId,
-              processInstanceId);
+              processInstanceId,
+              applicationName);
         this.processInstance = processInstance;
     }
 

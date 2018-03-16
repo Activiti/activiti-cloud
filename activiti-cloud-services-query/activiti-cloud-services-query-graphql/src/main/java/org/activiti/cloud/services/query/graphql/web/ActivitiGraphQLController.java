@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.*;
 @ConditionalOnClass(GraphQLExecutor.class)
 public class ActivitiGraphQLController {
     
-    private static final String PATH = "${spring.activiti.cloud.services.query.graphql.path:/graphql}";
+    private static final String PATH = "${spring.activiti.cloud.services.query.graphql.path:/admin/graphql}";
     public static final String APPLICATION_GRAPHQL_VALUE = "application/graphql";
     
     private final GraphQLExecutor   graphQLExecutor;

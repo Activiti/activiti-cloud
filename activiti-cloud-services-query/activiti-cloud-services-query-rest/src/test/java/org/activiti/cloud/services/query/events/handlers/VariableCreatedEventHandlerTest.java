@@ -70,6 +70,7 @@ public class VariableCreatedEventHandlerTest {
                                                               executionId,
                                                               "20",
                                                               String.valueOf(processInstanceId),
+                                                              "runtime-bundle-a",
                                                               variableName,
                                                               "content",
                                                               variableType,
@@ -97,8 +98,7 @@ public class VariableCreatedEventHandlerTest {
                 .hasTaskId(taskId)
                 .hasType(variableType)
                 .hasTask(task)
-                .hasProcessInstance(processInstance)
-                ;
+                .hasProcessInstance(processInstance);
     }
 
     @Test

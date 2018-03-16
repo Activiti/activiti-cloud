@@ -33,10 +33,10 @@ public class VariableDeletedEventHandlerTest {
     private VariableDeletedEventHandler handler;
 
     @Mock
-    private ProcessVariableDeletedHandler processVariableDeletedHandler;
+    private ProcessVariableDeletedEventHandler processVariableDeletedHandler;
 
     @Mock
-    private TaskVariableDeletedHandler taskVariableDeletedHandler;
+    private TaskVariableDeletedEventHandler taskVariableDeletedEventHandler;
 
     @Before
     public void setUp() throws Exception {
@@ -66,7 +66,7 @@ public class VariableDeletedEventHandlerTest {
         handler.handle(event);
 
         //then
-        verify(taskVariableDeletedHandler).handle(event);
+        verify(taskVariableDeletedEventHandler).handle(event);
     }
 
 

@@ -83,22 +83,40 @@ public class QueryEventHandlerContextIT {
 
         //then
         assertThat(handlers).containsOnlyKeys(
+                ProcessCreatedEvent.class,
                 ProcessStartedEvent.class,
                 ProcessCompletedEvent.class,
+                ProcessSuspendedEvent.class,
+                ProcessActivatedEvent.class,
                 TaskCreatedEvent.class,
                 TaskAssignedEvent.class,
+                TaskSuspendedEvent.class,
+                TaskActivatedEvent.class,
                 TaskCompletedEvent.class,
+                TaskCandidateUserAddedEvent.class,
+                TaskCandidateGroupAddedEvent.class,
+                TaskCandidateUserRemovedEvent.class,
+                TaskCandidateGroupRemovedEvent.class,
                 VariableCreatedEvent.class,
                 VariableUpdatedEvent.class,
                 VariableDeletedEvent.class
         );
-        assertThat(handlers.get(ProcessStartedEvent.class)).isInstanceOf(ProcessStartedHandler.class);
+        assertThat(handlers.get(ProcessCreatedEvent.class)).isInstanceOf(ProcessCreatedEventHandler.class);
+        assertThat(handlers.get(ProcessStartedEvent.class)).isInstanceOf(ProcessStartedEventHandler.class);
         assertThat(handlers.get(ProcessCompletedEvent.class)).isInstanceOf(ProcessCompletedEventHandler.class);
+        assertThat(handlers.get(ProcessActivatedEvent.class)).isInstanceOf(ProcessActivatedEventHandler.class);
+        assertThat(handlers.get(ProcessSuspendedEvent.class)).isInstanceOf(ProcessSuspendedEventHandler.class);
         assertThat(handlers.get(TaskCreatedEvent.class)).isInstanceOf(TaskCreatedEventHandler.class);
         assertThat(handlers.get(TaskAssignedEvent.class)).isInstanceOf(TaskAssignedEventHandler.class);
+        assertThat(handlers.get(TaskSuspendedEvent.class)).isInstanceOf(TaskSuspendedEventHandler.class);
+        assertThat(handlers.get(TaskActivatedEvent.class)).isInstanceOf(TaskActivatedEventHandler.class);
         assertThat(handlers.get(TaskCompletedEvent.class)).isInstanceOf(TaskCompletedEventHandler.class);
         assertThat(handlers.get(VariableCreatedEvent.class)).isInstanceOf(VariableCreatedEventHandler.class);
         assertThat(handlers.get(VariableUpdatedEvent.class)).isInstanceOf(VariableUpdatedEventHandler.class);
         assertThat(handlers.get(VariableDeletedEvent.class)).isInstanceOf(VariableDeletedEventHandler.class);
+        assertThat(handlers.get(TaskCandidateUserAddedEvent.class)).isInstanceOf(TaskCandidateUserAddedEventHandler.class);
+        assertThat(handlers.get(TaskCandidateGroupAddedEvent.class)).isInstanceOf(TaskCandidateGroupAddedEventHandler.class);
+        assertThat(handlers.get(TaskCandidateUserRemovedEvent.class)).isInstanceOf(TaskCandidateUserRemovedEventHandler.class);
+        assertThat(handlers.get(TaskCandidateGroupRemovedEvent.class)).isInstanceOf(TaskCandidateGroupRemovedEventHandler.class);
     }
 }

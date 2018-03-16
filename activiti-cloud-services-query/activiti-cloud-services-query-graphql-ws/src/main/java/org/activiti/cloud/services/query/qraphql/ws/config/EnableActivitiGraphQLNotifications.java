@@ -23,12 +23,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
-
+import org.activiti.cloud.services.query.qraphql.ws.config.GraphQLSubscriptionsSchemaAutoConfiguration.DefaultGraphQLSubscriptionsSchemaConfiguration;
+import org.activiti.cloud.services.query.qraphql.ws.config.GraphQLWebSocketMessageBrokerAutoConfiguration.DefaultGraphQLWebSocketMessageBrokerConfiguration;
 
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({GraphQLSubscriptionsSchemaConfiguration.class, GraphQLWebSocketMessageBrokerConfiguration.class})
+@Import({DefaultGraphQLSubscriptionsSchemaConfiguration.class, DefaultGraphQLWebSocketMessageBrokerConfiguration.class})
 public @interface EnableActivitiGraphQLNotifications {
 
 }

@@ -31,7 +31,7 @@ public class QuerySwaggerConfig {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2).select()
-                .apis(RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.controller"))
+                .apis(RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.rest"))
                 .paths(PathSelectors.any())
                 .build();
     }

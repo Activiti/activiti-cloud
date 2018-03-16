@@ -24,15 +24,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class VariableDeletedEventHandler implements QueryEventHandler {
 
-    private final ProcessVariableDeletedHandler processVariableDeletedHandler;
+    private final ProcessVariableDeletedEventHandler processVariableDeletedHandler;
 
-    private final TaskVariableDeletedHandler taskVariableDeletedHandler;
+    private final TaskVariableDeletedEventHandler taskVariableDeletedEventHandler;
 
     @Autowired
-    public VariableDeletedEventHandler(ProcessVariableDeletedHandler processVariableDeletedHandler,
-                                       TaskVariableDeletedHandler taskVariableDeletedHandler) {
+    public VariableDeletedEventHandler(ProcessVariableDeletedEventHandler processVariableDeletedHandler,
+                                       TaskVariableDeletedEventHandler taskVariableDeletedEventHandler) {
         this.processVariableDeletedHandler = processVariableDeletedHandler;
-        this.taskVariableDeletedHandler = taskVariableDeletedHandler;
+        this.taskVariableDeletedEventHandler = taskVariableDeletedEventHandler;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class VariableDeletedEventHandler implements QueryEventHandler {
         if (variableDeletedEvent.getTaskId() == null) {
             processVariableDeletedHandler.handle(variableDeletedEvent);
         } else {
-            taskVariableDeletedHandler.handle(variableDeletedEvent);
+            taskVariableDeletedEventHandler.handle(variableDeletedEvent);
         }
 
     }

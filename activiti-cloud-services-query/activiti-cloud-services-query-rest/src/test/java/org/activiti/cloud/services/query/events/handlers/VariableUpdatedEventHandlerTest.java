@@ -36,10 +36,10 @@ public class VariableUpdatedEventHandlerTest {
     private VariableUpdatedEventHandler handler;
 
     @Mock
-    private ProcessVariableUpdateHandler processVariableUpdateHandler;
+    private ProcessVariableUpdateEventHandler processVariableUpdateEventHandler;
 
     @Mock
-    private TaskVariableUpdatedHandler taskVariableUpdatedHandler;
+    private TaskVariableUpdatedEventHandler taskVariableUpdatedEventHandler;
 
     @Before
     public void setUp() throws Exception {
@@ -54,6 +54,7 @@ public class VariableUpdatedEventHandlerTest {
                                                               "10",
                                                               "20",
                                                               "30",
+                                                              "runtime-bundle-a",
                                                               "var",
                                                               "v1",
                                                               "string",
@@ -64,12 +65,13 @@ public class VariableUpdatedEventHandlerTest {
 
         //then
         ArgumentCaptor<Variable> captor = ArgumentCaptor.forClass(Variable.class);
-        verify(processVariableUpdateHandler).handle(captor.capture());
+        verify(processVariableUpdateEventHandler).handle(captor.capture());
 
         Variable variable = captor.getValue();
         Assertions.assertThat(variable)
                 .hasProcessInstanceId("30")
                 .hasName("var")
+                .hasApplicationName("runtime-bundle-a")
                 .hasValue("v1")
                 .hasType("string");
     }
@@ -82,6 +84,7 @@ public class VariableUpdatedEventHandlerTest {
                                                               "10",
                                                               "20",
                                                               "30",
+                                                              "runtime-bundle-a",
                                                               "var",
                                                               "v1",
                                                               "string",
@@ -92,13 +95,14 @@ public class VariableUpdatedEventHandlerTest {
 
         //then
         ArgumentCaptor<Variable> captor = ArgumentCaptor.forClass(Variable.class);
-        verify(taskVariableUpdatedHandler).handle(captor.capture());
+        verify(taskVariableUpdatedEventHandler).handle(captor.capture());
 
         Variable variable = captor.getValue();
         Assertions.assertThat(variable)
                 .hasTaskId("40")
                 .hasName("var")
                 .hasValue("v1")
+                .hasApplicationName("runtime-bundle-a")
                 .hasType("string");
     }
 

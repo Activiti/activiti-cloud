@@ -19,10 +19,20 @@ package org.activiti.cloud.services.query.model;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
+import javax.persistence.ConstraintMode;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -47,11 +57,16 @@ public class Task implements Serializable {
     private Date createTime;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date dueDate;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Date claimDate;
     private String priority;
     private String category;
     private String processDefinitionId;
     private String processInstanceId;
     private String status;
+    private String applicationName;
+    private String owner;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModified;
 
@@ -61,16 +76,30 @@ public class Task implements Serializable {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModifiedFrom;
 
-    @ManyToOne(optional=true)
-    @JoinColumn(name="processInstanceId", referencedColumnName="processInstanceId", insertable=false, updatable=false
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
+    @JsonIgnore
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private ProcessInstance processInstance;
-    
-    @OneToMany(fetch=FetchType.EAGER)
-    @JoinColumn(name="taskId", referencedColumnName="id", insertable=false, updatable=false
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
-    private Set<Variable> variables;    
-    
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private Set<TaskCandidateUser> taskCandidateUsers;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private Set<TaskCandidateGroup> taskCandidateGroups;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private Set<Variable> variables;
+
     public Task() {
     }
 
@@ -85,8 +114,11 @@ public class Task implements Serializable {
                 @JsonProperty("category") String category,
                 @JsonProperty("processDefinitionId") String processDefinitionId,
                 @JsonProperty("processInstanceId") String processInstanceId,
+                @JsonProperty("applicationName") String applicationName,
                 @JsonProperty("status") String status,
-                @JsonProperty("lastModified") Date lastModified) {
+                @JsonProperty("lastModified") Date lastModified,
+                @JsonProperty("claimDate") Date claimDate,
+                @JsonProperty("owner") String owner) {
         this.id = id;
         this.assignee = assignee;
         this.name = name;
@@ -97,8 +129,11 @@ public class Task implements Serializable {
         this.category = category;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
+        this.applicationName = applicationName;
         this.status = status;
         this.lastModified = lastModified;
+        this.claimDate = claimDate;
+        this.owner = owner;
     }
 
     public String getId() {
@@ -189,6 +224,14 @@ public class Task implements Serializable {
         this.processInstanceId = processInstanceId;
     }
 
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+
     public void setStatus(String status) {
         this.status = status;
     }
@@ -209,6 +252,22 @@ public class Task implements Serializable {
     @Transient
     public Date getLastModifiedFrom() {
         return lastModifiedFrom;
+    }
+
+    public Date getClaimDate() {
+        return claimDate;
+    }
+
+    public void setClaimDate(Date claimDate) {
+        this.claimDate = claimDate;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public void setLastModifiedFrom(Date lastModifiedFrom) {
@@ -243,4 +302,31 @@ public class Task implements Serializable {
         this.variables = variables;
     }
 
+    /**
+     * @return the taskCandidateUsers
+     */
+    public Set<TaskCandidateUser> getTaskCandidateUsers() {
+        return this.taskCandidateUsers;
+    }
+
+    /**
+     * @param taskCandidateUsers the taskCandidateUsers to set
+     */
+    public void setTaskCandidateUsers(Set<TaskCandidateUser> taskCandidateUsers) {
+        this.taskCandidateUsers = taskCandidateUsers;
+    }
+
+    /**
+     * @return the taskCandidateUsers
+     */
+    public Set<TaskCandidateGroup> getTaskCandidateGroups() {
+        return this.taskCandidateGroups;
+    }
+
+    /**
+     * @param taskCandidateGroups the taskCandidateGroups to set
+     */
+    public void setTaskCandidateGroups(Set<TaskCandidateGroup> taskCandidateGroups) {
+        this.taskCandidateGroups = taskCandidateGroups;
+    }
 }

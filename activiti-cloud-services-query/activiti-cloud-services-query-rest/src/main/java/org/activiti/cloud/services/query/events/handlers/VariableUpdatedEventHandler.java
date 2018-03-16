@@ -27,15 +27,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class VariableUpdatedEventHandler implements QueryEventHandler {
 
-    private ProcessVariableUpdateHandler processVariableUpdateHandler;
+    private ProcessVariableUpdateEventHandler processVariableUpdateEventHandler;
 
-    private TaskVariableUpdatedHandler taskVariableUpdatedHandler;
+    private TaskVariableUpdatedEventHandler taskVariableUpdatedEventHandler;
 
     @Autowired
-    public VariableUpdatedEventHandler(ProcessVariableUpdateHandler processVariableUpdateHandler,
-                                       TaskVariableUpdatedHandler taskVariableUpdatedHandler) {
-        this.processVariableUpdateHandler = processVariableUpdateHandler;
-        this.taskVariableUpdatedHandler = taskVariableUpdatedHandler;
+    public VariableUpdatedEventHandler(ProcessVariableUpdateEventHandler processVariableUpdateEventHandler,
+                                       TaskVariableUpdatedEventHandler taskVariableUpdatedEventHandler) {
+        this.processVariableUpdateEventHandler = processVariableUpdateEventHandler;
+        this.taskVariableUpdatedEventHandler = taskVariableUpdatedEventHandler;
     }
 
     @Override
@@ -44,15 +44,16 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
         Variable variable = new Variable(variableUpdatedEvent.getVariableType(),
                                          variableUpdatedEvent.getVariableName(),
                                          variableUpdatedEvent.getProcessInstanceId(),
+                                         variableUpdatedEvent.getApplicationName(),
                                          variableUpdatedEvent.getTaskId(),
                                          new Date(variableUpdatedEvent.getTimestamp()),
                                          new Date(variableUpdatedEvent.getTimestamp()),
                                          variableUpdatedEvent.getExecutionId(),
                                          variableUpdatedEvent.getVariableValue());
         if (variableUpdatedEvent.getTaskId() != null) {
-            taskVariableUpdatedHandler.handle(variable);
+            taskVariableUpdatedEventHandler.handle(variable);
         } else {
-            processVariableUpdateHandler.handle(variable);
+            processVariableUpdateEventHandler.handle(variable);
         }
 
     }

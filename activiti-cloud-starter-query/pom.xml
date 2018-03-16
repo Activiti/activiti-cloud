@@ -1,18 +1,22 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-query-service-parent</artifactId>
-    <version>7-201801-EA</version>
+    <version>7-201802-EA</version>
   </parent>
-
   <artifactId>activiti-cloud-starter-query</artifactId>
-  <name>Activiti Cloud Starter :: Query</name>
+  <name>Activiti Cloud Query :: Starter :: Query</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-security-policies</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -73,8 +77,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-
-      <!--exclude tomcat and use embedded jetty, see root pom-->
+      <!-- exclude tomcat and use embedded jetty, see root pom -->
       <exclusions>
         <exclusion>
           <groupId>org.springframework.boot</groupId>
@@ -82,16 +85,14 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-jetty</artifactId>
     </dependency>
-
-    <!-- Test deps -->
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.awaitility</groupId>
@@ -143,16 +144,10 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.commonjava.maven.plugins</groupId>
-        <artifactId>directory-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>${maven.docker.plugin.version}</version>
         <configuration>
           <images>
-            <!-- A single's image configuration -->
             <image>
               <name>activiti/activiti-cloud-sso-idm</name>
               <alias>activiti-cloud-sso-idm</alias>
@@ -162,12 +157,14 @@
                 </ports>
                 <wait>
                   <log>Keycloak .* started in</log>
-                  <time>40000</time>
+                  <time>45000</time>
+                  <shutdown>5000</shutdown>
+                  <kill>1000</kill>
                 </wait>
               </run>
             </image>
             <image>
-              <name>byteflair/rabbitmq-stomp</name>
+              <name>activiti/rabbitmq-stomp</name>
               <alias>activiti-rabbitmq</alias>
               <run>
                 <ports>
@@ -177,42 +174,19 @@
                 </ports>
                 <wait>
                   <log>Server startup complete</log>
-                  <time>15000</time>
+                  <time>20000</time>
+                  <shutdown>3000</shutdown>
+                  <kill>1000</kill>
                 </wait>
               </run>
             </image>
-
           </images>
+          <skip>${skipTests}</skip>
         </configuration>
-
-        <!-- Connect start/stop to pre- and
-             post-integration-test phase, respectively if you want to start
-             your docker containers during integration tests -->
         <executions>
           <execution>
-            <id>build</id>
-            <phase>package</phase>
-            <goals>
-              <goal>build</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>start</id>
-            <configuration>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <phase>pre-integration-test</phase>
             <goals>
               <goal>start</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>stop</id>
-            <configuration>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <phase>post-integration-test</phase>
-            <goals>
               <goal>stop</goal>
               <goal>remove</goal>
             </goals>
@@ -221,5 +195,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>

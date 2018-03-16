@@ -30,15 +30,23 @@ import org.activiti.cloud.services.api.events.ProcessEngineEvent;
         property = "eventType",
         defaultImpl = IgnoredProcessEngineEvent.class)
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = ProcessCreatedEvent.class, name = "ProcessCreatedEvent"),
         @JsonSubTypes.Type(value = ProcessStartedEvent.class, name = "ProcessStartedEvent"),
+        @JsonSubTypes.Type(value = ProcessSuspendedEvent.class, name = "ProcessSuspendedEvent"),
+        @JsonSubTypes.Type(value = ProcessActivatedEvent.class, name = "ProcessActivatedEvent"),
         @JsonSubTypes.Type(value = ProcessCompletedEvent.class, name = "ProcessCompletedEvent"),
         @JsonSubTypes.Type(value = TaskCreatedEvent.class, name = "TaskCreatedEvent"),
         @JsonSubTypes.Type(value = TaskAssignedEvent.class, name = "TaskAssignedEvent"),
         @JsonSubTypes.Type(value = TaskCompletedEvent.class, name = "TaskCompletedEvent"),
+        @JsonSubTypes.Type(value = TaskSuspendedEvent.class, name = "TaskSuspendedEvent"),
+        @JsonSubTypes.Type(value = TaskActivatedEvent.class, name = "TaskActivatedEvent"),
         @JsonSubTypes.Type(value = VariableCreatedEvent.class, name = "VariableCreatedEvent"),
         @JsonSubTypes.Type(value = VariableUpdatedEvent.class, name = "VariableUpdatedEvent"),
         @JsonSubTypes.Type(value = VariableDeletedEvent.class, name = "VariableDeletedEvent"),
-
+        @JsonSubTypes.Type(value = TaskCandidateUserAddedEvent.class, name = "TaskCandidateUserAddedEvent"),
+        @JsonSubTypes.Type(value = TaskCandidateGroupAddedEvent.class, name = "TaskCandidateGroupAddedEvent"),
+        @JsonSubTypes.Type(value = TaskCandidateUserRemovedEvent.class, name = "TaskCandidateUserRemovedEvent"),
+        @JsonSubTypes.Type(value = TaskCandidateGroupRemovedEvent.class, name = "TaskCandidateGroupRemovedEvent"),
 })
 public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
 
@@ -56,29 +64,27 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
                                       String eventType,
                                       String executionId,
                                       String processDefinitionId,
-                                      String processInstanceId) {
+                                      String processInstanceId,
+                                      String applicationName) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
+        this.applicationName = applicationName;
     }
-
 
     public Long getTimestamp() {
         return timestamp;
     }
 
-
     public String getEventType() {
         return eventType;
     }
 
-
     public String getExecutionId() {
         return executionId;
     }
-
 
     public String getProcessDefinitionId() {
         return processDefinitionId;
@@ -96,5 +102,4 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     public String getApplicationName() {
         return applicationName;
     }
-
 }
