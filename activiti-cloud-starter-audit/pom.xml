@@ -1,14 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-audit-service-parent</artifactId>
-    <version>7-201801-EA</version>
+    <version>7-201802-EA</version>
   </parent>
-
   <artifactId>activiti-cloud-starter-audit</artifactId>
-  <name>Activiti Cloud Starter :: Audit</name>
+  <name>Activiti Cloud Audit :: Starter :: Audit</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -71,53 +71,53 @@
       <artifactId>spring-web</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-
-      <!--exclude tomcat and use embedded jetty, see root pom-->
-      <exclusions>
-        <exclusion>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-starter-tomcat</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-jetty</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-monitoring</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-tracing</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-logging</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
     </dependency>
-
-    <!-- common -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-
-    <!-- Test deps -->
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-commons</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.awaitility</groupId>
@@ -173,16 +173,10 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.commonjava.maven.plugins</groupId>
-        <artifactId>directory-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>${maven.docker.plugin.version}</version>
         <configuration>
           <images>
-            <!-- A single's image configuration -->
             <image>
               <name>activiti/activiti-cloud-sso-idm</name>
               <alias>activiti-cloud-sso-idm</alias>
@@ -210,38 +204,13 @@
                 </wait>
               </run>
             </image>
-
           </images>
+          <skip>${skipTests}</skip>
         </configuration>
-
-        <!-- Connect start/stop to pre- and
-             post-integration-test phase, respectively if you want to start
-             your docker containers during integration tests -->
         <executions>
           <execution>
-            <id>build</id>
-            <phase>package</phase>
-            <goals>
-              <goal>build</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>start</id>
-            <configuration>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <phase>pre-integration-test</phase>
             <goals>
               <goal>start</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>stop</id>
-            <configuration>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <phase>post-integration-test</phase>
-            <goals>
               <goal>stop</goal>
               <goal>remove</goal>
             </goals>
@@ -255,7 +224,6 @@
       <plugin>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
-
         <executions>
           <execution>
             <goals>
@@ -263,9 +231,7 @@
             </goals>
           </execution>
         </executions>
-
         <configuration>
-
           <packages>
             <package>org.activiti.cloud.services.core.model</package>
             <package>org.activiti.cloud.services.audit.events</package>
@@ -273,27 +239,21 @@
           <classes>
             <class>org.springframework.http.ResponseEntity</class>
           </classes>
-
           <!-- whether generated assertions classes can be inherited with consistent assertion chaining -->
           <hierarchical>true</hierarchical>
-
           <!-- where to generate assertions entry point classes -->
           <entryPointClassPackage>${generated-assertions-package}</entryPointClassPackage>
-
           <excludes>
             <param>org\.activiti\.services\.core\.model\.converter.*</param>
             <param>org\.activiti\.services\.core\.model\.commands.*</param>
           </excludes>
-
           <targetDir>${generated-assertions-folder}</targetDir>
           <generateAssertions>true</generateAssertions>
           <generateBddAssertions>false</generateBddAssertions>
           <generateSoftAssertions>false</generateSoftAssertions>
           <generateJUnitSoftAssertions>false</generateJUnitSoftAssertions>
-
         </configuration>
       </plugin>
     </plugins>
   </build>
-
 </project>

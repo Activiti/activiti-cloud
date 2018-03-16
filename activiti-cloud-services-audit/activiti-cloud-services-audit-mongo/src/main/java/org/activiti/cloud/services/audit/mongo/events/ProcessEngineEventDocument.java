@@ -1,5 +1,6 @@
 package org.activiti.cloud.services.audit.mongo.events;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -14,7 +15,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "eventType",
-        visible = true)
+        visible = true,
+        defaultImpl = IgnoredProcessEngineEvent.class)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = ActivityStartedEventDocument.class, name = ActivityStartedEventDocument.ACTIVITY_STARTED_EVENT),
         @JsonSubTypes.Type(value = ActivityCompletedEventDocument.class, name = ActivityCompletedEventDocument.ACTIVITY_COMPLETED_EVENT),
@@ -100,5 +102,10 @@ public class ProcessEngineEventDocument {
 
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    @JsonIgnore
+    public boolean isIgnored() {
+        return false;
     }
 }

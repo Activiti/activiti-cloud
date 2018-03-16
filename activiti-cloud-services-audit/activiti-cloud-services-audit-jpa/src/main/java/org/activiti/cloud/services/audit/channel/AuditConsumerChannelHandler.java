@@ -37,7 +37,9 @@ public class AuditConsumerChannelHandler {
     @StreamListener(AuditConsumerChannels.AUDIT_CONSUMER)
     public synchronized void receive(ProcessEngineEventEntity[] events) {
         for (ProcessEngineEventEntity event : events) {
-            eventsRepository.save(event);
+            if (!event.isIgnored()) {
+                eventsRepository.save(event);
+            }
         }
     }
 }

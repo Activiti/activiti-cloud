@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.audit.mongo.events.ActivityStartedEventDocument;
 import org.activiti.cloud.services.audit.mongo.events.ProcessEngineEventDocument;
 import org.activiti.cloud.services.audit.mongo.repository.EventsRepository;
 import org.activiti.cloud.starters.test.MockEventsSamples;
@@ -35,6 +36,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.cloud.starters.test.builder.ActivityEventBuilder.aActivityStartedEvent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -164,4 +166,33 @@ public class AuditServiceIT {
             assertThat(responseEntity.getBody().getProcessInstanceId()).isEqualTo("4");
         });
     }
+
+    @Test
+    public void unknownEventShouldNotPreventHandlingOfKnownEvents() throws Exception {
+        //given
+        ProcessEngineEvent[] events = new ProcessEngineEvent[2];
+        events[0] = aActivityStartedEvent(System.currentTimeMillis())
+                .withExecutionId("2")
+                .withProcessDefinitionId("3")
+                .withProcessInstanceId("4")
+                .withName("first step")
+                .build();
+        events[1] = new MockProcessEngineEvent(System.currentTimeMillis(), "unknownType");
+        producer.send(events);
+
+        await().untilAsserted(() -> {
+            //then
+            ResponseEntity<PagedResources<ProcessEngineEventDocument>> eventsPagedResources = eventsRestTemplate.executeFindAll();
+            assertThat(eventsPagedResources.getBody()).isNotEmpty();
+            ProcessEngineEventDocument event = eventsPagedResources.getBody().iterator().next();
+
+            //when
+            assertThat(event).isInstanceOf(ActivityStartedEventDocument.class);
+            assertThat(event.getEventType()).isEqualTo("ActivityStartedEvent");
+            assertThat(event.getExecutionId()).isEqualTo("2");
+            assertThat(event.getProcessDefinitionId()).isEqualTo("3");
+            assertThat(event.getProcessInstanceId()).isEqualTo("4");
+        });
+    }
+
 }

@@ -28,6 +28,7 @@ import org.activiti.cloud.services.audit.events.TaskAssignedEventEntity;
 import org.activiti.cloud.services.audit.events.TaskAssignedEventEntityAssert;
 import org.activiti.cloud.services.audit.repository.EventsRepository;
 import org.activiti.cloud.starters.test.MockEventsSamples;
+import org.activiti.cloud.starters.test.MockProcessEngineEvent;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.Before;
 import org.junit.Test;
@@ -162,6 +163,36 @@ public class AuditServiceIT {
             assertThat(responseEntity.getBody()).isInstanceOf(ActivityStartedEventEntity.class);
             ActivityStartedEventEntityAssert.assertThat((ActivityStartedEventEntity) responseEntity.getBody())
                     .hasId(event.getId())
+                    .hasEventType("ActivityStartedEvent")
+                    .hasExecutionId("2")
+                    .hasProcessDefinitionId("3")
+                    .hasProcessInstanceId("4")
+                    .hasActivityName("first step");
+        });
+    }
+
+    @Test
+    public void unknownEventShouldNotPreventHandlingOfKnownEvents() throws Exception {
+        //given
+        ProcessEngineEvent[] events = new ProcessEngineEvent[2];
+        events[0] = aActivityStartedEvent(System.currentTimeMillis())
+                .withExecutionId("2")
+                .withProcessDefinitionId("3")
+                .withProcessInstanceId("4")
+                .withName("first step")
+                .build();
+        events[1] = new MockProcessEngineEvent(System.currentTimeMillis(), "unknownType");
+        producer.send(events);
+
+        await().untilAsserted(() -> {
+            //then
+            ResponseEntity<PagedResources<ProcessEngineEventEntity>> eventsPagedResources = eventsRestTemplate.executeFindAll();
+            assertThat(eventsPagedResources.getBody()).isNotEmpty();
+            ProcessEngineEventEntity event = eventsPagedResources.getBody().iterator().next();
+
+            //when
+            assertThat(event).isInstanceOf(ActivityStartedEventEntity.class);
+            ActivityStartedEventEntityAssert.assertThat((ActivityStartedEventEntity) event)
                     .hasEventType("ActivityStartedEvent")
                     .hasExecutionId("2")
                     .hasProcessDefinitionId("3")
