@@ -23,8 +23,9 @@
   </properties>
 
   <modules>
-    <module>runtime-acceptance-tests</module>
+    <module>shared-acceptance-tests</module>
     <module>modeling-acceptance-tests</module>
+    <module>runtime-acceptance-tests</module>
   </modules>
 
   <dependencyManagement>

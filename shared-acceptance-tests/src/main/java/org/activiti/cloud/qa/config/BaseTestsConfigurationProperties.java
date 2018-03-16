@@ -14,19 +14,30 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.rest;
+package org.activiti.cloud.qa.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
- * Dirty context configuration
+ * Config properties
  */
 @Configuration
-public class DirtyContextConfiguration {
+@PropertySource("classpath:config-${profile:env}.properties")
+public class BaseTestsConfigurationProperties {
+
+    @Value("${auth.url}")
+    private String authUrl;
+
+    public String getAuthUrl() {
+        return authUrl;
+    }
 
     @Bean
-    public DirtyContextHandler dirtyContextHandler() {
-        return new DirtyContextHandler();
+    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+        return new PropertySourcesPlaceholderConfigurer();
     }
 }

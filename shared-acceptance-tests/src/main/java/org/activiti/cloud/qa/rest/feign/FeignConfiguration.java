@@ -20,11 +20,8 @@ import feign.Feign;
 import feign.Logger;
 import feign.form.FormEncoder;
 import feign.gson.GsonDecoder;
-import org.activiti.cloud.qa.config.TestsConfigurationProperties;
-import org.activiti.cloud.qa.service.AuditService;
+import org.activiti.cloud.qa.config.BaseTestsConfigurationProperties;
 import org.activiti.cloud.qa.service.AuthenticationService;
-import org.activiti.cloud.qa.service.QueryService;
-import org.activiti.cloud.qa.service.RuntimeBundleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,11 +29,11 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Feign Configuration
  */
-@Configuration
+
 public class FeignConfiguration {
 
     @Autowired
-    private TestsConfigurationProperties acceptanceTestsConfiguration;
+    private BaseTestsConfigurationProperties baseTestsConfigurationProperties;
 
     @Bean
     public AuthenticationService authenticationClient() {
@@ -46,30 +43,9 @@ public class FeignConfiguration {
                 .logger(new Logger.ErrorLogger())
                 .logLevel(Logger.Level.FULL)
                 .target(AuthenticationService.class,
-                        acceptanceTestsConfiguration.getAuthUrl());
+                        baseTestsConfigurationProperties.getAuthUrl());
     }
 
-    @Bean
-    public RuntimeBundleService runtimeBundleService() {
-        return FeignRestDataClient
-                .builder()
-                .target(RuntimeBundleService.class,
-                        acceptanceTestsConfiguration.getRuntimeBundleUrl());
-    }
 
-    @Bean
-    public AuditService auditClient() {
-        return FeignRestDataClient
-                .builder()
-                .target(AuditService.class,
-                        acceptanceTestsConfiguration.getAuditEventUrl());
-    }
 
-    @Bean
-    public QueryService queryService() {
-        return FeignRestDataClient
-                .builder()
-                .target(QueryService.class,
-                        acceptanceTestsConfiguration.getQueryUrl());
-    }
 }

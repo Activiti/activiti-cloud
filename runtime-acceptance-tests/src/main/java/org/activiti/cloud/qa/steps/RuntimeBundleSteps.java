@@ -21,11 +21,14 @@ import java.util.Collection;
 import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
+import org.activiti.cloud.qa.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.Task;
+import org.activiti.cloud.qa.rest.RuntimeFeignConfiguration;
 import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -33,6 +36,7 @@ import static org.assertj.core.api.Assertions.*;
  * Runtime bundle steps
  */
 @EnableFeignContext
+@ContextConfiguration(classes = {RuntimeTestsConfigurationProperties.class, RuntimeFeignConfiguration.class})
 public class RuntimeBundleSteps {
 
     public static final String DEFAULT_PROCCES_INSTANCE_COMMAND_TYPE = "StartProcessInstanceCmd";

@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.model;
+package org.activiti.cloud.qa.rest.feign;
 
-public class AuthToken {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    private String access_token;
+import org.activiti.cloud.qa.config.BaseTestsConfigurationProperties;
+import org.springframework.test.context.ContextConfiguration;
 
-    public String getAccess_token() {
-        return access_token;
-    }
+/**
+ * Allow Feign clients autowiring
+ */
+@ContextConfiguration(classes = {BaseTestsConfigurationProperties.class, FeignConfiguration.class})
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface EnableFeignContext {
 
-    @Override
-    public String toString() {
-        return access_token;
-    }
 }

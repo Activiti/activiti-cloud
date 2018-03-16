@@ -14,56 +14,46 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.rest.feign;
+package org.activiti.cloud.qa.rest;
 
-import feign.Feign;
-import feign.Logger;
-import feign.form.FormEncoder;
-import feign.gson.GsonDecoder;
-import org.activiti.cloud.qa.config.TestsConfigurationProperties;
-import org.activiti.cloud.qa.service.AuthenticationService;
+import org.activiti.cloud.qa.config.BaseTestsConfigurationProperties;
+import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
+import org.activiti.cloud.qa.rest.feign.FeignConfiguration;
 import org.activiti.cloud.qa.service.ModelingGroupsService;
 import org.activiti.cloud.qa.service.ModelingModelsService;
 import org.activiti.cloud.qa.service.ModelingProjectsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 /**
  * Feign Configuration
  */
 @Configuration
-public class FeignConfiguration {
+@Import(FeignConfiguration.class)
+public class ModelingFeignConfiguration {
 
     @Autowired
-    private TestsConfigurationProperties acceptanceTestsConfiguration;
-
-    @Bean
-    public AuthenticationService authenticationClient() {
-        return Feign.builder()
-                .encoder(new FormEncoder())
-                .decoder(new GsonDecoder())
-                .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.FULL)
-                .target(AuthenticationService.class,
-                        acceptanceTestsConfiguration.getAuthUrl());
-    }
+    private ModelingTestsConfigurationProperties modelingTestsConfigurationProperties;
 
     @Bean
     public ModelingGroupsService modelingGroupsService() {
         return ModelingGroupsService
-                .build(acceptanceTestsConfiguration.getModelingUrl());
+                .build(modelingTestsConfigurationProperties.getModelingUrl());
     }
 
     @Bean
     public ModelingProjectsService modelingProjectsService() {
         return ModelingProjectsService
-                .build(acceptanceTestsConfiguration.getModelingUrl());
+                .build(modelingTestsConfigurationProperties.getModelingUrl());
     }
 
     @Bean
     public ModelingModelsService modelingModelsService() {
         return ModelingModelsService
-                .build(acceptanceTestsConfiguration.getModelingUrl());
+                .build(modelingTestsConfigurationProperties.getModelingUrl());
     }
+
 }

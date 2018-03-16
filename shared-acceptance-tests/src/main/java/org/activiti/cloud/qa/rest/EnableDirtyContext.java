@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.service;
+package org.activiti.cloud.qa.rest;
 
-import feign.Headers;
-import feign.Param;
-import feign.RequestLine;
-import org.activiti.cloud.qa.model.AuthToken;
-import org.springframework.stereotype.Service;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import org.springframework.test.context.ContextConfiguration;
 
 /**
- * Authentication service
+ * Allow Feign clients autowiring
  */
-public interface AuthenticationService {
+@ContextConfiguration(classes = {DirtyContextConfiguration.class})
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface EnableDirtyContext {
 
-    @RequestLine("POST")
-    @Headers("Content-Type: application/x-www-form-urlencoded")
-    AuthToken authenticate(@Param("client_id") String clientId,
-                           @Param("grant_type") String grantType,
-                           @Param("username") String username,
-                           @Param("password") String password);
 }

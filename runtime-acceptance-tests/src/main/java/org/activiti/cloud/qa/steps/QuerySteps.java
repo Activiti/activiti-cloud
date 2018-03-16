@@ -19,11 +19,14 @@ package org.activiti.cloud.qa.steps;
 import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
+import org.activiti.cloud.qa.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.QueryStatus;
+import org.activiti.cloud.qa.rest.RuntimeFeignConfiguration;
 import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
 import org.activiti.cloud.qa.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -31,6 +34,7 @@ import static org.assertj.core.api.Assertions.*;
  * Query steps
  */
 @EnableFeignContext
+@ContextConfiguration(classes = {RuntimeTestsConfigurationProperties.class, RuntimeFeignConfiguration.class})
 public class QuerySteps {
 
     @Autowired

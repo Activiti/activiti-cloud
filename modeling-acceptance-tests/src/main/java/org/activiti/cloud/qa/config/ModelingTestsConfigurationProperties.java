@@ -17,48 +17,23 @@
 package org.activiti.cloud.qa.config;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
  * Config properties
  */
 @Configuration
+@Import(BaseTestsConfigurationProperties.class)
 @PropertySource("classpath:config-${profile:env}.properties")
-public class TestsConfigurationProperties {
+public class ModelingTestsConfigurationProperties {
 
-    @Value("${auth.url}")
-    private String authUrl;
+    @Value("${modeling.url}")
+    private String modelingUrl;
 
-    @Value("${audit.event.url}")
-    private String auditEventUrl;
-
-    @Value("${runtime.bundle.url}")
-    private String runtimeBundleUrl;
-
-    @Value("${query.url}")
-    private String queryUrl;
-
-    public String getAuthUrl() {
-        return authUrl;
-    }
-
-    public String getAuditEventUrl() {
-        return auditEventUrl;
-    }
-
-    public String getRuntimeBundleUrl() {
-        return runtimeBundleUrl;
-    }
-
-    public String getQueryUrl() {
-        return queryUrl;
-    }
-
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-        return new PropertySourcesPlaceholderConfigurer();
+    public String getModelingUrl() {
+        return modelingUrl;
     }
 }
