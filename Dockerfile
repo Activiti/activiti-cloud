@@ -17,4 +17,4 @@ ENV REMOTE_DEBUG=false
 
 EXPOSE 8182
 
-CMD if [ "x$REMOTE_DEBUG" = "xfalse" ] ; then java -jar maven/*.jar ; else java -agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n -jar maven/*.jar ; fi
+CMD if [ "x$REMOTE_DEBUG" = "xfalse" ] ; then java $JAVA_OPTS -jar maven/*.jar ; else java $JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n -jar maven/*.jar ; fi
