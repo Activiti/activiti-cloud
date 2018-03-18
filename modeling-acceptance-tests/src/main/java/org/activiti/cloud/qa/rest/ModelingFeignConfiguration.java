@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.qa.rest;
 
-import org.activiti.cloud.qa.config.BaseTestsConfigurationProperties;
 import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.rest.feign.FeignConfiguration;
 import org.activiti.cloud.qa.service.ModelingGroupsService;
@@ -26,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 
 /**
  * Feign Configuration

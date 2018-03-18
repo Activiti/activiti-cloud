@@ -19,16 +19,13 @@ package org.activiti.cloud.qa.steps;
 import java.util.UUID;
 
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.model.modeling.Model;
 import org.activiti.cloud.qa.model.modeling.Model.ModelType;
 import org.activiti.cloud.qa.model.modeling.ModelingContext;
-import org.activiti.cloud.qa.rest.ModelingFeignConfiguration;
-import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
+import org.activiti.cloud.qa.rest.feign.EnableModelingFeignContext;
 import org.activiti.cloud.qa.service.ModelingModelsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
-import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.Link.REL_SELF;
@@ -36,8 +33,7 @@ import static org.springframework.hateoas.Link.REL_SELF;
 /**
  * Modeling steps for process models, from models, ...
  */
-@EnableFeignContext
-@ContextConfiguration(classes = {ModelingTestsConfigurationProperties.class, ModelingFeignConfiguration.class})
+@EnableModelingFeignContext
 public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     @Autowired

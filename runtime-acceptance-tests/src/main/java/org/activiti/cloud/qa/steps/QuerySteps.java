@@ -24,6 +24,7 @@ import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.QueryStatus;
 import org.activiti.cloud.qa.rest.RuntimeFeignConfiguration;
 import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
+import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,8 +34,7 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Query steps
  */
-@EnableFeignContext
-@ContextConfiguration(classes = {RuntimeTestsConfigurationProperties.class, RuntimeFeignConfiguration.class})
+@EnableRuntimeFeignContext
 public class QuerySteps {
 
     @Autowired
