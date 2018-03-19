@@ -16,17 +16,21 @@
 
 package org.activiti.cloud.qa.rest;
 
+import feign.Feign;
+import feign.Logger;
+import feign.gson.GsonEncoder;
 import org.activiti.cloud.qa.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.qa.rest.feign.FeignConfiguration;
 import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
+import org.activiti.cloud.qa.rest.feign.OAuth2FeignRequestInterceptor;
 import org.activiti.cloud.qa.service.AuditService;
 import org.activiti.cloud.qa.service.QueryService;
+import org.activiti.cloud.qa.service.RuntimeBundleDiagramService;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 
 /**
  * Feign Configuration
@@ -43,6 +47,17 @@ public class RuntimeFeignConfiguration {
         return FeignRestDataClient
                 .builder()
                 .target(RuntimeBundleService.class,
+                        runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public RuntimeBundleDiagramService runtimeBundleDiagramService() {
+        return Feign.builder()
+                .encoder(new GsonEncoder())
+                .logger(new Logger.ErrorLogger())
+                .logLevel(Logger.Level.FULL)
+                .requestInterceptor(new OAuth2FeignRequestInterceptor())
+                .target(RuntimeBundleDiagramService.class,
                         runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 

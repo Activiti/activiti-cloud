@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.qa.steps;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
@@ -24,7 +26,12 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
+import org.activiti.cloud.qa.service.RuntimeBundleDiagramService;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
+import org.apache.batik.transcoder.TranscoderException;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.*;
@@ -41,6 +48,9 @@ public class RuntimeBundleSteps {
 
     @Autowired
     private RuntimeBundleService runtimeBundleService;
+
+    @Autowired
+    private RuntimeBundleDiagramService runtimeBundleDiagramService;
 
     @Step
     public void checkServicesHealth() {
@@ -101,5 +111,27 @@ public class RuntimeBundleSteps {
     @Step
     public void waitForMessagesToBeConsumed() throws InterruptedException {
         Thread.sleep(200);
+    }
+
+    @Step
+    public String openProcessInstanceDiagram(String id) {
+        return runtimeBundleDiagramService.getProcessDiagram(id);
+    }
+
+    @Step
+    public void checkProcessInstanceDiagram(String diagram) throws Exception {
+        assertThat(diagram).isNotEmpty();
+        assertThat(svgToPng(diagram.getBytes())).isNotEmpty();
+    }
+
+    private byte[] svgToPng(byte[] streamBytes)
+            throws TranscoderException, IOException {
+        try (ByteArrayInputStream input = new ByteArrayInputStream(streamBytes);
+             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            new PNGTranscoder().transcode(new TranscoderInput(input),
+                                          new TranscoderOutput(output));
+            output.flush();
+            return output.toByteArray();
+        }
     }
 }

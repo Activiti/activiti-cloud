@@ -44,6 +44,9 @@ public class ProcessInstanceTasks {
     private QuerySteps querySteps;
 
     private ProcessInstance processInstance;
+
+    private String processInstanceDiagram;
+
     private Task currentTask;
 
     @When("services are started")
@@ -101,4 +104,15 @@ public class ProcessInstanceTasks {
         auditSteps.checkProcessInstanceEvent(processInstance.getId(),
                                              EventType.PROCESS_CANCELLED);
     }
+
+    @When("open the process diagram")
+    public void openProcessInstanceDiagram() {
+        processInstanceDiagram = runtimeBundleSteps.openProcessInstanceDiagram(processInstance.getId());
+    }
+
+    @Then("the digram is shown")
+    public void checkProcessInstanceDiagram() throws Exception {
+        runtimeBundleSteps.checkProcessInstanceDiagram(processInstanceDiagram);
+    }
+
 }
