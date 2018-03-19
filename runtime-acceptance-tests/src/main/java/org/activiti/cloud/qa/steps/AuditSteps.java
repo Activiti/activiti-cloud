@@ -20,15 +20,11 @@ import java.util.Collection;
 import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.qa.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.qa.model.Event;
 import org.activiti.cloud.qa.model.EventType;
-import org.activiti.cloud.qa.rest.RuntimeFeignConfiguration;
-import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.AuditService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -40,6 +36,11 @@ public class AuditSteps {
 
     @Autowired
     private AuditService auditService;
+
+    @Step
+    public void checkServicesHealth() {
+        assertThat(auditService.isServiceUp()).isTrue();
+    }
 
     @Step
     public Map<String, Object> health() {

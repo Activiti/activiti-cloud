@@ -18,7 +18,6 @@ package org.activiti.cloud.qa.story;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.qa.model.EventType;
@@ -49,9 +48,9 @@ public class ProcessInstanceTasks {
 
     @When("services are started")
     public void checkServicesStatus() {
-        assertThat(isServiceUp(runtimeBundleSteps.health())).isTrue();
-        assertThat(isServiceUp(auditSteps.health())).isTrue();
-        assertThat(isServiceUp(querySteps.health())).isTrue();
+        runtimeBundleSteps.checkServicesHealth();
+        auditSteps.checkServicesHealth();
+        querySteps.checkServicesHealth();
     }
 
     @When("the user starts a random process")
@@ -102,15 +101,4 @@ public class ProcessInstanceTasks {
         auditSteps.checkProcessInstanceEvent(processInstance.getId(),
                                              EventType.PROCESS_CANCELLED);
     }
-
-    private boolean isServiceUp(Map<String, Object> appInfo) {
-        if (appInfo != null) {
-            String status = appInfo.get("status").toString();
-            if (!"".equals(status) && "UP".equals(status)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }
