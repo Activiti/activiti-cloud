@@ -17,6 +17,8 @@
 package org.activiti.cloud.alfresco.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
@@ -24,6 +26,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.http.MediaType;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,4 +62,17 @@ public class AlfrescoWebConfigurerTest {
         assertThat(resolvers.get(0)).isEqualTo(alfrescoPageArgumentMethodResolver);
     }
 
+    @Test
+    public void extendMessageConvertersShouldRemoveApplicationJsonFromHalConverter() throws Exception {
+        //given
+
+        //when
+        TypeConstrainedMappingJackson2HttpMessageConverter halConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(Resource.class);
+        halConverter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON,
+                                                          MediaType.APPLICATION_JSON));
+        configurer.extendMessageConverters(Collections.singletonList(halConverter));
+
+        //then
+        assertThat(halConverter.getSupportedMediaTypes()).containsExactly(MediaTypes.HAL_JSON);
+    }
 }
