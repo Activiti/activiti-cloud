@@ -28,14 +28,6 @@
       </plugin>
     </plugins>
   </build>
-  <distributionManagement>
-    <!-- publish to alfresco repository for tagging -->
-    <repository>
-      <id>activiti-enterprise-snapshots</id>
-      <name>Alfresco internal repo</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
-    </repository>
-  </distributionManagement>
   <profiles>
     <profile>
       <id>docker</id>
