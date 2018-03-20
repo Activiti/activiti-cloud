@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.activiti</groupId>
     <artifactId>activiti-parent</artifactId>
-    <version>7-201802-EA</version>
+    <version>7-201803-EA-SNAPSHOT</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-build</artifactId>
-  <version>7-201802-EA</version>
+  <version>7-201803-EA-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Build</name>
   <url>http://activiti.org</url>
@@ -22,13 +22,13 @@
     <docker.rabbitmq.cli.port>15672</docker.rabbitmq.cli.port>
     <docker.rabbitmq.start.timeout>15000</docker.rabbitmq.start.timeout>
     <!-- dependencies -->
-    <activiti-cloud-service-common.version>7-201802-EA</activiti-cloud-service-common.version>
-    <activiti-cloud-runtime-bundle.version>7-201802-EA</activiti-cloud-runtime-bundle.version>
-    <activiti-cloud-audit.version>7-201802-EA</activiti-cloud-audit.version>
-    <activiti-cloud-query.version>7-201802-EA</activiti-cloud-query.version>
-    <activiti-cloud-connectors.version>7-201802-EA</activiti-cloud-connectors.version>
-    <activiti-cloud-process-model.version>7-201802-EA</activiti-cloud-process-model.version>
-    <activiti-cloud-org.version>7-201802-EA</activiti-cloud-org.version>
+    <activiti-cloud-service-common.version>7-201803-EA-SNAPSHOT</activiti-cloud-service-common.version>
+    <activiti-cloud-runtime-bundle.version>7-201803-EA-SNAPSHOT</activiti-cloud-runtime-bundle.version>
+    <activiti-cloud-audit.version>7-201803-EA-SNAPSHOT</activiti-cloud-audit.version>
+    <activiti-cloud-query.version>7-201803-EA-SNAPSHOT</activiti-cloud-query.version>
+    <activiti-cloud-connectors.version>7-201803-EA-SNAPSHOT</activiti-cloud-connectors.version>
+    <activiti-cloud-process-model.version>7-201803-EA-SNAPSHOT</activiti-cloud-process-model.version>
+    <activiti-cloud-org.version>7-201803-EA-SNAPSHOT</activiti-cloud-org.version>
     <awaitility.version>3.0.0</awaitility.version>
     <commons-configuration.version>1.8</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
