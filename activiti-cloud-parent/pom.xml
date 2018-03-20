@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-dependencies</artifactId>
-    <version>7-201802-EA-SNAPSHOT</version>
+    <version>7-201802-EA</version>
     <relativePath>../activiti-cloud-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-parent</artifactId>
