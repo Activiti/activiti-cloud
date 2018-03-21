@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.activiti.cloud.services.api.model.Task;
+import org.activiti.cloud.services.api.model.Task.TaskStatus;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.mockito.Mockito.*;
@@ -99,11 +101,11 @@ public class TaskAdminControllerImplIT {
     }
 
     private Task buildDefaultTask() {
-        return buildTask(Task.TaskStatus.ASSIGNED, "user");
+        return buildTask(ASSIGNED, "user");
     }
 
 
-    private Task buildTask(Task.TaskStatus status,
+    private Task buildTask(TaskStatus status,
                            String assignee) {
         return new Task(UUID.randomUUID().toString(),
                         "user",
@@ -117,7 +119,7 @@ public class TaskAdminControllerImplIT {
                         UUID.randomUUID().toString(),
                         UUID.randomUUID().toString(),
                         null,
-                        status.name());
+                        status);
     }
 
 }

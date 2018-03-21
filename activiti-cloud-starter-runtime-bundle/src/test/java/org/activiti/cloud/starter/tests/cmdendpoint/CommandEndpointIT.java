@@ -50,6 +50,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED;
+import static org.activiti.cloud.services.api.model.Task.TaskStatus.CREATED;
 import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
@@ -126,7 +128,7 @@ public class CommandEndpointIT {
         assertThat(responseEntity).isNotNull();
         Collection<Task> tasks = responseEntity.getBody().getContent();
         assertThat(tasks).extracting(Task::getName).contains("Perform action");
-        assertThat(tasks).extracting(Task::getStatus).contains(Task.TaskStatus.CREATED.name());
+        assertThat(tasks).extracting(Task::getStatus).contains(CREATED);
 
         Task task = tasks.iterator().next();
 
@@ -188,7 +190,7 @@ public class CommandEndpointIT {
         await("task to be released").untilTrue(streamHandler.getReleasedTaskAck());
 
         assertThatTaskHasStatus(task.getId(),
-                                Task.TaskStatus.CREATED);
+                                CREATED);
     }
 
     private void claimTask(Task task) throws InterruptedException {
@@ -201,7 +203,7 @@ public class CommandEndpointIT {
         await("task to be claimed").untilTrue(streamHandler.getClaimedTaskAck());
 
         assertThatTaskHasStatus(task.getId(),
-                                Task.TaskStatus.ASSIGNED
+                                ASSIGNED
         );
     }
 
@@ -209,7 +211,7 @@ public class CommandEndpointIT {
                                          Task.TaskStatus status) {
         ResponseEntity<Task> responseEntity = getTask(taskId);
         Task retrievedTask = responseEntity.getBody();
-        assertThat(retrievedTask.getStatus()).isEqualTo(status.name());
+        assertThat(retrievedTask.getStatus()).isEqualTo(status);
     }
 
     private void activateProcessInstance(String processDefinitionId,
