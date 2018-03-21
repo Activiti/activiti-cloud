@@ -26,6 +26,8 @@ public class Task {
 
     private String processInstanceId;
 
+    private String status;
+
     public String getId() {
         return id;
     }
@@ -42,4 +44,7 @@ public class Task {
         return processInstanceId;
     }
 
+    public String getStatus() {
+        return status;
+    }
 }

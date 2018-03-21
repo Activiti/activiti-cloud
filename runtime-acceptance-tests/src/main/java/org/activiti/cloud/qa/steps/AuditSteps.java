@@ -24,6 +24,7 @@ import org.activiti.cloud.qa.model.Event;
 import org.activiti.cloud.qa.model.EventType;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.AuditService;
+import org.assertj.core.api.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.*;
@@ -50,8 +51,8 @@ public class AuditSteps {
     @Step
     public Collection<Event> getEventsByProcessInstanceIdAndEventType(String processInstanceId,
                                                                       EventType eventType) throws Exception {
-        return auditService.getEvents(processInstanceId,
-                                      eventType.getType()).getContent();
+        return auditService.getProcessInstanceEvents(processInstanceId,
+                                                     eventType.getType()).getContent();
     }
 
     @Step
@@ -74,5 +75,38 @@ public class AuditSteps {
         Event resultingEvent = events.iterator().next();
         assertThat(resultingEvent).isNotNull();
         assertThat(resultingEvent.getTask().getId()).isEqualTo(taskId);
+    }
+
+    @Step
+    public Collection<Event> getEvents() {
+        return auditService.getEvents().getContent();
+    }
+
+    /**
+     * Check if a standalone task was created
+     * and assigned to it's creator
+     * @param taskId the id of the task (from rb)
+     */
+    @Step
+    public void checkTaskCreatedAndAssignedEvents(String taskId) {
+
+        final Collection<Event> events = getEvents();
+        Condition<Event> taskIsMatched = new Condition<Event>() {
+            @Override
+            public boolean matches(Event event) {
+
+                return event.getTask() != null && taskId.equals(event.getTask().getId());
+            }
+        };
+
+        assertThat(events).isNotNull()
+                .isNotEmpty()
+                .filteredOn(taskIsMatched).hasSize(2)
+                .extracting("task.id",
+                            "eventType")
+                .contains(tuple(taskId,
+                                EventType.TASK_CREATED),
+                          tuple(taskId,
+                                EventType.TASK_ASSIGNED));
     }
 }
