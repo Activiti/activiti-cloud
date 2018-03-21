@@ -8,6 +8,8 @@ RUN mvn -f /usr/src/myapp/pom.xml clean package -DskipTests
 
 FROM openjdk:alpine
 
+RUN apk --update add fontconfig ttf-dejavu
+
 COPY --from=BUILDRB /usr/src/myapp/target/*.jar /maven/
 
 # set debug=true to get spring boot debug-level logging
