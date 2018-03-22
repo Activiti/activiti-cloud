@@ -17,14 +17,18 @@
 package org.activiti.cloud.qa.steps;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.Event;
 import org.activiti.cloud.qa.model.EventType;
+import org.activiti.cloud.qa.model.TaskStatus;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.AuditService;
 import org.assertj.core.api.Condition;
+import org.jsoup.select.Collector;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.*;
@@ -103,10 +107,39 @@ public class AuditSteps {
                 .isNotEmpty()
                 .filteredOn(taskIsMatched).hasSize(2)
                 .extracting("task.id",
+                            "task.status",
                             "eventType")
-                .contains(tuple(taskId,
-                                EventType.TASK_CREATED),
-                          tuple(taskId,
-                                EventType.TASK_ASSIGNED));
+                .containsExactly(
+                        tuple(taskId,
+                              TaskStatus.ASSIGNED,
+                              EventType.TASK_ASSIGNED),
+                        tuple(taskId,
+                              TaskStatus.CREATED,
+                              EventType.TASK_CREATED));
+    }
+
+    /**
+     * Check if a standalone task was cancelled.
+     * @param taskId the id of the task
+     */
+    @Step
+    public void checkTaskDeletedEvent(String taskId) {
+        assertThat(getEvents())
+                .isNotEmpty()
+                .filteredOn(event -> event.getTask() != null && taskId.equals(event.getTask().getId()))
+                .hasSize(3)
+                .extracting("task.id",
+                            "task.status",
+                            "eventType")
+                .containsExactly(
+                        tuple(taskId,
+                              TaskStatus.CANCELLED,
+                              EventType.TASK_CANCELLED),
+                        tuple(taskId,
+                              TaskStatus.ASSIGNED,
+                              EventType.TASK_ASSIGNED),
+                        tuple(taskId,
+                              TaskStatus.CREATED,
+                              EventType.TASK_CREATED));
     }
 }

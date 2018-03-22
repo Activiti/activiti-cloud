@@ -17,11 +17,12 @@
 package org.activiti.cloud.qa.story;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.model.QueryStatus;
 import org.activiti.cloud.qa.model.Task;
+import org.activiti.cloud.qa.model.TaskStatus;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
+import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
@@ -44,6 +45,7 @@ public class Tasks {
     private Task newTask;
 
     @When("the user creates a standalone task")
+    @Given("an existing standalone task")
     public void createTask() throws Exception {
         newTask = runtimeBundleSteps.createNewTask();
         assertThat(newTask).isNotNull();
@@ -53,10 +55,24 @@ public class Tasks {
     public void taskIsCreatedAndAssigned() {
         final Task assignedTask = runtimeBundleSteps.getTaskById(newTask.getId());
         assertThat(assignedTask).isNotNull();
-        assertThat(assignedTask.getStatus()).isNotEmpty().isEqualToIgnoringCase(QueryStatus.ASSIGNED.toString());
+        assertThat(assignedTask.getStatus()).isEqualTo(TaskStatus.ASSIGNED);
 
         auditSteps.checkTaskCreatedAndAssignedEvents(assignedTask.getId());
         querySteps.checkTaskStatus(assignedTask.getId(),
-                                   QueryStatus.ASSIGNED);
+                                   TaskStatus.ASSIGNED);
+    }
+
+    @When("the user cancel the task")
+    public void cancelCurrentTask() {
+        runtimeBundleSteps.deleteTask(newTask.getId());
+    }
+
+    @Then("the task is cancelled")
+    public void checkTaskIsCancelled() throws Exception {
+        runtimeBundleSteps.checkTaskNotFound(newTask.getId());
+        runtimeBundleSteps.waitForMessagesToBeConsumed();
+        auditSteps.checkTaskDeletedEvent(newTask.getId());
+        querySteps.checkTaskStatus(newTask.getId(),
+                                   TaskStatus.CANCELLED);
     }
 }

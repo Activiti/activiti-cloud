@@ -63,4 +63,7 @@ public interface RuntimeBundleService extends BaseService {
 
     @RequestLine("GET /v1/tasks/{id}")
     Task getTaskById(@Param("id") String id);
+
+    @RequestLine("DELETE /v1/tasks/{id}")
+    void deleteTask(@Param("id") String id);
 }

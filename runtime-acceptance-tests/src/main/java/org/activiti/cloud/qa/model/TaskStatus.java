@@ -17,10 +17,9 @@
 package org.activiti.cloud.qa.model;
 
 /**
- * Query status enum
+ * Task status enumeration.
  */
-public enum QueryStatus {
-
-    CREATED, RUNNING, COMPLETED, CANCELLED, ASSIGNED;
-
+public enum TaskStatus {
+    CREATED, ASSIGNED, SUSPENDED, CANCELLED
 }
+

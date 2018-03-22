@@ -22,7 +22,7 @@ import java.util.List;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.qa.model.EventType;
 import org.activiti.cloud.qa.model.ProcessInstance;
-import org.activiti.cloud.qa.model.QueryStatus;
+import org.activiti.cloud.qa.model.ProcessInstanceStatus;
 import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
@@ -96,7 +96,7 @@ public class ProcessInstanceTasks {
     public void verifyProcessStatus() throws Exception {
         runtimeBundleSteps.waitForMessagesToBeConsumed();
         querySteps.checkProcessInstanceStatus(processInstance.getId(),
-                                              QueryStatus.COMPLETED);
+                                              ProcessInstanceStatus.COMPLETED);
         auditSteps.checkProcessInstanceTaskEvent(processInstance.getId(),
                                                  currentTask.getId(),
                                                  EventType.TASK_COMPLETED);
@@ -112,7 +112,7 @@ public class ProcessInstanceTasks {
         runtimeBundleSteps.checkProcessInstanceNotFound(processInstance.getId());
         runtimeBundleSteps.waitForMessagesToBeConsumed();
         querySteps.checkProcessInstanceStatus(processInstance.getId(),
-                                              QueryStatus.CANCELLED);
+                                              ProcessInstanceStatus.CANCELLED);
         auditSteps.checkProcessInstanceEvent(processInstance.getId(),
                                              EventType.PROCESS_CANCELLED);
     }

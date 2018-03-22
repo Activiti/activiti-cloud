@@ -157,4 +157,14 @@ public class RuntimeBundleSteps {
             return output.toByteArray();
         }
     }
+
+    public void deleteTask(String taskId) {
+        runtimeBundleService.deleteTask(taskId);
+    }
+
+    public void checkTaskNotFound(String taskId) {
+        assertThatExceptionOfType(Exception.class).isThrownBy(
+                () -> runtimeBundleService.getTaskById(taskId)
+        ).withMessageContaining("Not Found");
+    }
 }

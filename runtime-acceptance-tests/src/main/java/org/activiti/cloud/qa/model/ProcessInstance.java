@@ -35,7 +35,7 @@ public class ProcessInstance {
 
     private String initiator;
 
-    private QueryStatus status;
+    private ProcessInstanceStatus status;
 
     public String getId() {
         return id;
@@ -77,11 +77,11 @@ public class ProcessInstance {
         this.initiator = initiator;
     }
 
-    public QueryStatus getStatus() {
+    public ProcessInstanceStatus getStatus() {
         return status;
     }
 
-    public void setStatus(QueryStatus status) {
+    public void setStatus(ProcessInstanceStatus status) {
         this.status = status;
     }
 }
