@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
-import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.IdentityLink;
@@ -35,6 +34,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.activiti.engine.delegate.event.ActivitiEventType.ENTITY_ACTIVATED;
+import static org.activiti.engine.delegate.event.ActivitiEventType.ENTITY_CREATED;
+import static org.activiti.engine.delegate.event.ActivitiEventType.ENTITY_SUSPENDED;
+import static org.activiti.engine.delegate.event.ActivitiEventType.PROCESS_CANCELLED;
 import static org.activiti.engine.task.IdentityLinkType.CANDIDATE;
 
 @Component
@@ -46,7 +49,7 @@ public class EventConverterContext {
     public static final String TASK_EVENT_PREFIX = "Task:";
     public static final String TASK_CANDIDATE_USER_EVENT_PREFIX = "TaskCandidateUser:";
     public static final String TASK_CANDIDATE_GROUP_EVENT_PREFIX = "TaskCandidateGroup:";
-    public static final String ACTIVITI_EVENT_PREFIX = "";
+    public static final String EVENT_PREFIX = "";
 
     private Map<String, EventConverter> convertersMap;
 
@@ -79,43 +82,38 @@ public class EventConverterContext {
     public static String getPrefix(ActivitiEvent activitiEvent) {
         if (isProcessEvent(activitiEvent)) {
             return PROCESS_EVENT_PREFIX;
-        }
-
-        if (isTaskEvent(activitiEvent)) {
+        } else if (isTaskEvent(activitiEvent)) {
             return TASK_EVENT_PREFIX;
-        }
-
-        if (isIdentityLinkEntityEvent(activitiEvent)) {
+        } else if (isIdentityLinkEntityEvent(activitiEvent)) {
             IdentityLink identityLinkEntity = (IdentityLink) ((ActivitiEntityEvent) activitiEvent).getEntity();
             if (isCandidateUserEntity(identityLinkEntity)) {
                 return TASK_CANDIDATE_USER_EVENT_PREFIX;
-            }
-
-            if (isCandidateGroupEntity(identityLinkEntity)) {
+            } else if (isCandidateGroupEntity(identityLinkEntity)) {
                 return TASK_CANDIDATE_GROUP_EVENT_PREFIX;
             }
         }
 
-        return ACTIVITI_EVENT_PREFIX;
+        return EVENT_PREFIX;
     }
 
     private static boolean isProcessEvent(ActivitiEvent activitiEvent) {
+        boolean isProcessEvent = false;
         if (activitiEvent instanceof ActivitiEntityEvent) {
             Object entity = ((ActivitiEntityEvent) activitiEvent).getEntity();
             if (entity != null && ProcessInstance.class.isAssignableFrom(entity.getClass())) {
-                return isExecutionEntityEvent(activitiEvent) ?
-                        ((ExecutionEntity) entity).isProcessInstanceType() :
-                        true;
+                isProcessEvent = !isExecutionEntityEvent(activitiEvent) || ((ExecutionEntity) entity).isProcessInstanceType();
             }
+        } else if (activitiEvent.getType() == PROCESS_CANCELLED) {
+            isProcessEvent = true;
         }
 
-        return activitiEvent.getType() == ActivitiEventType.PROCESS_CANCELLED;
+        return isProcessEvent;
     }
 
     private static boolean isExecutionEntityEvent(ActivitiEvent activitiEvent) {
-        return activitiEvent.getType() == ActivitiEventType.ENTITY_SUSPENDED ||
-                activitiEvent.getType() == ActivitiEventType.ENTITY_ACTIVATED ||
-                activitiEvent.getType() == ActivitiEventType.ENTITY_CREATED;
+        return activitiEvent.getType() == ENTITY_SUSPENDED ||
+                activitiEvent.getType() == ENTITY_ACTIVATED ||
+                activitiEvent.getType() == ENTITY_CREATED;
     }
 
     private static boolean isTaskEvent(ActivitiEvent activitiEvent) {
