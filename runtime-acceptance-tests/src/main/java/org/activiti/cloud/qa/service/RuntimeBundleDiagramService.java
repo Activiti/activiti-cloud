@@ -27,8 +27,7 @@ public interface RuntimeBundleDiagramService {
 
     @RequestLine("GET /v1/process-instances/{id}/model")
     @Headers({
-            "Content-Type: image/svg+xml",
-            "Produces: image/svg+xml"
+            "Content-Type: image/svg+xml"
     })
     String getProcessDiagram(@Param("id") String id);
 

@@ -42,9 +42,9 @@ import static org.assertj.core.api.Assertions.*;
 @EnableRuntimeFeignContext
 public class RuntimeBundleSteps {
 
-    public static final String DEFAULT_PROCCES_INSTANCE_COMMAND_TYPE = "StartProcessInstanceCmd";
+    public static final String DEFAULT_PROCESS_INSTANCE_COMMAND_TYPE = "StartProcessInstanceCmd";
 
-    public static final String DEFAULT_PROCCES_INSTANCE_KEY = "ProcessWithVariables";
+    public static final String DEFAULT_PROCESS_INSTANCE_KEY = "ProcessWithVariables";
 
     @Autowired
     private RuntimeBundleService runtimeBundleService;
@@ -63,11 +63,16 @@ public class RuntimeBundleSteps {
     }
 
     @Step
-    public ProcessInstance startProcess() throws IOException {
+    public ProcessInstance startProcess() {
+        return this.startProcess(DEFAULT_PROCESS_INSTANCE_KEY);
+    }
+
+    @Step
+    public ProcessInstance startProcess(String process) {
 
         ProcessInstance processInstance = new ProcessInstance();
-        processInstance.setCommandType(DEFAULT_PROCCES_INSTANCE_COMMAND_TYPE);
-        processInstance.setProcessDefinitionKey(DEFAULT_PROCCES_INSTANCE_KEY);
+        processInstance.setCommandType(DEFAULT_PROCESS_INSTANCE_COMMAND_TYPE);
+        processInstance.setProcessDefinitionKey(process);
 
         return runtimeBundleService
                 .startProcess(processInstance);

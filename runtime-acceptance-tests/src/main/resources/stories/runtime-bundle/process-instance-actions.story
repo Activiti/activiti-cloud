@@ -14,5 +14,10 @@ Scenario: show a process instance diagram
 Given any authenticated user
 When the user starts a random process
 And open the process diagram
-Then the digram is shown
+Then the diagram is shown
 
+Scenario: show a process instance diagram with subprocesses
+Given any authenticated user
+When the user starts a process with subprocesses
+And open the process diagram
+Then the diagram is shown
