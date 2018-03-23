@@ -110,6 +110,7 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
         return Feign.builder()
                 .encoder(new GsonEncoder())
                 .decoder(new HalDecoder())
+                .errorDecoder(new FeignErrorDecoder())
                 .logger(new Logger.ErrorLogger())
                 .logLevel(Logger.Level.FULL)
                 .requestInterceptor(new OAuth2FeignRequestInterceptor());

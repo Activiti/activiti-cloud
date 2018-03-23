@@ -147,6 +147,16 @@ public class RuntimeBundleSteps {
         assertThat(diagram).isEmpty();
     }
 
+    @Step
+    public void suspendProcessInstance(String processInstanceId) {
+        runtimeBundleService.suspendProcess(processInstanceId);
+    }
+
+    @Step
+    public void activateProcessInstance(String processInstanceId) {
+        runtimeBundleService.activateProcess(processInstanceId);
+    }
+
     private byte[] svgToPng(byte[] streamBytes)
             throws TranscoderException, IOException {
         try (ByteArrayInputStream input = new ByteArrayInputStream(streamBytes);

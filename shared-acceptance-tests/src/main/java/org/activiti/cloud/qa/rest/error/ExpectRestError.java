@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa;
+package org.activiti.cloud.qa.rest.error;
 
-import org.activiti.cloud.qa.serenity.ExtendedSerenityStories;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class AcceptanceTests extends ExtendedSerenityStories {
+import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
+
+/**
+ * Expect rest error annotation
+ */
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExpectRestError {
+
+    int statusCode() default SC_INTERNAL_SERVER_ERROR;
+
+    String value() default "";
 
 }
