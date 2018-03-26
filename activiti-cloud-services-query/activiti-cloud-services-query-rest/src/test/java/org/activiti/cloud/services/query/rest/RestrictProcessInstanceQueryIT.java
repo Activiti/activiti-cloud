@@ -70,6 +70,26 @@ public class RestrictProcessInstanceQueryIT {
     }
 
     @Test
+    public void shouldMatchAppNameCaseInsensitiveIgnoringHyphens() throws Exception {
+        ProcessInstance processInstance = new ProcessInstance();
+        processInstance.setId("16");
+        processInstance.setName("name");
+        processInstance.setDescription("desc");
+        processInstance.setInitiator("initiator");
+        processInstance.setProcessDefinitionKey("defKey1");
+        processInstance.setApplicationName("Te-St-CmD-EnDpoInT");
+        processInstanceRepository.save(processInstance);
+
+        assertThat(processInstanceRepository.count()).isEqualTo(2);
+
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
+
+        Predicate predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(null, SecurityPolicy.READ);
+
+        assertThat(processInstanceRepository.count(predicate)).isEqualTo(2);
+    }
+
+    @Test
     public void shouldNotGetProcessInstancesWhenNotPermitted() throws Exception {
 
         Predicate predicate = QProcessInstance.processInstance.id.isNotNull();

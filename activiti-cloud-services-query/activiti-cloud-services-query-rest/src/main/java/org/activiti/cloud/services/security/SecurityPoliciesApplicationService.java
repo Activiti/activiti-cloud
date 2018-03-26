@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import org.activiti.cloud.services.query.model.QProcessInstance;
 import org.activiti.cloud.services.query.model.QVariable;
 import org.activiti.engine.UserGroupLookupProxy;
@@ -95,7 +96,11 @@ public class SecurityPoliciesApplicationService {
                                                                   BooleanExpression securityExpression,
                                                                   String appName,
                                                                   Set<String> defKeys) {
-        BooleanExpression nextExpression = processInstance.processDefinitionKey.in(defKeys).and(processInstance.applicationName.eq(appName));
+
+        //expect to remove hyphens when passing in environment variables
+        Predicate appNamePredicate = Expressions.stringTemplate("replace({0},'-','')", processInstance.applicationName).equalsIgnoreCase(appName.replace("-",""));
+
+        BooleanExpression nextExpression = processInstance.processDefinitionKey.in(defKeys).and(appNamePredicate);
         if (securityExpression == null) {
             securityExpression = nextExpression;
         } else {
