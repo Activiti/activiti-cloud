@@ -1,0 +1,208 @@
+/*
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.activiti.cloud.services.core;
+
+import java.io.InputStream;
+
+import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.services.core.utils.TestProcessEngine;
+import org.activiti.cloud.services.core.utils.TestProcessEngineConfiguration;
+import org.activiti.engine.ActivitiException;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.apache.commons.io.IOUtils;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper.DEFAULT_DIAGRAM_IMAGE_FILE;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+/**
+ * Integration tests for ProcessDiagramGeneratorWrapper
+ */
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = TestProcessEngineConfiguration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@TestPropertySource("classpath:test-process-diagram.properties")
+public class ProcessDiagramGeneratorWrapperIT {
+
+    private static final String DEFAULT_DIAGRAM_FONT_NAME = "Arial";
+
+    @SpyBean
+    private ProcessDiagramGeneratorWrapper processDiagramGenerator;
+
+    @Autowired
+    private TestProcessEngine processEngine;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    /**
+     * Test for generating a valid process diagram
+     * <p>
+     * 1. deploy a process with diagram
+     * 2. start the process
+     * 3. generate diagram for the corresponding BPMN model
+     * 4. Expected: the diagram is not empty
+     */
+    @Test
+    public void testGenerateProcessDiagram() throws Exception {
+        //GIVEN
+        processEngine.deploy("processes/SimpleProcess");
+        ProcessInstance processInstance = processEngine.startProcessInstanceByKey("SimpleProcess");
+        BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
+        assertThat(processDiagramGenerator.hasGraphicInfo(bpmnModel)).isTrue();
+
+        //WHEN
+        byte[] diagram = processDiagramGenerator.generateDiagram(bpmnModel);
+
+        //THEN
+        assertThat(diagram).isNotEmpty();
+    }
+
+    /**
+     * Test for generating diagram a process without diagram
+     * <p>
+     * 1. deploy a process without diagram
+     * 2. start the process
+     * 3. generate diagram for the corresponding BPMN model
+     * 4. Expected: the diagram is empty
+     */
+    @Test
+    public void testGenerateDiagramForProcessWithNoGraphicInfo() throws Exception {
+        //GIVEN
+        processEngine.deploy("processes/SubProcessTest.fixSystemFailureProcess");
+        ProcessInstance processInstance = processEngine.startProcessInstanceByKey("fixSystemFailure");
+        BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
+        assertThat(processDiagramGenerator.hasGraphicInfo(bpmnModel)).isFalse();
+
+        //WHEN
+        byte[] diagram = processDiagramGenerator.generateDiagram(bpmnModel);
+
+        //THEN
+        try (InputStream imageStream = getClass().getResourceAsStream(DEFAULT_DIAGRAM_IMAGE_FILE)) {
+            assertThat(diagram).isEqualTo(IOUtils.toByteArray(imageStream));
+        }
+    }
+
+    /**
+     * Test for generating diagram a process without diagram when there is no image for the default diagram
+     * <p>
+     * 1. deploy a process without diagram
+     * 2. start the process
+     * 3. generate diagram for the corresponding BPMN model
+     * 4. Expected: ActivitiException is thrown while generating diagram
+     */
+    @Test
+    public void testGenerateDiagramForProcessWithNoGraphicInfoAndNoDefaultImage() throws Exception {
+        //GIVEN
+        processEngine.deploy("processes/SubProcessTest.fixSystemFailureProcess");
+        ProcessInstance processInstance = processEngine.startProcessInstanceByKey("fixSystemFailure");
+        BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
+        assertThat(processDiagramGenerator.hasGraphicInfo(bpmnModel)).isFalse();
+
+        //THEN
+        expectedException.expect(ActivitiException.class);
+        expectedException.expectMessage("Error occured while getting the default diagram image");
+
+        //WHEN
+        when(processDiagramGenerator.getDefaultDiagramImageFile())
+                .thenReturn("invalid-file-name");
+        processDiagramGenerator.generateDiagram(bpmnModel);
+    }
+
+    /**
+     * Test for generating diagram a process with invalid diagram
+     * <p>
+     * 1. generate diagram for an invalid BPMN model
+     * 2. Expected: ActivitiException is thrown while generating diagram
+     */
+    @Test
+    public void testGenerateDiagramForProcessWithInvalidGraphicInfo() throws Exception {
+        //GIVEN
+        BpmnModel bpmnModel = new BpmnModel();
+        bpmnModel.addGraphicInfo("key",
+                                 null);
+        assertThat(processDiagramGenerator.hasGraphicInfo(bpmnModel)).isTrue();
+
+        //THEN
+        expectedException.expect(ActivitiException.class);
+        expectedException.expectMessage("Error occured while getting process diagram");
+
+        //WHEN
+        processDiagramGenerator.generateDiagram(bpmnModel);
+    }
+
+    /**
+     * Test the diagram custom font.
+     * <p>
+     * 1. Get the diagram activity font name when the custom font is 'Lucida' in properties file
+     * 2. Get the diagram label font name when the custom font is 'InvalidFont' in properties file
+     * 3. Get the diagram annotation font name when there is no custom font name specified in properties file
+     * 4. Expected:
+     * - the diagram activity font name is the custom one from properties file
+     * - the diagram label font name is the engine default one (Arial)
+     * - the diagram annotation font name is the engine default one (Arial)
+     */
+    @Test
+    public void testProcessDiagramFonts() {
+        //GIVEN
+        //test-process-diagram.properties:
+        //activiti.engine.diagram.activity.font=Lucida
+        //activiti.engine.diagram.label.font=InvalidFont
+
+        //WHEN
+        String activityFont = processDiagramGenerator.getActivityFontName();
+        String labelFont = processDiagramGenerator.getLabelFontName();
+        String annotationFont = processDiagramGenerator.getAnnotationFontName();
+
+        //THEN
+        assertThat(activityFont).isEqualTo("Lucida");
+        assertThat(labelFont).isEqualTo(DEFAULT_DIAGRAM_FONT_NAME);
+        assertThat(annotationFont).isEqualTo(DEFAULT_DIAGRAM_FONT_NAME);
+    }
+
+    /**
+     * Test the diagram custom font when the only available font on the system is the default one ('Arial').
+     * <p>
+     * Expected: The only used font is the default, no matter what custom font are specified
+     */
+    @Test
+    public void testProcessDiagramFontsWhenWithAvailableFonts() {
+        //GIVEN
+        when(processDiagramGenerator.getAvailableFonts())
+                .thenReturn(new String[]{DEFAULT_DIAGRAM_FONT_NAME});
+
+        //WHEN
+        String activityFont = processDiagramGenerator.getActivityFontName();
+        String labelFont = processDiagramGenerator.getLabelFontName();
+        String annotationFont = processDiagramGenerator.getAnnotationFontName();
+
+        //THEN
+        assertThat(activityFont).isEqualTo(DEFAULT_DIAGRAM_FONT_NAME);
+        assertThat(labelFont).isEqualTo(DEFAULT_DIAGRAM_FONT_NAME);
+        assertThat(annotationFont).isEqualTo(DEFAULT_DIAGRAM_FONT_NAME);
+    }
+}

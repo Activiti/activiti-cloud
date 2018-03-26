@@ -26,14 +26,13 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.converter.ProcessDefinitionConverter;
+import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.core.pageable.PageableRepositoryService;
-import org.activiti.cloud.services.rest.api.ProcessDefinitionMetaController;
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
-import org.activiti.image.ProcessDiagramGenerator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,16 +92,13 @@ public class ProcessDefinitionControllerImplIT {
     private RepositoryService repositoryService;
 
     @MockBean
-    private ProcessDiagramGenerator processDiagramGenerator;
+    private ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
     @MockBean
     private ProcessDefinitionConverter processDefinitionConverter;
 
     @MockBean
     private PageableRepositoryService pageableRepositoryService;
-
-    @MockBean
-    private ProcessDefinitionMetaController processDefinitionMetaController;
 
     @Test
     public void getProcessDefinitions() throws Exception {
@@ -273,12 +269,8 @@ public class ProcessDefinitionControllerImplIT {
                                                                         SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
         when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
         when(processDefinitionQuery.singleResult()).thenReturn(new ProcessDefinitionEntityImpl());
-        InputStream img = new ByteArrayInputStream("img".getBytes());
-        when(processDiagramGenerator.generateDiagram(bpmnModel,
-                                                     processDiagramGenerator.getDefaultActivityFontName(),
-                                                     processDiagramGenerator.getDefaultLabelFontName(),
-                                                     processDiagramGenerator.getDefaultAnnotationFontName()))
-                .thenReturn(img);
+        when(processDiagramGenerator.generateDiagram(any(BpmnModel.class)))
+                .thenReturn("img".getBytes());
 
         this.mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
@@ -287,4 +279,5 @@ public class ProcessDefinitionControllerImplIT {
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/diagram",
                                 processDefinitionIdParameter()));
     }
+
 }

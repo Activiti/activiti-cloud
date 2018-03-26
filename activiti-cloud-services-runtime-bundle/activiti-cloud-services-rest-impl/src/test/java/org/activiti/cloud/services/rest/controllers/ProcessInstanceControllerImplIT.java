@@ -16,9 +16,6 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -30,10 +27,10 @@ import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
+import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.engine.RepositoryService;
-import org.activiti.image.ProcessDiagramGenerator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +50,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -87,7 +86,7 @@ public class ProcessInstanceControllerImplIT {
     @MockBean
     private RepositoryService repositoryService;
     @MockBean
-    private ProcessDiagramGenerator processDiagramGenerator;
+    private ProcessDiagramGeneratorWrapper processDiagramGenerator;
     @SpyBean
     private ObjectMapper mapper;
 
@@ -114,9 +113,9 @@ public class ProcessInstanceControllerImplIT {
 
         List<ProcessInstance> processInstanceList = Collections.singletonList(buildDefaultProcessInstance());
         Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList,
-                                                                PageRequest.of(1,
-                                                                               10),
-                                                                processInstanceList.size());
+                                                                   PageRequest.of(1,
+                                                                                  10),
+                                                                   processInstanceList.size());
         when(processEngine.getProcessInstances(any())).thenReturn(processInstancePage);
 
         this.mockMvc.perform(get("/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
@@ -158,8 +157,8 @@ public class ProcessInstanceControllerImplIT {
         when(processEngine.startProcess(any())).thenThrow(new ActivitiForbiddenException("Not permitted"));
 
         this.mockMvc.perform(post("/v1/process-instances")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(cmd)))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(mapper.writeValueAsString(cmd)))
                 .andExpect(status().isForbidden())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/start"));
     }
@@ -177,30 +176,41 @@ public class ProcessInstanceControllerImplIT {
                                 pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
 
+    @Test
+    public void getProcessInstanceByIdNotFound() throws Exception {
+        when(processEngine.getProcessInstanceById("1")).thenReturn(null);
+
+        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}",
+                                 1))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     public void getProcessDiagram() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
-        when(processEngine.getProcessInstanceById("1")).thenReturn(processInstance);
-        InputStream diagram = new ByteArrayInputStream("diagram".getBytes());
-        BpmnModel bpmnModel = mock(BpmnModel.class);
-        when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId())).thenReturn(bpmnModel);
+        when(processEngine.getProcessInstanceById(anyString())).thenReturn(processInstance);
+        when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId())).thenReturn(mock(BpmnModel.class));
         when(securityService.canRead(processInstance.getProcessDefinitionId())).thenReturn(true);
-        List<String> activitiIds = new ArrayList<>();
-        when(processEngine.getActiveActivityIds("1")).thenReturn(activitiIds);
+        when(processEngine.getActiveActivityIds(anyString())).thenReturn(Collections.emptyList());
 
-        when(processDiagramGenerator.generateDiagram(bpmnModel,
-                                                     activitiIds,
-                                                     Collections.emptyList(),
-                                                     processDiagramGenerator.getDefaultActivityFontName(),
-                                                     processDiagramGenerator.getDefaultLabelFontName(),
-                                                     processDiagramGenerator.getDefaultAnnotationFontName())).thenReturn(diagram);
+        when(processDiagramGenerator.generateDiagram(any(BpmnModel.class),
+                                                     anyList(),
+                                                     anyList()))
+                .thenReturn("diagram".getBytes());
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/model",
                                  1).contentType("image/svg+xml"))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/diagram",
                                 pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+    }
+
+    @Test
+    public void getProcessDiagramProcessNotFound() throws Exception {
+        when(processEngine.getProcessInstanceById(anyString())).thenReturn(null);
+        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/model",
+                                 1).contentType("image/svg+xml"))
+                .andExpect(status().isNotFound());
     }
 
     @Test

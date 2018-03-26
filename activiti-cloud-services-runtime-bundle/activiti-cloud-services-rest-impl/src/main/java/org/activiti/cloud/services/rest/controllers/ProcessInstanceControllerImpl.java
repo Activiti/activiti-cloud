@@ -15,10 +15,7 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 
 import org.activiti.bpmn.model.BpmnModel;
@@ -29,16 +26,14 @@ import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
+import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
-import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
-import org.activiti.engine.impl.util.IoUtil;
-import org.activiti.image.ProcessDiagramGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
@@ -51,6 +46,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import static java.util.Collections.emptyList;
+
 @RestController
 public class ProcessInstanceControllerImpl implements ProcessInstanceController {
 
@@ -58,7 +55,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     private final RepositoryService repositoryService;
 
-    private final ProcessDiagramGenerator processDiagramGenerator;
+    private final ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
     private final ProcessInstanceResourceAssembler resourceAssembler;
 
@@ -72,7 +69,6 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
         return ex.getMessage();
     }
 
-
     @ExceptionHandler(ActivitiObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleAppException(ActivitiObjectNotFoundException ex) {
@@ -82,7 +78,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     @Autowired
     public ProcessInstanceControllerImpl(ProcessEngineWrapper processEngine,
                                          RepositoryService repositoryService,
-                                         ProcessDiagramGenerator processDiagramGenerator,
+                                         ProcessDiagramGeneratorWrapper processDiagramGenerator,
                                          ProcessInstanceResourceAssembler resourceAssembler,
                                          SecurityPoliciesApplicationService securityService,
                                          AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler) {
@@ -96,7 +92,8 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public PagedResources<ProcessInstanceResource> getProcessInstances(Pageable pageable) {
-        return pagedResourcesAssembler.toResource(pageable, processEngine.getProcessInstances(pageable),
+        return pagedResourcesAssembler.toResource(pageable,
+                                                  processEngine.getProcessInstances(pageable),
                                                   resourceAssembler);
     }
 
@@ -109,7 +106,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     @Override
     public Resource<ProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId) {
         ProcessInstance processInstance = processEngine.getProcessInstanceById(processInstanceId);
-        if(processInstance == null || !securityService.canRead(processInstance.getProcessDefinitionKey())){
+        if (processInstance == null || !securityService.canRead(processInstance.getProcessDefinitionKey())) {
             throw new ActivitiObjectNotFoundException("Unable to find process definition for the given id:'" + processInstanceId + "'");
         }
         return resourceAssembler.toResource(processInstance);
@@ -121,24 +118,13 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
         if (processInstance == null || !securityService.canRead(processInstance.getProcessDefinitionKey())) {
             throw new ActivitiObjectNotFoundException("Unable to find process instance for the given id:'" + processInstanceId + "'");
         }
+
         List<String> activityIds = processEngine.getActiveActivityIds(processInstanceId);
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
-        String activityFontName = processDiagramGenerator.getDefaultActivityFontName();
-        String labelFontName = processDiagramGenerator.getDefaultLabelFontName();
-        String annotationFontName = processDiagramGenerator.getDefaultAnnotationFontName();
-        try (final InputStream imageStream = processDiagramGenerator.generateDiagram(bpmnModel,
-                                                                                     activityIds,
-                                                                                     Collections.emptyList(),
-                                                                                     activityFontName,
-                                                                                     labelFontName,
-                                                                                     annotationFontName)) {
-            return new String(IoUtil.readInputStream(imageStream,
-                                                     null),
-                              StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new ActivitiException("Error occured while getting process diagram '" + processInstanceId + "' : " + e.getMessage(),
-                                        e);
-        }
+        return new String(processDiagramGenerator.generateDiagram(bpmnModel,
+                                                                  activityIds,
+                                                                  emptyList()),
+                          StandardCharsets.UTF_8);
     }
 
     @Override
