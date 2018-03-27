@@ -27,6 +27,7 @@ import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
+import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
@@ -75,8 +76,8 @@ public class ProcessInstanceTasks {
         this.startProcess(DEFAULT_PROCESS_INSTANCE_KEY);
     }
 
-    @When("the user starts a process with subprocesses")
-    public void startProcessWithSubprocesses() throws Exception {
+    @When("the user starts a process without graphic info")
+    public void startProcessWithoutFGraphicInfo() throws Exception {
         this.startProcess("fixSystemFailure");
     }
 
@@ -122,6 +123,7 @@ public class ProcessInstanceTasks {
     }
 
     @Then("the diagram is shown")
+    @Alias("the default diagram image is shown")
     public void checkProcessInstanceDiagram() throws Exception {
         runtimeBundleSteps.checkProcessInstanceDiagram(processInstanceDiagram);
     }

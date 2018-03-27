@@ -16,8 +16,8 @@ When the user starts a random process
 And open the process diagram
 Then the diagram is shown
 
-Scenario: show a process instance diagram with subprocesses
+Scenario: show diagram for a process instance without graphic info
 Given any authenticated user
-When the user starts a process with subprocesses
+When the user starts a process without graphic info
 And open the process diagram
-Then the diagram is shown
+Then the default diagram image is shown
