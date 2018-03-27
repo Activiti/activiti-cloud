@@ -150,4 +150,23 @@ public class SecurityPoliciesApplicationServiceTest {
 
         verify(query,times(2)).processDefinitionId(any());
     }
+
+
+    @Test
+    public void shouldRestrictProcDefQueryWhenPoliciesButNotForUser(){
+
+        when(securityPoliciesService.policiesDefined()).thenReturn(true);
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("intruder");
+        when(userRoleLookupProxy.isAdmin("intruder")).thenReturn(false);
+
+        when(userGroupLookupProxy.getGroupsForCandidateUser("intruder")).thenReturn(null);
+        Map<String,Set<String>> map = new HashMap<String,Set<String>>();
+        when(securityPoliciesService.getProcessDefinitionKeys("intruder",null,SecurityPolicy.READ)).thenReturn(map);
+
+        ProcessDefinitionQuery query = mock(ProcessDefinitionQuery.class);
+        when(query.processDefinitionId(any())).thenReturn(query);
+        securityPoliciesApplicationService.restrictProcessDefQuery(query,SecurityPolicy.READ);
+
+        verify(query,times(2)).processDefinitionId(any());
+    }
 }
