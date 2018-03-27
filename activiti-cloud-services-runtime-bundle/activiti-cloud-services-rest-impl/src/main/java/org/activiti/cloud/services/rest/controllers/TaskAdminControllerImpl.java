@@ -18,18 +18,17 @@ package org.activiti.cloud.services.rest.controllers;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.rest.api.AdminController;
+import org.activiti.cloud.services.rest.api.TaskAdminController;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class AdminControllerImpl implements AdminController {
+public class TaskAdminControllerImpl implements TaskAdminController {
 
     private ProcessEngineWrapper processEngine;
 
@@ -38,9 +37,9 @@ public class AdminControllerImpl implements AdminController {
     private final AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
 
     @Autowired
-    public AdminControllerImpl(ProcessEngineWrapper processEngine,
-                               TaskResourceAssembler taskResourceAssembler,
-                               AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler) {
+    public TaskAdminControllerImpl(ProcessEngineWrapper processEngine,
+                                   TaskResourceAssembler taskResourceAssembler,
+                                   AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler) {
         this.processEngine = processEngine;
         this.taskResourceAssembler = taskResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;

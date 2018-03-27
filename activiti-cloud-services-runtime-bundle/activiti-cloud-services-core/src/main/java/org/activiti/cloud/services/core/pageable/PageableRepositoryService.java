@@ -66,5 +66,16 @@ public class PageableRepositoryService {
                                       processDefinitionConverter);
     }
 
+    public Page<ProcessDefinition> getAllProcessDefinitions(Pageable pageable) {
+
+        ProcessDefinitionQuery query = repositoryService.createProcessDefinitionQuery();
+
+        sortApplier.applySort(query,
+                pageable);
+        return pageRetriever.loadPage(query,
+                pageable,
+                processDefinitionConverter);
+    }
+
 
 }

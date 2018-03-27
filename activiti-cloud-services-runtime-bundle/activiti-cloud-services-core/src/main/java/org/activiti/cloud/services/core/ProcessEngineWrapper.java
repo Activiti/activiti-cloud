@@ -74,6 +74,10 @@ public class ProcessEngineWrapper {
         return pageableProcessInstanceService.getProcessInstances(pageable);
     }
 
+    public Page<ProcessInstance> getAllProcessInstances(Pageable pageable) {
+        return pageableProcessInstanceService.getAllProcessInstances(pageable);
+    }
+
     public ProcessInstance startProcess(StartProcessInstanceCmd cmd) {
 
         String processDefinitionKey = null;

@@ -65,4 +65,15 @@ public class PageableProcessInstanceService {
                                       pageable,
                                       processInstanceConverter);
     }
+
+    public Page<ProcessInstance> getAllProcessInstances(Pageable pageable) {
+
+        ProcessInstanceQuery query = runtimeService.createProcessInstanceQuery();
+
+        sortApplier.applySort(query,
+                pageable);
+        return pageRetriever.loadPage(query,
+                pageable,
+                processInstanceConverter);
+    }
 }

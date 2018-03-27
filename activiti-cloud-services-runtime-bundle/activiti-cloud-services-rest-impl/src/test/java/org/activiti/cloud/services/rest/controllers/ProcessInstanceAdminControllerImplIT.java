@@ -16,12 +16,7 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import org.activiti.cloud.services.api.model.Task;
+import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +34,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.mockito.Mockito.any;
@@ -50,14 +50,16 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.subsecti
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(AdminControllerImpl.class)
+@WebMvcTest(ProcessInstanceAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
-public class AdminControllerImplIT {
+public class ProcessInstanceAdminControllerImplIT {
 
-    private static final String DOCUMENTATION_IDENTIFIER = "task-admin";
+    private static final String DOCUMENTATION_IDENTIFIER = "process-instance";
+
+    private static final String DOCUMENTATION_IDENTIFIER_ALFRESCO = "process-instance-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
@@ -65,17 +67,18 @@ public class AdminControllerImplIT {
     @MockBean
     private ProcessEngineWrapper processEngine;
 
+
     @Test
-    public void getTasks() throws Exception {
+    public void getProcessInstances() throws Exception {
 
-        List<Task> taskList = Collections.singletonList(buildDefaultTask());
-        Page<Task> tasks = new PageImpl<>(taskList,
-                                          PageRequest.of(0,
-                                                         10),
-                                          taskList.size());
-        when(processEngine.getAllTasks(any())).thenReturn(tasks);
+        List<ProcessInstance> processInstanceList = Collections.singletonList(buildDefaultProcessInstance());
+        Page<ProcessInstance> processInstances = new PageImpl<>(processInstanceList,
+                                                                PageRequest.of(0,
+                                                                               10),
+                                                                processInstanceList.size());
+        when(processEngine.getAllProcessInstances(any())).thenReturn(processInstances);
 
-        this.mockMvc.perform(get("/admin/v1/tasks"))
+        this.mockMvc.perform(get("/admin/v1/process-instances"))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 responseFields(subsectionWithPath("page").description("Pagination details."),
@@ -84,41 +87,32 @@ public class AdminControllerImplIT {
     }
 
     @Test
-    public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
-        List<Task> taskList = Collections.singletonList(buildDefaultTask());
-        Page<Task> taskPage = new PageImpl<>(taskList,
-                                          PageRequest.of(1,
-                                                         10),
-                                          taskList.size());
-        when(processEngine.getAllTasks(any())).thenReturn(taskPage);
+    public void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
 
-        this.mockMvc.perform(get("/admin/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
+        List<ProcessInstance> processInstanceList = Collections.singletonList(buildDefaultProcessInstance());
+        Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList,
+                                                                PageRequest.of(1,
+                                                                               10),
+                                                                processInstanceList.size());
+        when(processEngine.getAllProcessInstances(any())).thenReturn(processInstancePage);
+
+        this.mockMvc.perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
+                .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
                                 pageRequestParameters(),
                                 pagedResourcesResponseFields()));
     }
 
-    private Task buildDefaultTask() {
-        return buildTask(Task.TaskStatus.ASSIGNED, "user");
-    }
-
-
-    private Task buildTask(Task.TaskStatus status,
-                           String assignee) {
-        return new Task(UUID.randomUUID().toString(),
-                        "user",
-                        assignee,
-                        "Validate",
-                        "Validate request",
-                        new Date(),
-                        new Date(),
-                        new Date(),
-                        10,
-                        UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(),
-                        null,
-                        status.name());
+    private ProcessInstance buildDefaultProcessInstance() {
+        return new ProcessInstance(UUID.randomUUID().toString(),
+                                   "My process instance",
+                                   "This is my process instance",
+                                   UUID.randomUUID().toString(),
+                                   "user",
+                                   new Date(),
+                                   "my business key",
+                                   ProcessInstance.ProcessInstanceStatus.RUNNING.name(),
+                                   "my-proc-def");
     }
 
 }
