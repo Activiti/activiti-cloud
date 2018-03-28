@@ -20,7 +20,6 @@ import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import org.activiti.cloud.qa.model.AuthToken;
-import org.springframework.stereotype.Service;
 
 /**
  * Authentication service

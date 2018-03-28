@@ -19,7 +19,7 @@ package org.activiti.cloud.qa.rest.feign;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.jackson.JacksonDecoder;
-import org.springframework.cloud.netflix.feign.support.ResponseEntityDecoder;
+import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 
 /**

@@ -31,8 +31,8 @@ import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.DEFAULT_PROCESS_INSTANCE_KEY;
+import static org.assertj.core.api.Assertions.*;
 
 public class ProcessInstanceTasks {
 

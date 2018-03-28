@@ -24,7 +24,6 @@ import org.activiti.cloud.qa.config.BaseTestsConfigurationProperties;
 import org.activiti.cloud.qa.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Feign Configuration

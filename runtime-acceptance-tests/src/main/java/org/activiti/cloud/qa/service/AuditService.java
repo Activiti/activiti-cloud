@@ -21,7 +21,6 @@ import feign.Param;
 import feign.RequestLine;
 import org.activiti.cloud.qa.model.Event;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.stereotype.Service;
 
 /**
  * Audit service

@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import org.activiti.cloud.qa.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.qa.rest.RuntimeFeignConfiguration;
 import org.springframework.test.context.ContextConfiguration;
