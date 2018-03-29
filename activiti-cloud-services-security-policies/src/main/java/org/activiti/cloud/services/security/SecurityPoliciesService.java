@@ -19,6 +19,9 @@ public class SecurityPoliciesService {
 
     private SecurityProperties securityProperties;
 
+    @Value("${activiti.security.policies.wildcard:*}")
+    private String wildcard;
+
     @Autowired
     public SecurityPoliciesService(SecurityProperties securityProperties){
         this.securityProperties = securityProperties;
@@ -74,7 +77,7 @@ public class SecurityPoliciesService {
     }
 
     private boolean keyMatchesUserOrGroup(String userOrGroup, String key) {
-        return key!=null && key.toLowerCase().startsWith(userOrGroup.toLowerCase()+"."); //note . at end
+        return key!=null && key.replace("-","").toLowerCase().startsWith(userOrGroup.replace("-","").toLowerCase()+"."); //note . at end
     }
 
     private void addFilterKeysToMap(String propertyValue, String key, Map<String,Set<String>> procDefKeys) {
@@ -119,4 +122,7 @@ public class SecurityPoliciesService {
         return getProcessDefinitionKeys(userId,groups,Arrays.asList(minPolicyLevel));
     }
 
+    public String getWildcard(){
+        return wildcard;
+    }
 }
