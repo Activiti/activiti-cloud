@@ -205,6 +205,8 @@ public class ProcessEngineWrapper {
         task.setName(createTaskCmd.getName());
         task.setDescription(createTaskCmd.getDescription());
         task.setCategory(createTaskCmd.getCategory());
+        taskService.saveTask(task);
+
         task.setAssignee(authenticationWrapper.getAuthenticatedUserId());
         taskService.saveTask(task);
 
