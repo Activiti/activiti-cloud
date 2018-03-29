@@ -17,15 +17,14 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
-
 import javax.persistence.EntityManager;
 
-import org.activiti.engine.ActivitiException;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.events.TaskCreatedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.Task;
+import org.activiti.engine.ActivitiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,15 +44,19 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
     public void handle(ProcessEngineEvent event) {
         TaskCreatedEvent taskCreatedEvent = (TaskCreatedEvent) event;
         Task task = taskCreatedEvent.getTask();
-        
-        // Get processInstance reference proxy without database query
-        ProcessInstance processInstance = entityManager
-                .getReference(ProcessInstance.class, taskCreatedEvent.getProcessInstanceId());
 
-        task.setApplicationName(event.getApplicationName());
-        // Associate task with parent reference
-        task.setProcessInstance(processInstance);
-        
+        // not a standalone task
+        if (taskCreatedEvent.getProcessInstanceId() != null) {
+            // Get processInstance reference proxy without database query
+            ProcessInstance processInstance = entityManager
+                    .getReference(ProcessInstance.class,
+                                  taskCreatedEvent.getProcessInstanceId());
+
+            task.setApplicationName(event.getApplicationName());
+            // Associate task with parent reference
+            task.setProcessInstance(processInstance);
+        }
+
         // Set attributes
         task.setStatus("CREATED");
         task.setLastModified(new Date(taskCreatedEvent.getTimestamp()));
@@ -61,8 +64,9 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
         // Persist into database
         try {
             taskRepository.save(task);
-        } catch(Exception cause) {
-        	throw new ActivitiException("Error handling TaskCreatedEvent["+event+"]", cause);
+        } catch (Exception cause) {
+            throw new ActivitiException("Error handling TaskCreatedEvent[" + event + "]",
+                                        cause);
         }
     }
 
