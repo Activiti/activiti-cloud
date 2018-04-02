@@ -16,14 +16,12 @@
 
 package org.activiti.cloud.services.core;
 
-import java.io.InputStream;
-
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.services.core.utils.TestProcessEngine;
 import org.activiti.cloud.services.core.utils.TestProcessEngineConfiguration;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.runtime.ProcessInstance;
-import org.apache.commons.io.IOUtils;
+import org.activiti.image.exception.ActivitiImageException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,7 +33,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper.DEFAULT_DIAGRAM_IMAGE_FILE;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -73,7 +70,7 @@ public class ProcessDiagramGeneratorWrapperIT {
         processEngine.deploy("processes/SimpleProcess");
         ProcessInstance processInstance = processEngine.startProcessInstanceByKey("SimpleProcess");
         BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
-        assertThat(processDiagramGenerator.hasGraphicInfo(bpmnModel)).isTrue();
+        assertThat(bpmnModel.hasDiagramInterchangeInfo()).isTrue();
 
         //WHEN
         byte[] diagram = processDiagramGenerator.generateDiagram(bpmnModel);
@@ -96,15 +93,13 @@ public class ProcessDiagramGeneratorWrapperIT {
         processEngine.deploy("processes/SubProcessTest.fixSystemFailureProcess");
         ProcessInstance processInstance = processEngine.startProcessInstanceByKey("fixSystemFailure");
         BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
-        assertThat(processDiagramGenerator.hasGraphicInfo(bpmnModel)).isFalse();
+        assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
         //WHEN
         byte[] diagram = processDiagramGenerator.generateDiagram(bpmnModel);
 
         //THEN
-        try (InputStream imageStream = getClass().getResourceAsStream(DEFAULT_DIAGRAM_IMAGE_FILE)) {
-            assertThat(diagram).isEqualTo(IOUtils.toByteArray(imageStream));
-        }
+        assertThat(diagram).isNotEmpty();
     }
 
     /**
@@ -121,15 +116,46 @@ public class ProcessDiagramGeneratorWrapperIT {
         processEngine.deploy("processes/SubProcessTest.fixSystemFailureProcess");
         ProcessInstance processInstance = processEngine.startProcessInstanceByKey("fixSystemFailure");
         BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
-        assertThat(processDiagramGenerator.hasGraphicInfo(bpmnModel)).isFalse();
+        assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
-        //THEN
-        expectedException.expect(ActivitiException.class);
-        expectedException.expectMessage("Error occured while getting the default diagram image");
+        when(processDiagramGenerator.isGenerateDefaultDiagram())
+                .thenReturn(true);
+        when(processDiagramGenerator.getDefaultDiagramImageFileName())
+                .thenReturn("");
 
         //WHEN
-        when(processDiagramGenerator.getDefaultDiagramImageFile())
+        byte[] diagram = processDiagramGenerator.generateDiagram(bpmnModel);
+
+        //THEN
+        assertThat(diagram).isNotEmpty();
+    }
+
+    /**
+     * Test for generating diagram a process without diagram when there is no image for the default diagram
+     * <p>
+     * 1. deploy a process without diagram
+     * 2. start the process
+     * 3. generate diagram for the corresponding BPMN model
+     * 4. Expected: ActivitiException is thrown while generating diagram
+     */
+    @Test
+    public void testGenerateDiagramForProcessWithNoGraphicInfoAndInvalidDefaultImage() throws Exception {
+        //GIVEN
+        processEngine.deploy("processes/SubProcessTest.fixSystemFailureProcess");
+        ProcessInstance processInstance = processEngine.startProcessInstanceByKey("fixSystemFailure");
+        BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
+        assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
+
+        when(processDiagramGenerator.isGenerateDefaultDiagram())
+                .thenReturn(true);
+        when(processDiagramGenerator.getDefaultDiagramImageFileName())
                 .thenReturn("invalid-file-name");
+
+        //THEN
+        expectedException.expect(ActivitiImageException.class);
+        expectedException.expectMessage("Error occurred while getting default diagram image from file");
+
+        //WHEN
         processDiagramGenerator.generateDiagram(bpmnModel);
     }
 
@@ -145,11 +171,11 @@ public class ProcessDiagramGeneratorWrapperIT {
         BpmnModel bpmnModel = new BpmnModel();
         bpmnModel.addGraphicInfo("key",
                                  null);
-        assertThat(processDiagramGenerator.hasGraphicInfo(bpmnModel)).isTrue();
+        assertThat(bpmnModel.hasDiagramInterchangeInfo()).isTrue();
 
         //THEN
         expectedException.expect(ActivitiException.class);
-        expectedException.expectMessage("Error occured while getting process diagram");
+        expectedException.expectMessage("Error occurred while getting process diagram");
 
         //WHEN
         processDiagramGenerator.generateDiagram(bpmnModel);

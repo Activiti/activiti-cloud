@@ -33,6 +33,7 @@ import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
+import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,9 +58,7 @@ import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourc
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processDefinitionFields;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processDefinitionIdParameter;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.halLinks;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
@@ -278,6 +277,45 @@ public class ProcessDefinitionControllerImplIT {
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/diagram",
                                 processDefinitionIdParameter()));
+    }
+
+
+    @Test
+    public void getProcessDiagramProcessNotFound() throws Exception {
+        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
+        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
+        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery,
+                                                                        SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.singleResult()).thenReturn(null);
+        when(processDiagramGenerator.generateDiagram(any(BpmnModel.class)))
+                .thenReturn("img".getBytes());
+
+        this.mockMvc.perform(
+                get("/v1/process-definitions/{id}/model",
+                    1).accept("image/svg+xml"))
+                .andExpect(status().isNotFound())
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/diagram",
+                                processDefinitionIdParameter()));
+    }
+
+    @Test
+    public void getProcessDiagramWithoutInterchangeInfo() throws Exception {
+        BpmnModel bpmnModel = new BpmnModel();
+        when(repositoryService.getBpmnModel("1")).thenReturn(bpmnModel);
+        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
+        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
+        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery,
+                                                                        SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
+        when(processDefinitionQuery.singleResult()).thenReturn(new ProcessDefinitionEntityImpl());
+        when(processDiagramGenerator.generateDiagram(any(BpmnModel.class)))
+                .thenThrow(new ActivitiInterchangeInfoNotFoundException("No interchange information found."));
+
+        this.mockMvc.perform(
+                get("/v1/process-definitions/{id}/model",
+                    1).accept("image/svg+xml"))
+                .andExpect(status().isNoContent());
     }
 
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.ActivitiException;
 import org.activiti.image.ProcessDiagramGenerator;
+import org.activiti.image.exception.ActivitiImageException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,18 +43,22 @@ public class ProcessDiagramGeneratorWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessDiagramGeneratorWrapper.class);
 
-    public static final String DEFAULT_DIAGRAM_IMAGE_FILE = "/image/na.svg";
-
     private final ProcessDiagramGenerator processDiagramGenerator;
 
-    @Value("${activiti.engine.diagram.activity.font:}")
+    @Value("${activiti.diagram.activity.font:}")
     private String activityFontName;
 
-    @Value("${activiti.engine.diagram.label.font:}")
+    @Value("${activiti.diagram.label.font:}")
     private String labelFontName;
 
-    @Value("${activiti.engine.diagram.annotation.font:}")
+    @Value("${activiti.diagram.annotation.font:}")
     private String annotationFontName;
+
+    @Value("${activiti.diagram.default.image.file:}")
+    private String defaultDiagramImageFileName;
+
+    @Value("${activiti.diagram.generate.default:false}")
+    private boolean generateDefaultDiagram;
 
     @Autowired
     public ProcessDiagramGeneratorWrapper(ProcessDiagramGenerator processDiagramGenerator) {
@@ -81,42 +86,39 @@ public class ProcessDiagramGeneratorWrapper {
     public byte[] generateDiagram(BpmnModel bpmnModel,
                                   List<String> highLightedActivities,
                                   List<String> highLightedFlows) {
-        if (!hasGraphicInfo(bpmnModel)) {
-            return getDefaultDiagram();
-        }
-
         try (final InputStream imageStream = processDiagramGenerator.generateDiagram(bpmnModel,
                                                                                      highLightedActivities,
                                                                                      highLightedFlows,
                                                                                      getActivityFontName(),
                                                                                      getLabelFontName(),
-                                                                                     getAnnotationFontName())) {
+                                                                                     getAnnotationFontName(),
+                                                                                     isGenerateDefaultDiagram(),
+                                                                                     getDiagramImageFileName())) {
             return IOUtils.toByteArray(imageStream);
+        } catch (ActivitiImageException e) {
+            throw e;
         } catch (Exception e) {
-            throw new ActivitiException("Error occured while getting process diagram for model: " + bpmnModel,
+            throw new ActivitiException("Error occurred while getting process diagram for model: " + bpmnModel,
                                         e);
         }
     }
 
-    /**
-     * Get default diagram image as bytes array
-     * @return the default diagram image
-     */
-    protected byte[] getDefaultDiagram() {
-        try (InputStream imageStream = getClass().getResourceAsStream(getDefaultDiagramImageFile())) {
-            return IOUtils.toByteArray(imageStream);
-        } catch (Exception e) {
-            throw new ActivitiException("Error occured while getting the default diagram image",
-                                        e);
-        }
+    public boolean isGenerateDefaultDiagram() {
+        return generateDefaultDiagram;
+    }
+
+    public String getDefaultDiagramImageFileName() {
+        return defaultDiagramImageFileName;
     }
 
     /**
-     * Get the file name of the default diagram image
-     * @return file name
+     * Get diagram file name to use when there is no diagram graphic info inside model.
+     * @return the file name
      */
-    protected String getDefaultDiagramImageFile() {
-        return DEFAULT_DIAGRAM_IMAGE_FILE;
+    public String getDiagramImageFileName() {
+        return !StringUtils.isEmpty(getDefaultDiagramImageFileName()) ?
+                getDefaultDiagramImageFileName() :
+                processDiagramGenerator.getDefaultDiagramImageFileName();
     }
 
     /**
@@ -172,14 +174,5 @@ public class ProcessDiagramGeneratorWrapper {
 
     protected String[] getAvailableFonts() {
         return getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-    }
-
-    /**
-     * Ask if a BPMN model has graphic info.
-     * @param bpmnModel the model
-     * @return true if the model has graphic info inside
-     */
-    public boolean hasGraphicInfo(final BpmnModel bpmnModel) {
-        return !bpmnModel.getLocationMap().isEmpty();
     }
 }

@@ -31,6 +31,7 @@ import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.engine.RepositoryService;
+import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -211,6 +212,24 @@ public class ProcessInstanceControllerImplIT {
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/model",
                                  1).contentType("image/svg+xml"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getProcessDiagramWithoutInterchangeInfo() throws Exception {
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processEngine.getProcessInstanceById(anyString())).thenReturn(processInstance);
+        when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId())).thenReturn(mock(BpmnModel.class));
+        when(securityService.canRead(processInstance.getProcessDefinitionId())).thenReturn(true);
+        when(processEngine.getActiveActivityIds(anyString())).thenReturn(Collections.emptyList());
+
+        when(processDiagramGenerator.generateDiagram(any(BpmnModel.class),
+                                                     anyList(),
+                                                     anyList()))
+                .thenThrow(new ActivitiInterchangeInfoNotFoundException("No interchange information found."));
+
+        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/model",
+                                 1).contentType("image/svg+xml"))
+                .andExpect(status().isNoContent());
     }
 
     @Test

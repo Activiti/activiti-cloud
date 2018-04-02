@@ -37,6 +37,7 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
+import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -67,6 +68,12 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     @ExceptionHandler(ActivitiObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleAppException(ActivitiObjectNotFoundException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(ActivitiInterchangeInfoNotFoundException.class)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public String handleDiagramInterchangeInfoNotFoundException(ActivitiInterchangeInfoNotFoundException ex) {
         return ex.getMessage();
     }
 

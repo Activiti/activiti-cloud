@@ -34,6 +34,7 @@ import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
+import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
@@ -72,6 +73,12 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     @ExceptionHandler(ActivitiObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleAppException(ActivitiObjectNotFoundException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(ActivitiInterchangeInfoNotFoundException.class)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public String handleActivitiInterchangeInfoNotFoundException(ActivitiInterchangeInfoNotFoundException ex) {
         return ex.getMessage();
     }
 
