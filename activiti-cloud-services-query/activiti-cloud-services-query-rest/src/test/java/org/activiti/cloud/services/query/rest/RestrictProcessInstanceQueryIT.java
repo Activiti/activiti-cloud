@@ -23,6 +23,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Iterator;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -69,10 +71,55 @@ public class RestrictProcessInstanceQueryIT {
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
 
+
+    @Test
+    public void shouldGetProcessInstancesWhenPermittedByWildcard() throws Exception {
+        ProcessInstance processInstance = new ProcessInstance();
+        processInstance.setId("16");
+        processInstance.setName("name");
+        processInstance.setDescription("desc");
+        processInstance.setInitiator("initiator");
+        processInstance.setProcessDefinitionKey("defKeyWild");
+        processInstance.setApplicationName("test-cmd-endpoint-wild");
+        processInstanceRepository.save(processInstance);
+
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
+
+        Predicate predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(null, SecurityPolicy.READ);
+        Iterable<ProcessInstance> iterable = processInstanceRepository.findAll(predicate);
+        assertThat(iterable.iterator().hasNext()).isTrue();
+    }
+
+    @Test
+    public void shouldNotGetProcessInstancesWhenPolicyNotForUser() throws Exception {
+        ProcessInstance processInstance = new ProcessInstance();
+        processInstance.setId("17");
+        processInstance.setName("name");
+        processInstance.setDescription("desc");
+        processInstance.setInitiator("initiator");
+        processInstance.setProcessDefinitionKey("defKeyWild");
+        processInstance.setApplicationName("test-cmd-endpoint-wild");
+        processInstanceRepository.save(processInstance);
+
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
+
+        Predicate predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(null, SecurityPolicy.READ);
+        Iterable<ProcessInstance> iterable = processInstanceRepository.findAll(predicate);
+
+        //this user should see proc instances - but not for test-cmd-endpoint-wild
+
+        Iterator<ProcessInstance> iterator = iterable.iterator();
+        while(iterator.hasNext()){
+            ProcessInstance proc = iterator.next();
+            assertThat(proc.getApplicationName()).isNotEqualToIgnoringCase("test-cmd-endpoint-wild");
+            assertThat(proc.getApplicationName()).isEqualToIgnoringCase("test-cmd-endpoint");
+        }
+    }
+
     @Test
     public void shouldMatchAppNameCaseInsensitiveIgnoringHyphens() throws Exception {
         ProcessInstance processInstance = new ProcessInstance();
-        processInstance.setId("16");
+        processInstance.setId("18");
         processInstance.setName("name");
         processInstance.setDescription("desc");
         processInstance.setInitiator("initiator");
@@ -80,11 +127,28 @@ public class RestrictProcessInstanceQueryIT {
         processInstance.setApplicationName("Te-St-CmD-EnDpoInT");
         processInstanceRepository.save(processInstance);
 
-        assertThat(processInstanceRepository.count()).isEqualTo(2);
+        ProcessInstance processInstance2 = new ProcessInstance();
+        processInstance2.setId("19");
+        processInstance2.setName("name");
+        processInstance2.setDescription("desc");
+        processInstance2.setInitiator("initiator");
+        processInstance2.setProcessDefinitionKey("defKey1");
+        processInstance2.setApplicationName("test-cmd-endpoint-dontmatchthisone");
+        processInstanceRepository.save(processInstance2);
+
+        assertThat(processInstanceRepository.count()).isGreaterThanOrEqualTo(2);
 
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
 
         Predicate predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(null, SecurityPolicy.READ);
+        Iterable<ProcessInstance> iterable = processInstanceRepository.findAll(predicate);
+
+        Iterator<ProcessInstance> iterator = iterable.iterator();
+        while(iterator.hasNext()){
+            ProcessInstance proc = iterator.next();
+            assertThat(proc.getApplicationName()).isNotEqualToIgnoringCase("test-cmd-endpoint-dontmatchthisone");
+            assertThat(proc.getApplicationName().replace("-","")).isEqualToIgnoringCase("test-cmd-endpoint".replace("-",""));
+        }
 
         assertThat(processInstanceRepository.count(predicate)).isEqualTo(2);
     }

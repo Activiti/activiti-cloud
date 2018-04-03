@@ -91,6 +91,33 @@ public class SecurityPoliciesApplicationServiceTest {
         securityPoliciesApplicationService.restrictProcessInstanceVariableQuery(query, SecurityPolicy.READ);
 
         verify(securityPoliciesApplicationService,times(1)).addProcessDefRestrictionToExpression(any(),any(),any(),any());
+        verify(securityPoliciesApplicationService,times(1)).restrictByAppNameAndProcDefKeys(any(),any(),any());
+
+    }
+
+    @Test
+    public void shouldNotRestrictQueryByProcDefWhenWildcard(){
+        Predicate query = mock(Predicate.class);
+
+        when(securityPoliciesService.policiesDefined()).thenReturn(true);
+        when(securityPoliciesService.getWildcard()).thenReturn("*");
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
+
+        when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(Arrays.asList("hr"));
+
+        Map<String, Set<String>> policies = new HashMap<String, Set<String>>();
+        policies.put("rb1",new HashSet<>(Arrays.asList(securityPoliciesService.getWildcard())));
+
+        when(securityPoliciesService.getProcessDefinitionKeys(anyString(),
+                anyCollection(), any(SecurityPolicy.class))).thenReturn(policies);
+
+        securityPoliciesApplicationService.restrictProcessInstanceVariableQuery(query, SecurityPolicy.READ);
+
+        //should be no proc def restriction
+        verify(securityPoliciesApplicationService,times(0)).restrictByAppNameAndProcDefKeys(any(),any(),any());
+
+        //but there should be a restriction by app name
+        verify(securityPoliciesApplicationService,times(1)).addProcessDefRestrictionToExpression(any(),any(),any(),any());
 
     }
 
