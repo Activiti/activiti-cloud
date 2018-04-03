@@ -41,6 +41,7 @@ import org.activiti.cloud.services.api.events.ProcessEngineEvent;
         @JsonSubTypes.Type(value = TaskCompletedEvent.class, name = "TaskCompletedEvent"),
         @JsonSubTypes.Type(value = TaskSuspendedEvent.class, name = "TaskSuspendedEvent"),
         @JsonSubTypes.Type(value = TaskActivatedEvent.class, name = "TaskActivatedEvent"),
+        @JsonSubTypes.Type(value = TaskCancelledEvent.class, name = "TaskCancelledEvent"),
         @JsonSubTypes.Type(value = VariableCreatedEvent.class, name = "VariableCreatedEvent"),
         @JsonSubTypes.Type(value = VariableUpdatedEvent.class, name = "VariableUpdatedEvent"),
         @JsonSubTypes.Type(value = VariableDeletedEvent.class, name = "VariableDeletedEvent"),
@@ -97,6 +98,10 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
 
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override

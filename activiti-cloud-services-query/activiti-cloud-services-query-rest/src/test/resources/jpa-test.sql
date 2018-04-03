@@ -9,7 +9,8 @@ insert into task (id, assignee, category, create_time, description, due_date, la
   ('4', 'assignee', 'category', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task4', 'High', 'process_definition_id', '1', 'Running', 'owner', null ),
   ('5', 'assignee', 'category', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task5', 'Normal', 'process_definition_id', '1', 'Completed', 'owner', null ),
   ('6', 'assignee', 'category', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task6', 'Normal', 'process_definition_id', '1', 'Suspended' , 'owner', null),
-  ('7', '', 'category', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task7', 'Normal', 'process_definition_id', '1', 'Suspended', 'owner', null );
+  ('7', '', 'category', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task7', 'Normal', 'process_definition_id', '1', 'Suspended', 'owner', null ),
+  ('8', 'assignee', 'category', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task8', 'Normal', null, null, 'ASSIGNED', 'owner', null);
 
 insert into variable (create_time, execution_id, last_updated_time, name, process_instance_id, task_id, type, value) values
   (CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable1', '0', '1', 'String', 'value1'),
