@@ -70,6 +70,16 @@
         <artifactId>xstream</artifactId>
         <version>${xstream.version}</version>
       </dependency>
+      <!-- the dependency should be added here in addition to activiti-build
+          because someone else is overriding the version.
+      -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
       <!-- avoid commons-logging imported by Spring Contract and banned by Maven enforcer -->
       <dependency>
         <groupId>commons-beanutils</groupId>
