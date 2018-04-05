@@ -30,6 +30,7 @@
     <activiti-cloud-process-model.version>7-201803-EA-SNAPSHOT</activiti-cloud-process-model.version>
     <activiti-cloud-org.version>7-201803-EA-SNAPSHOT</activiti-cloud-org.version>
     <awaitility.version>3.0.0</awaitility.version>
+    <commons-beanutils.version>1.9.3</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
     <graphql-jpa-query.version>0.3.3</graphql-jpa-query.version>
@@ -68,6 +69,18 @@
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
         <version>${xstream.version}</version>
+      </dependency>
+      <!-- avoid commons-logging imported by Spring Contract and banned by Maven enforcer -->
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>${commons-beanutils.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <!-- avoid older commons dependencies used by Eureka being available for compilation -->
       <dependency>
