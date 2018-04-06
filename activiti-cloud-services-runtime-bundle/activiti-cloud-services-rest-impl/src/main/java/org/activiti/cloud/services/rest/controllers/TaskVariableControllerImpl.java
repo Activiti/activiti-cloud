@@ -15,16 +15,20 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import org.activiti.cloud.services.api.model.TaskVariables;
+import org.activiti.cloud.services.api.model.TaskVariable;
+import org.activiti.cloud.services.rest.api.resources.TaskVariableResource;
 import org.activiti.engine.TaskService;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
-import org.activiti.cloud.services.rest.assemblers.TaskVariablesResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskVariableResourceAssembler;
+import org.activiti.engine.impl.persistence.entity.VariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,27 +42,55 @@ public class TaskVariableControllerImpl implements TaskVariableController {
 
     private final TaskService taskService;
 
-    private final TaskVariablesResourceAssembler variableResourceBuilder;
+    private final TaskVariableResourceAssembler variableResourceBuilder;
 
     @Autowired
     public TaskVariableControllerImpl(ProcessEngineWrapper processEngine,
                                       TaskService taskService,
-                                      TaskVariablesResourceAssembler variableResourceBuilder) {
+                                      TaskVariableResourceAssembler variableResourceBuilder) {
         this.processEngine = processEngine;
         this.taskService = taskService;
         this.variableResourceBuilder = variableResourceBuilder;
     }
 
     @Override
-    public Resource<Map<String, Object>> getVariables(@PathVariable String taskId) {
+    public Resources<TaskVariableResource> getVariables(@PathVariable String taskId) {
         Map<String, Object> variables = taskService.getVariables(taskId);
-        return variableResourceBuilder.toResource(new TaskVariables(taskId, variables, TaskVariables.TaskVariableScope.GLOBAL));
+        Map<String, VariableInstance> variableInstancesMap = taskService.getVariableInstances(taskId);
+        List<VariableInstance> variableInstances = new ArrayList<>();
+        if(variableInstancesMap!=null){
+            variableInstances.addAll(variableInstancesMap.values());
+        }
+        List<TaskVariableResource> resourcesList = new ArrayList<>();
+        for(VariableInstance variableInstance:variableInstances){
+            resourcesList.add(variableResourceBuilder.toResource(new TaskVariable(
+                    variableInstance.getTaskId(),variableInstance.getName(),variableInstance.getTypeName(),
+                    variableInstance.getValue(),variableInstance.getExecutionId(),
+                    TaskVariable.TaskVariableScope.GLOBAL)));
+        }
+
+        Resources<TaskVariableResource> resources = new Resources<>(resourcesList);
+        return resources;
     }
 
     @Override
-    public Resource<Map<String, Object>> getVariablesLocal(@PathVariable String taskId) {
+    public Resources<TaskVariableResource> getVariablesLocal(@PathVariable String taskId) {
         Map<String, Object> variables = taskService.getVariablesLocal(taskId);
-        return variableResourceBuilder.toResource(new TaskVariables(taskId, variables, TaskVariables.TaskVariableScope.LOCAL));
+        Map<String, VariableInstance> variableInstancesMap = taskService.getVariableInstancesLocal(taskId);
+        List<VariableInstance> variableInstances = new ArrayList<>();
+        if(variableInstancesMap!=null){
+            variableInstances.addAll(variableInstancesMap.values());
+        }
+        List<TaskVariableResource> resourcesList = new ArrayList<>();
+        for(VariableInstance variableInstance:variableInstances){
+            resourcesList.add(variableResourceBuilder.toResource(new TaskVariable(
+                    variableInstance.getTaskId(),variableInstance.getName(),variableInstance.getTypeName(),
+                    variableInstance.getValue(),variableInstance.getExecutionId(),
+                    TaskVariable.TaskVariableScope.LOCAL)));
+        }
+
+        Resources<TaskVariableResource> resources = new Resources<>(resourcesList);
+        return resources;
     }
 
     @Override

@@ -17,10 +17,12 @@
 package org.activiti.cloud.starter.tests.helper;
 
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
+import org.activiti.cloud.services.api.model.TaskVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -69,23 +71,23 @@ public class TaskRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Resource<Map<String, Object>>> getVariables(String taskId) {
+    public ResponseEntity<Resources<TaskVariable>> getVariables(String taskId) {
 
-        ResponseEntity<Resource<Map<String, Object>>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/",
+        ResponseEntity<Resources<TaskVariable>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/",
                                                                                                  HttpMethod.GET,
                                                                                                  null,
-                                                                                                 new ParameterizedTypeReference<Resource<Map<String, Object>>>() {
+                                                                                                 new ParameterizedTypeReference<Resources<TaskVariable>>() {
                                                                                                  });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<Resource<Map<String, Object>>> getVariablesLocal(String taskId) {
+    public ResponseEntity<Resources<TaskVariable>> getVariablesLocal(String taskId) {
 
-        ResponseEntity<Resource<Map<String, Object>>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/local",
+        ResponseEntity<Resources<TaskVariable>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/local",
                                                                                                  HttpMethod.GET,
                                                                                                  null,
-                                                                                                 new ParameterizedTypeReference<Resource<Map<String, Object>>>() {
+                                                                                                 new ParameterizedTypeReference<Resources<TaskVariable>>() {
                                                                                                  });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
