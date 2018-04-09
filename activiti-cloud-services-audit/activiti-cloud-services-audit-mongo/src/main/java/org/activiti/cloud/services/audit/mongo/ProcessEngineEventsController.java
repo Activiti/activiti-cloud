@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.audit;
-
-import java.util.Optional;
+package org.activiti.cloud.services.audit.mongo;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.audit.assembler.EventResourceAssembler;
-import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
-import org.activiti.cloud.services.audit.repository.EventsRepository;
-import org.activiti.cloud.services.audit.resources.EventResource;
+import org.activiti.cloud.services.audit.mongo.assembler.EventResourceAssembler;
+import org.activiti.cloud.services.audit.mongo.events.ProcessEngineEventDocument;
+import org.activiti.cloud.services.audit.mongo.repository.EventsRepository;
+import org.activiti.cloud.services.audit.mongo.resources.EventResource;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +33,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping(value = "/v1/" + EventsRelProvider.COLLECTION_RESOURCE_REL)
 public class ProcessEngineEventsController {
@@ -43,14 +43,14 @@ public class ProcessEngineEventsController {
 
     private EventResourceAssembler eventResourceAssembler;
 
-    private PagedResourcesAssembler<ProcessEngineEventEntity> pagedResourcesAssembler;
+    private PagedResourcesAssembler<ProcessEngineEventDocument> pagedResourcesAssembler;
 
     private SecurityPoliciesApplicationService securityPoliciesApplicationService;
 
     @Autowired
     public ProcessEngineEventsController(EventsRepository eventsRepository,
                                          EventResourceAssembler eventResourceAssembler,
-                                         PagedResourcesAssembler<ProcessEngineEventEntity> pagedResourcesAssembler,
+                                         PagedResourcesAssembler<ProcessEngineEventDocument> pagedResourcesAssembler,
                                          SecurityPoliciesApplicationService securityPoliciesApplicationService) {
         this.eventsRepository = eventsRepository;
         this.eventResourceAssembler = eventResourceAssembler;
@@ -59,12 +59,12 @@ public class ProcessEngineEventsController {
     }
 
     @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
-    public EventResource findById(@PathVariable long eventId) {
-        Optional<ProcessEngineEventEntity> findResult = eventsRepository.findById(eventId);
+    public EventResource findById(@PathVariable String eventId) {
+        Optional<ProcessEngineEventDocument> findResult = eventsRepository.findById(eventId);
         if (!findResult.isPresent()) {
             throw new RuntimeException("Unable to find event for the given id:'" + eventId + "'");
         }
-        ProcessEngineEventEntity processEngineEventEntity = findResult.get();
+        ProcessEngineEventDocument processEngineEventEntity = findResult.get();
         if (!securityPoliciesApplicationService.canRead(processEngineEventEntity.getProcessDefinitionId(),processEngineEventEntity.getApplicationName())){
             throw new RuntimeException("Operation not permitted for " + processEngineEventEntity.getProcessDefinitionId());
         }
@@ -72,7 +72,7 @@ public class ProcessEngineEventsController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<EventResource> findAll(@QuerydslPredicate(root = ProcessEngineEventEntity.class) Predicate predicate,
+    public PagedResources<EventResource> findAll(@QuerydslPredicate(root = ProcessEngineEventDocument.class) Predicate predicate,
                                                  Pageable pageable) {
 
         predicate = securityPoliciesApplicationService.restrictProcessEngineEventQuery(predicate,

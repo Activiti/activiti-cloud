@@ -8,7 +8,7 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 
-@RepositoryRestResource(collectionResourceRel = "events", path = "events")
+@RepositoryRestResource(exported = false)
 public interface EventsRepository extends MongoRepository<ProcessEngineEventDocument, String>, QuerydslPredicateExecutor<ProcessEngineEventDocument> {
     
     @Override

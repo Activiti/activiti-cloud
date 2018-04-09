@@ -16,28 +16,23 @@
 
 package org.activiti.cloud.services.audit;
 
-import java.util.Optional;
-
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.audit.assembler.EventResourceAssembler;
 import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
 import org.activiti.cloud.services.audit.repository.EventsRepository;
 import org.activiti.cloud.services.audit.resources.EventResource;
-import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
-import org.activiti.cloud.services.security.SecurityPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/v1/" + EventsRelProvider.COLLECTION_RESOURCE_REL)
-public class ProcessEngineEventsController {
+@RequestMapping(value = "/admin/v1/" + EventsRelProvider.COLLECTION_RESOURCE_REL)
+public class ProcessEngineEventsAdminController {
 
     private final EventsRepository eventsRepository;
 
@@ -45,38 +40,19 @@ public class ProcessEngineEventsController {
 
     private PagedResourcesAssembler<ProcessEngineEventEntity> pagedResourcesAssembler;
 
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
-
     @Autowired
-    public ProcessEngineEventsController(EventsRepository eventsRepository,
-                                         EventResourceAssembler eventResourceAssembler,
-                                         PagedResourcesAssembler<ProcessEngineEventEntity> pagedResourcesAssembler,
-                                         SecurityPoliciesApplicationService securityPoliciesApplicationService) {
+    public ProcessEngineEventsAdminController(EventsRepository eventsRepository,
+                                              EventResourceAssembler eventResourceAssembler,
+                                              PagedResourcesAssembler<ProcessEngineEventEntity> pagedResourcesAssembler) {
         this.eventsRepository = eventsRepository;
         this.eventResourceAssembler = eventResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
-        this.securityPoliciesApplicationService = securityPoliciesApplicationService;
-    }
-
-    @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
-    public EventResource findById(@PathVariable long eventId) {
-        Optional<ProcessEngineEventEntity> findResult = eventsRepository.findById(eventId);
-        if (!findResult.isPresent()) {
-            throw new RuntimeException("Unable to find event for the given id:'" + eventId + "'");
-        }
-        ProcessEngineEventEntity processEngineEventEntity = findResult.get();
-        if (!securityPoliciesApplicationService.canRead(processEngineEventEntity.getProcessDefinitionId(),processEngineEventEntity.getApplicationName())){
-            throw new RuntimeException("Operation not permitted for " + processEngineEventEntity.getProcessDefinitionId());
-        }
-        return eventResourceAssembler.toResource(processEngineEventEntity);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public PagedResources<EventResource> findAll(@QuerydslPredicate(root = ProcessEngineEventEntity.class) Predicate predicate,
                                                  Pageable pageable) {
 
-        predicate = securityPoliciesApplicationService.restrictProcessEngineEventQuery(predicate,
-                SecurityPolicy.READ);
 
         return pagedResourcesAssembler.toResource(eventsRepository.findAll(predicate,
                                                                            pageable),
