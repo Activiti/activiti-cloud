@@ -86,27 +86,32 @@ public class ProcessVariablesIT {
         ResponseEntity<ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
                                                                                                  variables);
 
-        //when
-        ResponseEntity<Resources<ProcessInstanceVariable>> variablesResponse = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startResponse.getBody().getId() + "/variables",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<Resources<ProcessInstanceVariable>>() {
-                });
 
-        //then
-        assertThat(variablesResponse).isNotNull();
-        Collection<ProcessInstanceVariable> variableCollection = variablesResponse.getBody().getContent();
 
-        await().untilAsserted(() -> assertThat(variableCollection).isNotEmpty());
+        await().untilAsserted(() -> {
 
-        Iterator<ProcessInstanceVariable> iterator = variableCollection.iterator();
-        while(iterator.hasNext()){
-            ProcessInstanceVariable variable = iterator.next();
-            assertThat(variable.getName()).isIn("firstName","lastName","age");
-            assertThat(variable.getProcessInstanceId()).isEqualToIgnoringCase(startResponse.getBody().getId());
-            assertThat(variable.getValue()).isIn("Pedro","Silva",15);
-            assertThat(variable.getType()).isIn(String.class,Integer.class,Long.class);
-        }
+            //when
+            ResponseEntity<Resources<ProcessInstanceVariable>> variablesResponse = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startResponse.getBody().getId() + "/variables",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Resources<ProcessInstanceVariable>>() {
+                    });
+
+            //then
+            assertThat(variablesResponse).isNotNull();
+            Collection<ProcessInstanceVariable> variableCollection = variablesResponse.getBody().getContent();
+            assertThat(variableCollection).isNotEmpty();
+            Iterator<ProcessInstanceVariable> iterator = variableCollection.iterator();
+            while(iterator.hasNext()){
+                ProcessInstanceVariable variable = iterator.next();
+                assertThat(variable.getName()).isIn("firstName","lastName","age");
+                assertThat(variable.getProcessInstanceId()).isEqualToIgnoringCase(startResponse.getBody().getId());
+                assertThat(variable.getValue()).isIn("Pedro","Silva",15);
+                assertThat(variable.getType()).isIn(String.class,Integer.class,Long.class);
+            }
+        });
+
+
     }
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
