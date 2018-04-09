@@ -48,6 +48,7 @@ import java.util.Map;
 
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -114,11 +115,14 @@ public class SignalIT {
         ResponseEntity<PagedResources<Task>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
         assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
 
-        ResponseEntity<Resources<ProcessInstanceVariable>> variablesEntity = processInstanceRestTemplate.getVariables(startProcessEntity);
-        Collection<ProcessInstanceVariable> variableCollection = variablesEntity.getBody().getContent();
-        ProcessInstanceVariable variable = variableCollection.iterator().next();
-        assertThat(variable.getName()).isEqualToIgnoringCase("myVar");
-        assertThat(variable.getValue()).isEqualTo("myContent");
+        await().untilAsserted(() -> {
+            ResponseEntity<Resources<ProcessInstanceVariable>> variablesEntity = processInstanceRestTemplate.getVariables(startProcessEntity);
+            Collection<ProcessInstanceVariable> variableCollection = variablesEntity.getBody().getContent();
+            ProcessInstanceVariable variable = variableCollection.iterator().next();
+            assertThat(variable.getName()).isEqualToIgnoringCase("myVar");
+            assertThat(variable.getValue()).isEqualTo("myContent");
+        });
+
     }
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {

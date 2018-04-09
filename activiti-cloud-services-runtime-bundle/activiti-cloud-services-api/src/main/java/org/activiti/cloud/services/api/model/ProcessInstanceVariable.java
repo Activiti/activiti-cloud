@@ -17,6 +17,9 @@ public class ProcessInstanceVariable {
 
     private String executionId;
 
+    public ProcessInstanceVariable(){
+
+    }
 
     public ProcessInstanceVariable(String processInstanceId, String name, String type, Object value, String executionId){
         this.name=name;

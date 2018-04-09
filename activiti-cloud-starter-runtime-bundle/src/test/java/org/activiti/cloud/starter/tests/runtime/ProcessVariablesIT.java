@@ -46,6 +46,7 @@ import java.util.Map;
 
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -96,7 +97,8 @@ public class ProcessVariablesIT {
         assertThat(variablesResponse).isNotNull();
         Collection<ProcessInstanceVariable> variableCollection = variablesResponse.getBody().getContent();
 
-        assertThat(variableCollection).isNotEmpty();
+        await().untilAsserted(() -> assertThat(variableCollection).isNotEmpty());
+
         Iterator<ProcessInstanceVariable> iterator = variableCollection.iterator();
         while(iterator.hasNext()){
             ProcessInstanceVariable variable = iterator.next();

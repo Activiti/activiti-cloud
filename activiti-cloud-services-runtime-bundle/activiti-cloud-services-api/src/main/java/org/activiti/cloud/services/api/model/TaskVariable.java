@@ -23,6 +23,10 @@ public class TaskVariable {
 
     private TaskVariableScope scope;
 
+    public TaskVariable(){
+
+    }
+
     public TaskVariable(String taskId, String name, String type, Object value, String executionId, TaskVariableScope scope){
         this.taskId=taskId;
         this.name=name;
