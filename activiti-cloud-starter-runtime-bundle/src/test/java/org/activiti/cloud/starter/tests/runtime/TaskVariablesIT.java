@@ -99,16 +99,16 @@ public class TaskVariablesIT {
 
         //then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent()));
-        assertThat(variablesDoNotContainKeys(variablesResponse.getBody().getContent(),"var1"));
+        assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesDoNotContainKeys(variablesResponse.getBody().getContent(),"var1")).isTrue();
 
         // when
         variablesResponse = taskRestTemplate.getVariables(taskId);
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent()));
-        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent()));
+        assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
 
         // give
         taskVariables = new HashMap<>();
@@ -123,17 +123,17 @@ public class TaskVariablesIT {
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent()));
-        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent()));
-        assertThat(variablesContainEntry("var3","test3",variablesResponse.getBody().getContent()));
+        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var3","test3",variablesResponse.getBody().getContent())).isTrue();
 
         // when
         variablesResponse = taskRestTemplate.getVariablesLocal(taskId);
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent()));
-        assertThat(variablesDoNotContainKeys(variablesResponse.getBody().getContent(),"var1","var3"));
+        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesDoNotContainKeys(variablesResponse.getBody().getContent(),"var1","var3")).isTrue();
 
     }
 
@@ -141,7 +141,8 @@ public class TaskVariablesIT {
         Iterator<TaskVariable> iterator = variableCollection.iterator();
         while(iterator.hasNext()){
             TaskVariable variable = iterator.next();
-            if(variable.getName().equalsIgnoreCase("key")&&variable.getValue().equals(value)){
+            if(variable.getName().equalsIgnoreCase(key) && variable.getValue().equals(value)){
+                assertThat(variable.getType()).isEqualToIgnoringCase(variable.getValue().getClass().getSimpleName());
                 return true;
             }
         }

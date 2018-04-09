@@ -94,22 +94,25 @@ public class ProcessVariablesIT {
             Collection<ProcessInstanceVariable> variableCollection = variablesEntity.getBody().getContent();
 
             assertThat(variableCollection).isNotEmpty();
-            Iterator<ProcessInstanceVariable> iterator = variableCollection.iterator();
-            while(iterator.hasNext()){
-                ProcessInstanceVariable variable = iterator.next();
-                assertThat(variable.getName()).isIn("firstName","lastName","age");
-                assertThat(variable.getProcessInstanceId()).isEqualToIgnoringCase(startResponse.getBody().getId());
-                assertThat(variable.getValue()).isIn("Pedro","Silva",15);
-                assertThat(variable.getType()).isNotEmpty();
-                if(variable.getValue().equals(15)){
-                    assertThat(variable.getType()).isEqualToIgnoringCase(Integer.class.getSimpleName());
-                } else{
-                    assertThat(variable.getType()).isEqualToIgnoringCase(String.class.getSimpleName());
-                }
-            }
+            assertThat(variablesContainEntry("firstName","Pedro",variableCollection)).isTrue();
+            assertThat(variablesContainEntry("lastName","Silva",variableCollection)).isTrue();
+            assertThat(variablesContainEntry("age",15,variableCollection)).isTrue();
+
         });
 
 
+    }
+
+    private boolean variablesContainEntry(String key, Object value, Collection<ProcessInstanceVariable> variableCollection){
+        Iterator<ProcessInstanceVariable> iterator = variableCollection.iterator();
+        while(iterator.hasNext()){
+            ProcessInstanceVariable variable = iterator.next();
+            if(variable.getName().equalsIgnoreCase(key) && variable.getValue().equals(value)){
+                assertThat(variable.getType()).isEqualToIgnoringCase(variable.getValue().getClass().getSimpleName());
+                return true;
+            }
+        }
+        return false;
     }
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
