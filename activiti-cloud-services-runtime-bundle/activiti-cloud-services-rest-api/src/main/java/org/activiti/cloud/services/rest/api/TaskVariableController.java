@@ -15,16 +15,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
         produces = MediaTypes.HAL_JSON_VALUE)
 public interface TaskVariableController {
 
-    @RequestMapping(value = "/",
-            method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     Resources<TaskVariableResource> getVariables(@PathVariable String taskId);
 
     @RequestMapping(value = "/local",
             method = RequestMethod.GET)
     Resources<TaskVariableResource> getVariablesLocal(@PathVariable String taskId);
 
-    @RequestMapping(value = "/",
-            method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<Void> setVariables(@PathVariable String taskId,
                                       @RequestBody(required = true) SetTaskVariablesCmd setTaskVariablesCmd);
 

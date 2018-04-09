@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(value = "/v1/process-instances/{processInstanceId}/variables", produces = MediaTypes.HAL_JSON_VALUE)
 public interface ProcessInstanceVariableController {
 
-    @RequestMapping(value = "/",
-            method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     Resources<ProcessVariableResource> getVariables(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "/local",
