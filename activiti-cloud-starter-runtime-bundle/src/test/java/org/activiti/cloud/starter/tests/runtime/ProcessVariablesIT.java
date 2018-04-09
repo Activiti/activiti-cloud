@@ -87,19 +87,12 @@ public class ProcessVariablesIT {
                                                                                                  variables);
 
 
-
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<Resources<ProcessInstanceVariable>> variablesResponse = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startResponse.getBody().getId() + "/variables",
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Resources<ProcessInstanceVariable>>() {
-                    });
+            ResponseEntity<Resources<ProcessInstanceVariable>> variablesEntity = processInstanceRestTemplate.getVariables(startResponse);
+            Collection<ProcessInstanceVariable> variableCollection = variablesEntity.getBody().getContent();
 
-            //then
-            assertThat(variablesResponse).isNotNull();
-            Collection<ProcessInstanceVariable> variableCollection = variablesResponse.getBody().getContent();
             assertThat(variableCollection).isNotEmpty();
             Iterator<ProcessInstanceVariable> iterator = variableCollection.iterator();
             while(iterator.hasNext()){
@@ -107,7 +100,12 @@ public class ProcessVariablesIT {
                 assertThat(variable.getName()).isIn("firstName","lastName","age");
                 assertThat(variable.getProcessInstanceId()).isEqualToIgnoringCase(startResponse.getBody().getId());
                 assertThat(variable.getValue()).isIn("Pedro","Silva",15);
-                assertThat(variable.getType()).isIn(String.class,Integer.class,Long.class);
+                assertThat(variable.getType()).isNotEmpty();
+                if(variable.getValue().equals(15)){
+                    assertThat(variable.getType()).isEqualToIgnoringCase(Integer.class.getSimpleName());
+                } else{
+                    assertThat(variable.getType()).isEqualToIgnoringCase(String.class.getSimpleName());
+                }
             }
         });
 
