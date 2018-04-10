@@ -1,6 +1,5 @@
 package org.activiti.cloud.services.security;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -8,8 +7,6 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import org.activiti.cloud.services.audit.events.QProcessEngineEventEntity;
-import org.activiti.engine.UserGroupLookupProxy;
-import org.activiti.engine.UserRoleLookupProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,16 +14,7 @@ import org.springframework.stereotype.Component;
  * Applies permissions/restrictions to event data based upon property file
  */
 @Component
-public class SecurityPoliciesApplicationService {
-
-    @Autowired(required = false)
-    private UserGroupLookupProxy userGroupLookupProxy;
-
-    @Autowired(required = false)
-    private UserRoleLookupProxy userRoleLookupProxy;
-
-    @Autowired
-    private AuthenticationWrapper authenticationWrapper;
+public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesApplicationService {
 
     @Autowired
     private SecurityPoliciesService securityPoliciesService;
@@ -103,52 +91,4 @@ public class SecurityPoliciesApplicationService {
         return nextExpression;
     }
 
-    private boolean noSecurityPoliciesOrNoUser() {
-        return !securityPoliciesService.policiesDefined() || authenticationWrapper.getAuthenticatedUserId() == null;
-    }
-
-    private Map<String, Set<String>> definitionKeysAllowedForPolicy(SecurityPolicy securityPolicy) {
-        List<String> groups = null;
-
-        if (userGroupLookupProxy != null && authenticationWrapper.getAuthenticatedUserId() != null) {
-            groups = userGroupLookupProxy.getGroupsForCandidateUser(authenticationWrapper.getAuthenticatedUserId());
-        }
-
-        return securityPoliciesService.getProcessDefinitionKeys(authenticationWrapper.getAuthenticatedUserId(),
-                groups,
-                securityPolicy);
-    }
-
-    public boolean canRead(String processDefId,
-                           String appName) {
-        return hasPermission(processDefId,
-                SecurityPolicy.READ,
-                appName);
-    }
-
-    private boolean hasPermission(String processDefId,
-                                  SecurityPolicy securityPolicy,
-                                  String appName) {
-
-        if (!securityPoliciesService.policiesDefined() || userGroupLookupProxy == null || authenticationWrapper.getAuthenticatedUserId() == null) {
-            return true;
-        }
-
-        if (userRoleLookupProxy != null && userRoleLookupProxy.isAdmin(authenticationWrapper.getAuthenticatedUserId())) {
-            return true;
-        }
-
-        Set<String> keys = definitionKeysAllowedForPolicy(securityPolicy).get(appName);
-
-        return (keys != null && (anEntryInSetStartsId(keys,processDefId) || keys.contains(securityPoliciesService.getWildcard())));
-    }
-
-    private boolean anEntryInSetStartsId(Set<String> keys,String processDefId){
-        for(String key:keys){
-            if(processDefId.startsWith(key)){
-                return true;
-            }
-        }
-        return false;
-    }
 }

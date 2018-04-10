@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.audit.security;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
+import org.activiti.cloud.services.security.BaseAuthenticationWrapper;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.security.SecurityPoliciesService;
 import org.activiti.cloud.services.security.SecurityPolicy;
@@ -46,7 +46,7 @@ public class SecurityPoliciesApplicationServiceTest {
     private SecurityPoliciesService securityPoliciesService;
 
     @Mock
-    private AuthenticationWrapper authenticationWrapper;
+    private BaseAuthenticationWrapper authenticationWrapper;
 
     @Before
     public void setUp() throws Exception {
