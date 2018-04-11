@@ -20,4 +20,4 @@ Scenario: show diagram for a process instance without graphic info
 Given any authenticated user
 When the user starts a process without graphic info
 And open the process diagram
-Then the default diagram image is shown
+Then no diagram is shown

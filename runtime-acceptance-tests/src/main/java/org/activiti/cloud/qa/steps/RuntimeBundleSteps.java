@@ -129,6 +129,11 @@ public class RuntimeBundleSteps {
         assertThat(svgToPng(diagram.getBytes())).isNotEmpty();
     }
 
+    @Step
+    public void checkProcessInstanceNoDiagram(String diagram) {
+        assertThat(diagram).isEmpty();
+    }
+
     private byte[] svgToPng(byte[] streamBytes)
             throws TranscoderException, IOException {
         try (ByteArrayInputStream input = new ByteArrayInputStream(streamBytes);

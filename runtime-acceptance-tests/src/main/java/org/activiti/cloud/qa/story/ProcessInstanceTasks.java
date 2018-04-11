@@ -123,9 +123,12 @@ public class ProcessInstanceTasks {
     }
 
     @Then("the diagram is shown")
-    @Alias("the default diagram image is shown")
     public void checkProcessInstanceDiagram() throws Exception {
         runtimeBundleSteps.checkProcessInstanceDiagram(processInstanceDiagram);
     }
 
+    @Then("no diagram is shown")
+    public void checkProcessInstanceNoDiagram() throws Exception {
+        runtimeBundleSteps.checkProcessInstanceNoDiagram(processInstanceDiagram);
+    }
 }
