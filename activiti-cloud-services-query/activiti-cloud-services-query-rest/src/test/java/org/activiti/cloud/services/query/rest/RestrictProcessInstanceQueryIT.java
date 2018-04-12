@@ -9,6 +9,7 @@ import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.security.SecurityPoliciesService;
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.cloud.services.security.conf.SecurityProperties;
+import org.activiti.engine.UserGroupLookupProxy;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,8 +22,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Collections;
 import java.util.Iterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +47,9 @@ public class RestrictProcessInstanceQueryIT {
 
     @MockBean
     private AuthenticationWrapper authenticationWrapper;
+
+    @MockBean
+    private UserGroupLookupProxy userGroupLookupProxy;
 
     @Before
     public void setUp() throws Exception {
@@ -73,7 +77,7 @@ public class RestrictProcessInstanceQueryIT {
 
 
     @Test
-    public void shouldGetProcessInstancesWhenPermittedByWildcard() throws Exception {
+    public void shouldGetProcessInstancesWhenUserPermittedByWildcard() throws Exception {
         ProcessInstance processInstance = new ProcessInstance();
         processInstance.setId("16");
         processInstance.setName("name");
@@ -90,10 +94,30 @@ public class RestrictProcessInstanceQueryIT {
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
 
+
+    @Test
+    public void shouldGetProcessInstancesWhenGroupPermittedByWildcard() throws Exception {
+        ProcessInstance processInstance = new ProcessInstance();
+        processInstance.setId("17");
+        processInstance.setName("name");
+        processInstance.setDescription("desc");
+        processInstance.setInitiator("initiator");
+        processInstance.setProcessDefinitionKey("defKeyWild");
+        processInstance.setApplicationName("test-cmd-endpoint-wild");
+        processInstanceRepository.save(processInstance);
+
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bobinhr");
+        when(userGroupLookupProxy.getGroupsForCandidateUser("bobinhr")).thenReturn(Collections.singletonList("hRgRoUp"));
+
+        Predicate predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(null, SecurityPolicy.READ);
+        Iterable<ProcessInstance> iterable = processInstanceRepository.findAll(predicate);
+        assertThat(iterable.iterator().hasNext()).isTrue();
+    }
+
     @Test
     public void shouldNotGetProcessInstancesWhenPolicyNotForUser() throws Exception {
         ProcessInstance processInstance = new ProcessInstance();
-        processInstance.setId("17");
+        processInstance.setId("18");
         processInstance.setName("name");
         processInstance.setDescription("desc");
         processInstance.setInitiator("initiator");
@@ -119,7 +143,7 @@ public class RestrictProcessInstanceQueryIT {
     @Test
     public void shouldMatchAppNameCaseInsensitiveIgnoringHyphens() throws Exception {
         ProcessInstance processInstance = new ProcessInstance();
-        processInstance.setId("18");
+        processInstance.setId("19");
         processInstance.setName("name");
         processInstance.setDescription("desc");
         processInstance.setInitiator("initiator");
@@ -128,7 +152,7 @@ public class RestrictProcessInstanceQueryIT {
         processInstanceRepository.save(processInstance);
 
         ProcessInstance processInstance2 = new ProcessInstance();
-        processInstance2.setId("19");
+        processInstance2.setId("20");
         processInstance2.setName("name");
         processInstance2.setDescription("desc");
         processInstance2.setInitiator("initiator");
