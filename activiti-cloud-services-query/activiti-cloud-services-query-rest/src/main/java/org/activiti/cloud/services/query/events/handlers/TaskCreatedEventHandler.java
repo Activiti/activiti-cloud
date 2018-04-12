@@ -52,10 +52,10 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
                     .getReference(ProcessInstance.class,
                                   taskCreatedEvent.getProcessInstanceId());
 
-            task.setApplicationName(event.getApplicationName());
             // Associate task with parent reference
             task.setProcessInstance(processInstance);
         }
+        task.setApplicationName(event.getApplicationName());
 
         // Set attributes
         task.setStatus("CREATED");
