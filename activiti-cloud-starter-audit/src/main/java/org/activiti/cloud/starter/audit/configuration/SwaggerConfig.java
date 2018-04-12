@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.starter.configuration;
+package org.activiti.cloud.starter.audit.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -16,11 +16,10 @@
 
 package org.activiti.cloud.starter.audit.tests;
 
-import org.activiti.cloud.starter.configuration.EnableActivitiAudit;
+import org.activiti.cloud.starter.audit.configuration.EnableActivitiAudit;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
