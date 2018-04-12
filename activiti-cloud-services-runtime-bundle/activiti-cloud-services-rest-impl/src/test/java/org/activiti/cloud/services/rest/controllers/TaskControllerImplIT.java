@@ -60,7 +60,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -175,7 +174,8 @@ public class TaskControllerImplIT {
                         UUID.randomUUID().toString(),
                         UUID.randomUUID().toString(),
                         null,
-                        status.name());
+                        status.name(),
+                        "rb-my-app");
     }
 
     @Test
@@ -201,6 +201,9 @@ public class TaskControllerImplIT {
                                   1).contentType(MediaType.APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(new CreateTaskCmd("new-task",
                                                                                           "description",
+                                                                                          null,
+                                                                                          null,
+                                                                                          50,
                                                                                           null))))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/new",

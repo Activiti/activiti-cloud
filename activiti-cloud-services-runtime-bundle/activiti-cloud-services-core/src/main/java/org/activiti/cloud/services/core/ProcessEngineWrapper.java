@@ -36,17 +36,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProcessEngineWrapper {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessEngineWrapper.class);
+
     private final ProcessInstanceConverter processInstanceConverter;
     private final RuntimeService runtimeService;
-    private PageableProcessInstanceService pageableProcessInstanceService;
     private final TaskService taskService;
     private final TaskConverter taskConverter;
     private final PageableTaskService pageableTaskService;
     private final SecurityPoliciesApplicationService securityService;
     private final RepositoryService repositoryService;
     private final AuthenticationWrapper authenticationWrapper;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessEngineWrapper.class);
+    private PageableProcessInstanceService pageableProcessInstanceService;
 
     @Autowired
     public ProcessEngineWrapper(ProcessInstanceConverter processInstanceConverter,
@@ -84,21 +84,21 @@ public class ProcessEngineWrapper {
         String processDefinitionKey = null;
         if (cmd.getProcessDefinitionKey() != null) {
             long count = repositoryService.createProcessDefinitionQuery().processDefinitionKey(cmd.getProcessDefinitionKey()).count();
-            if(count == 0){
+            if (count == 0) {
                 throw new ActivitiObjectNotFoundException("Unable to find process definition for the given key:'" + cmd.getProcessDefinitionKey() + "'");
             }
             processDefinitionKey = cmd.getProcessDefinitionKey();
         } else {
             ProcessDefinition definition = repositoryService.getProcessDefinition(cmd.getProcessDefinitionId());
-            if(definition == null){
+            if (definition == null) {
                 throw new ActivitiObjectNotFoundException("Unable to find process definition for the given id:'" + cmd.getProcessDefinitionId() + "'");
             }
             processDefinitionKey = definition.getKey();
         }
 
-        if (!securityService.canWrite(processDefinitionKey)){
-            LOGGER.debug("User "+authenticationWrapper.getAuthenticatedUserId()+" not permitted to access definition "+processDefinitionKey);
-            throw new ActivitiForbiddenException("Operation not permitted for "+processDefinitionKey);
+        if (!securityService.canWrite(processDefinitionKey)) {
+            LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processDefinitionKey);
+            throw new ActivitiForbiddenException("Operation not permitted for " + processDefinitionKey);
         }
 
         ProcessInstanceBuilder builder = runtimeService.createProcessInstanceBuilder();
@@ -117,18 +117,19 @@ public class ProcessEngineWrapper {
         // - that's another piece of work though so for now no security here
 
         runtimeService.signalEventReceived(signalProcessInstancesCmd.getName(),
-                    signalProcessInstancesCmd.getInputVariables());
-
+                                           signalProcessInstancesCmd.getInputVariables());
     }
 
     public void suspend(SuspendProcessInstanceCmd suspendProcessInstanceCmd) {
         ProcessInstance processInstance = getProcessInstanceById(suspendProcessInstanceCmd.getProcessInstanceId());
 
-        verifyCanWriteToProcessInstance(processInstance, "Unable to find process instance for the given id:'" + suspendProcessInstanceCmd.getProcessInstanceId() + "'");
+        verifyCanWriteToProcessInstance(processInstance,
+                                        "Unable to find process instance for the given id:'" + suspendProcessInstanceCmd.getProcessInstanceId() + "'");
         runtimeService.suspendProcessInstanceById(suspendProcessInstanceCmd.getProcessInstanceId());
     }
 
-    private void verifyCanWriteToProcessInstance(ProcessInstance processInstance, String message) {
+    private void verifyCanWriteToProcessInstance(ProcessInstance processInstance,
+                                                 String message) {
 
         ProcessDefinition definition = repositoryService.getProcessDefinition(processInstance.getProcessDefinitionId());
 
@@ -136,15 +137,16 @@ public class ProcessEngineWrapper {
             throw new ActivitiException(message);
         }
         if (!securityService.canWrite(definition.getKey())) {
-            LOGGER.debug("User "+authenticationWrapper.getAuthenticatedUserId()+" not permitted to access definition "+definition.getKey());
-            throw new ActivitiForbiddenException("Operation not permitted for "+definition.getKey());
+            LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + definition.getKey());
+            throw new ActivitiForbiddenException("Operation not permitted for " + definition.getKey());
         }
     }
 
     public void activate(ActivateProcessInstanceCmd activateProcessInstanceCmd) {
         ProcessInstance processInstance = getProcessInstanceById(activateProcessInstanceCmd.getProcessInstanceId());
 
-        verifyCanWriteToProcessInstance(processInstance, "Unable to find process instance for the given id:'" + activateProcessInstanceCmd.getProcessInstanceId() + "'");
+        verifyCanWriteToProcessInstance(processInstance,
+                                        "Unable to find process instance for the given id:'" + activateProcessInstanceCmd.getProcessInstanceId() + "'");
         runtimeService.activateProcessInstanceById(activateProcessInstanceCmd.getProcessInstanceId());
     }
 
@@ -204,10 +206,15 @@ public class ProcessEngineWrapper {
         final org.activiti.engine.task.Task task = taskService.newTask();
         task.setName(createTaskCmd.getName());
         task.setDescription(createTaskCmd.getDescription());
-        task.setCategory(createTaskCmd.getCategory());
+        task.setCategory(createTaskCmd.getApplicationName());
+        task.setDueDate(createTaskCmd.getDueDate());
+        if (createTaskCmd.getPriority() != null) {
+            task.setPriority(createTaskCmd.getPriority());
+        }
         taskService.saveTask(task);
 
-        task.setAssignee(authenticationWrapper.getAuthenticatedUserId());
+        // see ACTIVITI#1854
+        task.setAssignee(createTaskCmd.getAssignee() == null ? authenticationWrapper.getAuthenticatedUserId() : createTaskCmd.getAssignee());
         taskService.saveTask(task);
 
         return taskConverter.from(taskService.createTaskQuery().taskId(task.getId()).singleResult());
