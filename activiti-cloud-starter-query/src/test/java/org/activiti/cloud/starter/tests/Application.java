@@ -19,7 +19,7 @@ package org.activiti.cloud.starter.tests;
 import org.activiti.cloud.services.query.graphql.autoconfigure.EnableActivitiGraphQLQueryService;
 import org.activiti.cloud.services.query.notifications.config.EnableActivitiNotificationsGateway;
 import org.activiti.cloud.services.query.qraphql.ws.config.EnableActivitiGraphQLNotifications;
-import org.activiti.cloud.starter.configuration.EnableActivitiQuery;
+import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
