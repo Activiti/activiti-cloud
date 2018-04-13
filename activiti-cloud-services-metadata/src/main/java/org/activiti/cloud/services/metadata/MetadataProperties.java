@@ -1,4 +1,4 @@
-package org.activit.cloud.services.metadata;
+package org.activiti.cloud.services.metadata;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
