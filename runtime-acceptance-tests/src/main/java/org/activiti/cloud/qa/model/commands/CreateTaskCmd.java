@@ -26,17 +26,14 @@ public class CreateTaskCmd {
     private final String commandType;
     private String name;
     private String description;
-    private String category;
 
     public CreateTaskCmd(@JsonProperty("name") String name,
                          @JsonProperty("description") String description,
-                         @JsonProperty("category") String category,
                          @JsonProperty("commandType") String commandType) {
 
         this.id = UUID.randomUUID().toString();
         this.name = name;
         this.description = description;
-        this.category = category;
         this.commandType = commandType;
     }
 
@@ -50,10 +47,6 @@ public class CreateTaskCmd {
 
     public String getDescription() {
         return description;
-    }
-
-    public String getCategory() {
-        return category;
     }
 
     public String getCommandType() {
