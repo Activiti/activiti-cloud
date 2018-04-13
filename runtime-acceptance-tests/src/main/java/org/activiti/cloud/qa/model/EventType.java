@@ -21,8 +21,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum EventType {
 
     TASK_COMPLETED("TaskCompletedEvent"),
+    PROCESS_STARTED("ProcessStartedEvent"),
     PROCESS_COMPLETED("ProcessCompletedEvent"),
-    PROCESS_CANCELLED("ProcessCancelledEvent");
+    PROCESS_CANCELLED("ProcessCancelledEvent"),
+    TASK_CREATED("TaskCreatedEvent"),
+    TASK_ASSIGNED("TaskAssignedEvent"),
+    ACTIVITY_STARTED("ActivityStartedEvent"),
+    ACTIVITY_COMPLETED("ActivityCompletedEvent"),
+    SEQUENCE_FLOW_TAKEN("SequenceFlowTakenEvent"),
+    TASK_CANDIDATE_GROUP_REMOVED("TaskCandidateGroupRemovedEvent"),
+    TASK_CANDIDATE_GROUP_ADDED("TaskCandidateGroupAddedEvent");
 
     private final String type;
 

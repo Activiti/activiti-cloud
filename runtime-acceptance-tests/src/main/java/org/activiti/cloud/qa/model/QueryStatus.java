@@ -21,6 +21,6 @@ package org.activiti.cloud.qa.model;
  */
 public enum QueryStatus {
 
-    CREATED, RUNNING, COMPLETED, CANCELLED;
+    CREATED, RUNNING, COMPLETED, CANCELLED, ASSIGNED;
 
 }

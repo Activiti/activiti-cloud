@@ -21,6 +21,7 @@ import feign.Param;
 import feign.RequestLine;
 import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.Task;
+import org.activiti.cloud.qa.model.commands.CreateTaskCmd;
 import org.springframework.hateoas.PagedResources;
 
 /**
@@ -56,4 +57,10 @@ public interface RuntimeBundleService extends BaseService {
     @Headers("Content-Type: application/json")
     ProcessInstance getProcessInstance(@Param("id") String id);
 
+    @RequestLine("POST /v1/tasks/")
+    @Headers("Content-Type: application/json")
+    Task createNewTask(CreateTaskCmd task);
+
+    @RequestLine("GET /v1/tasks/{id}")
+    Task getTaskById(@Param("id") String id);
 }

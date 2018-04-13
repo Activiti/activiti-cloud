@@ -21,7 +21,6 @@ import feign.Param;
 import feign.RequestLine;
 import org.activiti.cloud.qa.model.Event;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.stereotype.Service;
 
 /**
  * Audit service
@@ -30,6 +29,10 @@ public interface AuditService extends BaseService {
 
     @RequestLine("GET /v1/events?processInstanceId={processInstanceId}&eventType={eventType}")
     @Headers("Content-Type: application/json")
-    PagedResources<Event> getEvents(@Param("processInstanceId") String processInstanceId,
-                                    @Param("eventType") String eventType);
+    PagedResources<Event> getProcessInstanceEvents(@Param("processInstanceId") String processInstanceId,
+                                                   @Param("eventType") String eventType);
+
+    @RequestLine("GET /v1/events")
+    @Headers("Content-Type: application/json")
+    PagedResources<Event> getEvents();
 }
