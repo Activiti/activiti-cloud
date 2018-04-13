@@ -27,11 +27,6 @@ public class CreateTaskCmd implements Command {
     private final String id;
     private String name;
     private String description;
-
-    /**
-     * intended to replace category field from previous versions
-     */
-    private String applicationName;
     private Date dueDate;
     private Integer priority;
     private String assignee;
@@ -43,7 +38,6 @@ public class CreateTaskCmd implements Command {
     @JsonCreator
     public CreateTaskCmd(@JsonProperty("name") String name,
                          @JsonProperty("description") String description,
-                         @JsonProperty("applicationName") String applicationName,
                          @JsonProperty("dueDate") Date dueDate,
                          @JsonProperty("priority") Integer priority,
                          @JsonProperty("assignee") String assignee) {
@@ -51,7 +45,6 @@ public class CreateTaskCmd implements Command {
         this();
         this.name = name;
         this.description = description;
-        this.applicationName = applicationName;
         this.dueDate = dueDate;
         this.priority = priority;
         this.assignee = assignee;
@@ -68,10 +61,6 @@ public class CreateTaskCmd implements Command {
 
     public String getDescription() {
         return description;
-    }
-
-    public String getApplicationName() {
-        return applicationName;
     }
 
     public Date getDueDate() {

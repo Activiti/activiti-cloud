@@ -109,9 +109,9 @@ public class TaskControllerImplIT {
     public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultTask());
         Page<Task> taskPage = new PageImpl<>(taskList,
-                                          PageRequest.of(1,
-                                                         10),
-                                          taskList.size());
+                                             PageRequest.of(1,
+                                                            10),
+                                             taskList.size());
         when(processEngine.getTasks(any())).thenReturn(taskPage);
 
         this.mockMvc.perform(get("/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
@@ -122,7 +122,8 @@ public class TaskControllerImplIT {
     }
 
     private Task buildDefaultTask() {
-        return buildTask(Task.TaskStatus.ASSIGNED, "user");
+        return buildTask(Task.TaskStatus.ASSIGNED,
+                         "user");
     }
 
     @Test
@@ -151,7 +152,8 @@ public class TaskControllerImplIT {
     @Test
     public void releaseTask() throws Exception {
 
-        given(processEngine.releaseTask(any())).willReturn(buildTask(Task.TaskStatus.CREATED, null));
+        given(processEngine.releaseTask(any())).willReturn(buildTask(Task.TaskStatus.CREATED,
+                                                                     null));
 
         this.mockMvc.perform(post("/v1/tasks/{taskId}/release",
                                   1))
@@ -174,8 +176,7 @@ public class TaskControllerImplIT {
                         UUID.randomUUID().toString(),
                         UUID.randomUUID().toString(),
                         null,
-                        status.name(),
-                        "rb-my-app");
+                        status.name());
     }
 
     @Test
@@ -201,7 +202,6 @@ public class TaskControllerImplIT {
                                   1).contentType(MediaType.APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(new CreateTaskCmd("new-task",
                                                                                           "description",
-                                                                                          null,
                                                                                           null,
                                                                                           50,
                                                                                           null))))

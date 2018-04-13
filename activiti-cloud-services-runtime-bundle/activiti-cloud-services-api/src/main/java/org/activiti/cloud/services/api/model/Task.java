@@ -41,7 +41,6 @@ public class Task {
     private String processInstanceId;
     private String parentTaskId;
     private String status;
-    private String applicationName;
 
     public Task() {
     }
@@ -58,8 +57,7 @@ public class Task {
                 String processDefinitionId,
                 String processInstanceId,
                 String parentTaskId,
-                String status,
-                String applicationName) {
+                String status) {
         this.id = id;
         this.owner = owner;
         this.assignee = assignee;
@@ -73,7 +71,6 @@ public class Task {
         this.processInstanceId = processInstanceId;
         this.parentTaskId = parentTaskId;
         this.status = status;
-        this.applicationName = applicationName;
     }
 
     public String getId() {
@@ -136,7 +133,4 @@ public class Task {
         return parentTaskId;
     }
 
-    public String getApplicationName() {
-        return applicationName;
-    }
 }

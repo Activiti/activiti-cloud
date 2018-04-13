@@ -117,8 +117,7 @@ public class TaskAdminControllerImplIT {
                         UUID.randomUUID().toString(),
                         UUID.randomUUID().toString(),
                         null,
-                        status.name(),
-                        "rb-my-app");
+                        status.name());
     }
 
 }

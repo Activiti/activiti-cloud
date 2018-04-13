@@ -206,7 +206,6 @@ public class ProcessEngineWrapper {
         final org.activiti.engine.task.Task task = taskService.newTask();
         task.setName(createTaskCmd.getName());
         task.setDescription(createTaskCmd.getDescription());
-        task.setCategory(createTaskCmd.getApplicationName());
         task.setDueDate(createTaskCmd.getDueDate());
         if (createTaskCmd.getPriority() != null) {
             task.setPriority(createTaskCmd.getPriority());

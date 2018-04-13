@@ -125,7 +125,6 @@ public class ProcessInstanceTasksControllerImplIT {
                         UUID.randomUUID().toString(),
                         UUID.randomUUID().toString(),
                         null,
-                        Task.TaskStatus.ASSIGNED.name(),
-                        "rb-my-app");
+                        Task.TaskStatus.ASSIGNED.name());
     }
 }
