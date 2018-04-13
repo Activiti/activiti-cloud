@@ -1,10 +1,10 @@
 # App Metadata
 
-A way to get at metadata such as:
+Provides a way to get at metadata such as:
 
 activiti.cloud.service.version
 activiti.cloud.service.type
 activiti.cloud.application.name
 activiti.cloud.application.version
 
-Each app publishes to eureka.
+Makes this data available to be published (e.g. to eureka) by apps that use this dep.
