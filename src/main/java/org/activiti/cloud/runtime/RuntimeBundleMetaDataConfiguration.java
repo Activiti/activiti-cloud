@@ -9,13 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
+import org.activiti.cloud.services.metadata.MetadataService;
 
 @Configuration
 @ConditionalOnClass(ApplicationInfoManager.class)
 public class RuntimeBundleMetaDataConfiguration {
 
-    @Value("${activiti.cloud.application.name:}")
-    private String applicationName;
+    @Autowired
+    private MetadataService metadataService;
 
     @Autowired
     private ApplicationInfoManager appInfoManager;
@@ -27,11 +28,6 @@ public class RuntimeBundleMetaDataConfiguration {
 
     @PostConstruct
     public void init() {
-        Map<String, String> metadata = new HashMap<>();
-        metadata.put("activiti-cloud-service-type",
-                     "runtime-bundle");
-        metadata.put("activiti-cloud-application-name",
-                     applicationName);
-        appInfoManager.registerAppMetadata(metadata);
+        appInfoManager.registerAppMetadata(metadataService.getMetadata());
     }
 }
