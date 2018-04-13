@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package org.actviti.cloud.query;
+package org.activiti.cloud.query;
 import org.activiti.cloud.services.query.graphql.autoconfigure.EnableActivitiGraphQLQueryService;
 import org.activiti.cloud.services.query.notifications.config.EnableActivitiNotificationsGateway;
 import org.activiti.cloud.services.query.qraphql.ws.config.EnableActivitiGraphQLNotifications;
-import org.activiti.cloud.starter.configuration.EnableActivitiQuery;
+import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableActivitiQuery
 @EnableActivitiGraphQLNotifications
 @EnableActivitiNotificationsGateway
 @EnableActivitiGraphQLQueryService
-@ComponentScan({"org.activiti.cloud.services.query.app","org.activiti.cloud.services.query.events",
-        "org.activiti.cloud.services.query.rest","org.activiti.cloud.services.security","org.activiti.cloud.starters",
-        "org.activiti.cloud.starter","org.activiti.cloud.services.identity","org.activiti.cloud.alfresco"})
 public class QueryApplication {
 
     public static void main(String[] args) {
