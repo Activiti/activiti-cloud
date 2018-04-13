@@ -11,7 +11,7 @@ import java.util.Map;
 @ConfigurationProperties("activiti.cloud")
 @RefreshScope
 @Component
-public class ActivitiCloudMetadataProperties implements InitializingBean {
+public class MetadataProperties implements InitializingBean {
 
     private Map<String, String> application = new HashMap<String, String>();
     private Map<String, String> service = new HashMap<String,String>();
