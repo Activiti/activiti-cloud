@@ -14,5 +14,10 @@ Scenario: show a process instance diagram
 Given any authenticated user
 When the user starts a random process
 And open the process diagram
-Then the digram is shown
+Then the diagram is shown
 
+Scenario: show diagram for a process instance without graphic info
+Given any authenticated user
+When the user starts a process without graphic info
+And open the process diagram
+Then no diagram is shown

@@ -27,9 +27,11 @@ import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
+import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
+import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.DEFAULT_PROCESS_INSTANCE_KEY;
 import static org.assertj.core.api.Assertions.*;
 
 public class ProcessInstanceTasks {
@@ -56,9 +58,9 @@ public class ProcessInstanceTasks {
         querySteps.checkServicesHealth();
     }
 
-    @When("the user starts a random process")
-    public void startProcess() throws Exception {
-        processInstance = runtimeBundleSteps.startProcess();
+    @When("the user starts process '$process'")
+    public void startProcess(String process) throws Exception {
+        processInstance = runtimeBundleSteps.startProcess(process);
         assertThat(processInstance).isNotNull();
 
         List<Task> tasks = new ArrayList<>(
@@ -67,6 +69,16 @@ public class ProcessInstanceTasks {
         assertThat(tasks).isNotEmpty();
         currentTask = tasks.get(0);
         assertThat(currentTask).isNotNull();
+    }
+
+    @When("the user starts a random process")
+    public void startProcess() throws Exception {
+        this.startProcess(DEFAULT_PROCESS_INSTANCE_KEY);
+    }
+
+    @When("the user starts a process without graphic info")
+    public void startProcessWithoutFGraphicInfo() throws Exception {
+        this.startProcess("fixSystemFailure");
     }
 
     @When("the user claims a task")
@@ -110,9 +122,13 @@ public class ProcessInstanceTasks {
         processInstanceDiagram = runtimeBundleSteps.openProcessInstanceDiagram(processInstance.getId());
     }
 
-    @Then("the digram is shown")
+    @Then("the diagram is shown")
     public void checkProcessInstanceDiagram() throws Exception {
         runtimeBundleSteps.checkProcessInstanceDiagram(processInstanceDiagram);
     }
 
+    @Then("no diagram is shown")
+    public void checkProcessInstanceNoDiagram() throws Exception {
+        runtimeBundleSteps.checkProcessInstanceNoDiagram(processInstanceDiagram);
+    }
 }

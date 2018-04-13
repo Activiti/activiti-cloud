@@ -21,7 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.activiti.cloud.qa.config.BaseTestsConfigurationProperties;
 import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.rest.ModelingFeignConfiguration;
 import org.springframework.test.context.ContextConfiguration;

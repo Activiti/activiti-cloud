@@ -16,11 +16,6 @@
 
 package org.activiti.cloud.qa.steps;
 
-import java.io.IOException;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.AuthToken;
@@ -47,7 +42,7 @@ public class AuthenticationSteps {
     private AuthenticationService authenticationService;
 
     @Step
-    public void authenticateDefaultUser() throws IOException {
+    public void authenticateDefaultUser() {
         AuthToken authToken = authenticationService
                 .authenticate(AUTH_CLIENT_ID,
                               AUTH_GRANT_TYPE,
