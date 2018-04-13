@@ -1,6 +1,7 @@
 package org.activiti.cloud.services.rest.api;
 
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
+import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.springframework.data.domain.Pageable;
@@ -32,4 +33,7 @@ public interface TaskController {
     @RequestMapping(value = "/{taskId}/complete", method = RequestMethod.POST)
     ResponseEntity<Void> completeTask(@PathVariable String taskId,
                                       @RequestBody(required = false) CompleteTaskCmd completeTaskCmd);
+
+    @RequestMapping(method = RequestMethod.POST)
+    Resource<Task> createNewTask(@RequestBody CreateTaskCmd createTaskCmd);
 }

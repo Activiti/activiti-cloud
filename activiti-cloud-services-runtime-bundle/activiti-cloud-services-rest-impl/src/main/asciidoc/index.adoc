@@ -177,6 +177,16 @@ include::{snippets}/task/get/http-request.adoc[]
 .Response
 include::{snippets}/task/get/http-response.adoc[]
 
+==== Create a new task
+.Request
+include::{snippets}/task/new/http-request.adoc[]
+
+.Response
+include::{snippets}/task/new/http-response.adoc[]
+
+include::{snippets}/task/new/response-fields.adoc[]
+include::{snippets}/task/new/links.adoc[]
+
 ==== Claim a task
 .Request
 include::{snippets}/task/claim/http-request.adoc[]

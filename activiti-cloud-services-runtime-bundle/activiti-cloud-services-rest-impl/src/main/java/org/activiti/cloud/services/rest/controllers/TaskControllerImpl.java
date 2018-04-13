@@ -20,6 +20,7 @@ import java.util.Map;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
+import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.core.AuthenticationWrapper;
@@ -101,6 +102,10 @@ public class TaskControllerImpl implements TaskController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Override
+    public Resource<Task> createNewTask(@RequestBody CreateTaskCmd createTaskCmd) {
+        return taskResourceAssembler.toResource(processEngine.createNewTask(createTaskCmd));
+    }
 
     public AuthenticationWrapper getAuthenticationWrapper() {
         return authenticationWrapper;

@@ -47,7 +47,8 @@ public class TaskConverter implements ModelConverter<Task, org.activiti.cloud.se
                                                                   source.getProcessDefinitionId(),
                                                                   source.getProcessInstanceId(),
                                                                   source.getParentTaskId(),
-                                                                  calculateStatus(source));
+                                                                  calculateStatus(source),
+                                                                  source.getCategory());
         }
         return task;
     }

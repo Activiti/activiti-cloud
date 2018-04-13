@@ -25,15 +25,14 @@ import org.activiti.cloud.services.events.ActivityStartedEventImpl;
 import org.activiti.cloud.services.events.ProcessCompletedEventImpl;
 import org.activiti.cloud.services.events.ProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessStartedEventImpl;
-import org.activiti.cloud.services.events.ProcessSuspendedEventImpl;
 import org.activiti.cloud.services.events.SequenceFlowTakenEventImpl;
+import org.activiti.cloud.services.events.TaskAssignedEventImpl;
 import org.activiti.cloud.services.events.TaskCreatedEventImpl;
 import org.activiti.cloud.services.events.tests.util.MockMessageChannel;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
-import org.activiti.engine.runtime.ProcessInstance;
-import org.junit.Ignore;
+import org.activiti.engine.task.Task;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +107,38 @@ public class MessageProducerActivitiEventListenerIT {
         assertThat(events[2].getClass()).isEqualTo(ActivityStartedEventImpl.class);
         assertThat(events[3].getClass()).isEqualTo(ActivityCompletedEventImpl.class);
         assertThat(events[4].getClass()).isEqualTo(SequenceFlowTakenEventImpl.class);
+    }
+
+    /**
+     * This test is here for the default behavior of the engine when a new standalone task is created
+     * First is send the TASK_ASSIGNED event then the TASK_CREATED event
+     * Note: If it's decided to change the behavior this test should fail
+     * @throws Exception
+     */
+    @Test
+    public void executeListenerForTaskCreated() throws Exception {
+        // given
+        ProcessEngine processEngine = ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration()
+                .setDatabaseSchemaUpdate(ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_DROP_CREATE).buildProcessEngine();
+        processEngine.getRuntimeService().addEventListener(eventListener);
+
+        // when
+        final Task newTask = processEngine.getTaskService().newTask();
+        newTask.setName("new-task");
+        newTask.setDescription("new-task-description");
+        newTask.setAssignee("huser");
+        try {
+            processEngine.getTaskService().saveTask(newTask);
+        } catch (Exception e) {
+            // nothing to do
+        }
+
+        // then
+        ProcessEngineEvent[] events = (ProcessEngineEvent[]) MockMessageChannel.messageResult.getPayload();
+        assertThat(events.length).isEqualTo(2);
+        assertThat(events[0].getClass()).isEqualTo(TaskAssignedEventImpl.class);
+        assertThat(events[1].getClass()).isEqualTo(TaskCreatedEventImpl.class);
+
     }
 
     public static void deploy(final String processDefinitionKey, ProcessEngine processEngine) throws IOException {
