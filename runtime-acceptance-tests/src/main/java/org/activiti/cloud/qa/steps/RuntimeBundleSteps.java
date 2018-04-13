@@ -123,7 +123,6 @@ public class RuntimeBundleSteps {
     public Task createNewTask() {
         return runtimeBundleService.createNewTask(new CreateTaskCmd("new-task",
                                                                     "task-description",
-                                                                    null,
                                                                     "CreateTaskCmd"));
     }
 
