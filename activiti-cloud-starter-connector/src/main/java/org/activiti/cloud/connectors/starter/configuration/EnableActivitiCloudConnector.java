@@ -15,10 +15,6 @@ import org.springframework.context.annotation.PropertySource;
 @Inherited
 @EnableDiscoveryClient
 @ComponentScan("org.activiti.cloud.connectors.starter")
-@PropertySources({
-        @PropertySource("classpath:metadata.properties"),
-        @PropertySource("classpath:metadata-eureka.properties") //will have no effect when running without eureka
-})
 public @interface EnableActivitiCloudConnector {
 
 }
