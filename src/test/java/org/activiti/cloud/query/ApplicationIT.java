@@ -7,7 +7,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {QueryApplication.class, QueryMetaDataAutoConfiguration.class})
+@SpringBootTest(classes = {QueryApplication.class})
 @DirtiesContext
 public class ApplicationIT {
 
