@@ -8,10 +8,6 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @ComponentScan({"org.activiti.cloud.services.query",
         "org.activiti.cloud.alfresco", "org.activiti.cloud.services.security","org.activiti.cloud.services.identity"})
-@PropertySources({
-        @PropertySource("classpath:metadata.properties"),
-        @PropertySource("classpath:metadata-eureka.properties") //will have no effect when running without eureka
-})
 public class ActivitiQueryAutoConfiguration {
 
 }
