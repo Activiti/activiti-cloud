@@ -1,5 +1,6 @@
-package org.activiti.cloud.services.metadata;
+package org.activit.cloud.services.metadata.test;
 
+import org.activiti.cloud.services.metadata.MetadataService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

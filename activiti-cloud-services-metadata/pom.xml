@@ -13,8 +13,7 @@
     <dependency>
       <groupId>com.netflix.eureka</groupId>
       <artifactId>eureka-client</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

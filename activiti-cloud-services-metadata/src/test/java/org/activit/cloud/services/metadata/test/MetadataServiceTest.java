@@ -1,5 +1,7 @@
-package org.activiti.cloud.services.metadata;
+package org.activit.cloud.services.metadata.test;
 
+import org.activiti.cloud.services.metadata.MetadataProperties;
+import org.activiti.cloud.services.metadata.MetadataService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
