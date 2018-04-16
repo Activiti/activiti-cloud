@@ -2,12 +2,16 @@ package org.activiti.cloud.starter.query.configuration;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @ComponentScan({"org.activiti.cloud.services.query",
         "org.activiti.cloud.alfresco", "org.activiti.cloud.services.security","org.activiti.cloud.services.identity"})
-@PropertySource("classpath:metadata-eureka.properties") //includes the props for eureka
+@PropertySources({
+        @PropertySource("classpath:metadata.properties"),
+        @PropertySource("classpath:metadata-eureka.properties") //will have no effect when running without eureka
+})
 public class ActivitiQueryAutoConfiguration {
 
 }
