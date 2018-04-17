@@ -151,4 +151,10 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
         processEngine.activate(new ActivateProcessInstanceCmd(processInstanceId));
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @Override
+    public void deleteProcessInstance(@PathVariable String processInstanceId) {
+        processEngine.deleteProcessInstance(processInstanceId);
+    }
+
 }

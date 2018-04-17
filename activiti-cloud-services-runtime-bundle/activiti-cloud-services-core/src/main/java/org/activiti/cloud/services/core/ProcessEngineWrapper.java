@@ -121,32 +121,30 @@ public class ProcessEngineWrapper {
     }
 
     public void suspend(SuspendProcessInstanceCmd suspendProcessInstanceCmd) {
-        ProcessInstance processInstance = getProcessInstanceById(suspendProcessInstanceCmd.getProcessInstanceId());
-
-        verifyCanWriteToProcessInstance(processInstance,
-                                        "Unable to find process instance for the given id:'" + suspendProcessInstanceCmd.getProcessInstanceId() + "'");
+        verifyCanWriteToProcessInstance(suspendProcessInstanceCmd.getProcessInstanceId());
         runtimeService.suspendProcessInstanceById(suspendProcessInstanceCmd.getProcessInstanceId());
     }
 
-    private void verifyCanWriteToProcessInstance(ProcessInstance processInstance,
-                                                 String message) {
-
-        ProcessDefinition definition = repositoryService.getProcessDefinition(processInstance.getProcessDefinitionId());
-
-        if (processInstance == null || definition == null) {
-            throw new ActivitiException(message);
+    private void verifyCanWriteToProcessInstance(String processInstanceId) {
+        ProcessInstance processInstance = getProcessInstanceById(processInstanceId);
+        if (processInstance == null) {
+            throw new ActivitiException("Unable to find process instance for the given id: " + processInstanceId);
         }
-        if (!securityService.canWrite(definition.getKey())) {
-            LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + definition.getKey());
-            throw new ActivitiForbiddenException("Operation not permitted for " + definition.getKey());
+
+        ProcessDefinition processDefinition =
+                repositoryService.getProcessDefinition(processInstance.getProcessDefinitionId());
+        if (processDefinition == null) {
+            throw new ActivitiException("Unable to find process definition for the given id: " + processInstance.getProcessDefinitionId());
+        }
+
+        if (!securityService.canWrite(processDefinition.getKey())) {
+            LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processDefinition.getKey());
+            throw new ActivitiForbiddenException("Operation not permitted for " + processDefinition.getKey());
         }
     }
 
     public void activate(ActivateProcessInstanceCmd activateProcessInstanceCmd) {
-        ProcessInstance processInstance = getProcessInstanceById(activateProcessInstanceCmd.getProcessInstanceId());
-
-        verifyCanWriteToProcessInstance(processInstance,
-                                        "Unable to find process instance for the given id:'" + activateProcessInstanceCmd.getProcessInstanceId() + "'");
+        verifyCanWriteToProcessInstance(activateProcessInstanceCmd.getProcessInstanceId());
         runtimeService.activateProcessInstanceById(activateProcessInstanceCmd.getProcessInstanceId());
     }
 
@@ -217,5 +215,11 @@ public class ProcessEngineWrapper {
         taskService.saveTask(task);
 
         return taskConverter.from(taskService.createTaskQuery().taskId(task.getId()).singleResult());
+    }
+
+    public void deleteProcessInstance(String processInstanceId) {
+        verifyCanWriteToProcessInstance(processInstanceId);
+        runtimeService.deleteProcessInstance(processInstanceId,
+                                             "Cancelled by " + authenticationWrapper.getAuthenticatedUserId());
     }
 }

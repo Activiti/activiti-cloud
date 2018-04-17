@@ -1,5 +1,7 @@
 package org.activiti.cloud.services.core;
 
+import java.util.UUID;
+
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
@@ -12,6 +14,7 @@ import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
@@ -179,5 +182,48 @@ public class ProcessEngineWrapperTest {
     public void shouldSetTaskVariablesLocal(){
         processEngineWrapper.setTaskVariablesLocal(mock(SetTaskVariablesCmd.class));
         verify(taskService).setVariablesLocal(any(),any());
+    }
+
+    @Test
+    public void testDeleteNotExistingProcessInstance() {
+        ProcessInstanceQuery query = mock(ProcessInstanceQuery.class);
+        when(runtimeService.createProcessInstanceQuery()).thenReturn(query);
+        when(query.processInstanceId(any())).thenReturn(query);
+        assertThatExceptionOfType(ActivitiException.class).isThrownBy(
+                () -> processEngineWrapper.deleteProcessInstance(UUID.randomUUID().toString())
+        ).withMessageStartingWith("Unable to find process instance for the given id:");
+    }
+
+    @Test
+    public void testDeleteProcessInstanceForNotExistingProcessDefinition() {
+        org.activiti.engine.runtime.ProcessInstance processInstance =
+                mock(org.activiti.engine.runtime.ProcessInstance.class);
+        ProcessInstanceQuery query = mock(ProcessInstanceQuery.class);
+        when(runtimeService.createProcessInstanceQuery()).thenReturn(query);
+        when(query.processInstanceId(any())).thenReturn(query);
+        when(query.singleResult()).thenReturn(processInstance);
+        when(processInstanceConverter.from(processInstance)).thenReturn(mock(ProcessInstance.class));
+
+        assertThatExceptionOfType(ActivitiException.class).isThrownBy(
+                () -> processEngineWrapper.deleteProcessInstance(UUID.randomUUID().toString())
+        ).withMessageStartingWith("Unable to find process definition for the given id:");
+    }
+
+    @Test
+    public void shouldNotDeleteProcessInstanceWithoutPermission() {
+        ProcessDefinition def = mock(ProcessDefinition.class);
+        org.activiti.engine.runtime.ProcessInstance processInstance =
+                mock(org.activiti.engine.runtime.ProcessInstance.class);
+        ProcessInstanceQuery query = mock(ProcessInstanceQuery.class);
+        when(runtimeService.createProcessInstanceQuery()).thenReturn(query);
+        when(query.processInstanceId(any())).thenReturn(query);
+        when(query.singleResult()).thenReturn(processInstance);
+        when(processInstanceConverter.from(processInstance)).thenReturn(mock(ProcessInstance.class));
+        when(repositoryService.getProcessDefinition(any())).thenReturn(def);
+
+        when(securityService.canWrite(any())).thenReturn(false);
+        assertThatExceptionOfType(ActivitiForbiddenException.class).isThrownBy(
+                () -> processEngineWrapper.deleteProcessInstance(processInstance.getProcessInstanceId())
+        ).withMessageStartingWith("Operation not permitted");
     }
 }

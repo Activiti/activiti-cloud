@@ -25,21 +25,31 @@ import java.util.stream.Collectors;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
-import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.IdentityLink;
-import org.activiti.engine.task.IdentityLinkType;
 import org.activiti.engine.task.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.activiti.engine.delegate.event.ActivitiEventType.ENTITY_ACTIVATED;
+import static org.activiti.engine.delegate.event.ActivitiEventType.ENTITY_CREATED;
+import static org.activiti.engine.delegate.event.ActivitiEventType.ENTITY_SUSPENDED;
+import static org.activiti.engine.delegate.event.ActivitiEventType.PROCESS_CANCELLED;
+import static org.activiti.engine.task.IdentityLinkType.CANDIDATE;
+
 @Component
 public class EventConverterContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventConverterContext.class);
+
+    public static final String PROCESS_EVENT_PREFIX = "ProcessInstance:";
+    public static final String TASK_EVENT_PREFIX = "Task:";
+    public static final String TASK_CANDIDATE_USER_EVENT_PREFIX = "TaskCandidateUser:";
+    public static final String TASK_CANDIDATE_GROUP_EVENT_PREFIX = "TaskCandidateGroup:";
+    public static final String EVENT_PREFIX = "";
 
     private Map<String, EventConverter> convertersMap;
 
@@ -70,35 +80,59 @@ public class EventConverterContext {
     }
 
     public static String getPrefix(ActivitiEvent activitiEvent) {
-        if (activitiEvent instanceof ActivitiEntityEvent) {
-            Object entity = ((ActivitiEntityEvent) activitiEvent).getEntity();
-            if (entity != null) {
-                if (ProcessInstance.class.isAssignableFrom(entity.getClass())) {
-                    if (activitiEvent.getType().equals(ActivitiEventType.ENTITY_SUSPENDED) ||
-                            activitiEvent.getType().equals(ActivitiEventType.ENTITY_ACTIVATED) ||
-                            activitiEvent.getType().equals(ActivitiEventType.ENTITY_CREATED)) {
-                        ExecutionEntity executionEntity = (ExecutionEntity) entity;
-                        if (executionEntity.isProcessInstanceType()) {
-                            return "ProcessInstance:";
-                        } else {
-                            return "";
-                        }
-                    }
-                    return "ProcessInstance:";
-                } else if (entity instanceof Task) {
-                    return "Task:";
-                } else if (entity instanceof IdentityLink){
-                    IdentityLink identityLink = (IdentityLink)entity;
-                    if (IdentityLinkType.CANDIDATE.equalsIgnoreCase(identityLink.getType()) && identityLink.getUserId() != null) {
-                        return "TaskCandidateUser:";
-                    } else if (IdentityLinkType.CANDIDATE.equalsIgnoreCase(identityLink.getType()) && identityLink.getGroupId() != null) {
-                        return "TaskCandidateGroup:";
-                    } else {
-                        return "";
-                    }
-                }
+        if (isProcessEvent(activitiEvent)) {
+            return PROCESS_EVENT_PREFIX;
+        } else if (isTaskEvent(activitiEvent)) {
+            return TASK_EVENT_PREFIX;
+        } else if (isIdentityLinkEntityEvent(activitiEvent)) {
+            IdentityLink identityLinkEntity = (IdentityLink) ((ActivitiEntityEvent) activitiEvent).getEntity();
+            if (isCandidateUserEntity(identityLinkEntity)) {
+                return TASK_CANDIDATE_USER_EVENT_PREFIX;
+            } else if (isCandidateGroupEntity(identityLinkEntity)) {
+                return TASK_CANDIDATE_GROUP_EVENT_PREFIX;
             }
         }
-        return "";
+
+        return EVENT_PREFIX;
+    }
+
+    private static boolean isProcessEvent(ActivitiEvent activitiEvent) {
+        boolean isProcessEvent = false;
+        if (activitiEvent instanceof ActivitiEntityEvent) {
+            Object entity = ((ActivitiEntityEvent) activitiEvent).getEntity();
+            if (entity != null && ProcessInstance.class.isAssignableFrom(entity.getClass())) {
+                isProcessEvent = !isExecutionEntityEvent(activitiEvent) || ((ExecutionEntity) entity).isProcessInstanceType();
+            }
+        } else if (activitiEvent.getType() == PROCESS_CANCELLED) {
+            isProcessEvent = true;
+        }
+
+        return isProcessEvent;
+    }
+
+    private static boolean isExecutionEntityEvent(ActivitiEvent activitiEvent) {
+        return activitiEvent.getType() == ENTITY_SUSPENDED ||
+                activitiEvent.getType() == ENTITY_ACTIVATED ||
+                activitiEvent.getType() == ENTITY_CREATED;
+    }
+
+    private static boolean isTaskEvent(ActivitiEvent activitiEvent) {
+        return activitiEvent instanceof ActivitiEntityEvent &&
+                ((ActivitiEntityEvent) activitiEvent).getEntity() instanceof Task;
+    }
+
+    private static boolean isIdentityLinkEntityEvent(ActivitiEvent activitiEvent) {
+        return activitiEvent instanceof ActivitiEntityEvent &&
+                ((ActivitiEntityEvent) activitiEvent).getEntity() instanceof IdentityLink;
+    }
+
+    private static boolean isCandidateUserEntity(IdentityLink identityLinkEntity) {
+        return CANDIDATE.equalsIgnoreCase(identityLinkEntity.getType()) &&
+                identityLinkEntity.getUserId() != null;
+    }
+
+    private static boolean isCandidateGroupEntity(IdentityLink identityLinkEntity) {
+        return CANDIDATE.equalsIgnoreCase(identityLinkEntity.getType()) &&
+                identityLinkEntity.getGroupId() != null;
     }
 }
