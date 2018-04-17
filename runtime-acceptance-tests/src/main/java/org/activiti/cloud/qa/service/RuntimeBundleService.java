@@ -33,6 +33,14 @@ public interface RuntimeBundleService extends BaseService {
     @Headers("Content-Type: application/json")
     ProcessInstance startProcess(ProcessInstance processInstance);
 
+    @RequestLine("POST /v1/process-instances/{id}/suspend")
+    @Headers("Content-Type: application/json")
+    void suspendProcess(@Param("id") String id);
+
+    @RequestLine("POST /v1/process-instances/{id}/activate")
+    @Headers("Content-Type: application/json")
+    void activateProcess(@Param("id") String id);
+
     @RequestLine("GET /v1/process-instances/{id}/tasks")
     @Headers({
             "Content-Type: application/json",

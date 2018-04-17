@@ -21,6 +21,7 @@ import feign.Logger;
 import feign.gson.GsonEncoder;
 import org.activiti.cloud.qa.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.qa.rest.feign.FeignConfiguration;
+import org.activiti.cloud.qa.rest.feign.FeignErrorDecoder;
 import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.qa.rest.feign.OAuth2FeignRequestInterceptor;
 import org.activiti.cloud.qa.service.AuditService;
@@ -54,6 +55,7 @@ public class RuntimeFeignConfiguration {
     public RuntimeBundleDiagramService runtimeBundleDiagramService() {
         return Feign.builder()
                 .encoder(new GsonEncoder())
+                .errorDecoder(new FeignErrorDecoder())
                 .logger(new Logger.ErrorLogger())
                 .logLevel(Logger.Level.FULL)
                 .requestInterceptor(new OAuth2FeignRequestInterceptor())

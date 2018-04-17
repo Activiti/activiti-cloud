@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa;
+package org.activiti.cloud.qa.serenity;
 
-import org.activiti.cloud.qa.serenity.ExtendedSerenityStories;
+import net.serenitybdd.jbehave.SerenityStories;
+import org.jbehave.core.steps.InjectableStepsFactory;
 
-public class AcceptanceTests extends ExtendedSerenityStories {
+/**
+ * Custom SerenityStories
+ */
+public class ExtendedSerenityStories extends SerenityStories {
 
+    @Override
+    public InjectableStepsFactory stepsFactory() {
+        return new ExtendedSerenityStepsFactory(configuration(),
+                                                getRootPackage(),
+                                                getClassLoader());
+    }
 }

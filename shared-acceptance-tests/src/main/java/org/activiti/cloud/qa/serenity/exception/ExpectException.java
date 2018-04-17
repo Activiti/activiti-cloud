@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa;
+package org.activiti.cloud.qa.serenity.exception;
 
-import org.activiti.cloud.qa.serenity.ExtendedSerenityStories;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class AcceptanceTests extends ExtendedSerenityStories {
+/**
+ * Expect exception annotation
+ */
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExpectException {
+
+    String value() default "";
 
 }
