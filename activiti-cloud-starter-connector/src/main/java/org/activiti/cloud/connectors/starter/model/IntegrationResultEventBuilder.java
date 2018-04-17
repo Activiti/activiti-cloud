@@ -36,7 +36,7 @@ public class IntegrationResultEventBuilder {
         return new IntegrationResultEventBuilder(requestEvent)
                 .withExecutionId(requestEvent.getExecutionId())
                 .withFlowNodeId(requestEvent.getFlowNodeId())
-                .withTargetApplication(requestEvent.getApplicationName());
+                .withTargetApplication(requestEvent.getFullyQualifiedServiceName());
     }
 
     private IntegrationResultEventBuilder withExecutionId(String executionId) {
@@ -69,6 +69,6 @@ public class IntegrationResultEventBuilder {
 
     public MessageBuilder<IntegrationResultEvent> getMessageBuilder() {
         return MessageBuilder.withPayload(integrationResultEvent).setHeader("targetApplication",
-                                                                            requestEvent.getApplicationName());
+                                                                            requestEvent.getFullyQualifiedServiceName());
     }
 }

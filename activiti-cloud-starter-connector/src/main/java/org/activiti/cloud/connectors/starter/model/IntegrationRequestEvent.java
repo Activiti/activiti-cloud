@@ -35,7 +35,7 @@ public class IntegrationRequestEvent {
 
     private String flowNodeId;
 
-    private String applicationName;
+    private String fullyQualifiedServiceName;
 
     private String connectorType;
 
@@ -85,12 +85,12 @@ public class IntegrationRequestEvent {
         this.flowNodeId = flowNodeId;
     }
 
-    public String getApplicationName() {
-        return applicationName;
+    public String getFullyQualifiedServiceName() {
+        return fullyQualifiedServiceName;
     }
 
-    protected void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
+    protected void setFullyQualifiedServiceName(String fullyQualifiedServiceName) {
+        this.fullyQualifiedServiceName = fullyQualifiedServiceName;
     }
 
     public String getConnectorType() {

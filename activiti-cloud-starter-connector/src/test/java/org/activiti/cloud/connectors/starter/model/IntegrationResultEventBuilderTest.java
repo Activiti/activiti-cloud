@@ -42,7 +42,7 @@ public class IntegrationResultEventBuilderTest {
                                                                                       EXEC_ID,
                                                                                       Collections.emptyMap());
         integrationRequestEvent.setFlowNodeId(FLOW_NODE_ID);
-        integrationRequestEvent.setApplicationName(APP_NAME);
+        integrationRequestEvent.setFullyQualifiedServiceName(APP_NAME);
 
         //when
         IntegrationResultEvent resultEvent = IntegrationResultEventBuilder
@@ -67,7 +67,7 @@ public class IntegrationResultEventBuilderTest {
                                                                                       PROC_DEF_ID,
                                                                                       EXEC_ID,
                                                                                       Collections.emptyMap());
-        integrationRequestEvent.setApplicationName(APP_NAME);
+        integrationRequestEvent.setFullyQualifiedServiceName(APP_NAME);
 
         //when
         Message<IntegrationResultEvent> message = IntegrationResultEventBuilder
