@@ -57,7 +57,7 @@ public class ActivityCancelledEventConverterTest {
         given(activitiEvent.getActivityName()).willReturn("ActivityName");
         given(activitiEvent.getActivityType()).willReturn("ActivityType");
         given(activitiEvent.getCause()).willReturn("cause of the cancellation");
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn("myApp");
 
         ProcessEngineEvent pee = converter.from(activitiEvent);
 
@@ -66,7 +66,7 @@ public class ActivityCancelledEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getFullyQualifiedServiceName()).isEqualTo("myApp");
         assertThat(((ActivityCancelledEvent) pee).getActivityId()).isEqualTo("ABC");
         assertThat(((ActivityCancelledEvent) pee).getActivityName()).isEqualTo("ActivityName");
         assertThat(((ActivityCancelledEvent) pee).getActivityType()).isEqualTo("ActivityType");

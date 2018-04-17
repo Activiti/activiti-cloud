@@ -26,12 +26,12 @@ public class ProcessSuspendedEventImpl extends AbstractProcessEngineEvent implem
     public ProcessSuspendedEventImpl() {
     }
 
-    public ProcessSuspendedEventImpl(String applicationName,
+    public ProcessSuspendedEventImpl(String fullyQualifiedServiceName,
                                      String executionId,
                                      String processDefinitionId,
                                      String processInstanceId,
                                      ProcessInstance processInstance) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);
@@ -51,7 +51,7 @@ public class ProcessSuspendedEventImpl extends AbstractProcessEngineEvent implem
     public String toString() {
         return "ProcessSuspendedEventImpl{" +
                     "processInstance=" + processInstance +
-                    "applicationName='" + getApplicationName() + '\'' +
+                    "fullyQualifiedServiceName='" + getFullyQualifiedServiceName() + '\'' +
                     ", executionId='" + getExecutionId() + '\'' +
                     ", processDefinitionId='" + getProcessDefinitionId() + '\'' +
                     ", processInstanceId='" + getProcessInstanceId() + '\'' +

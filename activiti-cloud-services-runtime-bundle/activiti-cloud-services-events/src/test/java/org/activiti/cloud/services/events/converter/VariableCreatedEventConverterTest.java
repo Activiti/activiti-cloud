@@ -49,7 +49,7 @@ public class VariableCreatedEventConverterTest {
     @Test
     public void internalVariableEventToExternalConvertion() throws Exception {
         //given
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn("myApp");
 
         ActivitiVariableEventImpl activitiEvent = mock(ActivitiVariableEventImpl.class);
         given(activitiEvent.getType()).willReturn(ActivitiEventType.VARIABLE_CREATED);
@@ -68,7 +68,7 @@ public class VariableCreatedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getFullyQualifiedServiceName()).isEqualTo("myApp");
         assertThat(((VariableCreatedEvent) pee).getTaskId()).isEqualTo("1");
         assertThat(((VariableCreatedEvent) pee).getVariableName()).isEqualTo("myVar");
         assertThat(((VariableCreatedEvent) pee).getVariableType()).isEqualTo("string");

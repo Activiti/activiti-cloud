@@ -65,7 +65,7 @@ public class TaskCompletedEventConverterTest {
         org.activiti.cloud.services.api.model.Task externalTask = mock(org.activiti.cloud.services.api.model.Task.class);
         given(taskConverter.from(internalTask)).willReturn(externalTask);
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = taskCompletedEventConverter.from(activitiEvent);
@@ -75,7 +75,7 @@ public class TaskCompletedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getFullyQualifiedServiceName()).isEqualTo("myApp");
         assertThat(((TaskCompletedEvent) pee).getTask()).isEqualTo(externalTask);
     }
 

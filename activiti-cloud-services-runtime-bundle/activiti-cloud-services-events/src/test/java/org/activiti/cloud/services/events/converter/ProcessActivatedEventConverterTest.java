@@ -65,7 +65,7 @@ public class ProcessActivatedEventConverterTest {
         given(activitiEvent.getEntity()).willReturn(executionEntity);
         given(executionEntity.getProcessInstance()).willReturn(internalProcessInstance);
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn("myApp");
 
         ProcessInstance externalProcessInstance = mock(ProcessInstance.class);
         given(processInstanceConverter.from(internalProcessInstance)).willReturn(externalProcessInstance);
@@ -78,7 +78,7 @@ public class ProcessActivatedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getFullyQualifiedServiceName()).isEqualTo("myApp");
         assertThat(((ProcessActivatedEvent) pee).getProcessInstance()).isEqualTo(externalProcessInstance);
     }
 

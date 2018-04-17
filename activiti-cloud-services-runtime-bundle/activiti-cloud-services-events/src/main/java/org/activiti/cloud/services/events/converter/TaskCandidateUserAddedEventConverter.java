@@ -26,7 +26,7 @@ public class TaskCandidateUserAddedEventConverter extends AbstractEventConverter
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new TaskCandidateUserAddedEventImpl(getApplicationName(),
+        return new TaskCandidateUserAddedEventImpl(getFullyQualifiedServiceName(),
                 event.getExecutionId(),
                 event.getProcessDefinitionId(),
                 event.getProcessInstanceId(),

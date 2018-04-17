@@ -9,12 +9,12 @@ public class TaskCandidateUserRemovedEventImpl extends AbstractProcessEngineEven
     public TaskCandidateUserRemovedEventImpl() {
     }
 
-    public TaskCandidateUserRemovedEventImpl(String applicationName,
+    public TaskCandidateUserRemovedEventImpl(String fullyQualifiedServiceName,
                                              String executionId,
                                              String processDefinitionId,
                                              String processInstanceId,
                                              TaskCandidateUser taskCandidateUser) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);

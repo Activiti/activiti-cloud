@@ -42,7 +42,7 @@ public class TaskAssignedEventConverter extends AbstractEventConverter {
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new TaskAssignedEventImpl(getApplicationName(),
+        return new TaskAssignedEventImpl(getFullyQualifiedServiceName(),
                                          event.getExecutionId(),
                                          event.getProcessDefinitionId(),
                                          event.getProcessInstanceId(),

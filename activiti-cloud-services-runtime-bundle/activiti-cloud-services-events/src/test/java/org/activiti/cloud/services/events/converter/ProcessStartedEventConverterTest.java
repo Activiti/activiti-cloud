@@ -57,7 +57,7 @@ public class ProcessStartedEventConverterTest {
         given(activitiEvent.getNestedProcessDefinitionId()).willReturn("myParentProcessDef");
         given(activitiEvent.getNestedProcessInstanceId()).willReturn("2");
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = converter.from(activitiEvent);
@@ -71,7 +71,7 @@ public class ProcessStartedEventConverterTest {
         assertThat(processStartedEvent.getProcessDefinitionId()).isEqualTo("myProcessDef");
         assertThat(processStartedEvent.getNestedProcessDefinitionId()).isEqualTo("myParentProcessDef");
         assertThat(processStartedEvent.getNestedProcessInstanceId()).isEqualTo("2");
-        assertThat(processStartedEvent.getApplicationName()).isEqualTo("myApp");
+        assertThat(processStartedEvent.getFullyQualifiedServiceName()).isEqualTo("myApp");
     }
 
     @Test

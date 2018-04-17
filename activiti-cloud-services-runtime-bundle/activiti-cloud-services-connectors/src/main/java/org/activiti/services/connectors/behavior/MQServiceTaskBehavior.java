@@ -63,7 +63,7 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
     private void publishSpringEvent(DelegateExecution execution,
                                       IntegrationContextEntity integrationContext) {
         IntegrationRequestEvent event = new IntegrationRequestEvent(execution,
-                                                                    integrationContext, runtimeBundleProperties.getName());
+                                                                    integrationContext, runtimeBundleProperties.getFullyQualifiedServiceName());
 
         eventPublisher.publishEvent(event);
     }

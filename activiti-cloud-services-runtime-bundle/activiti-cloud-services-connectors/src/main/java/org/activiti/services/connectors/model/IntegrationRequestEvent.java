@@ -42,7 +42,7 @@ public class IntegrationRequestEvent {
 
     private String connectorType;
 
-    private String applicationName;
+    private String fullyQualifiedServiceName;
 
     private Map<String, Object> variables;
 
@@ -53,7 +53,7 @@ public class IntegrationRequestEvent {
 
     public IntegrationRequestEvent(DelegateExecution execution,
                                    IntegrationContextEntity integrationContext,
-                                   String applicationName) {
+                                   String fullyQualifiedServiceName) {
         this();
         this.processInstanceId = execution.getProcessInstanceId();
         this.processDefinitionId = execution.getProcessDefinitionId();
@@ -61,7 +61,7 @@ public class IntegrationRequestEvent {
         this.flowNodeId = integrationContext.getFlowNodeId();
         this.variables = execution.getVariables();
         this.integrationContextId = integrationContext.getId();
-        this.applicationName = applicationName;
+        this.fullyQualifiedServiceName = fullyQualifiedServiceName;
         this.connectorType = ((ServiceTask) execution.getCurrentFlowElement()).getImplementation();
     }
 
@@ -94,8 +94,8 @@ public class IntegrationRequestEvent {
         return connectorType;
     }
 
-    public String getApplicationName() {
-        return applicationName;
+    public String getFullyQualifiedServiceName() {
+        return fullyQualifiedServiceName;
     }
 
     public Map<String, Object> getVariables() {

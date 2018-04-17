@@ -26,7 +26,7 @@ public class TaskCandidateGroupRemovedEventConverter extends AbstractEventConver
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new TaskCandidateGroupRemovedEventImpl(getApplicationName(),
+        return new TaskCandidateGroupRemovedEventImpl(getFullyQualifiedServiceName(),
                 event.getExecutionId(),
                 event.getProcessDefinitionId(),
                 event.getProcessInstanceId(),

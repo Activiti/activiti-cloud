@@ -27,7 +27,7 @@ public class VariableCreatedEventImpl extends AbstractProcessEngineEvent impleme
     public VariableCreatedEventImpl() {
     }
 
-    public VariableCreatedEventImpl(String applicationName,
+    public VariableCreatedEventImpl(String fullyQualifiedServiceName,
                                     String executionId,
                                     String processDefinitionId,
                                     String processInstanceId,
@@ -35,7 +35,7 @@ public class VariableCreatedEventImpl extends AbstractProcessEngineEvent impleme
                                     String variableValue,
                                     String variableType,
                                     String taskId) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);

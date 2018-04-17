@@ -26,14 +26,14 @@ public class VariableDeletedEventImpl extends AbstractProcessEngineEvent impleme
     public VariableDeletedEventImpl() {
     }
 
-    public VariableDeletedEventImpl(String applicationName,
+    public VariableDeletedEventImpl(String fullyQualifiedServiceName,
                                     String executionId,
                                     String processDefinitionId,
                                     String processInstanceId,
                                     String variableName,
                                     String variableType,
                                     String taskId) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);

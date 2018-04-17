@@ -9,12 +9,12 @@ public class TaskCandidateUserAddedEventImpl extends AbstractProcessEngineEvent 
     public TaskCandidateUserAddedEventImpl() {
     }
 
-    public TaskCandidateUserAddedEventImpl(String applicationName,
+    public TaskCandidateUserAddedEventImpl(String fullyQualifiedServiceName,
                                            String executionId,
                                            String processDefinitionId,
                                            String processInstanceId,
                                            TaskCandidateUser taskCandidateUser) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
                 executionId,
                 processDefinitionId,
                 processInstanceId);

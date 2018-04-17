@@ -37,7 +37,7 @@ public class VariableUpdatedEventConverter extends AbstractEventConverter {
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
         ActivitiVariableEventImpl variableEvent = (ActivitiVariableEventImpl) event;
-        return new VariableUpdatedEventImpl(getApplicationName(),
+        return new VariableUpdatedEventImpl(getFullyQualifiedServiceName(),
                                             event.getExecutionId(),
                                             event.getProcessDefinitionId(),
                                             event.getProcessInstanceId(),

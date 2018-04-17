@@ -26,12 +26,12 @@ public class TaskAssignedEventImpl extends AbstractProcessEngineEvent implements
     public TaskAssignedEventImpl() {
     }
 
-    public TaskAssignedEventImpl(String applicationName,
+    public TaskAssignedEventImpl(String fullyQualifiedServiceName,
                                  String executionId,
                                  String processDefinitionId,
                                  String processInstanceId,
                                  Task task) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);

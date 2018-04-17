@@ -27,7 +27,7 @@ public class VariableUpdatedEventImpl extends AbstractProcessEngineEvent impleme
     public VariableUpdatedEventImpl() {
     }
 
-    public VariableUpdatedEventImpl(String applicationName,
+    public VariableUpdatedEventImpl(String fullyQualifiedServiceName,
                                     String executionId,
                                     String processDefinitionId,
                                     String processInstanceId,
@@ -35,7 +35,7 @@ public class VariableUpdatedEventImpl extends AbstractProcessEngineEvent impleme
                                     String variableValue,
                                     String variableType,
                                     String taskId) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);

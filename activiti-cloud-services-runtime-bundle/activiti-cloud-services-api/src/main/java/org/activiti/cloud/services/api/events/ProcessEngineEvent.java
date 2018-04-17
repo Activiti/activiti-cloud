@@ -34,5 +34,5 @@ public interface ProcessEngineEvent {
 
     String getProcessInstanceId();
 
-    String getApplicationName();
+    String getFullyQualifiedServiceName();
 }

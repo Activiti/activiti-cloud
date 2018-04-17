@@ -89,7 +89,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             Message<IntegrationResultReceivedEvent[]> message = MessageBuilder.withPayload(
                     new IntegrationResultReceivedEvent[]{
-                            new IntegrationResultReceivedEventImpl(runtimeBundleProperties.getName(),
+                            new IntegrationResultReceivedEventImpl(runtimeBundleProperties.getFullyQualifiedServiceName(),
                                                                    integrationContext.getExecutionId(),
                                                                    integrationContext.getProcessDefinitionId(),
                                                                    integrationContext.getProcessInstanceId(),

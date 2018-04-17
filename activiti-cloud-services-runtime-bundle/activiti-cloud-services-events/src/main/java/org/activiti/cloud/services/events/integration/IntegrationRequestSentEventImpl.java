@@ -22,13 +22,13 @@ public class IntegrationRequestSentEventImpl extends BaseIntegrationEventImpl im
     public IntegrationRequestSentEventImpl() {
     }
 
-    public IntegrationRequestSentEventImpl(String applicationName,
+    public IntegrationRequestSentEventImpl(String fullyQualifiedServiceName,
                                            String executionId,
                                            String processDefinitionId,
                                            String processInstanceId,
                                            String integrationContextId,
                                            String flowNodeId) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId,

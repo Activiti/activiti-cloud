@@ -50,7 +50,7 @@ public class TaskCandidateUserRemovedEventConverterTest {
         org.activiti.cloud.services.api.model.TaskCandidateUser externalTaskCandidateUser = mock(org.activiti.cloud.services.api.model.TaskCandidateUser.class);
         given(taskCandidateUserConverter.from(internalIdentityLink)).willReturn(externalTaskCandidateUser);
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = taskCandidateUserRemovedEventConverter.from(activitiEvent);
@@ -60,7 +60,7 @@ public class TaskCandidateUserRemovedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getFullyQualifiedServiceName()).isEqualTo("myApp");
         assertThat(((TaskCandidateUserRemovedEvent) pee).getTaskCandidateUser()).isEqualTo(externalTaskCandidateUser);
     }
 

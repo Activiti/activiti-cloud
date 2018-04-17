@@ -50,7 +50,7 @@ public class TaskCandidateGroupRemovedEventConverterTest {
         org.activiti.cloud.services.api.model.TaskCandidateGroup externalTaskCandidateGroup = mock(org.activiti.cloud.services.api.model.TaskCandidateGroup.class);
         given(taskCandidateGroupConverter.from(internalIdentityLink)).willReturn(externalTaskCandidateGroup);
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = taskCandidateGroupRemovedEventConverter.from(activitiEvent);
@@ -60,7 +60,7 @@ public class TaskCandidateGroupRemovedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getFullyQualifiedServiceName()).isEqualTo("myApp");
         assertThat(((TaskCandidateGroupRemovedEvent) pee).getTaskCandidateGroup()).isEqualTo(externalTaskCandidateGroup);
     }
 

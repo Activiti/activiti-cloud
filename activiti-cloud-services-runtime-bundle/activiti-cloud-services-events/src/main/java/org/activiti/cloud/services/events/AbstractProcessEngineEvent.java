@@ -21,7 +21,7 @@ import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 
 public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
 
-    private String applicationName;
+    private String fullyQualifiedServiceName;
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
@@ -30,23 +30,23 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     public AbstractProcessEngineEvent() {
     }
 
-    public AbstractProcessEngineEvent(String applicationName,
+    public AbstractProcessEngineEvent(String fullyQualifiedServiceName,
                                       String executionId,
                                       String processDefinitionId,
                                       String processInstanceId) {
-        this.applicationName = applicationName;
+        this.fullyQualifiedServiceName = fullyQualifiedServiceName;
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
         this.timestamp = System.currentTimeMillis();
     }
 
-    public AbstractProcessEngineEvent(String applicationName,
+    public AbstractProcessEngineEvent(String fullyQualifiedServiceName,
                                       String executionId,
                                       String processDefinitionId,
                                       String processInstanceId,
                                       Long timestamp) {
-        this.applicationName = applicationName;
+        this.fullyQualifiedServiceName = fullyQualifiedServiceName;
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
@@ -54,8 +54,8 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     }
 
     @Override
-    public String getApplicationName() {
-        return applicationName;
+    public String getFullyQualifiedServiceName() {
+        return fullyQualifiedServiceName;
     }
 
     @Override

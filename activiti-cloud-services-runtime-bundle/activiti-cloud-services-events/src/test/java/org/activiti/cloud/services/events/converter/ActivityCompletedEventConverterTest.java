@@ -57,7 +57,7 @@ public class ActivityCompletedEventConverterTest {
         given(activitiEvent.getActivityName()).willReturn("ActivityName");
         given(activitiEvent.getActivityType()).willReturn("ActivityType");
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = converter.from(activitiEvent);
@@ -67,7 +67,7 @@ public class ActivityCompletedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getFullyQualifiedServiceName()).isEqualTo("myApp");
         assertThat(((ActivityCompletedEventImpl) pee).getActivityId()).isEqualTo("ABC");
         assertThat(((ActivityCompletedEventImpl) pee).getActivityName()).isEqualTo("ActivityName");
         assertThat(((ActivityCompletedEventImpl) pee).getActivityType()).isEqualTo("ActivityType");

@@ -23,17 +23,17 @@ public abstract class BaseIntegrationEventImpl extends AbstractProcessEngineEven
     private String integrationContextId;
     private String flowNodeId;
 
-    //used to deserialize from json
+    //used to deserialize from jsons
     public BaseIntegrationEventImpl() {
     }
 
-    public BaseIntegrationEventImpl(String applicationName,
+    public BaseIntegrationEventImpl(String fullyQualifiedServiceName,
                                     String executionId,
                                     String processDefinitionId,
                                     String processInstanceId,
                                     String integrationContextId,
                                     String flowNodeId) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);

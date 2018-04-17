@@ -24,12 +24,12 @@ public class ProcessCancelledEventImpl extends AbstractProcessEngineEvent implem
     public ProcessCancelledEventImpl() {
     }
 
-    public ProcessCancelledEventImpl(String applicationName,
+    public ProcessCancelledEventImpl(String fullyQualifiedServiceName,
                                      String executionId,
                                      String processDefinitionId,
                                      String processInstanceId,
                                      String cause) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);

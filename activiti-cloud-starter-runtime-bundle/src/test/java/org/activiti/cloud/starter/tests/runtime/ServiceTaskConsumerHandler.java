@@ -51,6 +51,6 @@ public class ServiceTaskConsumerHandler {
                             ((Integer) requestVariables.get(variableToUpdate)) + 1);
         Message<IntegrationResultEvent> message = MessageBuilder.withPayload(new IntegrationResultEvent(integrationRequestEvent.getExecutionId(),
                                                                                                         resultVariables)).build();
-        resolver.resolveDestination("integrationResult:" + runtimeBundleProperties.getName()).send(message);
+        resolver.resolveDestination("integrationResult:" + runtimeBundleProperties.getFullyQualifiedServiceName()).send(message);
     }
 }

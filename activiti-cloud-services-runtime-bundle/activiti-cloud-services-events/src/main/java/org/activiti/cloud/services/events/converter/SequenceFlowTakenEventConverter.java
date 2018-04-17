@@ -36,7 +36,7 @@ public class SequenceFlowTakenEventConverter extends AbstractEventConverter {
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new SequenceFlowTakenEventImpl(getApplicationName(),
+        return new SequenceFlowTakenEventImpl(getFullyQualifiedServiceName(),
                                               event.getExecutionId(),
                                               event.getProcessDefinitionId(),
                                               event.getProcessInstanceId(),

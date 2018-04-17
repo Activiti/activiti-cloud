@@ -83,7 +83,7 @@ public class MQServiceTaskBehaviorTest {
                 .withServiceTask(serviceTask)
                 .withFlowNodeId(FLOW_NODE_ID)
                 .build();
-        given(runtimeBundleProperties.getName()).willReturn(APP_NAME);
+        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn(APP_NAME);
 
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId(INTEGRATION_CONTEXT_ID);
@@ -101,7 +101,7 @@ public class MQServiceTaskBehaviorTest {
         verify(eventPublisher).publishEvent(integrationRequestCaptor.capture());
         IntegrationRequestEvent event = integrationRequestCaptor.getValue();
         assertThat(event)
-                .hasApplicationName(APP_NAME)
+                .hasFullyQualifiedServiceName(APP_NAME)
                 .hasConnectorType(CONNECTOR_TYPE)
                 .hasExecutionId(EXECUTION_ID)
                 .hasProcessInstanceId(PROC_INST_ID)

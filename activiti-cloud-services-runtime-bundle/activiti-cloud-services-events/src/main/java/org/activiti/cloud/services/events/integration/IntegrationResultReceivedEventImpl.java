@@ -22,13 +22,13 @@ public class IntegrationResultReceivedEventImpl extends BaseIntegrationEventImpl
     public IntegrationResultReceivedEventImpl() {
     }
 
-    public IntegrationResultReceivedEventImpl(String applicationName,
+    public IntegrationResultReceivedEventImpl(String fullyQualifiedServiceName,
                                               String executionId,
                                               String processDefinitionId,
                                               String processInstanceId,
                                               String integrationContextId,
                                               String flowNodeId) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId,

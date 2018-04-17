@@ -9,12 +9,12 @@ public class TaskCandidateGroupRemovedEventImpl extends AbstractProcessEngineEve
     public TaskCandidateGroupRemovedEventImpl() {
     }
 
-    public TaskCandidateGroupRemovedEventImpl(String applicationName,
+    public TaskCandidateGroupRemovedEventImpl(String fullyQualifiedServiceName,
                                               String executionId,
                                               String processDefinitionId,
                                               String processInstanceId,
                                               TaskCandidateGroup taskCandidateGroup) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);

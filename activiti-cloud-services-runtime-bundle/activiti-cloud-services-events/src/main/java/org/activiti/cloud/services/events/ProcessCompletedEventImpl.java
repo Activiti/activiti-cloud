@@ -26,12 +26,12 @@ public class ProcessCompletedEventImpl extends AbstractProcessEngineEvent implem
     public ProcessCompletedEventImpl() {
     }
 
-    public ProcessCompletedEventImpl(String applicationName,
+    public ProcessCompletedEventImpl(String fullyQualifiedServiceName,
                                      String executionId,
                                      String processDefinitionId,
                                      String processInstanceId,
                                      ProcessInstance processInstance) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);

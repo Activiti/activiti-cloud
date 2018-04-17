@@ -26,7 +26,7 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
 
     private Long timestamp;
     private String eventType;
-    private String applicationName;
+    private String fullyQualifiedServiceName;
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
@@ -38,7 +38,7 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
                                   String eventType) {
         this.timestamp = timestamp;
         this.eventType = eventType;
-        this.applicationName = "mock-app-name";
+        this.fullyQualifiedServiceName = "mock-app-name";
     }
 
     public MockProcessEngineEvent(Long timestamp,
@@ -127,7 +127,7 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
     }
 
     @Override
-    public String getApplicationName() {
-        return applicationName;
+    public String getFullyQualifiedServiceName() {
+        return fullyQualifiedServiceName;
     }
 }

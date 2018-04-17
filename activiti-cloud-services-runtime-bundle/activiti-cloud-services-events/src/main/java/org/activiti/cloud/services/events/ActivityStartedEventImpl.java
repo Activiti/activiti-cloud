@@ -26,14 +26,14 @@ public class ActivityStartedEventImpl extends AbstractProcessEngineEvent impleme
     public ActivityStartedEventImpl() {
     }
 
-    public ActivityStartedEventImpl(String applicationName,
+    public ActivityStartedEventImpl(String fullyQualifiedServiceName,
                                     String executionId,
                                     String processDefinitionId,
                                     String processInstanceId,
                                     String activityId,
                                     String activityName,
                                     String activityType) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);

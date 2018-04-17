@@ -36,7 +36,7 @@ public class ActivityStartedEventConverter extends AbstractEventConverter {
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new ActivityStartedEventImpl(getApplicationName(),
+        return new ActivityStartedEventImpl(getFullyQualifiedServiceName(),
                                             event.getExecutionId(),
                                             event.getProcessDefinitionId(),
                                             event.getProcessInstanceId(),

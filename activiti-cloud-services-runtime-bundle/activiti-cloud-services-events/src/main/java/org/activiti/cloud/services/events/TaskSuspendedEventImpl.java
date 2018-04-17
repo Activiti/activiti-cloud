@@ -26,12 +26,12 @@ public class TaskSuspendedEventImpl extends AbstractProcessEngineEvent implement
     public TaskSuspendedEventImpl() {
     }
 
-    public TaskSuspendedEventImpl(String applicationName,
+    public TaskSuspendedEventImpl(String fullyQualifiedServiceName,
                                   String executionId,
                                   String processDefinitionId,
                                   String processInstanceId,
                                   Task task) {
-        super(applicationName,
+        super(fullyQualifiedServiceName,
               executionId,
               processDefinitionId,
               processInstanceId);
@@ -52,7 +52,7 @@ public class TaskSuspendedEventImpl extends AbstractProcessEngineEvent implement
     public String toString() {
         return "TaskSuspendedEventImpl{" +
                 "task=" + task +
-                "applicationName='" + getApplicationName() + '\'' +
+                "fullyQualifiedServiceName='" + getFullyQualifiedServiceName() + '\'' +
                 ", executionId='" + getExecutionId() + '\'' +
                 ", processDefinitionId='" + getProcessDefinitionId() + '\'' +
                 ", processInstanceId='" + getProcessInstanceId() + '\'' +

@@ -25,16 +25,70 @@ import org.springframework.context.annotation.Configuration;
 public class RuntimeBundleProperties {
 
     @Value("${spring.application.name}")
-    private String name;
+    private String rbSpringAppName;
+
+    @Value("${activiti.cloud.service.type:}")
+    private String serviceType;
+
+    @Value("${activiti.cloud.service.version:}")
+    private String serviceVersion;
+
+    @Value("${activiti.cloud.application.name:}")
+    private String activitiAppName;
+
+    @Value("${activiti.cloud.application.version:}")
+    private String activitiAppVersion;
 
     private RuntimeBundleEventsProperties eventsProperties = new RuntimeBundleEventsProperties();
 
-    public String getName() {
-        return name;
+    public String getRbSpringAppName() {
+        return rbSpringAppName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getFullyQualifiedServiceName(){
+        //if we change this then we also have to change integration-result-stream.properties
+        return rbSpringAppName;
+    }
+
+    // a level of indirection here as we may change this to use its own property
+    public String getServiceName(){
+        return getRbSpringAppName();
+    }
+
+    public void setRbSpringAppName(String name) {
+        this.rbSpringAppName = name;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public String getServiceVersion() {
+        return serviceVersion;
+    }
+
+    public void setServiceVersion(String serviceVersion) {
+        this.serviceVersion = serviceVersion;
+    }
+
+    public String getActivitiAppName() {
+        return activitiAppName;
+    }
+
+    public void setActivitiAppName(String activitiAppName) {
+        this.activitiAppName = activitiAppName;
+    }
+
+    public String getActivitiAppVersion() {
+        return activitiAppVersion;
+    }
+
+    public void setActivitiAppVersion(String activitiAppVersion) {
+        this.activitiAppVersion = activitiAppVersion;
     }
 
     public RuntimeBundleEventsProperties getEventsProperties() {

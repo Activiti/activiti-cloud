@@ -14,7 +14,7 @@ public abstract class AbstractEventConverter implements EventConverter{
         this.runtimeBundleProperties = runtimeBundleProperties;
     }
 
-    public String getApplicationName() {
-        return runtimeBundleProperties.getName();
+    public String getFullyQualifiedServiceName() {
+        return runtimeBundleProperties.getFullyQualifiedServiceName();
     }
 }

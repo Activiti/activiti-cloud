@@ -42,7 +42,7 @@ public class TaskSuspendedEventConverter extends AbstractEventConverter {
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-            return new TaskSuspendedEventImpl(getApplicationName(),
+            return new TaskSuspendedEventImpl(getFullyQualifiedServiceName(),
                                               event.getExecutionId(),
                                               event.getProcessDefinitionId(),
                                               event.getProcessInstanceId(),
