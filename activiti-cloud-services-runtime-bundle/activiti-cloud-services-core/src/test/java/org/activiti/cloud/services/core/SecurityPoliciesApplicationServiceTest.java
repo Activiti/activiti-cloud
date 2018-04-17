@@ -90,7 +90,7 @@ public class SecurityPoliciesApplicationServiceTest {
         Map<String,Set<String>> map = new HashMap<>();
         map.put("rb1", Collections.singleton("key"));
         when(securityPoliciesService.getProcessDefinitionKeys(any(),any(),any(SecurityPolicy.class))).thenReturn(map);
-        when(runtimeBundleProperties.getFullyQualifiedServiceName()).thenReturn("rb1");
+        when(runtimeBundleProperties.getServiceName()).thenReturn("rb1");
 
         securityPoliciesApplicationService.restrictProcessDefQuery(query, SecurityPolicy.READ);
 
@@ -110,7 +110,7 @@ public class SecurityPoliciesApplicationServiceTest {
         Map<String,Set<String>> map = new HashMap<>();
         map.put("rb1", Collections.singleton("key"));
         when(securityPoliciesService.getProcessDefinitionKeys(any(),any(),any(SecurityPolicy.class))).thenReturn(map);
-        when(runtimeBundleProperties.getFullyQualifiedServiceName()).thenReturn(null);
+        when(runtimeBundleProperties.getServiceName()).thenReturn(null);
 
         securityPoliciesApplicationService.restrictProcessDefQuery(query, SecurityPolicy.READ);
 
@@ -129,7 +129,7 @@ public class SecurityPoliciesApplicationServiceTest {
         Map<String,Set<String>> map = new HashMap<>();
         map.put("rb1", Collections.singleton("key"));
         when(securityPoliciesService.getProcessDefinitionKeys(any(),any(),any(SecurityPolicy.class))).thenReturn(map);
-        when(runtimeBundleProperties.getFullyQualifiedServiceName()).thenReturn("rb2");
+        when(runtimeBundleProperties.getServiceName()).thenReturn("rb2");
 
         securityPoliciesApplicationService.restrictProcessDefQuery(query, SecurityPolicy.READ);
 
