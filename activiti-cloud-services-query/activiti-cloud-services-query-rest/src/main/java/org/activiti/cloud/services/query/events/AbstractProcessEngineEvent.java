@@ -35,6 +35,7 @@ import org.activiti.cloud.services.api.events.ProcessEngineEvent;
         @JsonSubTypes.Type(value = ProcessSuspendedEvent.class, name = "ProcessSuspendedEvent"),
         @JsonSubTypes.Type(value = ProcessActivatedEvent.class, name = "ProcessActivatedEvent"),
         @JsonSubTypes.Type(value = ProcessCompletedEvent.class, name = "ProcessCompletedEvent"),
+        @JsonSubTypes.Type(value = ProcessCancelledEvent.class, name = "ProcessCancelledEvent"),
         @JsonSubTypes.Type(value = TaskCreatedEvent.class, name = "TaskCreatedEvent"),
         @JsonSubTypes.Type(value = TaskAssignedEvent.class, name = "TaskAssignedEvent"),
         @JsonSubTypes.Type(value = TaskCompletedEvent.class, name = "TaskCompletedEvent"),
