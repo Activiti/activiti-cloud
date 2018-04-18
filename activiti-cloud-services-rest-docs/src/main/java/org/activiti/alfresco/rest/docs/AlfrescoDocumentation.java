@@ -95,7 +95,7 @@ public class AlfrescoDocumentation {
         return responseFields(
                 subsectionWithPath("entry").ignored(),
                 subsectionWithPath("entry.id").description("The process instance id."),
-                subsectionWithPath("entry.applicationName")
+                subsectionWithPath("entry.serviceName")
                         .description("The name of the application which started this process instance."),
                 subsectionWithPath("entry.processDefinitionId").description("The related process definition id."),
                 subsectionWithPath("entry.status").description("The process instance status."),
@@ -116,7 +116,7 @@ public class AlfrescoDocumentation {
                 subsectionWithPath("entry.category").description("The task category."),
                 subsectionWithPath("entry.processDefinitionId").description("The related process definition id."),
                 subsectionWithPath("entry.processInstanceId").description("The related process instance id."),
-                subsectionWithPath("entry.applicationName")
+                subsectionWithPath("entry.serviceName")
                         .description("The name of the application which started this process instance."),
                 subsectionWithPath("entry.status").description("The process instance status."),
                 subsectionWithPath("entry.lastModified").description("The process instance last modified date."),
@@ -131,7 +131,7 @@ public class AlfrescoDocumentation {
                 subsectionWithPath("entry.type").description("The variable type."),
                 subsectionWithPath("entry.name").description("The variable type."),
                 subsectionWithPath("entry.processInstanceId").description("The related process instance id."),
-                subsectionWithPath("entry.applicationName")
+                subsectionWithPath("entry.serviceName")
                         .description("The name of the application which started this process instance."),
                 subsectionWithPath("entry.taskId").description("The related task id."),
                 subsectionWithPath("entry.createTime").description("Time where this variable has been created."),
