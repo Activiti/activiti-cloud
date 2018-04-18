@@ -140,7 +140,7 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
     }
-    
+
     public String getFullyQualifiedServiceName() {
         return service.getFullName();
     }

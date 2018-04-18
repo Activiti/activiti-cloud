@@ -91,7 +91,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     public void setUp() throws Exception {
         initMocks(this);
         when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
-        given(serviceBuilderService.buildService()).willReturn(new Service("myApp","myApp","runtime-bundle","1"));
+        when(serviceBuilderService.buildService()).thenReturn(new Service("myApp","myApp","runtime-bundle","1"));
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
         when(executionQuery.list()).thenReturn(Collections.emptyList());
@@ -113,7 +113,9 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
                                                                  "v");
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
-                                                                                   variables);
+                                                                                   variables,
+                serviceBuilderService.buildService(),
+                applicationBuilderService.buildApplication());
 
         //when
         handler.receive(integrationResultEvent);
@@ -134,7 +136,9 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
                                                                  "v");
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
-                                                                                   variables);
+                                                                                   variables,
+                serviceBuilderService.buildService(),
+                applicationBuilderService.buildApplication());
 
         //when
         handler.receive(integrationResultEvent);
@@ -160,7 +164,9 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
-                                                                                   variables);
+                                                                                   variables,
+                serviceBuilderService.buildService(),
+                applicationBuilderService.buildApplication());
 
         //when
         handler.receive(integrationResultEvent);
@@ -191,7 +197,9 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
                                                                  "v");
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(executionId,
-                                                                                   variables);
+                                                                                   variables,
+                serviceBuilderService.buildService(),
+                applicationBuilderService.buildApplication());
 
         //when
         handler.receive(integrationResultEvent);
