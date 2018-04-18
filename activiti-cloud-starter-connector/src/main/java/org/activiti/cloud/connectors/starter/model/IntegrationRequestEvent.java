@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IntegrationRequestEvent {
@@ -35,7 +37,9 @@ public class IntegrationRequestEvent {
 
     private String flowNodeId;
 
-    private String fullyQualifiedServiceName;
+    private Service service;
+
+    private Application application;
 
     private String connectorType;
 
@@ -49,12 +53,16 @@ public class IntegrationRequestEvent {
     public IntegrationRequestEvent(String processInstanceId,
                                    String processDefinitionId,
                                    String executionId,
-                                   Map<String, Object> variables) {
+                                   Map<String, Object> variables,
+                                   Service service,
+                                   Application application) {
         this();
         this.processInstanceId = processInstanceId;
         this.processDefinitionId = processDefinitionId;
         this.executionId = executionId;
         this.variables = variables;
+        this.service = service;
+        this.application = application;
     }
 
     public String getId() {
@@ -85,12 +93,20 @@ public class IntegrationRequestEvent {
         this.flowNodeId = flowNodeId;
     }
 
-    public String getFullyQualifiedServiceName() {
-        return fullyQualifiedServiceName;
+    public Service getService() {
+        return service;
     }
 
-    protected void setFullyQualifiedServiceName(String fullyQualifiedServiceName) {
-        this.fullyQualifiedServiceName = fullyQualifiedServiceName;
+    public void setService(Service service) {
+        this.service = service;
+    }
+
+    public Application getApplication() {
+        return application;
+    }
+
+    public void setApplication(Application application) {
+        this.application = application;
     }
 
     public String getConnectorType() {
@@ -101,6 +117,8 @@ public class IntegrationRequestEvent {
     public String toString() {
         return "IntegrationRequestEvent{" +
                 "processInstanceId='" + processInstanceId + '\'' +
+                ", service="+service+
+                ", application="+application+
                 ", processDefinitionId='" + processDefinitionId + '\'' +
                 ", executionId='" + executionId + '\'' +
                 ", variables=" + variables +

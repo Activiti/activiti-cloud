@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.activiti.cloud.connectors.starter.model.IntegrationRequestEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -75,7 +77,9 @@ public class ActivitiCloudConnectorServiceIT {
         IntegrationRequestEvent ire = new IntegrationRequestEvent(PROCESS_INSTANCE_ID,
                                                                   PROCESS_DEFINITION_ID,
                                                                   EXECUTION_ID,
-                                                                  variables);
+                                                                  variables,
+                new Service("mock-rb","mock-rb","runtime-bundle","1"),
+                new Application());
 
         Message<IntegrationRequestEvent> message = MessageBuilder.withPayload(ire)
                 .setHeader("type",

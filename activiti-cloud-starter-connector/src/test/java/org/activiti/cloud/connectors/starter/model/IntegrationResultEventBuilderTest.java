@@ -18,6 +18,8 @@ package org.activiti.cloud.connectors.starter.model;
 
 import java.util.Collections;
 
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.springframework.messaging.Message;
@@ -40,9 +42,10 @@ public class IntegrationResultEventBuilderTest {
         IntegrationRequestEvent integrationRequestEvent = new IntegrationRequestEvent(PROC_INST_ID,
                                                                                       PROC_DEF_ID,
                                                                                       EXEC_ID,
-                                                                                      Collections.emptyMap());
+                                                                                      Collections.emptyMap(),
+                                                                   new Service(APP_NAME,APP_NAME,"runtime-bundle","1"),
+                                                                                new Application());
         integrationRequestEvent.setFlowNodeId(FLOW_NODE_ID);
-        integrationRequestEvent.setFullyQualifiedServiceName(APP_NAME);
 
         //when
         IntegrationResultEvent resultEvent = IntegrationResultEventBuilder
@@ -66,9 +69,9 @@ public class IntegrationResultEventBuilderTest {
         IntegrationRequestEvent integrationRequestEvent = new IntegrationRequestEvent(PROC_INST_ID,
                                                                                       PROC_DEF_ID,
                                                                                       EXEC_ID,
-                                                                                      Collections.emptyMap());
-        integrationRequestEvent.setFullyQualifiedServiceName(APP_NAME);
-
+                                                                                      Collections.emptyMap(),
+                                                        new Service(APP_NAME,APP_NAME,"runtime-bundle","1"),
+                                                        new Application());
         //when
         Message<IntegrationResultEvent> message = IntegrationResultEventBuilder
                 .resultFor(integrationRequestEvent)
