@@ -23,9 +23,10 @@ import org.springframework.messaging.support.MessageBuilder;
 
 public class IntegrationResultEventBuilder {
 
-    private final IntegrationRequestEvent requestEvent;
+    private IntegrationRequestEvent requestEvent;
 
     private IntegrationResultEvent integrationResultEvent;
+
 
     private IntegrationResultEventBuilder(IntegrationRequestEvent requestEvent) {
         this.requestEvent = requestEvent;

@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IntegrationResultEvent {
@@ -34,13 +36,19 @@ public class IntegrationResultEvent {
 
     private Map<String, Object> variables;
 
+    private Service service;
+
+    private Application application;
+
     //used by json deserialization
     public IntegrationResultEvent() {
         this.id = UUID.randomUUID().toString();
     }
 
     public IntegrationResultEvent(String executionId,
-                                  Map<String, Object> variables) {
+                                  Map<String, Object> variables,
+                                  Service service,
+                                  Application application) {
         this();
         this.executionId = executionId;
         this.variables = variables;
@@ -82,10 +90,28 @@ public class IntegrationResultEvent {
         this.targetApplication = targetApplication;
     }
 
+    public Service getService() {
+        return service;
+    }
+
+    public void setService(Service service) {
+        this.service = service;
+    }
+
+    public Application getApplication() {
+        return application;
+    }
+
+    public void setApplication(Application application) {
+        this.application = application;
+    }
+
     @Override
     public String toString() {
         return "IntegrationResultEvent{" +
                 "id='" + id + '\'' +
+                ", service="+service+
+                ", application="+application+
                 ", executionId='" + executionId + '\'' +
                 ", variables=" + variables +
                 '}';

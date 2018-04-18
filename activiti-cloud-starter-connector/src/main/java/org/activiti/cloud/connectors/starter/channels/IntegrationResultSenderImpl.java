@@ -16,7 +16,11 @@
 
 package org.activiti.cloud.connectors.starter.channels;
 
+import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
@@ -26,12 +30,20 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
     private final BinderAwareChannelResolver resolver;
 
-    public IntegrationResultSenderImpl(BinderAwareChannelResolver resolver) {
+    private ConnectorProperties connectorProperties;
+
+    @Autowired
+    public IntegrationResultSenderImpl(BinderAwareChannelResolver resolver, ConnectorProperties connectorProperties) {
         this.resolver = resolver;
+        this.connectorProperties = connectorProperties;
     }
 
     @Override
     public void send(Message<IntegrationResultEvent> message) {
+
+        message.getPayload().setApplication(new Application(connectorProperties.getActivitiAppName(),connectorProperties.getActivitiAppVersion()));
+        message.getPayload().setService(new Service(connectorProperties.getServiceFullName(),connectorProperties.getServiceName(),
+                                                    connectorProperties.getServiceType(),connectorProperties.getServiceVersion()));
 
         resolver.resolveDestination("integrationResult:" + message.getPayload().getTargetApplication()).send(message);
 
