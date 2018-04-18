@@ -2,6 +2,10 @@ package org.activiti.services.connectors;
 
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.integration.IntegrationRequestSentEvent;
 import org.activiti.engine.delegate.DelegateExecution;
@@ -55,6 +59,12 @@ public class IntegrationRequestSenderTest {
     @Mock
     private IntegrationContextEntity integrationContextEntity;
 
+    @Mock
+    private ApplicationBuilderService applicationBuilderService;
+
+    @Mock
+    private ServiceBuilderService serviceBuilderService;
+
     private DelegateExecution delegateExecution;
 
     @Captor
@@ -69,7 +79,9 @@ public class IntegrationRequestSenderTest {
     public void setUp() throws Exception {
         initMocks(this);
 
-        integrationRequestSender = new IntegrationRequestSender(runtimeBundleProperties,
+        integrationRequestSender = new IntegrationRequestSender(applicationBuilderService,
+                                                                serviceBuilderService,
+                                                                runtimeBundleProperties,
                                                                 auditProducer,
                                                                 resolver);
 
@@ -79,9 +91,14 @@ public class IntegrationRequestSenderTest {
         configureExecution();
         configureIntegrationContext();
 
+        Service service = new Service(APP_NAME,APP_NAME,"runtime-bundle","1");
+
+        when(serviceBuilderService.buildService()).thenReturn(service);
+
         integrationRequestEvent = new IntegrationRequestEvent(delegateExecution,
                                                               integrationContextEntity,
-                                                              APP_NAME);
+                                                              service,
+                                                              new Application());
     }
 
     private void configureIntegrationContext() {
@@ -153,6 +170,6 @@ public class IntegrationRequestSenderTest {
         assertThat(integrationRequestSentEvent.getIntegrationContextId()).isEqualTo(INTEGRATION_CONTEXT_ID);
         assertThat(integrationRequestSentEvent.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(integrationRequestSentEvent.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
-        assertThat(integrationRequestSentEvent.getFullyQualifiedServiceName()).isEqualTo(APP_NAME);
+        assertThat(integrationRequestSentEvent.getService().getFullName()).isEqualTo(APP_NAME);
     }
 }

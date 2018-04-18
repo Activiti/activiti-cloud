@@ -17,7 +17,9 @@
 
 package org.activiti.cloud.services.events;
 
+import org.activiti.cloud.services.api.model.Application;
 import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.api.model.Service;
 
 public class ProcessSuspendedEventImpl extends AbstractProcessEngineEvent implements ProcessSuspendedEvent {
 
@@ -26,12 +28,14 @@ public class ProcessSuspendedEventImpl extends AbstractProcessEngineEvent implem
     public ProcessSuspendedEventImpl() {
     }
 
-    public ProcessSuspendedEventImpl(String fullyQualifiedServiceName,
+    public ProcessSuspendedEventImpl(Service service,
+                                     Application application,
                                      String executionId,
                                      String processDefinitionId,
                                      String processInstanceId,
                                      ProcessInstance processInstance) {
-        super(fullyQualifiedServiceName,
+        super(service,
+              application,
               executionId,
               processDefinitionId,
               processInstanceId);
@@ -51,7 +55,8 @@ public class ProcessSuspendedEventImpl extends AbstractProcessEngineEvent implem
     public String toString() {
         return "ProcessSuspendedEventImpl{" +
                     "processInstance=" + processInstance +
-                    "fullyQualifiedServiceName='" + getFullyQualifiedServiceName() + '\'' +
+                    ", service=" + getService() + '\'' +
+                    ", application=" + getApplication() + '\'' +
                     ", executionId='" + getExecutionId() + '\'' +
                     ", processDefinitionId='" + getProcessDefinitionId() + '\'' +
                     ", processInstanceId='" + getProcessInstanceId() + '\'' +

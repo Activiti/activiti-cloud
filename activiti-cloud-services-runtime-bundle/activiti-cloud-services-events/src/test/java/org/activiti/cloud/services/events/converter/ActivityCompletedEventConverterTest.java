@@ -17,8 +17,11 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.events.ActivityCompletedEventImpl;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.engine.delegate.event.ActivitiActivityEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.junit.Before;
@@ -38,7 +41,10 @@ public class ActivityCompletedEventConverterTest {
     private ActivityCompletedEventConverter converter;
 
     @Mock
-    private RuntimeBundleProperties runtimeBundleProperties;
+    private ServiceBuilderService serviceBuilderService;
+
+    @Mock
+    private ApplicationBuilderService applicationBuilderService;
 
     @Before
     public void setUp() throws Exception {
@@ -57,7 +63,9 @@ public class ActivityCompletedEventConverterTest {
         given(activitiEvent.getActivityName()).willReturn("ActivityName");
         given(activitiEvent.getActivityType()).willReturn("ActivityType");
 
-        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn("myApp");
+        given(serviceBuilderService.buildService()).willReturn(new Service("myApp","myApp","runtime-bundle","1"));
+        given(applicationBuilderService.buildApplication()).willReturn(new Application());
+
 
         //when
         ProcessEngineEvent pee = converter.from(activitiEvent);
@@ -67,7 +75,7 @@ public class ActivityCompletedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getFullyQualifiedServiceName()).isEqualTo("myApp");
+        assertThat(pee.getService().getFullName()).isEqualTo("myApp");
         assertThat(((ActivityCompletedEventImpl) pee).getActivityId()).isEqualTo("ABC");
         assertThat(((ActivityCompletedEventImpl) pee).getActivityName()).isEqualTo("ActivityName");
         assertThat(((ActivityCompletedEventImpl) pee).getActivityType()).isEqualTo("ActivityType");

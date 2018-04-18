@@ -17,8 +17,11 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.events.ProcessStartedEvent;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.ActivitiProcessStartedEvent;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
@@ -39,7 +42,10 @@ public class ProcessStartedEventConverterTest {
     private ProcessStartedEventConverter converter;
 
     @Mock
-    private RuntimeBundleProperties runtimeBundleProperties;
+    private ServiceBuilderService serviceBuilderService;
+
+    @Mock
+    private ApplicationBuilderService applicationBuilderService;
 
     @Before
     public void setUp() throws Exception {
@@ -57,7 +63,9 @@ public class ProcessStartedEventConverterTest {
         given(activitiEvent.getNestedProcessDefinitionId()).willReturn("myParentProcessDef");
         given(activitiEvent.getNestedProcessInstanceId()).willReturn("2");
 
-        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn("myApp");
+        given(serviceBuilderService.buildService()).willReturn(new Service("myApp","myApp","runtime-bundle","1"));
+        given(applicationBuilderService.buildApplication()).willReturn(new Application());
+
 
         //when
         ProcessEngineEvent pee = converter.from(activitiEvent);
@@ -71,7 +79,7 @@ public class ProcessStartedEventConverterTest {
         assertThat(processStartedEvent.getProcessDefinitionId()).isEqualTo("myProcessDef");
         assertThat(processStartedEvent.getNestedProcessDefinitionId()).isEqualTo("myParentProcessDef");
         assertThat(processStartedEvent.getNestedProcessInstanceId()).isEqualTo("2");
-        assertThat(processStartedEvent.getFullyQualifiedServiceName()).isEqualTo("myApp");
+        assertThat(processStartedEvent.getService().getFullName()).isEqualTo("myApp");
     }
 
     @Test

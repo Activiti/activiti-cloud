@@ -62,6 +62,7 @@ public class MessageProducerActivitiEventActivateSuspendIT {
             {
                     "org.activiti.cloud.services.events.tests.util",
                     "org.activiti.cloud.services.events.converter",
+                    "org.activiti.cloud.services.events.builders",
                     "org.activiti.cloud.services.api.model.converter",
                     "org.activiti.cloud.services.events.listeners"
             })

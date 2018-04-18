@@ -18,6 +18,8 @@ package org.activiti.services.connectors.channel;
 
 import java.util.List;
 
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEvent;
 import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEventImpl;
@@ -44,15 +46,21 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final IntegrationContextService integrationContextService;
     private final MessageChannel auditProducer;
     private final RuntimeBundleProperties runtimeBundleProperties;
+    private final ServiceBuilderService serviceBuilderService;
+    private final ApplicationBuilderService applicationBuilderService;
 
     public ServiceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
                                                     IntegrationContextService integrationContextService,
                                                     MessageChannel auditProducer,
-                                                    RuntimeBundleProperties runtimeBundleProperties) {
+                                                    RuntimeBundleProperties runtimeBundleProperties,
+                                                    ServiceBuilderService serviceBuilderService,
+                                                    ApplicationBuilderService applicationBuilderService) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
         this.auditProducer = auditProducer;
         this.runtimeBundleProperties = runtimeBundleProperties;
+        this.serviceBuilderService = serviceBuilderService;
+        this.applicationBuilderService = applicationBuilderService;
     }
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
@@ -89,7 +97,8 @@ public class ServiceTaskIntegrationResultEventHandler {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             Message<IntegrationResultReceivedEvent[]> message = MessageBuilder.withPayload(
                     new IntegrationResultReceivedEvent[]{
-                            new IntegrationResultReceivedEventImpl(runtimeBundleProperties.getFullyQualifiedServiceName(),
+                            new IntegrationResultReceivedEventImpl(serviceBuilderService.buildService(),
+                                                                   applicationBuilderService.buildApplication(),
                                                                    integrationContext.getExecutionId(),
                                                                    integrationContext.getProcessDefinitionId(),
                                                                    integrationContext.getProcessInstanceId(),

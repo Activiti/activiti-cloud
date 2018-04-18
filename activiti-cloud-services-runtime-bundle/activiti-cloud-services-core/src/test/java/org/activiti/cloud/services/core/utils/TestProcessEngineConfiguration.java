@@ -43,6 +43,7 @@ import org.springframework.context.annotation.Configuration;
         "org.activiti.cloud.services.security",
         "org.activiti.cloud.services.events.listeners",
         "org.activiti.cloud.services.events.converter",
+        "org.activiti.cloud.services.events.builders",
         "org.activiti.cloud.services.events.configuration",
         "org.activiti.cloud.services.core",
         "org.activiti.cloud.services.core.pageable",

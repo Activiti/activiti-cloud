@@ -20,6 +20,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
+import org.activiti.cloud.services.api.model.Service;
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEvent;
 import org.activiti.engine.RuntimeService;
@@ -61,6 +64,12 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private RuntimeService runtimeService;
 
     @Mock
+    private ServiceBuilderService serviceBuilderService;
+
+    @Mock
+    private ApplicationBuilderService applicationBuilderService;
+
+    @Mock
     private IntegrationContextService integrationContextService;
 
     @Mock
@@ -82,6 +91,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     public void setUp() throws Exception {
         initMocks(this);
         when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
+        given(serviceBuilderService.buildService()).willReturn(new Service("myApp","myApp","runtime-bundle","1"));
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
         when(executionQuery.list()).thenReturn(Collections.emptyList());
@@ -161,7 +171,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         assertThat(message.getPayload()).hasSize(1);
         IntegrationResultReceivedEvent integrationResultReceivedEvent = message.getPayload()[0];
         assertThat(integrationResultReceivedEvent.getIntegrationContextId()).isEqualTo(ENTITY_ID);
-        assertThat(integrationResultReceivedEvent.getFullyQualifiedServiceName()).isEqualTo("myApp");
+        assertThat(integrationResultReceivedEvent.getService().getFullName()).isEqualTo("myApp");
         assertThat(integrationResultReceivedEvent.getExecutionId()).isEqualTo(EXECUTION_ID);
         assertThat(integrationResultReceivedEvent.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(integrationResultReceivedEvent.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);

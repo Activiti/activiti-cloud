@@ -18,6 +18,8 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.VariableDeletedEventImpl;
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.impl.ActivitiVariableEventImpl;
@@ -30,13 +32,14 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.VARIABLE_DELE
 public class VariableDeletedEventConveter extends AbstractEventConverter {
 
     @Autowired
-    public VariableDeletedEventConveter(RuntimeBundleProperties runtimeBundleProperties) {
-        super(runtimeBundleProperties);
+    public VariableDeletedEventConveter(ApplicationBuilderService applicationBuilderService, ServiceBuilderService serviceBuilderService) {
+        super(applicationBuilderService, serviceBuilderService);
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new VariableDeletedEventImpl(getFullyQualifiedServiceName(),
+        return new VariableDeletedEventImpl(buildService(),
+                                            buildApplication(),
                                             event.getExecutionId(),
                                             event.getProcessDefinitionId(),
                                             event.getProcessInstanceId(),

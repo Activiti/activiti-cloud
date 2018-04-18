@@ -18,6 +18,8 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.VariableUpdatedEventImpl;
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.impl.ActivitiVariableEventImpl;
@@ -30,14 +32,15 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.VARIABLE_UPDA
 public class VariableUpdatedEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public VariableUpdatedEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
-        super(runtimeBundleProperties);
+    public VariableUpdatedEventConverter(ApplicationBuilderService applicationBuilderService, ServiceBuilderService serviceBuilderService) {
+        super(applicationBuilderService, serviceBuilderService);
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
         ActivitiVariableEventImpl variableEvent = (ActivitiVariableEventImpl) event;
-        return new VariableUpdatedEventImpl(getFullyQualifiedServiceName(),
+        return new VariableUpdatedEventImpl(buildService(),
+                                            buildApplication(),
                                             event.getExecutionId(),
                                             event.getProcessDefinitionId(),
                                             event.getProcessInstanceId(),

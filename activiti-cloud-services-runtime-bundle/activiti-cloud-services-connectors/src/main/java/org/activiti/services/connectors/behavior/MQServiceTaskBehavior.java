@@ -18,6 +18,8 @@ package org.activiti.services.connectors.behavior;
 
 import java.util.Date;
 
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
@@ -35,14 +37,20 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implements TriggerableActivityBehavior {
 
     private final IntegrationContextManager integrationContextManager;
+    private final ApplicationBuilderService applicationBuilderService;
+    private final ServiceBuilderService serviceBuilderService;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ApplicationEventPublisher eventPublisher;
 
     public MQServiceTaskBehavior(IntegrationContextManager integrationContextManager,
                                  RuntimeBundleProperties runtimeBundleProperties,
+                                 ApplicationBuilderService applicationBuilderService,
+                                 ServiceBuilderService serviceBuilderService,
                                  ApplicationEventPublisher eventPublisher) {
         this.integrationContextManager = integrationContextManager;
         this.runtimeBundleProperties = runtimeBundleProperties;
+        this.applicationBuilderService = applicationBuilderService;
+        this.serviceBuilderService = serviceBuilderService;
         this.eventPublisher = eventPublisher;
     }
 
@@ -63,7 +71,9 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
     private void publishSpringEvent(DelegateExecution execution,
                                       IntegrationContextEntity integrationContext) {
         IntegrationRequestEvent event = new IntegrationRequestEvent(execution,
-                                                                    integrationContext, runtimeBundleProperties.getFullyQualifiedServiceName());
+                                                                    integrationContext,
+                serviceBuilderService.buildService(),
+                applicationBuilderService.buildApplication());
 
         eventPublisher.publishEvent(event);
     }

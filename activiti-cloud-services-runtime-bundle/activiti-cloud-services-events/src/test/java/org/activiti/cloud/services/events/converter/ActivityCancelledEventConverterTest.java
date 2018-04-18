@@ -17,8 +17,11 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.events.ActivityCancelledEvent;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.engine.delegate.event.ActivitiActivityCancelledEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.junit.Before;
@@ -38,7 +41,10 @@ public class ActivityCancelledEventConverterTest {
     private ActivityCancelledEventConverter converter;
 
     @Mock
-    private RuntimeBundleProperties runtimeBundleProperties;
+    private ServiceBuilderService serviceBuilderService;
+
+    @Mock
+    private ApplicationBuilderService applicationBuilderService;
 
     @Before
     public void setUp() throws Exception {
@@ -57,7 +63,8 @@ public class ActivityCancelledEventConverterTest {
         given(activitiEvent.getActivityName()).willReturn("ActivityName");
         given(activitiEvent.getActivityType()).willReturn("ActivityType");
         given(activitiEvent.getCause()).willReturn("cause of the cancellation");
-        given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn("myApp");
+        given(serviceBuilderService.buildService()).willReturn(new Service("myApp","myApp","runtime-bundle","1"));
+        given(applicationBuilderService.buildApplication()).willReturn(new Application());
 
         ProcessEngineEvent pee = converter.from(activitiEvent);
 
@@ -66,7 +73,7 @@ public class ActivityCancelledEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getFullyQualifiedServiceName()).isEqualTo("myApp");
+        assertThat(pee.getService().getFullName()).isEqualTo("myApp");
         assertThat(((ActivityCancelledEvent) pee).getActivityId()).isEqualTo("ABC");
         assertThat(((ActivityCancelledEvent) pee).getActivityName()).isEqualTo("ActivityName");
         assertThat(((ActivityCancelledEvent) pee).getActivityType()).isEqualTo("ActivityType");

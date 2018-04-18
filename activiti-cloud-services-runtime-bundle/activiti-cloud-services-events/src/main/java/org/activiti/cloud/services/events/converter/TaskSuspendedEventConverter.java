@@ -19,6 +19,8 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.events.TaskSuspendedEventImpl;
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.impl.ActivitiEntityEventImpl;
@@ -35,14 +37,16 @@ public class TaskSuspendedEventConverter extends AbstractEventConverter {
 
     @Autowired
     public TaskSuspendedEventConverter(TaskConverter taskConverter,
-                                       RuntimeBundleProperties runtimeBundleProperties) {
-        super(runtimeBundleProperties);
+                                       ApplicationBuilderService applicationBuilderService,
+                                       ServiceBuilderService serviceBuilderService) {
+        super(applicationBuilderService,serviceBuilderService);
         this.taskConverter = taskConverter;
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-            return new TaskSuspendedEventImpl(getFullyQualifiedServiceName(),
+            return new TaskSuspendedEventImpl(buildService(),
+                                              buildApplication(),
                                               event.getExecutionId(),
                                               event.getProcessDefinitionId(),
                                               event.getProcessInstanceId(),

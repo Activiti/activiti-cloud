@@ -18,10 +18,13 @@
 package org.activiti.cloud.services.events;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 
 public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
 
-    private String fullyQualifiedServiceName;
+    private Service service;
+    private Application application;
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
@@ -30,32 +33,31 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     public AbstractProcessEngineEvent() {
     }
 
-    public AbstractProcessEngineEvent(String fullyQualifiedServiceName,
+    public AbstractProcessEngineEvent(Service service,
+                                      Application application,
                                       String executionId,
                                       String processDefinitionId,
                                       String processInstanceId) {
-        this.fullyQualifiedServiceName = fullyQualifiedServiceName;
+        this.service = service;
+        this.application = application;
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
         this.timestamp = System.currentTimeMillis();
     }
 
-    public AbstractProcessEngineEvent(String fullyQualifiedServiceName,
+    public AbstractProcessEngineEvent(Service service,
+                                      Application application,
                                       String executionId,
                                       String processDefinitionId,
                                       String processInstanceId,
                                       Long timestamp) {
-        this.fullyQualifiedServiceName = fullyQualifiedServiceName;
+        this.service = service;
+        this.application = application;
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
         this.timestamp = timestamp;
-    }
-
-    @Override
-    public String getFullyQualifiedServiceName() {
-        return fullyQualifiedServiceName;
     }
 
     @Override
@@ -76,5 +78,15 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     @Override
     public Long getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public Service getService() {
+        return service;
+    }
+
+    @Override
+    public Application getApplication() {
+        return application;
     }
 }

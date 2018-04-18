@@ -17,11 +17,16 @@
 package org.activiti.services.connectors.behavior;
 
 import org.activiti.bpmn.model.ServiceTask;
+import org.activiti.cloud.services.api.model.Service;
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.services.connectors.model.IntegrationRequestEvent;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -60,6 +65,12 @@ public class MQServiceTaskBehaviorTest {
     private RuntimeBundleProperties runtimeBundleProperties;
 
     @Mock
+    private ServiceBuilderService serviceBuilderService;
+
+    @Mock
+    private ApplicationBuilderService applicationBuilderService;
+
+    @Mock
     private ApplicationEventPublisher eventPublisher;
 
     @Captor
@@ -84,6 +95,7 @@ public class MQServiceTaskBehaviorTest {
                 .withFlowNodeId(FLOW_NODE_ID)
                 .build();
         given(runtimeBundleProperties.getFullyQualifiedServiceName()).willReturn(APP_NAME);
+        given(serviceBuilderService.buildService()).willReturn(new Service(APP_NAME,APP_NAME,"runtime-bundle","1"));
 
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId(INTEGRATION_CONTEXT_ID);
@@ -101,13 +113,13 @@ public class MQServiceTaskBehaviorTest {
         verify(eventPublisher).publishEvent(integrationRequestCaptor.capture());
         IntegrationRequestEvent event = integrationRequestCaptor.getValue();
         assertThat(event)
-                .hasFullyQualifiedServiceName(APP_NAME)
                 .hasConnectorType(CONNECTOR_TYPE)
                 .hasExecutionId(EXECUTION_ID)
                 .hasProcessInstanceId(PROC_INST_ID)
                 .hasProcessDefinitionId(PROC_DEF_ID)
                 .hasIntegrationContextId(INTEGRATION_CONTEXT_ID)
                 .hasFlowNodeId(FLOW_NODE_ID);
+        AssertionsForInterfaceTypes.assertThat(event.getService().getFullName()).isEqualTo(APP_NAME);
     }
 
     @Test

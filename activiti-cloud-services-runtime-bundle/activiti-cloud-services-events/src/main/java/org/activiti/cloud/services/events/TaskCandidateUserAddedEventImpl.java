@@ -1,5 +1,7 @@
 package org.activiti.cloud.services.events;
 
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.api.model.TaskCandidateUser;
 
 public class TaskCandidateUserAddedEventImpl extends AbstractProcessEngineEvent implements TaskCandidateUserAddedEvent {
@@ -9,12 +11,14 @@ public class TaskCandidateUserAddedEventImpl extends AbstractProcessEngineEvent 
     public TaskCandidateUserAddedEventImpl() {
     }
 
-    public TaskCandidateUserAddedEventImpl(String fullyQualifiedServiceName,
+    public TaskCandidateUserAddedEventImpl(Service service,
+                                           Application application,
                                            String executionId,
                                            String processDefinitionId,
                                            String processInstanceId,
                                            TaskCandidateUser taskCandidateUser) {
-        super(fullyQualifiedServiceName,
+        super(service,
+                application,
                 executionId,
                 processDefinitionId,
                 processInstanceId);

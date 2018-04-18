@@ -22,6 +22,8 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.activiti.bpmn.model.ServiceTask;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 
@@ -42,7 +44,9 @@ public class IntegrationRequestEvent {
 
     private String connectorType;
 
-    private String fullyQualifiedServiceName;
+    private Service service;
+
+    private Application application;
 
     private Map<String, Object> variables;
 
@@ -53,7 +57,8 @@ public class IntegrationRequestEvent {
 
     public IntegrationRequestEvent(DelegateExecution execution,
                                    IntegrationContextEntity integrationContext,
-                                   String fullyQualifiedServiceName) {
+                                   Service service,
+                                   Application application) {
         this();
         this.processInstanceId = execution.getProcessInstanceId();
         this.processDefinitionId = execution.getProcessDefinitionId();
@@ -61,7 +66,8 @@ public class IntegrationRequestEvent {
         this.flowNodeId = integrationContext.getFlowNodeId();
         this.variables = execution.getVariables();
         this.integrationContextId = integrationContext.getId();
-        this.fullyQualifiedServiceName = fullyQualifiedServiceName;
+        this.service = service;
+        this.application = application;
         this.connectorType = ((ServiceTask) execution.getCurrentFlowElement()).getImplementation();
     }
 
@@ -94,8 +100,12 @@ public class IntegrationRequestEvent {
         return connectorType;
     }
 
-    public String getFullyQualifiedServiceName() {
-        return fullyQualifiedServiceName;
+    public Service getService(){
+        return service;
+    }
+
+    public Application getApplication(){
+        return application;
     }
 
     public Map<String, Object> getVariables() {

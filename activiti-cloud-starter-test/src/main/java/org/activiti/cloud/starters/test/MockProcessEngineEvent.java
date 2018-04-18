@@ -19,6 +19,8 @@ package org.activiti.cloud.starters.test;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -30,6 +32,8 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
+    private Service service;
+    private Application application;
 
     public MockProcessEngineEvent() {
     }
@@ -39,6 +43,7 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.fullyQualifiedServiceName = "mock-app-name";
+        Service service = new Service(fullyQualifiedServiceName,fullyQualifiedServiceName,"runtime-bundle","1");
     }
 
     public MockProcessEngineEvent(Long timestamp,
@@ -122,12 +127,21 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
         return processInstanceId;
     }
 
-    public void setProcessInstanceId(String processInstanceId) {
-        this.processInstanceId = processInstanceId;
+    @Override
+    public Service getService() {
+        return service;
     }
 
     @Override
+    public Application getApplication() {
+        return application;
+    }
+
+    public void setProcessInstanceId(String processInstanceId) {
+        this.processInstanceId = processInstanceId;
+    }
+    
     public String getFullyQualifiedServiceName() {
-        return fullyQualifiedServiceName;
+        return service.getFullName();
     }
 }

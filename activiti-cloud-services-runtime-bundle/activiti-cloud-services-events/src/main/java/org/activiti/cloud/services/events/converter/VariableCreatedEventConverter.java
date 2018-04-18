@@ -18,6 +18,8 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.VariableCreatedEventImpl;
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.impl.ActivitiVariableEventImpl;
@@ -30,15 +32,16 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.VARIABLE_CREA
 public class VariableCreatedEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public VariableCreatedEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
-        super(runtimeBundleProperties);
+    public VariableCreatedEventConverter(ApplicationBuilderService applicationBuilderService, ServiceBuilderService serviceBuilderService) {
+        super(applicationBuilderService, serviceBuilderService);
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
         ActivitiVariableEventImpl variableEvent = (ActivitiVariableEventImpl) event;
 
-        return new VariableCreatedEventImpl(getFullyQualifiedServiceName(),
+        return new VariableCreatedEventImpl(buildService(),
+                                            buildApplication(),
                                             event.getExecutionId(),
                                             event.getProcessDefinitionId(),
                                             event.getProcessInstanceId(),

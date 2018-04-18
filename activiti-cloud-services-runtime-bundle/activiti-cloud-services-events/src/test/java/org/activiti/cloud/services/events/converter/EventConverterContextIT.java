@@ -46,6 +46,7 @@ public class EventConverterContextIT {
     @Configuration
     @ComponentScan({
             "org.activiti.cloud.services.events.converter",
+            "org.activiti.cloud.services.events.builders",
             "org.activiti.cloud.services.events.configuration",
             "org.activiti.cloud.services.api.model.converter"
     })
@@ -102,6 +103,6 @@ public class EventConverterContextIT {
 
         assertThat(processEngineEvent).isNotNull();
         // this comes from the application.properties (test-application.properties) spring app name configuration
-        assertThat(processEngineEvent.getFullyQualifiedServiceName()).isEqualTo("test-app");
+        assertThat(processEngineEvent.getService().getFullName()).isEqualTo("test-app");
     }
 }

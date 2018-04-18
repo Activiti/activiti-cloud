@@ -16,19 +16,24 @@
 
 package org.activiti.cloud.services.events.integration;
 
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
+
 public class IntegrationRequestSentEventImpl extends BaseIntegrationEventImpl implements IntegrationRequestSentEvent {
 
     //used to deserialize from json
     public IntegrationRequestSentEventImpl() {
     }
 
-    public IntegrationRequestSentEventImpl(String fullyQualifiedServiceName,
+    public IntegrationRequestSentEventImpl(Service service,
+                                           Application application,
                                            String executionId,
                                            String processDefinitionId,
                                            String processInstanceId,
                                            String integrationContextId,
                                            String flowNodeId) {
-        super(fullyQualifiedServiceName,
+        super(service,
+              application,
               executionId,
               processDefinitionId,
               processInstanceId,

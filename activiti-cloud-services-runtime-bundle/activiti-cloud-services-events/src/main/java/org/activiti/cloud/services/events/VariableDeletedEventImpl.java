@@ -17,6 +17,9 @@
 
 package org.activiti.cloud.services.events;
 
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
+
 public class VariableDeletedEventImpl extends AbstractProcessEngineEvent implements VariableDeletedEvent {
 
     private String variableName;
@@ -26,14 +29,16 @@ public class VariableDeletedEventImpl extends AbstractProcessEngineEvent impleme
     public VariableDeletedEventImpl() {
     }
 
-    public VariableDeletedEventImpl(String fullyQualifiedServiceName,
+    public VariableDeletedEventImpl(Service service,
+                                    Application application,
                                     String executionId,
                                     String processDefinitionId,
                                     String processInstanceId,
                                     String variableName,
                                     String variableType,
                                     String taskId) {
-        super(fullyQualifiedServiceName,
+        super(service,
+              application,
               executionId,
               processDefinitionId,
               processInstanceId);

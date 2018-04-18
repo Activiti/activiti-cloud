@@ -17,7 +17,9 @@
 
 package org.activiti.cloud.services.events;
 
+import org.activiti.cloud.services.api.model.Application;
 import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.api.model.Service;
 
 public class ProcessCompletedEventImpl extends AbstractProcessEngineEvent implements ProcessCompletedEvent {
 
@@ -26,12 +28,14 @@ public class ProcessCompletedEventImpl extends AbstractProcessEngineEvent implem
     public ProcessCompletedEventImpl() {
     }
 
-    public ProcessCompletedEventImpl(String fullyQualifiedServiceName,
+    public ProcessCompletedEventImpl(Service service,
+                                     Application application,
                                      String executionId,
                                      String processDefinitionId,
                                      String processInstanceId,
                                      ProcessInstance processInstance) {
-        super(fullyQualifiedServiceName,
+        super(service,
+              application,
               executionId,
               processDefinitionId,
               processInstanceId);

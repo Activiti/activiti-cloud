@@ -19,6 +19,8 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
 import org.activiti.cloud.services.events.ProcessActivatedEventImpl;
+import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
+import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
@@ -35,14 +37,16 @@ public class ProcessActivatedEventConverter extends AbstractEventConverter {
 
     @Autowired
     public ProcessActivatedEventConverter(ProcessInstanceConverter processInstanceConverter,
-                                          RuntimeBundleProperties runtimeBundleProperties) {
-        super(runtimeBundleProperties);
+                                          ServiceBuilderService serviceBuilderService,
+                                          ApplicationBuilderService applicationBuilderService) {
+        super(applicationBuilderService,serviceBuilderService);
         this.processInstanceConverter = processInstanceConverter;
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new ProcessActivatedEventImpl(getFullyQualifiedServiceName(),
+        return new ProcessActivatedEventImpl(buildService(),
+                                             buildApplication(),
                                              event.getExecutionId(),
                                              event.getProcessDefinitionId(),
                                              event.getProcessInstanceId(),

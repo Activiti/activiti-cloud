@@ -17,6 +17,8 @@
 
 package org.activiti.cloud.services.events;
 
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.api.model.Task;
 
 public class TaskSuspendedEventImpl extends AbstractProcessEngineEvent implements TaskSuspendedEvent {
@@ -26,12 +28,14 @@ public class TaskSuspendedEventImpl extends AbstractProcessEngineEvent implement
     public TaskSuspendedEventImpl() {
     }
 
-    public TaskSuspendedEventImpl(String fullyQualifiedServiceName,
+    public TaskSuspendedEventImpl(Service service,
+                                  Application application,
                                   String executionId,
                                   String processDefinitionId,
                                   String processInstanceId,
                                   Task task) {
-        super(fullyQualifiedServiceName,
+        super(service,
+              application,
               executionId,
               processDefinitionId,
               processInstanceId);
@@ -52,7 +56,8 @@ public class TaskSuspendedEventImpl extends AbstractProcessEngineEvent implement
     public String toString() {
         return "TaskSuspendedEventImpl{" +
                 "task=" + task +
-                "fullyQualifiedServiceName='" + getFullyQualifiedServiceName() + '\'' +
+                ", service=" + getService() +
+                ", application=" + getApplication() +
                 ", executionId='" + getExecutionId() + '\'' +
                 ", processDefinitionId='" + getProcessDefinitionId() + '\'' +
                 ", processInstanceId='" + getProcessInstanceId() + '\'' +
