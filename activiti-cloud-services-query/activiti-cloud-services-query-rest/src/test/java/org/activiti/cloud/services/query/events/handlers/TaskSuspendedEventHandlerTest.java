@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.events.TaskAssignedEvent;
 import org.activiti.cloud.services.query.events.TaskSuspendedEvent;
@@ -70,8 +72,9 @@ public class TaskSuspendedEventHandlerTest {
                              "taskSuspended",
                              "10",
                              "100",
+                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                new Application(),
                              "200",
-                             "runtime-bundle-a",
                              task));
 
         //then
@@ -97,8 +100,9 @@ public class TaskSuspendedEventHandlerTest {
                                              "taskSuspended",
                                              "10",
                                              "100",
+                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                new Application(),
                                              "200",
-                                             "runtime-bundle-a",
                                              task));
     }
 

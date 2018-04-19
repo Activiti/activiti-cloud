@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.events.TaskCandidateUserAddedEvent;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
@@ -77,7 +79,8 @@ public class TaskCandidateUserAddedEventHandlerIT {
                                                                                         null,
                                                                                         null,
                                                                                         null,
-                                                                                        "runtime-bundle-a",
+                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                new Application(),
                                                                                         eventTaskCandidateUser);
 
         //when

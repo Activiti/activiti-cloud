@@ -26,6 +26,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import javax.persistence.EntityManager;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.events.VariableCreatedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstance;
@@ -70,7 +72,8 @@ public class VariableCreatedEventHandlerTest {
                                                               executionId,
                                                               "20",
                                                               String.valueOf(processInstanceId),
-                                                              "runtime-bundle-a",
+                                                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                                                new Application(),
                                                               variableName,
                                                               "content",
                                                               variableType,

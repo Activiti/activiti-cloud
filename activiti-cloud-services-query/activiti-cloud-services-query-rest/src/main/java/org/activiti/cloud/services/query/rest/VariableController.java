@@ -106,7 +106,7 @@ public class VariableController {
         if (variable.getProcessInstance() != null) {
             ProcessInstance processInstance = variable.getProcessInstance();
             if (!securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionKey(),
-                                                            processInstance.getApplicationName())) {
+                                                            processInstance.getServiceName())) {
                 LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processInstance.getProcessDefinitionKey());
                 throw new ActivitiForbiddenException("Operation not permitted for " + processInstance.getProcessDefinitionKey());
             }

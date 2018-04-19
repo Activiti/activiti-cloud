@@ -127,7 +127,7 @@ public class ProcessInstanceControllerIT {
         //given
         ProcessInstance processInstance = buildDefaultProcessInstance();
         given(entityFinder.findById(eq(processInstanceRepository), eq(processInstance.getId()), any())).willReturn(processInstance);
-        given(securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionKey(), processInstance.getApplicationName()))
+        given(securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionKey(), processInstance.getServiceName()))
                 .willReturn(true);
 
         //when

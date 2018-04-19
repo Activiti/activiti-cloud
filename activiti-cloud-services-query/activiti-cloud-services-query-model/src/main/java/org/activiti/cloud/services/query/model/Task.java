@@ -64,7 +64,7 @@ public class Task implements Serializable {
     private String processDefinitionId;
     private String processInstanceId;
     private String status;
-    private String applicationName;
+    private String serviceName;
     private String owner;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -114,7 +114,7 @@ public class Task implements Serializable {
                 @JsonProperty("category") String category,
                 @JsonProperty("processDefinitionId") String processDefinitionId,
                 @JsonProperty("processInstanceId") String processInstanceId,
-                @JsonProperty("applicationName") String applicationName,
+                @JsonProperty("serviceName") String serviceName,
                 @JsonProperty("status") String status,
                 @JsonProperty("lastModified") Date lastModified,
                 @JsonProperty("claimDate") Date claimDate,
@@ -129,7 +129,7 @@ public class Task implements Serializable {
         this.category = category;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
-        this.applicationName = applicationName;
+        this.serviceName = serviceName;
         this.status = status;
         this.lastModified = lastModified;
         this.claimDate = claimDate;
@@ -224,12 +224,12 @@ public class Task implements Serializable {
         this.processInstanceId = processInstanceId;
     }
 
-    public String getApplicationName() {
-        return applicationName;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     public void setStatus(String status) {

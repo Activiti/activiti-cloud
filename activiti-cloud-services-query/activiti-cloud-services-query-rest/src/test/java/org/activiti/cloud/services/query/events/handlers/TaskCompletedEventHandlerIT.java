@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Date;
 import java.util.Optional;
 
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.events.TaskCompletedEvent;
@@ -98,8 +100,9 @@ public class TaskCompletedEventHandlerIT {
                                                             "taskCompleted",
                                                             "10",
                                                             "process_definition_id",
+                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                new Application(),
                                                             processInstanceId,
-                                                               "runtime-bundle-a",
                                                             eventTask);
         //when
         handler.handle(givenEvent);

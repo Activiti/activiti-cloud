@@ -36,7 +36,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProcessInstance {
 
-    private String applicationName;
+    private String serviceName;
     @Id
     @GraphQLDescription("Unique process instance identity attribute")
     private String id;
@@ -73,12 +73,12 @@ public class ProcessInstance {
     public ProcessInstance() {
     }
 
-    public ProcessInstance(String applicationName,
+    public ProcessInstance(String serviceName,
                            String processInstanceId,
                            String processDefinitionId,
                            String status,
                            Date lastModified) {
-        this.applicationName = applicationName;
+        this.serviceName = serviceName;
         this.id = processInstanceId;
         this.processDefinitionId = processDefinitionId;
         this.status = status;
@@ -143,12 +143,12 @@ public class ProcessInstance {
         this.variables = variables;
     }
 
-    public String getApplicationName() {
-        return applicationName;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     public String getProcessDefinitionKey() {

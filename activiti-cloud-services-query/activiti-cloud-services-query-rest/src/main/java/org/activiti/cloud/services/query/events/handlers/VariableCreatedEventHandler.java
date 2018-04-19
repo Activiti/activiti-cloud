@@ -51,7 +51,7 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
         Variable variable = new Variable(variableCreatedEvent.getVariableType(),
                                          variableCreatedEvent.getVariableName(),
                                          variableCreatedEvent.getProcessInstanceId(),
-                                         variableCreatedEvent.getApplicationName(),
+                                         variableCreatedEvent.getService().getName(),
                                          variableCreatedEvent.getTaskId(),
                                          now,
                                          now,

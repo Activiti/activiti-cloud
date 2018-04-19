@@ -44,7 +44,7 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
         Variable variable = new Variable(variableUpdatedEvent.getVariableType(),
                                          variableUpdatedEvent.getVariableName(),
                                          variableUpdatedEvent.getProcessInstanceId(),
-                                         variableUpdatedEvent.getApplicationName(),
+                                         variableUpdatedEvent.getService().getName(),
                                          variableUpdatedEvent.getTaskId(),
                                          new Date(variableUpdatedEvent.getTimestamp()),
                                          new Date(variableUpdatedEvent.getTimestamp()),

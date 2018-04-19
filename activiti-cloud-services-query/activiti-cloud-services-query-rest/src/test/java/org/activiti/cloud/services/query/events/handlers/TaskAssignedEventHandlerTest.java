@@ -19,6 +19,8 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 import java.util.Optional;
 
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.engine.ActivitiException;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.model.Task;
@@ -71,7 +73,8 @@ public class TaskAssignedEventHandlerTest {
                                              "10",
                                              "100",
                                              "200",
-                                             "runtime-bundle-a",
+                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                new Application(),
                                              task));
 
         //then
@@ -99,7 +102,8 @@ public class TaskAssignedEventHandlerTest {
                                              "10",
                                              "100",
                                              "200",
-                                             "runtime-bundle-a",
+                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                new Application(),
                                              task));
     }
 

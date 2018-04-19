@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Date;
 import java.util.Optional;
 
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.engine.ActivitiException;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -99,7 +101,8 @@ public class TaskCreatedEventHandlerIT {
                                                             "10",
                                                             "process_definition_id",
                                                             processInstanceId,
-                                                            "runtime-bundle-a",
+                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                new Application(),
                                                             eventTask);
         //when
         handler.handle(taskCreated);
@@ -109,7 +112,7 @@ public class TaskCreatedEventHandlerIT {
 
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getProcessInstance()).isNotNull();
-        assertThat(result.get().getApplicationName()).isEqualTo("runtime-bundle-a");
+        assertThat(result.get().getServiceName()).isEqualTo("runtime-bundle-a");
     }
 
     /* having to temporarily remove to resolve https://github.com/Activiti/Activiti/issues/1539

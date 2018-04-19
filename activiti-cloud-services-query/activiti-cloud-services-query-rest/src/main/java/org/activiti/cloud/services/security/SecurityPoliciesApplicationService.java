@@ -98,7 +98,7 @@ public class SecurityPoliciesApplicationService {
                                                                   Set<String> defKeys) {
 
         //expect to remove hyphens when passing in environment variables
-        BooleanExpression appNamePredicate = Expressions.stringTemplate("replace({0},'-','')", processInstance.applicationName).equalsIgnoreCase(appName.replace("-",""));
+        BooleanExpression appNamePredicate = Expressions.stringTemplate("replace({0},'-','')", processInstance.serviceName).equalsIgnoreCase(appName.replace("-",""));
 
         BooleanExpression nextExpression = appNamePredicate;
         //will filter by app name and will also filter by definition keys if no wildcard

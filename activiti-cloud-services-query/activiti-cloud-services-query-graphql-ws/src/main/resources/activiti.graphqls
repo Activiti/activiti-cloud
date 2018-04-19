@@ -11,11 +11,11 @@ type Query {
 }
 
 type Subscription {
-    ProcessEngineNotification(applicationName : String, processDefinitionId : String, processInstanceId: String) : ProcessEngineNotification
+    ProcessEngineNotification(serviceName : String, processDefinitionId : String, processInstanceId: String) : ProcessEngineNotification
 }
 
 type ProcessEngineNotification {
-    applicationName : String
+    serviceName : String
     processInstanceId : String
     processDefinitionId : String
 	ProcessStartedEvent : [ProcessStartedEvent]
@@ -42,7 +42,7 @@ type ProcessEngineNotification {
 
 type ProcessActivatedEvent {
     processInstance : ProcessInstanceEventType
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -52,7 +52,7 @@ type ProcessActivatedEvent {
 
 type ProcessSuspendedEvent {
     processInstance : ProcessInstanceEventType
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -61,7 +61,7 @@ type ProcessSuspendedEvent {
 }
 
 type ProcessStartedEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -72,7 +72,7 @@ type ProcessStartedEvent {
 }
 
 type ProcessCompletedEvent {
-    applicationName : String
+    serviceName : String
     timestamp : Long
     eventType : String
     executionId : String
@@ -83,7 +83,7 @@ type ProcessCompletedEvent {
 }
 
 type ProcessCreatedEvent {
-    applicationName : String
+    serviceName : String
     timestamp : Long
     eventType : String
     executionId : String
@@ -94,7 +94,7 @@ type ProcessCreatedEvent {
 }
 
 type ProcessCancelledEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -105,7 +105,7 @@ type ProcessCancelledEvent {
 
 
 type ActivityCompletedEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -117,7 +117,7 @@ type ActivityCompletedEvent {
 
 
 type ActivityStartedEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -128,7 +128,7 @@ type ActivityStartedEvent {
 }
 
 type ActivityCancelledEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -140,7 +140,7 @@ type ActivityCancelledEvent {
 }
 
 type VariableCreatedEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -154,7 +154,7 @@ type VariableCreatedEvent {
 }
 
 type VariableDeletedEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -167,7 +167,7 @@ type VariableDeletedEvent {
 }
 
 type VariableUpdatedEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -182,7 +182,7 @@ type VariableUpdatedEvent {
 
 
 type SequenceFlowTakenEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -214,7 +214,7 @@ type TaskActivatedEvent {
     eventType : String
     executionId : String
     processDefinitionId : String
-    applicationName : String
+    serviceName : String
     processInstanceId : String
     task : TaskEventType
 }
@@ -224,13 +224,13 @@ type TaskSuspendedEvent {
     eventType : String
     executionId : String
     processDefinitionId : String
-    applicationName : String
+    serviceName : String
     processInstanceId : String
     task : TaskEventType
 }
 
 type TaskCreatedEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -241,7 +241,7 @@ type TaskCreatedEvent {
 }
 
 type TaskAssignedEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -264,7 +264,7 @@ type TaskEventType {
 }
 
 type TaskCompletedEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -275,7 +275,7 @@ type TaskCompletedEvent {
 }
 
 type IntegrationRequestSentEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -286,7 +286,7 @@ type IntegrationRequestSentEvent {
 }
 
 type IntegrationResultReceivedEvent {
-    applicationName : String
+    serviceName : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String

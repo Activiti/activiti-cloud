@@ -122,7 +122,7 @@ public class RestrictVariableQueryIT {
         processInstance.setDescription("desc");
         processInstance.setInitiator("initiator");
         processInstance.setProcessDefinitionKey("defKey1");
-        processInstance.setApplicationName("test-cmd-endpoint");
+        processInstance.setServiceName("test-cmd-endpoint");
         processInstanceRepository.save(processInstance);
 
         Variable variable = new Variable();

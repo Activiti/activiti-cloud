@@ -43,7 +43,7 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
         LOGGER.debug("Handling created process Instance " + createdEvent.getProcessInstanceId());
 
         ProcessInstance createdProcessInstance = new ProcessInstance();
-        createdProcessInstance.setApplicationName(createdEvent.getApplicationName());
+        createdProcessInstance.setServiceName(createdEvent.getService().getName());
         createdProcessInstance.setProcessDefinitionId(createdEvent.getProcessDefinitionId());
         createdProcessInstance.setId(createdEvent.getProcessInstanceId());
         createdProcessInstance.setStatus("CREATED");

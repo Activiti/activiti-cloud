@@ -39,7 +39,7 @@ public class Variable {
     private String type;
     private String name;
     private String processInstanceId;
-    private String applicationName;
+    private String serviceName;
     private String taskId;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date createTime;
@@ -66,7 +66,7 @@ public class Variable {
     public Variable(String type,
                     String name,
                     String processInstanceId,
-                    String applicationName,
+                    String serviceName,
                     String taskId,
                     Date createTime,
                     Date lastUpdatedTime,
@@ -75,7 +75,7 @@ public class Variable {
         this.type = type;
         this.name = name;
         this.processInstanceId = processInstanceId;
-        this.applicationName = applicationName;
+        this.serviceName = serviceName;
         this.taskId = taskId;
         this.createTime = createTime;
         this.lastUpdatedTime = lastUpdatedTime;
@@ -111,12 +111,12 @@ public class Variable {
         this.processInstanceId = processInstanceId;
     }
 
-    public String getApplicationName() {
-        return applicationName;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     public String getTaskId() {

@@ -19,6 +19,8 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Optional;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.events.ProcessStartedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstance;
@@ -62,7 +64,8 @@ public class ProcessStartedEventHandlerTest {
                                                             "200",
                                                             "101",
                                                             "201",
-                                                            "runtime-bundle-a");
+                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                new Application());
         ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
         given(currentProcessInstance.getStatus()).willReturn("CREATED");
         given(processInstanceRepository.findById("200")).willReturn(Optional.of(currentProcessInstance));
@@ -85,7 +88,8 @@ public class ProcessStartedEventHandlerTest {
                                                             "200",
                                                             "101",
                                                             "201",
-                                                            "runtime-bundle-a");
+                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                new Application());
 
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
 

@@ -17,6 +17,8 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.Application;
+import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.model.Variable;
 import org.activiti.cloud.services.query.events.VariableUpdatedEvent;
 import org.activiti.test.Assertions;
@@ -54,7 +56,8 @@ public class VariableUpdatedEventHandlerTest {
                                                               "10",
                                                               "20",
                                                               "30",
-                                                              "runtime-bundle-a",
+                                                              new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                                                              new Application(),
                                                               "var",
                                                               "v1",
                                                               "string",
@@ -71,7 +74,7 @@ public class VariableUpdatedEventHandlerTest {
         Assertions.assertThat(variable)
                 .hasProcessInstanceId("30")
                 .hasName("var")
-                .hasApplicationName("runtime-bundle-a")
+                .hasServiceName("runtime-bundle-a")
                 .hasValue("v1")
                 .hasType("string");
     }
@@ -84,7 +87,8 @@ public class VariableUpdatedEventHandlerTest {
                                                               "10",
                                                               "20",
                                                               "30",
-                                                              "runtime-bundle-a",
+                                                                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
+                                                                new Application(),
                                                               "var",
                                                               "v1",
                                                               "string",
@@ -102,7 +106,7 @@ public class VariableUpdatedEventHandlerTest {
                 .hasTaskId("40")
                 .hasName("var")
                 .hasValue("v1")
-                .hasApplicationName("runtime-bundle-a")
+                .hasServiceName("runtime-bundle-a")
                 .hasType("string");
     }
 

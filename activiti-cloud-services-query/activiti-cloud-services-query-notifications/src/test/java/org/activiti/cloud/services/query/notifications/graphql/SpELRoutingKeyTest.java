@@ -32,7 +32,7 @@ public class SpELRoutingKeyTest {
 
         ProcessEngineNotification notification = new GraphQLProcessEngineNotification();
 
-        notification.put("applicationName", "my-app");
+        notification.put("serviceName", "my-app");
         notification.put("processDefinitionId", "1:2");
         notification.put("processInstanceId", 12);
 

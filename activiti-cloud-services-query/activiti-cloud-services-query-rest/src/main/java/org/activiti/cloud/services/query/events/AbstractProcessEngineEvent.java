@@ -20,7 +20,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.activiti.cloud.services.api.model.Application;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.api.model.Service;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -56,7 +58,8 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
-    private String applicationName;
+    private Service service;
+    private Application application;
 
     public AbstractProcessEngineEvent() {
     }
@@ -66,13 +69,15 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
                                       String executionId,
                                       String processDefinitionId,
                                       String processInstanceId,
-                                      String applicationName) {
+                                      Service service,
+                                      Application application) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
-        this.applicationName = applicationName;
+        this.service = service;
+        this.application = application;
     }
 
     public Long getTimestamp() {
@@ -100,7 +105,12 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     }
 
     @Override
-    public String getApplicationName() {
-        return applicationName;
+    public Service getService() {
+        return service;
+    }
+
+    @Override
+    public Application getApplication() {
+        return application;
     }
 }
