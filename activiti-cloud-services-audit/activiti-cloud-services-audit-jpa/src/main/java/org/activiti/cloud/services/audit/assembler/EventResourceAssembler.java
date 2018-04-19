@@ -20,14 +20,18 @@ import org.activiti.cloud.services.audit.resources.EventResource;
 import org.activiti.cloud.services.audit.ProcessEngineEventsController;
 import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceAssembler;
+import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.stereotype.Component;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Component
-public class EventResourceAssembler implements ResourceAssembler<ProcessEngineEventEntity, EventResource> {
+public class EventResourceAssembler extends ResourceAssemblerSupport<ProcessEngineEventEntity, EventResource> {
+
+    public EventResourceAssembler(){
+        super(ProcessEngineEventsController.class,EventResource.class);
+    }
 
     @Override
     public EventResource toResource(ProcessEngineEventEntity entity) {

@@ -106,4 +106,32 @@ public abstract class ProcessEngineEventEntity {
     public boolean isIgnored() {
         return false;
     }
+
+    protected void setId(Long id) {
+        this.id = id;
+    }
+
+    protected void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    protected void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
+    protected void setExecutionId(String executionId) {
+        this.executionId = executionId;
+    }
+
+    protected void setProcessDefinitionId(String processDefinitionId) {
+        this.processDefinitionId = processDefinitionId;
+    }
+
+    protected void setProcessInstanceId(String processInstanceId) {
+        this.processInstanceId = processInstanceId;
+    }
+
+    protected void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
 }

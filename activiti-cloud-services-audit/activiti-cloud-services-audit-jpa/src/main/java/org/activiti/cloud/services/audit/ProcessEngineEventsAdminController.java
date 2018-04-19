@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.audit;
 
 import com.querydsl.core.types.Predicate;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.audit.assembler.EventResourceAssembler;
 import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
 import org.activiti.cloud.services.audit.repository.EventsRepository;
@@ -24,26 +25,27 @@ import org.activiti.cloud.services.audit.resources.EventResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
-import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/admin/v1/" + EventsRelProvider.COLLECTION_RESOURCE_REL)
+@RequestMapping(value = "/admin/v1/" + EventsRelProvider.COLLECTION_RESOURCE_REL, produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public class ProcessEngineEventsAdminController {
 
     private final EventsRepository eventsRepository;
 
     private EventResourceAssembler eventResourceAssembler;
 
-    private PagedResourcesAssembler<ProcessEngineEventEntity> pagedResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<ProcessEngineEventEntity> pagedResourcesAssembler;
 
     @Autowired
     public ProcessEngineEventsAdminController(EventsRepository eventsRepository,
                                               EventResourceAssembler eventResourceAssembler,
-                                              PagedResourcesAssembler<ProcessEngineEventEntity> pagedResourcesAssembler) {
+                                              AlfrescoPagedResourcesAssembler<ProcessEngineEventEntity> pagedResourcesAssembler) {
         this.eventsRepository = eventsRepository;
         this.eventResourceAssembler = eventResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
@@ -54,7 +56,7 @@ public class ProcessEngineEventsAdminController {
                                                  Pageable pageable) {
 
 
-        return pagedResourcesAssembler.toResource(eventsRepository.findAll(predicate,
+        return pagedResourcesAssembler.toResource(pageable,eventsRepository.findAll(predicate,
                                                                            pageable),
                                                   eventResourceAssembler);
     }
