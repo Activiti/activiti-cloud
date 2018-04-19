@@ -28,7 +28,6 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
 
     private Long timestamp;
     private String eventType;
-    private String fullyQualifiedServiceName;
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
@@ -42,8 +41,7 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
                                   String eventType) {
         this.timestamp = timestamp;
         this.eventType = eventType;
-        this.fullyQualifiedServiceName = "mock-app-name";
-        Service service = new Service(fullyQualifiedServiceName,fullyQualifiedServiceName,"runtime-bundle","1");
+        service = new Service("mock-app-name","mock-app-name","runtime-bundle","1");
     }
 
     public MockProcessEngineEvent(Long timestamp,
@@ -141,7 +139,4 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
         this.processInstanceId = processInstanceId;
     }
 
-    public String getFullyQualifiedServiceName() {
-        return service.getFullName();
-    }
 }
