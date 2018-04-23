@@ -18,8 +18,6 @@ package org.activiti.cloud.connectors.starter.model;
 
 import java.util.Collections;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.springframework.messaging.Message;
@@ -32,7 +30,7 @@ public class IntegrationResultEventBuilderTest {
     private static final String PROC_DEF_ID = "procDefId";
     private static final String EXEC_ID = "execId";
     private static final String FLOW_NODE_ID = "flowNodeId";
-    private static final String APP_NAME = "appName";
+    private static final String RB_NAME = "appName";
     private static final String VAR = "var";
     private static final String VALUE = "value";
 
@@ -43,8 +41,12 @@ public class IntegrationResultEventBuilderTest {
                                                                                       PROC_DEF_ID,
                                                                                       EXEC_ID,
                                                                                       Collections.emptyMap(),
-                                                                   new Service(APP_NAME,APP_NAME,"runtime-bundle","1"),
-                                                                                new Application());
+                RB_NAME,
+                RB_NAME,
+                                                                                        "runtime-bundle",
+                                                                                        "1",
+                                                                                        null,
+                                                                                        null);
         integrationRequestEvent.setFlowNodeId(FLOW_NODE_ID);
 
         //when
@@ -58,7 +60,7 @@ public class IntegrationResultEventBuilderTest {
         assertThat(resultEvent)
                 .hasExecutionId(EXEC_ID)
                 .hasFlowNodeId(FLOW_NODE_ID)
-                .hasTargetApplication(APP_NAME)
+                .hasTargetApplication(RB_NAME)
                 .hasVariables(Collections.singletonMap(VAR,
                                                        VALUE));
     }
@@ -70,8 +72,12 @@ public class IntegrationResultEventBuilderTest {
                                                                                       PROC_DEF_ID,
                                                                                       EXEC_ID,
                                                                                       Collections.emptyMap(),
-                                                        new Service(APP_NAME,APP_NAME,"runtime-bundle","1"),
-                                                        new Application());
+                RB_NAME,
+                RB_NAME,
+                                                                                    "runtime-bundle",
+                                                                                    "1",
+                                                                                    null,
+                                                                                    null);
         //when
         Message<IntegrationResultEvent> message = IntegrationResultEventBuilder
                 .resultFor(integrationRequestEvent)
@@ -79,6 +85,6 @@ public class IntegrationResultEventBuilderTest {
 
         //then
         Assertions.assertThat(message.getHeaders()).containsEntry("targetApplication",
-                                                                  APP_NAME);
+                RB_NAME);
     }
 }

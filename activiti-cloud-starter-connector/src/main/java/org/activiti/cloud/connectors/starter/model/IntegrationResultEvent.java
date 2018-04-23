@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IntegrationResultEvent {
@@ -36,9 +34,17 @@ public class IntegrationResultEvent {
 
     private Map<String, Object> variables;
 
-    private Service service;
+    private String serviceName;
 
-    private Application application;
+    private String serviceFullName;
+
+    private String serviceType;
+
+    private String serviceVersion;
+
+    private String appName;
+
+    private String appVersion;
 
     //used by json deserialization
     public IntegrationResultEvent() {
@@ -47,11 +53,21 @@ public class IntegrationResultEvent {
 
     public IntegrationResultEvent(String executionId,
                                   Map<String, Object> variables,
-                                  Service service,
-                                  Application application) {
+                                  String serviceName,
+                                  String serviceFullName,
+                                  String serviceType,
+                                  String serviceVersion,
+                                  String appName,
+                                  String appVersion) {
         this();
         this.executionId = executionId;
         this.variables = variables;
+        this.serviceName = serviceName;
+        this.serviceFullName = serviceFullName;
+        this.serviceType = serviceType;
+        this.serviceVersion = serviceVersion;
+        this.appName = appName;
+        this.appVersion = appVersion;
     }
 
     public String getId() {
@@ -90,28 +106,64 @@ public class IntegrationResultEvent {
         this.targetApplication = targetApplication;
     }
 
-    public Service getService() {
-        return service;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setService(Service service) {
-        this.service = service;
+    public String getServiceFullName() {
+        return serviceFullName;
     }
 
-    public Application getApplication() {
-        return application;
+    public String getServiceType() {
+        return serviceType;
     }
 
-    public void setApplication(Application application) {
-        this.application = application;
+    public String getServiceVersion() {
+        return serviceVersion;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public void setServiceFullName(String serviceFullName) {
+        this.serviceFullName = serviceFullName;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public void setServiceVersion(String serviceVersion) {
+        this.serviceVersion = serviceVersion;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
     }
 
     @Override
     public String toString() {
         return "IntegrationResultEvent{" +
                 "id='" + id + '\'' +
-                ", service="+service+
-                ", application="+application+
+                ", serviceName="+serviceName+ '\'' +
+                ", serviceFullName="+serviceFullName+ '\'' +
+                ", serviceType="+serviceType+ '\'' +
+                ", serviceVersion="+serviceVersion+ '\'' +
+                ", appName="+appName+ '\'' +
+                ", appVersion="+appVersion+ '\'' +
                 ", executionId='" + executionId + '\'' +
                 ", variables=" + variables +
                 '}';

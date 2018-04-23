@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IntegrationRequestEvent {
@@ -37,9 +35,17 @@ public class IntegrationRequestEvent {
 
     private String flowNodeId;
 
-    private Service service;
+    private String serviceName;
 
-    private Application application;
+    private String serviceFullName;
+
+    private String serviceType;
+
+    private String serviceVersion;
+
+    private String appName;
+
+    private String appVersion;
 
     private String connectorType;
 
@@ -54,15 +60,23 @@ public class IntegrationRequestEvent {
                                    String processDefinitionId,
                                    String executionId,
                                    Map<String, Object> variables,
-                                   Service service,
-                                   Application application) {
+                                   String serviceName,
+                                   String serviceFullName,
+                                   String serviceType,
+                                   String serviceVersion,
+                                   String appName,
+                                   String appVersion) {
         this();
         this.processInstanceId = processInstanceId;
         this.processDefinitionId = processDefinitionId;
         this.executionId = executionId;
         this.variables = variables;
-        this.service = service;
-        this.application = application;
+        this.serviceName = serviceName;
+        this.serviceFullName = serviceFullName;
+        this.serviceType = serviceType;
+        this.serviceVersion = serviceVersion;
+        this.appName = appName;
+        this.appVersion = appVersion;
     }
 
     public String getId() {
@@ -93,21 +107,31 @@ public class IntegrationRequestEvent {
         this.flowNodeId = flowNodeId;
     }
 
-    public Service getService() {
-        return service;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setService(Service service) {
-        this.service = service;
+    public String getServiceFullName() {
+        return serviceFullName;
     }
 
-    public Application getApplication() {
-        return application;
+    public String getServiceType() {
+        return serviceType;
     }
 
-    public void setApplication(Application application) {
-        this.application = application;
+    public String getServiceVersion() {
+        return serviceVersion;
     }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+
 
     public String getConnectorType() {
         return connectorType;
@@ -117,8 +141,12 @@ public class IntegrationRequestEvent {
     public String toString() {
         return "IntegrationRequestEvent{" +
                 "processInstanceId='" + processInstanceId + '\'' +
-                ", service="+service+
-                ", application="+application+
+                ", serviceName="+serviceName+ '\'' +
+                ", serviceFullName="+serviceFullName+ '\'' +
+                ", serviceType="+serviceType+ '\'' +
+                ", serviceVersion="+serviceVersion+ '\'' +
+                ", appName="+appName+ '\'' +
+                ", appVersion="+appVersion+ '\'' +
                 ", processDefinitionId='" + processDefinitionId + '\'' +
                 ", executionId='" + executionId + '\'' +
                 ", variables=" + variables +
