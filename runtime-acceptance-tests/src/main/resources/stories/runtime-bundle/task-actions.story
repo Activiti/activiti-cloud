@@ -22,3 +22,16 @@ Given any authenticated user
 And an existing standalone task
 When the user cancel the task
 Then the task is cancelled
+
+Scenario: create a subtask
+Given the user is authenticated
+When the user creates a standalone task
+And user creates a subtask for the previously created task
+Then the subtask is created and references another task
+
+Scenario: get a list of subtasks
+Given the user is authenticated
+When the user creates a standalone task
+And user creates a subtask for the previously created task
+Then a list of one subtask should be available for the task
+

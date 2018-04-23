@@ -29,6 +29,7 @@ public enum EventType {
     TASK_CANCELLED("TaskCancelledEvent"),
     ACTIVITY_STARTED("ActivityStartedEvent"),
     ACTIVITY_COMPLETED("ActivityCompletedEvent"),
+    ACTIVITY_CANCELLED_EVENT("ActivityCancelledEvent"),
     SEQUENCE_FLOW_TAKEN("SequenceFlowTakenEvent"),
     TASK_CANDIDATE_GROUP_REMOVED("TaskCandidateGroupRemovedEvent"),
     TASK_CANDIDATE_GROUP_ADDED("TaskCandidateGroupAddedEvent");

@@ -23,6 +23,7 @@ import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.model.commands.CreateTaskCmd;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resources;
 
 /**
  * Runtime Bundle service
@@ -78,4 +79,15 @@ public interface RuntimeBundleService extends BaseService {
 
     @RequestLine("DELETE /v1/tasks/{id}")
     void deleteTask(@Param("id") String id);
+
+    @RequestLine("POST /v1/tasks/{parentTaskId}/subtask")
+    @Headers({
+            "Content-Type: application/json",
+            "Accept: application/hal+json;charset=UTF-8"
+    })
+    Task createSubtask(@Param("parentTaskId") String parentTaskId,
+                       CreateTaskCmd createTaskCmd);
+
+    @RequestLine("GET /v1/tasks/{parentTaskId}/subtasks")
+    Resources getSubtasks(@Param("parentTaskId") String parentTaskId);
 }

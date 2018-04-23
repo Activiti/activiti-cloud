@@ -35,6 +35,7 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Resources;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -128,6 +129,17 @@ public class RuntimeBundleSteps {
                 runtimeBundleService.createNewTask(new CreateTaskCmd("new-task",
                                                                      "task-description",
                                                                      "CreateTaskCmd")));
+    }
+
+    public Task createSubtask(String parentTaskId) {
+        return runtimeBundleService.createSubtask(parentTaskId,
+                                                  new CreateTaskCmd("subtask",
+                                                                    "subtask-description",
+                                                                    "CreateTaskCmd"));
+    }
+
+    public Resources getSubtasks(String parentTaskId) {
+        return runtimeBundleService.getSubtasks(parentTaskId);
     }
 
     @Step

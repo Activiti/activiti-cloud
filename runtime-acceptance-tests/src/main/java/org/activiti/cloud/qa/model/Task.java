@@ -28,6 +28,8 @@ public class Task {
 
     private TaskStatus status;
 
+    private String parentTaskId;
+
     public String getId() {
         return id;
     }
@@ -46,5 +48,9 @@ public class Task {
 
     public TaskStatus getStatus() {
         return status;
+    }
+
+    public String getParentTaskId() {
+        return parentTaskId;
     }
 }

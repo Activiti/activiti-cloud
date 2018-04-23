@@ -16,11 +16,13 @@
 
 package org.activiti.cloud.qa.steps;
 
+import java.util.Collection;
 import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.ProcessInstanceStatus;
+import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.model.TaskStatus;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.QueryService;
@@ -70,5 +72,14 @@ public class QuerySteps {
                 .isNotNull()
                 .isNotEmpty()
                 .hasSize(1);
+    }
+
+    @Step
+    public void checkSubtaskHasParentTaskId(String subtaskId,
+                                            String parentTaskId) {
+        final Collection<Task> tasks = queryService.queryTasksById(subtaskId).getContent();
+        assertThat(tasks).isNotNull().isNotEmpty().hasSize(1).extracting(Task::getId,
+                                                                         Task::getParentTaskId).containsOnly(tuple(subtaskId,
+                                                                                                                   parentTaskId));
     }
 }
