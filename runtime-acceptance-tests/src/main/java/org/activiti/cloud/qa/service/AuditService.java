@@ -32,7 +32,7 @@ public interface AuditService extends BaseService {
     PagedResources<Event> getProcessInstanceEvents(@Param("processInstanceId") String processInstanceId,
                                                    @Param("eventType") String eventType);
 
-    @RequestLine("GET /v1/events")
+    @RequestLine("GET /v1/events?sort=timestamp,desc")
     @Headers("Content-Type: application/json")
     PagedResources<Event> getEvents();
 }

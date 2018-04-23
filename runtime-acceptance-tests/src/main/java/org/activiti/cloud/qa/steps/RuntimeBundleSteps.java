@@ -26,6 +26,7 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.ProcessInstance;
 import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.model.commands.CreateTaskCmd;
+import org.activiti.cloud.qa.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.RuntimeBundleDiagramService;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
@@ -46,6 +47,9 @@ public class RuntimeBundleSteps {
     public static final String DEFAULT_PROCESS_INSTANCE_COMMAND_TYPE = "StartProcessInstanceCmd";
 
     public static final String DEFAULT_PROCESS_INSTANCE_KEY = "ProcessWithVariables";
+
+    @Autowired
+    private RuntimeDirtyContextHandler dirtyContextHandler;
 
     @Autowired
     private RuntimeBundleService runtimeBundleService;
@@ -75,8 +79,7 @@ public class RuntimeBundleSteps {
         processInstance.setCommandType(DEFAULT_PROCESS_INSTANCE_COMMAND_TYPE);
         processInstance.setProcessDefinitionKey(process);
 
-        return runtimeBundleService
-                .startProcess(processInstance);
+        return dirtyContextHandler.dirty(runtimeBundleService.startProcess(processInstance));
     }
 
     @Step
@@ -121,9 +124,10 @@ public class RuntimeBundleSteps {
 
     @Step
     public Task createNewTask() {
-        return runtimeBundleService.createNewTask(new CreateTaskCmd("new-task",
-                                                                    "task-description",
-                                                                    "CreateTaskCmd"));
+        return dirtyContextHandler.dirty(
+                runtimeBundleService.createNewTask(new CreateTaskCmd("new-task",
+                                                                     "task-description",
+                                                                     "CreateTaskCmd")));
     }
 
     @Step
@@ -166,5 +170,17 @@ public class RuntimeBundleSteps {
             output.flush();
             return output.toByteArray();
         }
+    }
+
+    @Step
+    public void deleteTask(String taskId) {
+        runtimeBundleService.deleteTask(taskId);
+    }
+
+    @Step
+    public void checkTaskNotFound(String taskId) {
+        assertThatExceptionOfType(Exception.class).isThrownBy(
+                () -> runtimeBundleService.getTaskById(taskId)
+        ).withMessageContaining("Not Found");
     }
 }

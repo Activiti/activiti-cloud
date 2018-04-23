@@ -16,35 +16,10 @@
 
 package org.activiti.cloud.qa.model;
 
-public class Task {
-
-    private String id;
-
-    private String name;
-
-    private String processDefinitionId;
-
-    private String processInstanceId;
-
-    private TaskStatus status;
-
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getProcessDefinitionId() {
-        return processDefinitionId;
-    }
-
-    public String getProcessInstanceId() {
-        return processInstanceId;
-    }
-
-    public TaskStatus getStatus() {
-        return status;
-    }
+/**
+ * Task status enumeration.
+ */
+public enum TaskStatus {
+    CREATED, ASSIGNED, SUSPENDED, CANCELLED
 }
+

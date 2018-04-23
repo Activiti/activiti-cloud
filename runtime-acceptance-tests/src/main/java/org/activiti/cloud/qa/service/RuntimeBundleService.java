@@ -29,6 +29,10 @@ import org.springframework.hateoas.PagedResources;
  */
 public interface RuntimeBundleService extends BaseService {
 
+    String PROCESS_INSTANCES_PATH = "/v1/process-instances/";
+
+    String TASKS_PATH = "/v1/tasks/";
+
     @RequestLine("POST /v1/process-instances")
     @Headers("Content-Type: application/json")
     ProcessInstance startProcess(ProcessInstance processInstance);
@@ -71,4 +75,7 @@ public interface RuntimeBundleService extends BaseService {
 
     @RequestLine("GET /v1/tasks/{id}")
     Task getTaskById(@Param("id") String id);
+
+    @RequestLine("DELETE /v1/tasks/{id}")
+    void deleteTask(@Param("id") String id);
 }

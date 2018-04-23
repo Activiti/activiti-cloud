@@ -20,8 +20,8 @@ import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import org.activiti.cloud.qa.model.ProcessInstance;
-import org.activiti.cloud.qa.model.QueryStatus;
 import org.activiti.cloud.qa.model.Task;
+import org.activiti.cloud.qa.model.TaskStatus;
 import org.springframework.hateoas.PagedResources;
 
 /**
@@ -35,5 +35,5 @@ public interface QueryService extends BaseService {
 
     @RequestLine("GET /v1/tasks?status={status}&id={taskId}")
     PagedResources<Task> queryTasksByIdAnsStatus(@Param("taskId") String taskId,
-                                                 @Param("status") QueryStatus taskStatus);
+                                                 @Param("status") TaskStatus taskStatus);
 }

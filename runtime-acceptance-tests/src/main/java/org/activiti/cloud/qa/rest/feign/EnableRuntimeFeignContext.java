@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.activiti.cloud.qa.config.RuntimeTestsConfigurationProperties;
+import org.activiti.cloud.qa.rest.RuntimeDirtyContextConfiguration;
 import org.activiti.cloud.qa.rest.RuntimeFeignConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -30,7 +31,11 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@ContextConfiguration(classes = {RuntimeTestsConfigurationProperties.class, RuntimeFeignConfiguration.class})
+@ContextConfiguration(classes = {
+        RuntimeTestsConfigurationProperties.class,
+        RuntimeFeignConfiguration.class,
+        RuntimeDirtyContextConfiguration.class
+})
 public @interface EnableRuntimeFeignContext {
 
 }

@@ -65,7 +65,7 @@ public class DirtyContextHandler {
                 try {
                     deleteByUri(uri);
                 } catch (Exception ex) {
-                    //this uri still dirty
+                    //this uri is still dirty
                     dirty(uri);
                 }
             }

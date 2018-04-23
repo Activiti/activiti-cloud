@@ -17,16 +17,24 @@
 package org.activiti.cloud.qa.story;
 
 import net.thucydides.core.annotations.Steps;
+import org.activiti.cloud.qa.rest.DirtyContextHandler;
+import org.activiti.cloud.qa.rest.EnableDirtyContext;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.AuthenticationSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
+import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeStories;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Lifecycle steps
  */
+@EnableDirtyContext
 public class RuntimeLifecycleActions {
+
+    @Autowired
+    private DirtyContextHandler dirtyContextHandler;
 
     @Steps
     private AuthenticationSteps authenticationSteps;
@@ -47,4 +55,10 @@ public class RuntimeLifecycleActions {
         auditSteps.checkServicesHealth();
         querySteps.checkServicesHealth();
     }
+
+    @AfterScenario
+    public void creanup() {
+        dirtyContextHandler.cleanup();
+    }
+
 }

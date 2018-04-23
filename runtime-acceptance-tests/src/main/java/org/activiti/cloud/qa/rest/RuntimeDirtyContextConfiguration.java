@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.model;
+package org.activiti.cloud.qa.rest;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
- * Query status enum
+ * Runtime dirty context configuration
  */
-public enum QueryStatus {
+@Configuration
+@Import(DirtyContextConfiguration.class)
+public class RuntimeDirtyContextConfiguration {
 
-    CREATED, RUNNING, COMPLETED, CANCELLED, ASSIGNED;
-
+    @Bean
+    public RuntimeDirtyContextHandler runtimeDirtyContextHandler() {
+        return new RuntimeDirtyContextHandler();
+    }
 }

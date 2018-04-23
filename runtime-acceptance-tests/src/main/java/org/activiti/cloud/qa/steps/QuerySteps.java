@@ -16,13 +16,12 @@
 
 package org.activiti.cloud.qa.steps;
 
-import java.util.Collection;
 import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.ProcessInstance;
-import org.activiti.cloud.qa.model.QueryStatus;
-import org.activiti.cloud.qa.model.Task;
+import org.activiti.cloud.qa.model.ProcessInstanceStatus;
+import org.activiti.cloud.qa.model.TaskStatus;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +54,7 @@ public class QuerySteps {
 
     @Step
     public void checkProcessInstanceStatus(String processInstanceId,
-                                           QueryStatus expectedStatus) throws Exception {
+                                           ProcessInstanceStatus expectedStatus) throws Exception {
         assertThat(expectedStatus).isNotNull();
 
         ProcessInstance processInstance = getProcessInstance(processInstanceId);
@@ -65,10 +64,11 @@ public class QuerySteps {
 
     @Step
     public void checkTaskStatus(String taskId,
-                                QueryStatus expectedStatus) {
-        assertThat(expectedStatus).isNotNull();
-        final Collection<Task> tasks = queryService.queryTasksByIdAnsStatus(taskId,
-                                                                              expectedStatus).getContent();
-        assertThat(tasks).isNotNull().isNotEmpty().hasSize(1);
+                                TaskStatus expectedStatus) {
+        assertThat(queryService.queryTasksByIdAnsStatus(taskId,
+                                                        expectedStatus).getContent())
+                .isNotNull()
+                .isNotEmpty()
+                .hasSize(1);
     }
 }
