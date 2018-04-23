@@ -78,21 +78,22 @@ public class TaskSuspendedEventHandlerIT {
 
         //given
         Task eventTask = new Task(
-                                  taskId,
-                                  "assignee",
-                                  "name",
-                                  "description",
-                                  new Date() /*createTime*/,
-                                  new Date() /*dueDate*/,
-                                  "priority",
-                                  "category",
-                                  "process_definition_id",
-                                  processInstanceId,
-                                  "runtime-bundle-a",
-                                  "ASSIGNED",
-                                  new Date() /*lastModified*/,
-                                new Date(), /*claimDate*/
-                                "owner"
+                taskId,
+                "assignee",
+                "name",
+                "description",
+                new Date() /*createTime*/,
+                new Date() /*dueDate*/,
+                "priority",
+                "category",
+                "process_definition_id",
+                processInstanceId,
+                "runtime-bundle-a",
+                "ASSIGNED",
+                new Date() /*lastModified*/,
+                new Date(), /*claimDate*/
+                "owner",
+                null
         );
         TaskSuspendedEvent givenEvent = new TaskSuspendedEvent(System.currentTimeMillis(),
                                                               "taskSuspended",

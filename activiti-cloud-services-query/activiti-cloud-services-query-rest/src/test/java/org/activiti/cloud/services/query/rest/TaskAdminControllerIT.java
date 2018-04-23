@@ -114,7 +114,8 @@ public class TaskAdminControllerIT {
                         org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED.name(),
                         new Date(),
                         new Date(),
-                        "peter"
+                        "peter",
+                        null
         );
     }
 

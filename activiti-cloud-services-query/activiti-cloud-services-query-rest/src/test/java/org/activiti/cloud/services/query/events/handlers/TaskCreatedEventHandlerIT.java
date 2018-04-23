@@ -92,7 +92,8 @@ public class TaskCreatedEventHandlerIT {
                                   "CREATED",
                                   new Date() /*lastModified*/,
                                     new Date(), /*claimDate*/
-                                    "owner"
+                                    "owner",
+                                  null
         );
         TaskCreatedEvent taskCreated = new TaskCreatedEvent(System.currentTimeMillis(),
                                                             "taskCreated",

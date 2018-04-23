@@ -78,21 +78,22 @@ public class TaskActivatedEventHandlerIT {
 
         //given
         Task eventTask = new Task(
-                                  taskId,
-                                  "assignee",
-                                  "name",
-                                  "description",
-                                  new Date() /*createTime*/,
-                                  new Date() /*dueDate*/,
-                                  "priority",
-                                  "category",
-                                  "process_definition_id",
-                                  processInstanceId,
-                                  "runtime-bundle-a",
-                                  "SUSPENDED",
-                                  new Date() /*lastModified*/,
-                                    new Date(),
-                                    "owner"
+                taskId,
+                "assignee",
+                "name",
+                "description",
+                new Date() /*createTime*/,
+                new Date() /*dueDate*/,
+                "priority",
+                "category",
+                "process_definition_id",
+                processInstanceId,
+                "runtime-bundle-a",
+                "SUSPENDED",
+                new Date() /*lastModified*/,
+                new Date(),
+                "owner",
+                null
         );
         TaskActivatedEvent givenEvent = new TaskActivatedEvent(System.currentTimeMillis(),
                                                               "taskActivated",
@@ -133,7 +134,8 @@ public class TaskActivatedEventHandlerIT {
                 "SUSPENDED",
                 new Date() /*lastModified*/,
                 new Date(), /*claimDate*/
-                "owner"
+                "owner",
+                null
         );
         TaskActivatedEvent givenEvent = new TaskActivatedEvent(System.currentTimeMillis(),
                                                                "taskActivated",

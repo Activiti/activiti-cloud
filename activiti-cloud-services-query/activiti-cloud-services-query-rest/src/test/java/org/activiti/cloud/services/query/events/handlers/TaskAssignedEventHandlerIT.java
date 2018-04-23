@@ -92,7 +92,8 @@ public class TaskAssignedEventHandlerIT {
                                   "ASSIGNED",
                                   new Date() /*lastModified*/,
                                     new Date(),
-                                    "owner"
+                                    "owner",
+                                  null
         );
         TaskAssignedEvent givenEvent = new TaskAssignedEvent(System.currentTimeMillis(),
                                                             "taskAssigned",

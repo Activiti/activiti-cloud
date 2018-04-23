@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Date;
 import java.util.Optional;
 
@@ -37,6 +35,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * TaskCreatedEventHandler JPA Repository Integration Tests
@@ -78,21 +78,22 @@ public class TaskCompletedEventHandlerIT {
 
         //given
         Task eventTask = new Task(
-                                  taskId,
-                                  "assignee",
-                                  "name",
-                                  "description",
-                                  new Date() /*createTime*/,
-                                  new Date() /*dueDate*/,
-                                  "priority",
-                                  "category",
-                                  "process_definition_id",
-                                  processInstanceId,
-                                  "runtime-bundle-a",
-                                  "COMPLETED",
-                                  new Date() /*lastModified*/,
-                                    new Date(),/*claimDate*/
-                                    "owner"
+                taskId,
+                "assignee",
+                "name",
+                "description",
+                new Date() /*createTime*/,
+                new Date() /*dueDate*/,
+                "priority",
+                "category",
+                "process_definition_id",
+                processInstanceId,
+                "runtime-bundle-a",
+                "COMPLETED",
+                new Date() /*lastModified*/,
+                new Date(),/*claimDate*/
+                "owner",
+                null
         );
         TaskCompletedEvent givenEvent = new TaskCompletedEvent(System.currentTimeMillis(),
                                                             "taskCompleted",
