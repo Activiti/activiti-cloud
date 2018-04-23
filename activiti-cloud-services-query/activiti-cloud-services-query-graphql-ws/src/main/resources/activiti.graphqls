@@ -11,11 +11,15 @@ type Query {
 }
 
 type Subscription {
-    ProcessEngineNotification(serviceName : String, processDefinitionId : String, processInstanceId: String) : ProcessEngineNotification
+    ProcessEngineNotification(serviceName : String, serviceFullName : String, serviceVersion : String, appName : String, appVersion : String, processDefinitionId : String, processInstanceId: String) : ProcessEngineNotification
 }
 
 type ProcessEngineNotification {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     processInstanceId : String
     processDefinitionId : String
 	ProcessStartedEvent : [ProcessStartedEvent]
@@ -43,6 +47,10 @@ type ProcessEngineNotification {
 type ProcessActivatedEvent {
     processInstance : ProcessInstanceEventType
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -53,6 +61,10 @@ type ProcessActivatedEvent {
 type ProcessSuspendedEvent {
     processInstance : ProcessInstanceEventType
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -62,6 +74,10 @@ type ProcessSuspendedEvent {
 
 type ProcessStartedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -73,6 +89,10 @@ type ProcessStartedEvent {
 
 type ProcessCompletedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     timestamp : Long
     eventType : String
     executionId : String
@@ -84,6 +104,10 @@ type ProcessCompletedEvent {
 
 type ProcessCreatedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     timestamp : Long
     eventType : String
     executionId : String
@@ -95,6 +119,10 @@ type ProcessCreatedEvent {
 
 type ProcessCancelledEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -106,6 +134,10 @@ type ProcessCancelledEvent {
 
 type ActivityCompletedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -118,6 +150,10 @@ type ActivityCompletedEvent {
 
 type ActivityStartedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -129,6 +165,10 @@ type ActivityStartedEvent {
 
 type ActivityCancelledEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -141,6 +181,10 @@ type ActivityCancelledEvent {
 
 type VariableCreatedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -155,6 +199,10 @@ type VariableCreatedEvent {
 
 type VariableDeletedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -168,6 +216,10 @@ type VariableDeletedEvent {
 
 type VariableUpdatedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -183,6 +235,10 @@ type VariableUpdatedEvent {
 
 type SequenceFlowTakenEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -215,6 +271,10 @@ type TaskActivatedEvent {
     executionId : String
     processDefinitionId : String
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     processInstanceId : String
     task : TaskEventType
 }
@@ -225,12 +285,20 @@ type TaskSuspendedEvent {
     executionId : String
     processDefinitionId : String
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     processInstanceId : String
     task : TaskEventType
 }
 
 type TaskCreatedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -242,6 +310,10 @@ type TaskCreatedEvent {
 
 type TaskAssignedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -265,6 +337,10 @@ type TaskEventType {
 
 type TaskCompletedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -276,6 +352,10 @@ type TaskCompletedEvent {
 
 type IntegrationRequestSentEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String
@@ -287,6 +367,10 @@ type IntegrationRequestSentEvent {
 
 type IntegrationResultReceivedEvent {
     serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    appName : String
+    appVersion : String
     executionId : String
     processDefinitionId : String
     processInstanceId : String

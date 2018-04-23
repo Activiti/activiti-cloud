@@ -16,9 +16,6 @@
 
 package org.activiti.cloud.services.query.events;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
-
 public class VariableUpdatedEvent extends AbstractProcessEngineEvent {
 
     protected String variableName;
@@ -34,8 +31,12 @@ public class VariableUpdatedEvent extends AbstractProcessEngineEvent {
                                 String executionId,
                                 String processDefinitionId,
                                 String processInstanceId,
-                                Service service,
-                                Application application,
+                                String serviceName,
+                                String serviceFullName,
+                                String serviceType,
+                                String serviceVersion,
+                                String appName,
+                                String appVersion,
                                 String variableName,
                                 String variableValue,
                                 String variableType,
@@ -45,8 +46,12 @@ public class VariableUpdatedEvent extends AbstractProcessEngineEvent {
               executionId,
               processDefinitionId,
               processInstanceId,
-              service,
-                application);
+              serviceName,
+                serviceFullName,
+                serviceType,
+                serviceVersion,
+                appName,
+                appVersion);
         this.variableName = variableName;
         this.variableValue = variableValue;
         this.variableType = variableType;

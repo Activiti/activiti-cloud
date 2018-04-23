@@ -28,8 +28,6 @@ import java.util.Date;
 import javax.persistence.EntityManager;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.events.TaskCreatedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstance;
@@ -65,8 +63,12 @@ public class TaskCreatedEventHandlerTest {
                                                             "10",
                                                             "100",
                                                             "200",
-                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                new Application(),
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle",
+                                                    "1",
+                                                    null,
+                                                    null,
                                                             eventTask);
 
         when(entityManager.getReference(ArgumentMatchers.eq(ProcessInstance.class), any()))

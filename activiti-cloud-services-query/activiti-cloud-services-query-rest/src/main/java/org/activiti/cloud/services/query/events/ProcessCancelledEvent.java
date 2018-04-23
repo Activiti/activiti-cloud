@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.services.query.events;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 
 public class ProcessCancelledEvent extends AbstractProcessEngineEvent {
 
@@ -29,14 +27,22 @@ public class ProcessCancelledEvent extends AbstractProcessEngineEvent {
                                  String executionId,
                                  String processDefinitionId,
                                  String processInstanceId,
-                                 Service service,
-                                 Application application) {
+                                 String serviceName,
+                                 String serviceFullName,
+                                 String serviceType,
+                                 String serviceVersion,
+                                 String appName,
+                                 String appVersion) {
         super(timestamp,
               eventType,
               executionId,
               processDefinitionId,
               processInstanceId,
-              service,
-                application);
+              serviceName,
+                serviceFullName,
+                serviceType,
+                serviceVersion,
+                appName,
+                appVersion);
     }
 }

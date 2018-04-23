@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.events.TaskCandidateGroupRemovedEvent;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
@@ -80,8 +78,12 @@ public class TaskCandidateGroupRemovedEventHandlerIT {
                                                                                         null,
                                                                                         null,
                                                                                         null,
-                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                new Application(),
+                                                                            "runtime-bundle-a",
+                                                                            "runtime-bundle-a",
+                                                                            "runtime-bundle",
+                                                                            "1",
+                                                                            null,
+                                                                            null,
                                                                                         eventTaskCandidateGroup);
 
         //when

@@ -20,9 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.activiti.cloud.services.api.model.Application;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.api.model.Service;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -58,8 +56,12 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
-    private Service service;
-    private Application application;
+    private String serviceName;
+    private String serviceFullName;
+    private String serviceType;
+    private String serviceVersion;
+    private String appName;
+    private String appVersion;
 
     public AbstractProcessEngineEvent() {
     }
@@ -69,15 +71,23 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
                                       String executionId,
                                       String processDefinitionId,
                                       String processInstanceId,
-                                      Service service,
-                                      Application application) {
+                                      String serviceName,
+                                      String serviceFullName,
+                                      String serviceType,
+                                      String serviceVersion,
+                                      String appName,
+                                      String appVersion) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
-        this.service = service;
-        this.application = application;
+        this.serviceName = serviceName;
+        this.serviceType = serviceType;
+        this.serviceFullName = serviceFullName;
+        this.serviceVersion = serviceVersion;
+        this.appName = appName;
+        this.appVersion = appVersion;
     }
 
     public Long getTimestamp() {
@@ -105,12 +115,32 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     }
 
     @Override
-    public Service getService() {
-        return service;
+    public String getServiceName() {
+        return serviceName;
     }
 
     @Override
-    public Application getApplication() {
-        return application;
+    public String getServiceFullName() {
+        return serviceFullName;
+    }
+
+    @Override
+    public String getServiceVersion() {
+        return serviceVersion;
+    }
+
+    @Override
+    public String getAppName() {
+        return appName;
+    }
+
+    @Override
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    @Override
+    public String getServiceType() {
+        return serviceType;
     }
 }

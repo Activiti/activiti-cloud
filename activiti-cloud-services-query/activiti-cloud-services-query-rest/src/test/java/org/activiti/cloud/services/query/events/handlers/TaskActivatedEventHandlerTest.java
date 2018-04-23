@@ -20,11 +20,8 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.events.TaskActivatedEvent;
-import org.activiti.cloud.services.query.events.TaskSuspendedEvent;
 import org.activiti.cloud.services.query.model.Task;
 import org.activiti.engine.ActivitiException;
 import org.junit.Before;
@@ -72,8 +69,12 @@ public class TaskActivatedEventHandlerTest {
                                               "taskActivated",
                                               "10",
                                               "100",
-                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                new Application(),
+                                    "runtime-bundle-a",
+                                    "runtime-bundle-a",
+                                    "runtime-bundle",
+                                    "1",
+                                    null,
+                                    null,
                                               "200",
                                               task));
 
@@ -99,8 +100,12 @@ public class TaskActivatedEventHandlerTest {
                                               "taskActivated",
                                               "10",
                                               "100",
-                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                new Application(),
+                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle",
+                "1",
+                null,
+                null,
                                               "200",
                                               task));
 
@@ -127,8 +132,12 @@ public class TaskActivatedEventHandlerTest {
                                               "taskActivated",
                                               "10",
                                               "100",
-                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                new Application(),
+                                    "runtime-bundle-a",
+                                    "runtime-bundle-a",
+                                    "runtime-bundle",
+                                    "1",
+                                    null,
+                                    null,
                                               "200",
                                               task));
     }

@@ -16,9 +16,6 @@
 
 package org.activiti.cloud.services.query.events;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
-
 public class ProcessStartedEvent extends AbstractProcessEngineEvent {
 
     private String nestedProcessDefinitionId;
@@ -34,15 +31,23 @@ public class ProcessStartedEvent extends AbstractProcessEngineEvent {
                                String processInstanceId,
                                String nestedProcessDefinitionId,
                                String nestedProcessInstanceId,
-                               Service service,
-                               Application application) {
+                               String serviceName,
+                               String serviceFullName,
+                               String serviceType,
+                               String serviceVersion,
+                               String appName,
+                               String appVersion) {
         super(timestamp,
               eventType,
               executionId,
               processDefinitionId,
               processInstanceId,
-              service,
-                application);
+              serviceName,
+                serviceFullName,
+                serviceType,
+                serviceVersion,
+                appName,
+                appVersion);
         this.nestedProcessDefinitionId = nestedProcessDefinitionId;
         this.nestedProcessInstanceId = nestedProcessInstanceId;
     }

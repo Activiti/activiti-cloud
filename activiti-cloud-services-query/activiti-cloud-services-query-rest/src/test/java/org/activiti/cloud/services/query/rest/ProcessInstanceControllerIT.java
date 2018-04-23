@@ -115,7 +115,7 @@ public class ProcessInstanceControllerIT {
 
 
     private ProcessInstance buildDefaultProcessInstance() {
-        return new ProcessInstance("My-app",
+        return new ProcessInstance("My-app","My-app","1",null,null,
                                    UUID.randomUUID().toString(),
                                    UUID.randomUUID().toString(),
                                    org.activiti.cloud.services.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name(),

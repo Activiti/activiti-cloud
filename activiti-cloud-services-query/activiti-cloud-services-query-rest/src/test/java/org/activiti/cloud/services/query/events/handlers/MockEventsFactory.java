@@ -17,8 +17,6 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.events.ProcessCancelledEvent;
 
 /**
@@ -49,8 +47,12 @@ public class MockEventsFactory {
                                          "10",
                                          "100",
                                          processInstanceId,
-                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                new Application());
+                                "runtime-bundle-a",
+                                "runtime-bundle-a",
+                                "runtime-bundle",
+                                "1",
+                                null,
+                                null);
     }
 
     private MockEventsFactory() {

@@ -20,8 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.events.VariableCreatedEvent;
 import org.activiti.cloud.services.query.model.QVariable;
@@ -80,8 +78,12 @@ public class VariableCreatedEventHandlerIT {
                                                               executionId,
                                                               "process_definition_id",
                                                               processInstanceId,
-                                                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                                                new Application(),
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle",
+                                                    "1",
+                                                    null,
+                                                    null,
                                                               variableName,
                                                               "content",
                                                               variableType,
@@ -112,8 +114,12 @@ public class VariableCreatedEventHandlerIT {
                                                               executionId,
                                                               "process_definition_id",
                                                               processInstanceId,
-                                                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                                                new Application(),
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle",
+                                                    "1",
+                                                    null,
+                                                    null,
                                                               variableName,
                                                               "content",
                                                               variableType,

@@ -21,8 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Date;
 import java.util.Optional;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.events.TaskAssignedEvent;
@@ -91,6 +89,10 @@ public class TaskAssignedEventHandlerIT {
                                   "process_definition_id",
                                   processInstanceId,
                                   "runtime-bundle-a",
+                                "runtime-bundle-a",
+                                  "1",
+                                  null,
+                                  null,
                                   "ASSIGNED",
                                   new Date() /*lastModified*/,
                                     new Date(),
@@ -101,8 +103,12 @@ public class TaskAssignedEventHandlerIT {
                                                             "10",
                                                             "process_definition_id",
                                                             processInstanceId,
-                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                new Application(),
+                                                "runtime-bundle-a",
+                                                "runtime-bundle-a",
+                                                "runtime-bundle",
+                                                "1",
+                                                null,
+                                                null,
                                                             eventTask);
         //when
         handler.handle(givenEvent);

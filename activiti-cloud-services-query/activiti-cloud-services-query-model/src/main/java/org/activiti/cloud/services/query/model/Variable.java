@@ -31,7 +31,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Variable {
+public class Variable extends ActivitiEntityMetadata {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)  
@@ -39,7 +39,6 @@ public class Variable {
     private String type;
     private String name;
     private String processInstanceId;
-    private String serviceName;
     private String taskId;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date createTime;
@@ -67,15 +66,19 @@ public class Variable {
                     String name,
                     String processInstanceId,
                     String serviceName,
+                    String serviceFullName,
+                    String serviceVersion,
+                    String appName,
+                    String appVersion,
                     String taskId,
                     Date createTime,
                     Date lastUpdatedTime,
                     String executionId,
                     String value) {
+        super(serviceName,serviceFullName,serviceVersion,appName,appVersion);
         this.type = type;
         this.name = name;
         this.processInstanceId = processInstanceId;
-        this.serviceName = serviceName;
         this.taskId = taskId;
         this.createTime = createTime;
         this.lastUpdatedTime = lastUpdatedTime;
@@ -109,14 +112,6 @@ public class Variable {
 
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
-    }
-
-    public String getServiceName() {
-        return serviceName;
-    }
-
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
     }
 
     public String getTaskId() {

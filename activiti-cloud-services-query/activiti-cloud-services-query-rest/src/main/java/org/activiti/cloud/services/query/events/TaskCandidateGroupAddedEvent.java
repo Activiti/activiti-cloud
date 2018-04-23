@@ -1,7 +1,5 @@
 package org.activiti.cloud.services.query.events;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 
 public class TaskCandidateGroupAddedEvent extends AbstractProcessEngineEvent  {
@@ -17,16 +15,24 @@ public class TaskCandidateGroupAddedEvent extends AbstractProcessEngineEvent  {
                                         String executionId,
                                         String processDefinitionId,
                                         String processInstanceId,
-                                        Service service,
-                                        Application application,
+                                        String serviceName,
+                                        String serviceFullName,
+                                        String serviceType,
+                                        String serviceVersion,
+                                        String appName,
+                                        String appVersion,
                                         TaskCandidateGroup taskCandidateGroup) {
         super(timestamp,
                 eventType,
                 executionId,
                 processDefinitionId,
                 processInstanceId,
-                service,
-                application);
+                serviceName,
+                serviceFullName,
+                serviceType,
+                serviceVersion,
+                appName,
+                appVersion);
         this.taskCandidateGroup = taskCandidateGroup;
     }
 

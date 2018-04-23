@@ -34,7 +34,7 @@ public class GraphQLProcessEngineNotificationTransformerTest {
 
     private static Logger LOGGER = LoggerFactory.getLogger(GraphQLProcessEngineNotificationTransformerTest.class);
 
-    private static String engineEventAttributeKeys = "serviceName,processInstanceId,processDefinitionId";
+    private static String engineEventAttributeKeys = "serviceName,appName,processInstanceId,processDefinitionId";
     private static String eventTypeKey = "eventType";
 
     ProcessEngineNotificationTransformer subject = new GraphQLProcessEngineNotificationTransformer(
@@ -49,7 +49,8 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             add(new GraphQLProcessEngineNotification() {
                 private static final long serialVersionUID = 1L;
             {
-                put("serviceName","app");
+                put("serviceName","rb");
+                put("appName","app");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type1");
@@ -59,7 +60,8 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             add(new GraphQLProcessEngineNotification() {
                 private static final long serialVersionUID = 1L;
             {
-                put("serviceName","app");
+                put("serviceName","rb");
+                put("appName","app");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type2");
@@ -69,7 +71,8 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             add(new GraphQLProcessEngineNotification() {
                 private static final long serialVersionUID = 1L;
             {
-                put("serviceName","app");
+                put("serviceName","rb");
+                put("appName","app");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type2");
@@ -79,7 +82,8 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             add(new GraphQLProcessEngineNotification() {
                 private static final long serialVersionUID = 1L;
             {
-                put("serviceName","app1");
+                put("serviceName","rb1");
+                put("appName","app");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type1");
@@ -96,16 +100,17 @@ public class GraphQLProcessEngineNotificationTransformerTest {
         // then
         assertThat(notifications).hasSize(2);
 
-
-        assertThat(notifications.get(0).get("serviceName")).isEqualTo("app1");
+        assertThat(notifications.get(0).get("serviceName")).isEqualTo("rb");
         assertThat(notifications.get(0).keySet())
-            .containsOnly("processInstanceId","serviceName","processDefinitionId","type1");
-        assertThat(notifications.get(0).get("type1")).asList().hasSize(1);
+                .containsOnly("processInstanceId","serviceName","appName","processDefinitionId","type1","type2");
+        assertThat(notifications.get(0).get("type2")).asList().hasSize(2);
 
-        assertThat(notifications.get(1).get("serviceName")).isEqualTo("app");
+
+        assertThat(notifications.get(1).get("serviceName")).isEqualTo("rb1");
         assertThat(notifications.get(1).keySet())
-                .containsOnly("processInstanceId","serviceName","processDefinitionId","type1","type2");
-        assertThat(notifications.get(1).get("type2")).asList().hasSize(2);
+                .containsOnly("processInstanceId","serviceName","appName","processDefinitionId","type1");
+        assertThat(notifications.get(1).get("type1")).asList().hasSize(1);
+
     }
 
     @Test
@@ -118,6 +123,7 @@ public class GraphQLProcessEngineNotificationTransformerTest {
                 private static final long serialVersionUID = 1L;
             {
                 put("serviceName", null);
+                put("appName","app");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type1");
@@ -127,7 +133,8 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             add(new GraphQLProcessEngineNotification() {
                 private static final long serialVersionUID = 1L;
             {
-                put("serviceName","app");
+                put("serviceName","rb");
+                put("appName","app");
                 put("processInstanceId",null);
                 put("processDefinitionId","pd1");
                 put("eventType","type2");
@@ -137,7 +144,8 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             add(new GraphQLProcessEngineNotification() {
                 private static final long serialVersionUID = 1L;
             {
-                put("serviceName","app");
+                put("serviceName","rb");
+                put("appName","app");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type2");
@@ -147,7 +155,8 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             add(new GraphQLProcessEngineNotification() {
                 private static final long serialVersionUID = 1L;
             {
-                put("serviceName","app1");
+                put("serviceName","rb1");
+                put("appName","app");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type1");
@@ -164,15 +173,16 @@ public class GraphQLProcessEngineNotificationTransformerTest {
         // then
         assertThat(notifications).hasSize(2);
 
-        assertThat(notifications.get(0).get("serviceName")).isEqualTo("app1");
+        assertThat(notifications.get(0).get("serviceName")).isEqualTo("rb");
         assertThat(notifications.get(0).keySet())
-            .containsOnly("processInstanceId","serviceName","processDefinitionId","type1");
-        assertThat(notifications.get(0).get("type1")).asList().hasSize(1);
+                .containsOnly("processInstanceId","serviceName","appName","processDefinitionId","type2");
+        assertThat(notifications.get(0).get("type2")).asList().hasSize(1);
 
-        assertThat(notifications.get(1).get("serviceName")).isEqualTo("app");
+        assertThat(notifications.get(1).get("serviceName")).isEqualTo("rb1");
         assertThat(notifications.get(1).keySet())
-                .containsOnly("processInstanceId","serviceName","processDefinitionId","type2");
-        assertThat(notifications.get(1).get("type2")).asList().hasSize(1);
+                .containsOnly("processInstanceId","serviceName","appName","processDefinitionId","type1");
+        assertThat(notifications.get(1).get("type1")).asList().hasSize(1);
+
 
     }
 
@@ -186,6 +196,7 @@ public class GraphQLProcessEngineNotificationTransformerTest {
                 private static final long serialVersionUID = 1L;
             {
                 //put("serviceName", null);
+                put("appName","app");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type1");
@@ -195,7 +206,8 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             add(new GraphQLProcessEngineNotification() {
                 private static final long serialVersionUID = 1L;
             {
-                put("serviceName","app");
+                put("serviceName","rb");
+                put("appName","app");
                 //put("processInstanceId",null);
                 put("processDefinitionId","pd1");
                 put("eventType","type2");
@@ -205,7 +217,8 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             add(new GraphQLProcessEngineNotification() {
                 private static final long serialVersionUID = 1L;
             {
-                put("serviceName","app");
+                put("serviceName","rb");
+                put("appName","app");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type2");
@@ -215,7 +228,8 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             add(new GraphQLProcessEngineNotification() {
                 private static final long serialVersionUID = 1L;
             {
-                put("serviceName","app1");
+                put("serviceName","rb1");
+                put("appName","app");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 //put("eventType","type1");
@@ -231,9 +245,9 @@ public class GraphQLProcessEngineNotificationTransformerTest {
 
         // then
         assertThat(notifications).hasSize(1);
-        assertThat(notifications.get(0).get("serviceName")).isEqualTo("app");
+        assertThat(notifications.get(0).get("serviceName")).isEqualTo("rb");
         assertThat(notifications.get(0).keySet())
-            .containsOnly("processInstanceId","serviceName","processDefinitionId","type2");
+            .containsOnly("processInstanceId","serviceName","appName","processDefinitionId","type2");
         assertThat(notifications.get(0).get("type2")).asList().hasSize(1);
 
     }

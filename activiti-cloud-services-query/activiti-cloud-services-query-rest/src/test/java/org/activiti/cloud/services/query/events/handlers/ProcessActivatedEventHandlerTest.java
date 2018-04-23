@@ -20,11 +20,8 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.events.ProcessActivatedEvent;
-import org.activiti.cloud.services.query.events.ProcessCompletedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.engine.ActivitiException;
 import org.junit.Before;
@@ -63,8 +60,12 @@ public class ProcessActivatedEventHandlerTest {
                                                                       "10",
                                                                       "100",
                                                                       "200",
-                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                new Application(),
+                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle",
+                "1",
+                null,
+                null,
                                                                       new ProcessInstance());
 
         ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
@@ -87,8 +88,12 @@ public class ProcessActivatedEventHandlerTest {
                                                                                 "10",
                                                                                 "100",
                                                                                 "200",
-                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                new Application(),
+                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle",
+                "1",
+                null,
+                null,
                                                                                 new ProcessInstance());
 
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());

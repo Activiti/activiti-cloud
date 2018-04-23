@@ -27,7 +27,7 @@ import org.activiti.cloud.services.query.notifications.model.ProcessEngineNotifi
 /**
  * Transform flat list of engine events maps into hierarchical structure
  * grouped by supplied common key attributes and event type ->
- * i.e. [{processInstanceId, serviceName, processDefinitionId, eventType:[{attr1, attr2, ...}]}, ... ]
+ * i.e. [{processInstanceId, serviceName, appName, processDefinitionId, eventType:[{attr1, attr2, ...}]}, ... ]
  *
  */
 public class GraphQLProcessEngineNotificationTransformer implements ProcessEngineNotificationTransformer {

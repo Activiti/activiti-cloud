@@ -19,8 +19,6 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 import java.util.Optional;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.events.TaskSuspendedEvent;
@@ -90,7 +88,11 @@ public class TaskSuspendedEventHandlerIT {
                                   "category",
                                   "process_definition_id",
                                   processInstanceId,
-                                  "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "1",
+                null,
+                null,
                                   "ASSIGNED",
                                   new Date() /*lastModified*/,
                                 new Date(), /*claimDate*/
@@ -100,8 +102,12 @@ public class TaskSuspendedEventHandlerIT {
                                                               "taskSuspended",
                                                               "10",
                                                               "process_definition_id",
-                new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                new Application(),
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle",
+                                                    "1",
+                                                    null,
+                                                    null,
                                                               processInstanceId,
                                                               eventTask);
         //when

@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.services.query.events;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.model.Task;
 
 public class TaskAssignedEvent extends AbstractProcessEngineEvent {
@@ -32,16 +30,24 @@ public class TaskAssignedEvent extends AbstractProcessEngineEvent {
                              String executionId,
                              String processDefinitionId,
                              String processInstanceId,
-                             Service service,
-                             Application application,
+                             String serviceName,
+                             String serviceFullName,
+                             String serviceType,
+                             String serviceVersion,
+                             String appName,
+                             String appVersion,
                              Task task) {
         super(timestamp,
               eventType,
               executionId,
               processDefinitionId,
               processInstanceId,
-              service,
-                application);
+              serviceName,
+                serviceFullName,
+                serviceType,
+                serviceVersion,
+                appName,
+                appVersion);
         this.task = task;
     }
 

@@ -20,8 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.events.VariableUpdatedEvent;
@@ -87,8 +85,12 @@ public class VariableUpdatedEventHandlerIT {
                                                               executionId,
                                                               "process_definition_id",
                                                               processInstanceId,
-                                                            new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                                                            new Application(),
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle",
+                                                    "1",
+                                                    null,
+                                                    null,
                                                               variableName,
                                                               "newValue",
                                                               variableType,
@@ -119,8 +121,12 @@ public class VariableUpdatedEventHandlerIT {
                                                               executionId,
                                                               "process_definition_id",
                                                               processInstanceId,
-                                                            new Service("runtime-bundle-a","runtime-bundle-a",null,null),
-                                                            new Application(),
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle",
+                                                    "1",
+                                                    null,
+                                                    null,
                                                               variableName,
                                                               "newValue",
                                                               variableType,
