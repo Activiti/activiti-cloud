@@ -67,7 +67,7 @@ public class ProcessEngineEventsController {
             throw new RuntimeException("Unable to find event for the given id:'" + eventId + "'");
         }
         ProcessEngineEventEntity processEngineEventEntity = findResult.get();
-        if (!securityPoliciesApplicationService.canRead(processEngineEventEntity.getProcessDefinitionId(),processEngineEventEntity.getApplicationName())){
+        if (!securityPoliciesApplicationService.canRead(processEngineEventEntity.getProcessDefinitionId(),processEngineEventEntity.getServiceName())){
             throw new RuntimeException("Operation not permitted for " + processEngineEventEntity.getProcessDefinitionId());
         }
         return eventResourceAssembler.toResource(processEngineEventEntity);

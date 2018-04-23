@@ -113,7 +113,7 @@ public class EventsEngineEventsAdminControllerIT {
     private TestProcessEngineEventDocument buildTestProcessEngineEventDocument(String id) {
         TestProcessEngineEventDocument eventEntity = new TestProcessEngineEventDocument();
         eventEntity.setId(id);
-        eventEntity.setApplicationName("rb-my-app");
+        eventEntity.setServiceName("rb-my-app");
         eventEntity.setEventType("ProcessStartedEvent");
         eventEntity.setProcessDefinitionId("1");
         eventEntity.setProcessInstanceId("10");

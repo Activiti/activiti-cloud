@@ -35,7 +35,7 @@ public class TestProcessEngineEventDocument extends ProcessEngineEventDocument{
     }
 
     @Override
-    public void setApplicationName(String applicationName) {
-        super.setApplicationName(applicationName);
+    public void setServiceName(String serviceName) {
+        super.setServiceName(serviceName);
     }
 }

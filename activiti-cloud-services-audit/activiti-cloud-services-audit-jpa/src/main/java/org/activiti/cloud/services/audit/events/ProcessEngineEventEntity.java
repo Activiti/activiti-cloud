@@ -73,7 +73,12 @@ public abstract class ProcessEngineEventEntity {
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
-    private String applicationName;
+    private String appName;
+    private String appVersion;
+    private String serviceName;
+    private String serviceFullName;
+    private String serviceType;
+    private String serviceVersion;
 
     public Long getTimestamp() {
         return timestamp;
@@ -99,9 +104,6 @@ public abstract class ProcessEngineEventEntity {
         return id;
     }
 
-    public String getApplicationName() {
-        return applicationName;
-    }
 
     @JsonIgnore
     public boolean isIgnored() {
@@ -132,7 +134,51 @@ public abstract class ProcessEngineEventEntity {
         this.processInstanceId = processInstanceId;
     }
 
-    protected void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public String getServiceFullName() {
+        return serviceFullName;
+    }
+
+    public void setServiceFullName(String serviceFullName) {
+        this.serviceFullName = serviceFullName;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public String getServiceVersion() {
+        return serviceVersion;
+    }
+
+    public void setServiceVersion(String serviceVersion) {
+        this.serviceVersion = serviceVersion;
     }
 }
