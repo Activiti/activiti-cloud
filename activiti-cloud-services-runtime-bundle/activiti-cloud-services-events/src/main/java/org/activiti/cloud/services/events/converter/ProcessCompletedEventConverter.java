@@ -19,8 +19,7 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
 import org.activiti.cloud.services.events.ProcessCompletedEventImpl;
-import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
-import org.activiti.cloud.services.events.builders.ServiceBuilderService;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
@@ -36,17 +35,20 @@ public class ProcessCompletedEventConverter extends AbstractEventConverter {
 
     @Autowired
     public ProcessCompletedEventConverter(ProcessInstanceConverter processInstanceConverter,
-                                          ServiceBuilderService serviceBuilderService,
-                                          ApplicationBuilderService applicationBuilderService) {
-        super(applicationBuilderService, serviceBuilderService);
+                                          RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
         this.processInstanceConverter = processInstanceConverter;
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new ProcessCompletedEventImpl(buildService(),
-                                             buildApplication(),
-                                             event.getExecutionId(),
+        return new ProcessCompletedEventImpl(getRuntimeBundleProperties().getAppName(),
+                                            getRuntimeBundleProperties().getAppVersion(),
+                                            getRuntimeBundleProperties().getServiceName(),
+                                            getRuntimeBundleProperties().getServiceFullName(),
+                                            getRuntimeBundleProperties().getServiceType(),
+                                            getRuntimeBundleProperties().getServiceVersion(),
+                                            event.getExecutionId(),
                                              event.getProcessDefinitionId(),
                                              event.getProcessInstanceId(),
                                              processInstanceConverter.from(((ExecutionEntityImpl) ((ActivitiEntityEvent) event).getEntity()).getProcessInstance()));

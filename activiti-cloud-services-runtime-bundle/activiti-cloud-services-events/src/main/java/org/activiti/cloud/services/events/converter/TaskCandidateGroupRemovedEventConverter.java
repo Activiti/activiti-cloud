@@ -3,8 +3,6 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.converter.TaskCandidateGroupConverter;
 import org.activiti.cloud.services.events.TaskCandidateGroupRemovedEventImpl;
-import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
-import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
@@ -21,16 +19,19 @@ public class TaskCandidateGroupRemovedEventConverter extends AbstractEventConver
 
     @Autowired
     public TaskCandidateGroupRemovedEventConverter(TaskCandidateGroupConverter identityLinkConverter,
-                                                   ServiceBuilderService serviceBuilderService,
-                                                   ApplicationBuilderService applicationBuilderService){
-        super(applicationBuilderService,serviceBuilderService);
+                                                   RuntimeBundleProperties runtimeBundleProperties){
+        super(runtimeBundleProperties);
         this.taskCandidateGroupConverter = identityLinkConverter;
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new TaskCandidateGroupRemovedEventImpl(buildService(),
-                buildApplication(),
+        return new TaskCandidateGroupRemovedEventImpl(getRuntimeBundleProperties().getAppName(),
+                getRuntimeBundleProperties().getAppVersion(),
+                getRuntimeBundleProperties().getServiceName(),
+                getRuntimeBundleProperties().getServiceFullName(),
+                getRuntimeBundleProperties().getServiceType(),
+                getRuntimeBundleProperties().getServiceVersion(),
                 event.getExecutionId(),
                 event.getProcessDefinitionId(),
                 event.getProcessInstanceId(),

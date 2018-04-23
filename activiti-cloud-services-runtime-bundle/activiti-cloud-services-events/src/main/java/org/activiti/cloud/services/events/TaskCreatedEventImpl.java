@@ -17,8 +17,8 @@
 
 package org.activiti.cloud.services.events;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
+
+
 import org.activiti.cloud.services.api.model.Task;
 
 public class TaskCreatedEventImpl extends AbstractProcessEngineEvent implements TaskCreatedEvent {
@@ -28,14 +28,14 @@ public class TaskCreatedEventImpl extends AbstractProcessEngineEvent implements 
     public TaskCreatedEventImpl() {
     }
 
-    public TaskCreatedEventImpl(Service service,
-                                Application application,
+    public TaskCreatedEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
+
                                 String executionId,
                                 String processDefinitionId,
                                 String processInstanceId,
                                 Task task) {
-        super(service,
-              application,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId);

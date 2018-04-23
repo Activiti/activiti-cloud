@@ -17,12 +17,11 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
+
+
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.events.TaskActivatedEvent;
-import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
-import org.activiti.cloud.services.events.builders.ServiceBuilderService;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiEntityEventImpl;
 import org.activiti.engine.task.Task;
@@ -46,10 +45,7 @@ public class TaskActivatedEventConverterTest {
     private TaskConverter taskConverter;
 
     @Mock
-    private ServiceBuilderService serviceBuilderService;
-
-    @Mock
-    private ApplicationBuilderService applicationBuilderService;
+    private RuntimeBundleProperties runtimeBundleProperties;
 
     @Before
     public void setUp() throws Exception {
@@ -71,8 +67,7 @@ public class TaskActivatedEventConverterTest {
         org.activiti.cloud.services.api.model.Task externalTask = mock(org.activiti.cloud.services.api.model.Task.class);
         given(taskConverter.from(internalTask)).willReturn(externalTask);
 
-        given(serviceBuilderService.buildService()).willReturn(new Service("myApp","myApp","runtime-bundle","1"));
-        given(applicationBuilderService.buildApplication()).willReturn(new Application());
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
 
 
         //when
@@ -83,7 +78,7 @@ public class TaskActivatedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getService().getFullName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((TaskActivatedEvent) pee).getTask()).isEqualTo(externalTask);
     }
 

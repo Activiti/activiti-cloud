@@ -1,12 +1,11 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
+
+
 import org.activiti.cloud.services.api.model.converter.TaskCandidateUserConverter;
 import org.activiti.cloud.services.events.TaskCandidateUserRemovedEvent;
-import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
-import org.activiti.cloud.services.events.builders.ServiceBuilderService;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiEntityEventImpl;
 import org.activiti.engine.task.IdentityLink;
@@ -31,10 +30,7 @@ public class TaskCandidateUserRemovedEventConverterTest {
     private TaskCandidateUserConverter taskCandidateUserConverter;
 
     @Mock
-    private ServiceBuilderService serviceBuilderService;
-
-    @Mock
-    private ApplicationBuilderService applicationBuilderService;
+    private RuntimeBundleProperties runtimeBundleProperties;
 
 
     @Before
@@ -57,9 +53,7 @@ public class TaskCandidateUserRemovedEventConverterTest {
         org.activiti.cloud.services.api.model.TaskCandidateUser externalTaskCandidateUser = mock(org.activiti.cloud.services.api.model.TaskCandidateUser.class);
         given(taskCandidateUserConverter.from(internalIdentityLink)).willReturn(externalTaskCandidateUser);
 
-        given(serviceBuilderService.buildService()).willReturn(new Service("myApp","myApp","runtime-bundle","1"));
-        given(applicationBuilderService.buildApplication()).willReturn(new Application());
-
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = taskCandidateUserRemovedEventConverter.from(activitiEvent);
@@ -69,7 +63,7 @@ public class TaskCandidateUserRemovedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getService().getFullName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((TaskCandidateUserRemovedEvent) pee).getTaskCandidateUser()).isEqualTo(externalTaskCandidateUser);
     }
 

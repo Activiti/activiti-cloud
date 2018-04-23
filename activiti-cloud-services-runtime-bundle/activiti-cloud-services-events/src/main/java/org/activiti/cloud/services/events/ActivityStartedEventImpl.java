@@ -17,8 +17,8 @@
 
 package org.activiti.cloud.services.events;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
+
+
 
 public class ActivityStartedEventImpl extends AbstractProcessEngineEvent implements ActivityStartedEvent {
 
@@ -29,16 +29,16 @@ public class ActivityStartedEventImpl extends AbstractProcessEngineEvent impleme
     public ActivityStartedEventImpl() {
     }
 
-    public ActivityStartedEventImpl(Service service,
-                                    Application application,
+    public ActivityStartedEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
+
                                     String executionId,
                                     String processDefinitionId,
                                     String processInstanceId,
                                     String activityId,
                                     String activityName,
                                     String activityType) {
-        super(service,
-              application,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId);

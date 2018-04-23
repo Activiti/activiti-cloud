@@ -19,8 +19,6 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.events.TaskCompletedEventImpl;
-import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
-import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.impl.ActivitiEntityEventImpl;
@@ -37,17 +35,20 @@ public class TaskCompletedEventConverter extends AbstractEventConverter {
 
     @Autowired
     public TaskCompletedEventConverter(TaskConverter taskConverter,
-                                       ServiceBuilderService serviceBuilderService,
-                                       ApplicationBuilderService applicationBuilderService) {
-        super(applicationBuilderService,serviceBuilderService);
+                                       RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
         this.taskConverter = taskConverter;
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new TaskCompletedEventImpl(buildService(),
-                                          buildApplication(),
-                                          event.getExecutionId(),
+        return new TaskCompletedEventImpl(getRuntimeBundleProperties().getAppName(),
+                                        getRuntimeBundleProperties().getAppVersion(),
+                                        getRuntimeBundleProperties().getServiceName(),
+                                        getRuntimeBundleProperties().getServiceFullName(),
+                                        getRuntimeBundleProperties().getServiceType(),
+                                        getRuntimeBundleProperties().getServiceVersion(),
+                                        event.getExecutionId(),
                                           event.getProcessDefinitionId(),
                                           event.getProcessInstanceId(),
                                           taskConverter.from((Task) ((ActivitiEntityEventImpl) event).getEntity()));

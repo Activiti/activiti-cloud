@@ -34,10 +34,10 @@ public class RuntimeBundleProperties {
     private String serviceVersion;
 
     @Value("${activiti.cloud.application.name:}")
-    private String activitiAppName;
+    private String appName;
 
     @Value("${activiti.cloud.application.version:}")
-    private String activitiAppVersion;
+    private String appVersion;
 
     private RuntimeBundleEventsProperties eventsProperties = new RuntimeBundleEventsProperties();
 
@@ -45,7 +45,7 @@ public class RuntimeBundleProperties {
         return rbSpringAppName;
     }
 
-    public String getFullyQualifiedServiceName(){
+    public String getServiceFullName(){
         //if we change this then we also have to change integration-result-stream.properties
         return rbSpringAppName;
     }
@@ -75,20 +75,20 @@ public class RuntimeBundleProperties {
         this.serviceVersion = serviceVersion;
     }
 
-    public String getActivitiAppName() {
-        return activitiAppName;
+    public String getAppName() {
+        return appName;
     }
 
-    public void setActivitiAppName(String activitiAppName) {
-        this.activitiAppName = activitiAppName;
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
-    public String getActivitiAppVersion() {
-        return activitiAppVersion;
+    public String getAppVersion() {
+        return appVersion;
     }
 
-    public void setActivitiAppVersion(String activitiAppVersion) {
-        this.activitiAppVersion = activitiAppVersion;
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
     }
 
     public RuntimeBundleEventsProperties getEventsProperties() {

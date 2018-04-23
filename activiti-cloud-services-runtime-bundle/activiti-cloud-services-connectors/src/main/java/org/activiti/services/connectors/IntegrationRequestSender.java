@@ -1,8 +1,6 @@
 package org.activiti.services.connectors;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
-import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.integration.IntegrationRequestSentEventImpl;
 import org.activiti.services.connectors.model.IntegrationRequestEvent;
@@ -18,19 +16,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class IntegrationRequestSender {
 
     protected static final String CONNECTOR_TYPE = "connectorType";
-    private final ApplicationBuilderService applicationBuilderService;
-    private final ServiceBuilderService serviceBuilderService;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final MessageChannel auditProducer;
     private final BinderAwareChannelResolver resolver;
 
-    public IntegrationRequestSender(ApplicationBuilderService applicationBuilderService,
-                                    ServiceBuilderService serviceBuilderService,
-                                    RuntimeBundleProperties runtimeBundleProperties,
+    public IntegrationRequestSender(RuntimeBundleProperties runtimeBundleProperties,
                                     MessageChannel auditProducer,
                                     BinderAwareChannelResolver resolver) {
-        this.applicationBuilderService = applicationBuilderService;
-        this.serviceBuilderService = serviceBuilderService;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.auditProducer = auditProducer;
         this.resolver = resolver;
@@ -45,8 +37,12 @@ public class IntegrationRequestSender {
 
     private void sendAuditEvent(IntegrationRequestEvent integrationRequestEvent) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            IntegrationRequestSentEventImpl event = new IntegrationRequestSentEventImpl(serviceBuilderService.buildService(),
-                                                                                        applicationBuilderService.buildApplication(),
+            IntegrationRequestSentEventImpl event = new IntegrationRequestSentEventImpl(runtimeBundleProperties.getAppName(),
+                                                                                        runtimeBundleProperties.getAppVersion(),
+                                                                                        runtimeBundleProperties.getServiceName(),
+                                                                                        runtimeBundleProperties.getServiceFullName(),
+                                                                                        runtimeBundleProperties.getServiceType(),
+                                                                                        runtimeBundleProperties.getServiceVersion(),
                                                                                         integrationRequestEvent.getExecutionId(),
                                                                                         integrationRequestEvent.getProcessDefinitionId(),
                                                                                         integrationRequestEvent.getProcessInstanceId(),

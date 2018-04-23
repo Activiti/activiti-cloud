@@ -17,8 +17,8 @@
 
 package org.activiti.cloud.services.events;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
+
+
 import org.activiti.cloud.services.api.model.Task;
 
 public class TaskSuspendedEventImpl extends AbstractProcessEngineEvent implements TaskSuspendedEvent {
@@ -28,14 +28,14 @@ public class TaskSuspendedEventImpl extends AbstractProcessEngineEvent implement
     public TaskSuspendedEventImpl() {
     }
 
-    public TaskSuspendedEventImpl(Service service,
-                                  Application application,
+    public TaskSuspendedEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
+
                                   String executionId,
                                   String processDefinitionId,
                                   String processInstanceId,
                                   Task task) {
-        super(service,
-              application,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId);
@@ -56,8 +56,12 @@ public class TaskSuspendedEventImpl extends AbstractProcessEngineEvent implement
     public String toString() {
         return "TaskSuspendedEventImpl{" +
                 "task=" + task +
-                ", service=" + getService() +
-                ", application=" + getApplication() +
+                ", appName='" + getAppName() + '\'' +
+                ", appVersion='" + getAppVersion() + '\'' +
+                ", serviceName='" + getServiceName() + '\'' +
+                ", serviceFullName='" + getServiceFullName() + '\'' +
+                ", serviceType='" + getServiceType() + '\'' +
+                ", serviceVersion='" + getServiceVersion() + '\'' +
                 ", executionId='" + getExecutionId() + '\'' +
                 ", processDefinitionId='" + getProcessDefinitionId() + '\'' +
                 ", processInstanceId='" + getProcessInstanceId() + '\'' +

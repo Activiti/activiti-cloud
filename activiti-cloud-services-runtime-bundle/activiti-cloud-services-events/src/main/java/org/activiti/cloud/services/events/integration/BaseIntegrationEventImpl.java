@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.services.events.integration;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
+
+
 import org.activiti.cloud.services.events.AbstractProcessEngineEvent;
 
 public abstract class BaseIntegrationEventImpl extends AbstractProcessEngineEvent implements IntegrationEvent {
@@ -29,15 +29,15 @@ public abstract class BaseIntegrationEventImpl extends AbstractProcessEngineEven
     public BaseIntegrationEventImpl() {
     }
 
-    public BaseIntegrationEventImpl(Service service,
-                                    Application application,
+    public BaseIntegrationEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
+
                                     String executionId,
                                     String processDefinitionId,
                                     String processInstanceId,
                                     String integrationContextId,
                                     String flowNodeId) {
-        super(service,
-              application,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId);

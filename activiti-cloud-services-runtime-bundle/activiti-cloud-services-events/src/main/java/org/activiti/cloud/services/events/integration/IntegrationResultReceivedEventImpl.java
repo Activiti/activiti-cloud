@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.services.events.integration;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
+
+
 
 public class IntegrationResultReceivedEventImpl extends BaseIntegrationEventImpl implements IntegrationResultReceivedEvent {
 
@@ -25,15 +25,15 @@ public class IntegrationResultReceivedEventImpl extends BaseIntegrationEventImpl
     public IntegrationResultReceivedEventImpl() {
     }
 
-    public IntegrationResultReceivedEventImpl(Service service,
-                                              Application application,
+    public IntegrationResultReceivedEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
+
                                               String executionId,
                                               String processDefinitionId,
                                               String processInstanceId,
                                               String integrationContextId,
                                               String flowNodeId) {
-        super(service,
-              application,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId,

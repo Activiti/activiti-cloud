@@ -19,8 +19,6 @@ package org.activiti.cloud.starters.test;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -31,8 +29,12 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
-    private Service service;
-    private Application application;
+    private String appName;
+    private String appVersion;
+    private String serviceName;
+    private String serviceFullName;
+    private String serviceType;
+    private String serviceVersion;
 
     public MockProcessEngineEvent() {
     }
@@ -41,7 +43,10 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
                                   String eventType) {
         this.timestamp = timestamp;
         this.eventType = eventType;
-        service = new Service("mock-app-name","mock-app-name","runtime-bundle","1");
+        this.serviceName = "mock-app-name";
+        this.serviceFullName = "mock-app-name";
+        this.serviceType = "runtime-bundle";
+        this.serviceVersion = "1";
     }
 
     public MockProcessEngineEvent(Long timestamp,
@@ -126,13 +131,33 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
     }
 
     @Override
-    public Service getService() {
-        return service;
+    public String getAppName() {
+        return appName;
     }
 
     @Override
-    public Application getApplication() {
-        return application;
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    @Override
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    @Override
+    public String getServiceFullName() {
+        return serviceFullName;
+    }
+
+    @Override
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    @Override
+    public String getServiceVersion() {
+        return serviceVersion;
     }
 
     public void setProcessInstanceId(String processInstanceId) {

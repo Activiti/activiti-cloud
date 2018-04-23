@@ -18,8 +18,6 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ProcessCancelledEventImpl;
-import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
-import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiCancelledEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
@@ -32,15 +30,19 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.PROCESS_CANCE
 public class ProcessCancelledEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public ProcessCancelledEventConverter(ApplicationBuilderService applicationBuilderService, ServiceBuilderService serviceBuilderService) {
-        super(applicationBuilderService, serviceBuilderService);
+    public ProcessCancelledEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new ProcessCancelledEventImpl(buildService(),
-                                             buildApplication(),
-                                             event.getExecutionId(),
+        return new ProcessCancelledEventImpl(getRuntimeBundleProperties().getAppName(),
+                                            getRuntimeBundleProperties().getAppVersion(),
+                                            getRuntimeBundleProperties().getServiceName(),
+                                            getRuntimeBundleProperties().getServiceFullName(),
+                                            getRuntimeBundleProperties().getServiceType(),
+                                            getRuntimeBundleProperties().getServiceVersion(),
+                                            event.getExecutionId(),
                                              event.getProcessDefinitionId(),
                                              event.getProcessInstanceId(),
                                              ((ActivitiCancelledEvent) event).getCause().toString());

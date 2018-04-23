@@ -3,8 +3,6 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.converter.TaskCandidateUserConverter;
 import org.activiti.cloud.services.events.TaskCandidateUserRemovedEventImpl;
-import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
-import org.activiti.cloud.services.events.builders.ServiceBuilderService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
@@ -21,16 +19,20 @@ public class TaskCandidateUserRemovedEventConverter extends AbstractEventConvert
 
     @Autowired
     public TaskCandidateUserRemovedEventConverter(TaskCandidateUserConverter identityLinkConverter,
-                                                  ServiceBuilderService serviceBuilderService, ApplicationBuilderService applicationBuilderService) {
-        super(applicationBuilderService,serviceBuilderService);
+                                                  RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
         this.taskCandidateUserConverter = identityLinkConverter;
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new TaskCandidateUserRemovedEventImpl(buildService(),
-                                                     buildApplication(),
-                                                     event.getExecutionId(),
+        return new TaskCandidateUserRemovedEventImpl(getRuntimeBundleProperties().getAppName(),
+                                                    getRuntimeBundleProperties().getAppVersion(),
+                                                    getRuntimeBundleProperties().getServiceName(),
+                                                    getRuntimeBundleProperties().getServiceFullName(),
+                                                    getRuntimeBundleProperties().getServiceType(),
+                                                    getRuntimeBundleProperties().getServiceVersion(),
+                                                    event.getExecutionId(),
                                                      event.getProcessDefinitionId(),
                                                      event.getProcessInstanceId(),
                                                      taskCandidateUserConverter.from((IdentityLink) ((ActivitiEntityEvent) event).getEntity()));

@@ -17,13 +17,12 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.api.model.Application;
+
 import org.activiti.cloud.services.api.model.ProcessInstance;
-import org.activiti.cloud.services.api.model.Service;
+
 import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
 import org.activiti.cloud.services.events.ProcessActivatedEvent;
-import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
-import org.activiti.cloud.services.events.builders.ServiceBuilderService;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
@@ -47,10 +46,7 @@ public class ProcessActivatedEventConverterTest {
     private ProcessInstanceConverter processInstanceConverter;
 
     @Mock
-    private ServiceBuilderService serviceBuilderService;
-
-    @Mock
-    private ApplicationBuilderService applicationBuilderService;
+    private RuntimeBundleProperties runtimeBundleProperties;
 
     @Before
     public void setUp() throws Exception {
@@ -71,8 +67,7 @@ public class ProcessActivatedEventConverterTest {
         given(activitiEvent.getEntity()).willReturn(executionEntity);
         given(executionEntity.getProcessInstance()).willReturn(internalProcessInstance);
 
-        given(serviceBuilderService.buildService()).willReturn(new Service("myApp","myApp","runtime-bundle","1"));
-        given(applicationBuilderService.buildApplication()).willReturn(new Application());
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
 
         ProcessInstance externalProcessInstance = mock(ProcessInstance.class);
         given(processInstanceConverter.from(internalProcessInstance)).willReturn(externalProcessInstance);
@@ -85,7 +80,7 @@ public class ProcessActivatedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getService().getFullName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((ProcessActivatedEvent) pee).getProcessInstance()).isEqualTo(externalProcessInstance);
     }
 

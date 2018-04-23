@@ -17,8 +17,8 @@
 
 package org.activiti.cloud.services.events;
 
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
+
+
 
 public class VariableUpdatedEventImpl extends AbstractProcessEngineEvent implements VariableUpdatedEvent {
 
@@ -30,8 +30,8 @@ public class VariableUpdatedEventImpl extends AbstractProcessEngineEvent impleme
     public VariableUpdatedEventImpl() {
     }
 
-    public VariableUpdatedEventImpl(Service service,
-                                    Application application,
+    public VariableUpdatedEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
+
                                     String executionId,
                                     String processDefinitionId,
                                     String processInstanceId,
@@ -39,8 +39,8 @@ public class VariableUpdatedEventImpl extends AbstractProcessEngineEvent impleme
                                     String variableValue,
                                     String variableType,
                                     String taskId) {
-        super(service,
-              application,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId);

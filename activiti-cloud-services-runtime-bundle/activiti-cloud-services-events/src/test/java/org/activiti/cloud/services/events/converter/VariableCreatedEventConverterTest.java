@@ -17,11 +17,10 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
+
+
 import org.activiti.cloud.services.events.VariableCreatedEvent;
-import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
-import org.activiti.cloud.services.events.builders.ServiceBuilderService;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiVariableEventImpl;
 import org.activiti.engine.impl.variable.StringType;
@@ -42,10 +41,7 @@ public class VariableCreatedEventConverterTest {
     private VariableCreatedEventConverter converter;
 
     @Mock
-    private ServiceBuilderService serviceBuilderService;
-
-    @Mock
-    private ApplicationBuilderService applicationBuilderService;
+    private RuntimeBundleProperties runtimeBundleProperties;
 
     @Before
     public void setUp() throws Exception {
@@ -55,8 +51,7 @@ public class VariableCreatedEventConverterTest {
     @Test
     public void internalVariableEventToExternalConvertion() throws Exception {
         //given
-        given(serviceBuilderService.buildService()).willReturn(new Service("myApp","myApp","runtime-bundle","1"));
-        given(applicationBuilderService.buildApplication()).willReturn(new Application());
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
 
         ActivitiVariableEventImpl activitiEvent = mock(ActivitiVariableEventImpl.class);
         given(activitiEvent.getType()).willReturn(ActivitiEventType.VARIABLE_CREATED);
@@ -75,7 +70,7 @@ public class VariableCreatedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getService().getFullName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((VariableCreatedEvent) pee).getTaskId()).isEqualTo("1");
         assertThat(((VariableCreatedEvent) pee).getVariableName()).isEqualTo("myVar");
         assertThat(((VariableCreatedEvent) pee).getVariableType()).isEqualTo("string");

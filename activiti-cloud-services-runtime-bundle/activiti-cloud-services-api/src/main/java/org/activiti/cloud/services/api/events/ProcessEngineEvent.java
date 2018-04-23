@@ -19,8 +19,6 @@ package org.activiti.cloud.services.api.events;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.activiti.cloud.services.api.model.Application;
-import org.activiti.cloud.services.api.model.Service;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -36,7 +34,16 @@ public interface ProcessEngineEvent {
 
     String getProcessInstanceId();
 
-    Service getService();
+    String getAppName();
 
-    Application getApplication();
+    String getAppVersion();
+
+    String getServiceName();
+
+    String getServiceFullName();
+
+    String getServiceType();
+
+    String getServiceVersion();
+
 }

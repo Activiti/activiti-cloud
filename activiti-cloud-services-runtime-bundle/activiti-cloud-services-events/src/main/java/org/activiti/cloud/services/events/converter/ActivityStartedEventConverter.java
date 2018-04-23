@@ -18,8 +18,7 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ActivityStartedEventImpl;
-import org.activiti.cloud.services.events.builders.ApplicationBuilderService;
-import org.activiti.cloud.services.events.builders.ServiceBuilderService;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.impl.ActivitiActivityEventImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,14 +30,18 @@ import static org.activiti.engine.delegate.event.ActivitiEventType.ACTIVITY_STAR
 public class ActivityStartedEventConverter extends AbstractEventConverter {
 
     @Autowired
-    public ActivityStartedEventConverter(ApplicationBuilderService applicationBuilderService, ServiceBuilderService serviceBuilderService) {
-        super(applicationBuilderService, serviceBuilderService);
+    public ActivityStartedEventConverter(RuntimeBundleProperties runtimeBundleProperties) {
+        super(runtimeBundleProperties);
     }
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new ActivityStartedEventImpl(buildService(),
-                                            buildApplication(),
+        return new ActivityStartedEventImpl(getRuntimeBundleProperties().getAppName(),
+                                            getRuntimeBundleProperties().getAppVersion(),
+                                            getRuntimeBundleProperties().getServiceName(),
+                                            getRuntimeBundleProperties().getServiceFullName(),
+                                            getRuntimeBundleProperties().getServiceType(),
+                                            getRuntimeBundleProperties().getServiceVersion(),
                                             event.getExecutionId(),
                                             event.getProcessDefinitionId(),
                                             event.getProcessInstanceId(),
