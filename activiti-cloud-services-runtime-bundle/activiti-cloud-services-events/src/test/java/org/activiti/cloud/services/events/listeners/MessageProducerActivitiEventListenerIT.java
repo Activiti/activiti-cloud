@@ -18,20 +18,25 @@ package org.activiti.cloud.services.events.listeners;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.cloud.services.events.ActivityCancelledEventImpl;
 import org.activiti.cloud.services.events.ActivityCompletedEventImpl;
 import org.activiti.cloud.services.events.ActivityStartedEventImpl;
+import org.activiti.cloud.services.events.ProcessCancelledEventImpl;
 import org.activiti.cloud.services.events.ProcessCompletedEventImpl;
 import org.activiti.cloud.services.events.ProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessStartedEventImpl;
 import org.activiti.cloud.services.events.SequenceFlowTakenEventImpl;
 import org.activiti.cloud.services.events.TaskAssignedEventImpl;
+import org.activiti.cloud.services.events.TaskCancelledEventImpl;
 import org.activiti.cloud.services.events.TaskCreatedEventImpl;
 import org.activiti.cloud.services.events.tests.util.MockMessageChannel;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -138,7 +143,61 @@ public class MessageProducerActivitiEventListenerIT {
         assertThat(events.length).isEqualTo(2);
         assertThat(events[0].getClass()).isEqualTo(TaskAssignedEventImpl.class);
         assertThat(events[1].getClass()).isEqualTo(TaskCreatedEventImpl.class);
+    }
 
+    /**
+     * Test that when deleting a process instance the process engine will fire
+     * activity cancelled event, task cancelled event and process cancelled event
+     */
+    @Test
+    public void testActivitiEventsDeleteProcessInstance() throws Exception {
+        //GIVEN
+        ProcessEngine processEngine = ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration()
+                .setDatabaseSchemaUpdate(ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_DROP_CREATE)
+                .buildProcessEngine();
+        deploy("SimpleUserTaskProcess",
+               processEngine);
+        processEngine.getRuntimeService().addEventListener(eventListener);
+
+        ProcessInstance processInstance =
+                processEngine.getRuntimeService().startProcessInstanceByKey("simpleUserTaskProcess");
+
+        //WHEN
+        processEngine.getRuntimeService().deleteProcessInstance(processInstance.getId(),
+                                                                "test");
+
+        //THEN
+        assertThat(Arrays.asList((ProcessEngineEvent[]) MockMessageChannel.messageResult.getPayload()))
+                .isNotNull()
+                .extracting("class")
+                .containsExactly(
+                        ActivityCancelledEventImpl.class,
+                        TaskCancelledEventImpl.class,
+                        ProcessCancelledEventImpl.class
+                );
+    }
+
+    /**
+     * Test that when deleting a task the process engine will fire a task cancelled event
+     */
+    @Test
+    public void executeListenerForTaskCancelled() {
+        //GIVEN
+        ProcessEngine processEngine = ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration()
+                .setDatabaseSchemaUpdate(ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_DROP_CREATE).buildProcessEngine();
+        processEngine.getRuntimeService().addEventListener(eventListener);
+
+        final Task newTask = processEngine.getTaskService().newTask();
+        processEngine.getTaskService().saveTask(newTask);
+
+        //WHEN
+        processEngine.getTaskService().deleteTask(newTask.getId(), "test");
+
+        //THEN
+        assertThat(Arrays.asList((ProcessEngineEvent[]) MockMessageChannel.messageResult.getPayload()))
+                .isNotNull()
+                .extracting("class")
+                .containsOnlyOnce(TaskCancelledEventImpl.class);
     }
 
     public static void deploy(final String processDefinitionKey, ProcessEngine processEngine) throws IOException {

@@ -25,6 +25,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.model.Task;
+import org.activiti.cloud.services.api.model.Task.TaskStatus;
 import org.activiti.cloud.services.api.model.converter.ListConverter;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.core.AuthenticationWrapper;
@@ -47,6 +48,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.activiti.cloud.services.api.model.Task.TaskStatus.CREATED;
+import static org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.mockito.BDDMockito.given;
@@ -56,6 +59,7 @@ import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.li
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -122,8 +126,7 @@ public class TaskControllerImplIT {
     }
 
     private Task buildDefaultTask() {
-        return buildTask(Task.TaskStatus.ASSIGNED,
-                         "user");
+        return buildTask(ASSIGNED, "user");
     }
 
     @Test
@@ -152,8 +155,7 @@ public class TaskControllerImplIT {
     @Test
     public void releaseTask() throws Exception {
 
-        given(processEngine.releaseTask(any())).willReturn(buildTask(Task.TaskStatus.CREATED,
-                                                                     null));
+        given(processEngine.releaseTask(any())).willReturn(buildTask(CREATED, null));
 
         this.mockMvc.perform(post("/v1/tasks/{taskId}/release",
                                   1))
@@ -162,7 +164,7 @@ public class TaskControllerImplIT {
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
 
-    private Task buildTask(Task.TaskStatus status,
+    private Task buildTask(TaskStatus status,
                            String assignee) {
         return new Task(UUID.randomUUID().toString(),
                         "user",
@@ -176,7 +178,7 @@ public class TaskControllerImplIT {
                         UUID.randomUUID().toString(),
                         UUID.randomUUID().toString(),
                         null,
-                        status.name());
+                        status);
     }
 
     @Test
@@ -186,6 +188,27 @@ public class TaskControllerImplIT {
                                   1))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/complete",
+                                pathParameters(parameterWithName("taskId").description("The task id"))));
+    }
+
+    @Test
+    public void deleteTask() throws Exception {
+
+        this.mockMvc.perform(delete("/v1/tasks/{taskId}",
+                                  1))
+                .andExpect(status().isOk())
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
+                                pathParameters(parameterWithName("taskId").description("The task id"))));
+    }
+
+    @Test
+    public void getTaskByIdTaskNotFound() throws Exception {
+        when(processEngine.getTaskById("not-existent-task")).thenReturn(null);
+
+        this.mockMvc.perform(get("/v1/tasks/{taskId}",
+                                 "not-existent-task"))
+                .andExpect(status().isNotFound())
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/get",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
 
@@ -215,7 +238,7 @@ public class TaskControllerImplIT {
                                         subsectionWithPath("name").description("The task name."),
                                         subsectionWithPath("description").description("Task description."),
                                         subsectionWithPath("priority").description("Task priority. Can have values between 0 and 100."),
-                                        subsectionWithPath("status").description("Task status (can be " + Arrays.asList(Task.TaskStatus.values()) + ")"),
+                                        subsectionWithPath("status").description("Task status (can be " + Arrays.asList(TaskStatus.values()) + ")"),
                                         subsectionWithPath("_links").ignored()
                                 )));
     }

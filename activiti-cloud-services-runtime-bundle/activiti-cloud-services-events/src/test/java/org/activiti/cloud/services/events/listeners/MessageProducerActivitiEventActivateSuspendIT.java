@@ -110,26 +110,6 @@ public class MessageProducerActivitiEventActivateSuspendIT {
         assertThat(events[1].getClass()).isEqualTo(TaskActivatedEventImpl.class);
     }
 
-    @Test
-    public void testActivitiEventsDeleteProcessInstance() throws Exception {
-        ProcessEngine processEngine = ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration()
-                .setDatabaseSchemaUpdate(ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_DROP_CREATE)
-                .buildProcessEngine();
-        deploy("SimpleUserTaskProcess",
-               processEngine);
-        processEngine.getRuntimeService().addEventListener(eventListener);
-
-        ProcessInstance processInstance =
-                processEngine.getRuntimeService().startProcessInstanceByKey("simpleUserTaskProcess");
-        processEngine.getRuntimeService().deleteProcessInstance(processInstance.getId(),
-                                                                "test");
-
-        ProcessEngineEvent[] events = (ProcessEngineEvent[]) MockMessageChannel.messageResult.getPayload();
-        assertThat(events.length).isEqualTo(2);
-        assertThat(events[0]).isInstanceOf(ActivityCancelledEventImpl.class);
-        assertThat(events[1]).isInstanceOf(ProcessCancelledEventImpl.class);
-    }
-
     public static void deploy(final String processDefinitionKey,
                               ProcessEngine processEngine) throws IOException {
         try (InputStream is = ClassLoader.getSystemResourceAsStream("processes/" + processDefinitionKey + ".bpmn")) {

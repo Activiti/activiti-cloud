@@ -40,6 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
@@ -125,6 +126,6 @@ public class ProcessInstanceTasksControllerImplIT {
                         UUID.randomUUID().toString(),
                         UUID.randomUUID().toString(),
                         null,
-                        Task.TaskStatus.ASSIGNED.name());
+                        ASSIGNED);
     }
 }

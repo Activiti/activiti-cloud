@@ -200,6 +200,26 @@ public class ProcessEngineWrapper {
                                       setTaskVariablesCmd.getVariables());
     }
 
+    /**
+     * Delete task by id.
+     * @param taskId the task id to delete
+     */
+    public void deleteTask(String taskId) {
+        Task task = getTaskById(taskId);
+        if (task == null) {
+            throw new ActivitiObjectNotFoundException("Unable to find task for the given id: " + taskId);
+        }
+
+        checkWritePermissionsOnTask(task);
+
+        taskService.deleteTask(taskId,
+                               "Cancelled by " + authenticationWrapper.getAuthenticatedUserId());
+    }
+
+    public void checkWritePermissionsOnTask(Task task) {
+        //TODO: to check the user write permissions on task
+    }
+
     public Task createNewTask(CreateTaskCmd createTaskCmd) {
         final org.activiti.engine.task.Task task = taskService.newTask();
         task.setName(createTaskCmd.getName());

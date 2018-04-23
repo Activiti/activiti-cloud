@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class Task {
 
     public enum TaskStatus {
-                            CREATED, ASSIGNED, SUSPENDED
+        CREATED, ASSIGNED, SUSPENDED, CANCELLED
     }
 
     private String id;
@@ -40,7 +40,7 @@ public class Task {
     private String processDefinitionId;
     private String processInstanceId;
     private String parentTaskId;
-    private String status;
+    private TaskStatus status;
 
     public Task() {
     }
@@ -57,7 +57,7 @@ public class Task {
                 String processDefinitionId,
                 String processInstanceId,
                 String parentTaskId,
-                String status) {
+                TaskStatus status) {
         this.id = id;
         this.owner = owner;
         this.assignee = assignee;
@@ -125,7 +125,7 @@ public class Task {
         return processInstanceId;
     }
 
-    public String getStatus() {
+    public TaskStatus getStatus() {
         return status;
     }
 

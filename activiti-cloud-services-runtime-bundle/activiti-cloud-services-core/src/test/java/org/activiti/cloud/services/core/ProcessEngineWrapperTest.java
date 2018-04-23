@@ -34,6 +34,7 @@ import org.mockito.Mock;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -225,5 +226,51 @@ public class ProcessEngineWrapperTest {
         assertThatExceptionOfType(ActivitiForbiddenException.class).isThrownBy(
                 () -> processEngineWrapper.deleteProcessInstance(processInstance.getProcessInstanceId())
         ).withMessageStartingWith("Operation not permitted");
+    }
+
+    /**
+     * Test that delete task method on process engine wrapper
+     * will trigger delete task method on process engine
+     * if the task exists.
+     */
+    @Test
+    public void testDeleteTask(){
+        //GIVEN
+        TaskQuery query = mock(TaskQuery.class);
+        when(query.taskId(eq("taskId"))).thenReturn(query);
+        when(taskService.createTaskQuery()).thenReturn(query);
+        Task task = mock(Task.class);
+        when(query.singleResult()).thenReturn(task);
+
+        org.activiti.cloud.services.api.model.Task modelTask = mock(org.activiti.cloud.services.api.model.Task.class);
+        modelTask.setId("taskId");
+
+        when(taskConverter.from(task)).thenReturn(modelTask);
+
+        //WHEN
+        processEngineWrapper.deleteTask("taskId");
+
+        //THEN
+        verify(taskService).deleteTask(eq("taskId"), startsWith("Cancelled by"));
+    }
+
+    /**
+     * Test that delete task method on process engine wrapper
+     * will throw ActivitiObjectNotFoundException
+     * if the task doesn't exist.
+     */
+    @Test
+    public void testDeleteTaskForNotExistingTask() {
+        //GIVEN
+        TaskQuery query = mock(TaskQuery.class);
+        when(query.taskId(eq("not-existent-task"))).thenReturn(query);
+        when(taskService.createTaskQuery()).thenReturn(query);
+        when(query.singleResult()).thenReturn(null);
+
+        //THEN
+        assertThatExceptionOfType(ActivitiObjectNotFoundException.class).isThrownBy(
+                //WHEN
+                () -> processEngineWrapper.deleteTask("not-existent-task")
+        ).withMessage("Unable to find task for the given id: not-existent-task");
     }
 }

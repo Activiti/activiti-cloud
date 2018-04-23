@@ -34,6 +34,9 @@ public interface TaskController {
     ResponseEntity<Void> completeTask(@PathVariable String taskId,
                                       @RequestBody(required = false) CompleteTaskCmd completeTaskCmd);
 
+    @RequestMapping(value = "/{taskId}", method = RequestMethod.DELETE)
+    void deleteTask(@PathVariable String taskId);
+
     @RequestMapping(method = RequestMethod.POST)
     Resource<Task> createNewTask(@RequestBody CreateTaskCmd createTaskCmd);
 }

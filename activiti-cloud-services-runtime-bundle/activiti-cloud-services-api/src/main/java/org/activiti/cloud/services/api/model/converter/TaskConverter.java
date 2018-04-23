@@ -17,9 +17,16 @@ package org.activiti.cloud.services.api.model.converter;
 
 import java.util.List;
 
+import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.activiti.cloud.services.api.model.Task.TaskStatus;
+
+import static org.activiti.cloud.services.api.model.Task.TaskStatus.CREATED;
+import static org.activiti.cloud.services.api.model.Task.TaskStatus.SUSPENDED;
+import static org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED;
+import static org.activiti.cloud.services.api.model.Task.TaskStatus.CANCELLED;
 
 @Component
 public class TaskConverter implements ModelConverter<Task, org.activiti.cloud.services.api.model.Task> {
@@ -52,13 +59,16 @@ public class TaskConverter implements ModelConverter<Task, org.activiti.cloud.se
         return task;
     }
 
-    private String calculateStatus(Task source) {
-        if (source.isSuspended()) {
-            return org.activiti.cloud.services.api.model.Task.TaskStatus.SUSPENDED.name();
+    private TaskStatus calculateStatus(Task source) {
+        if (source instanceof TaskEntity &&
+                (((TaskEntity) source).isDeleted() || ((TaskEntity) source).isCanceled())) {
+            return CANCELLED;
+        } else if (source.isSuspended()) {
+            return SUSPENDED;
         } else if (source.getAssignee() != null && !source.getAssignee().isEmpty()) {
-            return org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED.name();
+            return ASSIGNED;
         }
-        return org.activiti.cloud.services.api.model.Task.TaskStatus.CREATED.name();
+        return CREATED;
     }
 
     @Override
