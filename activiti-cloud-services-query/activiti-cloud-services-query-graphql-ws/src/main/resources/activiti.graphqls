@@ -11,7 +11,7 @@ type Query {
 }
 
 type Subscription {
-    ProcessEngineNotification(serviceName : String, serviceFullName : String, serviceVersion : String, appName : String, appVersion : String, processDefinitionId : String, processInstanceId: String) : ProcessEngineNotification
+    ProcessEngineNotification(serviceName : String, appName : String, processDefinitionId : String, processInstanceId: String) : ProcessEngineNotification
 }
 
 type ProcessEngineNotification {

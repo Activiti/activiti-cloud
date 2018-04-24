@@ -34,7 +34,7 @@ public class GraphQLProcessEngineNotificationTransformerTest {
 
     private static Logger LOGGER = LoggerFactory.getLogger(GraphQLProcessEngineNotificationTransformerTest.class);
 
-    private static String engineEventAttributeKeys = "serviceName,serviceFullName,serviceVersion,appName,appVersion,processInstanceId,processDefinitionId";
+    private static String engineEventAttributeKeys = "serviceName,appName,processInstanceId,processDefinitionId";
     private static String eventTypeKey = "eventType";
 
     ProcessEngineNotificationTransformer subject = new GraphQLProcessEngineNotificationTransformer(
@@ -51,8 +51,6 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             {
                 put("serviceName","rb");
                 put("appName","app");
-                put("serviceFullName","app-rb");
-                put("serviceVersion","0.1");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type1");
@@ -64,8 +62,6 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             {
                 put("serviceName","rb");
                 put("appName","app");
-                put("serviceFullName","app-rb");
-                put("serviceVersion","0.1");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type2");
@@ -77,8 +73,6 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             {
                 put("serviceName","rb");
                 put("appName","app");
-                put("serviceFullName","app-rb");
-                put("serviceVersion","0.1");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type2");
@@ -90,8 +84,6 @@ public class GraphQLProcessEngineNotificationTransformerTest {
             {
                 put("serviceName","rb1");
                 put("appName","app");
-                put("serviceFullName","app-rb");
-                put("serviceVersion","0.1");
                 put("processInstanceId","p1");
                 put("processDefinitionId","pd1");
                 put("eventType","type1");
@@ -110,15 +102,13 @@ public class GraphQLProcessEngineNotificationTransformerTest {
 
         assertThat(notifications.get(0).get("serviceName")).isEqualTo("rb");
         assertThat(notifications.get(0).keySet())
-                .containsOnly("processInstanceId","serviceName","appName","processDefinitionId","type1","type2","serviceVersion","serviceFullName");
+                .containsOnly("processInstanceId","serviceName","appName","processDefinitionId","type1","type2");
         assertThat(notifications.get(0).get("type2")).asList().hasSize(2);
-        assertThat(notifications.get(0).get("serviceVersion")).isEqualTo("0.1");
-        assertThat(notifications.get(0).get("serviceFullName")).isEqualTo("app-rb");
 
 
         assertThat(notifications.get(1).get("serviceName")).isEqualTo("rb1");
         assertThat(notifications.get(1).keySet())
-                .containsOnly("processInstanceId","serviceName","appName","processDefinitionId","type1","serviceVersion","serviceFullName");
+                .containsOnly("processInstanceId","serviceName","appName","processDefinitionId","type1");
         assertThat(notifications.get(1).get("type1")).asList().hasSize(1);
 
     }

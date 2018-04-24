@@ -31,16 +31,13 @@ public class SpELRoutingKeyTest {
         ProcessEngineNotification notification = new GraphQLProcessEngineNotification();
 
         notification.put("serviceName", "my-rb");
-        notification.put("serviceFullName","app-my-rb");
-        notification.put("serviceVersion","0.2");
         notification.put("appName","app");
-        notification.put("appVersion","0.1");
         notification.put("processDefinitionId", "1:2");
         notification.put("processInstanceId", 12);
 
         String routingKey = routingKeyResolver.resolveRoutingKey(notification);
 
-        assertThat(routingKey).isEqualTo("ProcessEngineNotification.my-rb.app-my-rb.0.2.0.1app.1:2.12");
+        assertThat(routingKey).isEqualTo("ProcessEngineNotification.my-rb.app-my-rb.1:2.12");
 
     }
 

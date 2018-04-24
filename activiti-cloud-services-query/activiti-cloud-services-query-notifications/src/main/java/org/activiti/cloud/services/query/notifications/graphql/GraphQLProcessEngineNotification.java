@@ -17,7 +17,7 @@ package org.activiti.cloud.services.query.notifications.graphql;
 
 import org.activiti.cloud.services.query.notifications.model.ProcessEngineNotification;
 
-@SpELTemplateRoutingKey("ProcessEngineNotification.#{['serviceName']}.#{['serviceFullName']}.#{['serviceVersion']}.#{['appName']}.#{['appVersion']}.#{['processDefinitionId']}.#{['processInstanceId']}")
+@SpELTemplateRoutingKey("ProcessEngineNotification.#{['serviceName']}.#{['appName']}.#{['processDefinitionId']}.#{['processInstanceId']}")
 public class GraphQLProcessEngineNotification extends ProcessEngineNotification {
 
     /**

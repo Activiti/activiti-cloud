@@ -33,7 +33,7 @@ public class ActivitiNotificationsGatewayProperties {
      * Customizes common process engine event attributes using comma separator
      */
     @NotBlank
-    private String processEngineEventAttributeKeys = "serviceName,serviceFullName,serviceVersion,appName,appVersion,processDefinitionId,processInstanceId";
+    private String processEngineEventAttributeKeys = "serviceName,appName,processDefinitionId,processInstanceId";
 
     /**
      * Customizes eventType key attribute name
