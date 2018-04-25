@@ -188,4 +188,23 @@ public class RestrictProcessInstanceQueryIT {
         Iterable<ProcessInstance> iterable = processInstanceRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isFalse();
     }
+
+
+    @Test
+    public void shouldGetProcessInstancesWhenMatchesFullServiceName() throws Exception {
+        ProcessInstance processInstance = new ProcessInstance();
+        processInstance.setId("21");
+        processInstance.setName("name");
+        processInstance.setDescription("desc");
+        processInstance.setInitiator("initiator");
+        processInstance.setProcessDefinitionKey("defKey2");
+        processInstance.setServiceFullName("test-cmd-endpoint");
+        processInstanceRepository.save(processInstance);
+
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
+
+        Predicate predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(null, SecurityPolicy.READ);
+        Iterable<ProcessInstance> iterable = processInstanceRepository.findAll(predicate);
+        assertThat(iterable.iterator().hasNext()).isTrue();
+    }
 }
