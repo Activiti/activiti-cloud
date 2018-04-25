@@ -79,7 +79,7 @@ public class SecurityPoliciesApplicationService {
         //expect to remove hyphens when passing in environment variables
         BooleanExpression appNamePredicate = Expressions.stringTemplate("replace({0},'-','')", qProcessEngineEventEntity.serviceName).equalsIgnoreCase(appName.replace("-",""));
 
-        BooleanExpression nextExpression = appNamePredicate;
+        BooleanExpression nextExpression = appNamePredicate.or(Expressions.stringTemplate("replace({0},'-','')", qProcessEngineEventEntity.serviceFullName).equalsIgnoreCase(appName.replace("-","")));
         //will filter by app name and will also filter by definition keys if no wildcard
         if(!defKeys.contains(securityPoliciesService.getWildcard())){
             nextExpression = restrictByAppNameAndProcDefKeys(qProcessEngineEventEntity, defKeys, appNamePredicate);
