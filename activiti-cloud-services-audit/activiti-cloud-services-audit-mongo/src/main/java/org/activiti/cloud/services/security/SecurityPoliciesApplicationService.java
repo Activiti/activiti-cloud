@@ -9,6 +9,7 @@ import org.activiti.engine.UserRoleLookupProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -138,7 +139,15 @@ public class SecurityPoliciesApplicationService {
             return true;
         }
 
-        Set<String> keys = definitionKeysAllowedForPolicy(securityPolicy).get(appName);
+        Set<String> keys = new HashSet();
+        Map<String, Set<String>> policiesMap = definitionKeysAllowedForPolicy(securityPolicy);
+        if(policiesMap.get(appName) !=null) {
+            keys.addAll(policiesMap.get(appName));
+        }
+        //also factor for case sensitivity and hyphens (which are stripped when specified through env var)
+        if(policiesMap.get(appName.replaceAll("-","").toLowerCase()) != null){
+            keys.addAll(policiesMap.get(appName.replaceAll("-","").toLowerCase()));
+        }
 
         return (keys != null && (anEntryInSetStartsId(keys,processDefId) || keys.contains(securityPoliciesService.getWildcard())));
     }
