@@ -59,7 +59,8 @@ public class SecurityPoliciesApplicationService {
             //or if we don't know our own appName (just being defensive) then include everything
             //ignore hyphens and case due to values getting set via env vars
             if((runtimeBundleProperties==null || runtimeBundleProperties.getServiceName()==null) ||
-                    (appName!=null && appName.replace("-","").equalsIgnoreCase(runtimeBundleProperties.getServiceName().replace("-","")))) {
+                    (appName!=null && appName.replace("-","").equalsIgnoreCase(runtimeBundleProperties.getServiceName().replace("-","")))
+                    || (runtimeBundleProperties.getServiceFullName()!=null &&appName!=null && appName.replace("-","").equalsIgnoreCase(runtimeBundleProperties.getServiceFullName().replace("-","")))) {
                 keys.addAll(restrictions.get(appName));
             }
         }
