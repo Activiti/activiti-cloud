@@ -60,6 +60,8 @@ public class QuerySteps {
         ProcessInstance processInstance = getProcessInstance(processInstanceId);
         assertThat(processInstance).isNotNull();
         assertThat(processInstance.getStatus()).isEqualTo(expectedStatus);
+        assertThat(processInstance.getServiceName()).isNotEmpty();
+        assertThat(processInstance.getServiceFullName()).isNotEmpty();
     }
 
     @Step
