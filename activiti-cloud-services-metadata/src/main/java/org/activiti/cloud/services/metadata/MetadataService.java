@@ -30,13 +30,17 @@ public class MetadataService {
         Iterator<String> applicationIterator =  metadataProperties.getApplication().keySet().iterator();
         while(applicationIterator.hasNext()){
             String key = applicationIterator.next();
-            metadata.put(getKeyAsMetaData(key,applicationPrefix),metadataProperties.getApplication().get(key));
+            if(metadataProperties.getApplication().get(key)!=null) {
+                metadata.put(getKeyAsMetaData(key, applicationPrefix), metadataProperties.getApplication().get(key));
+            }
         }
 
         Iterator<String> serviceIterator = metadataProperties.getService().keySet().iterator();
         while(serviceIterator.hasNext()){
             String key = serviceIterator.next();
-            metadata.put(getKeyAsMetaData(key,servicePrefix),metadataProperties.getApplication().get(key));
+            if(metadataProperties.getService().get(key)!=null) {
+                metadata.put(getKeyAsMetaData(key, servicePrefix), metadataProperties.getService().get(key));
+            }
         }
         return metadata;
     }
