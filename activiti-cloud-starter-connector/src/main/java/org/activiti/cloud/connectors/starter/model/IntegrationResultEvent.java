@@ -34,16 +34,40 @@ public class IntegrationResultEvent {
 
     private Map<String, Object> variables;
 
+    private String serviceName;
+
+    private String serviceFullName;
+
+    private String serviceType;
+
+    private String serviceVersion;
+
+    private String appName;
+
+    private String appVersion;
+
     //used by json deserialization
     public IntegrationResultEvent() {
         this.id = UUID.randomUUID().toString();
     }
 
     public IntegrationResultEvent(String executionId,
-                                  Map<String, Object> variables) {
+                                  Map<String, Object> variables,
+                                  String serviceName,
+                                  String serviceFullName,
+                                  String serviceType,
+                                  String serviceVersion,
+                                  String appName,
+                                  String appVersion) {
         this();
         this.executionId = executionId;
         this.variables = variables;
+        this.serviceName = serviceName;
+        this.serviceFullName = serviceFullName;
+        this.serviceType = serviceType;
+        this.serviceVersion = serviceVersion;
+        this.appName = appName;
+        this.appVersion = appVersion;
     }
 
     public String getId() {
@@ -82,10 +106,64 @@ public class IntegrationResultEvent {
         this.targetApplication = targetApplication;
     }
 
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public String getServiceFullName() {
+        return serviceFullName;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public String getServiceVersion() {
+        return serviceVersion;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public void setServiceFullName(String serviceFullName) {
+        this.serviceFullName = serviceFullName;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public void setServiceVersion(String serviceVersion) {
+        this.serviceVersion = serviceVersion;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
+    }
+
     @Override
     public String toString() {
         return "IntegrationResultEvent{" +
                 "id='" + id + '\'' +
+                ", serviceName="+serviceName+ '\'' +
+                ", serviceFullName="+serviceFullName+ '\'' +
+                ", serviceType="+serviceType+ '\'' +
+                ", serviceVersion="+serviceVersion+ '\'' +
+                ", appName="+appName+ '\'' +
+                ", appVersion="+appVersion+ '\'' +
                 ", executionId='" + executionId + '\'' +
                 ", variables=" + variables +
                 '}';

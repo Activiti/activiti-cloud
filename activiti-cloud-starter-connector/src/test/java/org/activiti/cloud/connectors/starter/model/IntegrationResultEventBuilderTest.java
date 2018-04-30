@@ -30,7 +30,7 @@ public class IntegrationResultEventBuilderTest {
     private static final String PROC_DEF_ID = "procDefId";
     private static final String EXEC_ID = "execId";
     private static final String FLOW_NODE_ID = "flowNodeId";
-    private static final String APP_NAME = "appName";
+    private static final String RB_NAME = "appName";
     private static final String VAR = "var";
     private static final String VALUE = "value";
 
@@ -40,9 +40,14 @@ public class IntegrationResultEventBuilderTest {
         IntegrationRequestEvent integrationRequestEvent = new IntegrationRequestEvent(PROC_INST_ID,
                                                                                       PROC_DEF_ID,
                                                                                       EXEC_ID,
-                                                                                      Collections.emptyMap());
+                                                                                      Collections.emptyMap(),
+                RB_NAME,
+                RB_NAME,
+                                                                                        "runtime-bundle",
+                                                                                        "1",
+                                                                                        null,
+                                                                                        null);
         integrationRequestEvent.setFlowNodeId(FLOW_NODE_ID);
-        integrationRequestEvent.setApplicationName(APP_NAME);
 
         //when
         IntegrationResultEvent resultEvent = IntegrationResultEventBuilder
@@ -55,7 +60,7 @@ public class IntegrationResultEventBuilderTest {
         assertThat(resultEvent)
                 .hasExecutionId(EXEC_ID)
                 .hasFlowNodeId(FLOW_NODE_ID)
-                .hasTargetApplication(APP_NAME)
+                .hasTargetApplication(RB_NAME)
                 .hasVariables(Collections.singletonMap(VAR,
                                                        VALUE));
     }
@@ -66,9 +71,13 @@ public class IntegrationResultEventBuilderTest {
         IntegrationRequestEvent integrationRequestEvent = new IntegrationRequestEvent(PROC_INST_ID,
                                                                                       PROC_DEF_ID,
                                                                                       EXEC_ID,
-                                                                                      Collections.emptyMap());
-        integrationRequestEvent.setApplicationName(APP_NAME);
-
+                                                                                      Collections.emptyMap(),
+                RB_NAME,
+                RB_NAME,
+                                                                                    "runtime-bundle",
+                                                                                    "1",
+                                                                                    null,
+                                                                                    null);
         //when
         Message<IntegrationResultEvent> message = IntegrationResultEventBuilder
                 .resultFor(integrationRequestEvent)
@@ -76,6 +85,6 @@ public class IntegrationResultEventBuilderTest {
 
         //then
         Assertions.assertThat(message.getHeaders()).containsEntry("targetApplication",
-                                                                  APP_NAME);
+                RB_NAME);
     }
 }

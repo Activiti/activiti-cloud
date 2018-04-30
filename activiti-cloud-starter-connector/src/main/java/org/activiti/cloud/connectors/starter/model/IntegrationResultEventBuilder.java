@@ -23,9 +23,10 @@ import org.springframework.messaging.support.MessageBuilder;
 
 public class IntegrationResultEventBuilder {
 
-    private final IntegrationRequestEvent requestEvent;
+    private IntegrationRequestEvent requestEvent;
 
     private IntegrationResultEvent integrationResultEvent;
+
 
     private IntegrationResultEventBuilder(IntegrationRequestEvent requestEvent) {
         this.requestEvent = requestEvent;
@@ -36,7 +37,7 @@ public class IntegrationResultEventBuilder {
         return new IntegrationResultEventBuilder(requestEvent)
                 .withExecutionId(requestEvent.getExecutionId())
                 .withFlowNodeId(requestEvent.getFlowNodeId())
-                .withTargetApplication(requestEvent.getApplicationName());
+                .withTargetApplication(requestEvent.getServiceFullName());
     }
 
     private IntegrationResultEventBuilder withExecutionId(String executionId) {
@@ -69,6 +70,6 @@ public class IntegrationResultEventBuilder {
 
     public MessageBuilder<IntegrationResultEvent> getMessageBuilder() {
         return MessageBuilder.withPayload(integrationResultEvent).setHeader("targetApplication",
-                                                                            requestEvent.getApplicationName());
+                                                                            requestEvent.getServiceFullName());
     }
 }

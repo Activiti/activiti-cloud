@@ -75,7 +75,9 @@ public class ActivitiCloudConnectorServiceIT {
         IntegrationRequestEvent ire = new IntegrationRequestEvent(PROCESS_INSTANCE_ID,
                                                                   PROCESS_DEFINITION_ID,
                                                                   EXECUTION_ID,
-                                                                  variables);
+                                                                  variables,
+                "mock-rb","mock-rb","runtime-bundle","1",
+                null,null);
 
         Message<IntegrationRequestEvent> message = MessageBuilder.withPayload(ire)
                 .setHeader("type",

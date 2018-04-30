@@ -35,7 +35,17 @@ public class IntegrationRequestEvent {
 
     private String flowNodeId;
 
-    private String applicationName;
+    private String serviceName;
+
+    private String serviceFullName;
+
+    private String serviceType;
+
+    private String serviceVersion;
+
+    private String appName;
+
+    private String appVersion;
 
     private String connectorType;
 
@@ -49,12 +59,24 @@ public class IntegrationRequestEvent {
     public IntegrationRequestEvent(String processInstanceId,
                                    String processDefinitionId,
                                    String executionId,
-                                   Map<String, Object> variables) {
+                                   Map<String, Object> variables,
+                                   String serviceName,
+                                   String serviceFullName,
+                                   String serviceType,
+                                   String serviceVersion,
+                                   String appName,
+                                   String appVersion) {
         this();
         this.processInstanceId = processInstanceId;
         this.processDefinitionId = processDefinitionId;
         this.executionId = executionId;
         this.variables = variables;
+        this.serviceName = serviceName;
+        this.serviceFullName = serviceFullName;
+        this.serviceType = serviceType;
+        this.serviceVersion = serviceVersion;
+        this.appName = appName;
+        this.appVersion = appVersion;
     }
 
     public String getId() {
@@ -85,13 +107,31 @@ public class IntegrationRequestEvent {
         this.flowNodeId = flowNodeId;
     }
 
-    public String getApplicationName() {
-        return applicationName;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    protected void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
+    public String getServiceFullName() {
+        return serviceFullName;
     }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public String getServiceVersion() {
+        return serviceVersion;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+
 
     public String getConnectorType() {
         return connectorType;
@@ -101,6 +141,12 @@ public class IntegrationRequestEvent {
     public String toString() {
         return "IntegrationRequestEvent{" +
                 "processInstanceId='" + processInstanceId + '\'' +
+                ", serviceName="+serviceName+ '\'' +
+                ", serviceFullName="+serviceFullName+ '\'' +
+                ", serviceType="+serviceType+ '\'' +
+                ", serviceVersion="+serviceVersion+ '\'' +
+                ", appName="+appName+ '\'' +
+                ", appVersion="+appVersion+ '\'' +
                 ", processDefinitionId='" + processDefinitionId + '\'' +
                 ", executionId='" + executionId + '\'' +
                 ", variables=" + variables +

@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.connectors.starter.channels;
 
+import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultEvent;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +42,9 @@ public class IntegrationResultSenderImplTest {
     @Mock
     private MessageChannel messageChannel;
 
+    @Mock
+    private ConnectorProperties connectorProperties;
+
 
     @Before
     public void setUp() throws Exception {
@@ -51,6 +55,7 @@ public class IntegrationResultSenderImplTest {
     public void sendShouldSendMessageBasedOnTheTargetApplication() throws Exception {
         //given
         given(resolver.resolveDestination("integrationResult:myApp")).willReturn(messageChannel);
+        given(connectorProperties.getServiceName()).willReturn("myApp");
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent();
         integrationResultEvent.setTargetApplication("myApp");
