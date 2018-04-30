@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
+import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
+import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
@@ -32,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -131,6 +134,36 @@ public class ProcessInstanceRestTemplate {
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<ProcessInstance>() {
+                });
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+
+    public ResponseEntity<Void> setVariables(String processId, Map<String, Object> variables) {
+        SetProcessVariablesCmd processVariablesCmd = new SetProcessVariablesCmd(processId, variables);
+
+        HttpEntity<SetProcessVariablesCmd> requestEntity = new HttpEntity<>(
+                processVariablesCmd,
+                null);
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processId + "/variables/",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<Void>() {
+                });
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+
+    public ResponseEntity<Void> removeVariables(String processId, List<String> variableNames) {
+        RemoveProcessVariablesCmd processVariablesCmd = new RemoveProcessVariablesCmd(processId, variableNames);
+
+        HttpEntity<RemoveProcessVariablesCmd> requestEntity = new HttpEntity<>(
+                processVariablesCmd,
+                null);
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processId + "/variables/",
+                HttpMethod.DELETE,
+                requestEntity,
+                new ParameterizedTypeReference<Void>() {
                 });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;

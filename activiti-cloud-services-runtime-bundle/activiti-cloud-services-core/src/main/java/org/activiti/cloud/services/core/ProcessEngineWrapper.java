@@ -7,6 +7,8 @@ import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
+import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
+import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
@@ -198,6 +200,19 @@ public class ProcessEngineWrapper {
     public void setTaskVariablesLocal(SetTaskVariablesCmd setTaskVariablesCmd) {
         taskService.setVariablesLocal(setTaskVariablesCmd.getTaskId(),
                                       setTaskVariablesCmd.getVariables());
+    }
+
+    public void setProcessVariables(SetProcessVariablesCmd setProcessVariablesCmd) {
+        ProcessInstance processInstance = getProcessInstanceById(setProcessVariablesCmd.getProcessId());
+        verifyCanWriteToProcessInstance(processInstance.getId());
+        runtimeService.setVariables(setProcessVariablesCmd.getProcessId(),
+        setProcessVariablesCmd.getVariables());
+    }
+
+    public void removeProcessVariables(RemoveProcessVariablesCmd removeProcessVariablesCmd){
+        ProcessInstance processInstance = getProcessInstanceById(removeProcessVariablesCmd.getProcessId());
+        verifyCanWriteToProcessInstance(processInstance.getId());
+        runtimeService.removeVariables(removeProcessVariablesCmd.getProcessId(),removeProcessVariablesCmd.getVariableNames());
     }
 
     /**

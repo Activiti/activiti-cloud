@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
@@ -32,6 +34,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +42,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
@@ -63,6 +68,8 @@ public class ProcessVariablesIT {
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
     private static final String SIMPLE_PROCESS_WITH_VARIABLES = "ProcessWithVariables";
+
+    private ObjectMapper mapper;
 
     @Before
     public void setUp() throws Exception {
@@ -113,6 +120,78 @@ public class ProcessVariablesIT {
             }
         }
         return false;
+    }
+
+    @Test
+    public void shouldDeleteProcessVariables() throws Exception {
+        //given
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("firstName",
+                "Peter");
+        variables.put("lastName",
+                "Silver");
+        variables.put("age",
+                19);
+        ResponseEntity<ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
+                variables);
+
+        List<String> variablesNames = new ArrayList<>();
+        variablesNames.addAll(variables.keySet());
+
+        HttpEntity<RemoveProcessVariablesCmd> entity = new HttpEntity<>(new RemoveProcessVariablesCmd(startResponse.getBody().getId(),variablesNames));
+
+        //when
+        ResponseEntity<Resource<Map<String, Object>>> variablesResponse = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startResponse.getBody().getId() + "/variables",
+                HttpMethod.DELETE,
+                entity,
+                new ParameterizedTypeReference<Resource<Map<String, Object>>>() {
+                });
+
+        //then
+        assertThat(variablesResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+
+    @Test
+    public void shouldUpdateProcessVariables() throws Exception {
+        //given
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("firstName",
+                "Peter");
+        variables.put("lastName",
+                "Silver");
+        variables.put("age",
+                19);
+        ResponseEntity<ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
+                variables);
+
+        variables.put("firstName",
+                "Kermit");
+        variables.put("lastName",
+                "Frog");
+        variables.put("age",
+                100);
+
+        //when
+        processInstanceRestTemplate.setVariables(startResponse.getBody().getId(), variables);
+
+
+        await().untilAsserted(() -> {
+
+
+            // when
+        ResponseEntity<Resources<ProcessInstanceVariable>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
+
+        // then
+        Collection<ProcessInstanceVariable> variableCollection = variablesResponse.getBody().getContent();
+
+        assertThat(variableCollection).isNotEmpty();
+        assertThat(variablesContainEntry("firstName","Kermit",variableCollection)).isTrue();
+        assertThat(variablesContainEntry("lastName","Frog",variableCollection)).isTrue();
+        assertThat(variablesContainEntry("age",100,variableCollection)).isTrue();
+
+        });
+
     }
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {

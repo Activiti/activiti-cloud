@@ -161,6 +161,20 @@ include::{snippets}/process-instance-variables/list/http-request.adoc[]
 .Response
 include::{snippets}/process-instance-variables/list/http-response.adoc[]
 
+=== Save/Update variables for a process instance
+.Request
+include::{snippets}/process-instance-variables/upsert/http-request.adoc[]
+
+.Response
+include::{snippets}/process-instance-variables/upsert/http-response.adoc[]
+
+=== Delete variables for a process instance
+.Request
+include::{snippets}/process-instance-variables/delete/http-request.adoc[]
+
+.Response
+include::{snippets}/process-instance-variables/delete/http-response.adoc[]
+
 === Task
 
 ==== List tasks
