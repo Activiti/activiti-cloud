@@ -19,9 +19,9 @@ public class TaskVariablesResourceAssemblerTest {
 
         TaskVariableResource resource = resourceAssembler.toResource(model);
 
-        Link selfResourceLink = resource.getLink("self");
+        Link globalVariablesLink = resource.getLink("globalVariables");
 
-        assertThat(selfResourceLink).isNotNull();
-        assertThat(selfResourceLink.getHref()).contains("my-identifier");
+        assertThat(globalVariablesLink).isNotNull();
+        assertThat(globalVariablesLink.getHref()).contains("my-identifier");
     }
 }

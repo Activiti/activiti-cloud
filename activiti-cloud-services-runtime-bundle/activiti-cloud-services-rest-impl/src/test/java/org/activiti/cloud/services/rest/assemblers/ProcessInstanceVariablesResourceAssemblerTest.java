@@ -19,9 +19,9 @@ public class ProcessInstanceVariablesResourceAssemblerTest {
 
         ProcessVariableResource resource = resourceAssembler.toResource(model);
 
-        Link selfResourceLink = resource.getLink("self");
+        Link processVariablesLink = resource.getLink("processVariables");
 
-        assertThat(selfResourceLink).isNotNull();
-        assertThat(selfResourceLink.getHref()).contains("my-identifier");
+        assertThat(processVariablesLink).isNotNull();
+        assertThat(processVariablesLink.getHref()).contains("my-identifier");
     }
 }

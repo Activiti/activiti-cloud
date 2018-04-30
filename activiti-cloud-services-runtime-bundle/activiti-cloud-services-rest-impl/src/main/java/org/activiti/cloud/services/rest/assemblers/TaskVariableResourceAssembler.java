@@ -22,14 +22,10 @@ public class TaskVariableResourceAssembler extends ResourceAssemblerSupport<Task
 
     @Override
     public TaskVariableResource toResource(TaskVariable taskVariable) {
-        Link selfRel;
-        if (TaskVariable.TaskVariableScope.GLOBAL.equals(taskVariable.getScope())) {
-            selfRel = linkTo(methodOn(TaskVariableControllerImpl.class).getVariables(taskVariable.getTaskId())).withSelfRel();
-        } else {
-            selfRel = linkTo(methodOn(TaskVariableControllerImpl.class).getVariablesLocal(taskVariable.getTaskId())).withSelfRel();
-        }
+        Link globalVariables = linkTo(methodOn(TaskVariableControllerImpl.class).getVariables(taskVariable.getTaskId())).withRel("globalVariables");
+        Link localVariables = linkTo(methodOn(TaskVariableControllerImpl.class).getVariablesLocal(taskVariable.getTaskId())).withRel("localVariables");
         Link taskRel = linkTo(methodOn(TaskControllerImpl.class).getTaskById(taskVariable.getTaskId())).withRel("task");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
-        return new TaskVariableResource(taskVariable,selfRel,taskRel,homeLink);
+        return new TaskVariableResource(taskVariable,globalVariables,localVariables,taskRel,homeLink);
     }
 }
