@@ -1,33 +1,22 @@
 package org.activiti.cloud.services.core;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.security.SecurityPoliciesService;
 import org.activiti.cloud.services.security.SecurityPolicy;
-import org.activiti.engine.UserGroupLookupProxy;
-import org.activiti.engine.UserRoleLookupProxy;
 import org.activiti.engine.query.Query;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.activiti.cloud.services.security.BaseSecurityPoliciesApplicationService;
 
 @Component
-public class SecurityPoliciesApplicationService {
+public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesApplicationService {
 
-
-    @Autowired(required = false)
-    private UserGroupLookupProxy userGroupLookupProxy;
-
-    @Autowired(required = false)
-    private UserRoleLookupProxy userRoleLookupProxy;
-
-    @Autowired
-    private AuthenticationWrapper authenticationWrapper;
 
     @Autowired
     private SecurityPoliciesService securityPoliciesService;
@@ -44,10 +33,6 @@ public class SecurityPoliciesApplicationService {
     public ProcessDefinitionQuery restrictProcessDefQuery(ProcessDefinitionQuery query, SecurityPolicy securityPolicy){
 
         return restrictQuery(query, processDefinitionRestrictionApplier, securityPolicy);
-    }
-
-    private boolean noSecurityPoliciesOrNoUser() {
-        return !securityPoliciesService.policiesDefined() || authenticationWrapper.getAuthenticatedUserId()== null;
     }
 
     private Set<String> definitionKeysAllowedForRBPolicy(SecurityPolicy securityPolicy) {
@@ -67,16 +52,6 @@ public class SecurityPoliciesApplicationService {
         return keys;
     }
 
-    private Map<String, Set<String>> definitionKeysAllowedForPolicy(SecurityPolicy securityPolicy) {
-        List<String> groups = null;
-
-        if(userGroupLookupProxy!=null && authenticationWrapper.getAuthenticatedUserId()!=null){
-            groups = userGroupLookupProxy.getGroupsForCandidateUser(authenticationWrapper.getAuthenticatedUserId());
-        }
-
-        return securityPoliciesService.getProcessDefinitionKeys(authenticationWrapper.getAuthenticatedUserId(),
-                groups, securityPolicy);
-    }
 
     public ProcessInstanceQuery restrictProcessInstQuery(ProcessInstanceQuery query, SecurityPolicy securityPolicy){
         return restrictQuery(query, processInstanceRestrictionApplier, securityPolicy);
@@ -107,26 +82,12 @@ public class SecurityPoliciesApplicationService {
     }
 
     public boolean canWrite(String processDefId){
-        return hasPermission(processDefId, SecurityPolicy.WRITE);
+        return hasPermission(processDefId, SecurityPolicy.WRITE,runtimeBundleProperties.getName());
     }
 
     public boolean canRead(String processDefId){
-        return hasPermission(processDefId, SecurityPolicy.READ);
+        return hasPermission(processDefId, SecurityPolicy.READ,runtimeBundleProperties.getName());
     }
 
-    private boolean hasPermission(String processDefId, SecurityPolicy securityPolicy){
-
-        if (!securityPoliciesService.policiesDefined() || userGroupLookupProxy == null || authenticationWrapper.getAuthenticatedUserId() == null){
-            return true;
-        }
-
-        if(userRoleLookupProxy != null && userRoleLookupProxy.isAdmin(authenticationWrapper.getAuthenticatedUserId())){
-            return true;
-        }
-
-        Set<String> keys = definitionKeysAllowedForRBPolicy(securityPolicy);
-
-        return (keys != null && (keys.contains(processDefId) || keys.contains(securityPoliciesService.getWildcard()) ));
-    }
 
 }

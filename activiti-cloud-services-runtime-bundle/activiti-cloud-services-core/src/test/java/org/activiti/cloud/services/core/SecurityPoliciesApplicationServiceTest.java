@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.core.AuthenticationWrapper;
 import org.activiti.cloud.services.security.SecurityPoliciesService;
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.engine.UserGroupLookupProxy;
@@ -189,6 +190,7 @@ public class SecurityPoliciesApplicationServiceTest {
         map.put("rb1", Collections.singleton("key"));
         when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.WRITE)).thenReturn(map);
         when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.READ)).thenReturn(map);
+        when(runtimeBundleProperties.getName()).thenReturn("rb1");
 
         assertThat(securityPoliciesApplicationService.canWrite("key")).isTrue();
         assertThat(securityPoliciesApplicationService.canRead("key")).isTrue();
@@ -208,6 +210,7 @@ public class SecurityPoliciesApplicationServiceTest {
         map.put("rb1",Collections.singleton(securityPoliciesService.getWildcard()));
         when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.WRITE)).thenReturn(map);
         when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.READ)).thenReturn(map);
+        when(runtimeBundleProperties.getName()).thenReturn("rb1");
 
         assertThat(securityPoliciesApplicationService.canWrite("key")).isTrue();
         assertThat(securityPoliciesApplicationService.canRead("key")).isTrue();
