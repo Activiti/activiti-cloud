@@ -17,12 +17,17 @@
 package org.activiti.cloud.connectors.starter.channels;
 
 import org.activiti.cloud.connectors.starter.model.IntegrationResultEvent;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
+
 @Component
 public class IntegrationResultSenderImpl implements IntegrationResultSender {
+
+    @Value("${ACT_INT_RES_CONSUMER:}")
+    private String resultDestinationOverride;
 
     private final BinderAwareChannelResolver resolver;
 
@@ -33,7 +38,10 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
     @Override
     public void send(Message<IntegrationResultEvent> message) {
 
-        resolver.resolveDestination("integrationResult:" + message.getPayload().getTargetApplication()).send(message);
+        String destination = (resultDestinationOverride == null || resultDestinationOverride.isEmpty())
+                                ? "integrationResult:" + message.getPayload().getTargetApplication() : resultDestinationOverride;
+
+        resolver.resolveDestination(destination).send(message);
 
     }
 
