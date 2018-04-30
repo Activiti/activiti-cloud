@@ -114,7 +114,7 @@ public class ProcessInstanceController {
                                                                 "Unable to find task for the given id:'" + processInstanceId + "'");
 
         if (!securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionKey(),
-                                                        processInstance.getApplicationName())) {
+                                                        processInstance.getServiceName())) {
             LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processInstance.getProcessDefinitionKey());
             throw new ActivitiForbiddenException("Operation not permitted for " + processInstance.getProcessDefinitionKey());
         }

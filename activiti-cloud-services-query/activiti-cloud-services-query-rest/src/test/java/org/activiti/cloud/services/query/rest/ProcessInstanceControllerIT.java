@@ -115,7 +115,7 @@ public class ProcessInstanceControllerIT {
 
 
     private ProcessInstance buildDefaultProcessInstance() {
-        return new ProcessInstance("My-app",
+        return new ProcessInstance("My-app","My-app","1",null,null,
                                    UUID.randomUUID().toString(),
                                    UUID.randomUUID().toString(),
                                    org.activiti.cloud.services.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name(),
@@ -127,7 +127,7 @@ public class ProcessInstanceControllerIT {
         //given
         ProcessInstance processInstance = buildDefaultProcessInstance();
         given(entityFinder.findById(eq(processInstanceRepository), eq(processInstance.getId()), any())).willReturn(processInstance);
-        given(securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionKey(), processInstance.getApplicationName()))
+        given(securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionKey(), processInstance.getServiceName()))
                 .willReturn(true);
 
         //when

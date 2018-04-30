@@ -15,14 +15,24 @@ public class TaskCandidateUserRemovedEvent extends AbstractProcessEngineEvent  {
                                          String executionId,
                                          String processDefinitionId,
                                          String processInstanceId,
-                                         String applicationName,
+                                         String serviceName,
+                                         String serviceFullName,
+                                         String serviceType,
+                                         String serviceVersion,
+                                         String appName,
+                                         String appVersion,
                                          TaskCandidateUser taskCandidateUser) {
         super(timestamp,
                 eventType,
                 executionId,
                 processDefinitionId,
                 processInstanceId,
-                applicationName);
+                serviceName,
+                serviceFullName,
+                serviceType,
+                serviceVersion,
+                appName,
+                appVersion);
         this.taskCandidateUser = taskCandidateUser;
     }
 

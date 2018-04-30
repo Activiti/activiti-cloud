@@ -36,11 +36,13 @@ public class ProcessEngineNotificationStompRelayDataFetcherDestinationResolver i
 		if(environment.getArguments().size() > 0) {
 
     		Optional<String> processInstanceId = resolveArgument(environment, "processInstanceId");
-            Optional<String> applicationName = resolveArgument(environment, "applicationName");
-            Optional<String> processDefinitionId = resolveArgument(environment, "processDefinitionId");
+            Optional<String> serviceName = resolveArgument(environment, "serviceName");
+			Optional<String> appName = resolveArgument(environment, "appName");
+			Optional<String> processDefinitionId = resolveArgument(environment, "processDefinitionId");
 
             destination = Stream.<Optional<String>>builder()
-                .add(applicationName)
+                .add(serviceName)
+                .add(appName)
                 .add(processDefinitionId)
                 .add(processInstanceId)
                 .build()

@@ -63,7 +63,12 @@ public class ProcessCreatedEventHandlerTest {
                                                             "10",
                                                             "100",
                                                             "200",
-                                                            "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle",
+                "1",
+                null,
+                null,
                                                             currentProcessInstance);
 
 
@@ -77,7 +82,7 @@ public class ProcessCreatedEventHandlerTest {
         Assertions.assertThat(processInstance)
                 .hasId("200")
                 .hasProcessDefinitionId("100")
-                .hasApplicationName("runtime-bundle-a")
+                .hasServiceName("runtime-bundle-a")
                 .hasProcessDefinitionKey("mykey")
                 .hasStatus("CREATED");
     }

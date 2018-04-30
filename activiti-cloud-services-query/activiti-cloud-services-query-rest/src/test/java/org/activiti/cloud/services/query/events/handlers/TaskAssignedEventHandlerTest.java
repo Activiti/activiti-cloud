@@ -71,7 +71,12 @@ public class TaskAssignedEventHandlerTest {
                                              "10",
                                              "100",
                                              "200",
-                                             "runtime-bundle-a",
+                                    "runtime-bundle-a",
+                                    "runtime-bundle-a",
+                                    "runtime-bundle",
+                                    "1",
+                                    null,
+                                    null,
                                              task));
 
         //then
@@ -99,7 +104,12 @@ public class TaskAssignedEventHandlerTest {
                                              "10",
                                              "100",
                                              "200",
-                                             "runtime-bundle-a",
+                                        "runtime-bundle-a",
+                                        "runtime-bundle-a",
+                                        "runtime-bundle",
+                                        "1",
+                                        null,
+                                        null,
                                              task));
     }
 

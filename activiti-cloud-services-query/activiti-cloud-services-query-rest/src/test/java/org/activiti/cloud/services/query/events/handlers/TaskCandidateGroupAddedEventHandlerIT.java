@@ -76,7 +76,12 @@ public class TaskCandidateGroupAddedEventHandlerIT {
                                                                                         null,
                                                                                         null,
                                                                                         null,
-                                                                                        "runtime-bundle-a",
+                                                                                "runtime-bundle-a",
+                                                                                "runtime-bundle-a",
+                                                                                "runtime-bundle",
+                                                                                "1",
+                                                                                null,
+                                                                                null,
                                                                                         eventTaskCandidateGroup);
 
         //when
