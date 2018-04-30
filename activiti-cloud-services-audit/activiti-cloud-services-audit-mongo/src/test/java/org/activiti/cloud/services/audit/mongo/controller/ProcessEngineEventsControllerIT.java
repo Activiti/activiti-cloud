@@ -118,7 +118,7 @@ public class ProcessEngineEventsControllerIT {
     private TestProcessEngineEventDocument buildTestProcessEngineEventDocument(String id) {
         TestProcessEngineEventDocument eventEntity = new TestProcessEngineEventDocument();
         eventEntity.setId(id);
-        eventEntity.setApplicationName("rb-my-app");
+        eventEntity.setServiceName("rb-my-app");
         eventEntity.setEventType("ProcessStartedEvent");
         eventEntity.setProcessDefinitionId("1");
         eventEntity.setProcessInstanceId("10");
@@ -225,7 +225,7 @@ public class ProcessEngineEventsControllerIT {
                                         subsectionWithPath("executionId").description("The execution id"),
                                         subsectionWithPath("processDefinitionId").description("The process definition id"),
                                         subsectionWithPath("processInstanceId").description("The process instance id"),
-                                        subsectionWithPath("applicationName").description("The application name")
+                                        subsectionWithPath("serviceName").description("The service name")
                                 )));
     }
 
@@ -253,7 +253,7 @@ public class ProcessEngineEventsControllerIT {
                                 subsectionWithPath("entry.executionId").description("The execution id"),
                                 subsectionWithPath("entry.processDefinitionId").description("The process definition id"),
                                 subsectionWithPath("entry.processInstanceId").description("The process instance id"),
-                                subsectionWithPath("entry.applicationName").description("The application name")
+                                subsectionWithPath("entry.serviceName").description("The service name")
                         )));
     }
 

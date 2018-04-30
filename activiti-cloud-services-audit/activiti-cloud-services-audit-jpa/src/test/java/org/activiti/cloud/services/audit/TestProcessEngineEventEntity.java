@@ -35,7 +35,7 @@ public class TestProcessEngineEventEntity extends ProcessEngineEventEntity{
     }
 
     @Override
-    public void setApplicationName(String applicationName) {
-        super.setApplicationName(applicationName);
+    public void setServiceName(String applicationName) {
+        super.setServiceName(applicationName);
     }
 }

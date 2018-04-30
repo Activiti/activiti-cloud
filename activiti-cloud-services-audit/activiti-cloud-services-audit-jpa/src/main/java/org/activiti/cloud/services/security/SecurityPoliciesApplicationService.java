@@ -1,5 +1,6 @@
 package org.activiti.cloud.services.security;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,9 +78,9 @@ public class SecurityPoliciesApplicationService {
                                                                   Set<String> defKeys) {
 
         //expect to remove hyphens when passing in environment variables
-        BooleanExpression appNamePredicate = Expressions.stringTemplate("replace({0},'-','')", qProcessEngineEventEntity.applicationName).equalsIgnoreCase(appName.replace("-",""));
+        BooleanExpression appNamePredicate = Expressions.stringTemplate("replace({0},'-','')", qProcessEngineEventEntity.serviceName).equalsIgnoreCase(appName.replace("-",""));
 
-        BooleanExpression nextExpression = appNamePredicate;
+        BooleanExpression nextExpression = appNamePredicate.or(Expressions.stringTemplate("replace({0},'-','')", qProcessEngineEventEntity.serviceFullName).equalsIgnoreCase(appName.replace("-","")));
         //will filter by app name and will also filter by definition keys if no wildcard
         if(!defKeys.contains(securityPoliciesService.getWildcard())){
             nextExpression = restrictByAppNameAndProcDefKeys(qProcessEngineEventEntity, defKeys, appNamePredicate);
@@ -138,7 +139,15 @@ public class SecurityPoliciesApplicationService {
             return true;
         }
 
-        Set<String> keys = definitionKeysAllowedForPolicy(securityPolicy).get(appName);
+        Set<String> keys = new HashSet();
+        Map<String, Set<String>> policiesMap = definitionKeysAllowedForPolicy(securityPolicy);
+        if(policiesMap.get(appName) !=null) {
+            keys.addAll(policiesMap.get(appName));
+        }
+        //also factor for case sensitivity and hyphens (which are stripped when specified through env var)
+        if(policiesMap.get(appName.replaceAll("-","").toLowerCase()) != null){
+            keys.addAll(policiesMap.get(appName.replaceAll("-","").toLowerCase()));
+        }
 
         return (keys != null && (anEntryInSetStartsId(keys,processDefId) || keys.contains(securityPoliciesService.getWildcard())));
     }
