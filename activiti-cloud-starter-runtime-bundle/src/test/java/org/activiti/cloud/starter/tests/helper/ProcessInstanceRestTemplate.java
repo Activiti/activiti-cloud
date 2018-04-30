@@ -18,12 +18,14 @@ package org.activiti.cloud.starter.tests.helper;
 
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
 import org.activiti.cloud.services.api.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -111,12 +113,12 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Resource<Map<String, Object>>> getVariables(ResponseEntity<ProcessInstance> processInstanceEntity) {
+    public ResponseEntity<Resources<ProcessInstanceVariable>> getVariables(ResponseEntity<ProcessInstance> processInstanceEntity) {
 
-        ResponseEntity<Resource<Map<String, Object>>> responseEntity = testRestTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/variables",
+        ResponseEntity<Resources<ProcessInstanceVariable>> responseEntity = testRestTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/variables",
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<Resource<Map<String, Object>>>() {
+                new ParameterizedTypeReference<Resources<ProcessInstanceVariable>>() {
                 });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;

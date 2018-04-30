@@ -19,6 +19,7 @@ package org.activiti.cloud.starter.tests.runtime;
 import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
 import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -31,6 +32,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -39,12 +41,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -111,9 +115,14 @@ public class SignalIT {
         ResponseEntity<PagedResources<Task>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
         assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
 
-        ResponseEntity<Resource<Map<String, Object>>> variablesEntity = processInstanceRestTemplate.getVariables(startProcessEntity);
-        assertThat(variablesEntity.getBody().getContent()).containsEntry("myVar",
-                "myContent");
+        await().untilAsserted(() -> {
+            ResponseEntity<Resources<ProcessInstanceVariable>> variablesEntity = processInstanceRestTemplate.getVariables(startProcessEntity);
+            Collection<ProcessInstanceVariable> variableCollection = variablesEntity.getBody().getContent();
+            ProcessInstanceVariable variable = variableCollection.iterator().next();
+            assertThat(variable.getName()).isEqualToIgnoringCase("myVar");
+            assertThat(variable.getValue()).isEqualTo("myContent");
+        });
+
     }
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {

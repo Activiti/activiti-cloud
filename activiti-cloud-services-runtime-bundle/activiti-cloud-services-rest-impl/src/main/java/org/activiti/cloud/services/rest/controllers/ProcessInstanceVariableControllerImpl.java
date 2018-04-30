@@ -15,15 +15,20 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
-import org.activiti.cloud.services.api.model.ProcessInstanceVariables;
-import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariablesResourceAssembler;
+import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
+import org.activiti.cloud.services.rest.api.resources.ProcessVariableResource;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
 import org.activiti.engine.RuntimeService;
 
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
+import org.activiti.engine.impl.persistence.entity.VariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,19 +39,43 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVariableController {
 
     private final RuntimeService runtimeService;
-    private final ProcessInstanceVariablesResourceAssembler variableResourceBuilder;
+    private final ProcessInstanceVariableResourceAssembler variableResourceBuilder;
 
     @Autowired
     public ProcessInstanceVariableControllerImpl(RuntimeService runtimeService,
-                                                 ProcessInstanceVariablesResourceAssembler variableResourceBuilder) {
+                                                 ProcessInstanceVariableResourceAssembler variableResourceBuilder) {
         this.runtimeService = runtimeService;
         this.variableResourceBuilder = variableResourceBuilder;
     }
 
     @Override
-    public Resource<Map<String, Object>> getVariables(@PathVariable String processInstanceId) {
-        Map<String, Object> variables = runtimeService.getVariables(processInstanceId);
-        return variableResourceBuilder.toResource(new ProcessInstanceVariables(processInstanceId,
-                                                                               variables));
+    public Resources<ProcessVariableResource> getVariables(@PathVariable String processInstanceId) {
+        List<VariableInstance> variableInstances = runtimeService.getVariableInstancesByExecutionIds(Collections.singleton(processInstanceId));
+
+        List<ProcessVariableResource> resourcesList = new ArrayList<>();
+        for(VariableInstance variableInstance:variableInstances){
+            resourcesList.add(variableResourceBuilder.toResource(new ProcessInstanceVariable(
+                    variableInstance.getProcessInstanceId(),variableInstance.getName(),variableInstance.getTypeName(),variableInstance.getValue(),variableInstance.getExecutionId())));
+        }
+
+        Resources<ProcessVariableResource> resources = new Resources<>(resourcesList);
+        return resources;
+    }
+
+    @Override
+    public Resources<ProcessVariableResource> getVariablesLocal(@PathVariable String processInstanceId) {
+        Map<String,VariableInstance> variableInstancesMap = runtimeService.getVariableInstancesLocal(processInstanceId);
+        List<VariableInstance> variableInstances = new ArrayList<>();
+        if(variableInstancesMap!=null){
+            variableInstances.addAll(variableInstancesMap.values());
+        }
+        List<ProcessVariableResource> resourcesList = new ArrayList<>();
+        for(VariableInstance variableInstance:variableInstances){
+            resourcesList.add(variableResourceBuilder.toResource(new ProcessInstanceVariable(
+                    variableInstance.getProcessInstanceId(),variableInstance.getName(),variableInstance.getTypeName(),variableInstance.getValue(),variableInstance.getExecutionId())));
+        }
+
+        Resources<ProcessVariableResource> resources = new Resources<>(resourcesList);
+        return resources;
     }
 }

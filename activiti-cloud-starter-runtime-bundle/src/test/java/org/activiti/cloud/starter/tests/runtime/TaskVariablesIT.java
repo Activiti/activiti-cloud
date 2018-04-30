@@ -19,6 +19,7 @@ package org.activiti.cloud.starter.tests.runtime;
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.api.model.Task;
+import org.activiti.cloud.services.api.model.TaskVariable;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 
@@ -32,6 +33,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +41,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,25 +95,20 @@ public class TaskVariablesIT {
         taskRestTemplate.setVariablesLocal(taskId, taskVariables);
 
         //when
-        ResponseEntity<Resource<Map<String, Object>>> variablesResponse = taskRestTemplate.getVariablesLocal(taskId);
+        ResponseEntity<Resources<TaskVariable>> variablesResponse = taskRestTemplate.getVariablesLocal(taskId);
 
         //then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesResponse.getBody().getContent())
-                                                            .containsEntry("var2",
-                                                                           "test2")
-                                                            .doesNotContainKey("var1");
+        assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesDoNotContainKeys(variablesResponse.getBody().getContent(),"var1")).isTrue();
 
         // when
         variablesResponse = taskRestTemplate.getVariables(taskId);
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesResponse.getBody().getContent())
-                                                            .containsEntry("var2",
-                                                                           "test2")
-                                                            .containsEntry("var1",
-                                                                           "test1");
+        assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
 
         // give
         taskVariables = new HashMap<>();
@@ -124,24 +123,43 @@ public class TaskVariablesIT {
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesResponse.getBody().getContent())
-                                                            .containsEntry("var1",
-                                                                           "test1")
-                                                            .containsEntry("var2",
-                                                                           "test2-update")
-                                                            .containsEntry("var3",
-                                                                           "test3");
+        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var3","test3",variablesResponse.getBody().getContent())).isTrue();
 
         // when
         variablesResponse = taskRestTemplate.getVariablesLocal(taskId);
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesResponse.getBody().getContent())
-                                                            .containsEntry("var2",
-                                                                           "test2-update")
-                                                            .doesNotContainKey("var1")
-                                                            .doesNotContainKey("var3");
+        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesDoNotContainKeys(variablesResponse.getBody().getContent(),"var1","var3")).isTrue();
+
+    }
+
+    private boolean variablesContainEntry(String key, Object value, Collection<TaskVariable> variableCollection){
+        Iterator<TaskVariable> iterator = variableCollection.iterator();
+        while(iterator.hasNext()){
+            TaskVariable variable = iterator.next();
+            if(variable.getName().equalsIgnoreCase(key) && variable.getValue().equals(value)){
+                assertThat(variable.getType()).isEqualToIgnoringCase(variable.getValue().getClass().getSimpleName());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean variablesDoNotContainKeys(Collection<TaskVariable> variableCollection, String... keys){
+        Iterator<TaskVariable> iterator = variableCollection.iterator();
+        while(iterator.hasNext()){
+            TaskVariable variable = iterator.next();
+            for(String key:keys){
+                if(variable.getName().equalsIgnoreCase(key)){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {

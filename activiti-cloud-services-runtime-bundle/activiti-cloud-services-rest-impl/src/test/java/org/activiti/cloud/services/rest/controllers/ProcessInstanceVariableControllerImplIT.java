@@ -16,9 +16,10 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariablesResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
 import org.activiti.engine.RuntimeService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,17 +55,29 @@ public class ProcessInstanceVariableControllerImplIT {
     @MockBean
     private RuntimeService runtimeService;
     @MockBean
-    private ProcessInstanceVariablesResourceAssembler variableResourceAssembler;
+    private ProcessInstanceVariableResourceAssembler variableResourceAssembler;
 
     @Test
     public void getVariables() throws Exception {
-        when(runtimeService.getVariables("1")).thenReturn(new HashMap<>());
+        when(runtimeService.getVariableInstancesByExecutionIds(any())).thenReturn(new ArrayList<>());
 
-        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables",
+        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables/",
                                  1,
                                  1).accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+    }
+
+    @Test
+    public void getVariablesLocal() throws Exception {
+        when(runtimeService.getVariableInstancesLocal(anyString())).thenReturn(new HashMap<>());
+
+        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables/local",
+                1,
+                1).accept(MediaTypes.HAL_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list/local",
+                        pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
 }

@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.rest.assemblers;
 
-import org.activiti.cloud.services.api.model.TaskVariables;
-import org.activiti.cloud.services.rest.api.resources.VariablesResource;
+import org.activiti.cloud.services.api.model.TaskVariable;
+import org.activiti.cloud.services.rest.api.resources.TaskVariableResource;
 import org.junit.Test;
 import org.springframework.hateoas.Link;
 
@@ -10,18 +10,18 @@ import static org.mockito.Mockito.*;
 
 public class TaskVariablesResourceAssemblerTest {
 
-    private TaskVariablesResourceAssembler resourceAssembler = new TaskVariablesResourceAssembler();
+    private TaskVariableResourceAssembler resourceAssembler = new TaskVariableResourceAssembler();
 
     @Test
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {
-        TaskVariables model = mock(TaskVariables.class);
+        TaskVariable model = mock(TaskVariable.class);
         when(model.getTaskId()).thenReturn("my-identifier");
 
-        VariablesResource resource = resourceAssembler.toResource(model);
+        TaskVariableResource resource = resourceAssembler.toResource(model);
 
-        Link selfResourceLink = resource.getLink("self");
+        Link globalVariablesLink = resource.getLink("globalVariables");
 
-        assertThat(selfResourceLink).isNotNull();
-        assertThat(selfResourceLink.getHref()).contains("my-identifier");
+        assertThat(globalVariablesLink).isNotNull();
+        assertThat(globalVariablesLink.getHref()).contains("my-identifier");
     }
 }

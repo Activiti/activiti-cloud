@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -30,6 +31,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,11 +39,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -81,22 +86,33 @@ public class ProcessVariablesIT {
         ResponseEntity<ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
                                                                                                  variables);
 
-        //when
-        ResponseEntity<Resource<Map<String, Object>>> variablesResponse = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startResponse.getBody().getId() + "/variables",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<Resource<Map<String, Object>>>() {
-                });
 
-        //then
-        assertThat(variablesResponse).isNotNull();
-        assertThat(variablesResponse.getBody().getContent())
-                .containsEntry("firstName",
-                        "Pedro")
-                .containsEntry("lastName",
-                        "Silva")
-                .containsEntry("age",
-                        15);
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<Resources<ProcessInstanceVariable>> variablesEntity = processInstanceRestTemplate.getVariables(startResponse);
+            Collection<ProcessInstanceVariable> variableCollection = variablesEntity.getBody().getContent();
+
+            assertThat(variableCollection).isNotEmpty();
+            assertThat(variablesContainEntry("firstName","Pedro",variableCollection)).isTrue();
+            assertThat(variablesContainEntry("lastName","Silva",variableCollection)).isTrue();
+            assertThat(variablesContainEntry("age",15,variableCollection)).isTrue();
+
+        });
+
+
+    }
+
+    private boolean variablesContainEntry(String key, Object value, Collection<ProcessInstanceVariable> variableCollection){
+        Iterator<ProcessInstanceVariable> iterator = variableCollection.iterator();
+        while(iterator.hasNext()){
+            ProcessInstanceVariable variable = iterator.next();
+            if(variable.getName().equalsIgnoreCase(key) && variable.getValue().equals(value)){
+                assertThat(variable.getType()).isEqualToIgnoringCase(variable.getValue().getClass().getSimpleName());
+                return true;
+            }
+        }
+        return false;
     }
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
