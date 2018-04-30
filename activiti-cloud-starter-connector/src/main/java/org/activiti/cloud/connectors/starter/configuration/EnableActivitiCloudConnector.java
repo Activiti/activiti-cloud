@@ -7,6 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySources;
+import org.springframework.context.annotation.PropertySource;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
