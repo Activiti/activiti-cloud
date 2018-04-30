@@ -1,6 +1,7 @@
 package org.activiti.cloud.services.audit.mongo;
 
 import com.querydsl.core.types.Predicate;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.audit.mongo.assembler.EventResourceAssembler;
 import org.activiti.cloud.services.audit.mongo.events.ProcessEngineEventDocument;
 import org.activiti.cloud.services.audit.mongo.repository.EventsRepository;
@@ -9,7 +10,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -27,7 +27,7 @@ public class ProcessEngineEventsAdminControllerTest {
     private EventResourceAssembler eventResourceAssembler;
 
     @Mock
-    private PagedResourcesAssembler<ProcessEngineEventDocument> pagedResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<ProcessEngineEventDocument> pagedResourcesAssembler;
 
 
     @Before

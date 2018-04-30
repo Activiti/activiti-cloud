@@ -1,5 +1,6 @@
 package org.activiti.cloud.services.audit;
 
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.audit.assembler.EventResourceAssembler;
 import org.activiti.cloud.services.audit.events.ProcessEngineEventEntity;
 import org.activiti.cloud.services.audit.repository.EventsRepository;
@@ -9,7 +10,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
 
 import java.util.Optional;
 
@@ -35,7 +35,7 @@ public class ProcessEngineEventsControllerTest {
     private EventResourceAssembler eventResourceAssembler;
 
     @Mock
-    private PagedResourcesAssembler<ProcessEngineEventEntity> pagedResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<ProcessEngineEventEntity> pagedResourcesAssembler;
 
 
     @Before

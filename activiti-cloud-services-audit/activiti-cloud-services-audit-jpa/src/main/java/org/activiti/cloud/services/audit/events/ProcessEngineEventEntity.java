@@ -47,6 +47,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = TaskCreatedEventEntity.class, name = TaskCreatedEventEntity.TASK_CREATED_EVENT),
         @JsonSubTypes.Type(value = TaskAssignedEventEntity.class, name = TaskAssignedEventEntity.TASK_ASSIGNED_EVENT),
         @JsonSubTypes.Type(value = TaskCompletedEventEntity.class, name = TaskCompletedEventEntity.TASK_COMPLETED_EVENT),
+        @JsonSubTypes.Type(value = TaskCancelledEventEntity.class, name = TaskCancelledEventEntity.TASK_CANCELLED_EVENT),
         @JsonSubTypes.Type(value = VariableCreatedEventEntity.class, name = VariableCreatedEventEntity.VARIABLE_CREATED_EVENT),
         @JsonSubTypes.Type(value = VariableUpdatedEventEntity.class, name = VariableUpdatedEventEntity.VARIABLE_UPDATED_EVENT),
         @JsonSubTypes.Type(value = VariableDeletedEventEntity.class, name = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT),
@@ -72,7 +73,12 @@ public abstract class ProcessEngineEventEntity {
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
-    private String applicationName;
+    private String appName;
+    private String appVersion;
+    private String serviceName;
+    private String serviceFullName;
+    private String serviceType;
+    private String serviceVersion;
 
     public Long getTimestamp() {
         return timestamp;
@@ -98,12 +104,81 @@ public abstract class ProcessEngineEventEntity {
         return id;
     }
 
-    public String getApplicationName() {
-        return applicationName;
-    }
 
     @JsonIgnore
     public boolean isIgnored() {
         return false;
+    }
+
+    protected void setId(Long id) {
+        this.id = id;
+    }
+
+    protected void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    protected void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
+    protected void setExecutionId(String executionId) {
+        this.executionId = executionId;
+    }
+
+    protected void setProcessDefinitionId(String processDefinitionId) {
+        this.processDefinitionId = processDefinitionId;
+    }
+
+    protected void setProcessInstanceId(String processInstanceId) {
+        this.processInstanceId = processInstanceId;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public String getServiceFullName() {
+        return serviceFullName;
+    }
+
+    public void setServiceFullName(String serviceFullName) {
+        this.serviceFullName = serviceFullName;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public String getServiceVersion() {
+        return serviceVersion;
+    }
+
+    public void setServiceVersion(String serviceVersion) {
+        this.serviceVersion = serviceVersion;
     }
 }

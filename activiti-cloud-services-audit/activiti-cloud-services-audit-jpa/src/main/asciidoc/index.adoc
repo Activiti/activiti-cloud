@@ -1,7 +1,7 @@
 = Activiti Cloud Audit JPA REST docs
 
 [[resources-events]]
-== Events
+== Events - HAL Version
  `Read-only` resources used to get different types of Activiti Events
 
 For the resources exposed, we use a set of default status codes:
@@ -51,3 +51,54 @@ include::{snippets}/events/get/http-response.adoc[]
 include::{snippets}/events/head/http-request.adoc[]
 ==== Response example
 include::{snippets}/events/head/http-response.adoc[]
+
+[[resources-events]]
+== Events - JSON Alfresco Guidelines Version
+ `Read-only` resources used to get different types of Activiti Events
+For the resources exposed, we use a set of default status codes:
+
+ - 200 OK - for plain GET requests.
+ - 204 No Content - for plain HEAD requests.
+ - 400 Bad Request
+ - 404 Not found
+ - 405 Method Not Allowed for POST, PUT or DELETE
+
+[[resource-events-list]]
+=== A `GET` request that returns a list of events (with Page and Sort support)
+
+=== Response fields
+include::{snippets}/events-alfresco/list/response-fields.adoc[]
+
+==== Request example
+include::{snippets}/events-alfresco/list/http-request.adoc[]
+
+==== Response example
+include::{snippets}/events-alfresco/list/http-response.adoc[]
+
+[[resource-events-head-list]]
+=== A `HEAD` request that returns whether the events collection resource is available.
+==== Request example
+include::{snippets}/events-alfresco/head/list/http-request.adoc[]
+==== Response example
+include::{snippets}/events-alfresco/head/list/http-response.adoc[]
+
+[[resource-events-get]]
+=== A `GET` request that retrieves a specific event ( by ID)
+
+==== Request parameters
+include::{snippets}/events-alfresco/get/path-parameters.adoc[]
+==== Response fields
+include::{snippets}/events-alfresco/get/response-fields.adoc[]
+
+==== Request example
+include::{snippets}/events-alfresco/get/http-request.adoc[]
+
+==== Response example
+include::{snippets}/events-alfresco/get/http-response.adoc[]
+
+[[resource-events-head]]
+=== A `HEAD` request that returns whether the event exists
+==== Request example
+include::{snippets}/events-alfresco/head/http-request.adoc[]
+==== Response example
+include::{snippets}/events-alfresco/head/http-response.adoc[]

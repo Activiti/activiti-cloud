@@ -1,6 +1,6 @@
 package org.activiti.cloud.starter.audit.mongo.tests;
 
-import org.activiti.cloud.starter.configuration.EnableActivitiAuditMongo;
+import org.activiti.cloud.starter.audit.configuration.EnableActivitiAuditMongo;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

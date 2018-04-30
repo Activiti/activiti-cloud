@@ -1,4 +1,4 @@
-package org.activiti.cloud.starter.configuration;
+package org.activiti.cloud.starter.audit.configuration;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
