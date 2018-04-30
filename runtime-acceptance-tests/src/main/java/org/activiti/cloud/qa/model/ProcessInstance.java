@@ -23,7 +23,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ProcessInstance {
+public class ProcessInstance extends ActivitiEntityMetadata {
 
     private String id;
 

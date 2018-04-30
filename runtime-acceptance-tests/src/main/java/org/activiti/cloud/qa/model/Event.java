@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.qa.model;
 
-public class Event {
+public class Event extends ActivitiEntityMetadata {
 
     private long id;
     private long timestamp;
@@ -24,7 +24,6 @@ public class Event {
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
-    private String applicationName;
     private Task task;
 
     public long getId() {
@@ -51,11 +50,8 @@ public class Event {
         return processInstanceId;
     }
 
-    public String getApplicationName() {
-        return applicationName;
-    }
-
     public Task getTask() {
         return task;
     }
+
 }

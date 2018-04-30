@@ -63,8 +63,15 @@ public class AuditSteps {
     public void checkProcessInstanceEvent(String processInstanceId,
                                           EventType eventType) throws Exception {
 
-        assertThat(getEventsByProcessInstanceIdAndEventType(processInstanceId,
-                                                            eventType)).isNotEmpty();
+        Collection<Event> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
+                eventType);
+
+        assertThat(events).isNotEmpty();
+        Event resultingEvent = events.iterator().next();
+        assertThat(resultingEvent).isNotNull();
+        assertThat(resultingEvent.getProcessInstanceId()).isEqualTo(processInstanceId);
+        assertThat(resultingEvent.getServiceName()).isNotEmpty();
+        assertThat(resultingEvent.getServiceFullName()).isNotEmpty();
     }
 
     @Step
@@ -79,6 +86,8 @@ public class AuditSteps {
         Event resultingEvent = events.iterator().next();
         assertThat(resultingEvent).isNotNull();
         assertThat(resultingEvent.getTask().getId()).isEqualTo(taskId);
+        assertThat(resultingEvent.getServiceName()).isNotEmpty();
+        assertThat(resultingEvent.getServiceFullName()).isNotEmpty();
     }
 
     @Step

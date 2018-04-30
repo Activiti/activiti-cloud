@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.qa.model;
 
-public class Task {
+public class Task extends ActivitiEntityMetadata {
 
     private String id;
 

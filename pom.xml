@@ -26,7 +26,7 @@
   <properties>
     <enforcer.skip>true</enforcer.skip>
     <feign-form.version>3.2.2</feign-form.version>
-    <serenity.version>1.9.4</serenity.version>
+    <serenity.version>1.9.6</serenity.version>
     <serenity-jbehave.version>1.38.0</serenity-jbehave.version>
   </properties>
   <dependencyManagement>
