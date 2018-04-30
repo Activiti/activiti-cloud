@@ -68,7 +68,7 @@ public class TaskCancelledEventConverterTest {
         org.activiti.cloud.services.api.model.Task externalTask = mock(org.activiti.cloud.services.api.model.Task.class);
         given(taskConverter.from(internalTask)).willReturn(externalTask);
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = taskCancelledEventConverter.from(activitiEvent);
@@ -76,7 +76,7 @@ public class TaskCancelledEventConverterTest {
         //then
         assertThat(pee).isInstanceOf(TaskCancelledEventImpl.class);
         assertThat(((TaskCancelledEventImpl) pee).getTask()).isEqualTo(externalTask);
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(pee.getEventType()).isEqualTo("TaskCancelledEvent");
     }
 

@@ -28,12 +28,12 @@ public class TaskCancelledEventImpl extends AbstractProcessEngineEvent {
     public TaskCancelledEventImpl() {
     }
 
-    public TaskCancelledEventImpl(String applicationName,
+    public TaskCancelledEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
                                   String executionId,
                                   String processDefinitionId,
                                   String processInstanceId,
                                   Task task) {
-        super(applicationName,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
               executionId,
               processDefinitionId,
               processInstanceId);

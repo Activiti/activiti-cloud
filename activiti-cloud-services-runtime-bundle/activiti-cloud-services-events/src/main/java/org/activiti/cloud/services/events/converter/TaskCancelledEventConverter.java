@@ -45,7 +45,12 @@ public class TaskCancelledEventConverter extends AbstractEventConverter {
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new TaskCancelledEventImpl(getApplicationName(),
+        return new TaskCancelledEventImpl(getRuntimeBundleProperties().getAppName(),
+                getRuntimeBundleProperties().getAppVersion(),
+                getRuntimeBundleProperties().getServiceName(),
+                getRuntimeBundleProperties().getServiceFullName(),
+                getRuntimeBundleProperties().getServiceType(),
+                getRuntimeBundleProperties().getServiceVersion(),
                                           event.getExecutionId(),
                                           event.getProcessDefinitionId(),
                                           event.getProcessInstanceId(),
