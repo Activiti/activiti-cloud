@@ -1,6 +1,5 @@
 package org.activiti.cloud.services.security;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,16 +18,8 @@ import org.springframework.stereotype.Component;
  * Applies permissions/restrictions to ProcessInstance data (and Proc Inst Variables) based upon property file
  */
 @Component
-public class SecurityPoliciesApplicationService {
+public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesApplicationService {
 
-    @Autowired(required = false)
-    private UserGroupLookupProxy userGroupLookupProxy;
-
-    @Autowired(required = false)
-    private UserRoleLookupProxy userRoleLookupProxy;
-
-    @Autowired
-    private AuthenticationWrapper authenticationWrapper;
 
     @Autowired
     private SecurityPoliciesService securityPoliciesService;
@@ -122,58 +113,4 @@ public class SecurityPoliciesApplicationService {
         return nextExpression;
     }
 
-    private boolean noSecurityPoliciesOrNoUser() {
-        return !securityPoliciesService.policiesDefined() || authenticationWrapper.getAuthenticatedUserId() == null;
-    }
-
-    private Map<String, Set<String>> definitionKeysAllowedForPolicy(SecurityPolicy securityPolicy) {
-        List<String> groups = null;
-
-        if (userGroupLookupProxy != null && authenticationWrapper.getAuthenticatedUserId() != null) {
-            groups = userGroupLookupProxy.getGroupsForCandidateUser(authenticationWrapper.getAuthenticatedUserId());
-        }
-
-        return securityPoliciesService.getProcessDefinitionKeys(authenticationWrapper.getAuthenticatedUserId(),
-                                                                groups,
-                                                                securityPolicy);
-    }
-
-    public boolean canWrite(String processDefId,
-                            String appName) {
-        return hasPermission(processDefId,
-                             SecurityPolicy.WRITE,
-                             appName);
-    }
-
-    public boolean canRead(String processDefId,
-                           String appName) {
-        return hasPermission(processDefId,
-                             SecurityPolicy.READ,
-                             appName);
-    }
-
-    private boolean hasPermission(String processDefId,
-                                  SecurityPolicy securityPolicy,
-                                  String appName) {
-
-        if (!securityPoliciesService.policiesDefined() || userGroupLookupProxy == null || authenticationWrapper.getAuthenticatedUserId() == null) {
-            return true;
-        }
-
-        if (userRoleLookupProxy != null && userRoleLookupProxy.isAdmin(authenticationWrapper.getAuthenticatedUserId())) {
-            return true;
-        }
-
-        Set<String> keys = new HashSet();
-        Map<String, Set<String>> policiesMap = definitionKeysAllowedForPolicy(securityPolicy);
-        if(policiesMap.get(appName) !=null) {
-            keys.addAll(policiesMap.get(appName));
-        }
-        //also factor for case sensitivity and hyphens (which are stripped when specified through env var)
-        if(policiesMap.get(appName.replaceAll("-","").toLowerCase()) != null){
-            keys.addAll(policiesMap.get(appName.replaceAll("-","").toLowerCase()));
-        }
-
-        return (keys != null && (keys.contains(processDefId) || keys.contains(securityPoliciesService.getWildcard())));
-    }
 }
