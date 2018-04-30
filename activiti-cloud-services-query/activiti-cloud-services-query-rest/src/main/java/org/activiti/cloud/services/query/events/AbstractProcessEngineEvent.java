@@ -57,7 +57,12 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
-    private String applicationName;
+    private String serviceName;
+    private String serviceFullName;
+    private String serviceType;
+    private String serviceVersion;
+    private String appName;
+    private String appVersion;
 
     public AbstractProcessEngineEvent() {
     }
@@ -67,13 +72,23 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
                                       String executionId,
                                       String processDefinitionId,
                                       String processInstanceId,
-                                      String applicationName) {
+                                      String serviceName,
+                                      String serviceFullName,
+                                      String serviceType,
+                                      String serviceVersion,
+                                      String appName,
+                                      String appVersion) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
-        this.applicationName = applicationName;
+        this.serviceName = serviceName;
+        this.serviceType = serviceType;
+        this.serviceFullName = serviceFullName;
+        this.serviceVersion = serviceVersion;
+        this.appName = appName;
+        this.appVersion = appVersion;
     }
 
     public Long getTimestamp() {
@@ -105,7 +120,32 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     }
 
     @Override
-    public String getApplicationName() {
-        return applicationName;
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    @Override
+    public String getServiceFullName() {
+        return serviceFullName;
+    }
+
+    @Override
+    public String getServiceVersion() {
+        return serviceVersion;
+    }
+
+    @Override
+    public String getAppName() {
+        return appName;
+    }
+
+    @Override
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    @Override
+    public String getServiceType() {
+        return serviceType;
     }
 }

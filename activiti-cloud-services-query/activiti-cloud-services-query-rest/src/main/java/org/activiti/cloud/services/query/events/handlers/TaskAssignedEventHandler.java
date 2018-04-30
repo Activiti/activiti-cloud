@@ -47,7 +47,11 @@ public class TaskAssignedEventHandler implements QueryEventHandler {
             task.setAssignee(eventTask.getAssignee());
             task.setStatus("ASSIGNED");
             task.setLastModified(new Date(taskAssignedEvent.getTimestamp()));
-            task.setApplicationName(taskAssignedEvent.getApplicationName());
+            task.setServiceName(taskAssignedEvent.getServiceName());
+            task.setServiceFullName(taskAssignedEvent.getServiceFullName());
+            task.setServiceVersion(taskAssignedEvent.getServiceVersion());
+            task.setAppName(taskAssignedEvent.getAppName());
+            task.setAppVersion(taskAssignedEvent.getAppVersion());
             task.setOwner(taskAssignedEvent.getTask().getOwner());
             task.setClaimDate(taskAssignedEvent.getTask().getClaimDate());
             taskRepository.save(task);

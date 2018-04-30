@@ -52,7 +52,12 @@ public class TaskCandidateUserRemovedEventHandlerTest {
                                                             "10",
                                                             "100",
                                                             "200",
-                                                            "runtime-bundle-a",
+                                                "runtime-bundle-a",
+                                                "runtime-bundle-a",
+                                                "runtime-bundle",
+                                                "1",
+                                                null,
+                                                null,
                                                             eventTaskCandidate);
 
         

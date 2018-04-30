@@ -88,7 +88,11 @@ public class TaskActivatedEventHandlerIT {
                                   "category",
                                   "process_definition_id",
                                   processInstanceId,
-                                  "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "1",
+                null,
+                null,
                                   "SUSPENDED",
                                   new Date() /*lastModified*/,
                                     new Date(),
@@ -98,8 +102,13 @@ public class TaskActivatedEventHandlerIT {
                                                               "taskActivated",
                                                               "10",
                                                               "process_definition_id",
+                                                            "runtime-bundle-a",
+                                                            "runtime-bundle-a",
+                                                            "runtime-bundle",
+                                                            "1",
+                                                            null,
+                                                            null,
                                                               processInstanceId,
-                                                              "runtime-bundle-a",
                                                               eventTask);
         //when
         handler.handle(givenEvent);
@@ -130,6 +139,10 @@ public class TaskActivatedEventHandlerIT {
                 "process_definition_id",
                 processInstanceId,
                 "runtime-bundle-a",
+                "runtime-bundle-a",
+                "1",
+                null,
+                null,
                 "SUSPENDED",
                 new Date() /*lastModified*/,
                 new Date(), /*claimDate*/
@@ -139,8 +152,13 @@ public class TaskActivatedEventHandlerIT {
                                                                "taskActivated",
                                                                "10",
                                                                "process_definition_id",
+                                                        "runtime-bundle-a",
+                                                        "runtime-bundle-a",
+                                                        "runtime-bundle",
+                                                        "1",
+                                                        null,
+                                                        null,
                                                                processInstanceId,
-                                                               "runtime-bundle-a",
                                                                eventTask);
         //when
         handler.handle(givenEvent);

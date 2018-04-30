@@ -78,7 +78,12 @@ public class VariableCreatedEventHandlerIT {
                                                               executionId,
                                                               "process_definition_id",
                                                               processInstanceId,
-                                                              "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle",
+                                                    "1",
+                                                    null,
+                                                    null,
                                                               variableName,
                                                               "content",
                                                               variableType,
@@ -92,7 +97,7 @@ public class VariableCreatedEventHandlerIT {
         
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getProcessInstance()).isNotNull();
-        assertThat(result.get().getApplicationName()).isEqualTo("runtime-bundle-a");
+        assertThat(result.get().getServiceName()).isEqualTo("runtime-bundle-a");
         assertThat(result.get().getTask()).isNotNull();
     }	
 
@@ -109,7 +114,12 @@ public class VariableCreatedEventHandlerIT {
                                                               executionId,
                                                               "process_definition_id",
                                                               processInstanceId,
-                                                              "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle",
+                                                    "1",
+                                                    null,
+                                                    null,
                                                               variableName,
                                                               "content",
                                                               variableType,
@@ -123,7 +133,7 @@ public class VariableCreatedEventHandlerIT {
         
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getProcessInstance()).isNotNull();
-        assertThat(result.get().getApplicationName()).isEqualTo("runtime-bundle-a");
+        assertThat(result.get().getServiceName()).isEqualTo("runtime-bundle-a");
         assertThat(result.get().getTask()).isNull();
     }	
 

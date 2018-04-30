@@ -41,7 +41,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Task implements Serializable {
+public class Task extends ActivitiEntityMetadata implements Serializable {
 
     /**
      * serialVersionUID
@@ -64,7 +64,6 @@ public class Task implements Serializable {
     private String processDefinitionId;
     private String processInstanceId;
     private String status;
-    private String applicationName;
     private String owner;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -114,11 +113,16 @@ public class Task implements Serializable {
                 @JsonProperty("category") String category,
                 @JsonProperty("processDefinitionId") String processDefinitionId,
                 @JsonProperty("processInstanceId") String processInstanceId,
-                @JsonProperty("applicationName") String applicationName,
+                @JsonProperty("serviceName") String serviceName,
+                @JsonProperty("serviceFullName") String serviceFullName,
+                @JsonProperty("serviceVersion") String serviceVersion,
+                @JsonProperty("appName") String appName,
+                @JsonProperty("appVersion") String appVersion,
                 @JsonProperty("status") String status,
                 @JsonProperty("lastModified") Date lastModified,
                 @JsonProperty("claimDate") Date claimDate,
                 @JsonProperty("owner") String owner) {
+        super(serviceName,serviceFullName,serviceVersion,appName,appVersion);
         this.id = id;
         this.assignee = assignee;
         this.name = name;
@@ -129,7 +133,6 @@ public class Task implements Serializable {
         this.category = category;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
-        this.applicationName = applicationName;
         this.status = status;
         this.lastModified = lastModified;
         this.claimDate = claimDate;
@@ -222,14 +225,6 @@ public class Task implements Serializable {
 
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
-    }
-
-    public String getApplicationName() {
-        return applicationName;
-    }
-
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
     }
 
     public void setStatus(String status) {

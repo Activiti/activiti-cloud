@@ -59,7 +59,7 @@ public class RestrictProcessInstanceQueryIT {
         processInstance.setDescription("desc");
         processInstance.setInitiator("initiator");
         processInstance.setProcessDefinitionKey("defKey1");
-        processInstance.setApplicationName("test-cmd-endpoint");
+        processInstance.setServiceName("test-cmd-endpoint");
         processInstanceRepository.save(processInstance);
 
         initMocks(this);
@@ -84,7 +84,7 @@ public class RestrictProcessInstanceQueryIT {
         processInstance.setDescription("desc");
         processInstance.setInitiator("initiator");
         processInstance.setProcessDefinitionKey("defKeyWild");
-        processInstance.setApplicationName("test-cmd-endpoint-wild");
+        processInstance.setServiceName("test-cmd-endpoint-wild");
         processInstanceRepository.save(processInstance);
 
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
@@ -103,7 +103,7 @@ public class RestrictProcessInstanceQueryIT {
         processInstance.setDescription("desc");
         processInstance.setInitiator("initiator");
         processInstance.setProcessDefinitionKey("defKeyWild");
-        processInstance.setApplicationName("test-cmd-endpoint-wild");
+        processInstance.setServiceName("test-cmd-endpoint-wild");
         processInstanceRepository.save(processInstance);
 
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bobinhr");
@@ -122,7 +122,7 @@ public class RestrictProcessInstanceQueryIT {
         processInstance.setDescription("desc");
         processInstance.setInitiator("initiator");
         processInstance.setProcessDefinitionKey("defKeyWild");
-        processInstance.setApplicationName("test-cmd-endpoint-wild");
+        processInstance.setServiceName("test-cmd-endpoint-wild");
         processInstanceRepository.save(processInstance);
 
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
@@ -135,8 +135,8 @@ public class RestrictProcessInstanceQueryIT {
         Iterator<ProcessInstance> iterator = iterable.iterator();
         while(iterator.hasNext()){
             ProcessInstance proc = iterator.next();
-            assertThat(proc.getApplicationName()).isNotEqualToIgnoringCase("test-cmd-endpoint-wild");
-            assertThat(proc.getApplicationName()).isEqualToIgnoringCase("test-cmd-endpoint");
+            assertThat(proc.getServiceName()).isNotEqualToIgnoringCase("test-cmd-endpoint-wild");
+            assertThat(proc.getServiceName()).isEqualToIgnoringCase("test-cmd-endpoint");
         }
     }
 
@@ -148,7 +148,7 @@ public class RestrictProcessInstanceQueryIT {
         processInstance.setDescription("desc");
         processInstance.setInitiator("initiator");
         processInstance.setProcessDefinitionKey("defKey1");
-        processInstance.setApplicationName("Te-St-CmD-EnDpoInT");
+        processInstance.setServiceName("Te-St-CmD-EnDpoInT");
         processInstanceRepository.save(processInstance);
 
         ProcessInstance processInstance2 = new ProcessInstance();
@@ -157,7 +157,7 @@ public class RestrictProcessInstanceQueryIT {
         processInstance2.setDescription("desc");
         processInstance2.setInitiator("initiator");
         processInstance2.setProcessDefinitionKey("defKey1");
-        processInstance2.setApplicationName("test-cmd-endpoint-dontmatchthisone");
+        processInstance2.setServiceName("test-cmd-endpoint-dontmatchthisone");
         processInstanceRepository.save(processInstance2);
 
         assertThat(processInstanceRepository.count()).isGreaterThanOrEqualTo(2);
@@ -170,8 +170,8 @@ public class RestrictProcessInstanceQueryIT {
         Iterator<ProcessInstance> iterator = iterable.iterator();
         while(iterator.hasNext()){
             ProcessInstance proc = iterator.next();
-            assertThat(proc.getApplicationName()).isNotEqualToIgnoringCase("test-cmd-endpoint-dontmatchthisone");
-            assertThat(proc.getApplicationName().replace("-","")).isEqualToIgnoringCase("test-cmd-endpoint".replace("-",""));
+            assertThat(proc.getServiceName()).isNotEqualToIgnoringCase("test-cmd-endpoint-dontmatchthisone");
+            assertThat(proc.getServiceName().replace("-","")).isEqualToIgnoringCase("test-cmd-endpoint".replace("-",""));
         }
 
         assertThat(processInstanceRepository.count(predicate)).isEqualTo(2);
@@ -187,5 +187,24 @@ public class RestrictProcessInstanceQueryIT {
         predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(predicate, SecurityPolicy.READ);
         Iterable<ProcessInstance> iterable = processInstanceRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isFalse();
+    }
+
+
+    @Test
+    public void shouldGetProcessInstancesWhenMatchesFullServiceName() throws Exception {
+        ProcessInstance processInstance = new ProcessInstance();
+        processInstance.setId("21");
+        processInstance.setName("name");
+        processInstance.setDescription("desc");
+        processInstance.setInitiator("initiator");
+        processInstance.setProcessDefinitionKey("defKey2");
+        processInstance.setServiceFullName("test-cmd-endpoint");
+        processInstanceRepository.save(processInstance);
+
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
+
+        Predicate predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(null, SecurityPolicy.READ);
+        Iterable<ProcessInstance> iterable = processInstanceRepository.findAll(predicate);
+        assertThat(iterable.iterator().hasNext()).isTrue();
     }
 }

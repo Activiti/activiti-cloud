@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 import java.util.Optional;
-
 import org.activiti.engine.ActivitiException;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.model.ProcessInstance;
@@ -60,7 +59,12 @@ public class ProcessCompletedEventHandlerTest {
                                                                                 "10",
                                                                                 "100",
                                                                                 "200",
-                                                                                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle",
+                "1",
+                null,
+                null,
                                                                                 new ProcessInstance());
 
         ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
@@ -83,7 +87,12 @@ public class ProcessCompletedEventHandlerTest {
                                                                                 "10",
                                                                                 "100",
                                                                                 "200",
-                                                                                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle",
+                "1",
+                null,
+                null,
                                                                                 new ProcessInstance());
 
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());

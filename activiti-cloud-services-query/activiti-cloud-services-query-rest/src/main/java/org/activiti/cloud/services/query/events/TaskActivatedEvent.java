@@ -29,15 +29,25 @@ public class TaskActivatedEvent extends AbstractProcessEngineEvent {
                               String eventType,
                               String executionId,
                               String processDefinitionId,
-                              String applicationName,
+                              String serviceName,
+                              String serviceFullName,
+                              String serviceType,
+                              String serviceVersion,
+                              String appName,
+                              String appVersion,
                               String processInstanceId,
                               Task task) {
         super(timestamp,
               eventType,
               executionId,
               processDefinitionId,
-              applicationName,
-              processInstanceId);
+              processInstanceId,
+                serviceName,
+                serviceFullName,
+                serviceType,
+                serviceVersion,
+                appName,
+                appVersion);
         this.task = task;
     }
 

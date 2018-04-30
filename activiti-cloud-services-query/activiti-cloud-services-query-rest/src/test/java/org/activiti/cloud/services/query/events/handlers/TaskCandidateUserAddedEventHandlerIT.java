@@ -77,7 +77,12 @@ public class TaskCandidateUserAddedEventHandlerIT {
                                                                                         null,
                                                                                         null,
                                                                                         null,
-                                                                                        "runtime-bundle-a",
+                                                                            "runtime-bundle-a",
+                                                                            "runtime-bundle-a",
+                                                                            "runtime-bundle",
+                                                                            "1",
+                                                                            null,
+                                                                            null,
                                                                                         eventTaskCandidateUser);
 
         //when

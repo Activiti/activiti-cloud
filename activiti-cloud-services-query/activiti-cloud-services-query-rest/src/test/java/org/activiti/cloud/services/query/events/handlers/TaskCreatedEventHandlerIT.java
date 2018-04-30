@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Date;
 import java.util.Optional;
 
-import org.activiti.engine.ActivitiException;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.events.TaskCreatedEvent;
@@ -88,7 +87,11 @@ public class TaskCreatedEventHandlerIT {
                                   "category",
                                   "process_definition_id",
                                   processInstanceId,
-                                  "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "1",
+                null,
+                null,
                                   "CREATED",
                                   new Date() /*lastModified*/,
                                     new Date(), /*claimDate*/
@@ -99,7 +102,12 @@ public class TaskCreatedEventHandlerIT {
                                                             "10",
                                                             "process_definition_id",
                                                             processInstanceId,
-                                                            "runtime-bundle-a",
+                                                "runtime-bundle-a",
+                                                "runtime-bundle-a",
+                                                "runtime-bundle",
+                                                "1",
+                                                null,
+                                                null,
                                                             eventTask);
         //when
         handler.handle(taskCreated);
@@ -109,7 +117,7 @@ public class TaskCreatedEventHandlerIT {
 
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getProcessInstance()).isNotNull();
-        assertThat(result.get().getApplicationName()).isEqualTo("runtime-bundle-a");
+        assertThat(result.get().getServiceName()).isEqualTo("runtime-bundle-a");
     }
 
     /* having to temporarily remove to resolve https://github.com/Activiti/Activiti/issues/1539

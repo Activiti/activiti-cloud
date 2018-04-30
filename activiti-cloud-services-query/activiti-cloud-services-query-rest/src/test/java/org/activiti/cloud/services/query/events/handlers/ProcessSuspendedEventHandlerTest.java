@@ -21,8 +21,6 @@ import java.util.Optional;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.events.ProcessActivatedEvent;
-import org.activiti.cloud.services.query.events.ProcessCompletedEvent;
 import org.activiti.cloud.services.query.events.ProcessSuspendedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.engine.ActivitiException;
@@ -62,7 +60,12 @@ public class ProcessSuspendedEventHandlerTest {
                                                                 "10",
                                                                 "100",
                                                                 "200",
-                                                                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle",
+                "1",
+                null,
+                null,
                                                                 new ProcessInstance());
 
         ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
@@ -85,7 +88,12 @@ public class ProcessSuspendedEventHandlerTest {
                                                                                 "10",
                                                                                 "100",
                                                                                 "200",
-                                                                                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle-a",
+                "runtime-bundle",
+                "1",
+                null,
+                null,
                                                                                 new ProcessInstance());
 
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
