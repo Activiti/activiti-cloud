@@ -17,6 +17,8 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+
+
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.events.TaskSuspendedEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -65,7 +67,7 @@ public class TaskSuspendedEventConverterTest {
         org.activiti.cloud.services.api.model.Task externalTask = mock(org.activiti.cloud.services.api.model.Task.class);
         given(taskConverter.from(internalTask)).willReturn(externalTask);
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = taskSuspendedEventConverter.from(activitiEvent);
@@ -75,7 +77,7 @@ public class TaskSuspendedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((TaskSuspendedEvent) pee).getTask()).isEqualTo(externalTask);
     }
 

@@ -17,7 +17,6 @@
 package org.activiti.services.connectors.behavior;
 
 import java.util.Date;
-
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
@@ -64,7 +63,13 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
     private void publishSpringEvent(DelegateExecution execution,
                                       IntegrationContextEntity integrationContext) {
         IntegrationRequestEvent event = new IntegrationRequestEvent(execution,
-                                                                    integrationContext, runtimeBundleProperties.getName());
+                                                                    integrationContext,
+                runtimeBundleProperties.getAppName(),
+                runtimeBundleProperties.getAppVersion(),
+                runtimeBundleProperties.getServiceName(),
+                runtimeBundleProperties.getServiceFullName(),
+                runtimeBundleProperties.getServiceType(),
+                runtimeBundleProperties.getServiceVersion());
 
         eventPublisher.publishEvent(event);
     }

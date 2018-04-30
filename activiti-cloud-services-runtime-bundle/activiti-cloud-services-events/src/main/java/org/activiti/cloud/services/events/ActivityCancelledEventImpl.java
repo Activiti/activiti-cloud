@@ -17,6 +17,9 @@
 
 package org.activiti.cloud.services.events;
 
+
+
+
 public class ActivityCancelledEventImpl extends AbstractProcessEngineEvent implements ActivityCancelledEvent {
 
     protected String activityId;
@@ -27,7 +30,9 @@ public class ActivityCancelledEventImpl extends AbstractProcessEngineEvent imple
     public ActivityCancelledEventImpl() {
     }
 
-    public ActivityCancelledEventImpl(String applicationName,
+    public ActivityCancelledEventImpl(String appName, String appVersion,
+                                      String serviceName, String serviceFullName,
+                                      String serviceType, String serviceVersion,
                                       String executionId,
                                       String processDefinitionId,
                                       String processInstanceId,
@@ -35,7 +40,8 @@ public class ActivityCancelledEventImpl extends AbstractProcessEngineEvent imple
                                       String activityName,
                                       String activityType,
                                       String cause) {
-        super(applicationName,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId);

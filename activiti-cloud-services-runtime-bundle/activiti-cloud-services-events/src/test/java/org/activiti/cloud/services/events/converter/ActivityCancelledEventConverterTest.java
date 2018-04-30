@@ -17,6 +17,8 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+
+
 import org.activiti.cloud.services.events.ActivityCancelledEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiActivityCancelledEvent;
@@ -57,7 +59,7 @@ public class ActivityCancelledEventConverterTest {
         given(activitiEvent.getActivityName()).willReturn("ActivityName");
         given(activitiEvent.getActivityType()).willReturn("ActivityType");
         given(activitiEvent.getCause()).willReturn("cause of the cancellation");
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
 
         ProcessEngineEvent pee = converter.from(activitiEvent);
 
@@ -66,7 +68,7 @@ public class ActivityCancelledEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((ActivityCancelledEvent) pee).getActivityId()).isEqualTo("ABC");
         assertThat(((ActivityCancelledEvent) pee).getActivityName()).isEqualTo("ActivityName");
         assertThat(((ActivityCancelledEvent) pee).getActivityType()).isEqualTo("ActivityType");

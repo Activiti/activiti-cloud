@@ -42,8 +42,13 @@ public class ProcessCompletedEventConverter extends AbstractEventConverter {
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new ProcessCompletedEventImpl(getApplicationName(),
-                                             event.getExecutionId(),
+        return new ProcessCompletedEventImpl(getRuntimeBundleProperties().getAppName(),
+                                            getRuntimeBundleProperties().getAppVersion(),
+                                            getRuntimeBundleProperties().getServiceName(),
+                                            getRuntimeBundleProperties().getServiceFullName(),
+                                            getRuntimeBundleProperties().getServiceType(),
+                                            getRuntimeBundleProperties().getServiceVersion(),
+                                            event.getExecutionId(),
                                              event.getProcessDefinitionId(),
                                              event.getProcessInstanceId(),
                                              processInstanceConverter.from(((ExecutionEntityImpl) ((ActivitiEntityEvent) event).getEntity()).getProcessInstance()));

@@ -42,7 +42,12 @@ public class TaskCreatedEventConverter extends AbstractEventConverter {
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new TaskCreatedEventImpl(getApplicationName(),
+        return new TaskCreatedEventImpl(getRuntimeBundleProperties().getAppName(),
+                                        getRuntimeBundleProperties().getAppVersion(),
+                                        getRuntimeBundleProperties().getServiceName(),
+                                        getRuntimeBundleProperties().getServiceFullName(),
+                                        getRuntimeBundleProperties().getServiceType(),
+                                        getRuntimeBundleProperties().getServiceVersion(),
                                         event.getExecutionId(),
                                         event.getProcessDefinitionId(),
                                         event.getProcessInstanceId(),

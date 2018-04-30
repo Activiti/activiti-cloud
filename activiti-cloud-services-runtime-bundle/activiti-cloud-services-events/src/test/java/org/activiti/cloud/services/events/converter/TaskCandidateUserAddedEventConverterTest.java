@@ -1,6 +1,8 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+
+
 import org.activiti.cloud.services.api.model.converter.TaskCandidateUserConverter;
 import org.activiti.cloud.services.events.TaskCandidateUserAddedEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -50,7 +52,7 @@ public class TaskCandidateUserAddedEventConverterTest {
         org.activiti.cloud.services.api.model.TaskCandidateUser externalTaskCandidateUser = mock(org.activiti.cloud.services.api.model.TaskCandidateUser.class);
         given(taskCandidateUserConverter.from(internalIdentityLink)).willReturn(externalTaskCandidateUser);
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = taskCandidateUserAddedEventConverter.from(activitiEvent);
@@ -60,7 +62,7 @@ public class TaskCandidateUserAddedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((TaskCandidateUserAddedEvent) pee).getTaskCandidateUser()).isEqualTo(externalTaskCandidateUser);
     }
 

@@ -19,9 +19,7 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
-import org.activiti.cloud.services.events.ProcessCompletedEvent;
 import org.activiti.cloud.services.events.ProcessCreatedEvent;
-import org.activiti.cloud.services.events.ProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEventType;
@@ -67,7 +65,7 @@ public class ProcessCreatedEventConverterTest {
         given(activitiEvent.getEntity()).willReturn(executionEntity);
         given(executionEntity.getProcessInstance()).willReturn(internalProcessInstance);
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
 
         ProcessInstance externalProcessInstance = mock(ProcessInstance.class);
         given(processInstanceConverter.from(internalProcessInstance)).willReturn(externalProcessInstance);
@@ -80,7 +78,7 @@ public class ProcessCreatedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((ProcessCreatedEvent) pee).getProcessInstance()).isEqualTo(externalProcessInstance);
     }
 

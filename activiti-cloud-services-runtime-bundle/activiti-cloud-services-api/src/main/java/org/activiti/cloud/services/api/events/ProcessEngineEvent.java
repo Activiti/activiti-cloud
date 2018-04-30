@@ -34,5 +34,16 @@ public interface ProcessEngineEvent {
 
     String getProcessInstanceId();
 
-    String getApplicationName();
+    String getAppName();
+
+    String getAppVersion();
+
+    String getServiceName();
+
+    String getServiceFullName();
+
+    String getServiceType();
+
+    String getServiceVersion();
+
 }

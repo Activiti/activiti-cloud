@@ -1,6 +1,8 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+
+
 import org.activiti.cloud.services.api.model.converter.TaskCandidateGroupConverter;
 import org.activiti.cloud.services.events.TaskCandidateGroupAddedEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -30,6 +32,7 @@ public class TaskCandidateGroupAddedEventConverterTest {
     @Mock
     private RuntimeBundleProperties runtimeBundleProperties;
 
+
     @Before
     public void setUp() throws Exception {
         initMocks(this);
@@ -50,7 +53,7 @@ public class TaskCandidateGroupAddedEventConverterTest {
         org.activiti.cloud.services.api.model.TaskCandidateGroup externalTaskCandidateGroup = mock(org.activiti.cloud.services.api.model.TaskCandidateGroup.class);
         given(taskCandidateGroupConverter.from(internalIdentityLink)).willReturn(externalTaskCandidateGroup);
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
 
         //when
         ProcessEngineEvent pee = taskCandidateGroupAddedEventConverter.from(activitiEvent);
@@ -60,7 +63,7 @@ public class TaskCandidateGroupAddedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((TaskCandidateGroupAddedEvent) pee).getTaskCandidateGroup()).isEqualTo(externalTaskCandidateGroup);
     }
 

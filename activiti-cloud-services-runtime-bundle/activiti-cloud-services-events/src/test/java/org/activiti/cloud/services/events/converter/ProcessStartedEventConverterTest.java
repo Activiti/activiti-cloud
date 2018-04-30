@@ -17,6 +17,8 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+
+
 import org.activiti.cloud.services.events.ProcessStartedEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
@@ -57,7 +59,8 @@ public class ProcessStartedEventConverterTest {
         given(activitiEvent.getNestedProcessDefinitionId()).willReturn("myParentProcessDef");
         given(activitiEvent.getNestedProcessInstanceId()).willReturn("2");
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
+
 
         //when
         ProcessEngineEvent pee = converter.from(activitiEvent);
@@ -71,7 +74,7 @@ public class ProcessStartedEventConverterTest {
         assertThat(processStartedEvent.getProcessDefinitionId()).isEqualTo("myProcessDef");
         assertThat(processStartedEvent.getNestedProcessDefinitionId()).isEqualTo("myParentProcessDef");
         assertThat(processStartedEvent.getNestedProcessInstanceId()).isEqualTo("2");
-        assertThat(processStartedEvent.getApplicationName()).isEqualTo("myApp");
+        assertThat(processStartedEvent.getServiceFullName()).isEqualTo("myApp");
     }
 
     @Test

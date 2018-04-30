@@ -22,6 +22,7 @@ import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.services.connectors.model.IntegrationRequestEvent;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -83,8 +84,7 @@ public class MQServiceTaskBehaviorTest {
                 .withServiceTask(serviceTask)
                 .withFlowNodeId(FLOW_NODE_ID)
                 .build();
-        given(runtimeBundleProperties.getName()).willReturn(APP_NAME);
-
+        given(runtimeBundleProperties.getServiceFullName()).willReturn(APP_NAME);
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId(INTEGRATION_CONTEXT_ID);
         given(integrationContextManager.create()).willReturn(entity);
@@ -101,13 +101,13 @@ public class MQServiceTaskBehaviorTest {
         verify(eventPublisher).publishEvent(integrationRequestCaptor.capture());
         IntegrationRequestEvent event = integrationRequestCaptor.getValue();
         assertThat(event)
-                .hasApplicationName(APP_NAME)
                 .hasConnectorType(CONNECTOR_TYPE)
                 .hasExecutionId(EXECUTION_ID)
                 .hasProcessInstanceId(PROC_INST_ID)
                 .hasProcessDefinitionId(PROC_DEF_ID)
                 .hasIntegrationContextId(INTEGRATION_CONTEXT_ID)
                 .hasFlowNodeId(FLOW_NODE_ID);
+        AssertionsForInterfaceTypes.assertThat(event.getServiceFullName()).isEqualTo(APP_NAME);
     }
 
     @Test

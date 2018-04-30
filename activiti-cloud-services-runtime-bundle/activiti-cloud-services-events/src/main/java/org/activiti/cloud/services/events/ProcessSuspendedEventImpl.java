@@ -17,7 +17,9 @@
 
 package org.activiti.cloud.services.events;
 
+
 import org.activiti.cloud.services.api.model.ProcessInstance;
+
 
 public class ProcessSuspendedEventImpl extends AbstractProcessEngineEvent implements ProcessSuspendedEvent {
 
@@ -26,12 +28,14 @@ public class ProcessSuspendedEventImpl extends AbstractProcessEngineEvent implem
     public ProcessSuspendedEventImpl() {
     }
 
-    public ProcessSuspendedEventImpl(String applicationName,
+    public ProcessSuspendedEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
+
                                      String executionId,
                                      String processDefinitionId,
                                      String processInstanceId,
                                      ProcessInstance processInstance) {
-        super(applicationName,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId);
@@ -51,7 +55,12 @@ public class ProcessSuspendedEventImpl extends AbstractProcessEngineEvent implem
     public String toString() {
         return "ProcessSuspendedEventImpl{" +
                     "processInstance=" + processInstance +
-                    "applicationName='" + getApplicationName() + '\'' +
+                    ", appName='" + getAppName() + '\'' +
+                    ", appVersion='" + getAppVersion() + '\'' +
+                    ", serviceName='" + getServiceName() + '\'' +
+                    ", serviceFullName='" + getServiceFullName() + '\'' +
+                    ", serviceType='" + getServiceType() + '\'' +
+                    ", serviceVersion='" + getServiceVersion() + '\'' +
                     ", executionId='" + getExecutionId() + '\'' +
                     ", processDefinitionId='" + getProcessDefinitionId() + '\'' +
                     ", processInstanceId='" + getProcessInstanceId() + '\'' +

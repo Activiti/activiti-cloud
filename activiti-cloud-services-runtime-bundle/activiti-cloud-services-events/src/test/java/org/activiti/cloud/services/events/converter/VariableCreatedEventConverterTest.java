@@ -17,6 +17,8 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+
+
 import org.activiti.cloud.services.events.VariableCreatedEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEventType;
@@ -49,7 +51,7 @@ public class VariableCreatedEventConverterTest {
     @Test
     public void internalVariableEventToExternalConvertion() throws Exception {
         //given
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
 
         ActivitiVariableEventImpl activitiEvent = mock(ActivitiVariableEventImpl.class);
         given(activitiEvent.getType()).willReturn(ActivitiEventType.VARIABLE_CREATED);
@@ -68,7 +70,7 @@ public class VariableCreatedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((VariableCreatedEvent) pee).getTaskId()).isEqualTo("1");
         assertThat(((VariableCreatedEvent) pee).getVariableName()).isEqualTo("myVar");
         assertThat(((VariableCreatedEvent) pee).getVariableType()).isEqualTo("string");

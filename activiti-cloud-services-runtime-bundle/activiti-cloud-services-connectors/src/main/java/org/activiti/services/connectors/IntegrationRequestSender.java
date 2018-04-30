@@ -37,7 +37,12 @@ public class IntegrationRequestSender {
 
     private void sendAuditEvent(IntegrationRequestEvent integrationRequestEvent) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            IntegrationRequestSentEventImpl event = new IntegrationRequestSentEventImpl(runtimeBundleProperties.getName(),
+            IntegrationRequestSentEventImpl event = new IntegrationRequestSentEventImpl(runtimeBundleProperties.getAppName(),
+                                                                                        runtimeBundleProperties.getAppVersion(),
+                                                                                        runtimeBundleProperties.getServiceName(),
+                                                                                        runtimeBundleProperties.getServiceFullName(),
+                                                                                        runtimeBundleProperties.getServiceType(),
+                                                                                        runtimeBundleProperties.getServiceVersion(),
                                                                                         integrationRequestEvent.getExecutionId(),
                                                                                         integrationRequestEvent.getProcessDefinitionId(),
                                                                                         integrationRequestEvent.getProcessInstanceId(),

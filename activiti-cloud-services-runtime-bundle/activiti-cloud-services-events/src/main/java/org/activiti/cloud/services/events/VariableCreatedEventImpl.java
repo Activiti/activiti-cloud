@@ -17,6 +17,9 @@
 
 package org.activiti.cloud.services.events;
 
+
+
+
 public class VariableCreatedEventImpl extends AbstractProcessEngineEvent implements VariableCreatedEvent {
 
     protected String variableName;
@@ -27,7 +30,8 @@ public class VariableCreatedEventImpl extends AbstractProcessEngineEvent impleme
     public VariableCreatedEventImpl() {
     }
 
-    public VariableCreatedEventImpl(String applicationName,
+    public VariableCreatedEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
+
                                     String executionId,
                                     String processDefinitionId,
                                     String processInstanceId,
@@ -35,7 +39,8 @@ public class VariableCreatedEventImpl extends AbstractProcessEngineEvent impleme
                                     String variableValue,
                                     String variableType,
                                     String taskId) {
-        super(applicationName,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId);

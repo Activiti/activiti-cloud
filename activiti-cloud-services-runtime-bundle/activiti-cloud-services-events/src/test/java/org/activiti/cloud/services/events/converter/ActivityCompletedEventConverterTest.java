@@ -17,6 +17,8 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+
+
 import org.activiti.cloud.services.events.ActivityCompletedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiActivityEvent;
@@ -57,7 +59,8 @@ public class ActivityCompletedEventConverterTest {
         given(activitiEvent.getActivityName()).willReturn("ActivityName");
         given(activitiEvent.getActivityType()).willReturn("ActivityType");
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
+
 
         //when
         ProcessEngineEvent pee = converter.from(activitiEvent);
@@ -67,7 +70,7 @@ public class ActivityCompletedEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((ActivityCompletedEventImpl) pee).getActivityId()).isEqualTo("ABC");
         assertThat(((ActivityCompletedEventImpl) pee).getActivityName()).isEqualTo("ActivityName");
         assertThat(((ActivityCompletedEventImpl) pee).getActivityType()).isEqualTo("ActivityType");

@@ -18,10 +18,10 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.services.connectors.model.IntegrationRequestEvent;
 import org.activiti.services.connectors.model.IntegrationResultEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
@@ -36,6 +36,7 @@ public class ServiceTaskConsumerHandler {
     private final BinderAwareChannelResolver resolver;
     private final RuntimeBundleProperties runtimeBundleProperties;
 
+    @Autowired
     public ServiceTaskConsumerHandler(BinderAwareChannelResolver resolver, RuntimeBundleProperties runtimeBundleProperties) {
         this.resolver = resolver;
         this.runtimeBundleProperties = runtimeBundleProperties;
@@ -50,7 +51,13 @@ public class ServiceTaskConsumerHandler {
         resultVariables.put(variableToUpdate,
                             ((Integer) requestVariables.get(variableToUpdate)) + 1);
         Message<IntegrationResultEvent> message = MessageBuilder.withPayload(new IntegrationResultEvent(integrationRequestEvent.getExecutionId(),
-                                                                                                        resultVariables)).build();
-        resolver.resolveDestination("integrationResult:" + runtimeBundleProperties.getName()).send(message);
+                                                                                                        resultVariables,
+                                                                                                        runtimeBundleProperties.getAppName(),
+                                                                                                        runtimeBundleProperties.getAppVersion(),
+                                                                                                        runtimeBundleProperties.getServiceName(),
+                                                                                                        runtimeBundleProperties.getServiceFullName(),
+                                                                                                        runtimeBundleProperties.getServiceType(),
+                                                                                                        runtimeBundleProperties.getServiceVersion())).build();
+        resolver.resolveDestination("integrationResult:" + runtimeBundleProperties.getServiceFullName()).send(message);
     }
 }

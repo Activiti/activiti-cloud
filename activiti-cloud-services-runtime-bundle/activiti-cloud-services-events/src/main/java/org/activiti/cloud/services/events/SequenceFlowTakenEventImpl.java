@@ -17,6 +17,9 @@
 
 package org.activiti.cloud.services.events;
 
+
+
+
 public class SequenceFlowTakenEventImpl extends AbstractProcessEngineEvent implements SequenceFlowTakenEvent {
     private String sequenceFlowId;
     private String sourceActivityId;
@@ -26,7 +29,8 @@ public class SequenceFlowTakenEventImpl extends AbstractProcessEngineEvent imple
     private String targetActivityName;
     private String targetActivityType;
 
-    public SequenceFlowTakenEventImpl(String applicatioName,
+    public SequenceFlowTakenEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
+
                                       String executionId,
                                       String processDefinitionId,
                                       String processInstanceId,
@@ -37,7 +41,8 @@ public class SequenceFlowTakenEventImpl extends AbstractProcessEngineEvent imple
                                       String targetActivityId,
                                       String targetActivityName,
                                       String targetActivityType) {
-        super(applicatioName,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId);

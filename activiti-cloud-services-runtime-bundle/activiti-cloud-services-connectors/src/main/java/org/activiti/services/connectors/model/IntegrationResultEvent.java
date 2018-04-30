@@ -32,16 +32,36 @@ public class IntegrationResultEvent {
 
     private Map<String, Object> variables;
 
+    private String appName;
+    private String appVersion;
+    private String serviceName;
+    private String serviceFullName;
+    private String serviceType;
+    private String serviceVersion;
+
+
     //used by json deserialization
     public IntegrationResultEvent() {
         this.id = UUID.randomUUID().toString();
     }
 
     public IntegrationResultEvent(String executionId,
-                                  Map<String, Object> variables) {
+                                  Map<String, Object> variables,
+                                  String appName,
+                                  String appVersion,
+                                  String serviceName,
+                                  String serviceFullName,
+                                  String serviceType,
+                                  String serviceVersion) {
         this();
         this.executionId = executionId;
         this.variables = variables;
+        this.appName = appName;
+        this.appVersion = appVersion;
+        this.serviceName = serviceName;
+        this.serviceFullName = serviceFullName;
+        this.serviceType = serviceType;
+        this.serviceVersion = serviceVersion;
     }
 
     public String getId() {
@@ -58,5 +78,29 @@ public class IntegrationResultEvent {
 
     public Map<String, Object> getVariables() {
         return variables;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public String getServiceFullName() {
+        return serviceFullName;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public String getServiceVersion() {
+        return serviceVersion;
     }
 }

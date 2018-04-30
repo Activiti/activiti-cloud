@@ -1,5 +1,7 @@
 package org.activiti.cloud.services.events;
 
+
+
 import org.activiti.cloud.services.api.model.TaskCandidateUser;
 
 public class TaskCandidateUserRemovedEventImpl extends AbstractProcessEngineEvent implements TaskCandidateUserRemovedEvent {
@@ -9,12 +11,14 @@ public class TaskCandidateUserRemovedEventImpl extends AbstractProcessEngineEven
     public TaskCandidateUserRemovedEventImpl() {
     }
 
-    public TaskCandidateUserRemovedEventImpl(String applicationName,
+    public TaskCandidateUserRemovedEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
+
                                              String executionId,
                                              String processDefinitionId,
                                              String processInstanceId,
                                              TaskCandidateUser taskCandidateUser) {
-        super(applicationName,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId);

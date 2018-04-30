@@ -26,12 +26,14 @@ public class ProcessCreatedEventImpl extends AbstractProcessEngineEvent implemen
     public ProcessCreatedEventImpl() {
     }
 
-    public ProcessCreatedEventImpl(String applicationName,
+    public ProcessCreatedEventImpl(String appName, String appVersion, String serviceName, String serviceFullName, String serviceType, String serviceVersion,
+
                                    String executionId,
                                    String processDefinitionId,
                                    String processInstanceId,
                                    ProcessInstance processInstance) {
-        super(applicationName,
+        super(appName,appVersion,serviceName,serviceFullName,serviceType,serviceVersion,
+
               executionId,
               processDefinitionId,
               processInstanceId);

@@ -36,7 +36,12 @@ public class VariableDeletedEventConveter extends AbstractEventConverter {
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new VariableDeletedEventImpl(getApplicationName(),
+        return new VariableDeletedEventImpl(getRuntimeBundleProperties().getAppName(),
+                                            getRuntimeBundleProperties().getAppVersion(),
+                                            getRuntimeBundleProperties().getServiceName(),
+                                            getRuntimeBundleProperties().getServiceFullName(),
+                                            getRuntimeBundleProperties().getServiceType(),
+                                            getRuntimeBundleProperties().getServiceVersion(),
                                             event.getExecutionId(),
                                             event.getProcessDefinitionId(),
                                             event.getProcessInstanceId(),

@@ -85,7 +85,7 @@ public class EventConverterContextIT {
     }
 
     @Test
-    public void shouldIncludeApplicationNameInConvertedEvents() throws Exception {
+    public void shouldIncludeFullyQualifiedServiceNameInConvertedEvents() throws Exception {
 
         //when
         Map<String, EventConverter> converters = converterContext.getConvertersMap();
@@ -103,6 +103,6 @@ public class EventConverterContextIT {
 
         assertThat(processEngineEvent).isNotNull();
         // this comes from the application.properties (test-application.properties) spring app name configuration
-        assertThat(processEngineEvent.getApplicationName()).isEqualTo("test-app");
+        assertThat(processEngineEvent.getServiceFullName()).isEqualTo("test-app");
     }
 }

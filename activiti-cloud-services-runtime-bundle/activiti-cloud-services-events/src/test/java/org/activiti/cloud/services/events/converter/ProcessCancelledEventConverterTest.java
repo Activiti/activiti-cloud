@@ -17,6 +17,8 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+
+
 import org.activiti.cloud.services.events.ProcessCancelledEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
@@ -42,6 +44,7 @@ public class ProcessCancelledEventConverterTest {
     @Mock
     private RuntimeBundleProperties runtimeBundleProperties;
 
+
     @Before
     public void setUp() throws Exception {
         initMocks(this);
@@ -57,7 +60,8 @@ public class ProcessCancelledEventConverterTest {
         given(activitiEvent.getProcessDefinitionId()).willReturn("myProcessDef");
         given(activitiEvent.getCause()).willReturn("cause of the cancellation");
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
+
 
         //when
         ProcessEngineEvent pee = converter.from(activitiEvent);
@@ -67,7 +71,7 @@ public class ProcessCancelledEventConverterTest {
         assertThat(pee.getExecutionId()).isEqualTo("1");
         assertThat(pee.getProcessInstanceId()).isEqualTo("1");
         assertThat(pee.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(pee.getApplicationName()).isEqualTo("myApp");
+        assertThat(pee.getServiceFullName()).isEqualTo("myApp");
         assertThat(((ProcessCancelledEvent) pee).getCause()).isEqualTo("cause of the cancellation");
     }
 

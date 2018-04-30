@@ -36,8 +36,13 @@ public class SequenceFlowTakenEventConverter extends AbstractEventConverter {
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new SequenceFlowTakenEventImpl(getApplicationName(),
-                                              event.getExecutionId(),
+        return new SequenceFlowTakenEventImpl(getRuntimeBundleProperties().getAppName(),
+                                            getRuntimeBundleProperties().getAppVersion(),
+                                            getRuntimeBundleProperties().getServiceName(),
+                                            getRuntimeBundleProperties().getServiceFullName(),
+                                            getRuntimeBundleProperties().getServiceType(),
+                                            getRuntimeBundleProperties().getServiceVersion(),
+                                            event.getExecutionId(),
                                               event.getProcessDefinitionId(),
                                               event.getProcessInstanceId(),
                                               ((ActivitiSequenceFlowTakenEventImpl) event).getId(),

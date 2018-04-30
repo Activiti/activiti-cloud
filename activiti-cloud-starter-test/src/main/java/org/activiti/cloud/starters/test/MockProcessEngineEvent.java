@@ -26,10 +26,15 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
 
     private Long timestamp;
     private String eventType;
-    private String applicationName;
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
+    private String appName;
+    private String appVersion;
+    private String serviceName;
+    private String serviceFullName;
+    private String serviceType;
+    private String serviceVersion;
 
     public MockProcessEngineEvent() {
     }
@@ -38,7 +43,10 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
                                   String eventType) {
         this.timestamp = timestamp;
         this.eventType = eventType;
-        this.applicationName = "mock-app-name";
+        this.serviceName = "mock-app-name";
+        this.serviceFullName = "mock-app-name";
+        this.serviceType = "runtime-bundle";
+        this.serviceVersion = "1";
     }
 
     public MockProcessEngineEvent(Long timestamp,
@@ -122,12 +130,38 @@ public class MockProcessEngineEvent implements ProcessEngineEvent {
         return processInstanceId;
     }
 
+    @Override
+    public String getAppName() {
+        return appName;
+    }
+
+    @Override
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    @Override
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    @Override
+    public String getServiceFullName() {
+        return serviceFullName;
+    }
+
+    @Override
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    @Override
+    public String getServiceVersion() {
+        return serviceVersion;
+    }
+
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
     }
 
-    @Override
-    public String getApplicationName() {
-        return applicationName;
-    }
 }

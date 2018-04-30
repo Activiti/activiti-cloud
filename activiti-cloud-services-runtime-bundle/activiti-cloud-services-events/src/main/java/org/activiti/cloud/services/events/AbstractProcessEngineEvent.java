@@ -21,7 +21,12 @@ import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 
 public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
 
-    private String applicationName;
+    private String appName;
+    private String appVersion;
+    private String serviceName;
+    private String serviceFullName;
+    private String serviceType;
+    private String serviceVersion;
     private String executionId;
     private String processDefinitionId;
     private String processInstanceId;
@@ -30,32 +35,47 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     public AbstractProcessEngineEvent() {
     }
 
-    public AbstractProcessEngineEvent(String applicationName,
+    public AbstractProcessEngineEvent(String appName,
+                                      String appVersion,
+                                      String serviceName,
+                                      String serviceFullName,
+                                      String serviceType,
+                                      String serviceVersion,
                                       String executionId,
                                       String processDefinitionId,
                                       String processInstanceId) {
-        this.applicationName = applicationName;
+        this.appName = appName;
+        this.appVersion = appVersion;
+        this.serviceName = serviceName;
+        this.serviceFullName = serviceFullName;
+        this.serviceType = serviceType;
+        this.serviceVersion = serviceVersion;
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
         this.timestamp = System.currentTimeMillis();
     }
 
-    public AbstractProcessEngineEvent(String applicationName,
+    public AbstractProcessEngineEvent(String appName,
+                                      String appVersion,
+                                      String serviceName,
+                                      String serviceFullName,
+                                      String serviceType,
+                                      String serviceVersion,
                                       String executionId,
                                       String processDefinitionId,
                                       String processInstanceId,
                                       Long timestamp) {
-        this.applicationName = applicationName;
+        this.appName = appName;
+        this.appVersion = appVersion;
+        this.serviceName = serviceName;
+        this.serviceFullName = serviceFullName;
+        this.serviceType = serviceType;
+        this.serviceVersion = serviceVersion;
         this.executionId = executionId;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
         this.timestamp = timestamp;
-    }
-
-    @Override
-    public String getApplicationName() {
-        return applicationName;
     }
 
     @Override
@@ -76,5 +96,35 @@ public abstract class AbstractProcessEngineEvent implements ProcessEngineEvent {
     @Override
     public Long getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public String getAppName() {
+        return appName;
+    }
+
+    @Override
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    @Override
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    @Override
+    public String getServiceFullName() {
+        return serviceFullName;
+    }
+
+    @Override
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    @Override
+    public String getServiceVersion() {
+        return serviceVersion;
     }
 }

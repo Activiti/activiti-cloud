@@ -26,7 +26,12 @@ public class TaskCandidateGroupAddedEventConverter extends AbstractEventConverte
 
     @Override
     public ProcessEngineEvent from(ActivitiEvent event) {
-        return new TaskCandidateGroupAddedEventImpl(getApplicationName(),
+        return new TaskCandidateGroupAddedEventImpl(getRuntimeBundleProperties().getAppName(),
+                getRuntimeBundleProperties().getAppVersion(),
+                getRuntimeBundleProperties().getServiceName(),
+                getRuntimeBundleProperties().getServiceFullName(),
+                getRuntimeBundleProperties().getServiceType(),
+                getRuntimeBundleProperties().getServiceVersion(),
                 event.getExecutionId(),
                 event.getProcessDefinitionId(),
                 event.getProcessInstanceId(),

@@ -82,6 +82,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     public void setUp() throws Exception {
         initMocks(this);
         when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
+        when(runtimeBundleProperties.getServiceFullName()).thenReturn("myApp");
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
         when(executionQuery.list()).thenReturn(Collections.emptyList());
@@ -103,7 +104,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
                                                                  "v");
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
-                                                                                   variables);
+                                                                                   variables,
+                runtimeBundleProperties.getAppName(),
+                runtimeBundleProperties.getAppVersion(),
+                runtimeBundleProperties.getServiceName(),
+                runtimeBundleProperties.getServiceFullName(),
+                runtimeBundleProperties.getServiceType(),
+                runtimeBundleProperties.getServiceVersion());
 
         //when
         handler.receive(integrationResultEvent);
@@ -124,7 +131,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
                                                                  "v");
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
-                                                                                   variables);
+                                                                                   variables,
+                runtimeBundleProperties.getAppName(),
+                runtimeBundleProperties.getAppVersion(),
+                runtimeBundleProperties.getServiceName(),
+                runtimeBundleProperties.getServiceFullName(),
+                runtimeBundleProperties.getServiceType(),
+                runtimeBundleProperties.getServiceVersion());
 
         //when
         handler.receive(integrationResultEvent);
@@ -146,11 +159,17 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
 
-        given(runtimeBundleProperties.getName()).willReturn("myApp");
+        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
-                                                                                   variables);
+                                                                                   variables,
+                runtimeBundleProperties.getAppName(),
+                runtimeBundleProperties.getAppVersion(),
+                runtimeBundleProperties.getServiceName(),
+                runtimeBundleProperties.getServiceFullName(),
+                runtimeBundleProperties.getServiceType(),
+                runtimeBundleProperties.getServiceVersion());
 
         //when
         handler.receive(integrationResultEvent);
@@ -161,7 +180,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         assertThat(message.getPayload()).hasSize(1);
         IntegrationResultReceivedEvent integrationResultReceivedEvent = message.getPayload()[0];
         assertThat(integrationResultReceivedEvent.getIntegrationContextId()).isEqualTo(ENTITY_ID);
-        assertThat(integrationResultReceivedEvent.getApplicationName()).isEqualTo("myApp");
+        assertThat(integrationResultReceivedEvent.getServiceFullName()).isEqualTo("myApp");
         assertThat(integrationResultReceivedEvent.getExecutionId()).isEqualTo(EXECUTION_ID);
         assertThat(integrationResultReceivedEvent.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(integrationResultReceivedEvent.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
@@ -181,7 +200,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
                                                                  "v");
 
         IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(executionId,
-                                                                                   variables);
+                                                                                   variables,
+                runtimeBundleProperties.getAppName(),
+                runtimeBundleProperties.getAppVersion(),
+                runtimeBundleProperties.getServiceName(),
+                runtimeBundleProperties.getServiceFullName(),
+                runtimeBundleProperties.getServiceType(),
+                runtimeBundleProperties.getServiceVersion());
 
         //when
         handler.receive(integrationResultEvent);

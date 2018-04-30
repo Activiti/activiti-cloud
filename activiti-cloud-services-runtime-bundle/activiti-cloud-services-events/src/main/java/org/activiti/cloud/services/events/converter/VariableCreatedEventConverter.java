@@ -38,7 +38,12 @@ public class VariableCreatedEventConverter extends AbstractEventConverter {
     public ProcessEngineEvent from(ActivitiEvent event) {
         ActivitiVariableEventImpl variableEvent = (ActivitiVariableEventImpl) event;
 
-        return new VariableCreatedEventImpl(getApplicationName(),
+        return new VariableCreatedEventImpl(getRuntimeBundleProperties().getAppName(),
+                                            getRuntimeBundleProperties().getAppVersion(),
+                                            getRuntimeBundleProperties().getServiceName(),
+                                            getRuntimeBundleProperties().getServiceFullName(),
+                                            getRuntimeBundleProperties().getServiceType(),
+                                            getRuntimeBundleProperties().getServiceVersion(),
                                             event.getExecutionId(),
                                             event.getProcessDefinitionId(),
                                             event.getProcessInstanceId(),

@@ -79,9 +79,16 @@ public class IntegrationRequestSenderTest {
         configureExecution();
         configureIntegrationContext();
 
+        when(runtimeBundleProperties.getServiceFullName()).thenReturn(APP_NAME);
+
         integrationRequestEvent = new IntegrationRequestEvent(delegateExecution,
                                                               integrationContextEntity,
-                                                              APP_NAME);
+                                                              runtimeBundleProperties.getAppName(),
+                runtimeBundleProperties.getAppVersion(),
+                runtimeBundleProperties.getServiceName(),
+                runtimeBundleProperties.getServiceFullName(),
+                runtimeBundleProperties.getServiceType(),
+                runtimeBundleProperties.getServiceVersion());
     }
 
     private void configureIntegrationContext() {
@@ -102,7 +109,7 @@ public class IntegrationRequestSenderTest {
     }
 
     private void configureProperties() {
-        when(runtimeBundleProperties.getName()).thenReturn(APP_NAME);
+        when(runtimeBundleProperties.getServiceFullName()).thenReturn(APP_NAME);
         when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
     }
 
@@ -153,6 +160,6 @@ public class IntegrationRequestSenderTest {
         assertThat(integrationRequestSentEvent.getIntegrationContextId()).isEqualTo(INTEGRATION_CONTEXT_ID);
         assertThat(integrationRequestSentEvent.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(integrationRequestSentEvent.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
-        assertThat(integrationRequestSentEvent.getApplicationName()).isEqualTo(APP_NAME);
+        assertThat(integrationRequestSentEvent.getServiceFullName()).isEqualTo(APP_NAME);
     }
 }

@@ -42,7 +42,12 @@ public class IntegrationRequestEvent {
 
     private String connectorType;
 
-    private String applicationName;
+    private String appName;
+    private String appVersion;
+    private String serviceName;
+    private String serviceFullName;
+    private String serviceType;
+    private String serviceVersion;
 
     private Map<String, Object> variables;
 
@@ -53,7 +58,12 @@ public class IntegrationRequestEvent {
 
     public IntegrationRequestEvent(DelegateExecution execution,
                                    IntegrationContextEntity integrationContext,
-                                   String applicationName) {
+                                   String appName,
+                                   String appVersion,
+                                   String serviceName,
+                                   String serviceFullName,
+                                   String serviceType,
+                                   String serviceVersion) {
         this();
         this.processInstanceId = execution.getProcessInstanceId();
         this.processDefinitionId = execution.getProcessDefinitionId();
@@ -61,7 +71,12 @@ public class IntegrationRequestEvent {
         this.flowNodeId = integrationContext.getFlowNodeId();
         this.variables = execution.getVariables();
         this.integrationContextId = integrationContext.getId();
-        this.applicationName = applicationName;
+        this.appName = appName;
+        this.appVersion = appVersion;
+        this.serviceName = serviceName;
+        this.serviceFullName = serviceFullName;
+        this.serviceType = serviceType;
+        this.serviceVersion = serviceVersion;
         this.connectorType = ((ServiceTask) execution.getCurrentFlowElement()).getImplementation();
     }
 
@@ -94,8 +109,28 @@ public class IntegrationRequestEvent {
         return connectorType;
     }
 
-    public String getApplicationName() {
-        return applicationName;
+    public String getAppName() {
+        return appName;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public String getServiceFullName() {
+        return serviceFullName;
+    }
+
+    public String getServiceVersion() {
+        return serviceVersion;
+    }
+
+    public String getServiceType() {
+        return serviceType;
     }
 
     public Map<String, Object> getVariables() {
