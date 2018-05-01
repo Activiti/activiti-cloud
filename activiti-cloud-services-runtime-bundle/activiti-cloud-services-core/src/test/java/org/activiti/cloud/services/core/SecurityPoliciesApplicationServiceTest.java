@@ -190,7 +190,7 @@ public class SecurityPoliciesApplicationServiceTest {
         map.put("rb1", Collections.singleton("key"));
         when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.WRITE)).thenReturn(map);
         when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.READ)).thenReturn(map);
-        when(runtimeBundleProperties.getName()).thenReturn("rb1");
+        when(runtimeBundleProperties.getServiceName()).thenReturn("rb1");
 
         assertThat(securityPoliciesApplicationService.canWrite("key")).isTrue();
         assertThat(securityPoliciesApplicationService.canRead("key")).isTrue();
@@ -210,7 +210,7 @@ public class SecurityPoliciesApplicationServiceTest {
         map.put("rb1",Collections.singleton(securityPoliciesService.getWildcard()));
         when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.WRITE)).thenReturn(map);
         when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.READ)).thenReturn(map);
-        when(runtimeBundleProperties.getName()).thenReturn("rb1");
+        when(runtimeBundleProperties.getServiceFullName()).thenReturn("rb1");
 
         assertThat(securityPoliciesApplicationService.canWrite("key")).isTrue();
         assertThat(securityPoliciesApplicationService.canRead("key")).isTrue();
