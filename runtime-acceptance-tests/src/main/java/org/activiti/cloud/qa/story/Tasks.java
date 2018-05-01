@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.qa.story;
 
+import java.util.Collection;
+
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.model.TaskStatus;
@@ -43,6 +45,11 @@ public class Tasks {
      * standalone task
      */
     private Task newTask;
+
+    /**
+     * subtask of {@link #newTask}
+     */
+    private Task subtask;
 
     @When("the user creates a standalone task")
     @Given("an existing standalone task")
@@ -74,5 +81,31 @@ public class Tasks {
         auditSteps.checkTaskDeletedEvent(newTask.getId());
         querySteps.checkTaskStatus(newTask.getId(),
                                    TaskStatus.CANCELLED);
+    }
+
+    @When("user creates a subtask for the previously created task")
+    public void createASubtask() throws Exception {
+        subtask = runtimeBundleSteps.createSubtask(newTask.getId());
+        assertThat(subtask).isNotNull();
+    }
+
+    @Then("the subtask is created and references another task")
+    public void taskWithSubtaskIsCreated() {
+        final Task createdSubtask = runtimeBundleSteps.getTaskById(subtask.getId());
+        assertThat(createdSubtask).isNotNull();
+        assertThat(createdSubtask.getParentTaskId()).isNotEmpty().isEqualToIgnoringCase(newTask.getId());
+
+        auditSteps.checkSubtaskCreated(createdSubtask.getId(),
+                                       newTask.getId());
+        querySteps.checkSubtaskHasParentTaskId(subtask.getId(),
+                                               newTask.getId());
+    }
+
+    @Then("a list of one subtask should be available for the task")
+    public void getSubtasksForTask() {
+        final Collection subtasks = runtimeBundleSteps.getSubtasks(newTask.getId()).getContent();
+        assertThat(subtasks).isNotNull().hasSize(1);
+        assertThat(subtasks.iterator().hasNext()).isTrue();
+        assertThat(subtasks.iterator().next()).extracting("id").containsOnly(subtask.getId());
     }
 }

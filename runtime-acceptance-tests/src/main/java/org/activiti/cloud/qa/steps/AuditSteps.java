@@ -151,4 +151,33 @@ public class AuditSteps {
                               TaskStatus.CREATED,
                               EventType.TASK_CREATED));
     }
+
+    /**
+     * Check if for a given task a new subtask is created
+     * @param subtaskId the id of the task (from rb)
+     * @param parentTaskId id of the parent task referenced in subtask
+     */
+    @Step
+    public void checkSubtaskCreated(String subtaskId,
+                                    String parentTaskId) {
+
+        final Collection<Event> events = getEvents();
+        Condition<Event> taskIsMatched = new Condition<Event>() {
+            @Override
+            public boolean matches(Event event) {
+
+                return event.getTask() != null && subtaskId.equals(event.getTask().getId());
+            }
+        };
+
+        assertThat(events).isNotNull()
+                .isNotEmpty()
+                .filteredOn(taskIsMatched).hasSize(2)
+                .extracting("task.id",
+                            "task.parentTaskId")
+                .contains(tuple(subtaskId,
+                                parentTaskId),
+                          tuple(subtaskId,
+                                parentTaskId));
+    }
 }

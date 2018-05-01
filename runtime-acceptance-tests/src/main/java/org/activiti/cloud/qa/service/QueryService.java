@@ -36,4 +36,7 @@ public interface QueryService extends BaseService {
     @RequestLine("GET /v1/tasks?status={status}&id={taskId}")
     PagedResources<Task> queryTasksByIdAnsStatus(@Param("taskId") String taskId,
                                                  @Param("status") TaskStatus taskStatus);
+
+    @RequestLine("GET /v1/tasks?id={taskId}")
+    PagedResources<Task> queryTasksById(@Param("taskId") String taskId);
 }
