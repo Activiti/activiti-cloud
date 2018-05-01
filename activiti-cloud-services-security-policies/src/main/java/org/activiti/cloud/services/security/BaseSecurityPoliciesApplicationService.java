@@ -4,6 +4,7 @@ import org.activiti.engine.UserGroupLookupProxy;
 import org.activiti.engine.UserRoleLookupProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
