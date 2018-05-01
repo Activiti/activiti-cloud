@@ -94,6 +94,7 @@ public class QueryEventHandlerContextIT {
                 TaskSuspendedEvent.class,
                 TaskActivatedEvent.class,
                 TaskCompletedEvent.class,
+                TaskCancelledEvent.class,
                 TaskCandidateUserAddedEvent.class,
                 TaskCandidateGroupAddedEvent.class,
                 TaskCandidateUserRemovedEvent.class,
@@ -113,6 +114,7 @@ public class QueryEventHandlerContextIT {
         assertThat(handlers.get(TaskSuspendedEvent.class)).isInstanceOf(TaskSuspendedEventHandler.class);
         assertThat(handlers.get(TaskActivatedEvent.class)).isInstanceOf(TaskActivatedEventHandler.class);
         assertThat(handlers.get(TaskCompletedEvent.class)).isInstanceOf(TaskCompletedEventHandler.class);
+        assertThat(handlers.get(TaskCancelledEvent.class)).isInstanceOf(TaskCancelledEventHandler.class);
         assertThat(handlers.get(VariableCreatedEvent.class)).isInstanceOf(VariableCreatedEventHandler.class);
         assertThat(handlers.get(VariableUpdatedEvent.class)).isInstanceOf(VariableUpdatedEventHandler.class);
         assertThat(handlers.get(VariableDeletedEvent.class)).isInstanceOf(VariableDeletedEventHandler.class);

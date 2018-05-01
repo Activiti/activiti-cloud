@@ -89,6 +89,10 @@ public class TaskAssignedEventHandlerIT {
                                   "process_definition_id",
                                   processInstanceId,
                                   "runtime-bundle-a",
+                                "runtime-bundle-a",
+                                  "1",
+                                  null,
+                                  null,
                                   "ASSIGNED",
                                   new Date() /*lastModified*/,
                                     new Date(),
@@ -100,7 +104,12 @@ public class TaskAssignedEventHandlerIT {
                                                             "10",
                                                             "process_definition_id",
                                                             processInstanceId,
-                                                             "runtime-bundle-a",
+                                                "runtime-bundle-a",
+                                                "runtime-bundle-a",
+                                                "runtime-bundle",
+                                                "1",
+                                                null,
+                                                null,
                                                             eventTask);
         //when
         handler.handle(givenEvent);
@@ -112,7 +121,7 @@ public class TaskAssignedEventHandlerIT {
         assertThat(result.get().getStatus()).isEqualTo("ASSIGNED");
         assertThat(result.get().getAssignee()).isEqualTo(eventTask.getAssignee());
         assertThat(result.get().getProcessInstance()).isNotNull();
-        assertThat(result.get().getApplicationName()).isEqualTo("runtime-bundle-a");
+        assertThat(result.get().getServiceName()).isEqualTo("runtime-bundle-a");
         assertThat(result.get().getVariables()).hasSize(1);
     }
 

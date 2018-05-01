@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
  * Wrap Authentication.java so as to be able to mock static methods. May later want to move this to engine level but not necessary now.
  */
 @Component
-public class AuthenticationWrapper {
+public class AuthenticationWrapper extends BaseAuthenticationWrapper {
 
     public void setAuthenticatedUserId(String user) {
         Authentication.setAuthenticatedUserId(user);

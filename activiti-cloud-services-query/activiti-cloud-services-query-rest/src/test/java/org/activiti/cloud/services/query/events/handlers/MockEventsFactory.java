@@ -47,7 +47,12 @@ public class MockEventsFactory {
                                          "10",
                                          "100",
                                          processInstanceId,
-                                         "runtime-bundle-a");
+                                "runtime-bundle-a",
+                                "runtime-bundle-a",
+                                "runtime-bundle",
+                                "1",
+                                null,
+                                null);
     }
 
     private MockEventsFactory() {

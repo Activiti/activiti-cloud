@@ -66,8 +66,13 @@ public class TaskCompletedEventHandlerTest {
                                               "taskCompleted",
                                               "10",
                                               "100",
+                                "runtime-bundle-a",
+                                "runtime-bundle-a",
+                                "runtime-bundle",
+                                "1",
+                                null,
+                                null,
                                               "200",
-                                              "runtime-bundle-a",
                                               eventTask));
 
         //then
@@ -93,8 +98,13 @@ public class TaskCompletedEventHandlerTest {
                                               "taskCompleted",
                                               "10",
                                               "100",
+                                    "runtime-bundle-a",
+                                    "runtime-bundle-a",
+                                    "runtime-bundle",
+                                    "1",
+                                    null,
+                                    null,
                                               "200",
-                                              "runtime-bundle-a",
                                               eventTask));
 
     }

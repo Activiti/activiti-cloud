@@ -18,16 +18,8 @@ import org.springframework.stereotype.Component;
  * Applies permissions/restrictions to ProcessInstance data (and Proc Inst Variables) based upon property file
  */
 @Component
-public class SecurityPoliciesApplicationService {
+public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesApplicationService {
 
-    @Autowired(required = false)
-    private UserGroupLookupProxy userGroupLookupProxy;
-
-    @Autowired(required = false)
-    private UserRoleLookupProxy userRoleLookupProxy;
-
-    @Autowired
-    private AuthenticationWrapper authenticationWrapper;
 
     @Autowired
     private SecurityPoliciesService securityPoliciesService;
@@ -98,7 +90,8 @@ public class SecurityPoliciesApplicationService {
                                                                   Set<String> defKeys) {
 
         //expect to remove hyphens when passing in environment variables
-        BooleanExpression appNamePredicate = Expressions.stringTemplate("replace({0},'-','')", processInstance.applicationName).equalsIgnoreCase(appName.replace("-",""));
+        BooleanExpression appNamePredicate = Expressions.stringTemplate("replace({0},'-','')", processInstance.serviceName).equalsIgnoreCase(appName.replace("-",""));
+        appNamePredicate = appNamePredicate.or(Expressions.stringTemplate("replace({0},'-','')", processInstance.serviceFullName).equalsIgnoreCase(appName.replace("-","")));
 
         BooleanExpression nextExpression = appNamePredicate;
         //will filter by app name and will also filter by definition keys if no wildcard
@@ -120,50 +113,4 @@ public class SecurityPoliciesApplicationService {
         return nextExpression;
     }
 
-    private boolean noSecurityPoliciesOrNoUser() {
-        return !securityPoliciesService.policiesDefined() || authenticationWrapper.getAuthenticatedUserId() == null;
-    }
-
-    private Map<String, Set<String>> definitionKeysAllowedForPolicy(SecurityPolicy securityPolicy) {
-        List<String> groups = null;
-
-        if (userGroupLookupProxy != null && authenticationWrapper.getAuthenticatedUserId() != null) {
-            groups = userGroupLookupProxy.getGroupsForCandidateUser(authenticationWrapper.getAuthenticatedUserId());
-        }
-
-        return securityPoliciesService.getProcessDefinitionKeys(authenticationWrapper.getAuthenticatedUserId(),
-                                                                groups,
-                                                                securityPolicy);
-    }
-
-    public boolean canWrite(String processDefId,
-                            String appName) {
-        return hasPermission(processDefId,
-                             SecurityPolicy.WRITE,
-                             appName);
-    }
-
-    public boolean canRead(String processDefId,
-                           String appName) {
-        return hasPermission(processDefId,
-                             SecurityPolicy.READ,
-                             appName);
-    }
-
-    private boolean hasPermission(String processDefId,
-                                  SecurityPolicy securityPolicy,
-                                  String appName) {
-
-        if (!securityPoliciesService.policiesDefined() || userGroupLookupProxy == null || authenticationWrapper.getAuthenticatedUserId() == null) {
-            return true;
-        }
-
-        if (userRoleLookupProxy != null && userRoleLookupProxy.isAdmin(authenticationWrapper.getAuthenticatedUserId())) {
-            return true;
-        }
-
-        Set<String> keys = definitionKeysAllowedForPolicy(securityPolicy).get(appName);
-
-        return (keys != null && (keys.contains(processDefId) || keys.contains(securityPoliciesService.getWildcard())));
-    }
 }

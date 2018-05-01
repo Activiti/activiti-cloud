@@ -122,7 +122,7 @@ public class RestrictVariableQueryIT {
         processInstance.setDescription("desc");
         processInstance.setInitiator("initiator");
         processInstance.setProcessDefinitionKey("defKey1");
-        processInstance.setApplicationName("test-cmd-endpoint");
+        processInstance.setServiceName("test-cmd-endpoint");
         processInstanceRepository.save(processInstance);
 
         Variable variable = new Variable();
@@ -143,5 +143,7 @@ public class RestrictVariableQueryIT {
    Could probably do it using queryFactory approach http://www.querydsl.com/static/querydsl/latest/reference/html/ch02.html#jpa_integration
    But would then have to handle the pagination to make consistent with using repository.
    No immediate need and would be inefficient to do those joins.
+   Better solution would be to add application name and process definition to task and/or variable to avoid the joins.
+   Should now also be able to simplify mapping using ElementCollection
  */
 }

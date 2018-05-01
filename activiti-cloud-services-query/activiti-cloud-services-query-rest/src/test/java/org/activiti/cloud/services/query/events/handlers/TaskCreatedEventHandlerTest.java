@@ -63,7 +63,12 @@ public class TaskCreatedEventHandlerTest {
                                                             "10",
                                                             "100",
                                                             "200",
-                                                            "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle-a",
+                                                    "runtime-bundle",
+                                                    "1",
+                                                    null,
+                                                    null,
                                                             eventTask);
 
         when(entityManager.getReference(ArgumentMatchers.eq(ProcessInstance.class), any()))
@@ -77,7 +82,7 @@ public class TaskCreatedEventHandlerTest {
         verify(eventTask).setStatus("CREATED");
         verify(eventTask).setLastModified(any(Date.class));
         verify(eventTask).setProcessInstance(any(ProcessInstance.class));
-        verify(eventTask).setApplicationName("runtime-bundle-a");
+        verify(eventTask).setServiceName("runtime-bundle-a");
     }
 
     @Test

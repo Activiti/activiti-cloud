@@ -31,13 +31,23 @@ public class ProcessStartedEvent extends AbstractProcessEngineEvent {
                                String processInstanceId,
                                String nestedProcessDefinitionId,
                                String nestedProcessInstanceId,
-                               String applicationName) {
+                               String serviceName,
+                               String serviceFullName,
+                               String serviceType,
+                               String serviceVersion,
+                               String appName,
+                               String appVersion) {
         super(timestamp,
               eventType,
               executionId,
               processDefinitionId,
               processInstanceId,
-              applicationName);
+              serviceName,
+                serviceFullName,
+                serviceType,
+                serviceVersion,
+                appName,
+                appVersion);
         this.nestedProcessDefinitionId = nestedProcessDefinitionId;
         this.nestedProcessInstanceId = nestedProcessInstanceId;
     }

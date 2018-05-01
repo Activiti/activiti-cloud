@@ -31,7 +31,12 @@ public class VariableUpdatedEvent extends AbstractProcessEngineEvent {
                                 String executionId,
                                 String processDefinitionId,
                                 String processInstanceId,
-                                String applicationName,
+                                String serviceName,
+                                String serviceFullName,
+                                String serviceType,
+                                String serviceVersion,
+                                String appName,
+                                String appVersion,
                                 String variableName,
                                 String variableValue,
                                 String variableType,
@@ -41,7 +46,12 @@ public class VariableUpdatedEvent extends AbstractProcessEngineEvent {
               executionId,
               processDefinitionId,
               processInstanceId,
-              applicationName);
+              serviceName,
+                serviceFullName,
+                serviceType,
+                serviceVersion,
+                appName,
+                appVersion);
         this.variableName = variableName;
         this.variableValue = variableValue;
         this.variableType = variableType;
