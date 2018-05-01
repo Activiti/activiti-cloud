@@ -65,6 +65,7 @@ public class Task extends ActivitiEntityMetadata implements Serializable {
     private String processInstanceId;
     private String status;
     private String owner;
+    private String parentTaskId;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModified;
@@ -121,7 +122,8 @@ public class Task extends ActivitiEntityMetadata implements Serializable {
                 @JsonProperty("status") String status,
                 @JsonProperty("lastModified") Date lastModified,
                 @JsonProperty("claimDate") Date claimDate,
-                @JsonProperty("owner") String owner) {
+                @JsonProperty("owner") String owner,
+                @JsonProperty("parentTaskId") String parentTaskId) {
         super(serviceName,serviceFullName,serviceVersion,appName,appVersion);
         this.id = id;
         this.assignee = assignee;
@@ -137,6 +139,7 @@ public class Task extends ActivitiEntityMetadata implements Serializable {
         this.lastModified = lastModified;
         this.claimDate = claimDate;
         this.owner = owner;
+        this.parentTaskId = parentTaskId;
     }
 
     public String getId() {
@@ -323,5 +326,13 @@ public class Task extends ActivitiEntityMetadata implements Serializable {
      */
     public void setTaskCandidateGroups(Set<TaskCandidateGroup> taskCandidateGroups) {
         this.taskCandidateGroups = taskCandidateGroups;
+    }
+
+    public String getParentTaskId() {
+        return parentTaskId;
+    }
+
+    public void setParentTaskId(String parentTaskId) {
+        this.parentTaskId = parentTaskId;
     }
 }

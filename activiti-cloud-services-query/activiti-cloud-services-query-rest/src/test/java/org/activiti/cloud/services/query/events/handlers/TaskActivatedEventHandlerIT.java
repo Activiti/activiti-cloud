@@ -78,25 +78,26 @@ public class TaskActivatedEventHandlerIT {
 
         //given
         Task eventTask = new Task(
-                                  taskId,
-                                  "assignee",
-                                  "name",
-                                  "description",
-                                  new Date() /*createTime*/,
-                                  new Date() /*dueDate*/,
-                                  "priority",
-                                  "category",
-                                  "process_definition_id",
-                                  processInstanceId,
+                taskId,
+                "assignee",
+                "name",
+                "description",
+                new Date() /*createTime*/,
+                new Date() /*dueDate*/,
+                "priority",
+                "category",
+                "process_definition_id",
+                processInstanceId,
                 "runtime-bundle-a",
                 "runtime-bundle-a",
                 "1",
                 null,
                 null,
-                                  "SUSPENDED",
-                                  new Date() /*lastModified*/,
-                                    new Date(),
-                                    "owner"
+                "SUSPENDED",
+                new Date() /*lastModified*/,
+                new Date(),
+                "owner",
+                "null"
         );
         TaskActivatedEvent givenEvent = new TaskActivatedEvent(System.currentTimeMillis(),
                                                               "taskActivated",
@@ -146,7 +147,8 @@ public class TaskActivatedEventHandlerIT {
                 "SUSPENDED",
                 new Date() /*lastModified*/,
                 new Date(), /*claimDate*/
-                "owner"
+                "owner",
+                null
         );
         TaskActivatedEvent givenEvent = new TaskActivatedEvent(System.currentTimeMillis(),
                                                                "taskActivated",

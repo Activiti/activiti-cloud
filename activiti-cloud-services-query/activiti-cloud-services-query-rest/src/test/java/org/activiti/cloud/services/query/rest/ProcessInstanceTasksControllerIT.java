@@ -88,7 +88,8 @@ public class ProcessInstanceTasksControllerIT {
                              org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED.name(),
                              new Date(),
                              new Date(),
-                             "peter"
+                             "peter",
+                             null
         );
 
         given(taskRepository.findAll(any(),
