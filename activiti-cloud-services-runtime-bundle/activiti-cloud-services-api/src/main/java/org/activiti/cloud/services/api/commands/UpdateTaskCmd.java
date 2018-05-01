@@ -22,7 +22,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class CreateTaskCmd implements Command {
+public class UpdateTaskCmd implements Command {
 
     private final String id;
     private String name;
@@ -32,12 +32,12 @@ public class CreateTaskCmd implements Command {
     private String assignee;
     private String parentTaskId;
 
-    public CreateTaskCmd() {
+    public UpdateTaskCmd() {
         this.id = UUID.randomUUID().toString();
     }
 
     @JsonCreator
-    public CreateTaskCmd(@JsonProperty("name") String name,
+    public UpdateTaskCmd(@JsonProperty("name") String name,
                          @JsonProperty("description") String description,
                          @JsonProperty("dueDate") Date dueDate,
                          @JsonProperty("priority") Integer priority,

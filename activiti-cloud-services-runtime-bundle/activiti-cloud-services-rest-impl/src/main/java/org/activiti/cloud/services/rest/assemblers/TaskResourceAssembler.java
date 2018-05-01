@@ -61,4 +61,9 @@ public class TaskResourceAssembler extends ResourceAssemblerSupport<Task, TaskRe
         return new TaskResource(task,
                                 links);
     }
+
+    @Override
+    public List<TaskResource> toResources(Iterable<? extends Task> entities) {
+        return super.toResources(entities);
+    }
 }

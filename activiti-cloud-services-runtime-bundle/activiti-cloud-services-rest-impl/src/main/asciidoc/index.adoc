@@ -201,6 +201,26 @@ include::{snippets}/task/new/http-response.adoc[]
 include::{snippets}/task/new/response-fields.adoc[]
 include::{snippets}/task/new/links.adoc[]
 
+==== Create a new subtask
+.Request
+include::{snippets}/task/subtask/http-request.adoc[]
+
+.Response
+include::{snippets}/task/subtask/http-response.adoc[]
+
+include::{snippets}/task/subtask/response-fields.adoc[]
+include::{snippets}/task/subtask/links.adoc[]
+
+==== Get a list of subtask
+.Request
+include::{snippets}/task//subtasks/get/http-request.adoc[]
+
+.Response
+include::{snippets}/task//subtasks/get/http-response.adoc[]
+
+include::{snippets}/task//subtasks/get/response-fields.adoc[]
+include::{snippets}/task//subtasks/get/links.adoc[]
+
 ==== Claim a task
 .Request
 include::{snippets}/task/claim/http-request.adoc[]

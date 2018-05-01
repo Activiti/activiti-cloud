@@ -2,12 +2,14 @@ package org.activiti.cloud.services.rest.api;
 
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.CreateTaskCmd;
+import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
 import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,4 +41,15 @@ public interface TaskController {
 
     @RequestMapping(method = RequestMethod.POST)
     Resource<Task> createNewTask(@RequestBody CreateTaskCmd createTaskCmd);
+
+    @RequestMapping(value = "/{taskId}", method = RequestMethod.PUT)
+    ResponseEntity<Void> updateTask(@PathVariable("taskId") String taskId,
+            @RequestBody UpdateTaskCmd updateTaskCmd);
+
+    @RequestMapping(value = "/{taskId}/subtask", method = RequestMethod.POST)
+    Resource<Task> createSubtask(@PathVariable String taskId,
+                                 @RequestBody CreateTaskCmd createSubtaskCmd);
+
+    @RequestMapping(value = "/{taskId}/subtasks", method = RequestMethod.GET)
+    Resources getSubtasks(@PathVariable String taskId);
 }

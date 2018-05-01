@@ -141,8 +141,8 @@ public class MessageProducerActivitiEventListenerIT {
         // then
         ProcessEngineEvent[] events = (ProcessEngineEvent[]) MockMessageChannel.messageResult.getPayload();
         assertThat(events.length).isEqualTo(2);
-        assertThat(events[0].getClass()).isEqualTo(TaskAssignedEventImpl.class);
-        assertThat(events[1].getClass()).isEqualTo(TaskCreatedEventImpl.class);
+        assertThat(events[0].getClass()).isEqualTo(TaskCreatedEventImpl.class);
+        assertThat(events[1].getClass()).isEqualTo(TaskAssignedEventImpl.class);
     }
 
     /**
