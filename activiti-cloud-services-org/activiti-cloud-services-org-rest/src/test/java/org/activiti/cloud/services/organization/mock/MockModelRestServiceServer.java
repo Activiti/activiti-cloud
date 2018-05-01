@@ -16,9 +16,12 @@
 
 package org.activiti.cloud.services.organization.mock;
 
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.ModelReference;
+import org.activiti.cloud.organization.core.service.ValidationErrorRepresentation;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
@@ -112,5 +115,20 @@ public class MockModelRestServiceServer {
                 .andRespond(withSuccess(new ObjectMapper().writeValueAsString(expectedProcessModel),
                                         APPLICATION_JSON));
         return this;
+    }
+
+    /**
+     * Expect a certain process-model to be validated
+     * @param validationErrorRepresentations
+     * @throws JsonProcessingException
+     */
+    public void expectProcessModelValidation(List<ValidationErrorRepresentation> validationErrorRepresentations) throws JsonProcessingException {
+        mockRestServer
+                .expect(requestToUriTemplate("{url}{version}/process-models/validate",
+                                             PROCESS_MODEL_URL,
+                                             API_VERSION))
+                .andExpect(method(POST))
+                .andRespond(withSuccess(new ObjectMapper().writeValueAsString(validationErrorRepresentations),
+                                        APPLICATION_JSON));
     }
 }

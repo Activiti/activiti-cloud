@@ -16,13 +16,19 @@
 
 package org.activiti.cloud.organization.core.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import static org.springframework.http.HttpMethod.GET;
@@ -80,10 +86,52 @@ public class RestClientService {
     }
 
     /**
+     * Make the rest call to validate a model
+     * @param restResourceUrl the url of the rest resource
+     * @param modelFilename model filename to be validated
+     * @param modelContent model content  to be validated
+     * @return the resource as json string
+     */
+    public List<ValidationErrorRepresentation> validateModel(String restResourceUrl,
+                                                             String modelFilename,
+                                                             byte[] modelContent) {
+        MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+        bodyMap.add("file",
+                    new ByteArrayResource(modelContent) {
+                        @Override
+                        public String getFilename() {
+                            return modelFilename;
+                        }
+                    });
+
+        log.trace("Validating rest resource using URL " + restResourceUrl);
+
+        return restTemplate.exchange(restResourceUrl,
+                                     POST,
+                                     new HttpEntity<>(bodyMap,
+                                                      multipartFormData()),
+                                     new ParameterizedTypeReference<List<ValidationErrorRepresentation>>() {
+                                     }
+
+        )
+                .getBody();
+    }
+
+    /**
+     * Create and get simple http header for multipart form data request.
+     * @return the created http headers
+     */
+    private HttpHeaders multipartFormData() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        return headers;
+    }
+
+    /**
      * Create and get simple http header for json request.
      * @return the created http headers
      */
-    protected HttpHeaders jsonHeaders() {
+    private HttpHeaders jsonHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
