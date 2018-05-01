@@ -71,7 +71,7 @@ public class BaseSecurityPoliciesApplicationService {
             keys.addAll(policiesMap.get(appName));
         }
         //also factor for case sensitivity and hyphens (which are stripped when specified through env var)
-        if(policiesMap.get(appName.replaceAll("-","").toLowerCase()) != null){
+        if(appName!=null && policiesMap.get(appName.replaceAll("-","").toLowerCase()) != null){
             keys.addAll(policiesMap.get(appName.replaceAll("-","").toLowerCase()));
         }
 
