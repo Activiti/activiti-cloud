@@ -40,6 +40,9 @@ public class RuntimeTestsConfigurationProperties {
     @Value("${query.url}")
     private String queryUrl;
 
+    @Value("${apps.url}")
+    private String appsUrl;
+
     public String getAuditEventUrl() {
         return auditEventUrl;
     }
@@ -50,5 +53,9 @@ public class RuntimeTestsConfigurationProperties {
 
     public String getQueryUrl() {
         return queryUrl;
+    }
+
+    public String getAppsUrl() {
+        return appsUrl;
     }
 }
