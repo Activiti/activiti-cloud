@@ -1,5 +1,6 @@
 package org.activiti.cloud.services.audit.mongo.config;
 
+import org.activiti.cloud.services.audit.mongo.events.ProcessCancelledEventDocument;
 import org.activiti.cloud.services.audit.mongo.events.TaskCompletedEventDocument;
 import org.activiti.cloud.services.audit.mongo.events.ActivityCompletedEventDocument;
 import org.activiti.cloud.services.audit.mongo.events.ActivityStartedEventDocument;
@@ -33,6 +34,7 @@ public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
         config.exposeIdsFor(ActivityStartedEventDocument.class);
         config.exposeIdsFor(ProcessCompletedEventDocument.class);
         config.exposeIdsFor(ProcessStartedEventDocument.class);
+        config.exposeIdsFor(ProcessCancelledEventDocument.class);
         config.exposeIdsFor(SequenceFlowTakenEventDocument.class);
         config.exposeIdsFor(TaskAssignedEventDocument.class);
         config.exposeIdsFor(TaskCompletedEventDocument.class);

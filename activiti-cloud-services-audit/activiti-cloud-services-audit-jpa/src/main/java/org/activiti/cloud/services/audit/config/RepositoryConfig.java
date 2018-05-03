@@ -18,10 +18,16 @@ package org.activiti.cloud.services.audit.config;
 
 import org.activiti.cloud.services.audit.events.ActivityCompletedEventEntity;
 import org.activiti.cloud.services.audit.events.ActivityStartedEventEntity;
+import org.activiti.cloud.services.audit.events.ProcessCancelledEventEntity;
 import org.activiti.cloud.services.audit.events.ProcessCompletedEventEntity;
 import org.activiti.cloud.services.audit.events.ProcessStartedEventEntity;
 import org.activiti.cloud.services.audit.events.SequenceFlowTakenEventEntity;
 import org.activiti.cloud.services.audit.events.TaskAssignedEventEntity;
+import org.activiti.cloud.services.audit.events.TaskCancelledEventEntity;
+import org.activiti.cloud.services.audit.events.TaskCandidateGroupAddedEventEntity;
+import org.activiti.cloud.services.audit.events.TaskCandidateGroupRemovedEventEntity;
+import org.activiti.cloud.services.audit.events.TaskCandidateUserAddedEventEntity;
+import org.activiti.cloud.services.audit.events.TaskCandidateUserRemovedEventEntity;
 import org.activiti.cloud.services.audit.events.TaskCompletedEventEntity;
 import org.activiti.cloud.services.audit.events.TaskCreatedEventEntity;
 import org.activiti.cloud.services.audit.events.VariableCreatedEventEntity;
@@ -42,12 +48,18 @@ public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
 
         config.exposeIdsFor(ActivityCompletedEventEntity.class);
         config.exposeIdsFor(ActivityStartedEventEntity.class);
+        config.exposeIdsFor(ProcessCancelledEventEntity.class);
         config.exposeIdsFor(ProcessCompletedEventEntity.class);
         config.exposeIdsFor(ProcessStartedEventEntity.class);
         config.exposeIdsFor(SequenceFlowTakenEventEntity.class);
         config.exposeIdsFor(TaskAssignedEventEntity.class);
         config.exposeIdsFor(TaskCompletedEventEntity.class);
         config.exposeIdsFor(TaskCreatedEventEntity.class);
+        config.exposeIdsFor(TaskCancelledEventEntity.class);
+        config.exposeIdsFor(TaskCandidateUserAddedEventEntity.class);
+        config.exposeIdsFor(TaskCandidateUserRemovedEventEntity.class);
+        config.exposeIdsFor(TaskCandidateGroupAddedEventEntity.class);
+        config.exposeIdsFor(TaskCandidateGroupRemovedEventEntity.class);
         config.exposeIdsFor(VariableCreatedEventEntity.class);
         config.exposeIdsFor(VariableDeletedEventEntity.class);
         config.exposeIdsFor(VariableUpdatedEventEntity.class);
