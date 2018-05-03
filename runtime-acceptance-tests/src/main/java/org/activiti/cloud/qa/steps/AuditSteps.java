@@ -17,9 +17,7 @@
 package org.activiti.cloud.qa.steps;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.Event;
@@ -28,7 +26,6 @@ import org.activiti.cloud.qa.model.TaskStatus;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.AuditService;
 import org.assertj.core.api.Condition;
-import org.jsoup.select.Collector;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.*;
@@ -120,10 +117,10 @@ public class AuditSteps {
                             "eventType")
                 .containsExactly(
                         tuple(taskId,
-                              TaskStatus.ASSIGNED,
-                              EventType.TASK_ASSIGNED),
+                                TaskStatus.ASSIGNED,
+                                EventType.TASK_ASSIGNED),
                         tuple(taskId,
-                              TaskStatus.CREATED,
+                              TaskStatus.ASSIGNED,
                               EventType.TASK_CREATED));
     }
 
@@ -142,14 +139,15 @@ public class AuditSteps {
                             "eventType")
                 .containsExactly(
                         tuple(taskId,
-                              TaskStatus.CANCELLED,
-                              EventType.TASK_CANCELLED),
+                                TaskStatus.CANCELLED,
+                                EventType.TASK_CANCELLED),
                         tuple(taskId,
-                              TaskStatus.ASSIGNED,
-                              EventType.TASK_ASSIGNED),
+                                TaskStatus.ASSIGNED,
+                                EventType.TASK_ASSIGNED),
                         tuple(taskId,
-                              TaskStatus.CREATED,
-                              EventType.TASK_CREATED));
+                                TaskStatus.ASSIGNED,
+                                EventType.TASK_CREATED)
+);
     }
 
     /**

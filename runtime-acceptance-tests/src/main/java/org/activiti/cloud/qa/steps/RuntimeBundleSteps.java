@@ -120,7 +120,7 @@ public class RuntimeBundleSteps {
 
     @Step
     public void waitForMessagesToBeConsumed() throws InterruptedException {
-        Thread.sleep(200);
+        Thread.sleep(220);
     }
 
     @Step
@@ -193,6 +193,6 @@ public class RuntimeBundleSteps {
     public void checkTaskNotFound(String taskId) {
         assertThatExceptionOfType(Exception.class).isThrownBy(
                 () -> runtimeBundleService.getTaskById(taskId)
-        ).withMessageContaining("Not Found");
+        ).withMessageContaining("Unable to find task");
     }
 }
