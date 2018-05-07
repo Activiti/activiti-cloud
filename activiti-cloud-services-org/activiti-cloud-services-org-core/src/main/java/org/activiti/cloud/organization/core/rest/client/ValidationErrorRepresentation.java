@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.service;
+package org.activiti.cloud.organization.core.rest.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.activiti.validation.ValidationError;

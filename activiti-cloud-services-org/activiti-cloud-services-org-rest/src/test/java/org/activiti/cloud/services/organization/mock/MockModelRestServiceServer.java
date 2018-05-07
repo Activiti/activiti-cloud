@@ -21,11 +21,11 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.service.ValidationErrorRepresentation;
+import org.activiti.cloud.organization.core.rest.client.ValidationErrorRepresentation;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
-import static org.activiti.cloud.services.organization.config.RepositoryRestConfig.API_VERSION;
+import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.CREATED;

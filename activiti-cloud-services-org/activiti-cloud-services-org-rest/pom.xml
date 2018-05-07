@@ -20,6 +20,10 @@
       <artifactId>activiti-cloud-services-org-core</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-dbp-rest</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-all</artifactId>
       <scope>test</scope>

@@ -22,9 +22,9 @@ import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.model.Project;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.services.organization.config.Application;
-import org.activiti.cloud.services.organization.config.RepositoryRestConfig;
-import org.activiti.cloud.services.organization.jpa.ModelRepository;
-import org.activiti.cloud.services.organization.jpa.ProjectRepository;
+import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
+import org.activiti.cloud.services.organization.jpa.ProjectJpaRepository;
+import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,10 +66,10 @@ public class ProjectRestIT {
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private ProjectRepository projectRepository;
+    private ProjectJpaRepository projectRepository;
 
     @Autowired
-    private ModelRepository modelRepository;
+    private ModelJpaRepository modelRepository;
 
     @Autowired
     private ObjectMapper mapper;
@@ -81,8 +81,8 @@ public class ProjectRestIT {
 
     @After
     public void tearDown() {
-        projectRepository.deleteAllInBatch();
         modelRepository.deleteAllInBatch();
+        projectRepository.deleteAllInBatch();
     }
 
     @Test

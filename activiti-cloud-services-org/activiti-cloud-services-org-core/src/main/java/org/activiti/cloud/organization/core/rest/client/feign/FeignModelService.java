@@ -23,7 +23,7 @@ import javax.annotation.Resource;
 import org.activiti.cloud.organization.core.model.Model.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
-import org.activiti.cloud.organization.core.service.ValidationErrorRepresentation;
+import org.activiti.cloud.organization.core.rest.client.ValidationErrorRepresentation;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;

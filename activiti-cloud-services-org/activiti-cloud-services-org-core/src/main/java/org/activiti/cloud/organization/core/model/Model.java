@@ -24,6 +24,7 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import org.activiti.cloud.organization.core.audit.AuditableEntity;
 import org.activiti.cloud.organization.core.rest.resource.EntityWithRestResource;
 import org.activiti.cloud.organization.core.rest.resource.RestResource;
 
@@ -36,7 +37,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @EntityWithRestResource
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class Model {
+public class Model extends AuditableEntity<String> {
 
     @Id
     private String id;

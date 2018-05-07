@@ -18,14 +18,15 @@ package org.activiti.cloud.services.organization.rest.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.Model;
+import org.activiti.cloud.organization.core.repository.ModelRepository;
 import org.activiti.cloud.services.organization.config.Application;
-import org.activiti.cloud.services.organization.jpa.ModelRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
+import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
@@ -34,6 +35,7 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
 import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -67,6 +69,7 @@ public class ProcessModelServiceRestClientIT {
                                        "newProcesModelId");
 
         given()
+                .contentType(APPLICATION_JSON_VALUE)
                 .body(mapper.writeValueAsString(processModel))
                 .post("/v1/models")
                 .then().expect(status().isCreated());
@@ -79,9 +82,10 @@ public class ProcessModelServiceRestClientIT {
                                        PROCESS_MODEL,
                                        "contractUpdateProcesModelId");
         processModel.getData().setContent("someContent");
-        modelRepository.save(processModel);
+        modelRepository.createModel(processModel);
 
         given()
+                .contentType(APPLICATION_JSON_VALUE)
                 .body(mapper.writeValueAsString(processModel))
                 .put("/v1/models/processModel_id2")
                 .then().expect(status().isNoContent());
@@ -93,9 +97,10 @@ public class ProcessModelServiceRestClientIT {
                                        "testProcesModelName",
                                        PROCESS_MODEL,
                                        "contractUpdateProcesModelId");
-        modelRepository.save(processModel);
+        modelRepository.createModel(processModel);
 
         given()
+                .contentType(APPLICATION_JSON_VALUE)
                 .get("/v1/models/processModel_id")
                 .then().expect(status().isOk())
                 .and().body("name",

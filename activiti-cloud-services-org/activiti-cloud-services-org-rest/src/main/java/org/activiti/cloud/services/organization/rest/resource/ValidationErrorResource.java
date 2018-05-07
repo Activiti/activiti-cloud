@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.jpa;
+package org.activiti.cloud.services.organization.rest.resource;
 
-import org.activiti.cloud.organization.core.model.Project;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.activiti.cloud.organization.core.rest.client.ValidationErrorRepresentation;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 
-/**
- * JPA Repository for {@link Project} entity
- */
-@RepositoryRestResource(path = "projects",
-        collectionResourceRel = "projects",
-        itemResourceRel = "projects")
-public interface ProjectRepository extends JpaRepository<Project, String> {
+public class ValidationErrorResource extends Resource<ValidationErrorRepresentation> {
 
+    public ValidationErrorResource(ValidationErrorRepresentation content,
+                                   Iterable<Link> links) {
+        super(content,
+              links);
+    }
 }

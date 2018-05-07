@@ -14,20 +14,33 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.config;
+package org.activiti.cloud.services.organization.rest.config;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
+import org.springframework.data.rest.webmvc.convert.UriListHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
 
 @Configuration
 public class RepositoryRestConfig extends RepositoryRestConfigurerAdapter {
 
     public static final String API_VERSION = "/v1";
 
+    @Autowired
+    private UriListHttpMessageConverter uriListHttpMessageConverter;
+
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
 
         config.setBasePath(API_VERSION);
+    }
+
+    @Override
+    public void configureHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
+        messageConverters.add(uriListHttpMessageConverter);
     }
 }

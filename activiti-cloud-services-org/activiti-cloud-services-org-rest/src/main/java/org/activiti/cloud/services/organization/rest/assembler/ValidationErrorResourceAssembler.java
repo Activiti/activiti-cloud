@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.assemblers;
+package org.activiti.cloud.services.organization.rest.assembler;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.activiti.cloud.organization.core.service.ValidationErrorRepresentation;
-import org.activiti.cloud.services.organization.controllers.ValidateModelController;
-import org.activiti.cloud.services.organization.resources.ValidationErrorResource;
+import org.activiti.cloud.organization.core.rest.client.ValidationErrorRepresentation;
+import org.activiti.cloud.services.organization.rest.controller.ValidateModelController;
+import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.stereotype.Component;
 

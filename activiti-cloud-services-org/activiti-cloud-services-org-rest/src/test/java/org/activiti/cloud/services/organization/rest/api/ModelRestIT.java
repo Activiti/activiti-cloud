@@ -21,8 +21,7 @@ import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.services.organization.config.Application;
-import org.activiti.cloud.services.organization.config.RepositoryRestConfig;
-import org.activiti.cloud.services.organization.jpa.ModelRepository;
+import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.organization.core.model.Model.ModelType.FORM;
 import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
 import static org.assertj.core.api.Assertions.*;
@@ -66,7 +66,7 @@ public class ModelRestIT {
     private ObjectMapper mapper;
 
     @Autowired
-    private ModelRepository modelRepository;
+    private ModelJpaRepository modelRepository;
 
     @Before
     public void setUp() {
@@ -112,7 +112,7 @@ public class ModelRestIT {
 
         //when
         ResultActions resultActions = mockMvc.perform(get("{version}/models/form_model_id",
-                                                          RepositoryRestConfig.API_VERSION))
+                                                          API_VERSION))
                 .andDo(print());
 
         //then
@@ -122,7 +122,7 @@ public class ModelRestIT {
 
         //when
         resultActions = mockMvc.perform(get("{version}/models/process_model_id",
-                                            RepositoryRestConfig.API_VERSION))
+                                            API_VERSION))
                 .andDo(print());
 
         //then
@@ -143,7 +143,7 @@ public class ModelRestIT {
                                     "form_model_refId");
 
         mockMvc.perform(post("{version}/models",
-                             RepositoryRestConfig.API_VERSION)
+                             API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(formModel)))
                 .andDo(print())

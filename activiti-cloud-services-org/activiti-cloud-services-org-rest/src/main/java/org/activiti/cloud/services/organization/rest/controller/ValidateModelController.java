@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.controllers;
+package org.activiti.cloud.services.organization.rest.controller;
 
 import java.io.IOException;
 import java.util.List;
 
+import org.activiti.cloud.organization.core.model.Model;
+import org.activiti.cloud.organization.core.repository.ModelRepository;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
-import org.activiti.cloud.organization.core.service.ValidationErrorRepresentation;
-import org.activiti.cloud.services.organization.assemblers.ValidationErrorResourceAssembler;
-import org.activiti.cloud.services.organization.jpa.ModelRepository;
-import org.activiti.cloud.services.organization.resources.ValidationErrorResource;
+import org.activiti.cloud.organization.core.rest.client.ValidationErrorRepresentation;
+import org.activiti.cloud.services.organization.rest.assembler.ValidationErrorResourceAssembler;
+import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.MediaTypes;
@@ -35,9 +36,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.activiti.cloud.services.organization.config.RepositoryRestConfig.API_VERSION;
+import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
+/**
+ * Controller for validation the content of a {@link Model}
+ */
 @RestController
 @RequestMapping(value = API_VERSION)
 public class ValidateModelController {
@@ -63,7 +67,7 @@ public class ValidateModelController {
 
         byte[] fileContent = file.getBytes();
         List<ValidationErrorRepresentation> validationResult = modelRepository
-                .findById(modelId)
+                .findModelById(modelId)
                 .map(model -> modelService.validateResourceContent(model.getType(),
                                                                    fileContent))
                 .orElseThrow(ResourceNotFoundException::new);
