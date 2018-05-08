@@ -19,20 +19,18 @@ package org.activiti.services.connectors.behavior;
 import java.util.Date;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.delegate.DelegateExecution;
-import org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
-import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.delegate.TriggerableActivityBehavior;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
+import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.model.IntegrationRequestEvent;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-@Component(DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME)
-public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implements TriggerableActivityBehavior {
+public class MQServiceTaskBehavior extends DefaultServiceTaskBehavior implements TriggerableActivityBehavior {
 
     private final IntegrationContextManager integrationContextManager;
     private final RuntimeBundleProperties runtimeBundleProperties;
@@ -40,7 +38,9 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
 
     public MQServiceTaskBehavior(IntegrationContextManager integrationContextManager,
                                  RuntimeBundleProperties runtimeBundleProperties,
-                                 ApplicationEventPublisher eventPublisher) {
+                                 ApplicationEventPublisher eventPublisher,
+                                 ApplicationContext applicationContext) {
+        super(applicationContext);
         this.integrationContextManager = integrationContextManager;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.eventPublisher = eventPublisher;
@@ -48,9 +48,15 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
 
     @Override
     public void execute(DelegateExecution execution) {
-        IntegrationContextEntity integrationContext = storeIntegrationContext(execution);
+        if(hasConnectorBean(execution)){
+            // use de default implementation -> directly call a bean
+            super.execute(execution);
+        } else {
+            IntegrationContextEntity integrationContext = storeIntegrationContext(execution);
 
-        publishSpringEvent(execution, integrationContext);
+            publishSpringEvent(execution,
+                               integrationContext);
+        }
     }
 
     /**
