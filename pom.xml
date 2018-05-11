@@ -24,6 +24,7 @@
     <!-- dependencies -->
     <activiti-cloud-service-common.version>7-201803-EA-SNAPSHOT</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle.version>7-201803-EA-SNAPSHOT</activiti-cloud-runtime-bundle.version>
+    <activiti-cloud-app.version>7-201803-EA-SNAPSHOT</activiti-cloud-app.version>
     <activiti-cloud-audit.version>7-201803-EA-SNAPSHOT</activiti-cloud-audit.version>
     <activiti-cloud-query.version>7-201803-EA-SNAPSHOT</activiti-cloud-query.version>
     <activiti-cloud-connectors.version>7-201803-EA-SNAPSHOT</activiti-cloud-connectors.version>
@@ -49,10 +50,12 @@
     <springfox.version>2.8.0</springfox.version>
     <swagger.version>1.5.10</swagger.version>
     <xstream.version>1.4.10</xstream.version>
+    <spring-cloud-kuberentes.version>0.3.0.RC1</spring-cloud-kuberentes.version>
   </properties>
   <modules>
     <module>activiti-cloud-service-common-dependencies</module>
     <module>activiti-cloud-runtime-bundle-dependencies</module>
+    <module>activiti-cloud-app-dependencies</module>
     <module>activiti-cloud-query-dependencies</module>
     <module>activiti-cloud-audit-dependencies</module>
     <module>activiti-cloud-connectors-dependencies</module>
@@ -156,6 +159,11 @@
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java</artifactId>
         <version>${graphql-java.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-kubernetes-discovery</artifactId>
+        <version>${spring-cloud-kuberentes.version}</version>
       </dependency>
       <!-- Querydsl dependencies http://www.querydsl.com -->
       <dependency>
