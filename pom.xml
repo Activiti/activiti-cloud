@@ -184,7 +184,7 @@
       </dependency>
       <dependency>
         <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-jetty94-adapter</artifactId>
+        <artifactId>keycloak-tomcat8-adapter</artifactId>
         <version>${keycloak.version}</version>
       </dependency>
       <dependency>
@@ -192,7 +192,7 @@
         <artifactId>keycloak-spring-boot-adapter-core</artifactId>
         <version>${keycloak-spring-boot.version}</version>
       </dependency>
-      <!-- addresses https://issues.jboss.org/browse/KEYCLOAK-2009 , may not be needed on servers other than embedded jetty -->
+      <!-- addresses https://issues.jboss.org/browse/KEYCLOAK-2009 -->
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-client</artifactId>
