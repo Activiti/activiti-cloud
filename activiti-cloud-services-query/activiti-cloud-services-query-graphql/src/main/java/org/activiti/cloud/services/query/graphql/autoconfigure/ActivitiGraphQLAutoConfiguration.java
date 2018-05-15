@@ -22,8 +22,12 @@ import com.introproventures.graphql.jpa.query.schema.GraphQLSchemaBuilder;
 import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
 import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaSchemaBuilder;
 import graphql.GraphQL;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.StaticDataFetcher;
 import org.activiti.cloud.services.query.graphql.web.ActivitiGraphQLController;
 import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.qraphql.ws.schema.GraphQLSubscriptionSchemaBuilder;
+import org.activiti.cloud.services.query.qraphql.ws.schema.GraphQLSubscriptionSchemaProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -42,11 +46,10 @@ import org.springframework.util.Assert;
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
  */
 @Configuration
-@ConditionalOnClass(GraphQL.class)
+@ConditionalOnClass({GraphQL.class})
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
 @PropertySource("classpath:/org/activiti/cloud/services/query/graphql/default.properties")
 public class ActivitiGraphQLAutoConfiguration {
-
 
     /**
      * Provides default configuration of Activiti GraphQL JPA Query Components
@@ -62,11 +65,25 @@ public class ActivitiGraphQLAutoConfiguration {
         @Autowired
         private ActivitiGraphQLSchemaProperties properties;
 
+        @Autowired
+        private GraphQLSubscriptionSchemaProperties subscriptionProperties;
+
         @Bean
         @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
         @ConditionalOnMissingBean(GraphQLExecutor.class)
-        public GraphQLExecutor graphQLExecutor(final GraphQLSchemaBuilder graphQLSchemaBuilder) {
-            return new GraphQLJpaExecutor(graphQLSchemaBuilder.build());
+        public GraphQLExecutor graphQLExecutor(final GraphQLSchemaBuilder querySchemaBuilder,
+                                               final GraphQLSubscriptionSchemaBuilder subscriptionSchemaBuilder) {
+
+            // Use NoOp DataFetcher for subscription schema fields via REST endpoint
+            subscriptionSchemaBuilder.withSubscription(subscriptionProperties.getSubscriptionFieldName(), new StaticDataFetcher(null));
+
+            // Merge query and subscriptions schemas into one
+            GraphQLSchema querySchema = GraphQLSchema
+                    .newSchema(querySchemaBuilder.build())
+                    .subscription(subscriptionSchemaBuilder.getGraphQLSchema().getSubscriptionType())
+                    .build();
+
+            return new GraphQLJpaExecutor(querySchema);
         }
 
         @Bean

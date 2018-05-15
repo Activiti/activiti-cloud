@@ -48,10 +48,10 @@ public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResul
     private final AtomicReference<Subscription> subscriptionRef = new AtomicReference<>();
 
 	public GraphQLBrokerChannelSubscriber(Message<?> message,  String operationMessageId,
-			MessageChannel simpMessagingTemplate,
+			MessageChannel outboundChannel,
 			long bufferTimeSpanMs, int bufferCount)
 	{
-		this.outboundChannel = simpMessagingTemplate;
+		this.outboundChannel = outboundChannel;
 		this.operationMessageId = operationMessageId;
 		this.headerAccessor = SimpMessageHeaderAccessor.getMutableAccessor(message);
 

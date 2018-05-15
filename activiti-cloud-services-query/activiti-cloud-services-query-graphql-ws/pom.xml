@@ -12,8 +12,12 @@
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-query-graphql</artifactId>
+      <artifactId>activiti-cloud-services-query-graphql-ws-schema</artifactId>
     </dependency>
+    <dependency> 
+      <groupId>com.introproventures</groupId> 
+      <artifactId>graphql-jpa-query-schema</artifactId> 
+    </dependency>     
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-websocket</artifactId>
@@ -21,17 +25,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <!-- exclude tomcat and use embedded jetty, see root pom -->
-      <exclusions>
-        <exclusion>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-starter-tomcat</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-jetty</artifactId>
     </dependency>
     <dependency>
       <groupId>io.reactivex.rxjava2</groupId>

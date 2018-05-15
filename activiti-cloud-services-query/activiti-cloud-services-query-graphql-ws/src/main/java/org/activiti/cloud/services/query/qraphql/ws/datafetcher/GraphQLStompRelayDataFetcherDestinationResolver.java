@@ -23,39 +23,40 @@ import java.util.stream.Stream;
 
 import graphql.schema.DataFetchingEnvironment;
 
-public class ProcessEngineNotificationStompRelayDataFetcherDestinationResolver implements StompRelayDestinationResolver {
+public class GraphQLStompRelayDataFetcherDestinationResolver implements StompRelayDestinationResolver {
+
+    private static final String HASH = "#";
+    private static final String WILDCARD = "*";
+    private static final String DOT = ".";
+
+    private final String[] argumentNames;
+
+    public GraphQLStompRelayDataFetcherDestinationResolver(String[] argumentNames) {
+        this.argumentNames = argumentNames;
+    }
 
 	@Override
 	public List<String> resolveDestinations(DataFetchingEnvironment environment) {
 		String fieldName = environment.getFields().iterator().next().getName();
 		List<String> destinations = new ArrayList<>();
 
-		String destination = "#";
+		String destination = HASH;
 
 		// Build stomp destination from arguments
 		if(environment.getArguments().size() > 0) {
 
-    		Optional<String> processInstanceId = resolveArgument(environment, "processInstanceId");
-            Optional<String> serviceName = resolveArgument(environment, "serviceName");
-			Optional<String> appName = resolveArgument(environment, "appName");
-			Optional<String> processDefinitionId = resolveArgument(environment, "processDefinitionId");
-
-            destination = Stream.<Optional<String>>builder()
-                .add(serviceName)
-                .add(appName)
-                .add(processDefinitionId)
-                .add(processInstanceId)
-                .build()
-                .map(value -> value.orElse("*"))
-                .collect(Collectors.joining("."));
+		    destination = Stream.of(argumentNames)
+		        .map(name -> resolveArgument(environment, name))
+                .map(value -> value.orElse(WILDCARD))
+                .collect(Collectors.joining(DOT));
         }
 
-        destinations.add(fieldName+"."+destination);
+        destinations.add(fieldName+DOT+destination);
 
 		return destinations;
 	}
 
-	private <R> Optional<R> resolveArgument(DataFetchingEnvironment environment, String arumentName) {
+	private Optional<String> resolveArgument(DataFetchingEnvironment environment, String arumentName) {
 	    return Optional.ofNullable(environment.getArgument(arumentName));
 	}
 

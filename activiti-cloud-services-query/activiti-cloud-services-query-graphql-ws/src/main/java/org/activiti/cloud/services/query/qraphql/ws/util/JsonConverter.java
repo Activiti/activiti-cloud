@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,10 +38,6 @@ public class JsonConverter {
     static final ObjectMapper JSON = new ObjectMapper()
     		.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, true)
     		.setSerializationInclusion(Include.ALWAYS);
-
-    public static void toJson(HttpServletResponse response, Object result) throws IOException {
-        JSON.writeValue(response.getWriter(), result);
-    }
 
     public static Map<String, Object> toMap(String jsonStr) throws JsonParseException, JsonMappingException, IOException {
         if (jsonStr == null || jsonStr.trim().length() == 0) {

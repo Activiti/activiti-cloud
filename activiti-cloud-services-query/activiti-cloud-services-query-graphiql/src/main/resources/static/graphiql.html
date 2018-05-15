@@ -110,11 +110,12 @@
       function graphQLFetcher(graphQLParams) {
         // This example expects a GraphQL server at the path /graphql.
         // Change this to point wherever you host your GraphQL server.
-        return fetch('./graphql', {
+        return fetch('./admin/graphql', {
           method: 'post',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
+            //'Authorization': 'Bearer ${prompt('Enter your token:', '')}',
           },
           body: JSON.stringify(graphQLParams),
           credentials: 'include',
@@ -129,9 +130,10 @@
         });
       }
 
-      var serverPathUrl = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-	  var wsURL = (window.location.protocol == "https:" ? "wss://" : "ws://") + 
-	  	window.location.host + serverPathUrl + "./ws/graphql";
+      // Build websocket endpoint
+	  var wsURL = (window.location.protocol == "https:" ? "wss://" : "ws://") 
+	  				+ window.location.host 
+	  				+ "/ws/graphql";
 	
       //  create a SubscriptionClient with your subscriptions endpoint
       var subscriptionsClient = new window.SubscriptionsTransportWs.SubscriptionClient(wsURL, { reconnect: true });

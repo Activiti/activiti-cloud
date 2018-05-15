@@ -86,14 +86,14 @@ public class GraphQLBrokerSubscriptionRegistry {
 
 
     public SessionSubscriptionInfo get(String sessionId) {
-		return subscriptionRegistry.get(sessionId);
+        return subscriptionRegistry.getOrDefault(sessionId, new SessionSubscriptionInfo(sessionId));
     }
 
 
 	/**
 	 * Hold subscriptions for a session.
 	 */
-	private static class SessionSubscriptionInfo {
+    public static class SessionSubscriptionInfo {
 
 		private final String sessionId;
 

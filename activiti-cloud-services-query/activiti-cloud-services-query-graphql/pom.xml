@@ -15,6 +15,10 @@
       <artifactId>activiti-cloud-services-query-model</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-graphql-ws-schema</artifactId>
+    </dependency>    
+    <dependency>
       <groupId>com.introproventures</groupId>
       <artifactId>graphql-jpa-query-schema</artifactId>
     </dependency>

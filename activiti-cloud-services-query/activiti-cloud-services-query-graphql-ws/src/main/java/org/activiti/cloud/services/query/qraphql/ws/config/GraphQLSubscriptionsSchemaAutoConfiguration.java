@@ -16,62 +16,50 @@
 package org.activiti.cloud.services.query.qraphql.ws.config;
 
 import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
-import com.introproventures.graphql.jpa.query.schema.GraphQLSchemaBuilder;
 import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
-import graphql.schema.GraphQLSchema;
-import org.activiti.cloud.services.query.graphql.autoconfigure.EnableActivitiGraphQLQueryService;
+import org.activiti.cloud.services.query.qraphql.ws.datafetcher.GraphQLStompRelayDataFetcherDestinationResolver;
 import org.activiti.cloud.services.query.qraphql.ws.datafetcher.StompRelayDataFetcher;
+import org.activiti.cloud.services.query.qraphql.ws.datafetcher.StompRelayDestinationResolver;
 import org.activiti.cloud.services.query.qraphql.ws.datafetcher.StompRelayPublisherFactory;
 import org.activiti.cloud.services.query.qraphql.ws.schema.GraphQLSubscriptionSchemaBuilder;
+import org.activiti.cloud.services.query.qraphql.ws.schema.GraphQLSubscriptionSchemaProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import graphql.GraphQL;
 
 @Configuration
-@ConditionalOnClass(GraphQL.class)
-@EnableActivitiGraphQLQueryService
-@ConditionalOnProperty(name="spring.activiti.cloud.services.notifications.gateway.enabled", matchIfMissing = true)
-@ConditionalOnExpression("${spring.activiti.cloud.services.query.graphql.enabled}==null or ${spring.activiti.cloud.services.query.graphql.enabled}")
+@ConditionalOnClass({GraphQLSubscriptionSchemaBuilder.class, StompRelayPublisherFactory.class})
+@ConditionalOnProperty(name="spring.activiti.cloud.services.query.graphql.ws.enabled", matchIfMissing = true)
 public class GraphQLSubscriptionsSchemaAutoConfiguration {
 
-
     @Configuration
-    @ConditionalOnProperty(name="spring.activiti.cloud.services.notifications.gateway.enabled", matchIfMissing = true)
-    @ConditionalOnExpression("${spring.activiti.cloud.services.query.graphql.enabled}==null or ${spring.activiti.cloud.services.query.graphql.enabled}")
     public static class DefaultGraphQLSubscriptionsSchemaConfiguration {
 
-        private String graphQLSchemaFileName = "activiti.graphqls";
-
-        private String graphQLSchemaSubscriptionFieldName = "ProcessEngineNotification";
+        @Autowired
+        private GraphQLSubscriptionSchemaProperties subscriptionProperties;
 
         @Bean
-        @ConditionalOnProperty(name="spring.activiti.cloud.services.notifications.gateway.enabled", matchIfMissing = true)
-        @ConditionalOnExpression("${spring.activiti.cloud.services.query.graphql.enabled}==null or ${spring.activiti.cloud.services.query.graphql.enabled}")
-        public GraphQLSubscriptionSchemaBuilder graphqlSchemaBuilder(StompRelayPublisherFactory stompRelay) {
-
-            GraphQLSubscriptionSchemaBuilder schemaBuilder = new GraphQLSubscriptionSchemaBuilder(graphQLSchemaFileName);
-
-            schemaBuilder.withSubscription(graphQLSchemaSubscriptionFieldName, new StompRelayDataFetcher(stompRelay));
-
-            return schemaBuilder;
+        @ConditionalOnMissingBean
+        public StompRelayDestinationResolver stompRelayDestinationResolver() {
+            return new GraphQLStompRelayDataFetcherDestinationResolver(subscriptionProperties.getSubscriptionArgumentNames());
         }
 
         @Bean
-        @ConditionalOnProperty(name="spring.activiti.cloud.services.notifications.gateway.enabled", matchIfMissing = true)
-        @ConditionalOnExpression("${spring.activiti.cloud.services.query.graphql.enabled}==null or ${spring.activiti.cloud.services.query.graphql.enabled}")
-        public GraphQLExecutor graphQLExecutor(final GraphQLSchemaBuilder querySchemaBuilder,
-                                               final GraphQLSubscriptionSchemaBuilder subscriptionSchemaBuilder)
-        {
-            // Merge query and subscriptions schemas into one
-            GraphQLSchema querySchema = GraphQLSchema
-                    .newSchema(querySchemaBuilder.build())
-                    .subscription(subscriptionSchemaBuilder.getGraphQLSchema().getSubscriptionType())
-                    .build();
+        @ConditionalOnMissingBean
+        public StompRelayDataFetcher stompRelayDataFetcher(StompRelayPublisherFactory stompRelayPublisherFactory) {
+            return new StompRelayDataFetcher(stompRelayPublisherFactory);
+        }
 
-            return new GraphQLJpaExecutor(querySchema);
+        @Bean
+        @ConditionalOnMissingBean
+        public GraphQLExecutor graphQLExecutor(final GraphQLSubscriptionSchemaBuilder subscriptionSchemaBuilder,
+                                               StompRelayDataFetcher stompRelayDataFetcher) {
+            subscriptionSchemaBuilder.withSubscription(subscriptionProperties.getSubscriptionFieldName(), stompRelayDataFetcher);
+
+            return new GraphQLJpaExecutor(subscriptionSchemaBuilder.getGraphQLSchema());
         }
     }
 

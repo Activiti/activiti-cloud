@@ -21,13 +21,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.config.annotation.AbstractWebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
 @Configuration
-public class StompWebSocketMessageBrokerConfigurer extends AbstractWebSocketMessageBrokerConfigurer {
+public class StompWebSocketMessageBrokerConfigurer implements WebSocketMessageBrokerConfigurer {
 
     @Value("${spring.rabbitmq.host:rabbitmq}")
     private String relayHost;

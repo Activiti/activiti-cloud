@@ -19,7 +19,6 @@ import java.util.Map;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -96,7 +95,7 @@ public class GraphQLMessage implements Message<Map<String, Object>> {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof GenericMessage)) {
+        if (!(other instanceof GraphQLMessage)) {
 			return false;
 		}
 		GraphQLMessage otherMsg = (GraphQLMessage) other;
