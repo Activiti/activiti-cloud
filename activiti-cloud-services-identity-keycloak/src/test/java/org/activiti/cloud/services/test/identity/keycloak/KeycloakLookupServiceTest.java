@@ -1,9 +1,11 @@
-package org.activiti.cloud.services.identity.keycloak;
+package org.activiti.cloud.services.test.identity.keycloak;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.activiti.cloud.services.identity.keycloak.KeycloakInstanceWrapper;
+import org.activiti.cloud.services.identity.keycloak.KeycloakLookupService;
 import org.junit.Before;
 import org.junit.Test;
 import org.keycloak.admin.client.resource.RealmResource;

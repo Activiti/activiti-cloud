@@ -1,9 +1,10 @@
-package org.activiti.cloud.services.identity.basic;
+package org.activiti.cloud.services.test.identity.basic;
 
 import org.activiti.engine.UserRoleLookupProxy;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -11,7 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = BasicUserRoleLookupProxyIT.Configuration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class BasicUserRoleLookupProxyIT {
 
     @Autowired

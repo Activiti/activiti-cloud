@@ -44,7 +44,7 @@ public class KeycloakActivitiAuthenticationProvider extends KeycloakAuthenticati
         return super.authenticate(authentication);
     }
 
-    protected void setAuthenticatedUserId(String userId) {
+    public void setAuthenticatedUserId(String userId) {
         org.activiti.engine.impl.identity.Authentication.setAuthenticatedUserId(userId);
     }
 }

@@ -1,8 +1,9 @@
-package org.activiti.cloud.services.identity.keycloak;
+package org.activiti.cloud.services.test.identity.keycloak;
 
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.activiti.cloud.services.identity.keycloak.KeycloakActivitiAuthenticationProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.keycloak.KeycloakPrincipal;

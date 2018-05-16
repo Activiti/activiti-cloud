@@ -1,4 +1,4 @@
-package org.activiti.cloud.services.identity.keycloak;
+package org.activiti.cloud.services.test.identity.keycloak;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -23,7 +23,7 @@ public class KeycloakInstanceWrapper {
                 activitiKeycloakProperties.getAdminClientApp());
     }
 
-    protected RealmResource getRealm(){
+    public RealmResource getRealm(){
         return getKeycloakInstance().realms().realm(keycloakProperties.getRealm());
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.identity.keycloak.interceptor;
+package org.activiti.cloud.services.test.identity.keycloak.interceptor;
 
 
 import java.io.IOException;

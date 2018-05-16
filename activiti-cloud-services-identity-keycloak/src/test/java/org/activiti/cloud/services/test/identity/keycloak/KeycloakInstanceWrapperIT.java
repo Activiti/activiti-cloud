@@ -1,5 +1,6 @@
-package org.activiti.cloud.services.identity.keycloak;
+package org.activiti.cloud.services.test.identity.keycloak;
 
+import org.activiti.cloud.services.identity.keycloak.KeycloakInstanceWrapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

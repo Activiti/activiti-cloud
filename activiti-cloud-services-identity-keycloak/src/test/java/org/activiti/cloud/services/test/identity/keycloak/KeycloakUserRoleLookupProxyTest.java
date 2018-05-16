@@ -1,5 +1,7 @@
-package org.activiti.cloud.services.identity.keycloak;
+package org.activiti.cloud.services.test.identity.keycloak;
 
+import org.activiti.cloud.services.identity.keycloak.KeycloakLookupService;
+import org.activiti.cloud.services.identity.keycloak.KeycloakUserRoleLookupProxy;
 import org.junit.Before;
 import org.junit.Test;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -11,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 

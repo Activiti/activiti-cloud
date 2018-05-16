@@ -1,5 +1,7 @@
-package org.activiti.cloud.services.identity.keycloak;
+package org.activiti.cloud.services.test.identity.keycloak;
 
+import org.activiti.cloud.services.identity.keycloak.KeycloakLookupService;
+import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupLookupProxy;
 import org.activiti.engine.UserGroupLookupProxy;
 import org.junit.Before;
 import org.junit.Test;

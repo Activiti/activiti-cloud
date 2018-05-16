@@ -1,5 +1,6 @@
-package org.activiti.cloud.services.identity.basic;
+package org.activiti.cloud.services.test.identity.basic;
 
+import org.activiti.cloud.services.identity.basic.BasicUserGroupLookupProxy;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

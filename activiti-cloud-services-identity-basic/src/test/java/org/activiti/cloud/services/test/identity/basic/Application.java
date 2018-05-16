@@ -1,4 +1,4 @@
-package org.activiti.cloud.services.identity.basic;
+package org.activiti.cloud.services.test.identity.basic;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
