@@ -50,7 +50,7 @@
     <springfox.version>2.8.0</springfox.version>
     <swagger.version>1.5.10</swagger.version>
     <xstream.version>1.4.10</xstream.version>
-    <spring-cloud-kuberentes.version>0.3.0.RC1</spring-cloud-kuberentes.version>
+    <spring-cloud-kubernetes.version>0.3.0.RC1</spring-cloud-kubernetes.version>
   </properties>
   <modules>
     <module>activiti-cloud-service-common-dependencies</module>
@@ -163,7 +163,7 @@
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-kubernetes-discovery</artifactId>
-        <version>${spring-cloud-kuberentes.version}</version>
+        <version>${spring-cloud-kubernetes.version}</version>
       </dependency>
       <!-- Querydsl dependencies http://www.querydsl.com -->
       <dependency>
@@ -247,5 +247,39 @@
         <enabled>false</enabled>
       </releases>
     </repository>
+    <repository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>spring-snapshots</id>
+      <name>Spring Snapshots</name>
+      <url>https://repo.spring.io/snapshot/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
   </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>spring-snapshots</id>
+      <name>Spring Snapshots</name>
+      <url>https://repo.spring.io/snapshot/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </pluginRepository>
+  </pluginRepositories>
 </project>
