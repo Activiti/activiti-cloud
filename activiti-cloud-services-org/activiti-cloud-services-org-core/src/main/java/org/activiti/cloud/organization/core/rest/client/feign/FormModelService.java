@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.rest.resource;
+package org.activiti.cloud.organization.core.rest.client.feign;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.activiti.cloud.organization.core.model.ModelReference;
+import org.springframework.cloud.openfeign.FeignClient;
 
 /**
- * Rest resource annotation.
+ * Feign client for forms REST service
  */
-@Target(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface RestResource {
-
-    String resourceIdField() default "";
-
-    String resourceKeyField() default "";
-
-    String targetField() default "";
+@FeignClient(value = "modeling-app", path = "/v1/forms")
+public interface FormModelService extends BaseModelService<ModelReference> {
 
 }

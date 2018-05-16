@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.rest.resource;
+package org.activiti.cloud.organization.core.rest.client;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.List;
+
+import org.activiti.cloud.organization.core.model.Model.ModelType;
+import org.activiti.cloud.organization.core.model.ModelReference;
+import org.activiti.cloud.organization.core.service.ValidationErrorRepresentation;
 
 /**
- * Rest resource annotation.
+ * Model rest client service interface
  */
-@Target(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface RestResource {
+public interface ModelService extends RestClientService<ModelType, ModelReference, String> {
 
-    String resourceIdField() default "";
-
-    String resourceKeyField() default "";
-
-    String targetField() default "";
-
+    List<ValidationErrorRepresentation> validateResourceContent(ModelType modelType,
+                                                                byte[] file);
 }

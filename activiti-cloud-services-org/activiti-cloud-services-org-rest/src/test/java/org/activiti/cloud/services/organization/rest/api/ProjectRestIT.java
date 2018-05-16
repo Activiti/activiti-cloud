@@ -20,27 +20,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.model.Project;
+import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.services.organization.config.Application;
 import org.activiti.cloud.services.organization.config.RepositoryRestConfig;
 import org.activiti.cloud.services.organization.jpa.ModelRepository;
 import org.activiti.cloud.services.organization.jpa.ProjectRepository;
-import org.activiti.cloud.services.organization.mock.MockModelRestServiceServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.activiti.cloud.organization.core.model.Model.ModelType.FORM;
+import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -56,15 +59,18 @@ public class ProjectRestIT {
 
     private MockMvc mockMvc;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    @MockBean
+    private ModelService modelService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
     @Autowired
     private ProjectRepository projectRepository;
+
     @Autowired
     private ModelRepository modelRepository;
+
     @Autowired
     private ObjectMapper mapper;
 
@@ -105,13 +111,14 @@ public class ProjectRestIT {
 
     @Test
     public void createProjectsWithModels() throws Exception {
-        MockModelRestServiceServer.createServer(restTemplate)
-                .expectFormModelCreation()
-                .expectProcessModelCreation()
-                .expectFormModelRequest(new ModelReference("ref_model_form_id",
-                                                           "Form Model"))
-                .expectProcessModelRequest(new ModelReference("ref_process_model_id",
-                                                              "Process Model"));
+        ModelReference expectedFormModel = new ModelReference("ref_model_form_id",
+                                                              "Form Model");
+        ModelReference expectedProcessModel = new ModelReference("ref_process_model_id",
+                                                                 "Process Model");
+        doReturn(expectedFormModel).when(modelService).getResource(FORM,
+                                                                   expectedFormModel.getModelId());
+        doReturn(expectedProcessModel).when(modelService).getResource(PROCESS_MODEL,
+                                                                      expectedProcessModel.getModelId());
 
         //given
         final String projectWithModelsId = "project_with_models_id";

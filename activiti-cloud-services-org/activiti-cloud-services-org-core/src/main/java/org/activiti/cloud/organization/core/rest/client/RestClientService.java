@@ -14,38 +14,23 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.rest.context;
+package org.activiti.cloud.organization.core.rest.client;
 
 /**
- * Rest resource context item.
+ * Rest client interface
  */
-public class RestResourceContextItem {
+public interface RestClientService<T, R, K> {
 
-    private String name;
+    R getResource(T resourceType,
+                  K resourceId);
 
-    private String url;
+    void createResource(T resourceType,
+                        R resource);
 
-    private String apiKey;
+    void updateResource(T resourceType,
+                        K resourceId,
+                        R resource);
 
-    public RestResourceContextItem(String name,
-                                   String url) {
-        this.name = name;
-        this.url = url;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
+    void deleteResource(T resourceType,
+                        K resourceId);
 }

@@ -19,27 +19,29 @@ package org.activiti.cloud.services.organization.rest.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.model.ModelReference;
+import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.services.organization.config.Application;
 import org.activiti.cloud.services.organization.config.RepositoryRestConfig;
 import org.activiti.cloud.services.organization.jpa.ModelRepository;
-import org.activiti.cloud.services.organization.mock.MockModelRestServiceServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.activiti.cloud.organization.core.model.Model.ModelType.FORM;
+import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
 import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -54,13 +56,15 @@ public class ModelRestIT {
 
     private MockMvc mockMvc;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    @MockBean
+    private ModelService modelService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
     @Autowired
     private ObjectMapper mapper;
+
     @Autowired
     private ModelRepository modelRepository;
 
@@ -82,9 +86,10 @@ public class ModelRestIT {
         final ModelReference expectedProcessModel = new ModelReference("process_model_refId",
                                                                        "Process Model");
 
-        MockModelRestServiceServer.createServer(restTemplate)
-                .expectFormModelRequest(expectedFormModel)
-                .expectProcessModelRequest(expectedProcessModel);
+        doReturn(expectedFormModel).when(modelService).getResource(FORM,
+                                                                   expectedFormModel.getModelId());
+        doReturn(expectedProcessModel).when(modelService).getResource(PROCESS_MODEL,
+                                                                      expectedProcessModel.getModelId());
 
         //given
         final String formModelId = "form_model_id";
@@ -106,24 +111,28 @@ public class ModelRestIT {
         assertThat(processModel).isNotNull();
 
         //when
-        final ResultActions resultActions = mockMvc.perform(get("{version}/models",
-                                                                RepositoryRestConfig.API_VERSION))
+        ResultActions resultActions = mockMvc.perform(get("{version}/models/form_model_id",
+                                                          RepositoryRestConfig.API_VERSION))
                 .andDo(print());
 
         //then
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.models",
-                                    hasSize(2)))
-                .andExpect(jsonPath("$._embedded.models[0].name",
-                                    is(formModelName)))
-                .andExpect(jsonPath("$._embedded.models[1].name",
+                .andExpect(jsonPath("name",
+                                    is(formModelName)));
+
+        //when
+        resultActions = mockMvc.perform(get("{version}/models/process_model_id",
+                                            RepositoryRestConfig.API_VERSION))
+                .andDo(print());
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("name",
                                     is(processModelName)));
     }
 
     @Test
     public void createModel() throws Exception {
-        MockModelRestServiceServer.createServer(restTemplate)
-                .expectFormModelCreation();
 
         //given
         final String formModelId = "form_model_id";

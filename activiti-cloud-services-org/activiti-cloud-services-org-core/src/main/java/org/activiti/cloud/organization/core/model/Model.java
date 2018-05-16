@@ -51,7 +51,6 @@ public class Model {
     @Transient
     @JsonUnwrapped
     @RestResource(
-            path = "/v1/{#name}/{#id}",
             resourceIdField = "refId",
             resourceKeyField = "type")
     private ModelReference data;

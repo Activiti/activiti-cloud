@@ -30,6 +30,22 @@ public final class ReflectionUtils {
      * Get entity field value.
      * @param entity the entity
      * @param fieldName the entity field name
+     * @return the field value
+     */
+    public static Object getFieldValue(Object entity,
+                                       String fieldName) {
+        return getFieldValue(entity,
+                             fieldName,
+                             () -> String.format(
+                                     "Cannot access field '%s' of entity type '%s'",
+                                     fieldName,
+                                     entity.getClass()));
+    }
+
+    /**
+     * Get entity field value.
+     * @param entity the entity
+     * @param fieldName the entity field name
      * @param exceptionMessage message exception supplier
      * @return the field value
      */
@@ -45,6 +61,24 @@ public final class ReflectionUtils {
             throw new RuntimeException(exceptionMessage.get(),
                                        e);
         }
+    }
+
+    /**
+     * Set entity field value.
+     * @param entity the entity
+     * @param fieldName the entity field name
+     * @return the field value
+     */
+    public static void setFieldValue(Object entity,
+                                     String fieldName,
+                                     Object value) {
+        setFieldValue(entity,
+                      fieldName,
+                      value,
+                      () -> String.format(
+                              "Cannot set vaslue to the target field '%s' of entity type '%s'",
+                              fieldName,
+                              entity.getClass()));
     }
 
     /**

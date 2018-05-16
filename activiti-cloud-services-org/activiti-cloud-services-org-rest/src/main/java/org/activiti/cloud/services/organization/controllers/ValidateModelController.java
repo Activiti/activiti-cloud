@@ -18,13 +18,8 @@ package org.activiti.cloud.services.organization.controllers;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
-import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.rest.context.RestContext;
-import org.activiti.cloud.organization.core.rest.context.RestContextProvider;
-import org.activiti.cloud.organization.core.rest.context.RestResourceContextItem;
-import org.activiti.cloud.organization.core.service.RestClientService;
+import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.organization.core.service.ValidationErrorRepresentation;
 import org.activiti.cloud.services.organization.assemblers.ValidationErrorResourceAssembler;
 import org.activiti.cloud.services.organization.jpa.ModelRepository;
@@ -47,52 +42,33 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 @RequestMapping(value = API_VERSION)
 public class ValidateModelController {
 
-    private final RestClientService restClientService;
-    private final RestContextProvider contextProvider;
-
     private final ModelRepository modelRepository;
+
     private final ValidationErrorResourceAssembler validationErrorResourceAssembler;
 
+    private final ModelService modelService;
+
     @Autowired
-    public ValidateModelController(RestClientService restClientService,
-                                   RestContextProvider contextProvider,
-                                   ModelRepository modelRepository,
+    public ValidateModelController(ModelRepository modelRepository,
+                                   ModelService modelService,
                                    ValidationErrorResourceAssembler validationErrorResourceAssembler) {
-        this.restClientService = restClientService;
-        this.contextProvider = contextProvider;
         this.modelRepository = modelRepository;
+        this.modelService = modelService;
         this.validationErrorResourceAssembler = validationErrorResourceAssembler;
     }
 
     @RequestMapping(value = "/models/{modelId}/validate", method = RequestMethod.POST, produces = MediaTypes.HAL_JSON_VALUE)
     public Resources<ValidationErrorResource> validateModel(@PathVariable(value = "modelId") String modelId,
-                                                            @RequestParam("file") MultipartFile content) throws IOException {
+                                                            @RequestParam("file") MultipartFile file) throws IOException {
 
-        Optional<Model> model = modelRepository.findById(modelId);
-        if (!model.isPresent()) {
-            throw new ResourceNotFoundException();
-        }
+        byte[] fileContent = file.getBytes();
+        List<ValidationErrorRepresentation> validationResult = modelRepository
+                .findById(modelId)
+                .map(model -> modelService.validateResourceContent(model.getType(),
+                                                                   fileContent))
+                .orElseThrow(ResourceNotFoundException::new);
 
-        return new Resources<>(validationErrorResourceAssembler.toResources(validateModel(model.get(),
-                                                                                          content)),
+        return new Resources<>(validationErrorResourceAssembler.toResources(validationResult),
                                linkTo(ValidateModelController.class).withSelfRel());
-    }
-
-    private List<ValidationErrorRepresentation> validateModel(Model processModel,
-                                                              MultipartFile multipartFile) throws IOException {
-        // todo refactor this to a service separately
-        final RestResourceContextItem restContextItem = contextProvider
-                .getContext(RestContext.ACTIVITI)
-                .getResource(processModel.getType());
-        return restClientService
-                .validateModel(new StringBuilder(restContextItem.getUrl())
-                                       .append(API_VERSION)
-                                       .append("/")
-                                       .append(restContextItem.getName())
-                                       .append("/validate")
-                                       .toString(),
-                               multipartFile.getOriginalFilename(),
-                               multipartFile.getBytes());
-
     }
 }
