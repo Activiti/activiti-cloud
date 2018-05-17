@@ -50,7 +50,6 @@
     <springfox.version>2.8.0</springfox.version>
     <swagger.version>1.5.10</swagger.version>
     <xstream.version>1.4.10</xstream.version>
-    <feign-form.version>3.3.0</feign-form.version>
   </properties>
   <modules>
     <module>activiti-cloud-service-common-dependencies</module>
@@ -229,11 +228,6 @@
         <groupId>net.logstash.logback</groupId>
         <artifactId>logstash-logback-encoder</artifactId>
         <version>${logstash.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.github.openfeign.form</groupId>
-        <artifactId>feign-form-spring</artifactId>
-        <version>${feign-form.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
