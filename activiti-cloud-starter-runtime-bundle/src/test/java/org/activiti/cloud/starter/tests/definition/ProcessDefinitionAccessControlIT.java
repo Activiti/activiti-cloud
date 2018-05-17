@@ -17,7 +17,7 @@
 package org.activiti.cloud.starter.tests.definition;
 
 import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
