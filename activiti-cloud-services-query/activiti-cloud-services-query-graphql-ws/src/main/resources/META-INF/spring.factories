@@ -1,3 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.activiti.cloud.services.query.qraphql.ws.config.GraphQLWebSocketMessageBrokerConfigurationProperties.AutoConfiguration,\
 org.activiti.cloud.services.query.qraphql.ws.config.GraphQLWebSocketMessageBrokerAutoConfiguration,\
 org.activiti.cloud.services.query.qraphql.ws.config.GraphQLSubscriptionsSchemaAutoConfiguration

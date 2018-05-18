@@ -21,10 +21,11 @@ import org.activiti.cloud.services.query.qraphql.ws.datafetcher.StompRelayDestin
 import org.activiti.cloud.services.query.qraphql.ws.datafetcher.StompRelayPublisherFactory;
 import org.activiti.cloud.services.query.qraphql.ws.transport.GraphQLBrokerMessageHandler;
 import org.activiti.cloud.services.query.qraphql.ws.transport.GraphQLBrokerSubProtocolHandler;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
@@ -44,6 +45,7 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
 @Configuration
+@ConditionalOnWebApplication
 @ConditionalOnClass({GraphQL.class, EnableWebSocketMessageBroker.class})
 @ConditionalOnProperty(name="spring.activiti.cloud.services.query.graphql.ws.enabled", matchIfMissing = true)
 public class GraphQLWebSocketMessageBrokerAutoConfiguration {
@@ -53,29 +55,8 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
     @EnableWebSocketMessageBroker
     public static class DefaultGraphQLWebSocketMessageBrokerConfiguration extends GraphQLWebSocketMessageBrokerConfigurationSupport implements WebSocketMessageBrokerConfigurer {
 
-        @Value("${spring.rabbitmq.host:rabbitmq}")
-        private String relayHost;
-
-        @Value("${spring.activiti.cloud.services.query.graphql.ws.relayPort:61613}")
-        private int relayPort;
-
-        @Value("${spring.rabbitmq.username:guest}")
-        private String login;
-
-        @Value("${spring.rabbitmq.password:guest}")
-        private String passcode;
-
-        @Value("${spring.activiti.cloud.services.query.graphql.ws.endpoint:/ws/graphql}")
-        private String graphQLEndpoint;
-
-        @Value("${spring.activiti.cloud.services.query.graphql.ws.allowed-origins:*}")
-        private String graphQLAllowedOrigins;
-
-        @Value("${spring.activiti.cloud.services.query.graphql.ws.buffer-count:50}")
-        private Integer bufferCount;
-
-        @Value("${spring.activiti.cloud.services.query.graphql.ws.buffer-timespan-ms:1000}")
-        private Integer bufferTimeSpanMs;
+        @Autowired
+        private GraphQLWebSocketMessageBrokerConfigurationProperties configurationProperties;
 
         /**
          * A hook for subclasses to customize message broker configuration through the
@@ -85,20 +66,20 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
         public void configureMessageBroker(MessageBrokerRegistry registry) {
             registry
                     .enableStompBrokerRelay()
-                    .setRelayHost(relayHost)
-                    .setRelayPort(relayPort)
-                    .setClientLogin(login) // TODO remove?
-                    .setClientPasscode(passcode)
-                    .setSystemLogin(login)
-                    .setSystemPasscode(passcode)
+                    .setRelayHost(configurationProperties.getRelayHost())
+                    .setRelayPort(configurationProperties.getRelayPort())
+                    .setClientLogin(configurationProperties.getClientLogin())
+                    .setClientPasscode(configurationProperties.getClientPasscode())
+                    .setSystemLogin(configurationProperties.getSystemLogin())
+                    .setSystemPasscode(configurationProperties.getSystemPasscode())
             ;
         }
 
         @Override
         public void registerStompEndpoints(StompEndpointRegistry registry) {
-            registry.addEndpoint(graphQLEndpoint)
+            registry.addEndpoint(configurationProperties.getEndpoint())
                     .setHandshakeHandler(new DefaultHandshakeHandler())
-                    .setAllowedOrigins(graphQLAllowedOrigins)
+                    .setAllowedOrigins(configurationProperties.getAllowedOrigins())
                     .addInterceptors(new HttpSessionHandshakeInterceptor())
             ;
         }
@@ -106,7 +87,8 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public ReactorNettyTcpStompClient stompClient() {
-            ReactorNettyTcpStompClient stompClient = new ReactorNettyTcpStompClient(relayHost, relayPort);
+            ReactorNettyTcpStompClient stompClient = new ReactorNettyTcpStompClient(configurationProperties.getRelayHost(),
+                                                                                    configurationProperties.getRelayPort());
             stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
             return stompClient;
@@ -116,8 +98,8 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
         @ConditionalOnMissingBean
         public StompRelayPublisherFactory stompRelayPublisherFactory(ReactorNettyTcpStompClient stompClient,
                                                                      StompRelayDestinationResolver stompRelayDestinationResolver) {
-            return new StompRelayPublisherFactory(stompClient).login(login)
-                                                              .passcode(passcode)
+            return new StompRelayPublisherFactory(stompClient).login(configurationProperties.getClientLogin())
+                                                              .passcode(configurationProperties.getClientPasscode())
                                                               .destinationResolver(stompRelayDestinationResolver);
         }
 
@@ -134,8 +116,8 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
                     graphQLSubscriptionExecutor);
 
             messageHandler.setTaskScheduler(messageBrokerTaskScheduler)
-                          .setBufferCount(bufferCount)
-                          .setBufferTimeSpanMs(bufferTimeSpanMs);
+                          .setBufferCount(configurationProperties.getBufferCount())
+                          .setBufferTimeSpanMs(configurationProperties.getBufferTimeSpanMs());
 
             return messageHandler;
         }
@@ -154,7 +136,7 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public GraphQLBrokerSubProtocolHandler graphQLBrokerSubProtocolHandler() {
-            return new GraphQLBrokerSubProtocolHandler(graphQLEndpoint);
+            return new GraphQLBrokerSubProtocolHandler(configurationProperties.getEndpoint());
         }
 
     }
