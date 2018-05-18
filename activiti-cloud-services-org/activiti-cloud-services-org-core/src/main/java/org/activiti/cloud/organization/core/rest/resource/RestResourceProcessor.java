@@ -48,19 +48,24 @@ public class RestResourceProcessor {
             @Override
             public Resource<T> process(Resource<T> resource) {
                 Class<?> entityType = resource.getContent().getClass();
-                if (entityType.isAnnotationPresent(EntityWithRestResource.class)) {
+                if (isEntityWithRestResource(entityType)) {
                     for (Field field : entityType.getDeclaredFields()) {
                         RestResource restResource = field.getAnnotation(RestResource.class);
                         if (restResource != null) {
                             restResourceService
-                                    .processResourceWithRestResource(resource,
+                                    .loadRestResourceIntoEntityField(resource.getContent(),
                                                                      field.getName(),
-                                                                     restResource);
+                                                                     restResource.resourceKeyField(),
+                                                                     restResource.resourceIdField());
                         }
                     }
                 }
                 return resource;
             }
         };
+    }
+
+    protected boolean isEntityWithRestResource(Class<?> entityType) {
+        return entityType.isAnnotationPresent(EntityWithRestResource.class);
     }
 }

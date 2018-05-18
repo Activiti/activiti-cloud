@@ -22,7 +22,7 @@ import java.util.List;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.repository.ModelRepository;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
-import org.activiti.cloud.organization.core.rest.client.ValidationErrorRepresentation;
+import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
 import org.activiti.cloud.services.organization.rest.assembler.ValidationErrorResourceAssembler;
 import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.springframework.beans.factory.annotation.Autowired;

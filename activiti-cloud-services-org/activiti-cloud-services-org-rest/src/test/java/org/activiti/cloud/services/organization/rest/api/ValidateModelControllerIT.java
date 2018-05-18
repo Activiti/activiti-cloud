@@ -23,7 +23,7 @@ import java.util.Optional;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.repository.ModelRepository;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
-import org.activiti.cloud.organization.core.rest.client.ValidationErrorRepresentation;
+import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
 import org.activiti.cloud.services.organization.config.Application;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
 import org.activiti.validation.ValidationError;
@@ -81,7 +81,7 @@ public class ValidateModelControllerIT {
                                                        "BPMN diagram".getBytes());
         when(modelRepository.findModelById("model_id")).thenReturn(Optional.of(new Model("model_id",
                                                                                          "Process-Model",
-                                                                                         Model.ModelType.PROCESS_MODEL,
+                                                                                         PROCESS_MODEL,
                                                                                          "model_ref_id")));
 
         List<ValidationErrorRepresentation> expectedValidationErrors =

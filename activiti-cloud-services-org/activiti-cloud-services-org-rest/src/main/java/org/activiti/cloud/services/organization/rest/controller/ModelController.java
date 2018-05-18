@@ -150,6 +150,7 @@ public class ModelController implements ApplicationEventPublisherAware {
     }
 
     @RequestMapping(method = DELETE, path = "/v1/models/{modelId}")
+    @ResponseStatus(NO_CONTENT)
     public void deleteModel(@PathVariable String modelId) {
         modelRepository.deleteModel(findModelById(modelId));
     }

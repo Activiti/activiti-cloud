@@ -19,7 +19,7 @@ package org.activiti.cloud.services.organization.rest.assembler;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.activiti.cloud.organization.core.rest.client.ValidationErrorRepresentation;
+import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
 import org.activiti.cloud.services.organization.rest.controller.ValidateModelController;
 import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;

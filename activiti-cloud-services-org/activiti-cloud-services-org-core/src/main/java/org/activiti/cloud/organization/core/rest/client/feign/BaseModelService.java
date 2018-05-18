@@ -18,7 +18,7 @@ package org.activiti.cloud.organization.core.rest.client.feign;
 
 import java.util.List;
 
-import org.activiti.cloud.organization.core.rest.client.ValidationErrorRepresentation;
+import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

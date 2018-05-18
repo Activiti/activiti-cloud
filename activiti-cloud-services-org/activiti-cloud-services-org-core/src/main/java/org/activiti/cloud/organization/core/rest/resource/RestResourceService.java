@@ -16,15 +16,8 @@
 
 package org.activiti.cloud.organization.core.rest.resource;
 
-import org.activiti.cloud.organization.core.model.Model.ModelType;
-import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resource;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import static org.activiti.cloud.organization.core.util.ReflectionUtils.getFieldValue;
 import static org.activiti.cloud.organization.core.util.ReflectionUtils.setFieldValue;
@@ -32,59 +25,46 @@ import static org.activiti.cloud.organization.core.util.ReflectionUtils.setField
 /**
  * Processing rest resources logic.
  */
-@Service
-public class RestResourceService {
+public abstract class RestResourceService<T, K, I> {
 
     private static Logger log = LoggerFactory.getLogger(RestResourceService.class);
 
-    private final ModelService modelService;
-
-    @Autowired
-    RestResourceService(ModelService modelService) {
-        this.modelService = modelService;
-    }
-
     /**
      * Process an entity with a rest resource.
-     * It loads the rest resource into the annotated field of the entity
-     * and adds the link to the resource, if needed.
-     * @param resource the resource to process
+     * It loads the rest resource into the annotated field of the entity.
+     * @param entity the object to process
      * @param fieldName the entity field name associated with the rest resource
-     * @param restResource the {@link RestResource} annotation of the resource
-     * @param <T> the type of the entity
+     * @param resourceKeyField the field name corresponding to the resource key
+     * @param resourceIdField the field name corresponding to the resource id
      */
-    protected <T> void processResourceWithRestResource(final Resource<T> resource,
-                                                       String fieldName,
-                                                       RestResource restResource) {
+    protected void loadRestResourceIntoEntityField(Object entity,
+                                                   String fieldName,
+                                                   String resourceKeyField,
+                                                   String resourceIdField) {
 
-        T entity = resource.getContent();
         log.trace("Processing entity with rest resource: " + entity);
 
-        ModelType modelType = (ModelType) getFieldValue(entity,
-                                                        restResource.resourceKeyField());
-        String modelId = (String) getFieldValue(entity,
-                                                restResource.resourceIdField());
+        K resourceKey = getFieldValue(entity,
+                                      resourceKeyField);
+        I resourceId = getFieldValue(entity,
+                                     resourceIdField);
 
-        final Object resolvedResource;
+        final T resolvedResource;
         try {
-            resolvedResource = modelService.getResource(modelType,
-                                                        modelId);
+            resolvedResource = getResource(resourceKey,
+                                           resourceId);
         } catch (Exception ex) {
             // just log the error, don't break the processing entity mechanism
             log.error(String.format("Failed to fetch resource of type '%s' with id '%s'",
-                                    modelType,
-                                    modelId),
+                                    resourceKey,
+                                    resourceId),
                       ex);
             return;
         }
 
-        String targetFieldName = !StringUtils.isEmpty(restResource.targetField()) ?
-                restResource.targetField() :
-                fieldName;
-
         setFieldValue(
                 entity,
-                targetFieldName,
+                fieldName,
                 resolvedResource);
     }
 
@@ -93,41 +73,50 @@ public class RestResourceService {
      * to a save operation on an entity containing a rest resource.
      * @param entity the entity to be saved
      * @param fieldName the entity field name associated with the rest resource
-     * @param restResource the {@link RestResource} annotation of the resource
+     * @param resourceKeyField the field name corresponding to the resource key
+     * @param resourceIdField the field name corresponding to the resource id
      * @param update true is the save is an update
      */
     public void saveRestResourceFromEntityField(Object entity,
                                                 String fieldName,
-                                                RestResource restResource,
+                                                String resourceKeyField,
+                                                String resourceIdField,
                                                 boolean update) {
 
         log.trace("Handling saving entity with rest resource: " + entity);
 
-        String targetFieldName = !StringUtils.isEmpty(restResource.targetField()) ?
-                restResource.targetField() :
-                fieldName;
-
-        ModelReference model = (ModelReference) getFieldValue(entity,
-                                                              targetFieldName);
-        if (model == null) {
+        T resource = getFieldValue(entity,
+                                   fieldName);
+        if (resource == null) {
             log.debug(String.format(
                     "No data found in field '%s' of entity type '%s'",
-                    targetFieldName,
+                    fieldName,
                     entity.getClass()));
+            return;
         }
 
-        ModelType modelType = (ModelType) getFieldValue(entity,
-                                                        restResource.resourceKeyField());
+        K resourceKey = getFieldValue(entity,
+                                      resourceKeyField);
 
         if (update) {
-            String modelId = (String) getFieldValue(entity,
-                                                    restResource.resourceIdField());
-            modelService.updateResource(modelType,
-                                        modelId,
-                                        model);
+            I resourceId = getFieldValue(entity,
+                                         resourceIdField);
+            updateResource(resourceKey,
+                           resourceId,
+                           resource);
         } else {
-            modelService.createResource(modelType,
-                                        model);
+            createResource(resourceKey,
+                           resource);
         }
     }
+
+    protected abstract T getResource(K resourceKey,
+                                     I resourceId);
+
+    protected abstract void createResource(K resourceKey,
+                                           T resource);
+
+    protected abstract void updateResource(K resourceKey,
+                                           I resourceId,
+                                           T resource);
 }

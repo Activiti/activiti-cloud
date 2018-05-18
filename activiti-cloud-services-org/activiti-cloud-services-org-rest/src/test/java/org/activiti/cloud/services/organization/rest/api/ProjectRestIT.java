@@ -17,11 +17,13 @@
 package org.activiti.cloud.services.organization.rest.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.organization.core.model.Group;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.model.Project;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.services.organization.config.Application;
+import org.activiti.cloud.services.organization.jpa.GroupJpaRepository;
 import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.organization.jpa.ProjectJpaRepository;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
@@ -40,10 +42,12 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.activiti.cloud.organization.core.model.Model.ModelType.FORM;
 import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
+import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -66,6 +70,9 @@ public class ProjectRestIT {
     private WebApplicationContext webApplicationContext;
 
     @Autowired
+    private GroupJpaRepository groupRepository;
+
+    @Autowired
     private ProjectJpaRepository projectRepository;
 
     @Autowired
@@ -86,7 +93,7 @@ public class ProjectRestIT {
     }
 
     @Test
-    public void getProjects() throws Exception {
+    public void testGetProjects() throws Exception {
 
         //given
         final String projectId = "project_id";
@@ -110,7 +117,7 @@ public class ProjectRestIT {
     }
 
     @Test
-    public void createProjectsWithModels() throws Exception {
+    public void testCreateProjectsWithModels() throws Exception {
         ModelReference expectedFormModel = new ModelReference("ref_model_form_id",
                                                               "Form Model");
         ModelReference expectedProcessModel = new ModelReference("ref_process_model_id",
@@ -189,4 +196,96 @@ public class ProjectRestIT {
                 .andExpect(jsonPath("$._embedded.models[1].name",
                                     is(processModelName)));
     }
+
+    @Test
+    public void testGetProject() throws Exception {
+        //given
+        final String projectId = "project_id";
+        final String projectName = "Project";
+        Project project = new Project(projectId,
+                                      projectName);
+
+        //when
+        project = projectRepository.save(project);
+        assertThat(project).isNotNull();
+
+        //then
+        mockMvc.perform(get("{version}/projects/{projectId}",
+                            API_VERSION,
+                            projectId))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testCreateProjectInGroup() throws Exception {
+        //given
+        final String projectId = "project_id";
+        final String projectName = "Project";
+        Project project = new Project(projectId,
+                                      projectName);
+
+        String parentGroupId = "parent_group_id";
+        groupRepository.save(new Group(parentGroupId, "Parent Group"));
+
+        //when
+        mockMvc.perform(post("{version}/groups/{groupId}/projects",
+                             API_VERSION,
+                             parentGroupId)
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(project)))
+                .andExpect(status().isCreated());
+
+        //then
+        assertThat(projectRepository.findById(projectId)).isNotEmpty();
+    }
+
+    @Test
+    public void testUpdateProject() throws Exception {
+        //given
+        final String projectId = "project_id";
+        final Project savedProject = projectRepository.save(new Project(projectId,
+                                                                      "Project name"));
+        assertThat(savedProject).isNotNull();
+
+        assertThat(projectRepository.findById(projectId))
+                .hasValueSatisfying(project -> {
+                    assertThat(project.getName()).isEqualTo("Project name");
+                });
+
+        Project newProject = new Project(projectId,
+                                      "New project name");
+
+        //when
+        mockMvc.perform(put("{version}/projects/{projectId}",
+                             API_VERSION,
+                             projectId)
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(newProject)))
+                .andExpect(status().isNoContent());
+
+        //then
+        assertThat(projectRepository.findById(projectId))
+                .hasValueSatisfying(project -> {
+                    assertThat(project.getName()).isEqualTo("New project name");
+                });
+    }
+
+    @Test
+    public void testDeleteProject() throws Exception {
+        //given
+        final String projectId = "project_id";
+        final Project savedProject = projectRepository.save(new Project(projectId,
+                                                                      "Project"));
+        assertThat(savedProject).isNotNull();
+
+        //when
+        mockMvc.perform(delete("{version}/projects/{projectId}",
+                               API_VERSION,
+                               projectId))
+                .andExpect(status().isNoContent());
+
+        //then
+        assertThat(projectRepository.findById(projectId)).isEmpty();
+    }
+
 }

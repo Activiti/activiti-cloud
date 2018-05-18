@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.organization.rest.resource;
 
-import org.activiti.cloud.organization.core.rest.client.ValidationErrorRepresentation;
+import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 

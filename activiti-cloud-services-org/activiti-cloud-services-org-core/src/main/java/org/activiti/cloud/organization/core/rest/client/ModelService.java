@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.activiti.cloud.organization.core.model.Model.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
+import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
 
 /**
  * Model rest client service interface

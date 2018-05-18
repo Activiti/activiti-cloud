@@ -73,7 +73,7 @@ public class ProjectController {
         this.groupController = groupController;
     }
 
-    @RequestMapping(method = GET, path = "/v1/projects}")
+    @RequestMapping(method = GET, path = "/v1/projects")
     public PagedResources<Resource<Project>> getProject(Pageable pageable) {
         return pagedResourcesAssembler.toResource(
                 pageable,
@@ -106,7 +106,14 @@ public class ProjectController {
                                                                             project));
     }
 
+    @RequestMapping(method = POST, path = "/v1/projects")
+    @ResponseStatus(CREATED)
+    public Resource<Project> createProject(@RequestBody Project project) {
+        return resourceAssembler.toResource(projectRepository.createProject(project));
+    }
+
     @RequestMapping(method = PUT, path = "/v1/projects/{projectId}")
+    @ResponseStatus(NO_CONTENT)
     public Resource<Project> updateProject(@PathVariable String projectId,
                                            @RequestBody Project project) {
         Project projectToUpdate = findProjectById(projectId);
@@ -128,6 +135,7 @@ public class ProjectController {
     }
 
     @RequestMapping(method = DELETE, path = "/v1/projects/{projectId}")
+    @ResponseStatus(NO_CONTENT)
     public void deleteProject(@PathVariable String projectId) {
         projectRepository.deleteProject(findProjectById(projectId));
     }

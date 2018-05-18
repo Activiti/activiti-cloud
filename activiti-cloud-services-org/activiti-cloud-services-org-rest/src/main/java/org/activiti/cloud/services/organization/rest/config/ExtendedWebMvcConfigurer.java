@@ -18,7 +18,6 @@ package org.activiti.cloud.services.organization.rest.config;
 
 import java.util.List;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.webmvc.convert.UriListHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -32,11 +31,6 @@ public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(uriListHttpMessageConverter());
-    }
-
-    @Bean
-    public UriListHttpMessageConverter uriListHttpMessageConverter() {
-        return new UriListHttpMessageConverter ();
+        converters.add(new UriListHttpMessageConverter());
     }
 }

@@ -123,6 +123,7 @@ public class GroupController {
     }
 
     @RequestMapping(method = PUT, path = "/{groupId}")
+    @ResponseStatus(NO_CONTENT)
     public Resource<Group> updateGroup(@PathVariable String groupId,
                                        @RequestBody Group group) {
         Group groupToUpdate = findGroupById(groupId);
@@ -131,6 +132,7 @@ public class GroupController {
     }
 
     @RequestMapping(method = DELETE, path = "/{groupId}")
+    @ResponseStatus(NO_CONTENT)
     public void deleteGroup(@PathVariable String groupId) {
         groupRepository.deleteGroup(findGroupById(groupId));
     }
