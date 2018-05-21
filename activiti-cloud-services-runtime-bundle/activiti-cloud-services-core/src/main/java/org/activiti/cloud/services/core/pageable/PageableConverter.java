@@ -14,30 +14,23 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.core;
+package org.activiti.cloud.services.core.pageable;
 
-import java.util.Set;
-import java.util.UUID;
-
+import org.activiti.runtime.api.query.Order;
+import org.activiti.runtime.api.query.Pageable;
 import org.activiti.runtime.api.query.ProcessInstanceFilter;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SecurityPoliciesProcessInstanceRestrictionApplier implements SecurityPoliciesRestrictionApplier<ProcessInstanceFilter> {
+public class PageableConverter {
 
-    @Override
-    public ProcessInstanceFilter restrictToKeys(Set<String> keys) {
-        return ProcessInstanceFilter.filteredOnKeys(keys);
-    }
+    public Pageable toAPIPageable(org.springframework.data.domain.Pageable springPageable) {
+        Sort.Order order = springPageable.getSort().stream().findFirst().orElse(Sort.Order.by(ProcessInstanceFilter.ID));
 
-    @Override
-    public ProcessInstanceFilter denyAll() {
-        //user should not see anything so give unsatisfiable condition
-        return ProcessInstanceFilter.filteredOnKey("missing-" + UUID.randomUUID().toString());
-    }
-
-    @Override
-    public ProcessInstanceFilter allowAll() {
-        return ProcessInstanceFilter.unfiltered();
+        return Pageable.of(Math.toIntExact(springPageable.getOffset()),
+                           springPageable.getPageSize(),
+                           Order.by(order.getProperty(),
+                                    Order.Direction.valueOf(order.getDirection().name())));
     }
 }

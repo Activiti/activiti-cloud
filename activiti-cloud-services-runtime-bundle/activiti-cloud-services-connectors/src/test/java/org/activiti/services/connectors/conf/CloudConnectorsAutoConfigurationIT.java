@@ -17,6 +17,8 @@
 package org.activiti.services.connectors.conf;
 
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.junit.Test;
@@ -27,9 +29,11 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -51,6 +55,16 @@ public class CloudConnectorsAutoConfigurationIT {
     @EnableAutoConfiguration
     @SpringBootConfiguration
     static class CloudConnectorsAutoConfigurationITApplication {
+
+        @Bean
+        public RepositoryService repositoryService() {
+            return mock(RepositoryService.class);
+        }
+
+        @Bean
+        public RuntimeService runtimeService() {
+            return mock(RuntimeService.class);
+        }
 
     }
 

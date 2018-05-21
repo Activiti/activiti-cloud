@@ -27,9 +27,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 
 import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
@@ -37,6 +36,7 @@ import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -50,8 +50,6 @@ public class MQServiceTaskBehaviorTest {
     private static final String INTEGRATION_CONTEXT_ID = "entityId";
     private static final String APP_NAME = "myApp";
 
-    @Spy
-    @InjectMocks
     private MQServiceTaskBehavior behavior;
 
     @Mock
@@ -63,16 +61,20 @@ public class MQServiceTaskBehaviorTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private ApplicationContext applicationContext;
+
     @Captor
     private ArgumentCaptor<IntegrationRequestEvent> integrationRequestCaptor;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
+        behavior = spy(new MQServiceTaskBehavior(integrationContextManager, runtimeBundleProperties, eventPublisher, applicationContext));
     }
 
     @Test
-    public void executeShouldStoreTheIntegrationContextAndPublishASpringEvent() throws Exception {
+    public void executeShouldStoreTheIntegrationContextAndPublishASpringEvent() {
         //given
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setImplementation(CONNECTOR_TYPE);
@@ -88,6 +90,8 @@ public class MQServiceTaskBehaviorTest {
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId(INTEGRATION_CONTEXT_ID);
         given(integrationContextManager.create()).willReturn(entity);
+
+        given(applicationContext.containsBean(CONNECTOR_TYPE)).willReturn(false);
 
         //when
         behavior.execute(execution);
@@ -111,7 +115,7 @@ public class MQServiceTaskBehaviorTest {
     }
 
     @Test
-    public void triggerShouldCallLeave() throws Exception {
+    public void triggerShouldCallLeave() {
         //given
         DelegateExecution execution = mock(DelegateExecution.class);
         doNothing().when(behavior).leave(execution);

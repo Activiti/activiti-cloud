@@ -16,8 +16,11 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import org.activiti.cloud.services.api.model.ProcessInstance;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
+import java.util.Collections;
+import java.util.List;
+
+import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +37,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
+import static org.activiti.cloud.services.rest.ProcessInstanceSamples.defaultProcessInstance;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -65,18 +64,17 @@ public class ProcessInstanceAdminControllerImplIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private ProcessEngineWrapper processEngine;
-
+    private SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
 
     @Test
     public void getProcessInstances() throws Exception {
 
-        List<ProcessInstance> processInstanceList = Collections.singletonList(buildDefaultProcessInstance());
+        List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstances = new PageImpl<>(processInstanceList,
                                                                 PageRequest.of(0,
                                                                                10),
                                                                 processInstanceList.size());
-        when(processEngine.getAllProcessInstances(any())).thenReturn(processInstances);
+        when(securityAwareProcessInstanceService.getAllProcessInstances(any())).thenReturn(processInstances);
 
         this.mockMvc.perform(get("/admin/v1/process-instances"))
                 .andExpect(status().isOk())
@@ -89,12 +87,12 @@ public class ProcessInstanceAdminControllerImplIT {
     @Test
     public void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
 
-        List<ProcessInstance> processInstanceList = Collections.singletonList(buildDefaultProcessInstance());
+        List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList,
-                                                                PageRequest.of(1,
-                                                                               10),
-                                                                processInstanceList.size());
-        when(processEngine.getAllProcessInstances(any())).thenReturn(processInstancePage);
+                                                                   PageRequest.of(1,
+                                                                                  10),
+                                                                   processInstanceList.size());
+        when(securityAwareProcessInstanceService.getAllProcessInstances(any())).thenReturn(processInstancePage);
 
         this.mockMvc.perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -102,17 +100,4 @@ public class ProcessInstanceAdminControllerImplIT {
                                 pageRequestParameters(),
                                 pagedResourcesResponseFields()));
     }
-
-    private ProcessInstance buildDefaultProcessInstance() {
-        return new ProcessInstance(UUID.randomUUID().toString(),
-                                   "My process instance",
-                                   "This is my process instance",
-                                   UUID.randomUUID().toString(),
-                                   "user",
-                                   new Date(),
-                                   "my business key",
-                                   ProcessInstance.ProcessInstanceStatus.RUNNING.name(),
-                                   "my-proc-def");
-    }
-
 }

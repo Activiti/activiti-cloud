@@ -2,12 +2,10 @@ package org.activiti.cloud.services.rest.api;
 
 import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
-import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,10 +21,10 @@ public interface ProcessInstanceController {
     PagedResources<ProcessInstanceResource> getProcessInstances(Pageable pageable);
 
     @RequestMapping(method = RequestMethod.POST)
-    Resource<ProcessInstance> startProcess(@RequestBody StartProcessInstanceCmd cmd);
+    ProcessInstanceResource startProcess(@RequestBody StartProcessInstanceCmd cmd);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    Resource<ProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId);
+    ProcessInstanceResource getProcessInstanceById(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "/{processInstanceId}/model",
             method = RequestMethod.GET,

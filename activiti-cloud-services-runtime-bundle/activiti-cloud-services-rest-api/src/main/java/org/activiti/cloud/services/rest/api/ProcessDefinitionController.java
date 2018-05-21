@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public interface ProcessDefinitionController {
 
     @RequestMapping(method = RequestMethod.GET)
-    PagedResources getProcessDefinitions(Pageable pageable);
+    PagedResources<ProcessDefinitionResource> getProcessDefinitions(Pageable pageable);
 
 
     @RequestMapping(value = "/{id}",

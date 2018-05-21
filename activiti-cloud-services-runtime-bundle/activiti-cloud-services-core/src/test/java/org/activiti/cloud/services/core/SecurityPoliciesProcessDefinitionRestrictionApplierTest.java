@@ -19,15 +19,10 @@ package org.activiti.cloud.services.core;
 import java.util.Collections;
 import java.util.Set;
 
-import org.activiti.engine.repository.ProcessDefinitionQuery;
+import org.activiti.runtime.api.query.ProcessDefinitionFilter;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.startsWith;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 public class SecurityPoliciesProcessDefinitionRestrictionApplierTest {
 
@@ -36,32 +31,22 @@ public class SecurityPoliciesProcessDefinitionRestrictionApplierTest {
     @Test
     public void restrictToKeysAddFilterOnGivenKeys() {
         //given
-        ProcessDefinitionQuery initialQuery = mock(ProcessDefinitionQuery.class);
         Set<String> keys = Collections.singleton("procDef");
 
-        ProcessDefinitionQuery restrictedQuery = mock(ProcessDefinitionQuery.class);
-        given(initialQuery.processDefinitionKeys(keys)).willReturn(restrictedQuery);
-
         //when
-        ProcessDefinitionQuery resultQuery = restrictionApplier.restrictToKeys(initialQuery,
-                                                                                          keys);
+        ProcessDefinitionFilter filter = restrictionApplier.restrictToKeys(keys);
 
         //then
-        assertThat(resultQuery).isEqualTo(restrictedQuery);
+        assertThat(filter.getProcessDefinitionKeys()).isEqualTo(keys);
     }
 
     @Test
     public void denyAllShouldAddUnmatchableFilter() {
-        //given
-        ProcessDefinitionQuery query = mock(ProcessDefinitionQuery.class);
-        ProcessDefinitionQuery restrictedQuery = mock(ProcessDefinitionQuery.class);
-        given(query.processDefinitionId(anyString())).willReturn(restrictedQuery);
-
         //when
-        ProcessDefinitionQuery resultQuery = restrictionApplier.denyAll(query);
+        ProcessDefinitionFilter filter = restrictionApplier.denyAll();
 
         //then
-        assertThat(resultQuery).isEqualTo(restrictedQuery);
-        verify(query).processDefinitionId(startsWith("missing-"));
+        assertThat(filter.getProcessDefinitionKeys()).hasSize(1);
+        assertThat(filter.getProcessDefinitionKeys().iterator().next()).startsWith("missing-");
     }
 }

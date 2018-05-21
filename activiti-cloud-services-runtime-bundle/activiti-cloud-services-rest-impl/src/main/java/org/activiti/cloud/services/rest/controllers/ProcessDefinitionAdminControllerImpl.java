@@ -16,12 +16,12 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.core.pageable.PageableRepositoryService;
+import org.activiti.cloud.services.core.pageable.SecurityAwareRepositoryService;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionAdminController;
 import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
+import org.activiti.runtime.api.model.ProcessDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,8 +37,7 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
 
     private final ProcessDefinitionResourceAssembler resourceAssembler;
 
-    private final PageableRepositoryService pageableRepositoryService;
-
+    private final SecurityAwareRepositoryService securityAwareRepositoryService;
 
     private final AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler;
 
@@ -50,16 +49,16 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
 
     @Autowired
     public ProcessDefinitionAdminControllerImpl(ProcessDefinitionResourceAssembler resourceAssembler,
-                                                PageableRepositoryService pageableRepositoryService,
+                                                SecurityAwareRepositoryService securityAwareRepositoryService,
                                                 AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler) {
         this.resourceAssembler = resourceAssembler;
-        this.pageableRepositoryService = pageableRepositoryService;
+        this.securityAwareRepositoryService = securityAwareRepositoryService;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @Override
     public PagedResources<ProcessDefinitionResource> getAllProcessDefinitions(Pageable pageable) {
-        Page<ProcessDefinition> page = pageableRepositoryService.getAllProcessDefinitions(pageable);
+        Page<ProcessDefinition> page = securityAwareRepositoryService.getAllProcessDefinitions(pageable);
         return pagedResourcesAssembler.toResource(pageable, page,
                                                   resourceAssembler);
     }

@@ -18,17 +18,15 @@ package org.activiti.cloud.services.rest.controllers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
-import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.rest.ProcessInstanceSamples;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
 import org.activiti.engine.RuntimeService;
 import org.junit.Test;
@@ -45,7 +43,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -111,7 +111,7 @@ public class ProcessInstanceVariableControllerImplIT {
         variables.put("var2",
                 "varObj2");
 
-        ProcessInstance processInstance = buildDefaultProcessInstance();
+        org.activiti.runtime.api.model.ProcessInstance processInstance = buildDefaultProcessInstance();
         when(processEngine.getProcessInstanceById(any())).thenReturn(processInstance);
         when(securityService.canWrite(processInstance.getProcessDefinitionKey())).thenReturn(true);
 
@@ -125,7 +125,7 @@ public class ProcessInstanceVariableControllerImplIT {
 
     @Test
     public void deleteVariables() throws Exception {
-        ProcessInstance processInstance = buildDefaultProcessInstance();
+        org.activiti.runtime.api.model.ProcessInstance processInstance = buildDefaultProcessInstance();
         when(processEngine.getProcessInstanceById(any())).thenReturn(processInstance);
         when(securityService.canRead(processInstance.getProcessDefinitionKey())).thenReturn(true);
         when(securityService.canWrite(processInstance.getProcessDefinitionKey())).thenReturn(true);
@@ -142,15 +142,7 @@ public class ProcessInstanceVariableControllerImplIT {
                         pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
 
-    private ProcessInstance buildDefaultProcessInstance() {
-        return new ProcessInstance(UUID.randomUUID().toString(),
-                "My process instance",
-                "This is my process instance",
-                UUID.randomUUID().toString(),
-                "user",
-                new Date(),
-                "my business key",
-                ProcessInstance.ProcessInstanceStatus.RUNNING.name(),
-                "my-proc-def");
+    private org.activiti.runtime.api.model.ProcessInstance buildDefaultProcessInstance() {
+        return ProcessInstanceSamples.defaultProcessInstance();
     }
 }

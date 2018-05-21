@@ -19,21 +19,25 @@ package org.activiti.cloud.services.core;
 import java.util.Set;
 import java.util.UUID;
 
-import org.activiti.engine.repository.ProcessDefinitionQuery;
+import org.activiti.runtime.api.query.ProcessDefinitionFilter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SecurityPoliciesProcessDefinitionRestrictionApplier implements SecurityPoliciesRestrictionApplier<ProcessDefinitionQuery> {
+public class SecurityPoliciesProcessDefinitionRestrictionApplier implements SecurityPoliciesRestrictionApplier<ProcessDefinitionFilter> {
 
     @Override
-    public ProcessDefinitionQuery restrictToKeys(ProcessDefinitionQuery query,
-                                                 Set<String> keys) {
-        return query.processDefinitionKeys(keys);
+    public ProcessDefinitionFilter restrictToKeys(Set<String> keys) {
+        return ProcessDefinitionFilter.filterOnKeys(keys);
     }
 
     @Override
-    public ProcessDefinitionQuery denyAll(ProcessDefinitionQuery query) {
+    public ProcessDefinitionFilter denyAll() {
         //user should not see anything so give unsatisfiable condition
-        return query.processDefinitionId("missing-" + UUID.randomUUID().toString());
+        return ProcessDefinitionFilter.filterOnKey("missing-" + UUID.randomUUID().toString());
+    }
+
+    @Override
+    public ProcessDefinitionFilter allowAll() {
+        return ProcessDefinitionFilter.unfiltered();
     }
 }

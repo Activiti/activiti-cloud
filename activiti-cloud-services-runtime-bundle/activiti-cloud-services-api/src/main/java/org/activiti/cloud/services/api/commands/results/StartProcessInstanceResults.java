@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.ProcessInstance;
 
 public class StartProcessInstanceResults implements CommandResults {
 

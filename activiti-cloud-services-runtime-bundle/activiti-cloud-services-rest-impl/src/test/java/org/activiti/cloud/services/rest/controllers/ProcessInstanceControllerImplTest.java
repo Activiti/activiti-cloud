@@ -18,9 +18,9 @@ package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
-import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -43,12 +43,12 @@ public class ProcessInstanceControllerImplTest {
     private SecurityPoliciesApplicationService securityPoliciesApplicationService;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
     @Test
-    public void suspendShouldCallSuspendOnRuntimeService() throws Exception {
+    public void suspendShouldCallSuspendOnRuntimeService() {
         //given
         String processInstanceId = "7";
         ProcessInstance processInstance = mock(ProcessInstance.class);
@@ -63,7 +63,7 @@ public class ProcessInstanceControllerImplTest {
     }
 
     @Test
-    public void activateShouldCallActivateOnRuntimeService() throws Exception {
+    public void activateShouldCallActivateOnRuntimeService() {
         //given
         String processInstanceId = "7";
         ProcessInstance processInstance = mock(ProcessInstance.class);

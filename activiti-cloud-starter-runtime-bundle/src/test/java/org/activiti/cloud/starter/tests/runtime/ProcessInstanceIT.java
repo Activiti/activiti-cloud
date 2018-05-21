@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpMethod;
@@ -87,7 +88,7 @@ public class ProcessInstanceIT {
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
     @Before
-    public void setUp() throws Exception{
+    public void setUp(){
         keycloakTestUser = "hruser";
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
         ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
@@ -102,7 +103,7 @@ public class ProcessInstanceIT {
 
 
     @Test
-    public void shouldStartProcess() throws Exception {
+    public void shouldStartProcess() {
         //when
         ResponseEntity<ProcessInstance> entity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
                                                                                           null,
@@ -120,7 +121,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldStartProcessByKey() throws Exception {
+    public void shouldStartProcessByKey() {
         //when
         ResponseEntity<ProcessInstance> entity = processInstanceRestTemplate.startProcessByKey(SIMPLE_PROCESS,
                                                                                           null,
@@ -138,7 +139,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldNotStartProcessWithoutPermission() throws Exception {
+    public void shouldNotStartProcessWithoutPermission() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
 
         assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
@@ -147,7 +148,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldRetrieveProcessInstanceById() throws Exception {
+    public void shouldRetrieveProcessInstanceById() {
 
 
         //given
@@ -210,7 +211,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldRetrieveListOfProcessInstances() throws Exception {
+    public void shouldRetrieveListOfProcessInstances() {
 
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
@@ -233,7 +234,7 @@ public class ProcessInstanceIT {
 
 
     @Test
-    public void suspendShouldPutProcessInstanceInSuspendedState() throws Exception {
+    public void suspendShouldPutProcessInstanceInSuspendedState() {
         //given
         ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
@@ -257,7 +258,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void activateShouldPutASuspendedProcessInstanceBackToActiveState() throws Exception {
+    public void activateShouldPutASuspendedProcessInstanceBackToActiveState() {
         //given
         ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         executeRequestSuspendProcess(startProcessEntity);

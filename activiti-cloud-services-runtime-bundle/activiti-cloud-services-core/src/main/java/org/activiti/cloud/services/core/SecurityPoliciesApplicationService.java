@@ -5,14 +5,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.security.BaseSecurityPoliciesApplicationService;
 import org.activiti.cloud.services.security.SecurityPoliciesService;
 import org.activiti.cloud.services.security.SecurityPolicy;
-import org.activiti.engine.query.Query;
-import org.activiti.engine.repository.ProcessDefinitionQuery;
-import org.activiti.engine.runtime.ProcessInstanceQuery;
+import org.activiti.runtime.api.query.ProcessDefinitionFilter;
+import org.activiti.runtime.api.query.ProcessInstanceFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.activiti.cloud.services.security.BaseSecurityPoliciesApplicationService;
 
 @Component
 public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesApplicationService {
@@ -30,9 +29,8 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
     @Autowired(required = false)
     private RuntimeBundleProperties runtimeBundleProperties;
 
-    public ProcessDefinitionQuery restrictProcessDefQuery(ProcessDefinitionQuery query, SecurityPolicy securityPolicy){
-
-        return restrictQuery(query, processDefinitionRestrictionApplier, securityPolicy);
+    public ProcessDefinitionFilter restrictProcessDefQuery(SecurityPolicy securityPolicy){
+        return restrictQuery(processDefinitionRestrictionApplier, securityPolicy);
     }
 
     private Set<String> definitionKeysAllowedForRBPolicy(SecurityPolicy securityPolicy) {
@@ -53,13 +51,13 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
     }
 
 
-    public ProcessInstanceQuery restrictProcessInstQuery(ProcessInstanceQuery query, SecurityPolicy securityPolicy){
-        return restrictQuery(query, processInstanceRestrictionApplier, securityPolicy);
+    public ProcessInstanceFilter restrictProcessInstQuery(SecurityPolicy securityPolicy){
+        return restrictQuery(processInstanceRestrictionApplier, securityPolicy);
     }
 
-    private  <T extends Query<?,?>> T restrictQuery(T query, SecurityPoliciesRestrictionApplier<T> restrictionApplier, SecurityPolicy securityPolicy){
+    private  <T> T restrictQuery(SecurityPoliciesRestrictionApplier<T> restrictionApplier, SecurityPolicy securityPolicy){
         if (noSecurityPoliciesOrNoUser()){
-            return query;
+            return restrictionApplier.allowAll();
         }
 
         Set<String> keys = definitionKeysAllowedForRBPolicy(securityPolicy);
@@ -67,18 +65,18 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
         if(keys != null && !keys.isEmpty()){
 
             if(keys.contains(securityPoliciesService.getWildcard())){
-                return query;
+                return restrictionApplier.allowAll();
             }
 
-            return restrictionApplier.restrictToKeys(query, keys);
+            return restrictionApplier.restrictToKeys(keys);
         }
 
         //policies are in place but if we've got here then none for this user
         if(keys != null && securityPoliciesService.policiesDefined()) {
-            restrictionApplier.denyAll(query);
+            restrictionApplier.denyAll();
         }
 
-        return query;
+        return restrictionApplier.allowAll();
     }
 
     public boolean canWrite(String processDefId){

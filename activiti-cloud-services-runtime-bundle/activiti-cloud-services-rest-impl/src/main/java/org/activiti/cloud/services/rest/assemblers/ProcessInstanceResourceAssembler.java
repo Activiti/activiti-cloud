@@ -15,11 +15,11 @@
 
 package org.activiti.cloud.services.rest.assemblers;
 
-import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceVariableControllerImpl;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.stereotype.Component;

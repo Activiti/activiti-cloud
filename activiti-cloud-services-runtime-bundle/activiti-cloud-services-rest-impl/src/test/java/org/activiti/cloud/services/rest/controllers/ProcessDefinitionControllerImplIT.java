@@ -24,16 +24,13 @@ import java.util.UUID;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
-import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.api.model.converter.ProcessDefinitionConverter;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
-import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
-import org.activiti.cloud.services.core.pageable.PageableRepositoryService;
-import org.activiti.cloud.services.security.SecurityPolicy;
+import org.activiti.cloud.services.core.pageable.SecurityAwareRepositoryService;
+import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
-import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
-import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
+import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.impl.ProcessDefinitionImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +55,9 @@ import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourc
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processDefinitionFields;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processDefinitionIdParameter;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.halLinks;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
@@ -85,32 +84,30 @@ public class ProcessDefinitionControllerImplIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
-
-    @MockBean
     private RepositoryService repositoryService;
 
     @MockBean
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
     @MockBean
-    private ProcessDefinitionConverter processDefinitionConverter;
-
-    @MockBean
-    private PageableRepositoryService pageableRepositoryService;
+    private SecurityAwareRepositoryService securityAwareRepositoryService;
 
     @Test
     public void getProcessDefinitions() throws Exception {
 
-        List<ProcessDefinition> processDefinitionList = Collections.singletonList(new ProcessDefinition("procId",
-                                                                                                        "my process",
-                                                                                                        "this is my process",
-                                                                                                        1));
+        String procId = "procId";
+        String my_process = "my process";
+        String this_is_my_process = "this is my process";
+        int version = 1;
+        List<ProcessDefinition> processDefinitionList = Collections.singletonList(buildProcessDefinition(procId,
+                                                                                                         my_process,
+                                                                                                         this_is_my_process,
+                                                                                                         version));
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
                                                                        PageRequest.of(0,
                                                                                       10),
                                                                        processDefinitionList.size());
-        when(pageableRepositoryService.getProcessDefinitions(any())).thenReturn(processDefinitionPage);
+        when(securityAwareRepositoryService.getAuthorizedProcessDefinitions(any())).thenReturn(processDefinitionPage);
 
         this.mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(print())
@@ -124,21 +121,33 @@ public class ProcessDefinitionControllerImplIT {
                 ));
     }
 
+    private ProcessDefinition buildProcessDefinition(String processDefinitionId,
+                                                     String name,
+                                                     String description,
+                                                     int version) {
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId(processDefinitionId);
+        processDefinition.setName(name);
+        processDefinition.setDescription(description);
+        processDefinition.setVersion(version);
+        return processDefinition;
+    }
+
     @Test
     public void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         String processDefId = UUID.randomUUID().toString();
-        ProcessDefinition processDefinition = new ProcessDefinition(processDefId,
-                                                                    "my process",
-                                                                    "This is my process",
-                                                                    1);
+        ProcessDefinition processDefinition = buildProcessDefinition(processDefId,
+                                                                     "my process",
+                                                                     "This is my process",
+                                                                     1);
         List<ProcessDefinition> processDefinitionList = Collections.singletonList(processDefinition);
         PageRequest pageable = PageRequest.of(1,
                                               10);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
                                                                        pageable,
                                                                        11);
-        given(pageableRepositoryService.getProcessDefinitions(any())).willReturn(processDefinitionPage);
+        given(securityAwareRepositoryService.getAuthorizedProcessDefinitions(any())).willReturn(processDefinitionPage);
 
         //when
         MvcResult result = this.mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
@@ -164,21 +173,17 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void getProcessDefinition() throws Exception {
-        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
-        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
-        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery,
-                                                                        SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
-        ProcessDefinitionEntityImpl processDefinitionEntity = new ProcessDefinitionEntityImpl();
-        when(processDefinitionQuery.singleResult()).thenReturn(processDefinitionEntity);
-        given(processDefinitionConverter.from(processDefinitionEntity)).willReturn(new ProcessDefinition("procId",
-                                                                                                         "my process",
-                                                                                                         "this is my process",
-                                                                                                         1));
+    public void shouldGetProcessDefinitionById() throws Exception {
+        //given
+        String processId = UUID.randomUUID().toString();
+        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processId))
+                .willReturn(buildProcessDefinition(processId,
+                                                   "my process",
+                                                   "this is my process",
+                                                   1));
 
         this.mockMvc.perform(get("/v1/process-definitions/{id}",
-                                 1).accept(MediaTypes.HAL_JSON_VALUE))
+                                 processId).accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/get",
                                 processDefinitionIdParameter()));
@@ -187,17 +192,11 @@ public class ProcessDefinitionControllerImplIT {
     @Test
     public void getProcessDefinitionShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         String procDefId = UUID.randomUUID().toString();
-        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
-        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
-        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery,
-                                                                        SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.processDefinitionId(procDefId)).thenReturn(processDefinitionQuery);
-        ProcessDefinitionEntityImpl processDefinitionEntity = new ProcessDefinitionEntityImpl();
-        when(processDefinitionQuery.singleResult()).thenReturn(processDefinitionEntity);
-        given(processDefinitionConverter.from(processDefinitionEntity)).willReturn(new ProcessDefinition(procDefId,
-                                                                                                         "my process",
-                                                                                                         "This is my process",
-                                                                                                         1));
+        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(procDefId))
+                .willReturn(buildProcessDefinition(procDefId,
+                                                   "my process",
+                                                   "This is my process",
+                                                   1));
 
         MvcResult result = this.mockMvc.perform(get("/v1/process-definitions/{id}",
                                                     procDefId).accept(MediaType.APPLICATION_JSON_VALUE))
@@ -217,98 +216,84 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void getProcessModel() throws Exception {
+    public void shouldGetXMLProcessModel() throws Exception {
+        String processDefinitionId = UUID.randomUUID().toString();
+        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processDefinitionId))
+                .willReturn(mock(ProcessDefinition.class));
+
         InputStream xml = new ByteArrayInputStream("activiti".getBytes());
-        when(repositoryService.getProcessModel("1")).thenReturn(xml);
-        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
-        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
-        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery,
-                                                                        SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.singleResult()).thenReturn(new ProcessDefinitionEntityImpl());
+        when(repositoryService.getProcessModel(processDefinitionId)).thenReturn(xml);
 
         this.mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
-                    1).accept(MediaType.APPLICATION_XML))
+                    processDefinitionId).accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/model/get",
                                 processDefinitionIdParameter()));
     }
 
     @Test
-    public void getBpmnModel() throws Exception {
+    public void shouldGetBpmnJsonModel() throws Exception {
+        String processDefinitionId = UUID.randomUUID().toString();
+        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processDefinitionId))
+                .willReturn(mock(ProcessDefinition.class));
+
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
-        process.setId("1");
+        process.setId(processDefinitionId);
         process.setName("Main Process");
         bpmnModel.getProcesses().add(process);
-        when(repositoryService.getBpmnModel("1")).thenReturn(bpmnModel);
-        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
-        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
-        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery,
-                                                                        SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.singleResult()).thenReturn(new ProcessDefinitionEntityImpl());
+        when(repositoryService.getBpmnModel(processDefinitionId)).thenReturn(bpmnModel);
 
         this.mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
-                    1).accept(MediaType.APPLICATION_JSON))
+                    processDefinitionId).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/bpmn-model/get",
                                 processDefinitionIdParameter()));
     }
 
     @Test
-    public void getProcessDiagram() throws Exception {
+    public void shouldGetSVGProcessDiagram() throws Exception {
+        String processDefinitionId = UUID.randomUUID().toString();
+        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processDefinitionId))
+                .willReturn(mock(ProcessDefinition.class));
+
         BpmnModel bpmnModel = new BpmnModel();
-        when(repositoryService.getBpmnModel("1")).thenReturn(bpmnModel);
-        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
-        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
-        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery,
-                                                                        SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.singleResult()).thenReturn(new ProcessDefinitionEntityImpl());
+        when(repositoryService.getBpmnModel(processDefinitionId)).thenReturn(bpmnModel);
         when(processDiagramGenerator.generateDiagram(any(BpmnModel.class)))
                 .thenReturn("img".getBytes());
 
         this.mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
-                    1).accept("image/svg+xml"))
+                    processDefinitionId).accept("image/svg+xml"))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/diagram",
                                 processDefinitionIdParameter()));
     }
 
-
     @Test
-    public void getProcessDiagramProcessNotFound() throws Exception {
-        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
-        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
-        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery,
-                                                                        SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.singleResult()).thenReturn(null);
-        when(processDiagramGenerator.generateDiagram(any(BpmnModel.class)))
-                .thenReturn("img".getBytes());
+    public void getProcessDiagramShouldReturnNotFoundWhenRelatedProcessDefinitionIsNotFound() throws Exception {
+        String processDefinitionId = UUID.randomUUID().toString();
+        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processDefinitionId))
+                .willThrow(new ActivitiObjectNotFoundException("missing"));
 
         this.mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
-                    1).accept("image/svg+xml"))
+                    processDefinitionId).accept("image/svg+xml"))
                 .andExpect(status().isNotFound())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/diagram",
                                 processDefinitionIdParameter()));
     }
 
     @Test
-    public void getProcessDiagramWithoutInterchangeInfo() throws Exception {
+    public void getProcessDiagramShouldReturnNoContentStatusWhenNoInterchangeInfo() throws Exception {
+        String processDefinitionId = UUID.randomUUID().toString();
+        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processDefinitionId))
+                .willReturn(mock(ProcessDefinition.class));
+
         BpmnModel bpmnModel = new BpmnModel();
         when(repositoryService.getBpmnModel("1")).thenReturn(bpmnModel);
-        ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
-        when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
-        when(securityPoliciesApplicationService.restrictProcessDefQuery(processDefinitionQuery,
-                                                                        SecurityPolicy.READ)).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);
-        when(processDefinitionQuery.singleResult()).thenReturn(new ProcessDefinitionEntityImpl());
         when(processDiagramGenerator.generateDiagram(any(BpmnModel.class)))
                 .thenThrow(new ActivitiInterchangeInfoNotFoundException("No interchange information found."));
 
@@ -317,5 +302,4 @@ public class ProcessDefinitionControllerImplIT {
                     1).accept("image/svg+xml"))
                 .andExpect(status().isNoContent());
     }
-
 }

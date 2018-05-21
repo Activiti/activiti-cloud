@@ -18,12 +18,12 @@ package org.activiti.cloud.services.core;
 
 import java.util.Set;
 
-import org.activiti.engine.query.Query;
+public interface SecurityPoliciesRestrictionApplier<T>  {
 
-public interface SecurityPoliciesRestrictionApplier<T extends Query<?, ?>>  {
+    T restrictToKeys(Set<String> keys);
 
-    T restrictToKeys(T query, Set<String> keys);
+    T denyAll();
 
-    T denyAll(T query);
+    T allowAll();
 
 }

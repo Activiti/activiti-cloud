@@ -1,0 +1,106 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+package org.activiti.cloud.services.core.pageable;
+
+import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
+import org.activiti.cloud.services.core.ActivitiForbiddenException;
+import org.activiti.cloud.services.core.AuthenticationWrapper;
+import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.security.SecurityPolicy;
+import org.activiti.engine.ActivitiObjectNotFoundException;
+import org.activiti.runtime.api.ProcessRuntime;
+import org.activiti.runtime.api.model.FluentProcessDefinition;
+import org.activiti.runtime.api.model.FluentProcessInstance;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.query.ProcessInstanceFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
+
+@Component
+public class SecurityAwareProcessInstanceService {
+
+    private final ProcessRuntime processRuntime;
+
+    private final SecurityPoliciesApplicationService securityService;
+
+    private final PageableConverter pageableConverter;
+
+    private final SpringPageConverter springPageConverter;
+
+    private final AuthenticationWrapper authenticationWrapper;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAwareProcessInstanceService.class);
+
+
+    public SecurityAwareProcessInstanceService(ProcessRuntime processRuntime,
+                                               SecurityPoliciesApplicationService securityPolicyApplicationService,
+                                               PageableConverter pageableConverter,
+                                               SpringPageConverter springPageConverter,
+                                               AuthenticationWrapper authenticationWrapper) {
+        this.processRuntime = processRuntime;
+        this.securityService = securityPolicyApplicationService;
+        this.pageableConverter = pageableConverter;
+        this.springPageConverter = springPageConverter;
+        this.authenticationWrapper = authenticationWrapper;
+    }
+
+    public Page<ProcessInstance> getAuthorizedProcessInstances(Pageable pageable) {
+
+        ProcessInstanceFilter filter = securityService.restrictProcessInstQuery(SecurityPolicy.READ);
+
+        return springPageConverter.toSpringPage(pageable,
+                               processRuntime.processInstances(pageableConverter.toAPIPageable(pageable),
+                                                               filter));
+    }
+
+    public Page<ProcessInstance> getAllProcessInstances(Pageable pageable) {
+
+        return springPageConverter.toSpringPage(pageable,
+                               processRuntime.processInstances(pageableConverter.toAPIPageable(pageable)));
+    }
+
+    public ProcessInstance startProcess(StartProcessInstanceCmd cmd) {
+
+        FluentProcessDefinition processDefinition;
+        if (cmd.getProcessDefinitionKey() != null) {
+            processDefinition = processRuntime.processDefinitionByKey(cmd.getProcessDefinitionKey());
+        } else {
+            processDefinition = processRuntime.processDefinitionById(cmd.getProcessDefinitionId());
+        }
+
+        if (!securityService.canWrite(processDefinition.getKey())) {
+            LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processDefinition.getKey());
+            throw new ActivitiForbiddenException("Operation not permitted for " + processDefinition.getKey());
+        }
+
+        return processDefinition.startProcessWith()
+                .variables(cmd.getVariables())
+                .businessKey(cmd.getBusinessKey())
+                .doIt();
+    }
+
+    public ProcessInstance getAuthorizedProcessInstanceById(String processInstanceId) {
+        FluentProcessInstance processInstance = processRuntime.processInstance(processInstanceId);
+        if (processInstance == null || !securityService.canRead(processInstance.getProcessDefinitionKey())) {
+            throw new ActivitiObjectNotFoundException("Unable to find process definition for the given id:'" + processInstanceId + "'");
+        }
+        return processInstance;
+    }
+
+}

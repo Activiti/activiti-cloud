@@ -11,15 +11,12 @@ import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
-import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
-import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.api.model.Task;
-import org.activiti.cloud.services.api.model.converter.ProcessInstanceConverter;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
-import org.activiti.cloud.services.core.pageable.PageableProcessInstanceService;
 import org.activiti.cloud.services.core.pageable.PageableTaskService;
+import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.cloud.services.events.listeners.MessageProducerActivitiEventListener;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
@@ -27,8 +24,6 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.runtime.ProcessInstanceBuilder;
-import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +36,6 @@ public class ProcessEngineWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessEngineWrapper.class);
 
-    private final ProcessInstanceConverter processInstanceConverter;
     private final RuntimeService runtimeService;
     private final TaskService taskService;
     private final TaskConverter taskConverter;
@@ -49,12 +43,11 @@ public class ProcessEngineWrapper {
     private final SecurityPoliciesApplicationService securityService;
     private final RepositoryService repositoryService;
     private final AuthenticationWrapper authenticationWrapper;
-    private PageableProcessInstanceService pageableProcessInstanceService;
+    private final SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
 
     @Autowired
-    public ProcessEngineWrapper(ProcessInstanceConverter processInstanceConverter,
-                                RuntimeService runtimeService,
-                                PageableProcessInstanceService pageableProcessInstanceService,
+    public ProcessEngineWrapper(RuntimeService runtimeService,
+                                SecurityAwareProcessInstanceService securityAwareProcessInstanceService,
                                 TaskService taskService,
                                 TaskConverter taskConverter,
                                 PageableTaskService pageableTaskService,
@@ -62,9 +55,8 @@ public class ProcessEngineWrapper {
                                 SecurityPoliciesApplicationService securityService,
                                 RepositoryService repositoryService,
                                 AuthenticationWrapper authenticationWrapper) {
-        this.processInstanceConverter = processInstanceConverter;
         this.runtimeService = runtimeService;
-        this.pageableProcessInstanceService = pageableProcessInstanceService;
+        this.securityAwareProcessInstanceService = securityAwareProcessInstanceService;
         this.taskService = taskService;
         this.taskConverter = taskConverter;
         this.pageableTaskService = pageableTaskService;
@@ -72,47 +64,6 @@ public class ProcessEngineWrapper {
         this.securityService = securityService;
         this.repositoryService = repositoryService;
         this.authenticationWrapper = authenticationWrapper;
-    }
-
-    public Page<ProcessInstance> getProcessInstances(Pageable pageable) {
-        return pageableProcessInstanceService.getProcessInstances(pageable);
-    }
-
-    public Page<ProcessInstance> getAllProcessInstances(Pageable pageable) {
-        return pageableProcessInstanceService.getAllProcessInstances(pageable);
-    }
-
-    public ProcessInstance startProcess(StartProcessInstanceCmd cmd) {
-
-        String processDefinitionKey = null;
-        if (cmd.getProcessDefinitionKey() != null) {
-            long count = repositoryService.createProcessDefinitionQuery().processDefinitionKey(cmd.getProcessDefinitionKey()).count();
-            if (count == 0) {
-                throw new ActivitiObjectNotFoundException("Unable to find process definition for the given key:'" + cmd.getProcessDefinitionKey() + "'");
-            }
-            processDefinitionKey = cmd.getProcessDefinitionKey();
-        } else {
-            ProcessDefinition definition = repositoryService.getProcessDefinition(cmd.getProcessDefinitionId());
-            if (definition == null) {
-                throw new ActivitiObjectNotFoundException("Unable to find process definition for the given id:'" + cmd.getProcessDefinitionId() + "'");
-            }
-            processDefinitionKey = definition.getKey();
-        }
-
-        if (!securityService.canWrite(processDefinitionKey)) {
-            LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processDefinitionKey);
-            throw new ActivitiForbiddenException("Operation not permitted for " + processDefinitionKey);
-        }
-
-        ProcessInstanceBuilder builder = runtimeService.createProcessInstanceBuilder();
-        if (cmd.getProcessDefinitionKey() != null) {
-            builder.processDefinitionKey(cmd.getProcessDefinitionKey());
-        } else {
-            builder.processDefinitionId(cmd.getProcessDefinitionId());
-        }
-        builder.variables(cmd.getVariables());
-        builder.businessKey(cmd.getBusinessKey());
-        return processInstanceConverter.from(builder.start());
     }
 
     public void signal(SignalProcessInstancesCmd signalProcessInstancesCmd) {
@@ -129,7 +80,7 @@ public class ProcessEngineWrapper {
     }
 
     private void verifyCanWriteToProcessInstance(String processInstanceId) {
-        ProcessInstance processInstance = getProcessInstanceById(processInstanceId);
+        org.activiti.runtime.api.model.ProcessInstance processInstance = getProcessInstanceById(processInstanceId);
         if (processInstance == null) {
             throw new ActivitiException("Unable to find process instance for the given id: " + processInstanceId);
         }
@@ -151,11 +102,8 @@ public class ProcessEngineWrapper {
         runtimeService.activateProcessInstanceById(activateProcessInstanceCmd.getProcessInstanceId());
     }
 
-    public ProcessInstance getProcessInstanceById(String processInstanceId) {
-        ProcessInstanceQuery query = runtimeService.createProcessInstanceQuery();
-        query = query.processInstanceId(processInstanceId);
-        org.activiti.engine.runtime.ProcessInstance processInstance = query.singleResult();
-        return processInstanceConverter.from(processInstance);
+    public org.activiti.runtime.api.model.ProcessInstance getProcessInstanceById(String processInstanceId) {
+        return securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(processInstanceId);
     }
 
     public List<String> getActiveActivityIds(String executionId) {
@@ -204,16 +152,17 @@ public class ProcessEngineWrapper {
     }
 
     public void setProcessVariables(SetProcessVariablesCmd setProcessVariablesCmd) {
-        ProcessInstance processInstance = getProcessInstanceById(setProcessVariablesCmd.getProcessId());
+        org.activiti.runtime.api.model.ProcessInstance processInstance = getProcessInstanceById(setProcessVariablesCmd.getProcessId());
         verifyCanWriteToProcessInstance(processInstance.getId());
         runtimeService.setVariables(setProcessVariablesCmd.getProcessId(),
-        setProcessVariablesCmd.getVariables());
+                                    setProcessVariablesCmd.getVariables());
     }
 
-    public void removeProcessVariables(RemoveProcessVariablesCmd removeProcessVariablesCmd){
-        ProcessInstance processInstance = getProcessInstanceById(removeProcessVariablesCmd.getProcessId());
+    public void removeProcessVariables(RemoveProcessVariablesCmd removeProcessVariablesCmd) {
+        org.activiti.runtime.api.model.ProcessInstance processInstance = getProcessInstanceById(removeProcessVariablesCmd.getProcessId());
         verifyCanWriteToProcessInstance(processInstance.getId());
-        runtimeService.removeVariables(removeProcessVariablesCmd.getProcessId(),removeProcessVariablesCmd.getVariableNames());
+        runtimeService.removeVariables(removeProcessVariablesCmd.getProcessId(),
+                                       removeProcessVariablesCmd.getVariableNames());
     }
 
     /**

@@ -16,8 +16,13 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.core.pageable.PageableRepositoryService;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import org.activiti.cloud.services.core.pageable.SecurityAwareRepositoryService;
+import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.impl.ProcessDefinitionImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +40,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
@@ -72,21 +73,22 @@ public class ProcessDefinitionAdminControllerImplIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private PageableRepositoryService pageableRepositoryService;
-
+    private SecurityAwareRepositoryService securityAwareRepositoryService;
 
     @Test
     public void getProcessDefinitions() throws Exception {
 
-        List<ProcessDefinition> processDefinitionList = Collections.singletonList(new ProcessDefinition("procId",
-                                                                                                        "my process",
-                                                                                                        "this is my process",
-                                                                                                        1));
-        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-                                                                       PageRequest.of(0,
-                                                                                      10),
-                                                                       processDefinitionList.size());
-        when(pageableRepositoryService.getAllProcessDefinitions(any())).thenReturn(processDefinitionPage);
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId("procId");
+        processDefinition.setName("my process");
+        processDefinition.setDescription("this is my process");
+        processDefinition.setVersion(1);
+        List<org.activiti.runtime.api.model.ProcessDefinition> processDefinitionList = Collections.singletonList(processDefinition);
+        Page<org.activiti.runtime.api.model.ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
+                                                                                                      PageRequest.of(0,
+                                                                                                                     10),
+                                                                                                      processDefinitionList.size());
+        when(securityAwareRepositoryService.getAllProcessDefinitions(any())).thenReturn(processDefinitionPage);
 
         this.mockMvc.perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(print())
@@ -104,17 +106,19 @@ public class ProcessDefinitionAdminControllerImplIT {
     public void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         String processDefId = UUID.randomUUID().toString();
-        ProcessDefinition processDefinition = new ProcessDefinition(processDefId,
-                                                                    "my process",
-                                                                    "This is my process",
-                                                                    1);
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId(processDefId);
+        processDefinition.setName("my process");
+        processDefinition.setDescription("This is my process");
+        processDefinition.setVersion(1);
+
         List<ProcessDefinition> processDefinitionList = Collections.singletonList(processDefinition);
         PageRequest pageable = PageRequest.of(1,
                                               10);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
                                                                        pageable,
                                                                        11);
-        given(pageableRepositoryService.getAllProcessDefinitions(any())).willReturn(processDefinitionPage);
+        given(securityAwareRepositoryService.getAllProcessDefinitions(any())).willReturn(processDefinitionPage);
 
         //when
         MvcResult result = this.mockMvc.perform(get("/admin/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
@@ -138,5 +142,4 @@ public class ProcessDefinitionAdminControllerImplIT {
                 .node("list.entries[0].entry.description").isEqualTo("This is my process")
                 .node("list.entries[0].entry.version").isEqualTo(1);
     }
-
 }

@@ -28,9 +28,11 @@ import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ProcessValidatorImpl;
 import org.activiti.validation.validator.ValidatorSetFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.MessageChannel;
 
 /**
  * Test context configuration for integration tests over Activiti process engine
@@ -48,6 +50,7 @@ import org.springframework.context.annotation.Configuration;
         "org.activiti.cloud.services.core.pageable",
         "org.activiti.cloud.services.core.utils"
 })
+@EnableAutoConfiguration
 public class TestProcessEngineConfiguration {
 
     @Autowired
@@ -86,5 +89,10 @@ public class TestProcessEngineConfiguration {
         ProcessValidatorImpl processValidator = new ProcessValidatorImpl();
         processValidator.addValidatorSet(new ValidatorSetFactory().createActivitiExecutableProcessValidatorSet());
         return processValidator;
+    }
+
+    @Bean
+    public MessageChannel commandResults(){
+        return new MockMessageChannel();
     }
 }

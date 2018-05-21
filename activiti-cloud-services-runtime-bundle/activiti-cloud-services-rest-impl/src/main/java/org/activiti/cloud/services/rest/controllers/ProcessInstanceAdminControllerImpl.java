@@ -16,14 +16,13 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
+import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceAdminController;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
@@ -34,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminController {
 
-    private ProcessEngineWrapper processEngine;
+    private final SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
 
     private final ProcessInstanceResourceAssembler resourceAssembler;
 
@@ -53,18 +52,17 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
         return ex.getMessage();
     }
 
-    @Autowired
-    public ProcessInstanceAdminControllerImpl(ProcessEngineWrapper processEngine,
+    public ProcessInstanceAdminControllerImpl(SecurityAwareProcessInstanceService securityAwareProcessInstanceService,
                                               ProcessInstanceResourceAssembler resourceAssembler,
                                               AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler) {
-        this.processEngine = processEngine;
+        this.securityAwareProcessInstanceService = securityAwareProcessInstanceService;
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @Override
     public PagedResources<ProcessInstanceResource> getAllProcessInstances(Pageable pageable) {
-        return pagedResourcesAssembler.toResource(pageable, processEngine.getAllProcessInstances(pageable),
+        return pagedResourcesAssembler.toResource(pageable, securityAwareProcessInstanceService.getAllProcessInstances(pageable),
                                                   resourceAssembler);
     }
 

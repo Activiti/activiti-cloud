@@ -15,7 +15,7 @@
 
 package org.activiti.cloud.services.rest.api.resources;
 
-import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 

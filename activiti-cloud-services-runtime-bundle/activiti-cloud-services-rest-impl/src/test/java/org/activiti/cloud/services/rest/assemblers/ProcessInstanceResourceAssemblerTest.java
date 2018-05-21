@@ -1,12 +1,13 @@
 package org.activiti.cloud.services.rest.assemblers;
 
-import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.Test;
 import org.springframework.hateoas.Link;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ProcessInstanceResourceAssemblerTest {
 

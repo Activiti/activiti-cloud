@@ -1,11 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import java.util.Date;
-
-import org.activiti.cloud.services.api.commands.results.StartProcessInstanceResults;
-import org.activiti.cloud.services.api.model.ProcessInstance;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.results.StartProcessInstanceResults;
+import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -14,9 +12,11 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class StartProcessInstanceCmdExecutorTest {
@@ -25,13 +25,13 @@ public class StartProcessInstanceCmdExecutorTest {
     private StartProcessInstanceCmdExecutor startProcessInstanceCmdExecutor;
 
     @Mock
-    private ProcessEngineWrapper processEngine;
+    private SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
 
     @Mock
     private MessageChannel commandResults;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
@@ -39,23 +39,15 @@ public class StartProcessInstanceCmdExecutorTest {
     public void startProcessInstanceCmdExecutorTest() {
         StartProcessInstanceCmd startProcessInstanceCmd = new StartProcessInstanceCmd("x");
 
-        ProcessInstance fakeProcessInstance = new ProcessInstance("fakeId",
-                                                                  "name",
-                                                                  "description",
-                                                                  "processDefinitionId",
-                                                                  "initiator",
-                                                                  new Date(),
-                                                                  "businessKey",
-                                                                  "status",
-                                                                  "definitionKey");
+        FluentProcessInstance fakeProcessInstance = mock(FluentProcessInstance.class);
 
-        given(processEngine.startProcess(any())).willReturn(fakeProcessInstance);
+        given(securityAwareProcessInstanceService.startProcess(any())).willReturn(fakeProcessInstance);
 
         assertThat(startProcessInstanceCmdExecutor.getHandledType()).isEqualTo(StartProcessInstanceCmd.class);
 
         startProcessInstanceCmdExecutor.execute(startProcessInstanceCmd);
 
-        verify(processEngine).startProcess(startProcessInstanceCmd);
+        verify(securityAwareProcessInstanceService).startProcess(startProcessInstanceCmd);
 
         verify(commandResults).send(ArgumentMatchers.<Message<StartProcessInstanceResults>>any());
     }
