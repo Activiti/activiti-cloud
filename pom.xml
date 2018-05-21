@@ -117,6 +117,13 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-kubernetes-dependencies</artifactId>
+        <version>${spring.cloud.k8s.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <!-- SpringFox dependencies -->
       <dependency>
         <groupId>io.springfox</groupId>
@@ -158,11 +165,6 @@
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java</artifactId>
         <version>${graphql-java.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-kubernetes-discovery</artifactId>
-        <version>${spring-cloud-kubernetes.version}</version>
       </dependency>
       <!-- Querydsl dependencies http://www.querydsl.com -->
       <dependency>
