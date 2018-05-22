@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.results.SuspendProcessInstanceResults;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.results.SuspendProcessInstanceResults;
+import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -11,8 +11,8 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class SuspendProcessInstanceCmdExecutorTest {
@@ -21,26 +21,27 @@ public class SuspendProcessInstanceCmdExecutorTest {
     private SuspendProcessInstanceCmdExecutor suspendProcessInstanceCmdExecutor;
 
     @Mock
-    private ProcessEngineWrapper processEngine;
+    private SecurityAwareProcessInstanceService processInstanceService;
 
     @Mock
     private MessageChannel commandResults;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
     @Test
     public void suspendProcessInstanceCmdExecutorTest() {
+        //given
         SuspendProcessInstanceCmd suspendProcessInstanceCmd = new SuspendProcessInstanceCmd("x");
-
         assertThat(suspendProcessInstanceCmdExecutor.getHandledType()).isEqualTo(SuspendProcessInstanceCmd.class);
 
+        //when
         suspendProcessInstanceCmdExecutor.execute(suspendProcessInstanceCmd);
 
-        verify(processEngine).suspend(suspendProcessInstanceCmd);
-
+        //then
+        verify(processInstanceService).suspend(suspendProcessInstanceCmd);
         verify(commandResults).send(ArgumentMatchers.<Message<SuspendProcessInstanceResults>>any());
     }
 }

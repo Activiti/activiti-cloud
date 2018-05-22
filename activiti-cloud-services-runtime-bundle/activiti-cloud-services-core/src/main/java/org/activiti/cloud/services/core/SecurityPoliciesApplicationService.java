@@ -79,12 +79,14 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
         return restrictionApplier.allowAll();
     }
 
-    public boolean canWrite(String processDefId){
-        return hasPermission(processDefId, SecurityPolicy.WRITE,runtimeBundleProperties.getServiceName()) || hasPermission(processDefId, SecurityPolicy.WRITE,runtimeBundleProperties.getServiceFullName());
+    public boolean canWrite(String processDefinitionKey){
+        return hasPermission(processDefinitionKey, SecurityPolicy.WRITE, runtimeBundleProperties.getServiceName())
+                || hasPermission(processDefinitionKey, SecurityPolicy.WRITE, runtimeBundleProperties.getServiceFullName());
     }
 
-    public boolean canRead(String processDefId){
-        return hasPermission(processDefId, SecurityPolicy.READ,runtimeBundleProperties.getServiceName())|| hasPermission(processDefId, SecurityPolicy.WRITE,runtimeBundleProperties.getServiceFullName());
+    public boolean canRead(String processDefinitionKey){
+        return hasPermission(processDefinitionKey, SecurityPolicy.READ,runtimeBundleProperties.getServiceName())
+                || hasPermission(processDefinitionKey, SecurityPolicy.WRITE,runtimeBundleProperties.getServiceFullName());
     }
 
 

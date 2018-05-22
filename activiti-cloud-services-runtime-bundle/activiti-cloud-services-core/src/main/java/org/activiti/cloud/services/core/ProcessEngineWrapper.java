@@ -2,16 +2,12 @@ package org.activiti.cloud.services.core;
 
 import java.util.List;
 
-import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
-import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
-import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
-import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
 import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
@@ -66,19 +62,6 @@ public class ProcessEngineWrapper {
         this.authenticationWrapper = authenticationWrapper;
     }
 
-    public void signal(SignalProcessInstancesCmd signalProcessInstancesCmd) {
-        //TODO: plan is to restrict access to events using a new security policy on events
-        // - that's another piece of work though so for now no security here
-
-        runtimeService.signalEventReceived(signalProcessInstancesCmd.getName(),
-                                           signalProcessInstancesCmd.getInputVariables());
-    }
-
-    public void suspend(SuspendProcessInstanceCmd suspendProcessInstanceCmd) {
-        verifyCanWriteToProcessInstance(suspendProcessInstanceCmd.getProcessInstanceId());
-        runtimeService.suspendProcessInstanceById(suspendProcessInstanceCmd.getProcessInstanceId());
-    }
-
     private void verifyCanWriteToProcessInstance(String processInstanceId) {
         org.activiti.runtime.api.model.ProcessInstance processInstance = getProcessInstanceById(processInstanceId);
         if (processInstance == null) {
@@ -97,17 +80,8 @@ public class ProcessEngineWrapper {
         }
     }
 
-    public void activate(ActivateProcessInstanceCmd activateProcessInstanceCmd) {
-        verifyCanWriteToProcessInstance(activateProcessInstanceCmd.getProcessInstanceId());
-        runtimeService.activateProcessInstanceById(activateProcessInstanceCmd.getProcessInstanceId());
-    }
-
     public org.activiti.runtime.api.model.ProcessInstance getProcessInstanceById(String processInstanceId) {
         return securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(processInstanceId);
-    }
-
-    public List<String> getActiveActivityIds(String executionId) {
-        return runtimeService.getActiveActivityIds(executionId);
     }
 
     public Page<Task> getTasks(Pageable pageable) {
@@ -151,13 +125,6 @@ public class ProcessEngineWrapper {
                                       setTaskVariablesCmd.getVariables());
     }
 
-    public void setProcessVariables(SetProcessVariablesCmd setProcessVariablesCmd) {
-        org.activiti.runtime.api.model.ProcessInstance processInstance = getProcessInstanceById(setProcessVariablesCmd.getProcessId());
-        verifyCanWriteToProcessInstance(processInstance.getId());
-        runtimeService.setVariables(setProcessVariablesCmd.getProcessId(),
-                                    setProcessVariablesCmd.getVariables());
-    }
-
     public void removeProcessVariables(RemoveProcessVariablesCmd removeProcessVariablesCmd) {
         org.activiti.runtime.api.model.ProcessInstance processInstance = getProcessInstanceById(removeProcessVariablesCmd.getProcessId());
         verifyCanWriteToProcessInstance(processInstance.getId());
@@ -181,7 +148,7 @@ public class ProcessEngineWrapper {
                                "Cancelled by " + authenticationWrapper.getAuthenticatedUserId());
     }
 
-    public void checkWritePermissionsOnTask(Task task) {
+    private void checkWritePermissionsOnTask(Task task) {
         //TODO: to check the user write permissions on task
     }
 
@@ -219,12 +186,6 @@ public class ProcessEngineWrapper {
         taskService.saveTask(task);
 
         return taskConverter.from(taskService.createTaskQuery().taskId(task.getId()).singleResult());
-    }
-
-    public void deleteProcessInstance(String processInstanceId) {
-        verifyCanWriteToProcessInstance(processInstanceId);
-        runtimeService.deleteProcessInstance(processInstanceId,
-                                             "Cancelled by " + authenticationWrapper.getAuthenticatedUserId());
     }
 
     public List<org.activiti.engine.task.Task> getSubtasks(String parentTaskId) {

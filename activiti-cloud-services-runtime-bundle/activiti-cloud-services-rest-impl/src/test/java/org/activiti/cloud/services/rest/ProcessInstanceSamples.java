@@ -19,13 +19,13 @@ package org.activiti.cloud.services.rest;
 import java.util.Date;
 import java.util.UUID;
 
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
+import org.activiti.runtime.api.model.FluentProcessInstance;
+import org.activiti.runtime.api.model.impl.FluentProcessInstanceImpl;
 
 public class ProcessInstanceSamples {
 
-    public static ProcessInstance defaultProcessInstance() {
-        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
+    public static FluentProcessInstance defaultProcessInstance() {
+        FluentProcessInstanceImpl processInstance = new FluentProcessInstanceImpl(null, null);
         processInstance.setId(UUID.randomUUID().toString());
         processInstance.setName("My process instance");
         processInstance.setDescription("This is my process instance");

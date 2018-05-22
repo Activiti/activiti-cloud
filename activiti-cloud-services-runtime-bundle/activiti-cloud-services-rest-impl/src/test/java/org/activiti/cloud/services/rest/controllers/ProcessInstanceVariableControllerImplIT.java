@@ -26,8 +26,8 @@ import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.cloud.services.rest.ProcessInstanceSamples;
-import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
 import org.activiti.engine.RuntimeService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +37,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -45,6 +46,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -60,6 +62,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs(outputDir = "target/snippets")
+@ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 public class ProcessInstanceVariableControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "process-instance-variables";
@@ -69,13 +72,15 @@ public class ProcessInstanceVariableControllerImplIT {
 
     @MockBean
     private RuntimeService runtimeService;
-    @MockBean
-    private ProcessInstanceVariableResourceAssembler variableResourceAssembler;
 
     @MockBean
     private SecurityPoliciesApplicationService securityService;
+
     @MockBean
     private ProcessEngineWrapper processEngine;
+
+    @MockBean
+    private SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
 
     @SpyBean
     private ObjectMapper mapper;
@@ -121,6 +126,8 @@ public class ProcessInstanceVariableControllerImplIT {
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/upsert",
                         pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+
+        verify(securityAwareProcessInstanceService).setProcessVariables(any());
     }
 
     @Test

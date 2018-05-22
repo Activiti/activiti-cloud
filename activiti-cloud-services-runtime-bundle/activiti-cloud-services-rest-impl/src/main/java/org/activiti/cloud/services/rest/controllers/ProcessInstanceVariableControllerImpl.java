@@ -25,13 +25,12 @@ import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
 import org.activiti.cloud.services.rest.api.resources.ProcessVariableResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RuntimeService;
-
-import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
 import org.activiti.engine.impl.persistence.entity.VariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
@@ -51,8 +50,8 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
 
     private final RuntimeService runtimeService;
     private final ProcessInstanceVariableResourceAssembler variableResourceBuilder;
-    private final SecurityPoliciesApplicationService securityPoliciesApplicationService;
     private final ProcessEngineWrapper processEngine;
+    private final SecurityAwareProcessInstanceService processInstanceService;
 
 
     @ExceptionHandler(ActivitiForbiddenException.class)
@@ -70,12 +69,12 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
     @Autowired
     public ProcessInstanceVariableControllerImpl(RuntimeService runtimeService,
                                                  ProcessInstanceVariableResourceAssembler variableResourceBuilder,
-                                                 SecurityPoliciesApplicationService securityPoliciesApplicationService,
-                                                 ProcessEngineWrapper processEngine) {
+                                                 ProcessEngineWrapper processEngine,
+                                                 SecurityAwareProcessInstanceService processInstanceService) {
         this.runtimeService = runtimeService;
         this.variableResourceBuilder = variableResourceBuilder;
-        this.securityPoliciesApplicationService = securityPoliciesApplicationService;
         this.processEngine = processEngine;
+        this.processInstanceService = processInstanceService;
     }
 
     @Override
@@ -88,8 +87,7 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
                     variableInstance.getProcessInstanceId(),variableInstance.getName(),variableInstance.getTypeName(),variableInstance.getValue(),variableInstance.getExecutionId())));
         }
 
-        Resources<ProcessVariableResource> resources = new Resources<>(resourcesList);
-        return resources;
+        return new Resources<>(resourcesList);
     }
 
     @Override
@@ -105,15 +103,14 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
                     variableInstance.getProcessInstanceId(),variableInstance.getName(),variableInstance.getTypeName(),variableInstance.getValue(),variableInstance.getExecutionId())));
         }
 
-        Resources<ProcessVariableResource> resources = new Resources<>(resourcesList);
-        return resources;
+        return new Resources<>(resourcesList);
     }
 
 
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
                                              @RequestBody SetProcessVariablesCmd setProcessVariablesCmd) {
-        processEngine.setProcessVariables(setProcessVariablesCmd);
+        processInstanceService.setProcessVariables(setProcessVariablesCmd);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

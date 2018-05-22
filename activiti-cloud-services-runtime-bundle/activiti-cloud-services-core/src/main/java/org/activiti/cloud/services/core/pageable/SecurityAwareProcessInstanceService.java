@@ -15,7 +15,13 @@
 
 package org.activiti.cloud.services.core.pageable;
 
+import java.util.HashMap;
+
+import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
+import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.AuthenticationWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
@@ -47,7 +53,6 @@ public class SecurityAwareProcessInstanceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAwareProcessInstanceService.class);
 
-
     public SecurityAwareProcessInstanceService(ProcessRuntime processRuntime,
                                                SecurityPoliciesApplicationService securityPolicyApplicationService,
                                                PageableConverter pageableConverter,
@@ -65,14 +70,14 @@ public class SecurityAwareProcessInstanceService {
         ProcessInstanceFilter filter = securityService.restrictProcessInstQuery(SecurityPolicy.READ);
 
         return springPageConverter.toSpringPage(pageable,
-                               processRuntime.processInstances(pageableConverter.toAPIPageable(pageable),
-                                                               filter));
+                                                processRuntime.processInstances(pageableConverter.toAPIPageable(pageable),
+                                                                                filter));
     }
 
     public Page<ProcessInstance> getAllProcessInstances(Pageable pageable) {
 
         return springPageConverter.toSpringPage(pageable,
-                               processRuntime.processInstances(pageableConverter.toAPIPageable(pageable)));
+                                                processRuntime.processInstances(pageableConverter.toAPIPageable(pageable)));
     }
 
     public ProcessInstance startProcess(StartProcessInstanceCmd cmd) {
@@ -95,12 +100,56 @@ public class SecurityAwareProcessInstanceService {
                 .doIt();
     }
 
-    public ProcessInstance getAuthorizedProcessInstanceById(String processInstanceId) {
+    public FluentProcessInstance getAuthorizedProcessInstanceById(String processInstanceId) {
         FluentProcessInstance processInstance = processRuntime.processInstance(processInstanceId);
         if (processInstance == null || !securityService.canRead(processInstance.getProcessDefinitionKey())) {
             throw new ActivitiObjectNotFoundException("Unable to find process definition for the given id:'" + processInstanceId + "'");
         }
         return processInstance;
+    }
+
+    public void signal(SignalProcessInstancesCmd signalProcessInstancesCmd) {
+        //TODO: plan is to restrict access to events using a new security policy on events
+        // - that's another piece of work though so for now no security here
+
+        processRuntime.sendSignalWith()
+                .name(signalProcessInstancesCmd.getName())
+                .variables(signalProcessInstancesCmd.getInputVariables())
+                .doIt();
+    }
+
+    private FluentProcessInstance verifyCanWriteToProcessInstance(String processInstanceId) {
+        FluentProcessInstance processInstance = getAuthorizedProcessInstanceById(processInstanceId);
+
+        String processDefinitionKey = processInstance.getProcessDefinitionKey();
+        if (!securityService.canWrite(processDefinitionKey)) {
+            LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processDefinitionKey);
+            throw new ActivitiForbiddenException("Operation not permitted for " + processDefinitionKey);
+        }
+
+        return processInstance;
+    }
+
+    public void suspend(SuspendProcessInstanceCmd suspendProcessInstanceCmd) {
+        FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(suspendProcessInstanceCmd.getProcessInstanceId());
+        processInstance.suspend();
+    }
+
+    public void activate(ActivateProcessInstanceCmd activateProcessInstanceCmd) {
+        FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(activateProcessInstanceCmd.getProcessInstanceId());
+        processInstance.resume();
+    }
+
+    public void setProcessVariables(SetProcessVariablesCmd setProcessVariablesCmd) {
+        FluentProcessInstance processInstance = getAuthorizedProcessInstanceById(setProcessVariablesCmd.getProcessId());
+        verifyCanWriteToProcessInstance(processInstance.getId());
+        processInstance.variables(new HashMap<>(setProcessVariablesCmd.getVariables()));
+    }
+
+    public void deleteProcessInstance(String processInstanceId) {
+        FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(processInstanceId);
+
+        processInstance.delete("Cancelled by " + authenticationWrapper.getAuthenticatedUserId());
     }
 
 }

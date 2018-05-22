@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
@@ -26,7 +25,6 @@ import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
@@ -35,6 +33,7 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.NotFoundException;
+import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
@@ -50,9 +49,6 @@ import static java.util.Collections.emptyList;
 
 @RestController
 public class ProcessInstanceControllerImpl implements ProcessInstanceController {
-
-    //TODO: remove engine wrapper
-    private ProcessEngineWrapper processEngine;
 
     private final RepositoryService repositoryService;
 
@@ -83,13 +79,11 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Autowired
-    public ProcessInstanceControllerImpl(ProcessEngineWrapper processEngine,
-                                         RepositoryService repositoryService,
+    public ProcessInstanceControllerImpl(RepositoryService repositoryService,
                                          ProcessDiagramGeneratorWrapper processDiagramGenerator,
                                          ProcessInstanceResourceAssembler resourceAssembler,
                                          AlfrescoPagedResourcesAssembler<org.activiti.runtime.api.model.ProcessInstance> pagedResourcesAssembler,
                                          SecurityAwareProcessInstanceService securityAwareProcessInstanceService) {
-        this.processEngine = processEngine;
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.resourceAssembler = resourceAssembler;
@@ -117,37 +111,36 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public String getProcessDiagram(@PathVariable String processInstanceId) {
-        org.activiti.runtime.api.model.ProcessInstance processInstance = securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(processInstanceId);
+        FluentProcessInstance processInstance = securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(processInstanceId);
 
-        List<String> activityIds = processEngine.getActiveActivityIds(processInstanceId);
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
         return new String(processDiagramGenerator.generateDiagram(bpmnModel,
-                                                                  activityIds,
+                                                                  processInstance.activeActivityIds(),
                                                                   emptyList()),
                           StandardCharsets.UTF_8);
     }
 
     @Override
     public ResponseEntity<Void> sendSignal(@RequestBody SignalProcessInstancesCmd cmd) {
-        processEngine.signal(cmd);
+        securityAwareProcessInstanceService.signal(cmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> suspend(@PathVariable String processInstanceId) {
-        processEngine.suspend(new SuspendProcessInstanceCmd(processInstanceId));
+        securityAwareProcessInstanceService.suspend(new SuspendProcessInstanceCmd(processInstanceId));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> activate(@PathVariable String processInstanceId) {
-        processEngine.activate(new ActivateProcessInstanceCmd(processInstanceId));
+        securityAwareProcessInstanceService.activate(new ActivateProcessInstanceCmd(processInstanceId));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public void deleteProcessInstance(@PathVariable String processInstanceId) {
-        processEngine.deleteProcessInstance(processInstanceId);
+        securityAwareProcessInstanceService.deleteProcessInstance(processInstanceId);
     }
 
 }

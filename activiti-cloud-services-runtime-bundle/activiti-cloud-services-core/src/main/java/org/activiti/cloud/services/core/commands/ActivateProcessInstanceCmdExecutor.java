@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.results.ActivateProcessInstanceResults;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.results.ActivateProcessInstanceResults;
+import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ActivateProcessInstanceCmdExecutor implements CommandExecutor<ActivateProcessInstanceCmd> {
 
-    private ProcessEngineWrapper processEngine;
+    private SecurityAwareProcessInstanceService processInstanceService;
     private MessageChannel commandResults;
 
     @Autowired
-    public ActivateProcessInstanceCmdExecutor(ProcessEngineWrapper processEngine,
+    public ActivateProcessInstanceCmdExecutor(SecurityAwareProcessInstanceService processInstanceService,
                                               MessageChannel commandResults) {
-        this.processEngine = processEngine;
+        this.processInstanceService = processInstanceService;
         this.commandResults = commandResults;
     }
 
@@ -28,7 +28,7 @@ public class ActivateProcessInstanceCmdExecutor implements CommandExecutor<Activ
 
     @Override
     public void execute(ActivateProcessInstanceCmd cmd) {
-        processEngine.activate(cmd);
+        processInstanceService.activate(cmd);
         ActivateProcessInstanceResults cmdResult = new ActivateProcessInstanceResults(cmd.getId());
         commandResults.send(MessageBuilder.withPayload(cmdResult).build());
     }

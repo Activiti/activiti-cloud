@@ -18,18 +18,14 @@ package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
-import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessInstanceControllerImplTest {
@@ -38,9 +34,7 @@ public class ProcessInstanceControllerImplTest {
     private ProcessInstanceControllerImpl controller;
 
     @Mock
-    private ProcessEngineWrapper processEngineWrapper;
-    @Mock
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityAwareProcessInstanceService processInstanceService;
 
     @Before
     public void setUp() {
@@ -51,29 +45,23 @@ public class ProcessInstanceControllerImplTest {
     public void suspendShouldCallSuspendOnRuntimeService() {
         //given
         String processInstanceId = "7";
-        ProcessInstance processInstance = mock(ProcessInstance.class);
-        when(processEngineWrapper.getProcessInstanceById("7")).thenReturn(processInstance);
-        when(securityPoliciesApplicationService.canWrite(processInstance.getProcessDefinitionId())).thenReturn(true);
 
         //when
         controller.suspend(processInstanceId);
 
         //then
-        verify(processEngineWrapper).suspend(any(SuspendProcessInstanceCmd.class));
+        verify(processInstanceService).suspend(any(SuspendProcessInstanceCmd.class));
     }
 
     @Test
     public void activateShouldCallActivateOnRuntimeService() {
         //given
         String processInstanceId = "7";
-        ProcessInstance processInstance = mock(ProcessInstance.class);
-        when(processEngineWrapper.getProcessInstanceById("7")).thenReturn(processInstance);
-        when(securityPoliciesApplicationService.canWrite(processInstance.getProcessDefinitionId())).thenReturn(true);
 
         //when
         controller.activate(processInstanceId);
 
         //then
-        verify(processEngineWrapper).activate(any(ActivateProcessInstanceCmd.class));
+        verify(processInstanceService).activate(any(ActivateProcessInstanceCmd.class));
     }
 }

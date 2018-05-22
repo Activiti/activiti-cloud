@@ -1,31 +1,23 @@
 package org.activiti.cloud.services.core;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.UUID;
 
-import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
-import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
-import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
-import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
-import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.repository.ProcessDefinitionQuery;
-import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
+import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
+import org.activiti.runtime.api.model.impl.FluentProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -33,7 +25,6 @@ import org.mockito.Mock;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.eq;
@@ -72,40 +63,6 @@ public class ProcessEngineWrapperTest {
     public void setUp() {
         initMocks(this);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("anonymous");
-    }
-
-    @Test
-    public void shouldSignal() {
-        ProcessDefinitionQuery query = mock(ProcessDefinitionQuery.class);
-        when(repositoryService.createProcessDefinitionQuery()).thenReturn(query);
-        when(query.count()).thenReturn(1L);
-        processEngineWrapper.signal(mock(SignalProcessInstancesCmd.class));
-        verify(runtimeService).signalEventReceived(any(),
-                                                   anyMap());
-    }
-
-    @Test
-    public void shouldNotSuspendWithoutPermission() {
-        //given
-        ProcessInstance processInstance = aProcessInstanceWithWritePermission(false);
-
-        //then
-        assertThatExceptionOfType(ActivitiForbiddenException.class).isThrownBy(
-                //when
-                () -> processEngineWrapper.suspend(new SuspendProcessInstanceCmd(processInstance.getId()))
-        );
-    }
-
-    @Test
-    public void shouldNotActivateWithoutPermission() {
-        //given
-        ProcessInstance processInstance = aProcessInstanceWithWritePermission(false);
-
-        //then
-        assertThatExceptionOfType(ActivitiForbiddenException.class).isThrownBy(
-                //when
-                () -> processEngineWrapper.activate(new ActivateProcessInstanceCmd(processInstance.getId()))
-        );
     }
 
     @Test
@@ -154,49 +111,15 @@ public class ProcessEngineWrapperTest {
                                               any());
     }
 
-    @Test
-    public void testDeleteNotExistingProcessInstance() {
-        ProcessInstanceQuery query = mock(ProcessInstanceQuery.class);
-        when(runtimeService.createProcessInstanceQuery()).thenReturn(query);
-        when(query.processInstanceId(any())).thenReturn(query);
-        assertThatExceptionOfType(ActivitiException.class).isThrownBy(
-                () -> processEngineWrapper.deleteProcessInstance(UUID.randomUUID().toString())
-        ).withMessageStartingWith("Unable to find process instance for the given id:");
-    }
-
-    @Test
-    public void testDeleteProcessInstanceForNotExistingProcessDefinition() {
-        ProcessInstanceImpl processInstance = buildProcessInstance(UUID.randomUUID().toString(),
-                                                                   UUID.randomUUID().toString());
-        given(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(processInstance.getId())).willReturn(processInstance);
-        when(repositoryService.getProcessDefinition(processInstance.getProcessDefinitionId())).thenReturn(null);
-
-        assertThatExceptionOfType(ActivitiException.class).isThrownBy(
-                () -> processEngineWrapper.deleteProcessInstance(processInstance.getId())
-        ).withMessageStartingWith("Unable to find process definition for the given id:");
-    }
-
-    @Test
-    public void shouldNotDeleteProcessInstanceWithoutPermission() {
-        //given
-        ProcessInstance processInstance = aProcessInstanceWithWritePermission(false);
-
-        //then
-        assertThatExceptionOfType(ActivitiForbiddenException.class).isThrownBy(
-                //when
-                () -> processEngineWrapper.deleteProcessInstance(processInstance.getId())
-        ).withMessageStartingWith("Operation not permitted");
-    }
-
     private ProcessDefinition buildProcessDefinition(String processDefinitionKey) {
         ProcessDefinition def = mock(ProcessDefinition.class);
         given(def.getKey()).willReturn(processDefinitionKey);
         return def;
     }
 
-    private ProcessInstanceImpl buildProcessInstance(String processInstanceId,
-                                                     String processDefinitionId) {
-        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
+    private FluentProcessInstance buildProcessInstance(String processInstanceId,
+                                                       String processDefinitionId) {
+        FluentProcessInstanceImpl processInstance = new FluentProcessInstanceImpl(null, null);
         processInstance.setId(processInstanceId);
         processInstance.setProcessDefinitionId(processDefinitionId);
         return processInstance;
@@ -249,43 +172,15 @@ public class ProcessEngineWrapperTest {
         ).withMessage("Unable to find task for the given id: not-existent-task");
     }
 
-    @Test
-    public void shouldSetProcessVariables() {
-        //given
-        ProcessInstance processInstance = aProcessInstanceWithWritePermission(true);
-
-        Map<String, String> variables = Collections.singletonMap("var",
-                                                                 "value");
-        //when
-        processEngineWrapper.setProcessVariables(new SetProcessVariablesCmd(processInstance.getId(),
-                                                                            variables));
-
-        //then
-        verify(runtimeService).setVariables(processInstance.getId(),
-                                            variables);
-    }
-
     private ProcessInstance aProcessInstanceWithWritePermission(boolean hasWritePermission) {
-        ProcessInstanceImpl processInstance = buildProcessInstance(UUID.randomUUID().toString(),
-                                                                   UUID.randomUUID().toString());
+        FluentProcessInstance processInstance = buildProcessInstance(UUID.randomUUID().toString(),
+                                                                     UUID.randomUUID().toString());
         given(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(processInstance.getId())).willReturn(processInstance);
         ProcessDefinition def = buildProcessDefinition("my-proc");
         when(repositoryService.getProcessDefinition(processInstance.getProcessDefinitionId())).thenReturn(def);
 
         when(securityService.canWrite(def.getKey())).thenReturn(hasWritePermission);
         return processInstance;
-    }
-
-    @Test
-    public void shouldNotSetProcessVariablesWithoutPermission() {
-        //given
-        ProcessInstance processInstance = aProcessInstanceWithWritePermission(false);
-
-        //then
-        assertThatExceptionOfType(ActivitiForbiddenException.class).isThrownBy(
-                //when
-                () -> processEngineWrapper.setProcessVariables(new SetProcessVariablesCmd(processInstance.getId(), Collections.emptyMap()))
-        );
     }
 
 }

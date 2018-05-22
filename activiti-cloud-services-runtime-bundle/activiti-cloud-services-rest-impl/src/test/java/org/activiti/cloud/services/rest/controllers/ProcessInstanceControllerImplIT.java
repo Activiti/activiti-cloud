@@ -26,11 +26,11 @@ import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.NotFoundException;
+import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,9 +81,6 @@ public class ProcessInstanceControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private ProcessEngineWrapper processEngine;
 
     @MockBean
     private SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
@@ -160,8 +157,7 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void getProcessInstanceById() throws Exception {
-        ProcessInstance processInstance = defaultProcessInstance();
-        when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById("1")).thenReturn(processInstance);
+        when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById("1")).thenReturn(defaultProcessInstance());
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}",
                                  1))
@@ -183,10 +179,10 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void getProcessDiagram() throws Exception {
-        ProcessInstance processInstance = mock(ProcessInstance.class);
+        FluentProcessInstance processInstance = mock(FluentProcessInstance.class);
         when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(anyString())).thenReturn(processInstance);
         when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId())).thenReturn(mock(BpmnModel.class));
-        when(processEngine.getActiveActivityIds(anyString())).thenReturn(Collections.emptyList());
+        when(processInstance.activeActivityIds()).thenReturn(Collections.emptyList());
 
         when(processDiagramGenerator.generateDiagram(any(BpmnModel.class),
                                                      anyList(),
@@ -212,10 +208,10 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void getProcessDiagramWithoutInterchangeInfo() throws Exception {
-        ProcessInstance processInstance = mock(ProcessInstance.class);
+        FluentProcessInstance processInstance = mock(FluentProcessInstance.class);
         when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(anyString())).thenReturn(processInstance);
         when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId())).thenReturn(mock(BpmnModel.class));
-        when(processEngine.getActiveActivityIds(anyString())).thenReturn(Collections.emptyList());
+        when(processInstance.activeActivityIds()).thenReturn(Collections.emptyList());
 
         when(processDiagramGenerator.generateDiagram(any(BpmnModel.class),
                                                      anyList(),
@@ -239,7 +235,7 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void suspend() throws Exception {
-        ProcessInstance processInstance = mock(ProcessInstance.class);
+        FluentProcessInstance processInstance = mock(FluentProcessInstance.class);
         when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById("1")).thenReturn(processInstance);
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/suspend",
@@ -251,7 +247,7 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void activate() throws Exception {
-        ProcessInstance processInstance = mock(ProcessInstance.class);
+        FluentProcessInstance processInstance = mock(FluentProcessInstance.class);
         when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById("1")).thenReturn(processInstance);
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/activate",
@@ -264,7 +260,7 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void deleteProcessInstance() throws Exception {
-        ProcessInstance processInstance = mock(ProcessInstance.class);
+        FluentProcessInstance processInstance = mock(FluentProcessInstance.class);
         when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById("1")).thenReturn(processInstance);
 
         this.mockMvc.perform(delete("/v1/process-instances/{processInstanceId}", 1))
