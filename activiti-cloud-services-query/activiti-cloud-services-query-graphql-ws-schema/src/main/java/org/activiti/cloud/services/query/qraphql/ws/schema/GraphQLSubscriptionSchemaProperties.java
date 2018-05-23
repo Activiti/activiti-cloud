@@ -29,7 +29,7 @@ import org.springframework.validation.annotation.Validated;
 public class GraphQLSubscriptionSchemaProperties {
 
     /**
-     * GraphQL subscription schema file name with .graphqls extension. Defaults to activiti.graphqls
+     * The URL of GraphQL subscription schema file name with .graphqls extension. Defaults to classpath:activiti.graphqls
      */
     @NotBlank
     private String graphqls;
@@ -48,7 +48,8 @@ public class GraphQLSubscriptionSchemaProperties {
     private String[] subscriptionArgumentNames;
 
     @Configuration
-    @PropertySource("classpath:org/activiti/cloud/services/query/graphql/ws/schema/default.properties")
+    @PropertySource("classpath:META-INF/graphql-ws-schema.properties")
+    @PropertySource(value = "classpath:graphql-ws-schema.properties", ignoreResourceNotFound = true)
     @EnableConfigurationProperties(GraphQLSubscriptionSchemaProperties.class)
     public static class AutoConfiguration {
         // auto configures parent properties class using spring.factories
