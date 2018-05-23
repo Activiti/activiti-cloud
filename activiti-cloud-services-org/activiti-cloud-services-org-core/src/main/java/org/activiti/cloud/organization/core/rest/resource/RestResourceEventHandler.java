@@ -60,24 +60,29 @@ public class RestResourceEventHandler {
     }
 
     /**
-     * Handler for sace entity event
+     * Handler for save entity event
      * @param entity the entity to be saved
      * @param update true if the event is an update one
      */
     protected void handleBeforeSave(Object entity,
                                     boolean update) {
         Class<?> entityType = entity.getClass();
-        if (entityType.isAnnotationPresent(EntityWithRestResource.class)) {
+        if (isEntityWithRestResource(entityType)) {
             for (Field field : entityType.getDeclaredFields()) {
                 RestResource restResource = field.getAnnotation(RestResource.class);
                 if (restResource != null) {
                     restResourceService
-                            .handleSaveOnEntityWithRestResource(entity,
-                                                                field.getName(),
-                                                                restResource,
-                                                                update);
+                            .saveRestResourceFromEntityField(entity,
+                                                             field.getName(),
+                                                             restResource.resourceKeyField(),
+                                                             restResource.resourceIdField(),
+                                                             update);
                 }
             }
         }
+    }
+
+    protected boolean isEntityWithRestResource(Class<?> entityType) {
+        return entityType.isAnnotationPresent(EntityWithRestResource.class);
     }
 }

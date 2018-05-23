@@ -19,29 +19,36 @@ package org.activiti.cloud.services.organization.rest.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.model.ModelReference;
+import org.activiti.cloud.organization.core.model.Project;
+import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.services.organization.config.Application;
-import org.activiti.cloud.services.organization.config.RepositoryRestConfig;
-import org.activiti.cloud.services.organization.jpa.ModelRepository;
-import org.activiti.cloud.services.organization.mock.MockModelRestServiceServer;
+import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
+import org.activiti.cloud.services.organization.jpa.ProjectJpaRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
+import static org.activiti.cloud.organization.core.model.Model.ModelType.FORM;
+import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,15 +61,20 @@ public class ModelRestIT {
 
     private MockMvc mockMvc;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    @MockBean
+    private ModelService modelService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
     @Autowired
     private ObjectMapper mapper;
+
     @Autowired
-    private ModelRepository modelRepository;
+    private ProjectJpaRepository projectRepository;
+
+    @Autowired
+    private ModelJpaRepository modelRepository;
 
     @Before
     public void setUp() {
@@ -76,15 +88,16 @@ public class ModelRestIT {
     }
 
     @Test
-    public void getModels() throws Exception {
+    public void testGetModels() throws Exception {
         final ModelReference expectedFormModel = new ModelReference("form_model_refId",
                                                                     "Form Model");
         final ModelReference expectedProcessModel = new ModelReference("process_model_refId",
                                                                        "Process Model");
 
-        MockModelRestServiceServer.createServer(restTemplate)
-                .expectFormModelRequest(expectedFormModel)
-                .expectProcessModelRequest(expectedProcessModel);
+        doReturn(expectedFormModel).when(modelService).getResource(FORM,
+                                                                   expectedFormModel.getModelId());
+        doReturn(expectedProcessModel).when(modelService).getResource(PROCESS_MODEL,
+                                                                      expectedProcessModel.getModelId());
 
         //given
         final String formModelId = "form_model_id";
@@ -107,7 +120,7 @@ public class ModelRestIT {
 
         //when
         final ResultActions resultActions = mockMvc.perform(get("{version}/models",
-                                                                RepositoryRestConfig.API_VERSION))
+                                                                API_VERSION))
                 .andDo(print());
 
         //then
@@ -121,9 +134,7 @@ public class ModelRestIT {
     }
 
     @Test
-    public void createModel() throws Exception {
-        MockModelRestServiceServer.createServer(restTemplate)
-                .expectFormModelCreation();
+    public void testCreateModel() throws Exception {
 
         //given
         final String formModelId = "form_model_id";
@@ -134,10 +145,97 @@ public class ModelRestIT {
                                     "form_model_refId");
 
         mockMvc.perform(post("{version}/models",
-                             RepositoryRestConfig.API_VERSION)
+                             API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(formModel)))
                 .andDo(print())
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void testGetModel() throws Exception {
+        //given
+        final String processModelId = "process_model_id";
+        Model processModel = new Model(processModelId,
+                                       "Process Model",
+                                       Model.ModelType.PROCESS_MODEL,
+                                       processModelId);
+
+        //when
+        assertThat(modelRepository.save(processModel)).isNotNull();
+
+        //then
+        mockMvc.perform(get("{version}/models/{modelId}",
+                            API_VERSION,
+                            processModelId))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testCreateProcessModelInProject() throws Exception {
+        //given
+        final String processModelId = "process_model_id";
+        Model processModel = new Model(processModelId,
+                                       "Process Model",
+                                       Model.ModelType.PROCESS_MODEL,
+                                       "process_model_refId");
+
+        String parentProjectId = "parent_project_id";
+        projectRepository.save(new Project(parentProjectId, "Parent Project"));
+
+        //when
+        mockMvc.perform(post("{version}/projects/{projectId}/models",
+                             API_VERSION,
+                             parentProjectId)
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(processModel)))
+                .andExpect(status().isCreated());
+
+        //then
+        assertThat(modelRepository.findById(processModelId)).isNotEmpty();
+    }
+
+    @Test
+    public void testUpdateProject() throws Exception {
+        //given
+        final String processModelId = "process_model_id";
+        Model processModel = new Model(processModelId,
+                                       "Process Model",
+                                       Model.ModelType.PROCESS_MODEL,
+                                       "process_model_refId");
+        assertThat(modelRepository.save(processModel)).isNotNull();
+
+        Model newModel = new Model(processModelId,
+                                   "New Process Model",
+                                   Model.ModelType.PROCESS_MODEL,
+                                   "process_model_refId");
+
+        //when
+        mockMvc.perform(put("{version}/models/{modelId}",
+                            API_VERSION,
+                            processModelId)
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(newModel)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteProject() throws Exception {
+        //given
+        final String processModelId = "process_model_id";
+        Model processModel = new Model(processModelId,
+                                       "Process Model",
+                                       Model.ModelType.PROCESS_MODEL,
+                                       "process_model_refId");
+        assertThat(modelRepository.save(processModel)).isNotNull();
+
+        //when
+        mockMvc.perform(delete("{version}/models/{modelId}",
+                               API_VERSION,
+                               processModelId))
+                .andExpect(status().isNoContent());
+
+        //then
+        assertThat(modelRepository.findById(processModelId)).isEmpty();
     }
 }

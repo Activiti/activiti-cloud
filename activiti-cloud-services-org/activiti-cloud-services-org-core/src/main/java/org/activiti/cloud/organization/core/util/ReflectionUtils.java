@@ -16,9 +16,7 @@
 
 package org.activiti.cloud.organization.core.util;
 
-import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 /**
@@ -30,21 +28,55 @@ public final class ReflectionUtils {
      * Get entity field value.
      * @param entity the entity
      * @param fieldName the entity field name
+     * @return the field value
+     */
+    public static <T> T getFieldValue(Object entity,
+                                      String fieldName) {
+        return getFieldValue(entity,
+                             fieldName,
+                             () -> String.format(
+                                     "Cannot access field '%s' of entity type '%s'",
+                                     fieldName,
+                                     entity.getClass()));
+    }
+
+    /**
+     * Get entity field value.
+     * @param entity the entity
+     * @param fieldName the entity field name
      * @param exceptionMessage message exception supplier
      * @return the field value
      */
-    public static Object getFieldValue(Object entity,
-                                       String fieldName,
-                                       Supplier<String> exceptionMessage) {
+    public static <T> T getFieldValue(Object entity,
+                                      String fieldName,
+                                      Supplier<String> exceptionMessage) {
         try {
-            return new PropertyDescriptor(fieldName,
-                                          entity.getClass())
+            return (T) new PropertyDescriptor(fieldName,
+                                              entity.getClass())
                     .getReadMethod()
                     .invoke(entity);
-        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
+        } catch (Exception e) {
             throw new RuntimeException(exceptionMessage.get(),
                                        e);
         }
+    }
+
+    /**
+     * Set entity field value.
+     * @param entity the entity
+     * @param fieldName the entity field name
+     * @return the field value
+     */
+    public static void setFieldValue(Object entity,
+                                     String fieldName,
+                                     Object value) {
+        setFieldValue(entity,
+                      fieldName,
+                      value,
+                      () -> String.format(
+                              "Cannot set value to the target field '%s' of entity type '%s'",
+                              fieldName,
+                              entity.getClass()));
     }
 
     /**
@@ -64,25 +96,7 @@ public final class ReflectionUtils {
                     .getWriteMethod()
                     .invoke(entity,
                             value);
-        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
-            throw new RuntimeException(exceptionMessage.get(),
-                                       e);
-        }
-    }
-
-    /**
-     * Get entity field type.
-     * @param entity the entity
-     * @param fieldName the entity field name
-     * @param exceptionMessage message exception supplier
-     * @return the field type
-     */
-    public static Class<?> getFieldClass(Object entity,
-                                         String fieldName,
-                                         Supplier<String> exceptionMessage) {
-        try {
-            return entity.getClass().getDeclaredField(fieldName).getType();
-        } catch (NoSuchFieldException e) {
+        } catch (Exception e) {
             throw new RuntimeException(exceptionMessage.get(),
                                        e);
         }

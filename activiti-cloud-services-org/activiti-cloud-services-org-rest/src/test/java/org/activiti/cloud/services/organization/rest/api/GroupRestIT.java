@@ -22,12 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.Group;
 import org.activiti.cloud.organization.core.model.Project;
 import org.activiti.cloud.services.organization.config.Application;
-import org.activiti.cloud.services.organization.config.RepositoryRestConfig;
-import org.activiti.cloud.services.organization.jpa.GroupRepository;
-import org.activiti.cloud.services.organization.jpa.ProjectRepository;
+import org.activiti.cloud.services.organization.jpa.GroupJpaRepository;
+import org.activiti.cloud.services.organization.jpa.ProjectJpaRepository;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +37,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
 import static java.util.Arrays.asList;
+import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.data.rest.webmvc.RestMediaTypes.TEXT_URI_LIST_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -57,14 +58,18 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 public class GroupRestIT {
 
     private MockMvc mockMvc;
+
     @Autowired
     private WebApplicationContext webApplicationContext;
+
     @Autowired
     private ObjectMapper mapper;
+
     @Autowired
-    private GroupRepository groupRepository;
+    private GroupJpaRepository groupRepository;
+
     @Autowired
-    private ProjectRepository projectRepository;
+    private ProjectJpaRepository projectRepository;
 
     @Before
     public void setUp() {
@@ -73,19 +78,18 @@ public class GroupRestIT {
 
     @After
     public void tearDown() {
-        groupRepository.deleteAllInBatch();
         projectRepository.deleteAllInBatch();
+        groupRepository.deleteAllInBatch();
     }
 
     @Test
     public void getGroups() throws Exception {
 
         mockMvc.perform(get("{version}/groups",
-                            RepositoryRestConfig.API_VERSION))
+                            API_VERSION))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$._embedded.groups",
-                                    hasSize(0)));
+                .andExpect(jsonPath("$._embedded").doesNotExist());
     }
 
     @Test
@@ -104,7 +108,7 @@ public class GroupRestIT {
         assertThat(savedGroup).isNotNull();
         //when
         mockMvc.perform(get("{version}/groups/{groupId}/subgroups",
-                            RepositoryRestConfig.API_VERSION,
+                            API_VERSION,
                             parentGroupId))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -120,7 +124,7 @@ public class GroupRestIT {
 
         //when
         mockMvc.perform(post("{version}/groups",
-                             RepositoryRestConfig.API_VERSION)
+                             API_VERSION)
                                 .content(mapper.writeValueAsString(newGroup))
                                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -128,7 +132,7 @@ public class GroupRestIT {
 
         //then
         mockMvc.perform(get("{version}/groups/{groupId}",
-                            RepositoryRestConfig.API_VERSION,
+                            API_VERSION,
                             newGroupId))
                 .andDo(print())
                 //then
@@ -147,7 +151,7 @@ public class GroupRestIT {
                                                newParentGroupName);
         //create the parent group
         mockMvc.perform(post("{version}/groups",
-                             RepositoryRestConfig.API_VERSION)
+                             API_VERSION)
                                 .content(mapper.writeValueAsString(newParentGroup)).contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().isCreated());
@@ -158,7 +162,7 @@ public class GroupRestIT {
         Group newSubgroupA = new Group(newSubgroupAId,
                                        newSubgroupAName);
         mockMvc.perform(post("{version}/groups",
-                             RepositoryRestConfig.API_VERSION)
+                             API_VERSION)
                                 .content(mapper.writeValueAsString(newSubgroupA))
                                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -170,7 +174,7 @@ public class GroupRestIT {
         Group newSubgroupB = new Group(newSubgroupBId,
                                        newSubgroupBName);
         mockMvc.perform(post("{version}/groups",
-                             RepositoryRestConfig.API_VERSION)
+                             API_VERSION)
                                 .content(mapper.writeValueAsString(newSubgroupB))
                                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -178,20 +182,20 @@ public class GroupRestIT {
 
         //when
 
-        String uriList = "http://localhost" + RepositoryRestConfig.API_VERSION + "/groups/" + newSubgroupAId + "\n"
-                + "http://localhost/" + RepositoryRestConfig.API_VERSION + "groups/" + newSubgroupBId;
+        String uriList = "http://localhost" + API_VERSION + "/groups/" + newSubgroupAId + "\n"
+                + "http://localhost/" + API_VERSION + "groups/" + newSubgroupBId;
         // add relation between parent group and subgroup
         mockMvc.perform(put("{version}/groups/{groupId}/subgroups",
-                            RepositoryRestConfig.API_VERSION,
+                            API_VERSION,
                             newParentGroupId)
-                                .contentType("text/uri-list")
-                                .content(uriList))
+                                .content(uriList)
+                                .contentType(TEXT_URI_LIST_VALUE))
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
         //then
         mockMvc.perform(get("{version}/groups/{groupId}/subgroups",
-                            RepositoryRestConfig.API_VERSION,
+                            API_VERSION,
                             newParentGroupId))
                 .andDo(print())
                 //then
@@ -214,7 +218,7 @@ public class GroupRestIT {
                                             groupWithProjectsName);
 
         mockMvc.perform(post("{version}/groups",
-                             RepositoryRestConfig.API_VERSION)
+                             API_VERSION)
                                 .content(mapper.writeValueAsString(groupWithProjects))
                                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -226,7 +230,7 @@ public class GroupRestIT {
         Project projectA = new Project(projectAId,
                                        projectAName);
         mockMvc.perform(post("{version}/projects",
-                             RepositoryRestConfig.API_VERSION)
+                             API_VERSION)
                                 .content(mapper.writeValueAsString(projectA))
                                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -234,7 +238,7 @@ public class GroupRestIT {
 
         //when
         mockMvc.perform(put("{version}/groups/{groupId}/projects",
-                            RepositoryRestConfig.API_VERSION,
+                            API_VERSION,
                             newGroupWithProjectsId)
                                 .contentType("text/uri-list")
                                 .content("http://localhost/projects/" + projectAId))
@@ -242,7 +246,7 @@ public class GroupRestIT {
                 .andExpect(status().isNoContent());
         //then
         mockMvc.perform(get("{version}/groups/{groupId}/projects",
-                            RepositoryRestConfig.API_VERSION,
+                            API_VERSION,
                             newGroupWithProjectsId))
                 .andDo(print())
                 //then
@@ -259,7 +263,7 @@ public class GroupRestIT {
         Project projectB = new Project(projectBId,
                                        projectBName);
         mockMvc.perform(post("{version}/projects",
-                             RepositoryRestConfig.API_VERSION)
+                             API_VERSION)
                                 .content(mapper.writeValueAsString(projectB))
                                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
@@ -267,7 +271,7 @@ public class GroupRestIT {
 
         //when
         mockMvc.perform(patch("{version}/groups/{groupId}/projects",
-                              RepositoryRestConfig.API_VERSION,
+                              API_VERSION,
                               newGroupWithProjectsId)
                                 .contentType("text/uri-list")
                                 .content("http://localhost/projects/" + projectBId))
@@ -275,7 +279,7 @@ public class GroupRestIT {
                 .andExpect(status().isNoContent());
         //then
         mockMvc.perform(get("{version}/groups/{groupId}/projects",
-                            RepositoryRestConfig.API_VERSION,
+                            API_VERSION,
                             newGroupWithProjectsId))
                 .andDo(print())
                 //then
@@ -289,13 +293,12 @@ public class GroupRestIT {
     }
 
     @Test
-    @Ignore
     public void createGroupWithSubgroupsDirectly() throws Exception {
         Group parentGroup = new Group("parent_group_id",
                                       "Parent Group");
 
         mockMvc.perform(post("{version}/groups",
-                             RepositoryRestConfig.API_VERSION)
+                             API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(parentGroup)))
                 .andDo(print())
@@ -306,7 +309,7 @@ public class GroupRestIT {
                                    parentGroup);
 
         mockMvc.perform(post("{version}/groups",
-                             RepositoryRestConfig.API_VERSION)
+                             API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(subgroup)))
                 .andDo(print())
@@ -314,5 +317,78 @@ public class GroupRestIT {
 
         final List<Group> all = groupRepository.findAll();
         assertThat(all.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void createSubgroupOfExistingGroup() throws Exception {
+        //given
+        final String parentGroupId = "parent_group_id";
+        final Group savedGroup = groupRepository.save(new Group(parentGroupId));
+        assertThat(savedGroup).isNotNull();
+
+        //when
+        Group subgroup = new Group("subgroup_id",
+                                   "Subgroup");
+
+        mockMvc.perform(post("{version}/groups/{groupId}/subgroups",
+                             API_VERSION,
+                             parentGroupId)
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(subgroup)))
+                .andExpect(status().isCreated());
+
+        //then
+        assertThat(groupRepository.findById("subgroup_id"))
+                .hasValueSatisfying(group -> {
+                    assertThat(group.getParent()).isNotNull();
+                    assertThat(group.getParent().getId()).isEqualTo(parentGroupId);
+                });
+    }
+
+    @Test
+    public void testUpdateGroup() throws Exception {
+        //given
+        final String groupId = "group_id";
+        final Group savedGroup = this.groupRepository.save(new Group(groupId,
+                                                                     "Group name"));
+        assertThat(savedGroup).isNotNull();
+
+        assertThat(groupRepository.findById("group_id"))
+                .hasValueSatisfying(group -> {
+                    assertThat(group.getName()).isEqualTo("Group name");
+                });
+
+        //when
+        Group newGroup = new Group(groupId,
+                                   "New group name");
+        mockMvc.perform(put("{version}/groups/{groupId}",
+                            API_VERSION,
+                            groupId)
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(newGroup)))
+                .andExpect(status().isNoContent());
+
+        //then
+        assertThat(groupRepository.findById("group_id"))
+                .hasValueSatisfying(group -> {
+                    assertThat(group.getName()).isEqualTo("New group name");
+                });
+    }
+
+    @Test
+    public void testDeleteGroup() throws Exception {
+        //given
+        final String groupId = "group_id";
+        final Group savedGroup = groupRepository.save(new Group(groupId));
+        assertThat(savedGroup).isNotNull();
+
+        //when
+        mockMvc.perform(delete("{version}/groups/{groupId}",
+                               API_VERSION,
+                               groupId))
+                .andExpect(status().isNoContent());
+
+        //then
+        assertThat(groupRepository.findById(groupId)).isEmpty();
     }
 }

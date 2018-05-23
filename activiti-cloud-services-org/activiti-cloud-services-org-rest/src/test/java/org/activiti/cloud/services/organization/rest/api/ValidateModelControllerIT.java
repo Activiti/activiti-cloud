@@ -17,14 +17,15 @@
 package org.activiti.cloud.services.organization.rest.api;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.service.ValidationErrorRepresentation;
+import org.activiti.cloud.organization.core.repository.ModelRepository;
+import org.activiti.cloud.organization.core.rest.client.ModelService;
+import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
 import org.activiti.cloud.services.organization.config.Application;
-import org.activiti.cloud.services.organization.config.RepositoryRestConfig;
-import org.activiti.cloud.services.organization.jpa.ModelRepository;
-import org.activiti.cloud.services.organization.mock.MockModelRestServiceServer;
+import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
 import org.activiti.validation.ValidationError;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,9 +38,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -61,8 +62,8 @@ public class ValidateModelControllerIT {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    @MockBean
+    private ModelService modelService;
 
     @Before
     public void setUp() {
@@ -78,13 +79,17 @@ public class ValidateModelControllerIT {
                                                        "diagram.bpm",
                                                        "text/plain",
                                                        "BPMN diagram".getBytes());
-        when(modelRepository.findById("model_id")).thenReturn(Optional.of(new Model("model_id",
-                                                                                    "Process-Model",
-                                                                                    Model.ModelType.PROCESS_MODEL,
-                                                                                    "model_ref_id")));
-        MockModelRestServiceServer.createServer(restTemplate)
-                .expectProcessModelValidation(Arrays.asList(new ValidationErrorRepresentation(new ValidationError()),
-                                                            new ValidationErrorRepresentation(new ValidationError())));
+        when(modelRepository.findModelById("model_id")).thenReturn(Optional.of(new Model("model_id",
+                                                                                         "Process-Model",
+                                                                                         PROCESS_MODEL,
+                                                                                         "model_ref_id")));
+
+        List<ValidationErrorRepresentation> expectedValidationErrors =
+                Arrays.asList(new ValidationErrorRepresentation(new ValidationError()),
+                              new ValidationErrorRepresentation(new ValidationError()));
+
+        doReturn(expectedValidationErrors).when(modelService).validateResourceContent(PROCESS_MODEL,
+                                                                                      file.getBytes());
 
         // when
         final ResultActions resultActions = mockMvc.perform(multipart("{version}/models/{model_id}/validate",
