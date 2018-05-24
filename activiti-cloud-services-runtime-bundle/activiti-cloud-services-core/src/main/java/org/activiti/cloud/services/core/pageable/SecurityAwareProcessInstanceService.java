@@ -45,8 +45,6 @@ public class SecurityAwareProcessInstanceService {
 
     private final SecurityPoliciesApplicationService securityService;
 
-    private final PageableConverter pageableConverter;
-
     private final SpringPageConverter springPageConverter;
 
     private final AuthenticationWrapper authenticationWrapper;
@@ -55,12 +53,10 @@ public class SecurityAwareProcessInstanceService {
 
     public SecurityAwareProcessInstanceService(ProcessRuntime processRuntime,
                                                SecurityPoliciesApplicationService securityPolicyApplicationService,
-                                               PageableConverter pageableConverter,
                                                SpringPageConverter springPageConverter,
                                                AuthenticationWrapper authenticationWrapper) {
         this.processRuntime = processRuntime;
         this.securityService = securityPolicyApplicationService;
-        this.pageableConverter = pageableConverter;
         this.springPageConverter = springPageConverter;
         this.authenticationWrapper = authenticationWrapper;
     }
@@ -70,14 +66,14 @@ public class SecurityAwareProcessInstanceService {
         ProcessInstanceFilter filter = securityService.restrictProcessInstQuery(SecurityPolicy.READ);
 
         return springPageConverter.toSpringPage(pageable,
-                                                processRuntime.processInstances(pageableConverter.toAPIPageable(pageable),
+                                                processRuntime.processInstances(springPageConverter.toAPIPageable(pageable),
                                                                                 filter));
     }
 
     public Page<ProcessInstance> getAllProcessInstances(Pageable pageable) {
 
         return springPageConverter.toSpringPage(pageable,
-                                                processRuntime.processInstances(pageableConverter.toAPIPageable(pageable)));
+                                                processRuntime.processInstances(springPageConverter.toAPIPageable(pageable)));
     }
 
     public ProcessInstance startProcess(StartProcessInstanceCmd cmd) {

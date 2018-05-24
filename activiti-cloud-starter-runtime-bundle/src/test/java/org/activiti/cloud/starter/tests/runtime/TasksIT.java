@@ -74,7 +74,7 @@ public class TasksIT  {
 
 
     @Before
-    public void setUp() throws Exception{
+    public void setUp(){
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
 
@@ -88,7 +88,7 @@ public class TasksIT  {
     }
 
     @Test
-    public void shouldGetAvailableTasks() throws Exception {
+    public void shouldGetAvailableTasks() {
         //we are hruser who is in hr group so we can see tasks
 
         //given
@@ -106,7 +106,7 @@ public class TasksIT  {
     }
 
     @Test
-    public void shouldNotGetTasksWithoutPermission() throws Exception {
+    public void shouldNotGetTasksWithoutPermission() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
 
         //now authenticated as testuser who is not in hr group
@@ -126,7 +126,7 @@ public class TasksIT  {
     }
 
     @Test
-    public void shouldNotSeeAdminTasks() throws Exception {
+    public void shouldNotSeeAdminTasks() {
 
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
@@ -155,7 +155,7 @@ public class TasksIT  {
 
 
     @Test
-    public void shouldGetTasksRelatedToTheGivenProcessInstance() throws Exception {
+    public void shouldGetTasksRelatedToTheGivenProcessInstance() {
         //given
         ResponseEntity<ProcessInstance> startProcessResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
@@ -172,7 +172,7 @@ public class TasksIT  {
 
 
     @Test
-    public void shouldGetTaskById() throws Exception {
+    public void shouldGetTaskById() {
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = executeRequestGetTasks().getBody().iterator().next();
@@ -190,7 +190,7 @@ public class TasksIT  {
 
 
     @Test
-    public void claimTaskShouldSetAssignee() throws Exception {
+    public void claimTaskShouldSetAssignee() {
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = executeRequestGetTasks().getBody().iterator().next();
@@ -213,7 +213,7 @@ public class TasksIT  {
     }
 
     @Test
-    public void releaseTaskShouldSetAssigneeBackToNull() throws Exception {
+    public void releaseTaskShouldSetAssigneeBackToNull() {
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = executeRequestGetTasks().getBody().iterator().next();
@@ -234,7 +234,7 @@ public class TasksIT  {
 
 
     @Test
-    public void shouldCompleteATask() throws Exception {
+    public void shouldCompleteATask() {
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = executeRequestGetTasks().getBody().iterator().next();
@@ -251,7 +251,7 @@ public class TasksIT  {
     }
 
     @Test
-    public void shouldCompleteATaskPassingInputVariables() throws Exception {
+    public void shouldCompleteATaskPassingInputVariables() {
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = executeRequestGetTasks().getBody().iterator().next();

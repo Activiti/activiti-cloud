@@ -1,21 +1,10 @@
 package org.activiti.cloud.services.core;
 
-import java.util.List;
-
-import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
-import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
-import org.activiti.cloud.services.api.commands.CreateTaskCmd;
-import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
-import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
-import org.activiti.cloud.services.api.model.Task;
-import org.activiti.cloud.services.api.model.converter.TaskConverter;
-import org.activiti.cloud.services.core.pageable.PageableTaskService;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.cloud.services.events.listeners.MessageProducerActivitiEventListener;
 import org.activiti.engine.ActivitiException;
-import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -23,8 +12,6 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,8 +21,6 @@ public class ProcessEngineWrapper {
 
     private final RuntimeService runtimeService;
     private final TaskService taskService;
-    private final TaskConverter taskConverter;
-    private final PageableTaskService pageableTaskService;
     private final SecurityPoliciesApplicationService securityService;
     private final RepositoryService repositoryService;
     private final AuthenticationWrapper authenticationWrapper;
@@ -45,8 +30,6 @@ public class ProcessEngineWrapper {
     public ProcessEngineWrapper(RuntimeService runtimeService,
                                 SecurityAwareProcessInstanceService securityAwareProcessInstanceService,
                                 TaskService taskService,
-                                TaskConverter taskConverter,
-                                PageableTaskService pageableTaskService,
                                 MessageProducerActivitiEventListener listener,
                                 SecurityPoliciesApplicationService securityService,
                                 RepositoryService repositoryService,
@@ -54,8 +37,6 @@ public class ProcessEngineWrapper {
         this.runtimeService = runtimeService;
         this.securityAwareProcessInstanceService = securityAwareProcessInstanceService;
         this.taskService = taskService;
-        this.taskConverter = taskConverter;
-        this.pageableTaskService = pageableTaskService;
         this.runtimeService.addEventListener(listener);
         this.securityService = securityService;
         this.repositoryService = repositoryService;
@@ -84,37 +65,6 @@ public class ProcessEngineWrapper {
         return securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(processInstanceId);
     }
 
-    public Page<Task> getTasks(Pageable pageable) {
-        return pageableTaskService.getTasks(pageable);
-    }
-
-    public Page<Task> getAllTasks(Pageable pageable) {
-        return pageableTaskService.getAllTasks(pageable);
-    }
-
-    public Task getTaskById(String taskId) {
-        org.activiti.engine.task.Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        return taskConverter.from(task);
-    }
-
-    public Task claimTask(ClaimTaskCmd claimTaskCmd) {
-        taskService.claim(claimTaskCmd.getTaskId(),
-                          claimTaskCmd.getAssignee());
-        return taskConverter.from(taskService.createTaskQuery().taskId(claimTaskCmd.getTaskId()).singleResult());
-    }
-
-    public Task releaseTask(ReleaseTaskCmd releaseTaskCmd) {
-        taskService.unclaim(releaseTaskCmd.getTaskId());
-        return taskConverter.from(taskService.createTaskQuery().taskId(releaseTaskCmd.getTaskId()).singleResult());
-    }
-
-    public void completeTask(CompleteTaskCmd completeTaskCmd) {
-        if (completeTaskCmd != null) {
-            taskService.complete(completeTaskCmd.getTaskId(),
-                                 completeTaskCmd.getOutputVariables());
-        }
-    }
-
     public void setTaskVariables(SetTaskVariablesCmd setTaskVariablesCmd) {
         taskService.setVariables(setTaskVariablesCmd.getTaskId(),
                                  setTaskVariablesCmd.getVariables());
@@ -132,92 +82,4 @@ public class ProcessEngineWrapper {
                                        removeProcessVariablesCmd.getVariableNames());
     }
 
-    /**
-     * Delete task by id.
-     * @param taskId the task id to delete
-     */
-    public void deleteTask(String taskId) {
-        Task task = getTaskById(taskId);
-        if (task == null) {
-            throw new ActivitiObjectNotFoundException("Unable to find task for the given id: " + taskId);
-        }
-
-        checkWritePermissionsOnTask(task);
-
-        taskService.deleteTask(taskId,
-                               "Cancelled by " + authenticationWrapper.getAuthenticatedUserId());
-    }
-
-    private void checkWritePermissionsOnTask(Task task) {
-        //TODO: to check the user write permissions on task
-    }
-
-    public Task createNewTask(CreateTaskCmd createTaskCmd) {
-        final org.activiti.engine.task.Task task = taskService.newTask();
-        task.setName(createTaskCmd.getName());
-        task.setDescription(createTaskCmd.getDescription());
-        task.setDueDate(createTaskCmd.getDueDate());
-        if (createTaskCmd.getPriority() != null) {
-            task.setPriority(createTaskCmd.getPriority());
-        }
-
-        task.setAssignee(createTaskCmd.getAssignee() == null ? authenticationWrapper.getAuthenticatedUserId() : createTaskCmd.getAssignee());
-        taskService.saveTask(task);
-
-        return taskConverter.from(taskService.createTaskQuery().taskId(task.getId()).singleResult());
-    }
-
-    public Task createNewSubtask(String parentTaskId,
-                                 CreateTaskCmd createSubtaskCmd) {
-        if (taskService.createTaskQuery().taskId(parentTaskId).singleResult() == null) {
-            throw new ActivitiException("Parent task with id " + parentTaskId + " was not found");
-        }
-
-        final org.activiti.engine.task.Task task = taskService.newTask();
-        task.setName(createSubtaskCmd.getName());
-        task.setDescription(createSubtaskCmd.getDescription());
-        task.setDueDate(createSubtaskCmd.getDueDate());
-        if (createSubtaskCmd.getPriority() != null) {
-            task.setPriority(createSubtaskCmd.getPriority());
-        }
-        task.setParentTaskId(parentTaskId);
-
-        task.setAssignee(createSubtaskCmd.getAssignee() == null ? authenticationWrapper.getAuthenticatedUserId() : createSubtaskCmd.getAssignee());
-        taskService.saveTask(task);
-
-        return taskConverter.from(taskService.createTaskQuery().taskId(task.getId()).singleResult());
-    }
-
-    public List<org.activiti.engine.task.Task> getSubtasks(String parentTaskId) {
-
-        return taskService.getSubTasks(parentTaskId);
-    }
-
-    public void updateTask(String taskId,
-                           UpdateTaskCmd updateTaskCmd) {
-        final org.activiti.engine.task.Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        if (task == null) {
-            throw new ActivitiObjectNotFoundException("Unable to find task for the given id: " + updateTaskCmd.getId());
-        }
-
-        if (updateTaskCmd.getAssignee() != null) {
-            task.setAssignee(updateTaskCmd.getAssignee());
-        }
-        if (updateTaskCmd.getName() != null) {
-            task.setName(updateTaskCmd.getName());
-        }
-        if (updateTaskCmd.getDescription() != null) {
-            task.setDescription(updateTaskCmd.getDescription());
-        }
-        if (updateTaskCmd.getDueDate() != null) {
-            task.setDueDate(updateTaskCmd.getDueDate());
-        }
-        if (updateTaskCmd.getPriority() != null) {
-            task.setPriority(updateTaskCmd.getPriority());
-        }
-        if (updateTaskCmd.getParentTaskId() != null) {
-            task.setParentTaskId(updateTaskCmd.getParentTaskId());
-        }
-        taskService.saveTask(task);
-    }
 }

@@ -23,16 +23,17 @@ import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
-import org.activiti.cloud.services.api.model.Task;
-import org.activiti.cloud.services.api.model.converter.TaskConverter;
 import org.activiti.cloud.services.core.AuthenticationWrapper;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
+import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
+import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskController;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
+import org.activiti.runtime.api.NotFoundException;
+import org.activiti.runtime.api.model.FluentTask;
+import org.activiti.runtime.api.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
@@ -50,48 +51,45 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 @RestController
 public class TaskControllerImpl implements TaskController {
 
-    private ProcessEngineWrapper processEngine;
-
     private final TaskResourceAssembler taskResourceAssembler;
 
     private AuthenticationWrapper authenticationWrapper;
 
     private final AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
 
-    private final TaskConverter taskConverter;
+    private final SecurityAwareTaskService securityAwareTaskService;
+
+    private final SpringPageConverter pageConverter;
 
     @Autowired
-    public TaskControllerImpl(ProcessEngineWrapper processEngine,
-                              TaskResourceAssembler taskResourceAssembler,
+    public TaskControllerImpl(TaskResourceAssembler taskResourceAssembler,
                               AuthenticationWrapper authenticationWrapper,
                               AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler,
-                              TaskConverter taskConverter) {
+                              SecurityAwareTaskService securityAwareTaskService,
+                              SpringPageConverter pageConverter) {
         this.authenticationWrapper = authenticationWrapper;
-        this.processEngine = processEngine;
         this.taskResourceAssembler = taskResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
-        this.taskConverter = taskConverter;
+        this.securityAwareTaskService = securityAwareTaskService;
+        this.pageConverter = pageConverter;
     }
 
-    @ExceptionHandler(ActivitiObjectNotFoundException.class)
+    @ExceptionHandler({ActivitiObjectNotFoundException.class, NotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleAppException(ActivitiObjectNotFoundException ex) {
+    public String handleAppException(Exception ex) {
         return ex.getMessage();
     }
 
     @Override
     public PagedResources<TaskResource> getTasks(Pageable pageable) {
-        Page<Task> page = processEngine.getTasks(pageable);
-        return pagedResourcesAssembler.toResource(pageable, page,
+        org.activiti.runtime.api.query.Page<FluentTask> taskPage = securityAwareTaskService.getAuthorizedTasks(pageConverter.toAPIPageable(pageable));
+        return pagedResourcesAssembler.toResource(pageable, pageConverter.toSpringPage(pageable, taskPage),
                                                   taskResourceAssembler);
     }
 
     @Override
     public Resource<Task> getTaskById(@PathVariable String taskId) {
-        Task task = processEngine.getTaskById(taskId);
-        if (task == null) {
-            throw new ActivitiObjectNotFoundException("Unable to find task for the given id: " + taskId);
-        }
+        Task task = securityAwareTaskService.getTaskById(taskId);
         return taskResourceAssembler.toResource(task);
     }
 
@@ -102,14 +100,14 @@ public class TaskControllerImpl implements TaskController {
             throw new IllegalStateException("Assignee must be resolved from the Identity/Security Layer");
         }
 
-        return taskResourceAssembler.toResource(processEngine.claimTask(new ClaimTaskCmd(taskId,
+        return taskResourceAssembler.toResource(securityAwareTaskService.claimTask(new ClaimTaskCmd(taskId,
                                                                                          assignee)));
     }
 
     @Override
     public Resource<Task> releaseTask(@PathVariable String taskId) {
 
-        return taskResourceAssembler.toResource(processEngine.releaseTask(new ReleaseTaskCmd(taskId)));
+        return taskResourceAssembler.toResource(securityAwareTaskService.releaseTask(new ReleaseTaskCmd(taskId)));
     }
 
     @Override
@@ -119,25 +117,25 @@ public class TaskControllerImpl implements TaskController {
         if (completeTaskCmd != null) {
             outputVariables = completeTaskCmd.getOutputVariables();
         }
-        processEngine.completeTask(new CompleteTaskCmd(taskId,
+        securityAwareTaskService.completeTask(new CompleteTaskCmd(taskId,
                                                        outputVariables));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public void deleteTask(@PathVariable String taskId) {
-        processEngine.deleteTask(taskId);
+        securityAwareTaskService.deleteTask(taskId);
     }
 
     @Override
     public Resource<Task> createNewTask(@RequestBody CreateTaskCmd createTaskCmd) {
-        return taskResourceAssembler.toResource(processEngine.createNewTask(createTaskCmd));
+        return taskResourceAssembler.toResource(securityAwareTaskService.createNewTask(createTaskCmd));
     }
 
     @Override
     public ResponseEntity<Void> updateTask(@PathVariable String taskId,
                                            @RequestBody UpdateTaskCmd updateTaskCmd) {
-        processEngine.updateTask(taskId,
+        securityAwareTaskService.updateTask(taskId,
                                  updateTaskCmd);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -146,22 +144,15 @@ public class TaskControllerImpl implements TaskController {
     public Resource<Task> createSubtask(@PathVariable String taskId,
                                         @RequestBody CreateTaskCmd createSubtaskCmd) {
 
-        return taskResourceAssembler.toResource(processEngine.createNewSubtask(taskId,
-                                                                               createSubtaskCmd));
+        return taskResourceAssembler.toResource(securityAwareTaskService.createNewSubtask(taskId,
+                                                                                          createSubtaskCmd));
     }
 
     @Override
     public Resources<TaskResource> getSubtasks(@PathVariable String taskId) {
 
-        return new Resources<>(taskResourceAssembler.toResources(taskConverter.from(processEngine.getSubtasks(taskId))),
+        return new Resources<>(taskResourceAssembler.toResources(securityAwareTaskService.getSubtasks(taskId)),
                                linkTo(TaskControllerImpl.class).withSelfRel());
     }
 
-    public AuthenticationWrapper getAuthenticationWrapper() {
-        return authenticationWrapper;
-    }
-    
-    public void setAuthenticationWrapper(AuthenticationWrapper authenticationWrapper) {
-        this.authenticationWrapper = authenticationWrapper;
-    }
 }

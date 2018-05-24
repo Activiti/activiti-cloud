@@ -16,13 +16,15 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.services.api.model.Task;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
+import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
+import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskAdminController;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
+import org.activiti.runtime.api.model.FluentTask;
+import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,26 +32,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TaskAdminControllerImpl implements TaskAdminController {
 
-    private ProcessEngineWrapper processEngine;
+    private final SecurityAwareTaskService taskService;
 
     private final TaskResourceAssembler taskResourceAssembler;
 
     private final AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
 
+    private final SpringPageConverter pageConverter;
+
     @Autowired
-    public TaskAdminControllerImpl(ProcessEngineWrapper processEngine,
+    public TaskAdminControllerImpl(SecurityAwareTaskService taskService,
                                    TaskResourceAssembler taskResourceAssembler,
-                                   AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler) {
-        this.processEngine = processEngine;
+                                   AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler,
+                                   SpringPageConverter pageConverter) {
+        this.taskService = taskService;
         this.taskResourceAssembler = taskResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.pageConverter = pageConverter;
     }
 
     @Override
     public PagedResources<TaskResource> getAllTasks(Pageable pageable) {
-        Page<Task> page = processEngine.getAllTasks(pageable);
-        return pagedResourcesAssembler.toResource(pageable, page,
-                taskResourceAssembler);
+        Page<FluentTask> tasksPage = taskService.getAllTasks(pageConverter.toAPIPageable(pageable));
+        return pagedResourcesAssembler.toResource(pageable,
+                                                  pageConverter.toSpringPage(pageable,
+                                                                             tasksPage),
+                                                  taskResourceAssembler);
     }
-
 }

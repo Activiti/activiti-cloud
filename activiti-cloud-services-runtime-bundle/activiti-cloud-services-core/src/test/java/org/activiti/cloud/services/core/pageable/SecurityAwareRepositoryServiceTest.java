@@ -30,9 +30,6 @@ public class SecurityAwareRepositoryServiceTest {
     private ProcessRuntime processRuntime;
 
     @Mock
-    private PageableConverter pageableConverter;
-
-    @Mock
     private SpringPageConverter pageConverter;
 
     @Mock
@@ -54,7 +51,7 @@ public class SecurityAwareRepositoryServiceTest {
         given(securityService.restrictProcessDefQuery(SecurityPolicy.READ)).willReturn(filter);
 
         org.activiti.runtime.api.query.Pageable apiPageable = mock(org.activiti.runtime.api.query.Pageable.class);
-        given(pageableConverter.toAPIPageable(springPageable)).willReturn(apiPageable);
+        given(pageConverter.toAPIPageable(springPageable)).willReturn(apiPageable);
 
         given(processRuntime.processDefinitions(apiPageable, filter)).willReturn(apiPage);
         given(pageConverter.<ProcessDefinition, FluentProcessDefinition>toSpringPage(springPageable, apiPage)).willReturn(springPage);

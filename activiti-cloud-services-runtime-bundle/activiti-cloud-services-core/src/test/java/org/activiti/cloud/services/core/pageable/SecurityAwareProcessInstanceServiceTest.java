@@ -54,9 +54,6 @@ public class SecurityAwareProcessInstanceServiceTest {
     private SecurityPoliciesApplicationService securityService;
 
     @Mock
-    private PageableConverter pageableConverter;
-
-    @Mock
     private SpringPageConverter springPageConverter;
 
     @Mock
@@ -88,7 +85,7 @@ public class SecurityAwareProcessInstanceServiceTest {
 
         Pageable springPageable = mock(Pageable.class);
         org.activiti.runtime.api.query.Pageable apiPageable = mock(org.activiti.runtime.api.query.Pageable.class);
-        given(pageableConverter.toAPIPageable(springPageable)).willReturn(apiPageable);
+        given(springPageConverter.toAPIPageable(springPageable)).willReturn(apiPageable);
 
         given(processRuntime.processInstances(apiPageable,
                                               filter)).willReturn(apiPage);

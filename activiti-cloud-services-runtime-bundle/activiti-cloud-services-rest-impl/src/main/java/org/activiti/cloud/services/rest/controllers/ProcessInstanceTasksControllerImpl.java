@@ -17,13 +17,14 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.services.api.model.Task;
-import org.activiti.cloud.services.core.pageable.PageableTaskService;
+import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
+import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceTasksController;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
+import org.activiti.runtime.api.model.FluentTask;
+import org.activiti.runtime.api.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,27 +33,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ProcessInstanceTasksControllerImpl implements ProcessInstanceTasksController {
 
-    private final PageableTaskService pageableTaskService;
+    private final SecurityAwareTaskService securityAwareTaskService;
 
     private final TaskResourceAssembler taskResourceAssembler;
 
     private final AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
 
+    private final SpringPageConverter pageConverter;
+
     @Autowired
-    public ProcessInstanceTasksControllerImpl(PageableTaskService pageableTaskService,
+    public ProcessInstanceTasksControllerImpl(SecurityAwareTaskService securityAwareTaskService,
                                               TaskResourceAssembler taskResourceAssembler,
-                                              AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler) {
-        this.pageableTaskService = pageableTaskService;
+                                              AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler,
+                                              SpringPageConverter pageConverter) {
+        this.securityAwareTaskService = securityAwareTaskService;
         this.taskResourceAssembler = taskResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.pageConverter = pageConverter;
     }
 
     @Override
     public PagedResources<TaskResource> getTasks(@PathVariable String processInstanceId,
                                                  Pageable pageable) {
-        Page<Task> page = pageableTaskService.getTasks(processInstanceId,
-                                                       pageable);
-        return pagedResourcesAssembler.toResource(pageable, page,
+        org.activiti.runtime.api.query.Page<FluentTask> page = securityAwareTaskService.getTasks(processInstanceId,
+                                                                                                 pageConverter.toAPIPageable(pageable));
+        return pagedResourcesAssembler.toResource(pageable, pageConverter.toSpringPage(pageable, page),
                                                   taskResourceAssembler);
     }
 }

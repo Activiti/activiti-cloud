@@ -18,7 +18,7 @@ package org.activiti.cloud.services.rest.assemblers;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.activiti.cloud.services.api.model.Task;
+import org.activiti.runtime.api.model.Task;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
@@ -27,9 +27,9 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.stereotype.Component;
 
+import static org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-import static org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED;
 
 @Component
 public class TaskResourceAssembler extends ResourceAssemblerSupport<Task, TaskResource> {

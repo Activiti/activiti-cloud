@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.results.ClaimTaskResults;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
+import org.activiti.cloud.services.api.commands.results.ClaimTaskResults;
+import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClaimTaskCmdExecutor implements CommandExecutor<ClaimTaskCmd> {
 
-    private ProcessEngineWrapper processEngine;
+    private SecurityAwareTaskService securityAwareTaskService;
     private MessageChannel commandResults;
 
     @Autowired
-    public ClaimTaskCmdExecutor(ProcessEngineWrapper processEngine,
+    public ClaimTaskCmdExecutor(SecurityAwareTaskService securityAwareTaskService,
                                 MessageChannel commandResults) {
-        this.processEngine = processEngine;
+        this.securityAwareTaskService = securityAwareTaskService;
         this.commandResults = commandResults;
     }
 
@@ -28,7 +28,7 @@ public class ClaimTaskCmdExecutor implements CommandExecutor<ClaimTaskCmd> {
 
     @Override
     public void execute(ClaimTaskCmd cmd) {
-        processEngine.claimTask(cmd);
+        securityAwareTaskService.claimTask(cmd);
         ClaimTaskResults cmdResult = new ClaimTaskResults(cmd.getId());
         commandResults.send(MessageBuilder.withPayload(cmdResult).build());
     }

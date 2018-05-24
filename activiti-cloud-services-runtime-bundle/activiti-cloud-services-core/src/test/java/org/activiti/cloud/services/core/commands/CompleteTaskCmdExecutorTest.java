@@ -3,9 +3,9 @@ package org.activiti.cloud.services.core.commands;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.services.api.commands.results.CompleteTaskResults;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
+import org.activiti.cloud.services.api.commands.results.CompleteTaskResults;
+import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -14,8 +14,8 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class CompleteTaskCmdExecutorTest {
@@ -24,13 +24,13 @@ public class CompleteTaskCmdExecutorTest {
     private CompleteTaskCmdExecutor completeTaskCmdExecutor;
 
     @Mock
-    private ProcessEngineWrapper processEngine;
+    private SecurityAwareTaskService securityAwareTaskService;
 
     @Mock
     private MessageChannel commandResults;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
@@ -44,7 +44,7 @@ public class CompleteTaskCmdExecutorTest {
 
         completeTaskCmdExecutor.execute(completeTaskCmd);
 
-        verify(processEngine).completeTask(completeTaskCmd);
+        verify(securityAwareTaskService).completeTask(completeTaskCmd);
 
         verify(commandResults).send(ArgumentMatchers.<Message<CompleteTaskResults>>any());
     }

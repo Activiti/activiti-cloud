@@ -34,18 +34,14 @@ public class SecurityAwareRepositoryService {
 
     private final ProcessRuntime processRuntime;
 
-    private final PageableConverter pageableConverter;
-
     private final SpringPageConverter pageConverter;
 
     @Autowired
     public SecurityAwareRepositoryService(SecurityPoliciesApplicationService securityPolicyApplicationService,
                                           ProcessRuntime processRuntime,
-                                          PageableConverter pageableConverter,
                                           SpringPageConverter pageConverter) {
         this.securityService = securityPolicyApplicationService;
         this.processRuntime = processRuntime;
-        this.pageableConverter = pageableConverter;
         this.pageConverter = pageConverter;
     }
 
@@ -53,13 +49,13 @@ public class SecurityAwareRepositoryService {
         ProcessDefinitionFilter filter = securityService.restrictProcessDefQuery(SecurityPolicy.READ);
 
         return pageConverter.toSpringPage(pageable,
-                                          processRuntime.processDefinitions(pageableConverter.toAPIPageable(pageable),
+                                          processRuntime.processDefinitions(pageConverter.toAPIPageable(pageable),
                                                                             filter));
     }
 
     public Page<ProcessDefinition> getAllProcessDefinitions(Pageable pageable) {
         return pageConverter.toSpringPage(pageable,
-                                          processRuntime.processDefinitions(pageableConverter.toAPIPageable(pageable)));
+                                          processRuntime.processDefinitions(pageConverter.toAPIPageable(pageable)));
     }
 
     public ProcessDefinition getAuthorizedProcessDefinition(String processDefinitionId) {

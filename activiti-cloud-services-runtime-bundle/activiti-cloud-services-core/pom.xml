@@ -30,6 +30,12 @@
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
+      <artifactId>activiti-task-runtime-api</artifactId>
+      <!-- Todo use dependency management-->
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-engine</artifactId>
     </dependency>
     <dependency>
@@ -114,7 +120,14 @@
       <groupId>org.activiti</groupId>
       <artifactId>activiti-process-runtime-api-impl</artifactId>
       <!--todo: dependency management-->
-      <version>7-201803-EA-SNAPSHOT</version>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-task-runtime-api-impl</artifactId>
+      <!--todo: dependency management-->
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

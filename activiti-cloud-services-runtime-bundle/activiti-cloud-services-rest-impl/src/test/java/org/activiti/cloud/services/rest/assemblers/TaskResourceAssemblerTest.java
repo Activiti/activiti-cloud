@@ -1,12 +1,12 @@
 package org.activiti.cloud.services.rest.assemblers;
 
-import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
+import org.activiti.runtime.api.model.Task;
 import org.junit.Test;
 import org.springframework.hateoas.Link;
 
-import static org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED;
-import static org.activiti.cloud.services.api.model.Task.TaskStatus.CREATED;
+import static org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED;
+import static org.activiti.runtime.api.model.Task.TaskStatus.CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

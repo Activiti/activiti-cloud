@@ -63,6 +63,8 @@
       <artifactId>activiti-bpmn-model</artifactId>
     </dependency>
     <dependency>
+      <!-- FIXME: temporary dependency, in the next iteration DefaultServiceTaskBehavior
+      shoud be moved inside Activiti/Activiti so that we no longer need this dependency-->
       <groupId>org.activiti</groupId>
       <artifactId>activiti-process-runtime-api-impl</artifactId>
       <!-- TODO dependency management-->

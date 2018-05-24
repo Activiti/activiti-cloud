@@ -17,13 +17,14 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
-import org.activiti.cloud.services.api.model.Task;
-import org.activiti.cloud.services.api.model.Task.TaskStatus;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
+import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
+import org.activiti.cloud.services.core.pageable.SpringPageConverter;
+import org.activiti.runtime.api.model.FluentTask;
+import org.activiti.runtime.api.query.Page;
+import org.activiti.runtime.api.query.impl.PageImpl;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,19 +32,19 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.mockito.Mockito.*;
+import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -64,17 +65,23 @@ public class TaskAdminControllerImplIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private ProcessEngineWrapper processEngine;
+    private SecurityAwareTaskService securityAwareTaskService;
+
+    @SpyBean
+    private SpringPageConverter pageConverter;
+
+    @Before
+    public void setUp() {
+        assertThat(pageConverter).isNotNull();
+    }
 
     @Test
     public void getTasks() throws Exception {
 
-        List<Task> taskList = Collections.singletonList(buildDefaultTask());
-        Page<Task> tasks = new PageImpl<>(taskList,
-                                          PageRequest.of(0,
-                                                         10),
+        List<FluentTask> taskList = Collections.singletonList(buildDefaultAssignedTask());
+        Page<FluentTask> tasks = new PageImpl<>(taskList,
                                           taskList.size());
-        when(processEngine.getAllTasks(any())).thenReturn(tasks);
+        when(securityAwareTaskService.getAllTasks(any())).thenReturn(tasks);
 
         this.mockMvc.perform(get("/admin/v1/tasks"))
                 .andExpect(status().isOk())
@@ -86,12 +93,10 @@ public class TaskAdminControllerImplIT {
 
     @Test
     public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
-        List<Task> taskList = Collections.singletonList(buildDefaultTask());
-        Page<Task> taskPage = new PageImpl<>(taskList,
-                                          PageRequest.of(1,
-                                                         10),
-                                          taskList.size());
-        when(processEngine.getAllTasks(any())).thenReturn(taskPage);
+        List<FluentTask> taskList = Collections.singletonList(buildDefaultAssignedTask());
+        Page<FluentTask> taskPage = new PageImpl<>(taskList,
+                                                   taskList.size());
+        when(securityAwareTaskService.getAllTasks(any())).thenReturn(taskPage);
 
         this.mockMvc.perform(get("/admin/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -100,26 +105,5 @@ public class TaskAdminControllerImplIT {
                                 pagedResourcesResponseFields()));
     }
 
-    private Task buildDefaultTask() {
-        return buildTask(ASSIGNED, "user");
-    }
-
-
-    private Task buildTask(TaskStatus status,
-                           String assignee) {
-        return new Task(UUID.randomUUID().toString(),
-                        "user",
-                        assignee,
-                        "Validate",
-                        "Validate request",
-                        new Date(),
-                        new Date(),
-                        new Date(),
-                        10,
-                        UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(),
-                        null,
-                        status);
-    }
 
 }
