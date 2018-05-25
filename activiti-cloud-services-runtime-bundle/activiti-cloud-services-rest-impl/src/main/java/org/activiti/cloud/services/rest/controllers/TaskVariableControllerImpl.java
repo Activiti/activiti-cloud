@@ -15,18 +15,11 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.activiti.cloud.services.api.model.TaskVariable;
-import org.activiti.cloud.services.rest.api.resources.TaskVariableResource;
-import org.activiti.engine.TaskService;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
+import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
-import org.activiti.cloud.services.rest.assemblers.TaskVariableResourceAssembler;
-import org.activiti.engine.impl.persistence.entity.VariableInstance;
+import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
+import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
@@ -38,73 +31,42 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TaskVariableControllerImpl implements TaskVariableController {
 
-    private ProcessEngineWrapper processEngine;
+    private final TaskVariableInstanceResourceAssembler variableResourceAssembler;
 
-    private final TaskService taskService;
+    private ResourcesAssembler resourcesAssembler;
 
-    private final TaskVariableResourceAssembler variableResourceBuilder;
+    private SecurityAwareTaskService securityAwareTaskService;
 
     @Autowired
-    public TaskVariableControllerImpl(ProcessEngineWrapper processEngine,
-                                      TaskService taskService,
-                                      TaskVariableResourceAssembler variableResourceBuilder) {
-        this.processEngine = processEngine;
-        this.taskService = taskService;
-        this.variableResourceBuilder = variableResourceBuilder;
+    public TaskVariableControllerImpl(TaskVariableInstanceResourceAssembler variableResourceAssembler,
+                                      ResourcesAssembler resourcesAssembler,
+                                      SecurityAwareTaskService securityAwareTaskService) {
+        this.variableResourceAssembler = variableResourceAssembler;
+        this.resourcesAssembler = resourcesAssembler;
+        this.securityAwareTaskService = securityAwareTaskService;
     }
 
     @Override
-    public Resources<TaskVariableResource> getVariables(@PathVariable String taskId) {
-        Map<String, Object> variables = taskService.getVariables(taskId);
-        Map<String, VariableInstance> variableInstancesMap = taskService.getVariableInstances(taskId);
-        List<VariableInstance> variableInstances = new ArrayList<>();
-        if(variableInstancesMap!=null){
-            variableInstances.addAll(variableInstancesMap.values());
-        }
-        List<TaskVariableResource> resourcesList = new ArrayList<>();
-        for(VariableInstance variableInstance:variableInstances){
-            resourcesList.add(variableResourceBuilder.toResource(new TaskVariable(
-                    variableInstance.getTaskId(),variableInstance.getName(),variableInstance.getTypeName(),
-                    variableInstance.getValue(),variableInstance.getExecutionId(),
-                    TaskVariable.TaskVariableScope.GLOBAL)));
-        }
-
-        Resources<TaskVariableResource> resources = new Resources<>(resourcesList);
-        return resources;
+    public Resources<VariableInstanceResource> getVariables(@PathVariable String taskId) {
+        return resourcesAssembler.toResources(securityAwareTaskService.getVariableInstances(taskId), variableResourceAssembler);
     }
 
     @Override
-    public Resources<TaskVariableResource> getVariablesLocal(@PathVariable String taskId) {
-        Map<String, Object> variables = taskService.getVariablesLocal(taskId);
-        Map<String, VariableInstance> variableInstancesMap = taskService.getVariableInstancesLocal(taskId);
-        List<VariableInstance> variableInstances = new ArrayList<>();
-        if(variableInstancesMap!=null){
-            variableInstances.addAll(variableInstancesMap.values());
-        }
-        List<TaskVariableResource> resourcesList = new ArrayList<>();
-        for(VariableInstance variableInstance:variableInstances){
-            resourcesList.add(variableResourceBuilder.toResource(new TaskVariable(
-                    variableInstance.getTaskId(),variableInstance.getName(),variableInstance.getTypeName(),
-                    variableInstance.getValue(),variableInstance.getExecutionId(),
-                    TaskVariable.TaskVariableScope.LOCAL)));
-        }
-
-        Resources<TaskVariableResource> resources = new Resources<>(resourcesList);
-        return resources;
+    public Resources<VariableInstanceResource> getVariablesLocal(@PathVariable String taskId) {
+       return resourcesAssembler.toResources(securityAwareTaskService.getLocalVariableInstances(taskId), variableResourceAssembler);
     }
 
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String taskId,
-                                             @RequestBody(required = true) SetTaskVariablesCmd setTaskVariablesCmd) {
-        processEngine.setTaskVariables(setTaskVariablesCmd);
+                                             @RequestBody SetTaskVariablesCmd setTaskVariablesCmd) {
+        securityAwareTaskService.setTaskVariables(setTaskVariablesCmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> setVariablesLocal(@PathVariable String taskId,
-                                                  @RequestBody(
-                                                          required = true) SetTaskVariablesCmd setTaskVariablesCmd) {
-        processEngine.setTaskVariablesLocal(setTaskVariablesCmd);
+                                                  @RequestBody SetTaskVariablesCmd setTaskVariablesCmd) {
+        securityAwareTaskService.setTaskVariablesLocal(setTaskVariablesCmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

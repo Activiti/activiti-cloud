@@ -16,13 +16,19 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
-
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,13 +47,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,7 +71,7 @@ public class ProcessVariablesIT {
     private ObjectMapper mapper;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
@@ -81,7 +80,7 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    public void shouldRetrieveProcessVariables() throws Exception {
+    public void shouldRetrieveProcessVariables() {
         //given
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName",
@@ -123,7 +122,7 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    public void shouldDeleteProcessVariables() throws Exception {
+    public void shouldDeleteProcessVariables() {
         //given
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName",
@@ -135,8 +134,7 @@ public class ProcessVariablesIT {
         ResponseEntity<ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
                 variables);
 
-        List<String> variablesNames = new ArrayList<>();
-        variablesNames.addAll(variables.keySet());
+        List<String> variablesNames = new ArrayList<>(variables.keySet());
 
         HttpEntity<RemoveProcessVariablesCmd> entity = new HttpEntity<>(new RemoveProcessVariablesCmd(startResponse.getBody().getId(),variablesNames));
 
@@ -153,7 +151,7 @@ public class ProcessVariablesIT {
 
 
     @Test
-    public void shouldUpdateProcessVariables() throws Exception {
+    public void shouldUpdateProcessVariables() {
         //given
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName",

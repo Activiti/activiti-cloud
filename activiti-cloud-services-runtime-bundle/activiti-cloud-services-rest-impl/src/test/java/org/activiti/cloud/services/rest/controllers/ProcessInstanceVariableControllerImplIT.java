@@ -16,19 +16,18 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
-import org.activiti.cloud.services.rest.ProcessInstanceSamples;
-import org.activiti.engine.RuntimeService;
+import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +43,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -66,18 +65,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ProcessInstanceVariableControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "process-instance-variables";
+    private static final String PROCESS_INSTANCE_ID =UUID.randomUUID().toString();
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private RuntimeService runtimeService;
-
-    @MockBean
-    private SecurityPoliciesApplicationService securityService;
-
-    @MockBean
-    private ProcessEngineWrapper processEngine;
 
     @MockBean
     private SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
@@ -85,9 +76,30 @@ public class ProcessInstanceVariableControllerImplIT {
     @SpyBean
     private ObjectMapper mapper;
 
+    @SpyBean
+    private ResourcesAssembler resourcesAssembler;
+
+    @Before
+    public void setUp() {
+        //this assertion is not really necessary. It's only here to remove warning
+        //telling that resourcesAssembler is never used. Even if we are not directly
+        //using it in the test we need to to declare it as @SpyBean so it get inject
+        //in the controller
+        assertThat(resourcesAssembler).isNotNull();
+    }
+
     @Test
     public void getVariables() throws Exception {
-        when(runtimeService.getVariableInstancesByExecutionIds(any())).thenReturn(new ArrayList<>());
+        VariableInstanceImpl<String> name = new VariableInstanceImpl<>("name",
+                                                                       String.class.getName(),
+                                                                       "Paul",
+                                                                       PROCESS_INSTANCE_ID);
+        VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>("age",
+                                                                       Integer.class.getName(),
+                                                                       12,
+                                                                       PROCESS_INSTANCE_ID);
+        given(securityAwareProcessInstanceService.getVariableInstances(PROCESS_INSTANCE_ID)).willReturn(Arrays.asList(name,
+                                                                                               age));
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables/",
                                  1,
@@ -99,7 +111,11 @@ public class ProcessInstanceVariableControllerImplIT {
 
     @Test
     public void getVariablesLocal() throws Exception {
-        when(runtimeService.getVariableInstancesLocal(anyString())).thenReturn(new HashMap<>());
+        VariableInstanceImpl<Integer> count = new VariableInstanceImpl<>("count",
+                                                                       Integer.class.getName(),
+                                                                       100,
+                                                                       PROCESS_INSTANCE_ID);
+        given(securityAwareProcessInstanceService.getLocalVariableInstances(PROCESS_INSTANCE_ID)).willReturn(Collections.singletonList(count));
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables/local",
                 1,
@@ -116,10 +132,6 @@ public class ProcessInstanceVariableControllerImplIT {
         variables.put("var2",
                 "varObj2");
 
-        org.activiti.runtime.api.model.ProcessInstance processInstance = buildDefaultProcessInstance();
-        when(processEngine.getProcessInstanceById(any())).thenReturn(processInstance);
-        when(securityService.canWrite(processInstance.getProcessDefinitionKey())).thenReturn(true);
-
         this.mockMvc.perform(post("/v1/process-instances/{processInstanceId}/variables",
                 1).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new SetProcessVariablesCmd("1",
                 variables))))
@@ -132,24 +144,17 @@ public class ProcessInstanceVariableControllerImplIT {
 
     @Test
     public void deleteVariables() throws Exception {
-        org.activiti.runtime.api.model.ProcessInstance processInstance = buildDefaultProcessInstance();
-        when(processEngine.getProcessInstanceById(any())).thenReturn(processInstance);
-        when(securityService.canRead(processInstance.getProcessDefinitionKey())).thenReturn(true);
-        when(securityService.canWrite(processInstance.getProcessDefinitionKey())).thenReturn(true);
-
         this.mockMvc.perform(delete("/v1/process-instances/{processInstanceId}/variables",
-                1)
+                                    PROCESS_INSTANCE_ID)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(new RemoveProcessVariablesCmd("1",Arrays.asList("varName1",
-                        "varName2")))))
+                .content(mapper.writeValueAsString(new RemoveProcessVariablesCmd(PROCESS_INSTANCE_ID, Arrays.asList("varName1",
+                                                                                                                    "varName2")))))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
                         pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+        verify(securityAwareProcessInstanceService).removeProcessVariables(any());
     }
 
-    private org.activiti.runtime.api.model.ProcessInstance buildDefaultProcessInstance() {
-        return ProcessInstanceSamples.defaultProcessInstance();
-    }
 }

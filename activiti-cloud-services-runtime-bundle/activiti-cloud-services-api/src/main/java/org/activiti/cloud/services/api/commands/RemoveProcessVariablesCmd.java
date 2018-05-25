@@ -1,23 +1,22 @@
 package org.activiti.cloud.services.api.commands;
 
+import java.util.List;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class RemoveProcessVariablesCmd implements Command {
 
     private final String id;
-    private String processId;
+    private String processInstanceId;
     private List<String> variableNames;
 
     @JsonCreator
-    public RemoveProcessVariablesCmd(@JsonProperty("processId") String processId,
+    public RemoveProcessVariablesCmd(@JsonProperty("processInstanceId") String processInstanceId,
                                      @JsonProperty("variables") List<String> variableNames) {
         this.id = UUID.randomUUID().toString();
-        this.processId = processId;
+        this.processInstanceId = processInstanceId;
         this.variableNames = variableNames;
     }
 
@@ -25,8 +24,8 @@ public class RemoveProcessVariablesCmd implements Command {
         return id;
     }
 
-    public String getProcessId() {
-        return processId;
+    public String getProcessInstanceId() {
+        return processInstanceId;
     }
 
     public List<String> getVariableNames() {

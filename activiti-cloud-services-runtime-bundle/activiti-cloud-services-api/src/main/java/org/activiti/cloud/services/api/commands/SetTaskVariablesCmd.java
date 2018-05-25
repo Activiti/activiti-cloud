@@ -26,11 +26,11 @@ public class SetTaskVariablesCmd implements Command {
 
     private final String id;
     private String taskId;
-    private Map<String, ? extends Object> variables;
+    private Map<String, Object> variables;
 
     @JsonCreator
     public SetTaskVariablesCmd(@JsonProperty("taskId") String taskId,
-                               @JsonProperty("variables") Map<String, ? extends Object> variables) {
+                               @JsonProperty("variables") Map<String, Object> variables) {
         this.id = UUID.randomUUID().toString();
         this.taskId = taskId;
         this.variables = variables;
@@ -44,7 +44,7 @@ public class SetTaskVariablesCmd implements Command {
         return taskId;
     }
 
-    public Map<String, ? extends Object> getVariables() {
+    public Map<String, Object> getVariables() {
         return variables;
     }
 }

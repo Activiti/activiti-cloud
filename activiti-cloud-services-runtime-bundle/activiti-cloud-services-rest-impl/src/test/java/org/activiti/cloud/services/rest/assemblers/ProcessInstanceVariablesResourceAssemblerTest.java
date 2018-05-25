@@ -1,12 +1,13 @@
 package org.activiti.cloud.services.rest.assemblers;
 
-import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
-import org.activiti.cloud.services.rest.api.resources.ProcessVariableResource;
+import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
+import org.activiti.runtime.api.model.VariableInstance;
 import org.junit.Test;
 import org.springframework.hateoas.Link;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ProcessInstanceVariablesResourceAssemblerTest {
 
@@ -14,10 +15,10 @@ public class ProcessInstanceVariablesResourceAssemblerTest {
 
     @Test
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {
-        ProcessInstanceVariable model = mock(ProcessInstanceVariable.class);
+        VariableInstance model = mock(VariableInstance.class);
         when(model.getProcessInstanceId()).thenReturn("my-identifier");
 
-        ProcessVariableResource resource = resourceAssembler.toResource(model);
+        VariableInstanceResource resource = resourceAssembler.toResource(model);
 
         Link processVariablesLink = resource.getLink("processVariables");
 

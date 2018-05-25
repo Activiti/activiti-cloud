@@ -22,11 +22,13 @@ import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
+import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
 import org.activiti.cloud.services.core.AuthenticationWrapper;
 import org.activiti.engine.UserGroupLookupProxy;
 import org.activiti.runtime.api.TaskRuntime;
 import org.activiti.runtime.api.model.FluentTask;
+import org.activiti.runtime.api.model.VariableInstance;
 import org.activiti.runtime.api.query.Page;
 import org.activiti.runtime.api.query.Pageable;
 import org.activiti.runtime.api.query.TaskFilter;
@@ -155,6 +157,25 @@ public class SecurityAwareTaskService {
         if (updateTaskCmd.getParentTaskId() != null) {
             task.updateParentTaskId(updateTaskCmd.getParentTaskId());
         }
+    }
+
+    public void setTaskVariables(SetTaskVariablesCmd setTaskVariablesCmd) {
+        taskRuntime.task(setTaskVariablesCmd.getTaskId())
+                .variables(setTaskVariablesCmd.getVariables());
+    }
+
+    public void setTaskVariablesLocal(SetTaskVariablesCmd setTaskVariablesCmd) {
+        taskRuntime.task(setTaskVariablesCmd.getTaskId())
+                .localVariables(setTaskVariablesCmd.getVariables());
+    }
+
+
+    public List<VariableInstance> getVariableInstances(String taskId) {
+        return taskRuntime.task(taskId).variables();
+    }
+
+    public List<VariableInstance> getLocalVariableInstances(String taskId) {
+        return taskRuntime.task(taskId).localVariables();
     }
 
 }

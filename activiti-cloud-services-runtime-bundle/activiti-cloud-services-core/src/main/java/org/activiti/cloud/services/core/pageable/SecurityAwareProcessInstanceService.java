@@ -16,8 +16,10 @@
 package org.activiti.cloud.services.core.pageable;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
+import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
@@ -31,6 +33,7 @@ import org.activiti.runtime.api.ProcessRuntime;
 import org.activiti.runtime.api.model.FluentProcessDefinition;
 import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.VariableInstance;
 import org.activiti.runtime.api.query.ProcessInstanceFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,7 +140,7 @@ public class SecurityAwareProcessInstanceService {
     }
 
     public void setProcessVariables(SetProcessVariablesCmd setProcessVariablesCmd) {
-        FluentProcessInstance processInstance = getAuthorizedProcessInstanceById(setProcessVariablesCmd.getProcessId());
+        FluentProcessInstance processInstance = getAuthorizedProcessInstanceById(setProcessVariablesCmd.getProcessInstanceId());
         verifyCanWriteToProcessInstance(processInstance.getId());
         processInstance.variables(new HashMap<>(setProcessVariablesCmd.getVariables()));
     }
@@ -146,6 +149,19 @@ public class SecurityAwareProcessInstanceService {
         FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(processInstanceId);
 
         processInstance.delete("Cancelled by " + authenticationWrapper.getAuthenticatedUserId());
+    }
+
+    public void removeProcessVariables(RemoveProcessVariablesCmd removeProcessVariablesCmd) {
+        FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(removeProcessVariablesCmd.getProcessInstanceId());
+        processInstance.removeVariables(removeProcessVariablesCmd.getVariableNames());
+    }
+
+    public List<VariableInstance> getVariableInstances(String processInstanceId) {
+        return processRuntime.processInstance(processInstanceId).variables();
+    }
+
+    public List<VariableInstance> getLocalVariableInstances(String processInstanceId) {
+        return processRuntime.processInstance(processInstanceId).localVariables();
     }
 
 }

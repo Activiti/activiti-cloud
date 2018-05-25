@@ -22,6 +22,7 @@ import java.util.Map;
 import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
+import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.core.AuthenticationWrapper;
 import org.activiti.runtime.api.TaskRuntime;
 import org.activiti.runtime.api.model.FluentTask;
@@ -122,6 +123,39 @@ public class SecurityAwareTaskServiceTest {
                                                      variables));
         verify(completeTaskPayload).variables(variables);
         verify(completeTaskPayload).doIt();
+    }
+
+    @Test
+    public void setTaskVariablesShouldSetVariablesOnFluentTask() {
+        //given
+        SetTaskVariablesCmd setTaskVariablesCmd = new SetTaskVariablesCmd("taskId",
+                                                                          Collections.singletonMap("name",
+                                                                                                   "john"));
+        FluentTask task = mock(FluentTask.class);
+        given(taskRuntime.task(setTaskVariablesCmd.getTaskId())).willReturn(task);
+
+        //when
+        taskService.setTaskVariables(setTaskVariablesCmd);
+
+        //then
+        verify(task).variables(setTaskVariablesCmd.getVariables());
+    }
+
+    @Test
+    public void shouldSetTaskVariablesLocal() {
+        //given
+        SetTaskVariablesCmd cmd = new SetTaskVariablesCmd("taskId",
+                                                          Collections.singletonMap("local",
+                                                                                   "myLocalVar"));
+
+        FluentTask task = mock(FluentTask.class);
+        given(taskRuntime.task(cmd.getTaskId())).willReturn(task);
+
+        //when
+        taskService.setTaskVariablesLocal(cmd);
+
+        //when
+        verify(task).localVariables(cmd.getVariables());
     }
 
 }

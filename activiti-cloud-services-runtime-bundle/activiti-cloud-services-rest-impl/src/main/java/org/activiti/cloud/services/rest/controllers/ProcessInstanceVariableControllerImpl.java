@@ -15,23 +15,14 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
-import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
-import org.activiti.cloud.services.core.ProcessEngineWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
-import org.activiti.cloud.services.rest.api.resources.ProcessVariableResource;
+import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.impl.persistence.entity.VariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
@@ -48,11 +39,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVariableController {
 
-    private final RuntimeService runtimeService;
-    private final ProcessInstanceVariableResourceAssembler variableResourceBuilder;
-    private final ProcessEngineWrapper processEngine;
-    private final SecurityAwareProcessInstanceService processInstanceService;
-
+    private final ProcessInstanceVariableResourceAssembler variableResourceAssembler;
+    private final SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
+    private final ResourcesAssembler resourcesAssembler;
 
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -67,58 +56,38 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
     }
 
     @Autowired
-    public ProcessInstanceVariableControllerImpl(RuntimeService runtimeService,
-                                                 ProcessInstanceVariableResourceAssembler variableResourceBuilder,
-                                                 ProcessEngineWrapper processEngine,
-                                                 SecurityAwareProcessInstanceService processInstanceService) {
-        this.runtimeService = runtimeService;
-        this.variableResourceBuilder = variableResourceBuilder;
-        this.processEngine = processEngine;
-        this.processInstanceService = processInstanceService;
+    public ProcessInstanceVariableControllerImpl(ProcessInstanceVariableResourceAssembler variableResourceAssembler,
+                                                 SecurityAwareProcessInstanceService securityAwareProcessInstanceService,
+                                                 ResourcesAssembler resourcesAssembler) {
+        this.variableResourceAssembler = variableResourceAssembler;
+        this.securityAwareProcessInstanceService = securityAwareProcessInstanceService;
+        this.resourcesAssembler = resourcesAssembler;
     }
 
     @Override
-    public Resources<ProcessVariableResource> getVariables(@PathVariable String processInstanceId) {
-        List<VariableInstance> variableInstances = runtimeService.getVariableInstancesByExecutionIds(Collections.singleton(processInstanceId));
-
-        List<ProcessVariableResource> resourcesList = new ArrayList<>();
-        for(VariableInstance variableInstance:variableInstances){
-            resourcesList.add(variableResourceBuilder.toResource(new ProcessInstanceVariable(
-                    variableInstance.getProcessInstanceId(),variableInstance.getName(),variableInstance.getTypeName(),variableInstance.getValue(),variableInstance.getExecutionId())));
-        }
-
-        return new Resources<>(resourcesList);
+    public Resources<VariableInstanceResource> getVariables(@PathVariable String processInstanceId) {
+        return resourcesAssembler.toResources(securityAwareProcessInstanceService.getVariableInstances(processInstanceId),
+                                              variableResourceAssembler);
     }
 
     @Override
-    public Resources<ProcessVariableResource> getVariablesLocal(@PathVariable String processInstanceId) {
-        Map<String,VariableInstance> variableInstancesMap = runtimeService.getVariableInstancesLocal(processInstanceId);
-        List<VariableInstance> variableInstances = new ArrayList<>();
-        if(variableInstancesMap!=null){
-            variableInstances.addAll(variableInstancesMap.values());
-        }
-        List<ProcessVariableResource> resourcesList = new ArrayList<>();
-        for(VariableInstance variableInstance:variableInstances){
-            resourcesList.add(variableResourceBuilder.toResource(new ProcessInstanceVariable(
-                    variableInstance.getProcessInstanceId(),variableInstance.getName(),variableInstance.getTypeName(),variableInstance.getValue(),variableInstance.getExecutionId())));
-        }
-
-        return new Resources<>(resourcesList);
+    public Resources<VariableInstanceResource> getVariablesLocal(@PathVariable String processInstanceId) {
+        return resourcesAssembler.toResources(
+                securityAwareProcessInstanceService.getLocalVariableInstances(processInstanceId),
+                variableResourceAssembler);
     }
-
 
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
                                              @RequestBody SetProcessVariablesCmd setProcessVariablesCmd) {
-        processInstanceService.setProcessVariables(setProcessVariablesCmd);
-
+        securityAwareProcessInstanceService.setProcessVariables(setProcessVariablesCmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
                                                 @RequestBody RemoveProcessVariablesCmd removeProcessVariablesCmd) {
-        this.processEngine.removeProcessVariables(removeProcessVariablesCmd);
+        securityAwareProcessInstanceService.removeProcessVariables(removeProcessVariablesCmd);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
