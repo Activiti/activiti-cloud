@@ -45,10 +45,12 @@ public class ProcessVariableDeletedEventHandler {
         BooleanExpression predicate = QVariable.variable.processInstanceId.eq(processInstanceId)
                 .and(
                         QVariable.variable.name.eq(variableName)
-                );
+
+                ).and(QVariable.variable.markedAsDeleted.eq(new Boolean(false)));
         Variable variable = entityFinder.findOne(variableRepository,
                                             predicate,
                                             "Unable to find variable with name '" + variableName + "' for process instance '" + processInstanceId + "'");
-        variableRepository.delete(variable);
+        variable.setMarkedAsDeleted(true);
+        variableRepository.save(variable);
     }
 }

@@ -126,6 +126,7 @@ public class QueryAdminVariablesIT {
         createAndDeleteVariable.addAll(Arrays.asList(aVariableDeletedEvent(timestamp)
                 .withProcessInstanceId(processInstanceId)
                 .withVariableName("varDeleted")
+                .withVariableValue("v3")
                 .withVariableType("string")
                 .build()));
 
@@ -154,7 +155,11 @@ public class QueryAdminVariablesIT {
                     .containsExactly(
                             tuple(
                                     "varUpdated",
-                                    "v2-up"));
+                                    "v2-up"),
+                            tuple(
+                                    "varDeleted",
+                                    "v1")
+                    );
         });
     }
 

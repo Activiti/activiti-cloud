@@ -188,7 +188,11 @@ public class QueryTaskVariablesIT {
                                     "v1"),
                             tuple(
                                     "varUpdated",
-                                    "v2-up"));
+                                    "v2-up"),
+                            tuple(
+                                    "varDeleted",
+                                    "v1")
+                    );
         });
     }
 

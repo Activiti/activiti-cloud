@@ -22,6 +22,7 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.events.VariableDeletedEvent;
 import org.activiti.cloud.services.query.model.Variable;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -54,7 +55,7 @@ public class TaskVariableDeletedEventHandlerTest {
     }
 
     @Test
-    public void handleShouldRemoveVariableFromProcessAndDeleteIt() throws Exception {
+    public void handleShouldRemoveVariableFromProcessAndSoftDeleteIt() throws Exception {
         //given
         VariableDeletedEvent event = new VariableDeletedEvent();
         event.setTaskId("10");
@@ -68,7 +69,8 @@ public class TaskVariableDeletedEventHandlerTest {
         handler.handle(event);
 
         //then
-        verify(variableRepository).delete(variable);
+        verify(variableRepository).save(variable);
+        assertThat(variable.getMarkedAsDeleted()).isTrue();
     }
 
 }

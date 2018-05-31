@@ -46,6 +46,7 @@ public class Variable extends ActivitiEntityMetadata {
     private Date lastUpdatedTime;
     private String executionId;
     private String value;
+    private Boolean markedAsDeleted = false;
 
     @JsonIgnore
     @ManyToOne(optional=true)
@@ -170,4 +171,11 @@ public class Variable extends ActivitiEntityMetadata {
         this.task = task;
     }
 
+    public Boolean getMarkedAsDeleted() {
+        return markedAsDeleted;
+    }
+
+    public void setMarkedAsDeleted(Boolean markedAsDeleted) {
+        this.markedAsDeleted = markedAsDeleted;
+    }
 }

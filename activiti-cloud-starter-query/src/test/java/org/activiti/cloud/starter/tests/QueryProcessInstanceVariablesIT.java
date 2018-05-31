@@ -150,7 +150,11 @@ public class QueryProcessInstanceVariablesIT {
                                     "v1"),
                             tuple(
                                     "varUpdated",
-                                    "v2-up"));
+                                    "v2-up"),
+                            tuple(// Variables deleted should be here, they are soft deleted
+                                    "varDeleted",
+                                    "v1")
+                    );
         });
     }
 
