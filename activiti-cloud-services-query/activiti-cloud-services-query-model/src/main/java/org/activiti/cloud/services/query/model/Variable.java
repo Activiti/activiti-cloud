@@ -45,6 +45,7 @@ public class Variable extends ActivitiEntityMetadata {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastUpdatedTime;
     private String executionId;
+    @Column(columnDefinition = "TEXT")
     private String value;
     private Boolean markedAsDeleted = false;
 
