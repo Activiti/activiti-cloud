@@ -45,7 +45,9 @@ public class Variable extends ActivitiEntityMetadata {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastUpdatedTime;
     private String executionId;
+    @Column(columnDefinition = "TEXT")
     private String value;
+    private Boolean markedAsDeleted = false;
 
     @JsonIgnore
     @ManyToOne(optional=true)
@@ -170,4 +172,11 @@ public class Variable extends ActivitiEntityMetadata {
         this.task = task;
     }
 
+    public Boolean getMarkedAsDeleted() {
+        return markedAsDeleted;
+    }
+
+    public void setMarkedAsDeleted(Boolean markedAsDeleted) {
+        this.markedAsDeleted = markedAsDeleted;
+    }
 }

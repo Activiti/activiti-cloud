@@ -45,11 +45,12 @@ public class TaskVariableDeletedEventHandler {
         BooleanExpression predicate = QVariable.variable.taskId.eq(taskId)
                 .and(
                         QVariable.variable.name.eq(variableName)
-                );
+
+                ).and(QVariable.variable.markedAsDeleted.eq(new Boolean(false)));
         Variable variable = entityFinder.findOne(variableRepository,
                                             predicate,
                                             "Unable to find variable with name '" + variableName + "' for task '" + taskId + "'");
-
-        variableRepository.delete(variable);
+        variable.setMarkedAsDeleted(true);
+        variableRepository.save(variable);
     }
 }

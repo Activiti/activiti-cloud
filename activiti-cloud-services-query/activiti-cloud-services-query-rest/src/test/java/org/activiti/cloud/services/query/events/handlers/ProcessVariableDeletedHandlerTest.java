@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -50,7 +51,7 @@ public class ProcessVariableDeletedHandlerTest {
     }
 
     @Test
-    public void handleRemoveVariableFromProcessAndDeleteIt() throws Exception {
+    public void handleRemoveVariableFromProcessAndSoftDeleteIt() throws Exception {
         //given
         VariableDeletedEvent event = new VariableDeletedEvent();
         event.setProcessInstanceId("10");
@@ -63,7 +64,8 @@ public class ProcessVariableDeletedHandlerTest {
         handler.handle(event);
 
         //then
-        verify(variableRepository).delete(variable);
+        verify(variableRepository).save(variable);
+        assertThat(variable.getMarkedAsDeleted()).isTrue();
     }
 
 }
