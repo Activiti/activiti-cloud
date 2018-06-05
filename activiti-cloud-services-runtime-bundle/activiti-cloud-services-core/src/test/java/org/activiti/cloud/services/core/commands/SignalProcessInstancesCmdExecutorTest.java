@@ -2,7 +2,7 @@ package org.activiti.cloud.services.core.commands;
 
 import org.activiti.cloud.services.api.commands.results.SignalProcessInstancesResults;
 import org.activiti.cloud.services.core.ProcessEngineWrapper;
-import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
+import org.activiti.cloud.services.api.commands.SignalCmd;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -33,9 +33,9 @@ public class SignalProcessInstancesCmdExecutorTest {
 
     @Test
     public void signalProcessInstancesCmdExecutorTest() {
-        SignalProcessInstancesCmd signalProcessInstancesCmd = new SignalProcessInstancesCmd("x");
+        SignalCmd signalProcessInstancesCmd = new SignalCmd("x");
 
-        assertThat(signalProcessInstancesCmdExecutor.getHandledType()).isEqualTo(SignalProcessInstancesCmd.class);
+        assertThat(signalProcessInstancesCmdExecutor.getHandledType()).isEqualTo(SignalCmd.class);
 
         signalProcessInstancesCmdExecutor.execute(signalProcessInstancesCmd);
 

@@ -9,7 +9,7 @@ import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
-import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
+import org.activiti.cloud.services.api.commands.SignalCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.api.model.ProcessInstance;
@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,7 +60,9 @@ public class ProcessEngineWrapperTest {
     private RepositoryService repositoryService;
     @Mock
     private AuthenticationWrapper authenticationWrapper;
-
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+    
     @Before
     public void setUp() throws Exception {
         initMocks(this);
@@ -119,8 +122,9 @@ public class ProcessEngineWrapperTest {
         when(repositoryService.createProcessDefinitionQuery()).thenReturn(query);
         when(securityService.restrictProcessDefQuery(query, SecurityPolicy.WRITE)).thenReturn(query);
         when(query.count()).thenReturn(1L);
-        processEngineWrapper.signal(mock(SignalProcessInstancesCmd.class));
+        processEngineWrapper.signal(mock(SignalCmd.class));
         verify(runtimeService).signalEventReceived(any(),anyMap());
+        verify(eventPublisher).publishEvent(any(SignalCmd.class));
     }
     @Test
     public void shouldNotSuspendWithoutPermission(){

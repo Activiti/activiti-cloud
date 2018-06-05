@@ -10,7 +10,7 @@ import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
-import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
+import org.activiti.cloud.services.api.commands.SignalCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
@@ -32,6 +32,7 @@ import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -50,6 +51,7 @@ public class ProcessEngineWrapper {
     private final RepositoryService repositoryService;
     private final AuthenticationWrapper authenticationWrapper;
     private PageableProcessInstanceService pageableProcessInstanceService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public ProcessEngineWrapper(ProcessInstanceConverter processInstanceConverter,
@@ -61,7 +63,8 @@ public class ProcessEngineWrapper {
                                 MessageProducerActivitiEventListener listener,
                                 SecurityPoliciesApplicationService securityService,
                                 RepositoryService repositoryService,
-                                AuthenticationWrapper authenticationWrapper) {
+                                AuthenticationWrapper authenticationWrapper,
+                                ApplicationEventPublisher eventPublisher) {
         this.processInstanceConverter = processInstanceConverter;
         this.runtimeService = runtimeService;
         this.pageableProcessInstanceService = pageableProcessInstanceService;
@@ -72,6 +75,7 @@ public class ProcessEngineWrapper {
         this.securityService = securityService;
         this.repositoryService = repositoryService;
         this.authenticationWrapper = authenticationWrapper;
+        this.eventPublisher = eventPublisher;
     }
 
     public Page<ProcessInstance> getProcessInstances(Pageable pageable) {
@@ -115,12 +119,12 @@ public class ProcessEngineWrapper {
         return processInstanceConverter.from(builder.start());
     }
 
-    public void signal(SignalProcessInstancesCmd signalProcessInstancesCmd) {
+    public void signal(SignalCmd signalCmd) {
         //TODO: plan is to restrict access to events using a new security policy on events
         // - that's another piece of work though so for now no security here
 
-        runtimeService.signalEventReceived(signalProcessInstancesCmd.getName(),
-                                           signalProcessInstancesCmd.getInputVariables());
+        runtimeService.signalEventReceived(signalCmd.getName(), signalCmd.getInputVariables());
+        eventPublisher.publishEvent(signalCmd);
     }
 
     public void suspend(SuspendProcessInstanceCmd suspendProcessInstanceCmd) {
