@@ -22,6 +22,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
+import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
+import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
+import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
+import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -51,7 +56,7 @@ public class AuditProducerIT {
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -63,13 +68,25 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldReceiveAuditMessage() throws Exception {
-
+    public void shouldReceiveAuditMessage() {
         //when
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //then
-        await().untilAsserted(() -> assertThat(streamHandler.isMessageReceived()).isTrue());
+        await().untilAsserted(() -> assertThat(streamHandler.getAndResetReceivedEvents())
+                .extracting(event -> event.getEventType().name())
+                .containsExactly(PROCESS_CREATED.name(),
+                          PROCESS_STARTED.name(),
+                          TASK_CANDIDATE_GROUP_ADDED.name(),
+                          TASK_CANDIDATE_USER_ADDED.name(),
+                          TASK_CREATED.name()));
+        //todo add events for:
+        // - completed process
+        // - rolled back
+        // - AsyncErrorProcess
+        // - Task created
+        // - process deleted
+        // - task deleted
     }
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {

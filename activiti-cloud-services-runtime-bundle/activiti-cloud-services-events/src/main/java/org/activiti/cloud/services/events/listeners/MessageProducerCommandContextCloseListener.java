@@ -18,15 +18,13 @@ package org.activiti.cloud.services.events.listeners;
 
 import java.util.List;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.stereotype.Component;
 
-@Component
 public class MessageProducerCommandContextCloseListener implements CommandContextCloseListener {
 
     public static final String PROCESS_ENGINE_EVENTS = "processEngineEvents";
@@ -40,10 +38,10 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
     @Override
     public void closed(CommandContext commandContext) {
-        List<ProcessEngineEvent> events = commandContext.getGenericAttribute(PROCESS_ENGINE_EVENTS);
+        List<CloudRuntimeEvent<?, ?>> events = commandContext.getGenericAttribute(PROCESS_ENGINE_EVENTS);
         if (events != null && !events.isEmpty()) {
             producer.auditProducer().send(MessageBuilder.withPayload(
-                    events.toArray(new ProcessEngineEvent[events.size()]))
+                    events.toArray(new CloudRuntimeEvent<?, ?>[0]))
                                                   .build());
         }
     }

@@ -16,16 +16,12 @@
 
 package org.activiti.cloud.services.events.listeners;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
 
-@Component
-public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggregator<ProcessEngineEvent, MessageProducerCommandContextCloseListener>{
+public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggregator<CloudRuntimeEvent<?,?>, MessageProducerCommandContextCloseListener>{
 
     private final MessageProducerCommandContextCloseListener closeListener;
 
-    @Autowired
     public ProcessEngineEventsAggregator(MessageProducerCommandContextCloseListener closeListener) {
         this.closeListener = closeListener;
     }

@@ -38,5 +38,19 @@
       <groupId>org.activiti</groupId>
       <artifactId>activiti-engine</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-cloud-process-model-api-impl</artifactId>
+      <version>7-201803-EA-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-cloud-task-model-api-impl</artifactId>
+      <version>7-201803-EA-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-test</artifactId>
+    </dependency>
   </dependencies>
 </project>
