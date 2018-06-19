@@ -28,6 +28,7 @@ import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 public class VariableEventContainedBuilder {
 
     private VariableInstanceImpl<?> variableInstance;
+    private VariableInstanceImpl<?> beforeUpdateVariableInstance;
 
     private EventsAggregator eventsAggregator;
 
@@ -38,9 +39,9 @@ public class VariableEventContainedBuilder {
     public <T> VariableEventContainedBuilder aCreatedVariable(String name,
                                                               T value,
                                                               String type) {
-        buildVariable(name,
-                      type,
-                      value);
+        variableInstance = buildVariable(name,
+                                         type,
+                                         value);
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(variableInstance));
         return this;
     }
@@ -48,10 +49,13 @@ public class VariableEventContainedBuilder {
     public <T> VariableEventContainedBuilder anUpdatedVariable(String name,
                                                                T value,
                                                                String type) {
-        buildVariable(name,
-                      type,
-                      value);
-        eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(variableInstance),
+        beforeUpdateVariableInstance = buildVariable(name,
+                                         type,
+                                         null);
+        variableInstance = buildVariable(name,
+                                                     type,
+                                                     value);
+        eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(beforeUpdateVariableInstance),
                                    new CloudVariableUpdatedEventImpl(variableInstance));
         return this;
     }
@@ -59,31 +63,51 @@ public class VariableEventContainedBuilder {
     public <T> VariableEventContainedBuilder aDeletedVariable(String name,
                                                               T value,
                                                               String type) {
-        buildVariable(name,
-                      type,
-                      value);
+        variableInstance = buildVariable(name,
+                                         type,
+                                         value);
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(variableInstance),
                                    new CloudVariableDeletedEventImpl(variableInstance));
         return this;
     }
 
-    private <T> void buildVariable(String name,
-                                   String type,
-                                   T value) {
-        variableInstance = new VariableInstanceImpl<>(name,
-                                                      type,
-                                                      value,
-                                                      null);
+    private <T> VariableInstanceImpl<T> buildVariable(String name,
+                                                      String type,
+                                                      T value) {
+        return new VariableInstanceImpl<>(name,
+                                          type,
+                                          value,
+                                          null);
     }
 
     public VariableInstance onProcessInstance(ProcessInstance processInstance) {
-        variableInstance.setProcessInstanceId(processInstance.getId());
+
+        setProcessInstanceInfo(variableInstance,
+                               processInstance);
+        setProcessInstanceInfo(beforeUpdateVariableInstance,
+                               processInstance);
         return variableInstance;
     }
 
+    private void setProcessInstanceInfo(VariableInstanceImpl<?> variableInstance,
+                                        ProcessInstance processInstance) {
+        if (variableInstance != null) {
+            variableInstance.setProcessInstanceId(processInstance.getId());
+        }
+    }
+
     public VariableInstance onTask(Task task) {
-        variableInstance.setProcessInstanceId(task.getProcessInstanceId());
-        variableInstance.setTaskId(task.getId());
+        setTaskInfo(variableInstance,
+                    task);
+        setTaskInfo(beforeUpdateVariableInstance, task);
         return variableInstance;
+    }
+
+    private void setTaskInfo(VariableInstanceImpl<?> variableInstance,
+                             Task task) {
+        if (variableInstance != null) {
+            variableInstance.setProcessInstanceId(task.getProcessInstanceId());
+            variableInstance.setTaskId(task.getId());
+        }
     }
 }
