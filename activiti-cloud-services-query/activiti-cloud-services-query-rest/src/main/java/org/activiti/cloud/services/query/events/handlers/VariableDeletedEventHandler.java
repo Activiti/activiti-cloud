@@ -40,9 +40,9 @@ public class VariableDeletedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudVariableDeletedEvent variableDeletedEvent = (CloudVariableDeletedEvent) event;
         if (variableDeletedEvent.getEntity().isTaskVariable()) {
-            processVariableDeletedHandler.handle(variableDeletedEvent);
-        } else {
             taskVariableDeletedEventHandler.handle(variableDeletedEvent);
+        } else {
+            processVariableDeletedHandler.handle(variableDeletedEvent);
         }
     }
 

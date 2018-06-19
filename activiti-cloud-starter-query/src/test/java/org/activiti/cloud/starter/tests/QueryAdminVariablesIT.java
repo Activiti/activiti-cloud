@@ -41,8 +41,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -93,7 +91,6 @@ public class QueryAdminVariablesIT {
     }
 
     @After
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void tearDown() {
         variableRepository.deleteAll();
         taskRepository.deleteAll();
@@ -129,14 +126,17 @@ public class QueryAdminVariablesIT {
             assertThat(responseEntity.getBody().getContent())
                     .extracting(
                             Variable::getName,
-                            Variable::getValue)
+                            Variable::getValue,
+                            Variable::getMarkedAsDeleted)
                     .containsExactly(
                             tuple(
                                     "varUpdated",
-                                    "v2-up"),
+                                    "v2-up",
+                                    false),
                             tuple(
                                     "varDeleted",
-                                    "v1")
+                                    "v1",
+                                    true)
                     );
         });
     }

@@ -84,7 +84,7 @@ public class QueryProcessInstanceVariablesIT {
 
     @After
     public void tearDown() {
-        variableRepository.findAll();
+        variableRepository.deleteAll();
         processInstanceRepository.deleteAll();
     }
 
@@ -92,18 +92,18 @@ public class QueryProcessInstanceVariablesIT {
     public void shouldRetrieveAllProcessVariable() {
         //given
         variableEventContainedBuilder.aCreatedVariable("varCreated",
-                         "v1",
-                         "string")
+                                                       "v1",
+                                                       "string")
                 .onProcessInstance(runningProcessInstance);
 
         variableEventContainedBuilder.anUpdatedVariable("varUpdated",
-                          "v2-up",
-                          "string")
+                                                        "v2-up",
+                                                        "string")
                 .onProcessInstance(runningProcessInstance);
 
         variableEventContainedBuilder.aDeletedVariable("varDeleted",
-                         "v1",
-                         "string")
+                                                       "v1",
+                                                       "string")
                 .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
@@ -122,17 +122,21 @@ public class QueryProcessInstanceVariablesIT {
             assertThat(responseEntity.getBody().getContent())
                     .extracting(
                             Variable::getName,
-                            Variable::getValue)
+                            Variable::getValue,
+                            Variable::getMarkedAsDeleted)
                     .containsExactly(
                             tuple(
                                     "varCreated",
-                                    "v1"),
+                                    "v1",
+                                    false),
                             tuple(
                                     "varUpdated",
-                                    "v2-up"),
+                                    "v2-up",
+                                    false),
                             tuple(// Variables deleted should be here, they are soft deleted
                                   "varDeleted",
-                                  "v1")
+                                  "v1",
+                                  true)
                     );
         });
     }
@@ -141,18 +145,18 @@ public class QueryProcessInstanceVariablesIT {
     public void shouldFilterOnVariableName() {
         //given
         variableEventContainedBuilder.aCreatedVariable("var1",
-                         "v1",
-                         "string")
+                                                       "v1",
+                                                       "string")
                 .onProcessInstance(runningProcessInstance);
 
         variableEventContainedBuilder.aCreatedVariable("var2",
-                         "v2",
-                         "string")
+                                                       "v2",
+                                                       "string")
                 .onProcessInstance(runningProcessInstance);
 
         variableEventContainedBuilder.aCreatedVariable("var3",
-                         "v3",
-                         "string")
+                                                       "v3",
+                                                       "string")
                 .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();

@@ -41,8 +41,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -92,7 +90,6 @@ public class QueryTasksIT {
     }
 
     @After
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void tearDown() {
         taskCandidateUserRepository.deleteAll();
         taskRepository.deleteAll();

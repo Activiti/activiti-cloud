@@ -27,11 +27,15 @@ import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudVariableCreatedEvent;
 import org.activiti.runtime.api.event.VariableEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class VariableCreatedEventHandler implements QueryEventHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VariableCreatedEventHandler.class);
 
     private final VariableRepository variableRepository;
 
@@ -47,6 +51,7 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudVariableCreatedEvent variableCreatedEvent = (CloudVariableCreatedEvent) event;
+        LOGGER.debug("Handling variable created event: " + variableCreatedEvent.getEntity().getName());
         Variable variable = new Variable(variableCreatedEvent.getEntity().getType(),
                                          variableCreatedEvent.getEntity().getName(),
                                          variableCreatedEvent.getEntity().getProcessInstanceId(),
