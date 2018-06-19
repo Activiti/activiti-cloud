@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
@@ -46,21 +45,16 @@ public class GraphQLEndpointSecurityIT {
     private TestRestTemplate testRestTemplate;
 
     @Test
-    public void shouldNotSeeGraphQLEndpoint() throws Exception {
+    public void shouldNotSeeGraphQLEndpoint() {
 
         ActivitiGraphQLController.GraphQLQueryRequest query = new ActivitiGraphQLController.GraphQLQueryRequest("{ \"query\": \"{ ProcessInstances { select { id, status } } }\" }");
 
         //when
-        ResponseEntity<String> responseEntity = testRestTemplate.postForEntity(GRAPHQL_URL, new HttpEntity<>(query,getHeader()), String.class);
+        ResponseEntity<String> responseEntity = testRestTemplate.postForEntity(GRAPHQL_URL, new HttpEntity<>(query,
+                                                                                                             keycloakTokenProducer.authorizationHeaders()), String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 
-    }
-
-    private HttpHeaders getHeader(){
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", keycloakTokenProducer.getTokenString());
-        return headers;
     }
 }

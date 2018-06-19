@@ -4,6 +4,8 @@ import java.io.IOException;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -28,25 +30,29 @@ public class KeycloakTokenProducer implements ClientHttpRequestInterceptor {
     }
 
     public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes, ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
-        AccessTokenResponse token = this.getAccessTokenResponse();
-        httpRequest.getHeaders().set("Authorization", "Bearer " + token.getToken());
+        httpRequest.getHeaders().set(AUTHORIZATION_HEADER, getTokenString());
         return clientHttpRequestExecution.execute(httpRequest, bytes);
     }
 
-    public AccessTokenResponse getAccessTokenResponse() {
+    private AccessTokenResponse getAccessTokenResponse() {
         return Keycloak.getInstance(this.authServer, this.realm, this.keycloakTestUser, this.keycloakTestPassword, this.resource).tokenManager().getAccessToken();
     }
 
-    public String getTokenString(){
-        AccessTokenResponse token = this.getAccessTokenResponse();
+    private String getTokenString(){
+        AccessTokenResponse token = getAccessTokenResponse();
         return "Bearer " + token.getToken();
     }
 
-    public void setKeycloakTestUser(String keycloakTestUser) {
-        this.keycloakTestUser = keycloakTestUser;
+    public HttpEntity entityWithAuthorizationHeader() {
+        HttpHeaders headers = authorizationHeaders();
+        return new HttpEntity<>("parameters",
+                                headers);
     }
 
-    public String getKeycloakTestUser() {
-        return this.keycloakTestUser;
+    public HttpHeaders authorizationHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(AUTHORIZATION_HEADER,
+                    getTokenString());
+        return headers;
     }
 }

@@ -16,6 +16,10 @@
 
 package org.activiti.cloud.services.query.rest;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
+
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.cloud.services.security.AuthenticationWrapper;
@@ -36,10 +40,6 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
 
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
@@ -98,10 +98,10 @@ public class ProcessInstanceAdminControllerIT {
 
 
     private ProcessInstance buildDefaultProcessInstance() {
-        return new ProcessInstance("My-app","My-app","1",null,null,
+        return new ProcessInstance("My-app", "My-app", "1", null, null,
                                    UUID.randomUUID().toString(),
                                    UUID.randomUUID().toString(),
-                                   org.activiti.cloud.services.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name(),
+                                   org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name(),
                                    new Date());
     }
 

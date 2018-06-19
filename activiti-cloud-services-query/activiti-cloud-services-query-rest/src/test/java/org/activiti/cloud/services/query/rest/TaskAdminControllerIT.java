@@ -115,7 +115,7 @@ public class TaskAdminControllerIT {
                         "1",
                         null,
                         null,
-                        org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED.name(),
+                        org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED.name(),
                         new Date(),
                         new Date(),
                         "peter",

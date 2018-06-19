@@ -17,14 +17,13 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
-import java.util.Optional;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.events.TaskCompletedEvent;
-import org.activiti.cloud.services.query.events.TaskSuspendedEvent;
 import org.activiti.cloud.services.query.model.Task;
 import org.activiti.engine.ActivitiException;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudTaskSuspendedEvent;
+import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,22 +38,19 @@ public class TaskSuspendedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        TaskSuspendedEvent taskSuspendedEvent = (TaskSuspendedEvent) event;
-        Task eventTask = taskSuspendedEvent.getTask();
-        Optional<Task> findResult = taskRepository.findById(eventTask.getId());
-        if (findResult.isPresent()) {
-            Task task = findResult.get();
-            task.setStatus("SUSPENDED");
-            task.setLastModified(new Date(taskSuspendedEvent.getTimestamp()));
-            taskRepository.save(task);
-        } else {
-            throw new ActivitiException("Unable to find task with id: " + eventTask.getId());
-        }
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudTaskSuspendedEvent taskSuspendedEvent = (CloudTaskSuspendedEvent) event;
+        org.activiti.runtime.api.model.Task eventTask = taskSuspendedEvent.getEntity();
+
+        Task task = taskRepository.findById(eventTask.getId())
+                .orElseThrow(() -> new ActivitiException("Unable to find task with id: " + eventTask.getId()));
+        task.setStatus("SUSPENDED");
+        task.setLastModified(new Date(taskSuspendedEvent.getTimestamp()));
+        taskRepository.save(task);
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return TaskSuspendedEvent.class;
+    public String getHandledEvent() {
+        return TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name();
     }
 }

@@ -16,12 +16,17 @@
 
 package org.activiti.cloud.starter.tests;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
+import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
+import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
+import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.Task;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,29 +36,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import static org.activiti.cloud.starter.tests.CoreTaskBuilder.aTask;
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
-import static org.activiti.cloud.starters.test.MockTaskEvent.aTaskCreatedEvent;
-import static org.activiti.cloud.starters.test.builder.VariableCreatedEventBuilder.aVariableCreatedEvent;
-import static org.activiti.cloud.starters.test.builder.VariableDeletedEventBuilder.aVariableDeletedEvent;
-import static org.activiti.cloud.starters.test.builder.VariableUpdatedEventBuilder.aVariableUpdatedEvent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -87,94 +77,66 @@ public class QueryTaskVariablesIT {
     @Autowired
     private MyProducer producer;
 
-    private static final String PROCESS_INSTANCE_ID = "15";
-    private static final String TASK_ID = "30";
+    private EventsAggregator eventsAggregator;
+
+    private ProcessInstanceEventContainedBuilder processInstanceEventContainedBuilder;
+
+    private TaskEventContainedBuilder taskEventContainedBuilder;
+
+    private VariableEventContainedBuilder variableEventContainedBuilder;
+
+    private Task task;
 
     @Before
-    public void setUp() throws Exception {
-        // start a process
-        producer.send(aProcessCreatedEvent(System.currentTimeMillis(),
-                                           "10",
-                                           "defId",
-                                           PROCESS_INSTANCE_ID));
-        producer.send(aProcessStartedEvent(System.currentTimeMillis(),
-                                           "10",
-                                           "defId",
-                                           PROCESS_INSTANCE_ID));
+    public void setUp() {
+        eventsAggregator = new EventsAggregator(producer);
+        processInstanceEventContainedBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
+        taskEventContainedBuilder = new TaskEventContainedBuilder(eventsAggregator);
+        variableEventContainedBuilder = new VariableEventContainedBuilder(eventsAggregator);
 
-        producer.send(aTaskCreatedEvent(System.currentTimeMillis(),
-                                        aTask()
-                                                .withId(TASK_ID)
-                                                .withName("Created task")
-                                                .build(),
-                                        PROCESS_INSTANCE_ID));
+        ProcessInstance runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance("Process with variables");
+
+        task = taskEventContainedBuilder.aCreatedTask("Created task",
+                                                      runningProcessInstance);
     }
 
     @After
-    public void tearDown() throws Exception {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void tearDown() {
         variableRepository.deleteAll();
         taskRepository.deleteAll();
         processInstanceRepository.deleteAll();
     }
 
     @Test
-    public void shouldRetrieveAllTaskVariables() throws Exception {
+    public void shouldRetrieveAllTaskVariables() {
         //given
-        long timestamp = System.currentTimeMillis();
 
-        List<ProcessEngineEvent> createAndUpdateVariable = new ArrayList<ProcessEngineEvent>();
-        createAndUpdateVariable.addAll(Arrays.asList(aVariableCreatedEvent(timestamp)
-                .withTaskId(TASK_ID)
-                .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                .withVariableName("varCreated")
-                .withVariableValue("v1")
-                .withVariableType("string")
-                .build()));
-        createAndUpdateVariable.addAll(Arrays.asList(aVariableCreatedEvent(timestamp)
-                .withTaskId(TASK_ID)
-                .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                .withVariableName("varUpdated")
-                .withVariableValue("v2")
-                .withVariableType("string")
-                .build()));
-        createAndUpdateVariable.addAll(Arrays.asList(aVariableUpdatedEvent(timestamp)
-                .withTaskId(TASK_ID)
-                .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                .withVariableName("varUpdated")
-                .withVariableValue("v2-up")
-                .withVariableType("string")
-                .build()));
+        variableEventContainedBuilder.aCreatedVariable("varCreated",
+                                                       "v1",
+                                                       "string")
+                .onTask(task);
 
-        // a variable created and deleted
-        List<ProcessEngineEvent> createAndDeleteVariable = new ArrayList<ProcessEngineEvent>();
-        createAndDeleteVariable.addAll(Arrays.asList(aVariableCreatedEvent(timestamp)
-                .withVariableName("varDeleted")
-                .withVariableValue("v1")
-                .withVariableType("string")
-                .withTaskId(TASK_ID)
-                .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                .build()));
-        createAndDeleteVariable.addAll(Arrays.asList(aVariableDeletedEvent(timestamp)
-                .withTaskId(TASK_ID)
-                .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                .withVariableName("varDeleted")
-                .withVariableType("string")
-                .build()));
+        variableEventContainedBuilder.anUpdatedVariable("varUpdated",
+                                                        "v2-up",
+                                                        "string")
+                .onTask(task);
 
-        List<ProcessEngineEvent> createUpdateAndDeleteSequences = new ArrayList<ProcessEngineEvent>();
-        createUpdateAndDeleteSequences.addAll(createAndUpdateVariable);
-        createUpdateAndDeleteSequences.addAll(createAndDeleteVariable);
-        producer.send(createUpdateAndDeleteSequences.toArray(new ProcessEngineEvent[]{}));
+        variableEventContainedBuilder.aDeletedVariable("varDeleted",
+                                                       "v1",
+                                                       "string")
+                .onTask(task);
 
+        eventsAggregator.sendAll();
 
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().untilAsserted(() -> {
 
             //when
             ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
                                                                                                 HttpMethod.GET,
-                                                                                                getHeaderEntity(),
+                                                                                                keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                 PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                                TASK_ID);
+                                                                                                task.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -197,75 +159,52 @@ public class QueryTaskVariablesIT {
     }
 
     @Test
-    public void shouldFilterOnVariableName() throws Exception {
+    public void shouldFilterOnVariableName() {
         //given
-        long timestamp = System.currentTimeMillis();
+        variableEventContainedBuilder.aCreatedVariable("var1",
+                                                       "v1",
+                                                       "string")
+                .onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("var2",
+                                                       "v2",
+                                                       "string")
+                .onTask(task);
 
-        List<ProcessEngineEvent> createVariables = new ArrayList<ProcessEngineEvent>();
-        createVariables.addAll(Arrays.asList(aVariableCreatedEvent(timestamp)
-                .withTaskId(TASK_ID)
-                .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                .withVariableName("var1")
-                .withVariableValue("v1")
-                .withVariableType("string")
-                .build()));
-        createVariables.addAll(Arrays.asList(aVariableCreatedEvent(timestamp)
-                .withTaskId(TASK_ID)
-                .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                .withVariableName("var2")
-                .withVariableValue("v2")
-                .withVariableType("string")
-                .build()));
+        eventsAggregator.sendAll();
 
-        producer.send(createVariables.toArray(new ProcessEngineEvent[]{}));
+        await().untilAsserted(() -> {
 
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "?name={varName}",
+                                                                                                HttpMethod.GET,
+                                                                                                keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                PAGED_VARIABLE_RESPONSE_TYPE,
+                                                                                                task.getId(),
+                                                                                                "var2");
 
-                    //need to handle path and request params separately
-                    Map<String, String> uriParams = new HashMap<String, String>();
-                    uriParams.put("taskId", TASK_ID);
-
-                    UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(VARIABLES_URL)
-                            // Add query parameter
-                            .queryParam("name", "var2");
-
-
-                    //when
-                    ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(builder.buildAndExpand(uriParams).toUri(),
-                            HttpMethod.GET,
-                            getHeaderEntity(),
-                            PAGED_VARIABLE_RESPONSE_TYPE);
-
-                    //then
-                    assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                    assertThat(responseEntity.getBody().getContent())
-                            .extracting(
-                                    Variable::getName,
-                                    Variable::getValue)
-                            .containsExactly(
-                                    tuple("var2",
-                                            "v2")
-                            );
-
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(
+                            Variable::getName,
+                            Variable::getValue)
+                    .containsExactly(
+                            tuple("var2",
+                                  "v2")
+                    );
         });
     }
 
     @Test
-    public void shouldNotSeeAdminVariables() throws Exception {
+    public void shouldNotSeeAdminVariables() {
 
-            //when
-            ResponseEntity<String> responseEntity = testRestTemplate.exchange(ADMIN_VARIABLES_URL,
-                    HttpMethod.GET,
-                    getHeaderEntity(),String.class);
+        //when
+        ResponseEntity<String> responseEntity = testRestTemplate.exchange(ADMIN_VARIABLES_URL,
+                                                                          HttpMethod.GET,
+                                                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                          String.class);
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-    }
-
-    private HttpEntity getHeaderEntity(){
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", keycloakTokenProducer.getTokenString());
-        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-        return entity;
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 }

@@ -18,17 +18,15 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.events.TaskCancelledEvent;
 import org.activiti.cloud.services.query.model.Task;
 import org.activiti.engine.ActivitiException;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudTaskCancelledEvent;
+import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * TaskCancelledEventHandler
- */
 @Component
 public class TaskCancelledEventHandler implements QueryEventHandler {
 
@@ -40,27 +38,25 @@ public class TaskCancelledEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        TaskCancelledEvent taskCancelledEvent = (TaskCancelledEvent) event;
-        Task eventTask = taskCancelledEvent.getTask();
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudTaskCancelledEvent taskCancelledEvent = (CloudTaskCancelledEvent) event;
+        org.activiti.runtime.api.model.Task eventTask = taskCancelledEvent.getEntity();
 
         updateTaskStatus(taskRepository
                                  .findById(eventTask.getId())
                                  .orElseThrow(() -> new ActivitiException("Unable to find task with id: " + eventTask.getId())),
-                         "CANCELLED",
                          taskCancelledEvent.getTimestamp());
     }
 
     private void updateTaskStatus(Task task,
-                                  String status,
                                   Long eventTimestamp) {
-        task.setStatus(status);
+        task.setStatus(org.activiti.runtime.api.model.Task.TaskStatus.CANCELLED.name());
         task.setLastModified(new Date(eventTimestamp));
         taskRepository.save(task);
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return TaskCancelledEvent.class;
+    public String getHandledEvent() {
+        return TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name();
     }
 }

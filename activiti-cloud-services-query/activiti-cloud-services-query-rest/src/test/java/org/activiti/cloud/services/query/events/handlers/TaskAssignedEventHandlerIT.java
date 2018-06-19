@@ -16,25 +16,8 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Date;
-import java.util.Optional;
-
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.events.TaskAssignedEvent;
-import org.activiti.cloud.services.query.model.ProcessInstance;
-import org.activiti.cloud.services.query.model.Task;
-import org.junit.After;
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -47,117 +30,117 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Sql(value = "classpath:/jpa-test.sql")
 public class TaskAssignedEventHandlerIT {
 
-    @Autowired
-    private TaskRepository repository;
-
-    @Autowired
-    private TaskAssignedEventHandler handler;
-
-    @SpringBootConfiguration
-    @EnableJpaRepositories(basePackageClasses = ProcessInstanceRepository.class)
-    @EntityScan(basePackageClasses = ProcessInstance.class)
-    @Import(TaskAssignedEventHandler.class)
-    static class Configuation {
-    }
-
-    @Test
-    public void contextLoads() {
-        // Should pass
-    }
-
-
-    @After
-    public void tearDown() throws Exception {
-        repository.deleteAll();
-    }
-
-    @Test
-    public void handleShouldStoreAssignedTaskInstance() throws Exception {
-        String processInstanceId = "1";
-        String taskId = "5";
-
-        //given
-        Task eventTask = new Task(
-                                  taskId,
-                                  "assignee",
-                                  "name",
-                                  "description",
-                                  new Date() /*createTime*/,
-                                  new Date() /*dueDate*/,
-                                  "priority",
-                                  "category",
-                                  "process_definition_id",
-                                  processInstanceId,
-                                  "runtime-bundle-a",
-                                "runtime-bundle-a",
-                                  "1",
-                                  null,
-                                  null,
-                                  "ASSIGNED",
-                                  new Date() /*lastModified*/,
-                                    new Date(),
-                                    "owner",
-                                  null
-        );
-        TaskAssignedEvent givenEvent = new TaskAssignedEvent(System.currentTimeMillis(),
-                                                            "taskAssigned",
-                                                            "10",
-                                                            "process_definition_id",
-                                                            processInstanceId,
-                                                "runtime-bundle-a",
-                                                "runtime-bundle-a",
-                                                "runtime-bundle",
-                                                "1",
-                                                null,
-                                                null,
-                                                            eventTask);
-        //when
-        handler.handle(givenEvent);
-
-        //then
-        Optional<Task> result = repository.findById(taskId);
-
-        assertThat(result.isPresent()).isTrue();
-        assertThat(result.get().getStatus()).isEqualTo("ASSIGNED");
-        assertThat(result.get().getAssignee()).isEqualTo(eventTask.getAssignee());
-        assertThat(result.get().getProcessInstance()).isNotNull();
-        assertThat(result.get().getServiceName()).isEqualTo("runtime-bundle-a");
-        assertThat(result.get().getVariables()).hasSize(1);
-    }
-
-    /* having to temporarily remove to resolve https://github.com/Activiti/Activiti/issues/1539
-    @Test(expected = ActivitiException.class)
-    public void handleShouldFailOnAssignedTaskInstanceWithNonExistingTaskId() throws Exception {
-        String processInstanceId = "1";
-        String taskId = "-1";
-
-        //given
-        Task eventTask = new Task(
-                                  taskId,
-                                  "assignee",
-                                  "name",
-                                  "description",
-                                  new Date() , //createTime
-                                  new Date() , //dueDate
-                                  "priority",
-                                  "category",
-                                  "process_definition_id",
-                                  processInstanceId,
-                                  "ASSIGNED",
-                                  new Date() //lastModified
-        );
-
-        TaskAssignedEvent givenEvent = new TaskAssignedEvent(System.currentTimeMillis(),
-                                                             "taskAssigned",
-                                                             "10",
-                                                             "process_definition_id",
-                                                             processInstanceId,
-                                                             eventTask);
-         //when
-         handler.handle(givenEvent);
-
-        //then
-        //should throw ActivitiException
-    }
-*/
+//    @Autowired
+//    private TaskRepository repository;
+//
+//    @Autowired
+//    private TaskAssignedEventHandler handler;
+//
+//    @SpringBootConfiguration
+//    @EnableJpaRepositories(basePackageClasses = ProcessInstanceRepository.class)
+//    @EntityScan(basePackageClasses = ProcessInstance.class)
+//    @Import(TaskAssignedEventHandler.class)
+//    static class Configuation {
+//    }
+//
+//    @Test
+//    public void contextLoads() {
+//        // Should pass
+//    }
+//
+//
+//    @After
+//    public void tearDown() throws Exception {
+//        repository.deleteAll();
+//    }
+//
+//    @Test
+//    public void handleShouldStoreAssignedTaskInstance() throws Exception {
+//        String processInstanceId = "1";
+//        String taskId = "5";
+//
+//        //given
+//        Task eventTask = new Task(
+//                                  taskId,
+//                                  "assignee",
+//                                  "name",
+//                                  "description",
+//                                  new Date() /*createTime*/,
+//                                  new Date() /*dueDate*/,
+//                                  "priority",
+//                                  "category",
+//                                  "process_definition_id",
+//                                  processInstanceId,
+//                                  "runtime-bundle-a",
+//                                "runtime-bundle-a",
+//                                  "1",
+//                                  null,
+//                                  null,
+//                                  "ASSIGNED",
+//                                  new Date() /*lastModified*/,
+//                                    new Date(),
+//                                    "owner",
+//                                  null
+//        );
+//        TaskAssignedEvent givenEvent = new TaskAssignedEvent(System.currentTimeMillis(),
+//                                                            "taskAssigned",
+//                                                            "10",
+//                                                            "process_definition_id",
+//                                                            processInstanceId,
+//                                                "runtime-bundle-a",
+//                                                "runtime-bundle-a",
+//                                                "runtime-bundle",
+//                                                "1",
+//                                                null,
+//                                                null,
+//                                                            eventTask);
+//        //when
+//        handler.handle(givenEvent);
+//
+//        //then
+//        Optional<Task> result = repository.findById(taskId);
+//
+//        assertThat(result.isPresent()).isTrue();
+//        assertThat(result.get().getStatus()).isEqualTo("ASSIGNED");
+//        assertThat(result.get().getAssignee()).isEqualTo(eventTask.getAssignee());
+//        assertThat(result.get().getProcessInstance()).isNotNull();
+//        assertThat(result.get().getServiceName()).isEqualTo("runtime-bundle-a");
+//        assertThat(result.get().getVariables()).hasSize(1);
+//    }
+//
+//    /* having to temporarily remove to resolve https://github.com/Activiti/Activiti/issues/1539
+//    @Test(expected = ActivitiException.class)
+//    public void handleShouldFailOnAssignedTaskInstanceWithNonExistingTaskId() throws Exception {
+//        String processInstanceId = "1";
+//        String taskId = "-1";
+//
+//        //given
+//        Task eventTask = new Task(
+//                                  taskId,
+//                                  "assignee",
+//                                  "name",
+//                                  "description",
+//                                  new Date() , //createTime
+//                                  new Date() , //dueDate
+//                                  "priority",
+//                                  "category",
+//                                  "process_definition_id",
+//                                  processInstanceId,
+//                                  "ASSIGNED",
+//                                  new Date() //lastModified
+//        );
+//
+//        TaskAssignedEvent givenEvent = new TaskAssignedEvent(System.currentTimeMillis(),
+//                                                             "taskAssigned",
+//                                                             "10",
+//                                                             "process_definition_id",
+//                                                             processInstanceId,
+//                                                             eventTask);
+//         //when
+//         handler.handle(givenEvent);
+//
+//        //then
+//        //should throw ActivitiException
+//    }
+//*/
 }

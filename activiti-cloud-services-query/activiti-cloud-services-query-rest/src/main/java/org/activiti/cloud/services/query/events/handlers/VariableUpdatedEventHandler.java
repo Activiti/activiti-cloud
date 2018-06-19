@@ -18,9 +18,10 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.model.Variable;
-import org.activiti.cloud.services.query.events.VariableUpdatedEvent;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudVariableUpdatedEvent;
+import org.activiti.runtime.api.event.VariableEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,22 +40,22 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        VariableUpdatedEvent variableUpdatedEvent = (VariableUpdatedEvent) event;
-        Variable variable = new Variable(variableUpdatedEvent.getVariableType(),
-                                         variableUpdatedEvent.getVariableName(),
-                                         variableUpdatedEvent.getProcessInstanceId(),
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudVariableUpdatedEvent variableUpdatedEvent = (CloudVariableUpdatedEvent) event;
+        Variable variable = new Variable(variableUpdatedEvent.getEntity().getType(),
+                                         variableUpdatedEvent.getEntity().getName(),
+                                         variableUpdatedEvent.getEntity().getProcessInstanceId(),
                                         variableUpdatedEvent.getServiceName(),
                                         variableUpdatedEvent.getServiceFullName(),
                                         variableUpdatedEvent.getServiceVersion(),
                                         variableUpdatedEvent.getAppName(),
                                         variableUpdatedEvent.getAppVersion(),
-                                         variableUpdatedEvent.getTaskId(),
+                                         variableUpdatedEvent.getEntity().getTaskId(),
                                          new Date(variableUpdatedEvent.getTimestamp()),
                                          new Date(variableUpdatedEvent.getTimestamp()),
-                                         variableUpdatedEvent.getExecutionId(),
-                                         variableUpdatedEvent.getVariableValue());
-        if (variableUpdatedEvent.getTaskId() != null) {
+                                         null,
+                                         variableUpdatedEvent.getEntity().getValue());
+        if (variableUpdatedEvent.getEntity().isTaskVariable()) {
             taskVariableUpdatedEventHandler.handle(variable);
         } else {
             processVariableUpdateEventHandler.handle(variable);
@@ -63,7 +64,7 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return VariableUpdatedEvent.class;
+    public String getHandledEvent() {
+        return VariableEvent.VariableEvents.VARIABLE_UPDATED.name();
     }
 }

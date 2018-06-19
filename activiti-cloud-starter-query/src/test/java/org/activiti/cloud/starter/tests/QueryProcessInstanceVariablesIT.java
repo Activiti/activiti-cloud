@@ -19,8 +19,13 @@ package org.activiti.cloud.starter.tests;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
+import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
+import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,24 +33,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
-import static org.activiti.cloud.starters.test.builder.VariableCreatedEventBuilder.aVariableCreatedEvent;
-import static org.activiti.cloud.starters.test.builder.VariableDeletedEventBuilder.aVariableDeletedEvent;
-import static org.activiti.cloud.starters.test.builder.VariableUpdatedEventBuilder.aVariableUpdatedEvent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -71,72 +64,58 @@ public class QueryProcessInstanceVariablesIT {
     @Autowired
     private VariableRepository variableRepository;
 
+    private EventsAggregator eventsAggregator;
+
+    private VariableEventContainedBuilder variableEventContainedBuilder;
+
     @Autowired
-    private MyProducer producer;
+    private MyProducer myProducer;
+
+    private ProcessInstance runningProcessInstance;
+
+    @Before
+    public void setUp() {
+        eventsAggregator = new EventsAggregator(myProducer);
+        ProcessInstanceEventContainedBuilder processInstanceEventContainedBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
+        variableEventContainedBuilder = new VariableEventContainedBuilder(eventsAggregator);
+
+        runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance("process with variables");
+    }
 
     @After
-    public void tearDown() throws Exception {
-        variableRepository.deleteAll();
+    public void tearDown() {
+        variableRepository.findAll();
         processInstanceRepository.deleteAll();
     }
 
     @Test
-    public void shouldRetrieveAllProcessVariable() throws Exception {
+    public void shouldRetrieveAllProcessVariable() {
         //given
-        String processInstanceId = "20";
-        long timestamp = System.currentTimeMillis();
+        variableEventContainedBuilder.aCreatedVariable("varCreated",
+                         "v1",
+                         "string")
+                .onProcessInstance(runningProcessInstance);
 
-        producer.send(aProcessCreatedEvent(timestamp,
-                                           "10",
-                                           "defId",
-                                           processInstanceId));
-        producer.send(aProcessStartedEvent(timestamp,
-                                           "10",
-                                           "defId",
-                                           processInstanceId));
-        // a variable created
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withProcessInstanceId(processInstanceId)
-                              .withVariableName("varCreated")
-                              .withVariableValue("v1")
-                              .withVariableType("string")
-                              .build());
+        variableEventContainedBuilder.anUpdatedVariable("varUpdated",
+                          "v2-up",
+                          "string")
+                .onProcessInstance(runningProcessInstance);
 
-        // a variable created and updated
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withProcessInstanceId(processInstanceId)
-                              .withVariableName("varUpdated")
-                              .withVariableValue("v2")
-                              .withVariableType("string")
-                              .build());
-        producer.send(aVariableUpdatedEvent(timestamp)
-                              .withProcessInstanceId(processInstanceId)
-                              .withVariableName("varUpdated")
-                              .withVariableValue("v2-up")
-                              .withVariableType("string")
-                              .build());
+        variableEventContainedBuilder.aDeletedVariable("varDeleted",
+                         "v1",
+                         "string")
+                .onProcessInstance(runningProcessInstance);
 
-        // a variable created and deleted
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withVariableName("varDeleted")
-                              .withVariableValue("v1")
-                              .withVariableType("string")
-                              .withProcessInstanceId(processInstanceId)
-                              .build());
-        producer.send(aVariableDeletedEvent(timestamp)
-                              .withProcessInstanceId(processInstanceId)
-                              .withVariableName("varDeleted")
-                              .withVariableType("string")
-                              .build());
+        eventsAggregator.sendAll();
 
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().untilAsserted(() -> {
 
             //when
             ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
                                                                                                 HttpMethod.GET,
-                    getHeaderEntity(),
+                                                                                                keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                 PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                                processInstanceId);
+                                                                                                runningProcessInstance.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -152,63 +131,41 @@ public class QueryProcessInstanceVariablesIT {
                                     "varUpdated",
                                     "v2-up"),
                             tuple(// Variables deleted should be here, they are soft deleted
-                                    "varDeleted",
-                                    "v1")
+                                  "varDeleted",
+                                  "v1")
                     );
         });
     }
 
-
     @Test
-    public void shouldFilterOnVariableName() throws Exception {
+    public void shouldFilterOnVariableName() {
         //given
-        String processInstanceId = "20";
-        long timestamp = System.currentTimeMillis();
+        variableEventContainedBuilder.aCreatedVariable("var1",
+                         "v1",
+                         "string")
+                .onProcessInstance(runningProcessInstance);
 
-        producer.send(aProcessCreatedEvent(timestamp,
-                                           "10",
-                                           "defId",
-                                           processInstanceId));
-        producer.send(aProcessStartedEvent(timestamp,
-                                           "10",
-                                           "defId",
-                                           processInstanceId));
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withProcessInstanceId(processInstanceId)
-                              .withVariableName("var1")
-                              .withVariableValue("v1")
-                              .withVariableType("string")
-                              .build());
+        variableEventContainedBuilder.aCreatedVariable("var2",
+                         "v2",
+                         "string")
+                .onProcessInstance(runningProcessInstance);
 
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withProcessInstanceId(processInstanceId)
-                              .withVariableName("var2")
-                              .withVariableValue("v2")
-                              .withVariableType("string")
-                              .build());
+        variableEventContainedBuilder.aCreatedVariable("var3",
+                         "v3",
+                         "string")
+                .onProcessInstance(runningProcessInstance);
 
-        producer.send(aVariableCreatedEvent(timestamp)
-                              .withVariableName("var3")
-                              .withVariableValue("v3")
-                              .withVariableType("string")
-                              .withProcessInstanceId(processInstanceId)
-                              .build());
+        eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
 
-            Map<String, String> uriParams = new HashMap<String, String>();
-            uriParams.put("processInstanceId", processInstanceId);
-
-            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(VARIABLES_URL)
-                    // Add query parameter
-                    .queryParam("name", "var2");
-
-
             //when
-            ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(builder.buildAndExpand(uriParams).toUri(),
+            ResponseEntity<PagedResources<Variable>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "?name={varName}",
                                                                                                 HttpMethod.GET,
-                    getHeaderEntity(),
-                                                                                                PAGED_VARIABLE_RESPONSE_TYPE);
+                                                                                                keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                PAGED_VARIABLE_RESPONSE_TYPE,
+                                                                                                runningProcessInstance.getId(),
+                                                                                                "var2");
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -221,13 +178,5 @@ public class QueryProcessInstanceVariablesIT {
                                   "v2")
                     );
         });
-    }
-
-
-    private HttpEntity getHeaderEntity(){
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", keycloakTokenProducer.getTokenString());
-        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-        return entity;
     }
 }

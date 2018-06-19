@@ -20,10 +20,17 @@ import org.activiti.cloud.services.query.graphql.autoconfigure.EnableActivitiGra
 import org.activiti.cloud.services.query.notifications.config.EnableActivitiNotificationsGateway;
 import org.activiti.cloud.services.query.qraphql.ws.config.EnableActivitiGraphQLNotifications;
 import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+
+import static org.mockito.Mockito.mock;
 
 @SpringBootApplication
 @EnableActivitiQuery
@@ -39,10 +46,28 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
         "org.activiti.cloud.starter",
         "org.activiti.cloud.services.identity",
         "org.activiti.cloud.alfresco"})
+@EnableAutoConfiguration
 public class Application {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class,
                               args);
     }
+
+    //TODO remove this when no dependency to engine has been removed
+    @Bean
+    public TaskService taskService(){
+        return mock(TaskService.class);
+    }
+
+    @Bean
+    public RuntimeService runtimeService() {
+        return mock(RuntimeService.class);
+    }
+
+    @Bean
+    public RepositoryService repositoryService(){
+        return mock(RepositoryService.class);
+    }
+
 }

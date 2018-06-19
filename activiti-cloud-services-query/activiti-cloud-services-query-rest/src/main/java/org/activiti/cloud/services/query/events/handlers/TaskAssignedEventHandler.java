@@ -19,11 +19,12 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 import java.util.Optional;
 
-import org.activiti.engine.ActivitiException;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.query.model.Task;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.events.TaskAssignedEvent;
+import org.activiti.cloud.services.query.model.Task;
+import org.activiti.engine.ActivitiException;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
+import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,30 +39,28 @@ public class TaskAssignedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        TaskAssignedEvent taskAssignedEvent = (TaskAssignedEvent) event;
-        Task eventTask = taskAssignedEvent.getTask();
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudTaskAssignedEvent taskAssignedEvent = (CloudTaskAssignedEvent) event;
+        org.activiti.runtime.api.model.Task eventTask = taskAssignedEvent.getEntity();
         Optional<Task> findResult = taskRepository.findById(eventTask.getId());
-        if (findResult.isPresent()) {
-            Task task = findResult.get();
-            task.setAssignee(eventTask.getAssignee());
-            task.setStatus("ASSIGNED");
-            task.setLastModified(new Date(taskAssignedEvent.getTimestamp()));
-            task.setServiceName(taskAssignedEvent.getServiceName());
-            task.setServiceFullName(taskAssignedEvent.getServiceFullName());
-            task.setServiceVersion(taskAssignedEvent.getServiceVersion());
-            task.setAppName(taskAssignedEvent.getAppName());
-            task.setAppVersion(taskAssignedEvent.getAppVersion());
-            task.setOwner(taskAssignedEvent.getTask().getOwner());
-            task.setClaimDate(taskAssignedEvent.getTask().getClaimDate());
-            taskRepository.save(task);
-        } else {
-            throw new ActivitiException("Unable to find task with id: " + eventTask.getId());
-        }
+        Task queryTask = findResult.orElseThrow(
+                () -> new ActivitiException("Unable to find task with id: " + eventTask.getId())
+        );
+        queryTask.setAssignee(eventTask.getAssignee());
+        queryTask.setStatus(eventTask.getStatus().name());
+        queryTask.setLastModified(new Date(taskAssignedEvent.getTimestamp()));
+        queryTask.setServiceName(taskAssignedEvent.getServiceName());
+        queryTask.setServiceFullName(taskAssignedEvent.getServiceFullName());
+        queryTask.setServiceVersion(taskAssignedEvent.getServiceVersion());
+        queryTask.setAppName(taskAssignedEvent.getAppName());
+        queryTask.setAppVersion(taskAssignedEvent.getAppVersion());
+        queryTask.setOwner(eventTask.getOwner());
+        queryTask.setClaimDate(eventTask.getClaimedDate());
+        taskRepository.save(queryTask);
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return TaskAssignedEvent.class;
+    public String getHandledEvent() {
+        return TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name();
     }
 }

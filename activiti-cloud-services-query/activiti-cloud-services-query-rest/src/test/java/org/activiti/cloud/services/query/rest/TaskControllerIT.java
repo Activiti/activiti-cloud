@@ -52,7 +52,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -127,12 +127,12 @@ public class TaskControllerIT {
                         "My category",
                         UUID.randomUUID().toString(),
                         UUID.randomUUID().toString(),
-                "My app",
-                "My app",
-                "1",
-                null,
-                null,
-                        org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED.name(),
+                        "My app",
+                        "My app",
+                        "1",
+                        null,
+                        null,
+                        org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED.name(),
                         new Date(),
                         new Date(),
                         "peter",

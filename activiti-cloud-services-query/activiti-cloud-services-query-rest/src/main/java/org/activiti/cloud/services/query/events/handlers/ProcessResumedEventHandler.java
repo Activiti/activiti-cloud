@@ -17,42 +17,44 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
+import java.util.Optional;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.engine.ActivitiException;
-import org.activiti.runtime.api.event.CloudProcessSuspendedEvent;
+import org.activiti.runtime.api.event.CloudProcessResumedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProcessSuspendedEventHandler implements QueryEventHandler {
+public class ProcessResumedEventHandler implements QueryEventHandler {
 
     private ProcessInstanceRepository processInstanceRepository;
 
     @Autowired
-    public ProcessSuspendedEventHandler(ProcessInstanceRepository processInstanceRepository) {
+    public ProcessResumedEventHandler(ProcessInstanceRepository processInstanceRepository) {
         this.processInstanceRepository = processInstanceRepository;
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessSuspendedEvent suspendedEvent = (CloudProcessSuspendedEvent) event;
-        String processInstanceId = suspendedEvent.getEntity().getId();
-
-        ProcessInstance processInstance = processInstanceRepository.findById(processInstanceId)
-                .orElseThrow(
-                        () -> new ActivitiException("Unable to find process instance with the given id: " + processInstanceId)
-                );
-        processInstance.setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.SUSPENDED.name());
-        processInstance.setLastModified(new Date(suspendedEvent.getTimestamp()));
+        CloudProcessResumedEvent processResumedEvent = (CloudProcessResumedEvent) event;
+        String processInstanceId = processResumedEvent.getEntity().getId();
+        Optional<ProcessInstance> findResult = processInstanceRepository.findById(processInstanceId);
+        ProcessInstance processInstance = findResult.orElseThrow(() -> new ActivitiException("Unable to find process instance with the given id: " + processInstanceId));
+        processInstance.setStatus("RUNNING");
+        processInstance.setLastModified(new Date(processResumedEvent.getTimestamp()));
+        processInstance.setProcessDefinitionKey(processResumedEvent.getEntity().getProcessDefinitionKey());
+        processInstance.setInitiator(processResumedEvent.getEntity().getInitiator());
+        processInstance.setStartDate(processResumedEvent.getEntity().getStartDate());
+        processInstance.setBusinessKey(processResumedEvent.getEntity().getBusinessKey());
         processInstanceRepository.save(processInstance);
     }
 
     @Override
     public String getHandledEvent() {
-        return ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name();
+        return ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name();
     }
 }

@@ -19,11 +19,12 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 import java.util.Optional;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.events.ProcessStartedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.engine.ActivitiException;
+import org.activiti.runtime.api.event.CloudProcessStartedEvent;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +43,11 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent startedEvent) {
-        LOGGER.debug("Handling start of process Instance " + startedEvent.getProcessInstanceId());
+    public void handle(CloudRuntimeEvent<?,?> event) {
+        CloudProcessStartedEvent startedEvent = (CloudProcessStartedEvent) event;
+        String processInstanceId = startedEvent.getEntity().getId();
+        LOGGER.debug("Handling start of process Instance " + processInstanceId);
 
-        String processInstanceId = startedEvent.getProcessInstanceId();
         Optional<ProcessInstance> findResult = processInstanceRepository.findById(processInstanceId);
         if (findResult.isPresent()) {
             ProcessInstance processInstance = findResult.get();
@@ -62,8 +64,8 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return ProcessStartedEvent.class;
+    public  String getHandledEvent() {
+        return ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name();
     }
 
 }

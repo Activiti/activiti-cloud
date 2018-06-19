@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,15 @@
 
 package org.activiti.cloud.starter.tests;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
+import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,18 +32,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCompletedEvent;
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessCreatedEvent;
-import static org.activiti.cloud.starters.test.MockProcessEngineEvent.aProcessStartedEvent;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
@@ -69,49 +65,31 @@ public class QueryProcessInstancesIT {
     @Autowired
     private MyProducer producer;
 
+    private EventsAggregator eventsAggregator;
+
+    private ProcessInstanceEventContainedBuilder processInstanceBuilder;
+
+    @Before
+    public void setUp() {
+        eventsAggregator = new EventsAggregator(producer);
+        processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
+    }
+
     @After
-    public void tearDown() throws Exception {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void tearDown() {
         processInstanceRepository.deleteAll();
     }
 
     @Test
-    public void shouldGetAvailableProcInstancesAndFilteredProcessInstaces() throws Exception {
+    public void shouldGetAvailableProcInstancesAndFilteredProcessInstances() {
         //given
+        org.activiti.runtime.api.model.ProcessInstance completedProcess = processInstanceBuilder.aCompletedProcessInstance("first");
+        org.activiti.runtime.api.model.ProcessInstance runningProcess = processInstanceBuilder.aRunningProcessInstance("second");
 
-        // a completed process
-        List<ProcessEngineEvent> createStartCompleteProcess = new ArrayList<ProcessEngineEvent>();
-        createStartCompleteProcess.addAll(Arrays.asList(aProcessCreatedEvent(System.currentTimeMillis(),
-                "10",
-                "defId",
-                "15")));
-        createStartCompleteProcess.addAll(Arrays.asList(aProcessStartedEvent(System.currentTimeMillis(),
-                "10",
-                "defId",
-                "15")));
-        createStartCompleteProcess.addAll(Arrays.asList(aProcessCompletedEvent(System.currentTimeMillis(),
-                "10",
-                "defId",
-                "15")));
+        eventsAggregator.sendAll();
 
-        // a running process
-        List<ProcessEngineEvent> startRunningProcess = new ArrayList<ProcessEngineEvent>();
-        createStartCompleteProcess.addAll(Arrays.asList(aProcessCreatedEvent(System.currentTimeMillis(),
-                "11",
-                "defId",
-                "16")));
-        createStartCompleteProcess.addAll(Arrays.asList(aProcessStartedEvent(System.currentTimeMillis(),
-                "11",
-                "defId",
-                "16")));
-
-        List<ProcessEngineEvent> eventsForTest = new ArrayList<>();
-        eventsForTest.addAll(createStartCompleteProcess);
-        eventsForTest.addAll(startRunningProcess);
-
-        producer.send(eventsForTest.toArray(new ProcessEngineEvent[]{}));
-
-
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().untilAsserted(() -> {
 
             //when
             ResponseEntity<PagedResources<ProcessInstance>> responseEntity = executeRequestGetProcInstances();
@@ -123,22 +101,22 @@ public class QueryProcessInstancesIT {
             Collection<ProcessInstance> processInstances = responseEntity.getBody().getContent();
             assertThat(processInstances)
                     .extracting(ProcessInstance::getId,
-                            ProcessInstance::getStatus)
-                    .contains(tuple("15",
-                            "COMPLETED"),
-                            tuple("16",
+                                ProcessInstance::getStatus)
+                    .contains(tuple(completedProcess.getId(),
+                                    "COMPLETED"),
+                              tuple(runningProcess.getId(),
                                     "RUNNING"));
         });
 
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().untilAsserted(() -> {
 
             //and filter by status
             //when
             ResponseEntity<PagedResources<ProcessInstance>> responseEntityFiltered = testRestTemplate.exchange(PROC_URL + "?status={status}",
-                    HttpMethod.GET,
-                    getHeaderEntity(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
-                    "COMPLETED");
+                                                                                                               HttpMethod.GET,
+                                                                                                               keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                               PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
+                                                                                                               "COMPLETED");
 
             //then
             assertThat(responseEntityFiltered).isNotNull();
@@ -147,28 +125,17 @@ public class QueryProcessInstancesIT {
             Collection<ProcessInstance> filteredProcessInstances = responseEntityFiltered.getBody().getContent();
             assertThat(filteredProcessInstances)
                     .extracting(ProcessInstance::getId,
-                            ProcessInstance::getStatus)
-                    .containsExactly(tuple("15",
-                            "COMPLETED"));
+                                ProcessInstance::getStatus)
+                    .containsExactly(tuple(completedProcess.getId(),
+                                           "COMPLETED"));
         });
-
-
     }
-
 
     private ResponseEntity<PagedResources<ProcessInstance>> executeRequestGetProcInstances() {
 
         return testRestTemplate.exchange(PROC_URL,
-                HttpMethod.GET,
-                getHeaderEntity(),
-                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
     }
-
-    private HttpEntity getHeaderEntity(){
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", keycloakTokenProducer.getTokenString());
-        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-        return entity;
-    }
-
 }

@@ -182,6 +182,10 @@ public class Task extends ActivitiEntityMetadata implements Serializable {
         return processInstanceId;
     }
 
+    public boolean isStandAlone() {
+        return processInstanceId == null;
+    }
+
     public String getStatus() {
         return status;
     }

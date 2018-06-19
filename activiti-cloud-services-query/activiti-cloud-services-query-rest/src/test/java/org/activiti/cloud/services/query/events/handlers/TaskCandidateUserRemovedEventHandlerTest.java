@@ -16,64 +16,50 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
-import org.activiti.cloud.services.query.events.TaskCandidateUserRemovedEvent;
-import org.activiti.cloud.services.query.model.TaskCandidateUser;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class TaskCandidateUserRemovedEventHandlerTest {
 
-    @InjectMocks
-    private TaskCandidateUserRemovedEventHandler handler;
-
-    @Mock
-    private TaskCandidateUserRepository taskCandidateRepository;
-
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
-
-    @Test
-    public void handleShouldStoreNewTaskInstance() throws Exception {
-        //given
-        TaskCandidateUser eventTaskCandidate = mock(TaskCandidateUser.class);
-        TaskCandidateUserRemovedEvent taskCreated = new TaskCandidateUserRemovedEvent(System.currentTimeMillis(),
-                                                            "taskCandidateUserRemoved",
-                                                            "10",
-                                                            "100",
-                                                            "200",
-                                                "runtime-bundle-a",
-                                                "runtime-bundle-a",
-                                                "runtime-bundle",
-                                                "1",
-                                                null,
-                                                null,
-                                                            eventTaskCandidate);
-
-        
-        //when
-        handler.handle(taskCreated);
-
-        //then
-        verify(taskCandidateRepository).delete(eventTaskCandidate);
-    }
-
-    @Test
-    public void getHandledEventClassShouldReturnTaskCreatedEventClass() throws Exception {
-        //when
-        Class<? extends ProcessEngineEvent> handledEventClass = handler.getHandledEventClass();
-
-        //then
-        assertThat(handledEventClass).isEqualTo(TaskCandidateUserRemovedEvent.class);
-    }
+//    @InjectMocks
+//    private TaskCandidateUserRemovedEventHandler handler;
+//
+//    @Mock
+//    private TaskCandidateUserRepository taskCandidateRepository;
+//
+//    @Before
+//    public void setUp() throws Exception {
+//        initMocks(this);
+//    }
+//
+//    @Test
+//    public void handleShouldStoreNewTaskInstance() throws Exception {
+//        //given
+//        TaskCandidateUser eventTaskCandidate = mock(TaskCandidateUser.class);
+//        TaskCandidateUserRemovedEvent taskCreated = new TaskCandidateUserRemovedEvent(System.currentTimeMillis(),
+//                                                            "taskCandidateUserRemoved",
+//                                                            "10",
+//                                                            "100",
+//                                                            "200",
+//                                                "runtime-bundle-a",
+//                                                "runtime-bundle-a",
+//                                                "runtime-bundle",
+//                                                "1",
+//                                                null,
+//                                                null,
+//                                                            eventTaskCandidate);
+//
+//
+//        //when
+//        handler.handle(taskCreated);
+//
+//        //then
+//        verify(taskCandidateRepository).delete(eventTaskCandidate);
+//    }
+//
+//    @Test
+//    public void getHandledEventClassShouldReturnTaskCreatedEventClass() throws Exception {
+//        //when
+//        Class<? extends ProcessEngineEvent> handledEventClass = handler.getHandledEventClass();
+//
+//        //then
+//        assertThat(handledEventClass).isEqualTo(TaskCandidateUserRemovedEvent.class);
+//    }
 }

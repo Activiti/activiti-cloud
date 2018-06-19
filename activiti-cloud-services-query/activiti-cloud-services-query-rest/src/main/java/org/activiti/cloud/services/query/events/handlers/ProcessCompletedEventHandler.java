@@ -19,11 +19,12 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 import java.util.Optional;
 
-import org.activiti.engine.ActivitiException;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.events.ProcessCompletedEvent;
+import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.engine.ActivitiException;
+import org.activiti.runtime.api.event.CloudProcessCompletedEvent;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,8 +39,9 @@ public class ProcessCompletedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent completedEvent) {
-        String processInstanceId = completedEvent.getProcessInstanceId();
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudProcessCompletedEvent completedEvent = (CloudProcessCompletedEvent) event;
+        String processInstanceId = completedEvent.getEntity().getId();
         Optional<ProcessInstance> findResult = processInstanceRepository.findById(processInstanceId);
         if (findResult.isPresent()) {
             ProcessInstance processInstance = findResult.get();
@@ -52,8 +54,7 @@ public class ProcessCompletedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return ProcessCompletedEvent.class;
+    public String getHandledEvent() {
+        return ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name();
     }
-
 }

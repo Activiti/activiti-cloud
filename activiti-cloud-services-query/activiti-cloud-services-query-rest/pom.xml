@@ -13,10 +13,6 @@
     <!-- keycloak included as default identity provider to be excluded if overridden -->
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-security-policies</artifactId>
     </dependency>
     <dependency>
@@ -53,7 +49,15 @@
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
-      <artifactId>activiti-engine</artifactId>
+      <artifactId>activiti-cloud-task-model-api-impl</artifactId>
+      <!-- Todo:  dependency management-->
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-cloud-process-model-api-impl</artifactId>
+      <!-- Todo:  dependency management-->
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>

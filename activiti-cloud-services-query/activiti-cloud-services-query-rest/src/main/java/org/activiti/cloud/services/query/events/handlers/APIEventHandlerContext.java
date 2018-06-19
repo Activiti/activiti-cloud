@@ -21,37 +21,38 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.query.events.AbstractProcessEngineEvent;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class QueryEventHandlerContext {
+public class APIEventHandlerContext {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContext.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(APIEventHandlerContext.class);
 
-    private Map<Class<? extends ProcessEngineEvent>, QueryEventHandler> handlers;
+    private Map<String, QueryEventHandler> handlers;
 
     @Autowired
-    public QueryEventHandlerContext(Set<QueryEventHandler> handlers) {
-        this.handlers = handlers.stream().collect(Collectors.toMap(QueryEventHandler::getHandledEventClass,
+    public APIEventHandlerContext(Set<QueryEventHandler> handlers) {
+        this.handlers = handlers.stream().collect(Collectors.toMap(QueryEventHandler::getHandledEvent,
                                                                    Function.identity()));
     }
 
-    public void handle(AbstractProcessEngineEvent[] events) {
-        for (AbstractProcessEngineEvent event : events) {
-            QueryEventHandler handler = handlers.get(event.getClass());
-            if (handler != null) {
-                LOGGER.debug("Handling event: " + handler.getHandledEventClass().getName());
-                handler.handle(event);
+    public void handle(CloudRuntimeEvent<?, ?> ... events) {
+        if (events != null) {
+            for (CloudRuntimeEvent<?, ?> event : events) {
+                QueryEventHandler handler = handlers.get(event.getEventType().name());
+                if (handler != null) {
+                    LOGGER.debug("Handling event: " + handler.getHandledEvent());
+                    handler.handle(event);
+                }
             }
         }
     }
 
-    protected Map<Class<? extends ProcessEngineEvent>, QueryEventHandler> getHandlers() {
+    protected Map<String, QueryEventHandler> getHandlers() {
         return handlers;
     }
 }

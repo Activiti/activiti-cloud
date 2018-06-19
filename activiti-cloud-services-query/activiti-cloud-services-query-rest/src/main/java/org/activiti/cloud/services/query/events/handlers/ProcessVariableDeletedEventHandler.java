@@ -19,9 +19,9 @@ package org.activiti.cloud.services.query.events.handlers;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.events.VariableDeletedEvent;
 import org.activiti.cloud.services.query.model.QVariable;
 import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.runtime.api.event.CloudVariableDeletedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,14 +39,14 @@ public class ProcessVariableDeletedEventHandler {
         this.entityFinder = entityFinder;
     }
 
-    public void handle(VariableDeletedEvent event) {
-        String variableName = event.getVariableName();
-        String processInstanceId = event.getProcessInstanceId();
+    public void handle(CloudVariableDeletedEvent event) {
+        String variableName = event.getEntity().getName();
+        String processInstanceId = event.getEntity().getProcessInstanceId();
         BooleanExpression predicate = QVariable.variable.processInstanceId.eq(processInstanceId)
                 .and(
                         QVariable.variable.name.eq(variableName)
 
-                ).and(QVariable.variable.markedAsDeleted.eq(new Boolean(false)));
+                ).and(QVariable.variable.markedAsDeleted.eq(Boolean.FALSE));
         Variable variable = entityFinder.findOne(variableRepository,
                                             predicate,
                                             "Unable to find variable with name '" + variableName + "' for process instance '" + processInstanceId + "'");

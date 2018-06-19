@@ -16,29 +16,9 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Date;
-import java.util.Optional;
-
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.events.ProcessActivatedEvent;
-import org.activiti.cloud.services.query.model.ProcessInstance;
-import org.activiti.engine.ActivitiException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class ProcessActivatedEventHandlerTest {
 
-    @InjectMocks
+    /*@InjectMocks
     private ProcessActivatedEventHandler handler;
 
     @Mock
@@ -114,5 +94,5 @@ public class ProcessActivatedEventHandlerTest {
 
         //then
         assertThat(handledEventClass).isEqualTo(ProcessActivatedEvent.class);
-    }
+    }*/
 }

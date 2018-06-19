@@ -16,56 +16,38 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.events.VariableDeletedEvent;
-import org.activiti.cloud.services.query.model.Variable;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class ProcessVariableDeletedHandlerTest {
 
-    @InjectMocks
-    private ProcessVariableDeletedEventHandler handler;
-
-    @Mock
-    private VariableRepository variableRepository;
-
-    @Mock
-    private EntityFinder entityFinder;
-
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
-
-    @Test
-    public void handleRemoveVariableFromProcessAndSoftDeleteIt() throws Exception {
-        //given
-        VariableDeletedEvent event = new VariableDeletedEvent();
-        event.setProcessInstanceId("10");
-        event.setVariableName("var");
-
-        Variable variable = new Variable();
-        given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variable);
-
-        //when
-        handler.handle(event);
-
-        //then
-        verify(variableRepository).save(variable);
-        assertThat(variable.getMarkedAsDeleted()).isTrue();
-    }
+//    @InjectMocks
+//    private ProcessVariableDeletedEventHandler handler;
+//
+//    @Mock
+//    private VariableRepository variableRepository;
+//
+//    @Mock
+//    private EntityFinder entityFinder;
+//
+//    @Before
+//    public void setUp() throws Exception {
+//        initMocks(this);
+//    }
+//
+//    @Test
+//    public void handleRemoveVariableFromProcessAndSoftDeleteIt() throws Exception {
+//        //given
+//        VariableDeletedEvent event = new VariableDeletedEvent();
+//        event.setProcessInstanceId("10");
+//        event.setVariableName("var");
+//
+//        Variable variable = new Variable();
+//        given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variable);
+//
+//        //when
+//        handler.handle(event);
+//
+//        //then
+//        verify(variableRepository).save(variable);
+//        assertThat(variable.getMarkedAsDeleted()).isTrue();
+//    }
 
 }
