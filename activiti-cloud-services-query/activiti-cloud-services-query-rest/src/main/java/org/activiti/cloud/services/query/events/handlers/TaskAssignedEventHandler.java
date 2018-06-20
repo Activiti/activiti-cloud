@@ -47,7 +47,7 @@ public class TaskAssignedEventHandler implements QueryEventHandler {
                 () -> new ActivitiException("Unable to find task with id: " + eventTask.getId())
         );
         queryTask.setAssignee(eventTask.getAssignee());
-        queryTask.setStatus(eventTask.getStatus().name());
+        queryTask.setStatus(org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED.name());
         queryTask.setLastModified(new Date(taskAssignedEvent.getTimestamp()));
         queryTask.setServiceName(taskAssignedEvent.getServiceName());
         queryTask.setServiceFullName(taskAssignedEvent.getServiceFullName());

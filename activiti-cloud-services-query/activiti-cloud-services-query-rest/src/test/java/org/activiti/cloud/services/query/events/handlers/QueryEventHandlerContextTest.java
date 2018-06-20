@@ -16,43 +16,58 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Collections;
+
+import org.activiti.runtime.api.event.CloudTaskCompletedEvent;
+import org.activiti.runtime.api.event.CloudTaskCreatedEvent;
+import org.activiti.runtime.api.event.TaskRuntimeEvent;
+import org.activiti.runtime.api.event.impl.CloudTaskCompletedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudTaskCreatedEventImpl;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 public class QueryEventHandlerContextTest {
 
-//    private QueryEventHandlerContext context;
-//
-//    @Mock
-//    private QueryEventHandler handler;
-//
-//    @Before
-//    public void setUp() throws Exception {
-//        initMocks(this);
-//        doReturn(TaskCreatedEvent.class).when(handler).getHandledEventClass();
-//        context = new QueryEventHandlerContext(Collections.singleton(handler));
-//    }
-//
-//    @Test
-//    public void handleShouldSelectHandlerBasedOnEventType() throws Exception {
-//        //given
-//        TaskCreatedEvent event = new TaskCreatedEvent();
-//
-//        //when
-//        AbstractProcessEngineEvent[] events = {event};
-//        context.handle(events);
-//
-//        //then
-//        verify(handler).handle(event);
-//    }
-//
-//    @Test
-//    public void handleShouldDoNothingWhenNoHandlerIsFoundForTheGivenEvent() throws Exception {
-//        //given
-//        TaskCompletedEvent event = new TaskCompletedEvent();
-//
-//        //when
-//        AbstractProcessEngineEvent[] events = {event};
-//        context.handle(events);
-//
-//        //then
-//        verify(handler, never()).handle(any());
-//    }
+    private QueryEventHandlerContext context;
+
+    @Mock
+    private QueryEventHandler handler;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+        doReturn(TaskRuntimeEvent.TaskEvents.TASK_CREATED.name()).when(handler).getHandledEvent();
+        context = new QueryEventHandlerContext(Collections.singleton(handler));
+    }
+
+    @Test
+    public void handleShouldSelectHandlerBasedOnEventType() {
+        //given
+        CloudTaskCreatedEvent event = new CloudTaskCreatedEventImpl();
+
+        //when
+        context.handle(event);
+
+        //then
+        verify(handler).handle(event);
+    }
+
+    @Test
+    public void handleShouldDoNothingWhenNoHandlerIsFoundForTheGivenEvent() {
+        //given
+        CloudTaskCompletedEvent event = new CloudTaskCompletedEventImpl();
+
+        //when
+        context.handle(event);
+
+        //then
+        verify(handler, never()).handle(any());
+    }
 }

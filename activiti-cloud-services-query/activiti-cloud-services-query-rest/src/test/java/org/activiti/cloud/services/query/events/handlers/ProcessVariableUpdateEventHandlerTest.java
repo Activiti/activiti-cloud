@@ -38,12 +38,12 @@ public class ProcessVariableUpdateEventHandlerTest {
     private VariableUpdater variableUpdater;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
     @Test
-    public void handleShouldUpdateVariable() throws Exception {
+    public void handleShouldUpdateVariable() {
         //given
         Variable variable = new Variable();
         variable.setName("var");

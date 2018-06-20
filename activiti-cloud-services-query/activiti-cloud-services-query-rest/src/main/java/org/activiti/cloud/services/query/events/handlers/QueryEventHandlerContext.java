@@ -28,14 +28,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class APIEventHandlerContext {
+public class QueryEventHandlerContext {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(APIEventHandlerContext.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContext.class);
 
     private Map<String, QueryEventHandler> handlers;
 
     @Autowired
-    public APIEventHandlerContext(Set<QueryEventHandler> handlers) {
+    public QueryEventHandlerContext(Set<QueryEventHandler> handlers) {
         this.handlers = handlers.stream().collect(Collectors.toMap(QueryEventHandler::getHandledEvent,
                                                                    Function.identity()));
     }

@@ -16,83 +16,105 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.engine.ActivitiException;
+import org.activiti.runtime.api.event.CloudProcessStartedEvent;
+import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
+import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 public class ProcessStartedEventHandlerTest {
 
-//    @InjectMocks
-//    private ProcessStartedEventHandler handler;
-//
-//    @Mock
-//    private ProcessInstanceRepository processInstanceRepository;
-//
-//    @Rule
-//    public ExpectedException expectedException = ExpectedException.none();
-//
-//    @Before
-//    public void setUp() throws Exception {
-//        initMocks(this);
-//    }
-//
-//    @Test
-//    public void handleShouldStoreANewProcessInstanceInTheRepository() throws Exception {
-//        //given
-//        ProcessStartedEvent event = new ProcessStartedEvent(System.currentTimeMillis(),
-//                                                            "ProcessStartedEvent",
-//                                                            "10",
-//                                                            "100",
-//                                                            "200",
-//                                                            "101",
-//                                                            "201",
-//                "runtime-bundle-a",
-//                "runtime-bundle-a",
-//                "runtime-bundle",
-//                "1",
-//                null,
-//                null);
-//        ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
-//        given(currentProcessInstance.getStatus()).willReturn("CREATED");
-//        given(processInstanceRepository.findById("200")).willReturn(Optional.of(currentProcessInstance));
-//
-//        //when
-//        handler.handle(event);
-//
-//        //then
-//        verify(processInstanceRepository).save(currentProcessInstance);
-//        verify(currentProcessInstance).setStatus("RUNNING");
-//    }
-//
-//    @Test
-//    public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() throws Exception {
-//        //given
-//        ProcessStartedEvent event = new ProcessStartedEvent(System.currentTimeMillis(),
-//                                                            "ProcessStartedEvent",
-//                                                            "10",
-//                                                            "100",
-//                                                            "200",
-//                                                            "101",
-//                                                            "201",
-//                "runtime-bundle-a",
-//                "runtime-bundle-a",
-//                "runtime-bundle",
-//                "1",
-//                null,
-//                null);
-//
-//        given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
-//
-//        //then
-//        expectedException.expect(ActivitiException.class);
-//        expectedException.expectMessage("Unable to find process instance with the given id: ");
-//
-//        //when
-//        handler.handle(event);
-//    }
-//
-//    @Test
-//    public void getHandledEventClassShouldReturnProcessStartedEvent() throws Exception {
-//        //when
-//        Class<? extends ProcessEngineEvent> handledEventClass = handler.getHandledEventClass();
-//
-//        //then
-//        assertThat(handledEventClass).isEqualTo(ProcessStartedEvent.class);
-//    }
+    @InjectMocks
+    private ProcessStartedEventHandler handler;
+
+    @Mock
+    private ProcessInstanceRepository processInstanceRepository;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+    }
+
+    @Test
+    public void handleShouldUpdateProcessInstanceStatusToRunning() {
+        //given
+        CloudProcessStartedEvent event = buildProcessStartedEvent();
+        ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
+        given(currentProcessInstance.getStatus()).willReturn(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.CREATED.name());
+        given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstance));
+
+        //when
+        handler.handle(event);
+
+        //then
+        verify(processInstanceRepository).save(currentProcessInstance);
+        verify(currentProcessInstance).setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+    }
+
+    @Test
+    public void handleShouldIgnoreEventIfProcessInstanceIsAlreadyInRunningStatus() {
+        //given
+        CloudProcessStartedEvent event = buildProcessStartedEvent();
+        ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
+        given(currentProcessInstance.getStatus()).willReturn(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+        given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstance));
+
+        //when
+        handler.handle(event);
+
+        //then
+        verify(processInstanceRepository, never()).save(currentProcessInstance);
+        verify(currentProcessInstance, never()).setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+    }
+
+    private CloudProcessStartedEvent buildProcessStartedEvent() {
+        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
+        processInstance.setId(UUID.randomUUID().toString());
+        return new CloudProcessStartedEventImpl(processInstance);
+    }
+
+    @Test
+    public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
+        //given
+        CloudProcessStartedEvent event = buildProcessStartedEvent();
+
+        given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
+
+        //then
+        expectedException.expect(ActivitiException.class);
+        expectedException.expectMessage("Unable to find process instance with the given id: ");
+
+        //when
+        handler.handle(event);
+    }
+
+    @Test
+    public void getHandledEventClassShouldReturnProcessStartedEvent() {
+        //when
+        String handledEvent = handler.getHandledEvent();
+
+        //then
+        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name());
+    }
 }

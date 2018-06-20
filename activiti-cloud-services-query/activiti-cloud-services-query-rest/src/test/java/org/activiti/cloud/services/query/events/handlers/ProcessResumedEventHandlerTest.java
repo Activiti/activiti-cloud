@@ -23,9 +23,9 @@ import java.util.UUID;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstance;
 import org.activiti.engine.ActivitiException;
-import org.activiti.runtime.api.event.CloudProcessSuspendedEvent;
+import org.activiti.runtime.api.event.CloudProcessResumedEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.event.impl.CloudProcessSuspendedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudProcessResumedEventImpl;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,17 +34,17 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class ProcessSuspendedEventHandlerTest {
+public class ProcessResumedEventHandlerTest {
 
     @InjectMocks
-    private ProcessSuspendedEventHandler handler;
+    private ProcessResumedEventHandler handler;
 
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
@@ -58,34 +58,32 @@ public class ProcessSuspendedEventHandlerTest {
     }
 
     @Test
-    public void handleShouldUpdateCurrentProcessInstanceStateToSuspended() {
+    public void handleShouldUpdateCurrentProcessInstanceStateToRunning() {
         //given
-        CloudProcessSuspendedEvent event = buildProcessSuspendedEvent();
+        ProcessInstanceImpl eventProcessInstance = new ProcessInstanceImpl();
+        eventProcessInstance.setId(UUID.randomUUID().toString());
+        CloudProcessResumedEvent event = new CloudProcessResumedEventImpl(eventProcessInstance);
 
         ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
-        given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstance));
+        given(processInstanceRepository.findById(eventProcessInstance.getId())).willReturn(Optional.of(currentProcessInstance));
 
         //when
         handler.handle(event);
 
         //then
         verify(processInstanceRepository).save(currentProcessInstance);
-        verify(currentProcessInstance).setStatus("SUSPENDED");
+        verify(currentProcessInstance).setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
         verify(currentProcessInstance).setLastModified(any(Date.class));
-    }
-
-    private CloudProcessSuspendedEvent buildProcessSuspendedEvent() {
-        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
-        processInstance.setId(UUID.randomUUID().toString());
-        return new CloudProcessSuspendedEventImpl(processInstance);
     }
 
     @Test
     public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
         //given
-        CloudProcessSuspendedEvent event = buildProcessSuspendedEvent();
+        ProcessInstanceImpl eventProcessInstance = new ProcessInstanceImpl();
+        eventProcessInstance.setId(UUID.randomUUID().toString());
+        CloudProcessResumedEvent event = new CloudProcessResumedEventImpl(eventProcessInstance);
 
-        given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
+        given(processInstanceRepository.findById(eventProcessInstance.getId())).willReturn(Optional.empty());
 
         //then
         expectedException.expect(ActivitiException.class);
@@ -97,11 +95,11 @@ public class ProcessSuspendedEventHandlerTest {
     }
 
     @Test
-    public void getHandledEventClassShouldReturnProcessActivatedEvent() {
+    public void getHandledEventClassShouldReturnProcessResumedEvent() {
         //when
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name());
+        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name());
     }
 }
