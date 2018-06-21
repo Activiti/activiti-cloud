@@ -138,7 +138,7 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Void> suspendProcess(ResponseEntity<ProcessInstance> processInstanceEntity) {
+    public ResponseEntity<Void> suspend(ResponseEntity<ProcessInstance> processInstanceEntity) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/suspend",
                                                                     HttpMethod.POST,
                                                                     null,
@@ -147,6 +147,17 @@ public class ProcessInstanceRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
+
+    public ResponseEntity<Void> resume(ResponseEntity<ProcessInstance> startProcessEntity) {
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startProcessEntity.getBody().getId() + "/activate",
+                                                                    HttpMethod.POST,
+                                                                    null,
+                                                                    new ParameterizedTypeReference<Void>() {
+                                                                    });
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+
 
     public ResponseEntity<Void> setVariables(String processId, Map<String, Object> variables) {
         SetProcessVariablesCmd processVariablesCmd = new SetProcessVariablesCmd(processId, variables);

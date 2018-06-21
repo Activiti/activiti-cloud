@@ -264,18 +264,13 @@ public class ProcessInstanceIT {
         executeRequestSuspendProcess(startProcessEntity);
 
         //when
-        ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startProcessEntity.getBody().getId() + "/activate",
-                HttpMethod.POST,
-                null,
-                new ParameterizedTypeReference<Void>() {
-                });
+        ResponseEntity<Void> responseEntity = processInstanceRestTemplate.resume(startProcessEntity);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         ResponseEntity<ProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING.name());
     }
-
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
         ParameterizedTypeReference<PagedResources<ProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<ProcessDefinition>>() {

@@ -55,7 +55,7 @@ public class ProcessRuntimeExternalEventsProducer implements ProcessRuntimeEvent
 
     @Override
     public void onProcessResumed(ProcessResumedEvent event) {
-
+        eventsAggregator.add(eventConverter.from(event));
     }
 
     @Override

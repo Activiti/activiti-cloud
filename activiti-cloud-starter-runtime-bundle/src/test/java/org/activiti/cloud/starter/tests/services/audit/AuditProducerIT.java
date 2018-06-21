@@ -24,6 +24,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
+import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED;
 import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
@@ -84,12 +85,22 @@ public class AuditProducerIT {
                           TASK_CREATED.name()));
 
         //when
-        processInstanceRestTemplate.suspendProcess(startProcessEntity);
+        processInstanceRestTemplate.suspend(startProcessEntity);
 
         //then
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(PROCESS_SUSPENDED.name()));
+
+        //when
+        processInstanceRestTemplate.resume(startProcessEntity);
+
+        //then
+        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
+                .extracting(event -> event.getEventType().name())
+                .containsExactly(PROCESS_RESUMED.name()));
+
+
 
         //todo add events for:
         // - completed process
