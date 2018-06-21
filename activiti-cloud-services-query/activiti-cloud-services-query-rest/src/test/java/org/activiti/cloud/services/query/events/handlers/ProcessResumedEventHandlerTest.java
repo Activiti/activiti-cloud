@@ -95,7 +95,7 @@ public class ProcessResumedEventHandlerTest {
     }
 
     @Test
-    public void getHandledEventClassShouldReturnProcessResumedEvent() {
+    public void getHandledEventShouldReturnProcessResumedEvent() {
         //when
         String handledEvent = handler.getHandledEvent();
 

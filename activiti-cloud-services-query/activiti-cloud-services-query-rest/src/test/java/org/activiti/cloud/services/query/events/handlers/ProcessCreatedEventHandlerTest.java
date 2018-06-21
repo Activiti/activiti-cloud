@@ -84,7 +84,7 @@ public class ProcessCreatedEventHandlerTest {
     }
 
     @Test
-    public void getHandledEventClassShouldReturnProcessCreatedEvent() {
+    public void getHandledEventShouldReturnProcessCreatedEvent() {
         //when
         String handledEvent = handler.getHandledEvent();
 

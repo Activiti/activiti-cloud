@@ -45,12 +45,12 @@ public class VariableUpdaterTest {
 
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
     @Test
-    public void updateShouldUpdateVariableRetrievedByPredicate() throws Exception {
+    public void updateShouldUpdateVariableRetrievedByPredicate() {
         //given
         Variable currentVariable = new Variable();
 

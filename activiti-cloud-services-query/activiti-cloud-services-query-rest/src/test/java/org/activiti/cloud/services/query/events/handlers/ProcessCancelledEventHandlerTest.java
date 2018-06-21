@@ -103,7 +103,7 @@ public class ProcessCancelledEventHandlerTest {
      * Test that ProcessCancelledEventHandler is handling ProcessCancelledEvent events
      */
     @Test
-    public void testHandleProcessCancelledEvent() {
+    public void getHandledEventShouldReturnProcessCancelledEvent() {
         //when
         String handledEvent = handler.getHandledEvent();
 

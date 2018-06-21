@@ -96,7 +96,7 @@ public class ProcessCompletedEventHandlerTest {
     }
 
     @Test
-    public void getHandledEventClassShouldReturnProcessCompletedEvent() {
+    public void getHandledEventShouldReturnProcessCompletedEvent() {
         //when
         String handledEvent = handler.getHandledEvent();
 

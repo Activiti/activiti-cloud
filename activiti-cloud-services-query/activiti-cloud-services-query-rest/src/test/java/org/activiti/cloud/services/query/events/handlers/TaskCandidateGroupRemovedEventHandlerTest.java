@@ -68,7 +68,7 @@ public class TaskCandidateGroupRemovedEventHandlerTest {
     }
 
     @Test
-    public void getHandledEventClassShouldReturnTaskCreatedEventClass() {
+    public void getHandledEventShouldReturnTaskCreatedEvent() {
         //when
         String handledEvent = handler.getHandledEvent();
 

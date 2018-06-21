@@ -16,42 +16,63 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.UUID;
+
+import com.querydsl.core.types.Predicate;
+import org.activiti.cloud.services.query.app.repository.EntityFinder;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.runtime.api.event.impl.CloudVariableDeletedEventImpl;
+import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 public class TaskVariableDeletedEventHandlerTest {
 
-//    @InjectMocks
-//    private TaskVariableDeletedEventHandler handler;
-//
-//    @Mock
-//    private VariableRepository variableRepository;
-//
-//    @Mock
-//    private TaskRepository taskRepository;
-//
-//    @Mock
-//    private EntityFinder entityFinder;
-//
-//    @Before
-//    public void setUp() throws Exception {
-//        initMocks(this);
-//    }
-//
-//    @Test
-//    public void handleShouldRemoveVariableFromProcessAndSoftDeleteIt() throws Exception {
-//        //given
-//        VariableDeletedEvent event = new VariableDeletedEvent();
-//        event.setTaskId("10");
-//        event.setVariableName("var");
-//
-//        Variable variable = new Variable();
-//        given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variable);
-//
-//
-//        //when
-//        handler.handle(event);
-//
-//        //then
-//        verify(variableRepository).save(variable);
-//        assertThat(variable.getMarkedAsDeleted()).isTrue();
-//    }
-//
+    @InjectMocks
+    private TaskVariableDeletedEventHandler handler;
+
+    @Mock
+    private VariableRepository variableRepository;
+
+    @Mock
+    private EntityFinder entityFinder;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+    }
+
+    @Test
+    public void handleShouldSoftDeleteIt() {
+        //given
+        VariableInstanceImpl<String> variableInstance = new VariableInstanceImpl<>("var",
+                                                                         "string",
+                                                                         "v1",
+                                                                         UUID.randomUUID().toString());
+        variableInstance.setTaskId(UUID.randomUUID().toString());
+        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(variableInstance);
+
+        Variable variable = new Variable();
+        given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variable);
+
+
+        //when
+        handler.handle(event);
+
+        //then
+        verify(variableRepository).save(variable);
+        assertThat(variable.getMarkedAsDeleted()).isTrue();
+    }
+
 }

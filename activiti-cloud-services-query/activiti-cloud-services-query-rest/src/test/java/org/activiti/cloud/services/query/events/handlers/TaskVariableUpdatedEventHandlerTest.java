@@ -38,12 +38,12 @@ public class TaskVariableUpdatedEventHandlerTest {
 
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
     @Test
-    public void handleShouldUpdateVariableValue() throws Exception {
+    public void handleShouldUpdateVariableValue() {
         //given
         String taskId = "10";
         Variable updatedVariable = new Variable();

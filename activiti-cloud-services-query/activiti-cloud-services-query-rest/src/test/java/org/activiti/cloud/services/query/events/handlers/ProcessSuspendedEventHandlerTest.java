@@ -97,7 +97,7 @@ public class ProcessSuspendedEventHandlerTest {
     }
 
     @Test
-    public void getHandledEventClassShouldReturnProcessActivatedEvent() {
+    public void getHandledEventShouldReturnProcessSuspendedEvent() {
         //when
         String handledEvent = handler.getHandledEvent();
 

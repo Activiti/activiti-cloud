@@ -16,50 +16,60 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.UUID;
+
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
+import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.runtime.api.event.TaskCandidateUserEvent;
+import org.activiti.runtime.api.event.impl.CloudTaskCandidateUserRemovedEventImpl;
+import org.activiti.runtime.api.model.impl.TaskCandidateUserImpl;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 public class TaskCandidateUserRemovedEventHandlerTest {
 
-//    @InjectMocks
-//    private TaskCandidateUserRemovedEventHandler handler;
-//
-//    @Mock
-//    private TaskCandidateUserRepository taskCandidateRepository;
-//
-//    @Before
-//    public void setUp() throws Exception {
-//        initMocks(this);
-//    }
-//
-//    @Test
-//    public void handleShouldStoreNewTaskInstance() throws Exception {
-//        //given
-//        TaskCandidateUser eventTaskCandidate = mock(TaskCandidateUser.class);
-//        TaskCandidateUserRemovedEvent taskCreated = new TaskCandidateUserRemovedEvent(System.currentTimeMillis(),
-//                                                            "taskCandidateUserRemoved",
-//                                                            "10",
-//                                                            "100",
-//                                                            "200",
-//                                                "runtime-bundle-a",
-//                                                "runtime-bundle-a",
-//                                                "runtime-bundle",
-//                                                "1",
-//                                                null,
-//                                                null,
-//                                                            eventTaskCandidate);
-//
-//
-//        //when
-//        handler.handle(taskCreated);
-//
-//        //then
-//        verify(taskCandidateRepository).delete(eventTaskCandidate);
-//    }
-//
-//    @Test
-//    public void getHandledEventClassShouldReturnTaskCreatedEventClass() throws Exception {
-//        //when
-//        Class<? extends ProcessEngineEvent> handledEventClass = handler.getHandledEventClass();
-//
-//        //then
-//        assertThat(handledEventClass).isEqualTo(TaskCandidateUserRemovedEvent.class);
-//    }
+    @InjectMocks
+    private TaskCandidateUserRemovedEventHandler handler;
+
+    @Mock
+    private TaskCandidateUserRepository taskCandidateRepository;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+    }
+
+    @Test
+    public void handleShouldStoreNewTaskInstance() {
+        //given
+        CloudTaskCandidateUserRemovedEventImpl event = new CloudTaskCandidateUserRemovedEventImpl(
+                new TaskCandidateUserImpl(UUID.randomUUID().toString(),
+                                          UUID.randomUUID().toString())
+        );
+
+        //when
+        handler.handle(event);
+
+        //then
+        ArgumentCaptor<TaskCandidateUser> captor = ArgumentCaptor.forClass(TaskCandidateUser.class);
+        verify(taskCandidateRepository).delete(captor.capture());
+        assertThat(captor.getValue().getTaskId()).isEqualTo(event.getEntity().getTaskId());
+        assertThat(captor.getValue().getUserId()).isEqualTo(event.getEntity().getUserId());
+    }
+
+    @Test
+    public void getHandledEventShouldReturnTaskCandidateUserCreated() {
+        //when
+        String handledEvent = handler.getHandledEvent();
+
+        //then
+        assertThat(handledEvent).isEqualTo(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name());
+    }
 }

@@ -16,79 +16,121 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.UUID;
+import javax.persistence.EntityManager;
+
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.runtime.api.event.VariableEvent;
+import org.activiti.runtime.api.event.impl.CloudVariableCreatedEventImpl;
+import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
+import org.activiti.test.Assertions;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 public class VariableCreatedEventHandlerTest {
 
-//    @InjectMocks
-//    private VariableCreatedEventHandler handler;
-//
-//    @Mock
-//    private VariableRepository variableRepository;
-//
-//    @Mock
-//    private EntityManager entityManager;
-//
-//    @Before
-//    public void setUp() throws Exception {
-//        initMocks(this);
-//    }
-//
-//    @Test
-//    public void handleShouldCreateAndStoreVariable() throws Exception {
-//        //given
-//    	String executionId = "10";
-//        long processInstanceId = 30L;
-//        String taskId = "50";
-//        String variableName = "var";
-//        String variableType = String.class.getName();
-//        ProcessInstance processInstance = mock(ProcessInstance.class);
-//        Task task = mock(Task.class);
-//        VariableCreatedEvent event = new VariableCreatedEvent(System.currentTimeMillis(),
-//                                                              "variableCreated",
-//                                                              executionId,
-//                                                              "20",
-//                                                              String.valueOf(processInstanceId),
-//                                                    "runtime-bundle-a",
-//                                                    "runtime-bundle-a",
-//                                                    "runtime-bundle",
-//                                                    "1",
-//                                                    null,
-//                                                    null,
-//                                                              variableName,
-//                                                              "content",
-//                                                              variableType,
-//                                                              taskId);
-//
-//        when(entityManager.getReference(ArgumentMatchers.eq(ProcessInstance.class), any()))
-//    		.thenReturn(processInstance);
-//
-//        when(entityManager.getReference(ArgumentMatchers.eq(Task.class), any()))
-//    		.thenReturn(task);
-//
-//        //when
-//        handler.handle(event);
-//
-//        //then
-//        ArgumentCaptor<Variable> captor = ArgumentCaptor.forClass(Variable.class);
-//        verify(variableRepository).save(captor.capture());
-//
-//        Variable variable = captor.getValue();
-//
-//        Assertions.assertThat(variable)
-//                .hasExecutionId(executionId)
-//                .hasProcessInstanceId(String.valueOf(processInstanceId))
-//                .hasName(variableName)
-//                .hasTaskId(taskId)
-//                .hasType(variableType)
-//                .hasTask(task)
-//                .hasProcessInstance(processInstance);
-//    }
-//
-//    @Test
-//    public void getHandledEventClass() throws Exception {
-//        //when
-//        Class<? extends ProcessEngineEvent> handledEventClass = handler.getHandledEventClass();
-//
-//        //then
-//        assertThat(handledEventClass).isEqualTo(VariableCreatedEvent.class);
-//    }
+    @InjectMocks
+    private VariableCreatedEventHandler handler;
+
+    @Mock
+    private VariableRepository variableRepository;
+
+    @Mock
+    private EntityManager entityManager;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+    }
+
+    @Test
+    public void handleShouldCreateAndStoreProcessInstanceVariable() {
+        //given
+        CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
+
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(entityManager.getReference(ProcessInstance.class,
+                                        event.getEntity().getProcessInstanceId()))
+                .thenReturn(processInstance);
+
+        //when
+        handler.handle(event);
+
+        //then
+        ArgumentCaptor<Variable> captor = ArgumentCaptor.forClass(Variable.class);
+        verify(variableRepository).save(captor.capture());
+
+        Variable variable = captor.getValue();
+
+        Assertions.assertThat(variable)
+                .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
+                .hasName(event.getEntity().getName())
+                .hasTaskId(event.getEntity().getTaskId())
+                .hasType(event.getEntity().getType())
+                .hasTask(null)
+                .hasProcessInstance(processInstance);
+    }
+
+    @Test
+    public void handleShouldCreateAndStoreTaskVariable() {
+        //given
+        VariableInstanceImpl<String> variableInstance = buildVariable();
+        variableInstance.setTaskId(UUID.randomUUID().toString());
+        CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(variableInstance);
+
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(entityManager.getReference(ProcessInstance.class,
+                                        event.getEntity().getProcessInstanceId()))
+                .thenReturn(processInstance);
+
+        Task task = mock(Task.class);
+        when(entityManager.getReference(Task.class,
+                                        event.getEntity().getTaskId()))
+                .thenReturn(task);
+
+        //when
+        handler.handle(event);
+
+        //then
+        ArgumentCaptor<Variable> captor = ArgumentCaptor.forClass(Variable.class);
+        verify(variableRepository).save(captor.capture());
+
+        Variable variable = captor.getValue();
+
+        Assertions.assertThat(variable)
+                .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
+                .hasName(event.getEntity().getName())
+                .hasTaskId(event.getEntity().getTaskId())
+                .hasType(event.getEntity().getType())
+                .hasTask(task)
+                .hasProcessInstance(processInstance);
+    }
+
+    private VariableInstanceImpl<String> buildVariable() {
+        return new VariableInstanceImpl<>("var",
+                                          "string",
+                                          "v1",
+                                          UUID.randomUUID().toString());
+    }
+
+    @Test
+    public void getHandledEventShouldReturnVariableCreatedEvent() {
+        //when
+        String handledEvent = handler.getHandledEvent();
+
+        //then
+        assertThat(handledEvent).isEqualTo(VariableEvent.VariableEvents.VARIABLE_CREATED.name());
+    }
 }

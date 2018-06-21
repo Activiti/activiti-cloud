@@ -92,7 +92,7 @@ public class TaskCandidateGroupAddedEventHandlerTest {
     }
 
     @Test
-    public void getHandledEventShouldReturnTaskCandidateGroupAddedEventClass() {
+    public void getHandledEventShouldReturnTaskCandidateGroupAddedEvent() {
         //when
         String event = handler.getHandledEvent();
 

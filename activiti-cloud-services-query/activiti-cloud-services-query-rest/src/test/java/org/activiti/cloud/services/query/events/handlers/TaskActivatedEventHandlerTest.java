@@ -125,7 +125,7 @@ public class TaskActivatedEventHandlerTest {
     }
 
     @Test
-    public void getHandledEventShouldReturnTaskAssignedEvent() {
+    public void getHandledEventShouldReturnTaskActivatedEvent() {
         //when
         String handledEvent = handler.getHandledEvent();
 

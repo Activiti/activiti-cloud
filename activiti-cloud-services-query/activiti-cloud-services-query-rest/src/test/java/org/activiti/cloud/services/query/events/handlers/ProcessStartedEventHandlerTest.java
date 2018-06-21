@@ -110,7 +110,7 @@ public class ProcessStartedEventHandlerTest {
     }
 
     @Test
-    public void getHandledEventClassShouldReturnProcessStartedEvent() {
+    public void getHandledEventShouldReturnProcessStartedEvent() {
         //when
         String handledEvent = handler.getHandledEvent();
 
