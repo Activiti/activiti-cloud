@@ -16,55 +16,42 @@
 
 package org.activiti.cloud.services.query;
 
+import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
+import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
+import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 public class QueryConsumerChannelHandlerTest {
 
-//    @InjectMocks
-//    private QueryConsumerChannelHandler consumer;
-//
-//    @Mock
-//    private QueryEventHandlerContext eventHandlerContext;
-//
-//    @Before
-//    public void setUp() throws Exception {
-//        initMocks(this);
-//    }
-//
-//    @Test
-//    public void receiveShouldHandleReceivedEvent() throws Exception {
-//        //given
-//        AbstractProcessEngineEvent event = mock(AbstractProcessEngineEvent.class);
-//
-//        //when
-//        AbstractProcessEngineEvent[] events = {event};
-//        consumer.receive(events);
-//
-//        //then
-//        verify(eventHandlerContext).handle(events);
-//    }
-//
-//    @Test
-//    public void testHandleProcessCancelledEvent() throws Exception {
-//        //given
-//        AbstractProcessEngineEvent event = mock(ProcessCancelledEvent.class);
-//
-//        //when
-//        AbstractProcessEngineEvent[] events = {event};
-//        consumer.receive(events);
-//
-//        //then
-//        verify(eventHandlerContext).handle(events);
-//    }
-//
-//    @Test
-//    public void testHandleTestCancelledEvent() {
-//        //given
-//        AbstractProcessEngineEvent event = mock(TaskCancelledEvent.class);
-//
-//        //when
-//        AbstractProcessEngineEvent[] events = {event};
-//        consumer.receive(events);
-//
-//        //then
-//        verify(eventHandlerContext).handle(events);
-//    }
+    @InjectMocks
+    private QueryConsumerChannelHandler consumer;
+
+    @Mock
+    private QueryEventHandlerContext eventHandlerContext;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+    }
+
+    @Test
+    public void receiveShouldHandleReceivedEvent() {
+        //given
+        CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
+        CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
+
+        //when
+        consumer.receive(processCreatedEvent, processStartedEvent);
+
+        //then
+        verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
+    }
+
 }
