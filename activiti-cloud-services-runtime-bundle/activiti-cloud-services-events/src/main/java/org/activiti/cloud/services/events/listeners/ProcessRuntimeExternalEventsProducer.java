@@ -29,28 +29,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProcessRuntimeExternalEventsProducer implements ProcessRuntimeEventListener {
 
-    private final ToCloudProcessRuntimeEventConverter startedEventConverter;
+    private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public ProcessRuntimeExternalEventsProducer(ToCloudProcessRuntimeEventConverter startedEventConverter,
+    public ProcessRuntimeExternalEventsProducer(ToCloudProcessRuntimeEventConverter eventConverter,
                                                 ProcessEngineEventsAggregator eventsAggregator) {
-        this.startedEventConverter = startedEventConverter;
+        this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }
 
     @Override
     public void onProcessCreated(ProcessCreatedEvent event) {
-        eventsAggregator.add(startedEventConverter.from(event));
+        eventsAggregator.add(eventConverter.from(event));
     }
 
     @Override
     public void onProcessStarted(ProcessStartedEvent event) {
-        eventsAggregator.add(startedEventConverter.from(event));
+        eventsAggregator.add(eventConverter.from(event));
     }
 
     @Override
     public void onProcessSuspended(ProcessSuspendedEvent event) {
-
+        eventsAggregator.add(eventConverter.from(event));
     }
 
     @Override

@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
+import java.util.List;
+import java.util.Map;
+
 import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
@@ -26,16 +29,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -135,6 +134,16 @@ public class ProcessInstanceRestTemplate {
                 null,
                 new ParameterizedTypeReference<ProcessInstance>() {
                 });
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+
+    public ResponseEntity<Void> suspendProcess(ResponseEntity<ProcessInstance> processInstanceEntity) {
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/suspend",
+                                                                    HttpMethod.POST,
+                                                                    null,
+                                                                    new ParameterizedTypeReference<Void>() {
+                                                                    });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }

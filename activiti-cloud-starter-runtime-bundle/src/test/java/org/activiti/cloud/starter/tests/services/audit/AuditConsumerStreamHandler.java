@@ -40,9 +40,7 @@ public class AuditConsumerStreamHandler {
         receivedEvents = Arrays.asList(events);
     }
 
-    public List<CloudRuntimeEvent<?, ?>> getAndResetReceivedEvents() {
-        List<CloudRuntimeEvent<?, ?>> currentEvents = this.receivedEvents;
-        receivedEvents = Collections.emptyList();
-        return currentEvents;
+    public List<CloudRuntimeEvent<?, ?>> getReceivedEvents() {
+        return this.receivedEvents;
     }
 }

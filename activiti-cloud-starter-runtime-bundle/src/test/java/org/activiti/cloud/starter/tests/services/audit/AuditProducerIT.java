@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.activiti.cloud.services.api.model.ProcessDefinition;
+import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
+import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED;
 import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
 import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
@@ -70,16 +72,25 @@ public class AuditProducerIT {
     @Test
     public void shouldReceiveAuditMessage() {
         //when
-        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //then
-        await().untilAsserted(() -> assertThat(streamHandler.getAndResetReceivedEvents())
+        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(PROCESS_CREATED.name(),
                           PROCESS_STARTED.name(),
                           TASK_CANDIDATE_GROUP_ADDED.name(),
                           TASK_CANDIDATE_USER_ADDED.name(),
                           TASK_CREATED.name()));
+
+        //when
+        processInstanceRestTemplate.suspendProcess(startProcessEntity);
+
+        //then
+        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
+                .extracting(event -> event.getEventType().name())
+                .containsExactly(PROCESS_SUSPENDED.name()));
+
         //todo add events for:
         // - completed process
         // - rolled back

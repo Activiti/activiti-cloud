@@ -17,11 +17,17 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.runtime.api.event.CloudProcessCreatedEvent;
+import org.activiti.runtime.api.event.CloudProcessResumedEvent;
 import org.activiti.runtime.api.event.CloudProcessStartedEvent;
+import org.activiti.runtime.api.event.CloudProcessSuspendedEvent;
 import org.activiti.runtime.api.event.ProcessCreatedEvent;
+import org.activiti.runtime.api.event.ProcessResumedEvent;
 import org.activiti.runtime.api.event.ProcessStartedEvent;
+import org.activiti.runtime.api.event.ProcessSuspendedEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudProcessResumedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudProcessSuspendedEventImpl;
 
 public class ToCloudProcessRuntimeEventConverter {
 
@@ -41,6 +47,18 @@ public class ToCloudProcessRuntimeEventConverter {
 
     public CloudProcessCreatedEvent from(ProcessCreatedEvent event) {
         CloudProcessCreatedEventImpl cloudEvent = new CloudProcessCreatedEventImpl(event.getEntity());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+
+    public CloudProcessResumedEvent from(ProcessResumedEvent event) {
+        CloudProcessResumedEventImpl cloudEvent = new CloudProcessResumedEventImpl(event.getEntity());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+
+    public CloudProcessSuspendedEvent from(ProcessSuspendedEvent event) {
+        CloudProcessSuspendedEventImpl cloudEvent = new CloudProcessSuspendedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
