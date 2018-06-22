@@ -60,7 +60,7 @@ public class ProcessRuntimeExternalEventsProducer implements ProcessRuntimeEvent
 
     @Override
     public void onProcessCompleted(ProcessCompletedEvent event) {
-
+        eventsAggregator.add(eventConverter.from(event));
     }
 
     @Override

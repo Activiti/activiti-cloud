@@ -22,6 +22,7 @@ import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,8 +55,7 @@ public class TasksIT  {
     private static final String TASKS_URL = "/v1/tasks/";
     private static final String ADMIN_TASKS_URL = "/admin/v1/tasks/";
     private static final String SIMPLE_PROCESS = "SimpleProcess";
-    private static final ParameterizedTypeReference<Task> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {
-    };
+    private static final ParameterizedTypeReference<Task> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {};
     private static final ParameterizedTypeReference<PagedResources<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Task>>() {
     };
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
@@ -66,6 +66,9 @@ public class TasksIT  {
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
+
+    @Autowired
+    private TaskRestTemplate taskRestTemplate;
 
     @Autowired
     private KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
@@ -196,7 +199,7 @@ public class TasksIT  {
         Task task = executeRequestGetTasks().getBody().iterator().next();
 
         //when
-        ResponseEntity<Task> responseEntity = executeRequestClaim(task);
+        ResponseEntity<Task> responseEntity = taskRestTemplate.claim(task);
 
 
         //then
@@ -205,20 +208,13 @@ public class TasksIT  {
         assertThat(responseEntity.getBody().getAssignee()).isEqualTo(keycloakSecurityContextClientRequestInterceptor.getKeycloakTestUser());
     }
 
-    private ResponseEntity<Task> executeRequestClaim(Task task) {
-        return testRestTemplate.exchange(TASKS_URL + task.getId() + "/claim",
-                HttpMethod.POST,
-                null,
-                TASK_RESPONSE_TYPE);
-    }
-
     @Test
     public void releaseTaskShouldSetAssigneeBackToNull() {
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = executeRequestGetTasks().getBody().iterator().next();
 
-        executeRequestClaim(task);
+        taskRestTemplate.claim(task);
 
         //when
         ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId() + "/release",
@@ -240,15 +236,12 @@ public class TasksIT  {
         Task task = executeRequestGetTasks().getBody().iterator().next();
 
         //when
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId() + "/complete",
-                HttpMethod.POST,
-                null,
-                new ParameterizedTypeReference<Void>() {
-                });
+        ResponseEntity<Void> responseEntity = taskRestTemplate.complete(task);
 
         //then
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
     }
+
 
     @Test
     public void shouldCompleteATaskPassingInputVariables() {

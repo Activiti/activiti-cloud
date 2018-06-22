@@ -16,12 +16,14 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
+import java.util.Map;
+
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
+import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.api.model.TaskVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -29,17 +31,36 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Component
 public class TaskRestTemplate {
 
-    public static final String TASK_VAR_RELATIVE_URL = "/v1/tasks/";
+    private static final String TASK_VAR_RELATIVE_URL = "/v1/tasks/";
+
+    private static final ParameterizedTypeReference<Task> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {};
 
     @Autowired
     private TestRestTemplate testRestTemplate;
+
+    public ResponseEntity<Void> complete(Task task) {
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId() + "/complete",
+                                                                        HttpMethod.POST,
+                                                                        null,
+                                                                        new ParameterizedTypeReference<Void>() {
+                                                                        });
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        return responseEntity;
+    }
+
+    public ResponseEntity<Task> claim(Task task) {
+        ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId() + "/claim",
+                                                                        HttpMethod.POST,
+                                                                        null,
+                                                                        TASK_RESPONSE_TYPE);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
 
     public ResponseEntity<Void> setVariables(String taskId, Map<String, Object> variables) {
         SetTaskVariablesCmd setTaskVariablesCmd = new SetTaskVariablesCmd(taskId, variables);

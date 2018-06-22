@@ -5,7 +5,9 @@ import java.util.Map;
 
 import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.ProcessInstance;
+import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,12 +25,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED;
 import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
 import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
+import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
+import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -49,6 +54,9 @@ public class AuditProducerIT {
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
+
+    @Autowired
+    private TaskRestTemplate taskRestTemplate;
 
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
@@ -101,14 +109,25 @@ public class AuditProducerIT {
                 .containsExactly(PROCESS_RESUMED.name()));
 
 
+        //given
+        ResponseEntity<PagedResources<Task>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);
+        Task task = tasks.getBody().iterator().next();
 
-        //todo add events for:
-        // - completed process
-        // - rolled back
-        // - AsyncErrorProcess
-        // - Task created
-        // - process deleted
-        // - task deleted
+        //when
+        taskRestTemplate.claim(task);
+        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
+                .extracting(event -> event.getEventType().name())
+                .containsExactly(TASK_ASSIGNED.name()));
+
+        //when
+        taskRestTemplate.complete(task);
+
+        //then
+        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
+                .extracting(event -> event.getEventType().name())
+                .containsExactly(TASK_COMPLETED.name(),
+                                 PROCESS_COMPLETED.name()));
+
     }
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {

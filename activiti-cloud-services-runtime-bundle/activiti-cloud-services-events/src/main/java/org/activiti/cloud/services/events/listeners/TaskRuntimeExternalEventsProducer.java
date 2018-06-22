@@ -43,7 +43,7 @@ public class TaskRuntimeExternalEventsProducer implements TaskRuntimeEventListen
 
     @Override
     public void onTaskAssigned(TaskAssignedEvent event) {
-
+        eventsAggregator.add(converter.from(event));
     }
 
     @Override
@@ -53,7 +53,7 @@ public class TaskRuntimeExternalEventsProducer implements TaskRuntimeEventListen
 
     @Override
     public void onTaskCompleted(TaskCompletedEvent event) {
-
+        eventsAggregator.add(converter.from(event));
     }
 
     @Override
