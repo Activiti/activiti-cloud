@@ -26,7 +26,6 @@ import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.qa.rest.feign.OAuth2FeignRequestInterceptor;
 import org.activiti.cloud.qa.service.AuditService;
 import org.activiti.cloud.qa.service.QueryService;
-import org.activiti.cloud.qa.service.AppsService;
 import org.activiti.cloud.qa.service.RuntimeBundleDiagramService;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,11 +79,4 @@ public class RuntimeFeignConfiguration {
                         runtimeTestsConfigurationProperties.getQueryUrl());
     }
 
-    @Bean
-    AppsService appsService(){
-        return FeignRestDataClient
-                .builder()
-                .target(AppsService.class,
-                        runtimeTestsConfigurationProperties.getAppsUrl());
-    }
 }

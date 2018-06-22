@@ -29,27 +29,12 @@ import org.springframework.context.annotation.PropertySource;
 @Import(BaseTestsConfigurationProperties.class)
 @Primary
 @PropertySource("classpath:config-${profile:env}.properties")
-public class RuntimeTestsConfigurationProperties {
+public class AppsTestsConfigurationProperties {
 
-    @Value("${audit.event.url}")
-    private String auditEventUrl;
+    @Value("${apps.url}")
+    private String appsUrl;
 
-    @Value("${runtime.bundle.url}")
-    private String runtimeBundleUrl;
-
-    @Value("${query.url}")
-    private String queryUrl;
-
-    public String getAuditEventUrl() {
-        return auditEventUrl;
+    public String getAppsUrl() {
+        return appsUrl;
     }
-
-    public String getRuntimeBundleUrl() {
-        return runtimeBundleUrl;
-    }
-
-    public String getQueryUrl() {
-        return queryUrl;
-    }
-
 }

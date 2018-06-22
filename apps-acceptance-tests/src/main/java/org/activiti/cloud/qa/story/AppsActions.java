@@ -16,12 +16,6 @@ public class AppsActions {
         appsServiceSteps.checkAppsServiceHealth();
     }
 
-    @Given("an app is running")
-    public void anAppIsRunning(){
-        appsServiceSteps.checkAnAppIsRunning();
-    }
-
-
     @Then("the status of the app is shown as running")
     public void appIsShownAsRunning(){
         appsServiceSteps.checkAppsServiceShowsApp("default-app");

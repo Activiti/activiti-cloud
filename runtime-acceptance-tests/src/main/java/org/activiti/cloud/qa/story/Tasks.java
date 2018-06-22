@@ -59,10 +59,11 @@ public class Tasks {
     }
 
     @Then("the task is created and the status is assigned")
-    public void taskIsCreatedAndAssigned() {
+    public void taskIsCreatedAndAssigned() throws Exception {
         final Task assignedTask = runtimeBundleSteps.getTaskById(newTask.getId());
         assertThat(assignedTask).isNotNull();
         assertThat(assignedTask.getStatus()).isEqualTo(TaskStatus.ASSIGNED);
+        runtimeBundleSteps.waitForMessagesToBeConsumed();
 
         auditSteps.checkTaskCreatedAndAssignedEvents(assignedTask.getId());
         querySteps.checkTaskStatus(assignedTask.getId(),
@@ -90,10 +91,11 @@ public class Tasks {
     }
 
     @Then("the subtask is created and references another task")
-    public void taskWithSubtaskIsCreated() {
+    public void taskWithSubtaskIsCreated()  throws Exception {
         final Task createdSubtask = runtimeBundleSteps.getTaskById(subtask.getId());
         assertThat(createdSubtask).isNotNull();
         assertThat(createdSubtask.getParentTaskId()).isNotEmpty().isEqualToIgnoringCase(newTask.getId());
+        runtimeBundleSteps.waitForMessagesToBeConsumed();
 
         auditSteps.checkSubtaskCreated(createdSubtask.getId(),
                                        newTask.getId());

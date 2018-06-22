@@ -5,4 +5,7 @@ For custom values for gateway and sso hosts:
 
 > export GATEWAY_HOST=<custom-gateway-host>:<custom-gateway-port>
 > export SSO_HOST=<custom-sso-host>:<custom-sso-port>
+> export REALM=springboot
 > mvn clean verify
+
+Or to run just runtime mvn -pl '!modeling-acceptance-tests,!apps-acceptance-tests' clean verify
