@@ -138,6 +138,18 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
+    public ResponseEntity<Void> delete(ResponseEntity<ProcessInstance> processInstanceEntity) {
+
+
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId(),
+                HttpMethod.DELETE,
+                null,
+                new ParameterizedTypeReference<Void>() {
+                });
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+
     public ResponseEntity<Void> suspend(ResponseEntity<ProcessInstance> processInstanceEntity) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/suspend",
                                                                     HttpMethod.POST,

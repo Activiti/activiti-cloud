@@ -65,6 +65,6 @@ public class ProcessRuntimeExternalEventsProducer implements ProcessRuntimeEvent
 
     @Override
     public void onProcessCancelled(ProcessCancelledEvent event) {
-
+        eventsAggregator.add(eventConverter.from(event));
     }
 }
