@@ -19,10 +19,8 @@ package org.activiti.cloud.services.rest.conf;
 import org.activiti.cloud.services.rest.controllers.ResourcesAssembler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource("classpath:conf/rest-jackson-configuration.properties")
 public class ServicesRestAutoConfiguration {
 
     @Bean
