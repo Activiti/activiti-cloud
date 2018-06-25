@@ -16,6 +16,7 @@
     <module>shared-acceptance-tests</module>
     <module>modeling-acceptance-tests</module>
     <module>runtime-acceptance-tests</module>
+    <module>multiple-runtime-acceptance-tests</module>
     <module>apps-acceptance-tests</module>
   </modules>
   <scm>
