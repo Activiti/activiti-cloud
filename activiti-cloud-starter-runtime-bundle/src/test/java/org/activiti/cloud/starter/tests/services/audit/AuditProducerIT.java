@@ -36,6 +36,7 @@ import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.P
 import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
 import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
+import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CANCELLED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -144,7 +145,8 @@ public class AuditProducerIT {
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getReceivedEvents();
             assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
-                    .containsExactly(PROCESS_CANCELLED.name());
+                    .containsExactly(TASK_CANCELLED.name(),
+                                     PROCESS_CANCELLED.name());
         });
     }
 
