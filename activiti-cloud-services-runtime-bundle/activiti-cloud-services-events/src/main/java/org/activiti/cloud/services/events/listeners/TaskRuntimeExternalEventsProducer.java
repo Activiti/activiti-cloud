@@ -49,7 +49,7 @@ public class TaskRuntimeExternalEventsProducer implements TaskRuntimeEventListen
 
     @Override
     public void onTaskSuspended(TaskSuspendedEvent event) {
-
+        eventsAggregator.add(converter.from(event));
     }
 
     @Override

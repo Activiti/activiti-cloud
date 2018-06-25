@@ -39,6 +39,7 @@ import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_AS
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CANCELLED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
+import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -102,7 +103,8 @@ public class AuditProducerIT {
         //then
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
                 .extracting(event -> event.getEventType().name())
-                .containsExactly(PROCESS_SUSPENDED.name()));
+                .containsExactly(PROCESS_SUSPENDED.name(),
+                                 TASK_SUSPENDED.name()));
 
         //when
         processInstanceRestTemplate.resume(startProcessEntity);
