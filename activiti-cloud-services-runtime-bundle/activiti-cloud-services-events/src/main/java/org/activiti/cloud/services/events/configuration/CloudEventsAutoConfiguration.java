@@ -31,6 +31,7 @@ import org.activiti.cloud.services.events.listeners.CloudTaskAssignedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCancelledProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCandidateGroupAddedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCandidateUserAddedProducer;
+import org.activiti.cloud.services.events.listeners.CloudTaskCandidateUserRemovedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCompletedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCreatedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskSuspendedProducer;
@@ -114,6 +115,12 @@ public class CloudEventsAutoConfiguration {
                                                                                    ProcessEngineEventsAggregator eventsAggregator) {
         return new CloudTaskCandidateUserAddedProducer(taskRuntimeEventConverter,
                                                        eventsAggregator);
+    }
+
+    @Bean
+    public CloudTaskCandidateUserRemovedProducer taskCandidateUserRemovedProducer(ToCloudTaskRuntimeEventConverter converter,
+                                                                                  ProcessEngineEventsAggregator eventsAggregator){
+        return new CloudTaskCandidateUserRemovedProducer(converter, eventsAggregator);
     }
 
     @Bean

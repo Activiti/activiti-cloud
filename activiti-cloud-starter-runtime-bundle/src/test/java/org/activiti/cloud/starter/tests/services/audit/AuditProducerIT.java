@@ -35,6 +35,7 @@ import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.P
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED;
 import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
 import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
+import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_ACTIVATED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CANCELLED;
@@ -133,6 +134,7 @@ public class AuditProducerIT {
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(TASK_COMPLETED.name(),
+                                 TASK_CANDIDATE_USER_REMOVED.name(),
                                  PROCESS_COMPLETED.name()));
     }
 

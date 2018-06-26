@@ -21,6 +21,7 @@ import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
 import org.activiti.runtime.api.event.CloudTaskCancelledEvent;
 import org.activiti.runtime.api.event.CloudTaskCandidateGroupAddedEvent;
 import org.activiti.runtime.api.event.CloudTaskCandidateUserAddedEvent;
+import org.activiti.runtime.api.event.CloudTaskCandidateUserRemovedEvent;
 import org.activiti.runtime.api.event.CloudTaskCompletedEvent;
 import org.activiti.runtime.api.event.CloudTaskCreatedEvent;
 import org.activiti.runtime.api.event.CloudTaskSuspendedEvent;
@@ -29,6 +30,7 @@ import org.activiti.runtime.api.event.TaskAssigned;
 import org.activiti.runtime.api.event.TaskCancelled;
 import org.activiti.runtime.api.event.TaskCandidateGroupAdded;
 import org.activiti.runtime.api.event.TaskCandidateUserAdded;
+import org.activiti.runtime.api.event.TaskCandidateUserRemoved;
 import org.activiti.runtime.api.event.TaskCompleted;
 import org.activiti.runtime.api.event.TaskCreated;
 import org.activiti.runtime.api.event.TaskSuspended;
@@ -37,6 +39,7 @@ import org.activiti.runtime.api.event.impl.CloudTaskAssignedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCancelledEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCandidateGroupAddedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCandidateUserAddedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudTaskCandidateUserRemovedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCompletedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCreatedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskSuspendedEventImpl;
@@ -87,6 +90,12 @@ public class ToCloudTaskRuntimeEventConverter {
 
     public CloudTaskCandidateUserAddedEvent from(TaskCandidateUserAdded event){
         CloudTaskCandidateUserAddedEventImpl cloudEvent = new CloudTaskCandidateUserAddedEventImpl(event.getEntity());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+
+    public CloudTaskCandidateUserRemovedEvent from(TaskCandidateUserRemoved event){
+        CloudTaskCandidateUserRemovedEventImpl cloudEvent = new CloudTaskCandidateUserRemovedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
