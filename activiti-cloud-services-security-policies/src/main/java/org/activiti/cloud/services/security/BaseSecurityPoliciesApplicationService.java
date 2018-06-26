@@ -1,13 +1,13 @@
 package org.activiti.cloud.services.security;
 
-import org.activiti.engine.UserGroupLookupProxy;
-import org.activiti.engine.UserRoleLookupProxy;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.activiti.engine.UserGroupLookupProxy;
+import org.activiti.engine.UserRoleLookupProxy;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class BaseSecurityPoliciesApplicationService {
 
@@ -40,20 +40,20 @@ public class BaseSecurityPoliciesApplicationService {
                 securityPolicy);
     }
 
-    public boolean canRead(String processDefId,
+    public boolean canRead(String processDefinitionKey,
                            String appName) {
-        return hasPermission(processDefId,
+        return hasPermission(processDefinitionKey,
                 SecurityPolicy.READ,
                 appName);
     }
 
 
-    public boolean canWrite(String processDefId, String appName){
-        return hasPermission(processDefId, SecurityPolicy.WRITE,appName);
+    public boolean canWrite(String processDefinitionKey, String appName){
+        return hasPermission(processDefinitionKey, SecurityPolicy.WRITE,appName);
     }
 
 
-    protected boolean hasPermission(String processDefId,
+    protected boolean hasPermission(String processDefinitionKey,
                                   SecurityPolicy securityPolicy,
                                   String appName) {
 
@@ -65,7 +65,7 @@ public class BaseSecurityPoliciesApplicationService {
             return true;
         }
 
-        Set<String> keys = new HashSet();
+        Set<String> keys = new HashSet<>();
         Map<String, Set<String>> policiesMap = definitionKeysAllowedForPolicy(securityPolicy);
         if(policiesMap.get(appName) !=null) {
             keys.addAll(policiesMap.get(appName));
@@ -75,12 +75,13 @@ public class BaseSecurityPoliciesApplicationService {
             keys.addAll(policiesMap.get(appName.replaceAll("-","").toLowerCase()));
         }
 
-        return (keys != null && (anEntryInSetStartsId(keys,processDefId) || keys.contains(securityPoliciesService.getWildcard())));
+        return anEntryInSetStartsKey(keys,
+                                     processDefinitionKey) || keys.contains(securityPoliciesService.getWildcard());
     }
 
-    protected boolean anEntryInSetStartsId(Set<String> keys,String processDefId){
+    private boolean anEntryInSetStartsKey(Set<String> keys, String processDefinitionKey){
         for(String key:keys){
-            if(processDefId.startsWith(key)){
+            if(processDefinitionKey.startsWith(key)){
                 return true;
             }
         }
