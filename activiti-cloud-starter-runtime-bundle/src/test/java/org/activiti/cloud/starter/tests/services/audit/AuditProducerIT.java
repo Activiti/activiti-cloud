@@ -35,6 +35,7 @@ import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.P
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED;
 import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
 import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
+import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_ACTIVATED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CANCELLED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
@@ -112,7 +113,8 @@ public class AuditProducerIT {
         //then
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
                 .extracting(event -> event.getEventType().name())
-                .containsExactly(PROCESS_RESUMED.name()));
+                .containsExactly(PROCESS_RESUMED.name(),
+                                 TASK_ACTIVATED.name()));
 
         //given
         ResponseEntity<PagedResources<Task>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);

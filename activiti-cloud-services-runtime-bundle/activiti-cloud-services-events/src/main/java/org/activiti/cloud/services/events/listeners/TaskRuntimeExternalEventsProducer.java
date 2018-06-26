@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
+import org.activiti.runtime.api.event.TaskActivated;
 import org.activiti.runtime.api.event.TaskAssignedEvent;
 import org.activiti.runtime.api.event.TaskCancelled;
 import org.activiti.runtime.api.event.TaskCandidateGroupAddedEvent;
@@ -49,6 +50,11 @@ public class TaskRuntimeExternalEventsProducer implements TaskRuntimeEventListen
 
     @Override
     public void onTaskSuspended(TaskSuspendedEvent event) {
+        eventsAggregator.add(converter.from(event));
+    }
+
+    @Override
+    public void onTaskActivated(TaskActivated event) {
         eventsAggregator.add(converter.from(event));
     }
 

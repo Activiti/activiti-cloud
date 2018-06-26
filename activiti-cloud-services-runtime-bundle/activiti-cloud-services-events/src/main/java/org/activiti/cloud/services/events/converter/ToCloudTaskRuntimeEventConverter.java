@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.runtime.api.event.CloudTaskActivatedEvent;
 import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
 import org.activiti.runtime.api.event.CloudTaskCancelledEvent;
 import org.activiti.runtime.api.event.CloudTaskCandidateGroupAddedEvent;
@@ -23,6 +24,7 @@ import org.activiti.runtime.api.event.CloudTaskCandidateUserAddedEvent;
 import org.activiti.runtime.api.event.CloudTaskCompletedEvent;
 import org.activiti.runtime.api.event.CloudTaskCreatedEvent;
 import org.activiti.runtime.api.event.CloudTaskSuspendedEvent;
+import org.activiti.runtime.api.event.TaskActivated;
 import org.activiti.runtime.api.event.TaskAssignedEvent;
 import org.activiti.runtime.api.event.TaskCancelled;
 import org.activiti.runtime.api.event.TaskCandidateGroupAddedEvent;
@@ -30,6 +32,7 @@ import org.activiti.runtime.api.event.TaskCandidateUserAddedEvent;
 import org.activiti.runtime.api.event.TaskCompletedEvent;
 import org.activiti.runtime.api.event.TaskCreatedEvent;
 import org.activiti.runtime.api.event.TaskSuspendedEvent;
+import org.activiti.runtime.api.event.impl.CloudTaskActivatedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskAssignedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCancelledEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCandidateGroupAddedEventImpl;
@@ -72,6 +75,12 @@ public class ToCloudTaskRuntimeEventConverter {
 
     public CloudTaskSuspendedEvent from(TaskSuspendedEvent event) {
         CloudTaskSuspendedEventImpl cloudEvent = new CloudTaskSuspendedEventImpl(event.getEntity());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+
+    public CloudTaskActivatedEvent from(TaskActivated event) {
+        CloudTaskActivatedEventImpl cloudEvent = new CloudTaskActivatedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
