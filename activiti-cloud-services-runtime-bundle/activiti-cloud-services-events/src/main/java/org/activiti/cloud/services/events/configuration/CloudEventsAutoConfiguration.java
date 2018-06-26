@@ -20,14 +20,20 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
+import org.activiti.cloud.services.events.listeners.CloudProcessCancelledProducer;
+import org.activiti.cloud.services.events.listeners.CloudProcessCompletedProducer;
+import org.activiti.cloud.services.events.listeners.CloudProcessCreatedProducer;
+import org.activiti.cloud.services.events.listeners.CloudProcessResumedProducer;
+import org.activiti.cloud.services.events.listeners.CloudProcessStartedProducer;
+import org.activiti.cloud.services.events.listeners.CloudProcessSuspendedProducer;
+import org.activiti.cloud.services.events.listeners.CloudTaskActivatedProducer;
+import org.activiti.cloud.services.events.listeners.CloudTaskAssignedProducer;
+import org.activiti.cloud.services.events.listeners.CloudTaskCancelledProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCandidateGroupAddedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCandidateUserAddedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCompletedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskAssignedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCancelledProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCreatedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskSuspendedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskActivatedProducer;
 import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.springframework.context.annotation.Bean;
@@ -63,50 +69,95 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     public CloudTaskCreatedProducer cloudTaskCreatedProducer(ToCloudTaskRuntimeEventConverter taskRuntimeEventConverter,
-                                                             ProcessEngineEventsAggregator eventsAggregator){
-        return new CloudTaskCreatedProducer(taskRuntimeEventConverter, eventsAggregator);
+                                                             ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudTaskCreatedProducer(taskRuntimeEventConverter,
+                                            eventsAggregator);
     }
 
     @Bean
     public CloudTaskCancelledProducer cloudTaskCancelledProducer(ToCloudTaskRuntimeEventConverter taskRuntimeEventConverter,
-                                                          ProcessEngineEventsAggregator eventsAggregator) {
-        return new CloudTaskCancelledProducer(taskRuntimeEventConverter, eventsAggregator);
+                                                                 ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudTaskCancelledProducer(taskRuntimeEventConverter,
+                                              eventsAggregator);
     }
 
     @Bean
     public CloudTaskAssignedProducer cloudTaskAssignedProducer(ToCloudTaskRuntimeEventConverter taskRuntimeEventConverter,
-                                                        ProcessEngineEventsAggregator eventsAggregator) {
-        return new CloudTaskAssignedProducer(taskRuntimeEventConverter, eventsAggregator);
+                                                               ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudTaskAssignedProducer(taskRuntimeEventConverter,
+                                             eventsAggregator);
     }
 
     @Bean
     public CloudTaskSuspendedProducer cloudTaskSuspendedProducer(ToCloudTaskRuntimeEventConverter taskRuntimeEventConverter,
-                                                                  ProcessEngineEventsAggregator eventsAggregator) {
-        return new CloudTaskSuspendedProducer(taskRuntimeEventConverter, eventsAggregator);
+                                                                 ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudTaskSuspendedProducer(taskRuntimeEventConverter,
+                                              eventsAggregator);
     }
 
     @Bean
     public CloudTaskActivatedProducer cloutTaskActivatedProducer(ToCloudTaskRuntimeEventConverter taskRuntimeEventConverter,
                                                                  ProcessEngineEventsAggregator eventsAggregator) {
-        return new CloudTaskActivatedProducer(taskRuntimeEventConverter, eventsAggregator);
+        return new CloudTaskActivatedProducer(taskRuntimeEventConverter,
+                                              eventsAggregator);
     }
 
     @Bean
     public CloudTaskCompletedProducer cloudTaskCompletedProducer(ToCloudTaskRuntimeEventConverter taskRuntimeEventConverter,
-                                                                ProcessEngineEventsAggregator eventsAggregator) {
-        return new CloudTaskCompletedProducer(taskRuntimeEventConverter, eventsAggregator);
+                                                                 ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudTaskCompletedProducer(taskRuntimeEventConverter,
+                                              eventsAggregator);
     }
 
     @Bean
     public CloudTaskCandidateUserAddedProducer cloudTaskCandidateUserAddedProducer(ToCloudTaskRuntimeEventConverter taskRuntimeEventConverter,
-                                                                            ProcessEngineEventsAggregator eventsAggregator) {
-        return new CloudTaskCandidateUserAddedProducer(taskRuntimeEventConverter, eventsAggregator);
+                                                                                   ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudTaskCandidateUserAddedProducer(taskRuntimeEventConverter,
+                                                       eventsAggregator);
     }
 
     @Bean
     public CloudTaskCandidateGroupAddedProducer cloudTaskCandidateGroupAddedProducer(ToCloudTaskRuntimeEventConverter taskRuntimeEventConverter,
                                                                                      ProcessEngineEventsAggregator eventsAggregator) {
-        return new CloudTaskCandidateGroupAddedProducer(taskRuntimeEventConverter, eventsAggregator);
+        return new CloudTaskCandidateGroupAddedProducer(taskRuntimeEventConverter,
+                                                        eventsAggregator);
+    }
+
+    @Bean
+    public CloudProcessCreatedProducer processCreatedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
+                                                              ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudProcessCreatedProducer(eventConverter,
+                                               eventsAggregator);
+    }
+
+    @Bean
+    public CloudProcessStartedProducer processStartedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
+                                                              ProcessEngineEventsAggregator eventsAggregator){
+        return new CloudProcessStartedProducer(eventConverter, eventsAggregator);
+    }
+
+    @Bean
+    public CloudProcessSuspendedProducer cloudProcessSuspendedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
+                                                                       ProcessEngineEventsAggregator eventsAggregator){
+        return new CloudProcessSuspendedProducer(eventConverter, eventsAggregator);
+    }
+
+    @Bean
+    public CloudProcessResumedProducer cloudProcessResumedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
+                                                                   ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudProcessResumedProducer(eventConverter, eventsAggregator);
+    }
+
+    @Bean
+    public CloudProcessCompletedProducer cloudProcessCompletedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
+                                                                       ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudProcessCompletedProducer(eventConverter, eventsAggregator);
+    }
+
+    @Bean
+    public CloudProcessCancelledProducer cloudProcessCancelledProducer(ToCloudProcessRuntimeEventConverter eventConverter,
+                                                                       ProcessEngineEventsAggregator eventsAggregator){
+        return new CloudProcessCancelledProducer(eventConverter, eventsAggregator);
     }
 
 }
