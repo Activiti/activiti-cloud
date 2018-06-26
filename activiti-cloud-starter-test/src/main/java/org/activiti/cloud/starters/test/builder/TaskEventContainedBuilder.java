@@ -84,9 +84,9 @@ public class TaskEventContainedBuilder {
     private static TaskImpl buildTask(String taskName,
                                       Task.TaskStatus status,
                                       ProcessInstance processInstance) {
-        TaskImpl task = new TaskImpl(status,
+        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
                                      taskName,
-                                     UUID.randomUUID().toString());
+                                     status);
         task.setProcessInstanceId(processInstance.getId());
         return task;
     }
