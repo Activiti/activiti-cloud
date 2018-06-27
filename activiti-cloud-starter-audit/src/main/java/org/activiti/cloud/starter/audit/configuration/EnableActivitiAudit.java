@@ -12,8 +12,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@EnableJpaRepositories("org.activiti.cloud.services.audit")
-@EntityScan(basePackages = {"org.activiti.cloud.services.audit.events","org.activiti.cloud.services.audit.events.model"})
+@EnableJpaRepositories("org.activiti.cloud.services.audit.jpa")
+@EntityScan(basePackages = {"org.activiti.cloud.services.audit.jpa.events","org.activiti.cloud.services.audit.jpa.events.model"})
 @Inherited
 @EnableDiscoveryClient
 public @interface EnableActivitiAudit {

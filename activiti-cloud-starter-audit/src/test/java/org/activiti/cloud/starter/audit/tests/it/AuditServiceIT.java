@@ -22,9 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.activiti.cloud.services.audit.events.ActivityStartedAuditEventEntity;
-import org.activiti.cloud.services.audit.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.repository.EventsRepository;
+import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.runtime.api.event.BPMNActivityEvent;
 import org.activiti.runtime.api.event.CloudBPMNActivityStartedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
@@ -40,12 +38,15 @@ import org.activiti.runtime.api.event.impl.CloudRuntimeEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskAssignedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCompletedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCreatedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudVariableCreatedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudVariableDeletedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudVariableUpdatedEventImpl;
 import org.activiti.runtime.api.model.impl.BPMNActivityImpl;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.activiti.runtime.api.model.impl.TaskImpl;
+import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.conf.activiti.runtime.IgnoredRuntimeEvent;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,107 +104,6 @@ public class AuditServiceIT {
                                         coveredEvent.getServiceVersion()));
             }
         });
-    }
-
-    private List<CloudRuntimeEvent> getTestEvents() {
-        List<CloudRuntimeEvent> testEvents = new ArrayList<>();
-
-        BPMNActivityImpl bpmnActivityCancelled = new BPMNActivityImpl();
-
-        CloudBPMNActivityCancelledEventImpl cloudBPMNActivityCancelledEvent = new CloudBPMNActivityCancelledEventImpl("ActivityCancelledEventId",
-                                                                                                                      System.currentTimeMillis(),
-                                                                                                                      bpmnActivityCancelled);
-        cloudBPMNActivityCancelledEvent.setProcessDefinitionId("103");
-        cloudBPMNActivityCancelledEvent.setProcessInstanceId("104");
-
-        testEvents.add(cloudBPMNActivityCancelledEvent);
-
-        BPMNActivityImpl bpmnActivityStarted = new BPMNActivityImpl();
-
-        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent = new CloudBPMNActivityStartedEventImpl("ActivityStartedEventId",
-                                                                                                                System.currentTimeMillis(),
-                                                                                                                bpmnActivityStarted);
-        cloudBPMNActivityStartedEvent.setProcessDefinitionId("3");
-        cloudBPMNActivityStartedEvent.setProcessInstanceId("4");
-
-        testEvents.add(cloudBPMNActivityStartedEvent);
-
-        BPMNActivityImpl bpmnActivityCompleted = new BPMNActivityImpl();
-
-        CloudBPMNActivityCompletedEventImpl cloudBPMNActivityCompletedEvent = new CloudBPMNActivityCompletedEventImpl("ActivityCompletedEventId",
-                                                                                                                      System.currentTimeMillis(),
-                                                                                                                      bpmnActivityCompleted);
-        cloudBPMNActivityCompletedEvent.setProcessDefinitionId("23");
-        cloudBPMNActivityCompletedEvent.setProcessInstanceId("42");
-
-        testEvents.add(cloudBPMNActivityCompletedEvent);
-
-        ProcessInstanceImpl processInstanceCompleted = new ProcessInstanceImpl();
-        processInstanceCompleted.setId("24");
-        processInstanceCompleted.setProcessDefinitionId("43");
-
-        CloudProcessCompletedEventImpl cloudProcessCompletedEvent = new CloudProcessCompletedEventImpl("ProcessCompletedEventId",
-                                                                                                       System.currentTimeMillis(),
-                                                                                                       processInstanceCompleted);
-
-        testEvents.add(cloudProcessCompletedEvent);
-
-        ProcessInstanceImpl processInstanceCancelled = new ProcessInstanceImpl();
-        processInstanceCancelled.setId("124");
-        processInstanceCancelled.setProcessDefinitionId("143");
-
-        CloudProcessCancelledEventImpl cloudProcessCancelledEvent = new CloudProcessCancelledEventImpl("ProcessCancelledEventId",
-                                                                                                       System.currentTimeMillis(),
-                                                                                                       processInstanceCancelled);
-
-        testEvents.add(cloudProcessCancelledEvent);
-
-        ProcessInstanceImpl processInstanceStarted = new ProcessInstanceImpl();
-        processInstanceStarted.setId("25");
-        processInstanceStarted.setProcessDefinitionId("44");
-
-        CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl("ProcessStartedEventId",
-                                                                                                 System.currentTimeMillis(),
-                                                                                                 processInstanceStarted);
-
-        testEvents.add(cloudProcessStartedEvent);
-
-        TaskImpl taskAssigned = new TaskImpl();
-        taskAssigned.setProcessDefinitionId("27");
-        taskAssigned.setProcessInstanceId("46");
-        CloudTaskAssignedEventImpl cloudTaskAssignedEvent = new CloudTaskAssignedEventImpl("TaskAssignedEventId",
-                                                                                           System.currentTimeMillis(),
-                                                                                           taskAssigned);
-        testEvents.add(cloudTaskAssignedEvent);
-
-        TaskImpl taskCompleted = new TaskImpl();
-        taskCompleted.setProcessDefinitionId("28");
-        taskCompleted.setProcessInstanceId("47");
-        CloudTaskCompletedEventImpl cloudTaskCompletedEvent = new CloudTaskCompletedEventImpl("TaskCompletedEventId",
-                                                                                              System.currentTimeMillis(),
-                                                                                              taskCompleted);
-        testEvents.add(cloudTaskCompletedEvent);
-
-        TaskImpl taskCreated = new TaskImpl();
-        taskCreated.setProcessDefinitionId("28");
-        taskCreated.setProcessInstanceId("47");
-        CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl("TaskCreatedEventId",
-                                                                                        System.currentTimeMillis(),
-                                                                                        taskCreated);
-        testEvents.add(cloudTaskCreatedEvent);
-
-//  String processDefinitionId, String processInstanceId
-
-//        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(), "SequenceFlowTakenEvent", "14", "26", "45"));
-
-//        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(), "TaskCreatedEvent", "17", "29", "48"));
-//        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(), "VariableCreatedEvent", "18", "30", "49"));
-//        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(), "VariableDeletedEvent", "19", "31", "50"));
-//        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(), "VariableUpdatedEvent", "20", "32", "51"));
-//        coveredEvents.add(((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)MockIntegrationEventBuilder.anIntegrationRequestSentEvent().withExecutionId("21")).withProcessDefinitionId("33")).withProcessInstanceId("52")).withFlowNodeId("serviceTask").build());
-//        coveredEvents.add(((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)MockIntegrationEventBuilder.anIntegrationResultRecievedEvent().withExecutionId("22")).withProcessDefinitionId("33")).withProcessInstanceId("52")).withFlowNodeId("serviceTask").build());
-
-        return testEvents;
     }
 
     @Test
@@ -301,7 +201,7 @@ public class AuditServiceIT {
         cloudBPMNActivityStartedEvent.setProcessInstanceId("4");
 
         events[0] = cloudBPMNActivityStartedEvent;
-        events[1] = new CloudRuntimeEventImpl(){
+        events[1] = new CloudRuntimeEventImpl() {
             @Override
             public Enum<?> getEventType() {
                 return IgnoredRuntimeEvent.IgnoredRuntimeEvents.IGNORED;
@@ -327,5 +227,120 @@ public class AuditServiceIT {
             assertThat(cloudProcessStartedEvent.getProcessInstanceId()).isEqualTo("4");
             assertThat(cloudProcessStartedEvent.getEntity().getActivityName()).isEqualTo("first step");
         });
+    }
+
+    private List<CloudRuntimeEvent> getTestEvents() {
+        List<CloudRuntimeEvent> testEvents = new ArrayList<>();
+
+        BPMNActivityImpl bpmnActivityCancelled = new BPMNActivityImpl();
+
+        CloudBPMNActivityCancelledEventImpl cloudBPMNActivityCancelledEvent = new CloudBPMNActivityCancelledEventImpl("ActivityCancelledEventId",
+                                                                                                                      System.currentTimeMillis(),
+                                                                                                                      bpmnActivityCancelled);
+        cloudBPMNActivityCancelledEvent.setProcessDefinitionId("103");
+        cloudBPMNActivityCancelledEvent.setProcessInstanceId("104");
+
+        testEvents.add(cloudBPMNActivityCancelledEvent);
+
+        BPMNActivityImpl bpmnActivityStarted = new BPMNActivityImpl();
+
+        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent = new CloudBPMNActivityStartedEventImpl("ActivityStartedEventId",
+                                                                                                                System.currentTimeMillis(),
+                                                                                                                bpmnActivityStarted);
+        cloudBPMNActivityStartedEvent.setProcessDefinitionId("3");
+        cloudBPMNActivityStartedEvent.setProcessInstanceId("4");
+
+        testEvents.add(cloudBPMNActivityStartedEvent);
+
+        BPMNActivityImpl bpmnActivityCompleted = new BPMNActivityImpl();
+
+        CloudBPMNActivityCompletedEventImpl cloudBPMNActivityCompletedEvent = new CloudBPMNActivityCompletedEventImpl("ActivityCompletedEventId",
+                                                                                                                      System.currentTimeMillis(),
+                                                                                                                      bpmnActivityCompleted);
+        cloudBPMNActivityCompletedEvent.setProcessDefinitionId("23");
+        cloudBPMNActivityCompletedEvent.setProcessInstanceId("42");
+
+        testEvents.add(cloudBPMNActivityCompletedEvent);
+
+        ProcessInstanceImpl processInstanceCompleted = new ProcessInstanceImpl();
+        processInstanceCompleted.setId("24");
+        processInstanceCompleted.setProcessDefinitionId("43");
+
+        CloudProcessCompletedEventImpl cloudProcessCompletedEvent = new CloudProcessCompletedEventImpl("ProcessCompletedEventId",
+                                                                                                       System.currentTimeMillis(),
+                                                                                                       processInstanceCompleted);
+
+        testEvents.add(cloudProcessCompletedEvent);
+
+        ProcessInstanceImpl processInstanceCancelled = new ProcessInstanceImpl();
+        processInstanceCancelled.setId("124");
+        processInstanceCancelled.setProcessDefinitionId("143");
+
+        CloudProcessCancelledEventImpl cloudProcessCancelledEvent = new CloudProcessCancelledEventImpl("ProcessCancelledEventId",
+                                                                                                       System.currentTimeMillis(),
+                                                                                                       processInstanceCancelled);
+
+        testEvents.add(cloudProcessCancelledEvent);
+
+        ProcessInstanceImpl processInstanceStarted = new ProcessInstanceImpl();
+        processInstanceStarted.setId("25");
+        processInstanceStarted.setProcessDefinitionId("44");
+
+        CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl("ProcessStartedEventId",
+                                                                                                 System.currentTimeMillis(),
+                                                                                                 processInstanceStarted);
+
+        testEvents.add(cloudProcessStartedEvent);
+
+        TaskImpl taskAssigned = new TaskImpl();
+        taskAssigned.setProcessDefinitionId("27");
+        taskAssigned.setProcessInstanceId("46");
+        CloudTaskAssignedEventImpl cloudTaskAssignedEvent = new CloudTaskAssignedEventImpl("TaskAssignedEventId",
+                                                                                           System.currentTimeMillis(),
+                                                                                           taskAssigned);
+        testEvents.add(cloudTaskAssignedEvent);
+
+        TaskImpl taskCompleted = new TaskImpl();
+        taskCompleted.setProcessDefinitionId("28");
+        taskCompleted.setProcessInstanceId("47");
+        CloudTaskCompletedEventImpl cloudTaskCompletedEvent = new CloudTaskCompletedEventImpl("TaskCompletedEventId",
+                                                                                              System.currentTimeMillis(),
+                                                                                              taskCompleted);
+        testEvents.add(cloudTaskCompletedEvent);
+
+        TaskImpl taskCreated = new TaskImpl();
+        taskCreated.setProcessDefinitionId("28");
+        taskCreated.setProcessInstanceId("47");
+        CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl("TaskCreatedEventId",
+                                                                                        System.currentTimeMillis(),
+                                                                                        taskCreated);
+        testEvents.add(cloudTaskCreatedEvent);
+
+//        VariableInstanceImpl variableCreated = new VariableInstanceImpl("name", "string", "value of string", "49" );
+//        CloudVariableCreatedEventImpl cloudVariableCreatedEvent = new CloudVariableCreatedEventImpl("VariableCreatedEventId",
+//                                                                                                    System.currentTimeMillis(),
+//                                                                                                    variableCreated);
+//        testEvents.add(cloudVariableCreatedEvent);
+//
+//        VariableInstanceImpl variableDeleted = new VariableInstanceImpl("name", "string", "value of string", "50" );
+//        CloudVariableDeletedEventImpl cloudVariableDeletedEvent = new CloudVariableDeletedEventImpl("VariableDeletedEventId",
+//                                                                                                    System.currentTimeMillis(),
+//                                                                                                    variableDeleted);
+//        testEvents.add(cloudVariableDeletedEvent);
+//
+//        VariableInstanceImpl variableUpdated = new VariableInstanceImpl("name", "string", "value of string", "51" );
+//        CloudVariableUpdatedEventImpl cloudVariableUpdatedEvent = new CloudVariableUpdatedEventImpl("VariableUpdatedEventId",
+//                                                                                                    System.currentTimeMillis(),
+//                                                                                                    variableUpdated);
+//        testEvents.add(cloudVariableUpdatedEvent);
+
+//  String processDefinitionId, String processInstanceId
+
+//        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(), "SequenceFlowTakenEvent", "14", "26", "45"));
+
+//        coveredEvents.add(((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)MockIntegrationEventBuilder.anIntegrationRequestSentEvent().withExecutionId("21")).withProcessDefinitionId("33")).withProcessInstanceId("52")).withFlowNodeId("serviceTask").build());
+//        coveredEvents.add(((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)MockIntegrationEventBuilder.anIntegrationResultRecievedEvent().withExecutionId("22")).withProcessDefinitionId("33")).withProcessInstanceId("52")).withFlowNodeId("serviceTask").build());
+
+        return testEvents;
     }
 }

@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.starter.audit.tests;
+package org.activiti.cloud.services.audit.jpa;
 
-import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
-import org.activiti.cloud.starter.audit.configuration.EnableActivitiAudit;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@EnableActivitiAudit
-public class JpaAuditApplication  {
+@ComponentScan(basePackages = {"org.activiti.cloud.services","org.activiti.cloud.alfresco"})
+public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(JpaAuditApplication.class,
+        SpringApplication.run(Application.class,
                               args);
     }
-
 }
