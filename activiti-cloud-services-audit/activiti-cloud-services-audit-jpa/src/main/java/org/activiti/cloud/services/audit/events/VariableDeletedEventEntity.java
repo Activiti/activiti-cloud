@@ -19,25 +19,43 @@ package org.activiti.cloud.services.audit.events;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.activiti.runtime.api.event.VariableEvent;
+import org.activiti.runtime.api.model.VariableInstance;
+
 @Entity
 @DiscriminatorValue(value = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT)
-public class VariableDeletedEventEntity extends ProcessEngineEventEntity {
+public class VariableDeletedEventEntity extends VariableAuditEventEntity {
 
     protected static final String VARIABLE_DELETED_EVENT = "VariableDeletedEvent";
 
-    private String variableName;
-    private String variableType;
-    private String taskId;
-
-    public String getVariableName() {
-        return variableName;
+    public VariableDeletedEventEntity() {
     }
 
-    public String getVariableType() {
-        return variableType;
+    public VariableDeletedEventEntity(String eventId,
+                                      Long timestamp) {
+        super(eventId,
+              timestamp,
+              VariableEvent.VariableEvents.VARIABLE_DELETED.name());
     }
 
-    public String getTaskId() {
-        return taskId;
+    public VariableDeletedEventEntity(String eventId,
+                                      Long timestamp,
+                                      String appName,
+                                      String appVersion,
+                                      String serviceName,
+                                      String serviceFullName,
+                                      String serviceType,
+                                      String serviceVersion,
+                                      VariableInstance variableInstance) {
+        super(eventId,
+              timestamp,
+              VariableEvent.VariableEvents.VARIABLE_DELETED.name(),
+              appName,
+              appVersion,
+              serviceName,
+              serviceFullName,
+              serviceType,
+              serviceVersion,
+              variableInstance);
     }
 }

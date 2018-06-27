@@ -16,27 +16,46 @@
 
 package org.activiti.cloud.services.audit.events;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
 
-import org.activiti.cloud.services.audit.converter.TaskJpaJsonConverter;
-import org.activiti.cloud.services.audit.events.model.Task;
+import org.activiti.runtime.api.event.TaskRuntimeEvent;
+import org.activiti.runtime.api.model.Task;
 
 @Entity
 @DiscriminatorValue(value = TaskCreatedEventEntity.TASK_CREATED_EVENT)
-public class TaskCreatedEventEntity extends ProcessEngineEventEntity {
+public class TaskCreatedEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_CREATED_EVENT = "TaskCreatedEvent";
 
-    @Convert(converter = TaskJpaJsonConverter.class)
-    @Lob
-    @Column
-    private Task task;
+    public TaskCreatedEventEntity() {
+    }
 
-    public Task getTask() {
-        return task;
+    public TaskCreatedEventEntity(String eventId,
+                                  Long timestamp) {
+        super(eventId,
+              timestamp,
+              TaskRuntimeEvent.TaskEvents.TASK_CREATED.name());
+    }
+
+    public TaskCreatedEventEntity(String eventId,
+                                  Long timestamp,
+                                  String appName,
+                                  String appVersion,
+                                  String serviceName,
+                                  String serviceFullName,
+                                  String serviceType,
+                                  String serviceVersion,
+                                  Task task) {
+        super(eventId,
+              timestamp,
+              TaskRuntimeEvent.TaskEvents.TASK_CREATED.name(),
+              appName,
+              appVersion,
+              serviceName,
+              serviceFullName,
+              serviceType,
+              serviceVersion,
+              task);
     }
 }

@@ -16,23 +16,71 @@
 
 package org.activiti.cloud.services.audit.events;
 
-import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.cloud.services.audit.converter.ProcessInstanceJpaJsonConverter;
-import org.activiti.cloud.services.audit.events.model.ProcessInstance;
+import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.model.ProcessInstance;
 
 @Entity
 @DiscriminatorValue(value = ProcessCompletedEventEntity.PROCESS_COMPLETED_EVENT)
-public class ProcessCompletedEventEntity extends ProcessEngineEventEntity {
+public class ProcessCompletedEventEntity extends ProcessAuditEventEntity {
 
     protected static final String PROCESS_COMPLETED_EVENT = "ProcessCompletedEvent";
 
-    @Convert(converter = ProcessInstanceJpaJsonConverter.class)
-    private ProcessInstance processInstance;
+    public ProcessCompletedEventEntity() {
+    }
 
-    public ProcessInstance getProcessInstance() {
-        return processInstance;
+    public ProcessCompletedEventEntity(String eventId,
+                                       Long timestamp) {
+        super(eventId,
+              timestamp,
+              ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name());
+    }
+
+    public ProcessCompletedEventEntity(String eventId,
+                                       Long timestamp,
+                                       String appName,
+                                       String appVersion,
+                                       String serviceName,
+                                       String serviceFullName,
+                                       String serviceType,
+                                       String serviceVersion,
+                                       ProcessInstance processInstance,
+                                       String nestedProcessDefinitionId,
+                                       String nestedProcessInstanceId) {
+        super(eventId,
+              timestamp,
+              ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name(),
+              appName,
+              appVersion,
+              serviceName,
+              serviceFullName,
+              serviceType,
+              serviceVersion,
+              processInstance,
+              nestedProcessDefinitionId,
+              nestedProcessInstanceId);
+    }
+
+    public ProcessCompletedEventEntity(String eventId,
+                                       Long timestamp,
+                                       String appName,
+                                       String appVersion,
+                                       String serviceName,
+                                       String serviceFullName,
+                                       String serviceType,
+                                       String serviceVersion,
+                                       ProcessInstance processInstance) {
+        super(eventId,
+              timestamp,
+              ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name(),
+              appName,
+              appVersion,
+              serviceName,
+              serviceFullName,
+              serviceType,
+              serviceVersion,
+              processInstance);
     }
 }

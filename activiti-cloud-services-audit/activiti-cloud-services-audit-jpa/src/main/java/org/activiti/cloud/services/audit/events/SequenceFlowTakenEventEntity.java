@@ -21,7 +21,7 @@ import javax.persistence.Entity;
 
 @Entity
 @DiscriminatorValue(value = SequenceFlowTakenEventEntity.SEQUENCE_FLOW_TAKEN_EVENT)
-public class SequenceFlowTakenEventEntity extends ProcessEngineEventEntity {
+public class SequenceFlowTakenEventEntity extends AuditEventEntity {
 
     protected static final String SEQUENCE_FLOW_TAKEN_EVENT = "SequenceFlowTakenEvent";
 
@@ -32,6 +32,39 @@ public class SequenceFlowTakenEventEntity extends ProcessEngineEventEntity {
     private String targetActivityId;
     private String targetActivityName;
     private String targetActivityType;
+
+    public SequenceFlowTakenEventEntity() {
+    }
+
+    public SequenceFlowTakenEventEntity(String eventId,
+                                        Long timestamp,
+                                        String eventType) {
+        super(eventId,
+              timestamp,
+              eventType);
+    }
+
+    public SequenceFlowTakenEventEntity(String eventId,
+                                        Long timestamp,
+                                        String eventType,
+                                        String sequenceFlowId,
+                                        String sourceActivityId,
+                                        String sourceActivityName,
+                                        String sourceActivityType,
+                                        String targetActivityId,
+                                        String targetActivityName,
+                                        String targetActivityType) {
+        super(eventId,
+              timestamp,
+              eventType);
+        this.sequenceFlowId = sequenceFlowId;
+        this.sourceActivityId = sourceActivityId;
+        this.sourceActivityName = sourceActivityName;
+        this.sourceActivityType = sourceActivityType;
+        this.targetActivityId = targetActivityId;
+        this.targetActivityName = targetActivityName;
+        this.targetActivityType = targetActivityType;
+    }
 
     public String getSequenceFlowId() {
         return sequenceFlowId;

@@ -16,27 +16,60 @@
 
 package org.activiti.cloud.services.audit.events;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
 
-import org.activiti.cloud.services.audit.converter.TaskJpaJsonConverter;
-import org.activiti.cloud.services.audit.events.model.Task;
+import org.activiti.runtime.api.event.TaskRuntimeEvent;
+import org.activiti.runtime.api.model.Task;
 
 @Entity
 @DiscriminatorValue(value = TaskCancelledEventEntity.TASK_CANCELLED_EVENT)
-public class TaskCancelledEventEntity extends ProcessEngineEventEntity {
+public class TaskCancelledEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_CANCELLED_EVENT = "TaskCancelledEvent";
 
-    @Convert(converter = TaskJpaJsonConverter.class)
-    @Lob
-    @Column
-    private Task task;
+    public TaskCancelledEventEntity() {
+    }
 
-    public Task getTask() {
-        return task;
+    public TaskCancelledEventEntity(String eventId,
+                                    Long timestamp,
+                                    String cause) {
+        super(eventId,
+              timestamp,
+              TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name());
+        this.cause = cause;
+    }
+
+    public TaskCancelledEventEntity(String eventId,
+                                    Long timestamp,
+                                    String appName,
+                                    String appVersion,
+                                    String serviceName,
+                                    String serviceFullName,
+                                    String serviceType,
+                                    String serviceVersion,
+                                    Task task,
+                                    String cause) {
+        super(eventId,
+              timestamp,
+              TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name(),
+              appName,
+              appVersion,
+              serviceName,
+              serviceFullName,
+              serviceType,
+              serviceVersion,
+              task);
+        this.cause = cause;
+    }
+
+    private String cause;
+
+    public String getCause() {
+        return cause;
+    }
+
+    public void setCause(String cause) {
+        this.cause = cause;
     }
 }

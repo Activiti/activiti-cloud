@@ -16,16 +16,19 @@
 
 package org.activiti.cloud.starter.audit.tests;
 
+import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.starter.audit.configuration.EnableActivitiAudit;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableActivitiAudit
-@ComponentScan("org.activiti")
 public class JpaAuditApplication implements CommandLineRunner {
+
+    @Autowired
+    private APIEventToEntityConverters converters;
 
     public static void main(String[] args) {
         SpringApplication.run(JpaAuditApplication.class,
@@ -34,8 +37,6 @@ public class JpaAuditApplication implements CommandLineRunner {
 
     @Override
     public void run(String... strings) throws Exception {
-
+        System.out.println(">>>>> Conversters: " + converters.getConverters().keySet());
     }
-
-
 }

@@ -11,6 +11,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud Audit :: Services :: Parent</name>
   <modules>
+    <module>activiti-cloud-services-audit-api</module>
     <module>activiti-cloud-services-audit-jpa</module>
     <module>activiti-cloud-services-audit-mongo</module>
   </modules>

@@ -25,4 +25,26 @@ public class IntegrationResultReceivedEventEntity extends IntegrationEventEntity
 
     protected static final String INTEGRATION_RESULT_RECEIVED_EVENT = "IntegrationResultReceivedEvent";
 
+    public IntegrationResultReceivedEventEntity() {
+    }
+
+    public IntegrationResultReceivedEventEntity(String eventId,
+                                                Long timestamp,
+                                                String eventType) {
+        super(eventId,
+              timestamp,
+              eventType);
+    }
+
+    public IntegrationResultReceivedEventEntity(String eventId,
+                                                Long timestamp,
+                                                String eventType,
+                                                String integrationContextId,
+                                                String flowNodeId) {
+        super(eventId,
+              timestamp,
+              eventType,
+              integrationContextId,
+              flowNodeId);
+    }
 }

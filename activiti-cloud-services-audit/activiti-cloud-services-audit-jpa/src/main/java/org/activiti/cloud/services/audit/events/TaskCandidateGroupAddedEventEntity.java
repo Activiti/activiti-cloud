@@ -21,8 +21,19 @@ import javax.persistence.Entity;
 
 @Entity
 @DiscriminatorValue(value = TaskCandidateGroupAddedEventEntity.TASK_CANDIDATE_GROUP_ADDED_EVENT)
-public class TaskCandidateGroupAddedEventEntity extends ProcessEngineEventEntity {
+public class TaskCandidateGroupAddedEventEntity extends AuditEventEntity {
 
     protected static final String TASK_CANDIDATE_GROUP_ADDED_EVENT = "TaskCandidateGroupAddedEvent";
+
+    public TaskCandidateGroupAddedEventEntity() {
+    }
+
+    public TaskCandidateGroupAddedEventEntity(String eventId,
+                                              Long timestamp,
+                                              String eventType) {
+        super(eventId,
+              timestamp,
+              eventType);
+    }
 
 }

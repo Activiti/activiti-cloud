@@ -19,30 +19,43 @@ package org.activiti.cloud.services.audit.events;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.activiti.runtime.api.event.VariableEvent;
+import org.activiti.runtime.api.model.VariableInstance;
+
 @Entity
 @DiscriminatorValue(value = VariableCreatedEventEntity.VARIABLE_CREATED_EVENT)
-public class VariableCreatedEventEntity extends ProcessEngineEventEntity {
+public class VariableCreatedEventEntity extends VariableAuditEventEntity {
 
     protected static final String VARIABLE_CREATED_EVENT = "VariableCreatedEvent";
 
-    private String variableName;
-    private String variableValue;
-    private String variableType;
-    private String taskId;
-
-    public String getVariableName() {
-        return variableName;
+    public VariableCreatedEventEntity() {
     }
 
-    public String getVariableValue() {
-        return variableValue;
+    public VariableCreatedEventEntity(String eventId,
+                                      Long timestamp) {
+        super(eventId,
+              timestamp,
+              VariableEvent.VariableEvents.VARIABLE_CREATED.name());
     }
 
-    public String getVariableType() {
-        return variableType;
-    }
-
-    public String getTaskId() {
-        return taskId;
+    public VariableCreatedEventEntity(String eventId,
+                                      Long timestamp,
+                                      String appName,
+                                      String appVersion,
+                                      String serviceName,
+                                      String serviceFullName,
+                                      String serviceType,
+                                      String serviceVersion,
+                                      VariableInstance variableInstance) {
+        super(eventId,
+              timestamp,
+              VariableEvent.VariableEvents.VARIABLE_CREATED.name(),
+              appName,
+              appVersion,
+              serviceName,
+              serviceFullName,
+              serviceType,
+              serviceVersion,
+              variableInstance);
     }
 }

@@ -1,17 +1,6 @@
 package org.activiti.cloud.services.audit.security;
 
-import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.security.BaseAuthenticationWrapper;
-import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
-import org.activiti.cloud.services.security.SecurityPoliciesService;
-import org.activiti.cloud.services.security.SecurityPolicy;
-import org.activiti.engine.UserGroupLookupProxy;
-import org.activiti.engine.UserRoleLookupProxy;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+//import com.querydsl.core.types.Predicate;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,14 +9,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.activiti.cloud.services.audit.repository.EventSpecification;
+import org.activiti.cloud.services.security.BaseAuthenticationWrapper;
+import org.activiti.cloud.services.security.SecurityPoliciesService;
+import org.activiti.cloud.services.security.SecurityPolicy;
+import org.activiti.engine.UserGroupLookupProxy;
+import org.activiti.engine.UserRoleLookupProxy;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.springframework.data.jpa.domain.Specification;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class SecurityPoliciesApplicationServiceTest {
@@ -54,28 +51,35 @@ public class SecurityPoliciesApplicationServiceTest {
     }
 
     @Test
-    public void shouldNotModifyQueryWhenNoPoliciesDefined(){
-        Predicate query = mock(Predicate.class);
+    public void shouldNotModifyQueryWhenNoPoliciesDefined() {
+
+        EventSpecification search = mock(EventSpecification.class);
 
         when(securityPoliciesService.policiesDefined()).thenReturn(false);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
 
-        verify(securityPoliciesApplicationService,times(0)).addProcessDefRestrictionToExpression(any(),any(),any(),any());
+        securityPoliciesApplicationService.createSpecWithSecurity(search,
+                                                                  SecurityPolicy.READ);
+
+        verifyZeroInteractions(search);
     }
 
     @Test
-    public void shouldNotModifyQueryWhenNoUser(){
-        Predicate query = mock(Predicate.class);
+    public void shouldNotModifyQueryWhenNoUser() {
+        EventSpecification search = mock(EventSpecification.class);
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn(null);
 
-        verify(securityPoliciesApplicationService,times(0)).addProcessDefRestrictionToExpression(any(),any(),any(),any());
+        securityPoliciesApplicationService.createSpecWithSecurity(search,
+                                                                  SecurityPolicy.READ);
+
+        verifyZeroInteractions(search);
     }
 
     @Test
-    public void shouldRestrictQueryWhenGroupsAndPoliciesAvailable(){
-        Predicate query = mock(Predicate.class);
+    public void shouldRestrictQueryWhenGroupsAndPoliciesAvailable() {
+        EventSpecification search = mock(EventSpecification.class);
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
@@ -83,21 +87,25 @@ public class SecurityPoliciesApplicationServiceTest {
         when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(Arrays.asList("hr"));
 
         Map<String, Set<String>> policies = new HashMap<String, Set<String>>();
-        policies.put("rb1",new HashSet<>(Arrays.asList("SimpleProcess")));
+        policies.put("rb1",
+                     new HashSet<>(Arrays.asList("SimpleProcess")));
 
         when(securityPoliciesService.getProcessDefinitionKeys(anyString(),
-                anyCollection(), any(SecurityPolicy.class))).thenReturn(policies);
+                                                              anyCollection(),
+                                                              any(SecurityPolicy.class))).thenReturn(policies);
 
-        securityPoliciesApplicationService.restrictProcessEngineEventQuery(query, SecurityPolicy.READ);
+        securityPoliciesApplicationService.createSpecWithSecurity(search,
+                                                                  SecurityPolicy.READ);
+        ArgumentCaptor<Specification> securitySpecArgumentCaptor = ArgumentCaptor.forClass(Specification.class);
+        verify(search,
+               times(1)).and(securitySpecArgumentCaptor.capture());
 
-        verify(securityPoliciesApplicationService,times(1)).addProcessDefRestrictionToExpression(any(),any(),any(),any());
-        verify(securityPoliciesApplicationService,times(1)).restrictByAppNameAndProcDefKeys(any(),any(),any());
-
+        assertThat(securitySpecArgumentCaptor.getValue()).isInstanceOf(ApplicationProcessDefSecuritySpecification.class);
     }
 
     @Test
-    public void shouldNotRestrictQueryByProcDefWhenWildcard(){
-        Predicate query = mock(Predicate.class);
+    public void shouldNotRestrictQueryByProcDefWhenWildcard() {
+        EventSpecification search = mock(EventSpecification.class);
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(securityPoliciesService.getWildcard()).thenReturn("*");
@@ -106,23 +114,25 @@ public class SecurityPoliciesApplicationServiceTest {
         when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(Arrays.asList("hr"));
 
         Map<String, Set<String>> policies = new HashMap<String, Set<String>>();
-        policies.put("rb1",new HashSet<>(Arrays.asList(securityPoliciesService.getWildcard())));
+        policies.put("rb1",
+                     new HashSet<>(Arrays.asList(securityPoliciesService.getWildcard())));
 
         when(securityPoliciesService.getProcessDefinitionKeys(anyString(),
-                anyCollection(), any(SecurityPolicy.class))).thenReturn(policies);
+                                                              anyCollection(),
+                                                              any(SecurityPolicy.class))).thenReturn(policies);
 
-        securityPoliciesApplicationService.restrictProcessEngineEventQuery(query, SecurityPolicy.READ);
+        securityPoliciesApplicationService.createSpecWithSecurity(search,
+                                                                  SecurityPolicy.READ);
 
-        //should be no proc def restriction
-        verify(securityPoliciesApplicationService,times(0)).restrictByAppNameAndProcDefKeys(any(),any(),any());
+        ArgumentCaptor<Specification> securitySpecArgumentCaptor = ArgumentCaptor.forClass(Specification.class);
+        verify(search,
+               times(1)).and(securitySpecArgumentCaptor.capture());
 
-        //but there should be a restriction by app name
-        verify(securityPoliciesApplicationService,times(1)).addProcessDefRestrictionToExpression(any(),any(),any(),any());
-
+        assertThat(securitySpecArgumentCaptor.getValue()).isInstanceOf(ApplicationSecuritySpecification.class);
     }
 
     @Test
-    public void shouldHavePermissionWhenDefIsInPolicy(){
+    public void shouldHavePermissionWhenDefIsInPolicy() {
         List<String> groups = Arrays.asList("hr");
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
@@ -130,26 +140,33 @@ public class SecurityPoliciesApplicationServiceTest {
         when(userRoleLookupProxy.isAdmin("bob")).thenReturn(false);
 
         when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(groups);
-        Map<String,Set<String>> map = new HashMap<String,Set<String>>();
-        map.put("rb1",new HashSet(Arrays.asList("key")));
-        when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.WRITE)).thenReturn(map);
-        when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.READ)).thenReturn(map);
+        Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+        map.put("rb1",
+                new HashSet(Arrays.asList("key")));
+        when(securityPoliciesService.getProcessDefinitionKeys("bob",
+                                                              groups,
+                                                              SecurityPolicy.WRITE)).thenReturn(map);
+        when(securityPoliciesService.getProcessDefinitionKeys("bob",
+                                                              groups,
+                                                              SecurityPolicy.READ)).thenReturn(map);
 
-        assertThat(securityPoliciesApplicationService.canRead("key","rb1")).isTrue();
+        assertThat(securityPoliciesApplicationService.canRead("key",
+                                                              "rb1")).isTrue();
     }
 
     @Test
-    public void shouldHavePermissionWhenAdmin(){
+    public void shouldHavePermissionWhenAdmin() {
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("admin");
         when(userRoleLookupProxy.isAdmin("admin")).thenReturn(true);
 
-        assertThat(securityPoliciesApplicationService.canRead("key","rb1")).isTrue();
+        assertThat(securityPoliciesApplicationService.canRead("key",
+                                                              "rb1")).isTrue();
     }
 
     @Test
-    public void shouldRestrictQueryWhenKeysFromPolicy(){
+    public void shouldRestrictQueryWhenKeysFromPolicy() {
         List<String> groups = Arrays.asList("hr");
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
@@ -157,32 +174,46 @@ public class SecurityPoliciesApplicationServiceTest {
         when(userRoleLookupProxy.isAdmin("bob")).thenReturn(false);
 
         when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(groups);
-        Map<String,Set<String>> map = new HashMap<String,Set<String>>();
-        map.put("rb1",new HashSet(Arrays.asList("key")));
-        when(securityPoliciesService.getProcessDefinitionKeys("bob",groups,SecurityPolicy.READ)).thenReturn(map);
+        Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+        map.put("rb1",
+                new HashSet(Arrays.asList("key")));
+        when(securityPoliciesService.getProcessDefinitionKeys("bob",
+                                                              groups,
+                                                              SecurityPolicy.READ)).thenReturn(map);
 
-        Predicate query = mock(Predicate.class);
-        securityPoliciesApplicationService.restrictProcessEngineEventQuery(query, SecurityPolicy.READ);
+        EventSpecification search = mock(EventSpecification.class);
+        securityPoliciesApplicationService.createSpecWithSecurity(search,
+                                                                  SecurityPolicy.READ);
 
-        verify(securityPoliciesApplicationService,times(1)).addProcessDefRestrictionToExpression(any(),any(),any(),any());
+        ArgumentCaptor<Specification> securitySpecArgumentCaptor = ArgumentCaptor.forClass(Specification.class);
+        verify(search,
+               times(1)).and(securitySpecArgumentCaptor.capture());
+
+        assertThat(securitySpecArgumentCaptor.getValue()).isInstanceOf(ApplicationProcessDefSecuritySpecification.class);
     }
 
-
     @Test
-    public void shouldRestrictQueryWhenPoliciesButNotForUser(){
+    public void shouldRestrictQueryWhenPoliciesButNotForUser() {
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("intruder");
         when(userRoleLookupProxy.isAdmin("intruder")).thenReturn(false);
 
         when(userGroupLookupProxy.getGroupsForCandidateUser("intruder")).thenReturn(null);
-        Map<String,Set<String>> map = new HashMap<String,Set<String>>();
+        Map<String, Set<String>> map = new HashMap<String, Set<String>>();
 
-        when(securityPoliciesService.getProcessDefinitionKeys("intruder",null,SecurityPolicy.READ)).thenReturn(map);
+        when(securityPoliciesService.getProcessDefinitionKeys("intruder",
+                                                              null,
+                                                              SecurityPolicy.READ)).thenReturn(map);
 
-        Predicate query = mock(Predicate.class);
-        securityPoliciesApplicationService.restrictProcessEngineEventQuery(query, SecurityPolicy.READ);
+        EventSpecification search = mock(EventSpecification.class);
+        securityPoliciesApplicationService.createSpecWithSecurity(search,
+                                                                  SecurityPolicy.READ);
 
-        verify(securityPoliciesApplicationService,times(1)).getImpossiblePredicate(any());
+        ArgumentCaptor<Specification> securitySpecArgumentCaptor = ArgumentCaptor.forClass(Specification.class);
+        verify(search,
+               times(1)).and(securitySpecArgumentCaptor.capture());
+
+        assertThat(securitySpecArgumentCaptor.getValue()).isInstanceOf(ImpossibleSpecification.class);
     }
 }

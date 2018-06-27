@@ -19,11 +19,34 @@ package org.activiti.cloud.services.audit.events;
 import javax.persistence.Entity;
 
 @Entity
-public abstract class IntegrationEventEntity extends ProcessEngineEventEntity {
+public abstract class IntegrationEventEntity extends AuditEventEntity {
 
     private String integrationContextId;
 
     private String flowNodeId;
+
+    public IntegrationEventEntity() {
+    }
+
+    public IntegrationEventEntity(String eventId,
+                                  Long timestamp,
+                                  String eventType) {
+        super(eventId,
+              timestamp,
+              eventType);
+    }
+
+    public IntegrationEventEntity(String eventId,
+                                  Long timestamp,
+                                  String eventType,
+                                  String integrationContextId,
+                                  String flowNodeId) {
+        super(eventId,
+              timestamp,
+              eventType);
+        this.integrationContextId = integrationContextId;
+        this.flowNodeId = flowNodeId;
+    }
 
     public String getIntegrationContextId() {
         return integrationContextId;
@@ -32,5 +55,4 @@ public abstract class IntegrationEventEntity extends ProcessEngineEventEntity {
     public String getFlowNodeId() {
         return flowNodeId;
     }
-
 }
