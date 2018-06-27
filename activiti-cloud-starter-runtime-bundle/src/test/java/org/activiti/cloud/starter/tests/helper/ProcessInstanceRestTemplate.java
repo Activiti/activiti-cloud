@@ -171,13 +171,13 @@ public class ProcessInstanceRestTemplate {
     }
 
 
-    public ResponseEntity<Void> setVariables(String processId, Map<String, Object> variables) {
-        SetProcessVariablesCmd processVariablesCmd = new SetProcessVariablesCmd(processId, variables);
+    public ResponseEntity<Void> setVariables(String processInstanceId, Map<String, Object> variables) {
+        SetProcessVariablesCmd processVariablesCmd = new SetProcessVariablesCmd(processInstanceId, variables);
 
         HttpEntity<SetProcessVariablesCmd> requestEntity = new HttpEntity<>(
                 processVariablesCmd,
                 null);
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processId + "/variables/",
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables/",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<Void>() {

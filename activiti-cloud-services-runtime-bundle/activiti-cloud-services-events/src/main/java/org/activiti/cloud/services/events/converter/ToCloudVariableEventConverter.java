@@ -17,8 +17,11 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.runtime.api.event.CloudVariableCreatedEvent;
+import org.activiti.runtime.api.event.CloudVariableUpdatedEvent;
 import org.activiti.runtime.api.event.VariableCreated;
+import org.activiti.runtime.api.event.VariableUpdated;
 import org.activiti.runtime.api.event.impl.CloudVariableCreatedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudVariableUpdatedEventImpl;
 
 public class ToCloudVariableEventConverter {
 
@@ -30,6 +33,12 @@ public class ToCloudVariableEventConverter {
 
     public CloudVariableCreatedEvent from(VariableCreated event) {
         CloudVariableCreatedEventImpl cloudEvent = new CloudVariableCreatedEventImpl(event.getEntity());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+
+    public CloudVariableUpdatedEvent from(VariableUpdated event) {
+        CloudVariableUpdatedEventImpl cloudEvent = new CloudVariableUpdatedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }

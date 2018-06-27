@@ -45,6 +45,7 @@ import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CO
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED;
 import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_CREATED;
+import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_UPDATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -121,6 +122,14 @@ public class AuditProducerIT {
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(PROCESS_RESUMED.name(),
                                  TASK_ACTIVATED.name()));
+
+        //when
+        processInstanceRestTemplate.setVariables(startProcessEntity.getBody().getId(), Collections.singletonMap("name", "paul"));
+
+        //then
+        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
+                .extracting(event -> event.getEventType().name())
+                .containsExactly(VARIABLE_UPDATED.name()));
 
         //given
         ResponseEntity<PagedResources<Task>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);
