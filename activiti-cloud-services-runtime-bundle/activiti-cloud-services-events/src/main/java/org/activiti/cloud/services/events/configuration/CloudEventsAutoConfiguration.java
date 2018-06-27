@@ -38,6 +38,7 @@ import org.activiti.cloud.services.events.listeners.CloudTaskCompletedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCreatedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskSuspendedProducer;
 import org.activiti.cloud.services.events.listeners.CloudVariableCreatedProducer;
+import org.activiti.cloud.services.events.listeners.CloudVariableDeletedProducer;
 import org.activiti.cloud.services.events.listeners.CloudVariableUpdatedProducer;
 import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
@@ -192,13 +193,21 @@ public class CloudEventsAutoConfiguration {
     @Bean
     public CloudVariableCreatedProducer cloudVariableCreatedProducer(ToCloudVariableEventConverter converter,
                                                                      ProcessEngineEventsAggregator eventsAggregator) {
-        return new CloudVariableCreatedProducer(converter, eventsAggregator);
+        return new CloudVariableCreatedProducer(converter,
+                                                eventsAggregator);
     }
 
     @Bean
     public CloudVariableUpdatedProducer cloudVariableUpdatedProducer(ToCloudVariableEventConverter converter,
                                                                      ProcessEngineEventsAggregator eventsAggregator) {
-        return new CloudVariableUpdatedProducer(converter, eventsAggregator);
+        return new CloudVariableUpdatedProducer(converter,
+                                                eventsAggregator);
     }
 
+    @Bean
+    public CloudVariableDeletedProducer cloudVariableDeletedProducer(ToCloudVariableEventConverter converter,
+                                                                     ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudVariableDeletedProducer(converter,
+                                                eventsAggregator);
+    }
 }

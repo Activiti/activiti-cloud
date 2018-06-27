@@ -45,6 +45,7 @@ import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CO
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED;
 import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_CREATED;
+import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_DELETED;
 import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_UPDATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -150,6 +151,7 @@ public class AuditProducerIT {
                 .containsExactly(TASK_COMPLETED.name(),
                                  TASK_CANDIDATE_GROUP_REMOVED.name(),
                                  TASK_CANDIDATE_USER_REMOVED.name(),
+                                 VARIABLE_DELETED.name(),
                                  PROCESS_COMPLETED.name()));
     }
 
