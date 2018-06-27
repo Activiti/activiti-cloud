@@ -1,5 +1,6 @@
 package org.activiti.cloud.starter.tests.services.audit;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,7 @@ import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CA
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
 import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED;
+import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -89,12 +91,14 @@ public class AuditProducerIT {
     @Test
     public void shouldProduceEventsDuringSimpleProcessExecution() {
         //when
-        ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                                      Collections.singletonMap("name", "peter"));
 
         //then
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(PROCESS_CREATED.name(),
+                                 VARIABLE_CREATED.name(),
                                  PROCESS_STARTED.name(),
                                  TASK_CANDIDATE_GROUP_ADDED.name(),
                                  TASK_CANDIDATE_USER_ADDED.name(),

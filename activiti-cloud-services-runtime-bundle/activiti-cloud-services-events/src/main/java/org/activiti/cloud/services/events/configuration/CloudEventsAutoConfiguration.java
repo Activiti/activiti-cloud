@@ -20,6 +20,7 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
+import org.activiti.cloud.services.events.converter.ToCloudVariableEventConverter;
 import org.activiti.cloud.services.events.listeners.CloudProcessCancelledProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCompletedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCreatedProducer;
@@ -36,6 +37,7 @@ import org.activiti.cloud.services.events.listeners.CloudTaskCandidateUserRemove
 import org.activiti.cloud.services.events.listeners.CloudTaskCompletedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCreatedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskSuspendedProducer;
+import org.activiti.cloud.services.events.listeners.CloudVariableCreatedProducer;
 import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.springframework.context.annotation.Bean;
@@ -180,4 +182,16 @@ public class CloudEventsAutoConfiguration {
         return new CloudProcessCancelledProducer(eventConverter,
                                                  eventsAggregator);
     }
+
+    @Bean
+    public ToCloudVariableEventConverter cloudVariableEventConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+        return new ToCloudVariableEventConverter(runtimeBundleInfoAppender);
+    }
+
+    @Bean
+    public CloudVariableCreatedProducer cloudVariableCreatedProducer(ToCloudVariableEventConverter converter,
+                                                                     ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudVariableCreatedProducer(converter, eventsAggregator);
+    }
+
 }
