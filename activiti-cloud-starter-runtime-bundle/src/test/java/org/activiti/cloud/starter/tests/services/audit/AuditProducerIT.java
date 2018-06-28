@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.runtime.api.event.BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED;
 import static org.activiti.runtime.api.event.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
 import static org.activiti.runtime.api.event.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED;
@@ -190,6 +191,7 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(TASK_CANCELLED.name(),
+                                     ACTIVITY_CANCELLED.name(),
                                      TASK_CANDIDATE_GROUP_REMOVED.name(),
                                      TASK_CANDIDATE_USER_REMOVED.name(),
                                      PROCESS_CANCELLED.name());
