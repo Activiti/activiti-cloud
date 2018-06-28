@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
@@ -41,7 +42,7 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
 
     private final static ObjectMapper objectMapper = new ObjectMapper();
 
-    {
+    static {
         {
             SimpleModule module = new SimpleModule("mapCommonModelInterfaces",
                                                    Version.unknownVersion());
@@ -68,6 +69,7 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
             module.setAbstractTypes(resolver);
 
             objectMapper.registerModule(module);
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         }
     }
 
