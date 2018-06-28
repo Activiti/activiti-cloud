@@ -10,6 +10,7 @@ import org.activiti.cloud.services.api.model.ProcessInstance;
 import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.runtime.api.event.CloudBPMNActivityStartedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.runtime.api.event.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
@@ -94,17 +96,29 @@ public class AuditProducerIT {
     public void shouldProduceEventsDuringSimpleProcessExecution() {
         //when
         ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                      Collections.singletonMap("name", "peter"));
+                                                                                                      Collections.singletonMap("name",
+                                                                                                                               "peter"));
 
         //then
-        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
-                .extracting(event -> event.getEventType().name())
-                .containsExactly(PROCESS_CREATED.name(),
-                                 VARIABLE_CREATED.name(),
-                                 PROCESS_STARTED.name(),
-                                 TASK_CANDIDATE_GROUP_ADDED.name(),
-                                 TASK_CANDIDATE_USER_ADDED.name(),
-                                 TASK_CREATED.name()));
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getReceivedEvents();
+
+            assertThat(receivedEvents)
+                    .extracting(event -> event.getEventType().name())
+                    .containsExactly(PROCESS_CREATED.name(),
+                                     VARIABLE_CREATED.name(),
+                                     PROCESS_STARTED.name(),
+                                     ACTIVITY_STARTED.name()/*start event*/,
+                                     ACTIVITY_STARTED.name()/*user task*/,
+                                     TASK_CANDIDATE_GROUP_ADDED.name(),
+                                     TASK_CANDIDATE_USER_ADDED.name(),
+                                     TASK_CREATED.name());
+            assertThat(receivedEvents)
+                    .filteredOn(event -> ACTIVITY_STARTED.equals(event.getEventType()))
+                    .extracting(event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType())
+                    .containsExactly("startEvent",
+                                     "userTask");
+        });
 
         //when
         processInstanceRestTemplate.suspend(startProcessEntity);
@@ -125,7 +139,9 @@ public class AuditProducerIT {
                                  TASK_ACTIVATED.name()));
 
         //when
-        processInstanceRestTemplate.setVariables(startProcessEntity.getBody().getId(), Collections.singletonMap("name", "paul"));
+        processInstanceRestTemplate.setVariables(startProcessEntity.getBody().getId(),
+                                                 Collections.singletonMap("name",
+                                                                          "paul"));
 
         //then
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
@@ -151,6 +167,7 @@ public class AuditProducerIT {
                 .containsExactly(TASK_COMPLETED.name(),
                                  TASK_CANDIDATE_GROUP_REMOVED.name(),
                                  TASK_CANDIDATE_USER_REMOVED.name(),
+                                 ACTIVITY_STARTED.name()/*end event*/,
                                  VARIABLE_DELETED.name(),
                                  PROCESS_COMPLETED.name()));
     }

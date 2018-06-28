@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.runtime.api.event.BPMNActivityStarted;
+import org.activiti.runtime.api.event.CloudBPMNActivityStartedEvent;
 import org.activiti.runtime.api.event.CloudProcessCancelledEvent;
 import org.activiti.runtime.api.event.CloudProcessCompletedEvent;
 import org.activiti.runtime.api.event.CloudProcessCreatedEvent;
@@ -28,6 +30,7 @@ import org.activiti.runtime.api.event.ProcessCreated;
 import org.activiti.runtime.api.event.ProcessResumed;
 import org.activiti.runtime.api.event.ProcessStarted;
 import org.activiti.runtime.api.event.ProcessSuspended;
+import org.activiti.runtime.api.event.impl.CloudBPMNActivityStartedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudProcessCancelledEventImpl;
 import org.activiti.runtime.api.event.impl.CloudProcessCompletedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
@@ -77,6 +80,12 @@ public class ToCloudProcessRuntimeEventConverter {
 
     public CloudProcessCancelledEvent from(ProcessCancelled event) {
         CloudProcessCancelledEventImpl cloudEvent = new CloudProcessCancelledEventImpl(event.getEntity());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+
+    public CloudBPMNActivityStartedEvent from(BPMNActivityStarted event) {
+        CloudBPMNActivityStartedEventImpl cloudEvent = new CloudBPMNActivityStartedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
