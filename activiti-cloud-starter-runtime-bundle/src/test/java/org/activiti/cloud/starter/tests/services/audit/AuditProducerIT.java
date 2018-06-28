@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.activiti.runtime.api.event.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
 import static org.activiti.runtime.api.event.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
@@ -109,6 +110,7 @@ public class AuditProducerIT {
                                      VARIABLE_CREATED.name(),
                                      PROCESS_STARTED.name(),
                                      ACTIVITY_STARTED.name()/*start event*/,
+                                     ACTIVITY_COMPLETED.name()/*start event*/,
                                      ACTIVITY_STARTED.name()/*user task*/,
                                      TASK_CANDIDATE_GROUP_ADDED.name(),
                                      TASK_CANDIDATE_USER_ADDED.name(),
@@ -167,7 +169,9 @@ public class AuditProducerIT {
                 .containsExactly(TASK_COMPLETED.name(),
                                  TASK_CANDIDATE_GROUP_REMOVED.name(),
                                  TASK_CANDIDATE_USER_REMOVED.name(),
+                                 ACTIVITY_COMPLETED.name()/*user task*/,
                                  ACTIVITY_STARTED.name()/*end event*/,
+                                 ACTIVITY_COMPLETED.name()/*end event*/,
                                  VARIABLE_DELETED.name(),
                                  PROCESS_COMPLETED.name()));
     }
