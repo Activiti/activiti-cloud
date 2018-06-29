@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.services.events.converter;
 
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.runtime.api.event.CloudProcessStartedEvent;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
 import org.activiti.runtime.api.model.impl.FluentProcessInstanceImpl;
@@ -26,7 +25,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ToCloudProcessRuntimeEventConverterTest {
@@ -35,10 +35,10 @@ public class ToCloudProcessRuntimeEventConverterTest {
     private ToCloudProcessRuntimeEventConverter converter;
 
     @Mock
-    private RuntimeBundleProperties runtimeBundleProperties;
+    private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
@@ -53,22 +53,19 @@ public class ToCloudProcessRuntimeEventConverterTest {
         event.setNestedProcessDefinitionId("myParentProcessDef");
         event.setNestedProcessInstanceId("2");
 
-        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
-
 
         //when
-        CloudProcessStartedEvent pee = converter.from(event);
+        CloudProcessStartedEvent processStarted = converter.from(event);
 
         //then
-        assertThat(pee).isInstanceOf(org.activiti.cloud.services.events.ProcessStartedEvent.class);
-        org.activiti.cloud.services.events.ProcessStartedEvent processStartedEvent = (org.activiti.cloud.services.events.ProcessStartedEvent) pee;
+        assertThat(processStarted).isInstanceOf(CloudProcessStartedEvent.class);
 
-        assertThat(processStartedEvent.getExecutionId()).isEqualTo("1");
-        assertThat(processStartedEvent.getProcessInstanceId()).isEqualTo("10");
-        assertThat(processStartedEvent.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(processStartedEvent.getNestedProcessDefinitionId()).isEqualTo("myParentProcessDef");
-        assertThat(processStartedEvent.getNestedProcessInstanceId()).isEqualTo("2");
-        assertThat(processStartedEvent.getServiceFullName()).isEqualTo("myApp");
+        assertThat(processStarted.getEntity().getId()).isEqualTo("10");
+        assertThat(processStarted.getEntity().getProcessDefinitionId()).isEqualTo("myProcessDef");
+        assertThat(processStarted.getNestedProcessDefinitionId()).isEqualTo("myParentProcessDef");
+        assertThat(processStarted.getNestedProcessInstanceId()).isEqualTo("2");
+
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any());
     }
 
 }
