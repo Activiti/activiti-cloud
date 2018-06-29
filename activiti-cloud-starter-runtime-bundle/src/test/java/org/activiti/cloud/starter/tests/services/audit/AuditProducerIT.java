@@ -38,6 +38,7 @@ import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.P
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
 import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED;
+import static org.activiti.runtime.api.event.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
 import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
 import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED;
 import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
@@ -112,6 +113,7 @@ public class AuditProducerIT {
                                      PROCESS_STARTED.name(),
                                      ACTIVITY_STARTED.name()/*start event*/,
                                      ACTIVITY_COMPLETED.name()/*start event*/,
+                                     SEQUENCE_FLOW_TAKEN.name(),
                                      ACTIVITY_STARTED.name()/*user task*/,
                                      TASK_CANDIDATE_GROUP_ADDED.name(),
                                      TASK_CANDIDATE_USER_ADDED.name(),
@@ -171,6 +173,7 @@ public class AuditProducerIT {
                                  TASK_CANDIDATE_GROUP_REMOVED.name(),
                                  TASK_CANDIDATE_USER_REMOVED.name(),
                                  ACTIVITY_COMPLETED.name()/*user task*/,
+                                 SEQUENCE_FLOW_TAKEN.name(),
                                  ACTIVITY_STARTED.name()/*end event*/,
                                  ACTIVITY_COMPLETED.name()/*end event*/,
                                  VARIABLE_DELETED.name(),

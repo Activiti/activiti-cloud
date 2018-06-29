@@ -28,12 +28,14 @@ import org.activiti.runtime.api.event.CloudProcessCreatedEvent;
 import org.activiti.runtime.api.event.CloudProcessResumedEvent;
 import org.activiti.runtime.api.event.CloudProcessStartedEvent;
 import org.activiti.runtime.api.event.CloudProcessSuspendedEvent;
+import org.activiti.runtime.api.event.CloudSequenceFlowTaken;
 import org.activiti.runtime.api.event.ProcessCancelled;
 import org.activiti.runtime.api.event.ProcessCompleted;
 import org.activiti.runtime.api.event.ProcessCreated;
 import org.activiti.runtime.api.event.ProcessResumed;
 import org.activiti.runtime.api.event.ProcessStarted;
 import org.activiti.runtime.api.event.ProcessSuspended;
+import org.activiti.runtime.api.event.SequenceFlowTaken;
 import org.activiti.runtime.api.event.impl.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.runtime.api.event.impl.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudBPMNActivityStartedEventImpl;
@@ -43,6 +45,7 @@ import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudProcessResumedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudProcessSuspendedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudSequenceFlowTakenImpl;
 
 public class ToCloudProcessRuntimeEventConverter {
 
@@ -104,6 +107,12 @@ public class ToCloudProcessRuntimeEventConverter {
 
     public CloudBPMNActivityCancelledEvent from(BPMNActivityCancelled event) {
         CloudBPMNActivityCancelledEventImpl cloudEvent = new CloudBPMNActivityCancelledEventImpl(event.getEntity());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+
+    public CloudSequenceFlowTaken from(SequenceFlowTaken event) {
+        CloudSequenceFlowTakenImpl cloudEvent = new CloudSequenceFlowTakenImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }

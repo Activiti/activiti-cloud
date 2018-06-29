@@ -30,6 +30,7 @@ import org.activiti.cloud.services.events.listeners.CloudProcessCreatedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessResumedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessStartedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessSuspendedProducer;
+import org.activiti.cloud.services.events.listeners.CloudSequenceFlowTakenProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskActivatedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskAssignedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskCancelledProducer;
@@ -233,6 +234,12 @@ public class CloudEventsAutoConfiguration {
                                                                          ProcessEngineEventsAggregator eventsAggregator) {
         return new CloudActivityCancelledProducer(converter,
                                                 eventsAggregator);
+    }
+
+    @Bean
+    public CloudSequenceFlowTakenProducer cloudSequenceFlowTakenProducer(ToCloudProcessRuntimeEventConverter converter,
+                                                                         ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudSequenceFlowTakenProducer(converter, eventsAggregator);
     }
 
 }
