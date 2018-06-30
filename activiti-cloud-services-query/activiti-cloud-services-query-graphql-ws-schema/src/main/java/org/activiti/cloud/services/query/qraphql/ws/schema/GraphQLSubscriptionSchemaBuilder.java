@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.qraphql.ws.schema;
 
 import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -29,6 +30,7 @@ import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.TypeRuntimeWiring;
+import org.springframework.core.io.DefaultResourceLoader;
 
 public class GraphQLSubscriptionSchemaBuilder {
 
@@ -41,9 +43,15 @@ public class GraphQLSubscriptionSchemaBuilder {
         //
         // reads a file that provides the schema types
         //
-        Reader streamReader = loadSchemaFile(schemaFileName);
+        Reader streamReader;
+        try {
+            streamReader = loadSchemaFile(schemaFileName);
+        } catch (IOException cause) {
+            throw new RuntimeException(cause);
+        }
         this.typeRegistry = new SchemaParser().parse(streamReader);
         this.wiring = RuntimeWiring.newRuntimeWiring();
+
    }
 
     private GraphQLSchema buildSchema() {
@@ -72,8 +80,10 @@ public class GraphQLSubscriptionSchemaBuilder {
         		.orElseGet(this::buildSchema);
     }
 
-    private Reader loadSchemaFile(String name) {
-        InputStream stream = getClass().getClassLoader().getResourceAsStream(name);
+    protected Reader loadSchemaFile(String name) throws IOException {
+        DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
+
+        InputStream stream = resourceLoader.getResource(name).getInputStream();
         return new InputStreamReader(stream);
     }
 

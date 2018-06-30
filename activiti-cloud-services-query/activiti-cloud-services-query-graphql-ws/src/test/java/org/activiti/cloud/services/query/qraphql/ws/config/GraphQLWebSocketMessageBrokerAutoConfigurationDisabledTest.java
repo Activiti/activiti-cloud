@@ -17,7 +17,8 @@ package org.activiti.cloud.services.query.qraphql.ws.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
+import org.activiti.cloud.services.query.qraphql.ws.config.GraphQLSubscriptionsSchemaAutoConfiguration.DefaultGraphQLSubscriptionsSchemaConfiguration;
+import org.activiti.cloud.services.query.qraphql.ws.config.GraphQLWebSocketMessageBrokerAutoConfiguration.DefaultGraphQLWebSocketMessageBrokerConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,30 +26,29 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.messaging.MessageHandler;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT,
+@SpringBootTest(
+    webEnvironment = WebEnvironment.RANDOM_PORT,
     properties="spring.activiti.cloud.services.query.graphql.ws.enabled=false")
-public class EnableActivitiGraphQLNotificationsTest {
+public class GraphQLWebSocketMessageBrokerAutoConfigurationDisabledTest {
 
     @Autowired(required=false)
-    private MessageHandler graphQLBrokerMessageHandler;
+    private DefaultGraphQLWebSocketMessageBrokerConfiguration defaultGraphQLWebSocketMessageBrokerConfiguration;
 
     @Autowired(required=false)
-    private GraphQLExecutor graphQLExecutor;
+    private DefaultGraphQLSubscriptionsSchemaConfiguration defaultGraphQLSubscriptionsSchemaConfiguration;
 
     @EnableAutoConfiguration
     @SpringBootConfiguration
-    @EnableActivitiGraphQLNotifications
-    static class EnableActivitiGraphQLNotificationsTestApplication {
+    static class GraphQLWebSocketMessageBrokerAutoConfigurationTestApplication {
 
     }
 
     @Test
-    public void testContextLoads() {
-        assertThat(graphQLBrokerMessageHandler).isNotNull();
-        assertThat(graphQLExecutor).isNotNull();
+    public void testContextLoads() throws InterruptedException {
+        assertThat(defaultGraphQLWebSocketMessageBrokerConfiguration).isNull();
+        assertThat(defaultGraphQLSubscriptionsSchemaConfiguration).isNull();
     }
 }
