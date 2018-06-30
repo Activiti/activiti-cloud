@@ -1,3 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.activiti.cloud.services.query.qraphql.ws.schema.GraphQLSubscriptionSchemaProperties.AutoConfiguration,\
-org.activiti.cloud.services.query.qraphql.ws.schema.GraphQLSubscriptionsSchemaBuilderAutoConfiguration

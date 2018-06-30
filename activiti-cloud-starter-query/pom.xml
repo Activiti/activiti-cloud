@@ -36,22 +36,6 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-query-graphql</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-query-notifications</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-query-graphql-ws</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-query-graphiql</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-query-rest</artifactId>
     </dependency>
     <dependency>
