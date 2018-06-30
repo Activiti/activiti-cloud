@@ -29,11 +29,8 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.springframework.format.annotation.DateTimeFormat;
-
-@GraphQLDescription("Process Instance Entity Model")
 
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -42,7 +39,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 
     @Id
-    @GraphQLDescription("Unique process instance identity attribute")
     private String id;
     private String name;
     private String description;
@@ -64,13 +60,11 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private Date lastModifiedFrom;
 
     @JsonIgnore
-    @GraphQLDescription("Associated task entities")
     @OneToMany(mappedBy = "processInstance")
     @org.hibernate.annotations.ForeignKey(name = "none")
     private Set<TaskEntity> task;
 
     @JsonIgnore
-    @GraphQLDescription("Associated process instance variable")
     @OneToMany(mappedBy = "processInstance")
     @org.hibernate.annotations.ForeignKey(name = "none")
     private Set<VariableEntity> variable;

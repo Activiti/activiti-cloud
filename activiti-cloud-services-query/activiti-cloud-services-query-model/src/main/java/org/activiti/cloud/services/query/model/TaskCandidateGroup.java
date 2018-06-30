@@ -12,9 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
-
-@GraphQLDescription("TaskEntity Candidate Group Entity Model")
 
 @Entity
 @IdClass(TaskCandidateGroupId.class)
@@ -32,7 +29,7 @@ public class TaskCandidateGroup {
     @ManyToOne(optional = true)
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private TaskEntity taskEntity;
+    private TaskEntity task;
 
     public TaskCandidateGroup() {
 
@@ -61,11 +58,11 @@ public class TaskCandidateGroup {
         this.groupId = groupId;
     }
 
-    public TaskEntity getTaskEntity() {
-        return this.taskEntity;
+    public TaskEntity getTask() {
+        return this.task;
     }
 
-    public void setTaskEntity(TaskEntity taskEntity) {
-        this.taskEntity = taskEntity;
+    public void setTask(TaskEntity task) {
+        this.task = task;
     }
 }
