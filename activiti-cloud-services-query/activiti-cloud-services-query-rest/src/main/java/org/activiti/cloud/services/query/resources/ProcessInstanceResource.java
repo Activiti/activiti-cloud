@@ -16,16 +16,15 @@
 
 package org.activiti.cloud.services.query.resources;
 
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
-public class ProcessInstanceResource extends Resource<ProcessInstance> {
+public class ProcessInstanceResource extends Resource<CloudProcessInstance> {
 
-    public ProcessInstanceResource(ProcessInstance content,
+    public ProcessInstanceResource(CloudProcessInstance content,
                                    Link... links) {
         super(content,
               links);
     }
-
 }

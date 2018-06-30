@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import org.activiti.cloud.services.query.model.QTask;
-import org.activiti.cloud.services.query.model.QVariable;
+import org.activiti.cloud.services.query.model.QTaskEntity;
+import org.activiti.cloud.services.query.model.QVariableEntity;
 import org.activiti.engine.UserGroupLookupProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 /*
  * Tested by RestrictTaskQueryIT
- * Applies permissions/restrictions to Task data (and Task Variables) based upon Candidate user/group logic
+ * Applies permissions/restrictions to TaskEntity data (and TaskEntity Variables) based upon Candidate user/group logic
  */
 @Component
 public class TaskLookupRestrictionService {
@@ -29,20 +29,20 @@ public class TaskLookupRestrictionService {
 
     public Predicate restrictTaskQuery(Predicate predicate){
 
-        return restrictTaskQuery(predicate,QTask.task);
+        return restrictTaskQuery(predicate, QTaskEntity.taskEntity);
     }
 
 
     public Predicate restrictTaskVariableQuery(Predicate predicate){
 
-        QTask task = QVariable.variable.task;
+        QTaskEntity task = QVariableEntity.variableEntity.taskEntity;
 
         Predicate extendedPredicate = addAndConditionToPredicate(predicate,task.isNotNull());
 
         return restrictTaskQuery(extendedPredicate, task);
     }
 
-    private Predicate restrictTaskQuery(Predicate predicate, QTask task){
+    private Predicate restrictTaskQuery(Predicate predicate, QTaskEntity task){
 
         if (!restrictionsEnabled){
             return predicate;

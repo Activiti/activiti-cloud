@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.query.rest.assembler;
 
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.resources.TaskResource;
 import org.activiti.cloud.services.query.rest.TaskController;
 import org.springframework.hateoas.Link;
@@ -27,10 +27,10 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Component
-public class TaskResourceAssembler implements ResourceAssembler<Task, TaskResource> {
+public class TaskResourceAssembler implements ResourceAssembler<TaskEntity, TaskResource> {
 
     @Override
-    public TaskResource toResource(Task entity) {
+    public TaskResource toResource(TaskEntity entity) {
         Link selfRel = linkTo(methodOn(TaskController.class).findById(entity.getId())).withSelfRel();
         return new TaskResource(entity, selfRel);
     }

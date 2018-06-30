@@ -19,7 +19,8 @@ package org.activiti.cloud.services.query.events.handlers;
 import javax.persistence.EntityManager;
 
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskCreatedEvent;
@@ -42,44 +43,44 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskCreatedEvent taskCreatedEvent = (CloudTaskCreatedEvent) event;
         Task eventEntity = taskCreatedEvent.getEntity();
-        org.activiti.cloud.services.query.model.Task queryTask = new org.activiti.cloud.services.query.model.Task(eventEntity.getId(),
-                                                                                                             eventEntity.getAssignee(),
-                                                                                                             eventEntity.getName(),
-                                                                                                             eventEntity.getDescription(),
-                                                                                                             eventEntity.getCreatedDate(),
-                                                                                                             eventEntity.getDueDate(),
-                                                                                                             String.valueOf(eventEntity.getPriority()),
-                                                                                                             null,
-                                                                                                             eventEntity.getProcessDefinitionId(),
-                                                                                                             eventEntity.getProcessInstanceId(),
-                                                                                                             event.getServiceName(),
-                                                                                                             event.getServiceFullName(),
-                                                                                                             event.getServiceVersion(),
-                                                                                                             event.getAppName(),
-                                                                                                             event.getAppVersion(),
-                                                                                                             eventEntity.getStatus().name(),
-                                                                                                             eventEntity.getCreatedDate(),
-                                                                                                             eventEntity.getClaimedDate(),
-                                                                                                             eventEntity.getOwner(),
-                                                                                                             eventEntity.getParentTaskId());
+        TaskEntity queryTaskEntity = new TaskEntity(eventEntity.getId(),
+                                                    eventEntity.getAssignee(),
+                                                    eventEntity.getName(),
+                                                    eventEntity.getDescription(),
+                                                    eventEntity.getCreatedDate(),
+                                                    eventEntity.getDueDate(),
+                                                    eventEntity.getPriority(),
+                                                    null,
+                                                    eventEntity.getProcessDefinitionId(),
+                                                    eventEntity.getProcessInstanceId(),
+                                                    event.getServiceName(),
+                                                    event.getServiceFullName(),
+                                                    event.getServiceVersion(),
+                                                    event.getAppName(),
+                                                    event.getAppVersion(),
+                                                    eventEntity.getStatus(),
+                                                    eventEntity.getCreatedDate(),
+                                                    eventEntity.getClaimedDate(),
+                                                    eventEntity.getOwner(),
+                                                    eventEntity.getParentTaskId());
 
-        if (!queryTask.isStandAlone()) {
-            // Get processInstance reference proxy without database query
-            ProcessInstance processInstance = entityManager
-                    .getReference(ProcessInstance.class,
-                                  queryTask.getProcessInstanceId());
+        if (!queryTaskEntity.isStandAlone()) {
+            // Get processInstanceEntity reference proxy without database query
+            ProcessInstanceEntity processInstanceEntity = entityManager
+                    .getReference(ProcessInstanceEntity.class,
+                                  queryTaskEntity.getProcessInstanceId());
 
-            queryTask.setProcessInstance(processInstance);
+            queryTaskEntity.setProcessInstance(processInstanceEntity);
         }
 
         persistIntoDatabase(event,
-                            queryTask);
+                            queryTaskEntity);
     }
 
     private void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
-                                     org.activiti.cloud.services.query.model.Task queryTask) {
+                                     TaskEntity queryTaskEntity) {
         try {
-            taskRepository.save(queryTask);
+            taskRepository.save(queryTaskEntity);
         } catch (Exception cause) {
             throw new ActivitiException("Error handling TaskCreatedEvent[" + event + "]",
                                         cause);

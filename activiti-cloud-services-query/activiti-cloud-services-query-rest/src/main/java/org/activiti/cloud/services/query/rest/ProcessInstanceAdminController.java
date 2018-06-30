@@ -19,7 +19,7 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
@@ -49,7 +49,7 @@ public class ProcessInstanceAdminController {
 
     private ProcessInstanceResourceAssembler processInstanceResourceAssembler;
 
-    private AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<ProcessInstanceEntity> pagedResourcesAssembler;
 
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -66,14 +66,14 @@ public class ProcessInstanceAdminController {
     @Autowired
     public ProcessInstanceAdminController(ProcessInstanceRepository processInstanceRepository,
                                           ProcessInstanceResourceAssembler processInstanceResourceAssembler,
-                                          AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler) {
+                                          AlfrescoPagedResourcesAssembler<ProcessInstanceEntity> pagedResourcesAssembler) {
         this.processInstanceRepository = processInstanceRepository;
         this.processInstanceResourceAssembler = processInstanceResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<ProcessInstanceResource> findAll(@QuerydslPredicate(root = ProcessInstance.class) Predicate predicate,
+    public PagedResources<ProcessInstanceResource> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                            Pageable pageable) {
 
 

@@ -19,7 +19,7 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.resources.TaskResource;
 import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +49,12 @@ public class TaskAdminController {
 
     private TaskResourceAssembler taskResourceAssembler;
 
-    private AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<TaskEntity> pagedResourcesAssembler;
 
     @Autowired
     public TaskAdminController(TaskRepository taskRepository,
                                TaskResourceAssembler taskResourceAssembler,
-                               AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler) {
+                               AlfrescoPagedResourcesAssembler<TaskEntity> pagedResourcesAssembler) {
         this.taskRepository = taskRepository;
         this.taskResourceAssembler = taskResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
@@ -67,11 +67,11 @@ public class TaskAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<TaskResource> allTasks(@QuerydslPredicate(root = Task.class) Predicate predicate,
+    public PagedResources<TaskResource> allTasks(@QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
                                                  Pageable pageable) {
 
-        Page<Task> page = taskRepository.findAll(predicate,
-                                                 pageable);
+        Page<TaskEntity> page = taskRepository.findAll(predicate,
+                                                       pageable);
 
         return pagedResourcesAssembler.toResource(pageable,
                                                   page,

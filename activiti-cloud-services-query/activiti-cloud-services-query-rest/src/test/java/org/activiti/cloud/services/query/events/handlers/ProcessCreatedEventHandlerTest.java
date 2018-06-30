@@ -19,7 +19,7 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.UUID;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.runtime.api.event.CloudProcessCreatedEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
@@ -61,11 +61,11 @@ public class ProcessCreatedEventHandlerTest {
         //when
         handler.handle(event);
 
-        ArgumentCaptor<ProcessInstance> argumentCaptor = ArgumentCaptor.forClass(ProcessInstance.class);
+        ArgumentCaptor<ProcessInstanceEntity> argumentCaptor = ArgumentCaptor.forClass(ProcessInstanceEntity.class);
         verify(processInstanceRepository).save(argumentCaptor.capture());
 
-        ProcessInstance processInstance = argumentCaptor.getValue();
-        Assertions.assertThat(processInstance)
+        ProcessInstanceEntity processInstanceEntity = argumentCaptor.getValue();
+        Assertions.assertThat(processInstanceEntity)
                 .hasId(event.getEntity().getId())
                 .hasProcessDefinitionId(event.getEntity().getProcessDefinitionId())
                 .hasServiceName(event.getServiceName())

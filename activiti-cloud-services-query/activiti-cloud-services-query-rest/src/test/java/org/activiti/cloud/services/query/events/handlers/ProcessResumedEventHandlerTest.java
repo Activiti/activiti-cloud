@@ -21,11 +21,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudProcessResumedEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessResumedEventImpl;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,11 +35,10 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessResumedEventHandlerTest {
@@ -64,16 +64,16 @@ public class ProcessResumedEventHandlerTest {
         eventProcessInstance.setId(UUID.randomUUID().toString());
         CloudProcessResumedEvent event = new CloudProcessResumedEventImpl(eventProcessInstance);
 
-        ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
-        given(processInstanceRepository.findById(eventProcessInstance.getId())).willReturn(Optional.of(currentProcessInstance));
+        ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
+        given(processInstanceRepository.findById(eventProcessInstance.getId())).willReturn(Optional.of(currentProcessInstanceEntity));
 
         //when
         handler.handle(event);
 
         //then
-        verify(processInstanceRepository).save(currentProcessInstance);
-        verify(currentProcessInstance).setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
-        verify(currentProcessInstance).setLastModified(any(Date.class));
+        verify(processInstanceRepository).save(currentProcessInstanceEntity);
+        verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
     }
 
     @Test
@@ -91,7 +91,6 @@ public class ProcessResumedEventHandlerTest {
 
         //when
         handler.handle(event);
-
     }
 
     @Test

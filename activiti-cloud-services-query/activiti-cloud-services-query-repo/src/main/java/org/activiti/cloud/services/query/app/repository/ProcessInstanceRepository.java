@@ -17,8 +17,8 @@
 package org.activiti.cloud.services.query.app.repository;
 
 import com.querydsl.core.types.dsl.StringPath;
-import org.activiti.cloud.services.query.model.ProcessInstance;
-import org.activiti.cloud.services.query.model.QProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -26,11 +26,13 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
-public interface ProcessInstanceRepository extends PagingAndSortingRepository<ProcessInstance, String>, QuerydslPredicateExecutor<ProcessInstance>, QuerydslBinderCustomizer<QProcessInstance> {
+public interface ProcessInstanceRepository extends PagingAndSortingRepository<ProcessInstanceEntity, String>,
+                                                   QuerydslPredicateExecutor<ProcessInstanceEntity>,
+                                                   QuerydslBinderCustomizer<QProcessInstanceEntity> {
 
     @Override
     default void customize(QuerydslBindings bindings,
-                           QProcessInstance root) {
+                           QProcessInstanceEntity root) {
 
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
         bindings.bind(root.lastModifiedFrom).first((path, value) -> root.lastModified.after(value));

@@ -20,11 +20,12 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudProcessCompletedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,12 +43,12 @@ public class ProcessCompletedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudProcessCompletedEvent completedEvent = (CloudProcessCompletedEvent) event;
         String processInstanceId = completedEvent.getEntity().getId();
-        Optional<ProcessInstance> findResult = processInstanceRepository.findById(processInstanceId);
+        Optional<ProcessInstanceEntity> findResult = processInstanceRepository.findById(processInstanceId);
         if (findResult.isPresent()) {
-            ProcessInstance processInstance = findResult.get();
-            processInstance.setStatus("COMPLETED");
-            processInstance.setLastModified(new Date(completedEvent.getTimestamp()));
-            processInstanceRepository.save(processInstance);
+            ProcessInstanceEntity processInstanceEntity = findResult.get();
+            processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
+            processInstanceEntity.setLastModified(new Date(completedEvent.getTimestamp()));
+            processInstanceRepository.save(processInstanceEntity);
         } else {
             throw new ActivitiException("Unable to find process instance with the given id: " + processInstanceId);
         }

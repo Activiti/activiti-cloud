@@ -20,7 +20,7 @@ import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
@@ -56,7 +56,7 @@ public class ProcessInstanceController {
 
     private ProcessInstanceResourceAssembler processInstanceResourceAssembler;
 
-    private AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<ProcessInstanceEntity> pagedResourcesAssembler;
 
     private SecurityPoliciesApplicationService securityPoliciesApplicationService;
 
@@ -81,7 +81,7 @@ public class ProcessInstanceController {
     @Autowired
     public ProcessInstanceController(ProcessInstanceRepository processInstanceRepository,
                                      ProcessInstanceResourceAssembler processInstanceResourceAssembler,
-                                     AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler,
+                                     AlfrescoPagedResourcesAssembler<ProcessInstanceEntity> pagedResourcesAssembler,
                                      EntityFinder entityFinder,
                                      SecurityPoliciesApplicationService securityPoliciesApplicationService,
                                      AuthenticationWrapper authenticationWrapper) {
@@ -94,7 +94,7 @@ public class ProcessInstanceController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<ProcessInstanceResource> findAll(@QuerydslPredicate(root = ProcessInstance.class) Predicate predicate,
+    public PagedResources<ProcessInstanceResource> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                            Pageable pageable) {
 
         predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(predicate,
@@ -109,16 +109,16 @@ public class ProcessInstanceController {
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     public ProcessInstanceResource findById(@PathVariable String processInstanceId) {
 
-        ProcessInstance processInstance = entityFinder.findById(processInstanceRepository,
-                                                                processInstanceId,
-                                                                "Unable to find task for the given id:'" + processInstanceId + "'");
+        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
+                                                                            processInstanceId,
+                                                                            "Unable to find task for the given id:'" + processInstanceId + "'");
 
-        if (!securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionKey(),
-                                                        processInstance.getServiceName())) {
-            LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processInstance.getProcessDefinitionKey());
-            throw new ActivitiForbiddenException("Operation not permitted for " + processInstance.getProcessDefinitionKey());
+        if (!securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(),
+                                                        processInstanceEntity.getServiceName())) {
+            LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey());
+            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey());
         }
 
-        return processInstanceResourceAssembler.toResource(processInstance);
+        return processInstanceResourceAssembler.toResource(processInstanceEntity);
     }
 }

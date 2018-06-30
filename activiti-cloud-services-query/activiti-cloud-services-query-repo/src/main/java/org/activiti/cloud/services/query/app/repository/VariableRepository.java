@@ -17,8 +17,8 @@
 package org.activiti.cloud.services.query.app.repository;
 
 import com.querydsl.core.types.dsl.StringPath;
-import org.activiti.cloud.services.query.model.QVariable;
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.QVariableEntity;
+import org.activiti.cloud.services.query.model.VariableEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -26,14 +26,15 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
-public interface VariableRepository extends PagingAndSortingRepository<Variable, Long>, QuerydslPredicateExecutor<Variable>, QuerydslBinderCustomizer<QVariable> {
+public interface VariableRepository extends PagingAndSortingRepository<VariableEntity, Long>,
+                                            QuerydslPredicateExecutor<VariableEntity>,
+                                            QuerydslBinderCustomizer<QVariableEntity> {
 
     @Override
     default void customize(QuerydslBindings bindings,
-                           QVariable root) {
+                           QVariableEntity root) {
 
         bindings.bind(String.class).first(
-                                          (StringPath path, String value) -> path.eq(value));
-
+                (StringPath path, String value) -> path.eq(value));
     }
 }

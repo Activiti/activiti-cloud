@@ -19,7 +19,7 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskCancelledEvent;
@@ -48,11 +48,11 @@ public class TaskCancelledEventHandler implements QueryEventHandler {
                          taskCancelledEvent.getTimestamp());
     }
 
-    private void updateTaskStatus(Task task,
+    private void updateTaskStatus(TaskEntity taskEntity,
                                   Long eventTimestamp) {
-        task.setStatus(org.activiti.runtime.api.model.Task.TaskStatus.CANCELLED.name());
-        task.setLastModified(new Date(eventTimestamp));
-        taskRepository.save(task);
+        taskEntity.setStatus(org.activiti.runtime.api.model.Task.TaskStatus.CANCELLED);
+        taskEntity.setLastModified(new Date(eventTimestamp));
+        taskRepository.save(taskEntity);
     }
 
     @Override

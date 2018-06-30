@@ -19,7 +19,7 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudProcessCancelledEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
@@ -53,11 +53,11 @@ public class ProcessCancelledEventHandler implements QueryEventHandler {
                 cancelledEvent.getTimestamp());
     }
 
-    private void updateProcessInstanceStatus(ProcessInstance processInstance,
+    private void updateProcessInstanceStatus(ProcessInstanceEntity processInstanceEntity,
                                              Long eventTimestamp) {
-        processInstance.setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.CANCELLED.name());
-        processInstance.setLastModified(new Date(eventTimestamp));
-        processInstanceRepository.save(processInstance);
+        processInstanceEntity.setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.CANCELLED);
+        processInstanceEntity.setLastModified(new Date(eventTimestamp));
+        processInstanceRepository.save(processInstanceEntity);
     }
 
     @Override

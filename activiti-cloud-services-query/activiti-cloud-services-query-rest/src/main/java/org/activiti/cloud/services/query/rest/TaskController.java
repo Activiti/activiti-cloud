@@ -20,8 +20,8 @@ import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.QTask;
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.QTaskEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.resources.TaskResource;
 import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
@@ -57,7 +57,7 @@ public class TaskController {
 
     private TaskResourceAssembler taskResourceAssembler;
 
-    private AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<TaskEntity> pagedResourcesAssembler;
 
     private EntityFinder entityFinder;
 
@@ -70,7 +70,7 @@ public class TaskController {
     @Autowired
     public TaskController(TaskRepository taskRepository,
                           TaskResourceAssembler taskResourceAssembler,
-                          AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler,
+                          AlfrescoPagedResourcesAssembler<TaskEntity> pagedResourcesAssembler,
                           EntityFinder entityFinder,
                           TaskLookupRestrictionService taskLookupRestrictionService,
                           AuthenticationWrapper authenticationWrapper) {
@@ -95,12 +95,12 @@ public class TaskController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<TaskResource> findAll(@QuerydslPredicate(root = Task.class) Predicate predicate,
+    public PagedResources<TaskResource> findAll(@QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
                                                 Pageable pageable) {
 
         Predicate extendedPredicate = taskLookupRestrictionService.restrictTaskQuery(predicate);
-        Page<Task> page = taskRepository.findAll(extendedPredicate,
-                                                 pageable);
+        Page<TaskEntity> page = taskRepository.findAll(extendedPredicate,
+                                                       pageable);
 
         return pagedResourcesAssembler.toResource(pageable,
                                                   page,
@@ -110,17 +110,17 @@ public class TaskController {
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
     public TaskResource findById(@PathVariable String taskId) {
 
-        Task task = entityFinder.findById(taskRepository,
-                                          taskId,
-                                          "Unable to find task for the given id:'" + taskId + "'");
+        TaskEntity taskEntity = entityFinder.findById(taskRepository,
+                                                      taskId,
+                                                      "Unable to find taskEntity for the given id:'" + taskId + "'");
 
         //do restricted query and check if still able to see it
-        Iterable<Task> taskIterable = taskRepository.findAll(taskLookupRestrictionService.restrictTaskQuery(QTask.task.id.eq(taskId)));
+        Iterable<TaskEntity> taskIterable = taskRepository.findAll(taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq(taskId)));
         if (!taskIterable.iterator().hasNext()) {
-            LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access task " + taskId);
+            LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }
 
-        return taskResourceAssembler.toResource(task);
+        return taskResourceAssembler.toResource(taskEntity);
     }
 }

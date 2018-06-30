@@ -19,10 +19,11 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.runtime.api.event.CloudProcessCreatedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,25 +45,25 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
         CloudProcessCreatedEvent createdEvent = (CloudProcessCreatedEvent) event;
         LOGGER.debug("Handling created process Instance " + createdEvent.getEntity().getId());
 
-        ProcessInstance createdProcessInstance = new ProcessInstance();
-        createdProcessInstance.setServiceName(createdEvent.getServiceName());
-        createdProcessInstance.setServiceFullName(createdEvent.getServiceFullName());
-        createdProcessInstance.setServiceVersion(createdEvent.getServiceVersion());
-        createdProcessInstance.setAppName(createdEvent.getAppName());
-        createdProcessInstance.setAppVersion(createdEvent.getAppVersion());
+        ProcessInstanceEntity createdProcessInstanceEntity = new ProcessInstanceEntity();
+        createdProcessInstanceEntity.setServiceName(createdEvent.getServiceName());
+        createdProcessInstanceEntity.setServiceFullName(createdEvent.getServiceFullName());
+        createdProcessInstanceEntity.setServiceVersion(createdEvent.getServiceVersion());
+        createdProcessInstanceEntity.setAppName(createdEvent.getAppName());
+        createdProcessInstanceEntity.setAppVersion(createdEvent.getAppVersion());
 
-        createdProcessInstance.setProcessDefinitionId(createdEvent.getEntity().getProcessDefinitionId());
-        createdProcessInstance.setId(createdEvent.getEntity().getId());
-        createdProcessInstance.setStatus("CREATED");
-        createdProcessInstance.setLastModified(new Date(createdEvent.getTimestamp()));
+        createdProcessInstanceEntity.setProcessDefinitionId(createdEvent.getEntity().getProcessDefinitionId());
+        createdProcessInstanceEntity.setId(createdEvent.getEntity().getId());
+        createdProcessInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.CREATED);
+        createdProcessInstanceEntity.setLastModified(new Date(createdEvent.getTimestamp()));
 
-        createdProcessInstance.setProcessDefinitionKey(createdEvent.getEntity().getProcessDefinitionKey());
-        createdProcessInstance.setInitiator(createdEvent.getEntity().getInitiator());
-        createdProcessInstance.setBusinessKey(createdEvent.getEntity().getBusinessKey());
-        createdProcessInstance.setDescription(createdEvent.getEntity().getDescription());
-        createdProcessInstance.setStartDate(createdEvent.getEntity().getStartDate());
+        createdProcessInstanceEntity.setProcessDefinitionKey(createdEvent.getEntity().getProcessDefinitionKey());
+        createdProcessInstanceEntity.setInitiator(createdEvent.getEntity().getInitiator());
+        createdProcessInstanceEntity.setBusinessKey(createdEvent.getEntity().getBusinessKey());
+        createdProcessInstanceEntity.setDescription(createdEvent.getEntity().getDescription());
+        createdProcessInstanceEntity.setStartDate(createdEvent.getEntity().getStartDate());
 
-        processInstanceRepository.save(createdProcessInstance);
+        processInstanceRepository.save(createdProcessInstanceEntity);
     }
 
     @Override

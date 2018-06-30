@@ -14,7 +14,7 @@ import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-@GraphQLDescription("Task Candidate User Entity Model")
+@GraphQLDescription("TaskEntity Candidate User Entity Model")
 
 @Entity
 @IdClass(TaskCandidateUserId.class)
@@ -33,7 +33,7 @@ public class TaskCandidateUser {
     @ManyToOne(optional=true)
     @JoinColumn(name="taskId", referencedColumnName="id", insertable=false, updatable=false, nullable=true
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
-    private Task task;
+    private TaskEntity taskEntity;
 
     @JsonCreator
     public TaskCandidateUser(@JsonProperty("taskId") String taskid,
@@ -62,11 +62,11 @@ public class TaskCandidateUser {
         this.userId = userId;
     }
 
-    public Task getTask() {
-        return this.task;
+    public TaskEntity getTaskEntity() {
+        return this.taskEntity;
     }
 
-    public void setTask(Task task) {
-        this.task = task;
+    public void setTaskEntity(TaskEntity taskEntity) {
+        this.taskEntity = taskEntity;
     }
 }

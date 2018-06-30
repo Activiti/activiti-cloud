@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
@@ -42,21 +42,21 @@ public class TaskAssignedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskAssignedEvent taskAssignedEvent = (CloudTaskAssignedEvent) event;
         org.activiti.runtime.api.model.Task eventTask = taskAssignedEvent.getEntity();
-        Optional<Task> findResult = taskRepository.findById(eventTask.getId());
-        Task queryTask = findResult.orElseThrow(
+        Optional<TaskEntity> findResult = taskRepository.findById(eventTask.getId());
+        TaskEntity queryTaskEntity = findResult.orElseThrow(
                 () -> new ActivitiException("Unable to find task with id: " + eventTask.getId())
         );
-        queryTask.setAssignee(eventTask.getAssignee());
-        queryTask.setStatus(org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED.name());
-        queryTask.setLastModified(new Date(taskAssignedEvent.getTimestamp()));
-        queryTask.setServiceName(taskAssignedEvent.getServiceName());
-        queryTask.setServiceFullName(taskAssignedEvent.getServiceFullName());
-        queryTask.setServiceVersion(taskAssignedEvent.getServiceVersion());
-        queryTask.setAppName(taskAssignedEvent.getAppName());
-        queryTask.setAppVersion(taskAssignedEvent.getAppVersion());
-        queryTask.setOwner(eventTask.getOwner());
-        queryTask.setClaimDate(eventTask.getClaimedDate());
-        taskRepository.save(queryTask);
+        queryTaskEntity.setAssignee(eventTask.getAssignee());
+        queryTaskEntity.setStatus(org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED);
+        queryTaskEntity.setLastModified(new Date(taskAssignedEvent.getTimestamp()));
+        queryTaskEntity.setServiceName(taskAssignedEvent.getServiceName());
+        queryTaskEntity.setServiceFullName(taskAssignedEvent.getServiceFullName());
+        queryTaskEntity.setServiceVersion(taskAssignedEvent.getServiceVersion());
+        queryTaskEntity.setAppName(taskAssignedEvent.getAppName());
+        queryTaskEntity.setAppVersion(taskAssignedEvent.getAppVersion());
+        queryTaskEntity.setOwner(eventTask.getOwner());
+        queryTaskEntity.setClaimedDate(eventTask.getClaimedDate());
+        taskRepository.save(queryTaskEntity);
     }
 
     @Override

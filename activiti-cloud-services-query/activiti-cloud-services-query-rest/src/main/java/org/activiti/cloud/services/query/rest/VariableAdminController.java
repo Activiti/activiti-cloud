@@ -19,7 +19,7 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.cloud.services.query.resources.VariableResource;
 import org.activiti.cloud.services.query.rest.assembler.VariableResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
         })
 public class VariableAdminController {
 
-    private AlfrescoPagedResourcesAssembler<Variable> pagedVariablesResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<VariableEntity> pagedVariablesResourcesAssembler;
 
     private VariableRepository variableRepository;
 
@@ -53,7 +53,7 @@ public class VariableAdminController {
     @Autowired
     public VariableAdminController(VariableRepository variableRepository,
                                    VariableResourceAssembler variableResourceAssembler,
-                                   AlfrescoPagedResourcesAssembler<Variable> pagedVariablesResourcesAssembler) {
+                                   AlfrescoPagedResourcesAssembler<VariableEntity> pagedVariablesResourcesAssembler) {
         this.variableRepository = variableRepository;
         this.variableResourceAssembler = variableResourceAssembler;
         this.pagedVariablesResourcesAssembler = pagedVariablesResourcesAssembler;
@@ -66,7 +66,7 @@ public class VariableAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<VariableResource> findAll(@QuerydslPredicate(root = Variable.class) Predicate predicate,
+    public PagedResources<VariableResource> findAll(@QuerydslPredicate(root = VariableEntity.class) Predicate predicate,
                                                     Pageable pageable) {
 
         return pagedVariablesResourcesAssembler.toResource(pageable,

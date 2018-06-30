@@ -21,7 +21,7 @@ import java.util.Collection;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
@@ -52,7 +52,7 @@ import static org.awaitility.Awaitility.await;
 public class QueryTasksIT {
 
     private static final String TASKS_URL = "/v1/tasks";
-    private static final ParameterizedTypeReference<PagedResources<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Task>>() {
+    private static final ParameterizedTypeReference<PagedResources<TaskEntity>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<TaskEntity>>() {
     };
 
     @Autowired
@@ -112,16 +112,16 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+            ResponseEntity<PagedResources<TaskEntity>> responseEntity = executeRequestGetTasks();
 
             //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            Collection<Task> tasks = responseEntity.getBody().getContent();
-            assertThat(tasks)
-                    .extracting(Task::getId,
-                                Task::getStatus)
+            Collection<TaskEntity> taskEntities = responseEntity.getBody().getContent();
+            assertThat(taskEntities)
+                    .extracting(TaskEntity::getId,
+                                TaskEntity::getStatus)
                     .contains(tuple(createdTask.getId(),
                                     org.activiti.runtime.api.model.Task.TaskStatus.CREATED.name()),
                               tuple(assignedTask.getId(),
@@ -133,20 +133,20 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
-                                                                                            HttpMethod.GET,
-                                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                            PAGED_TASKS_RESPONSE_TYPE,
-                                                                                            org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED.name());
+            ResponseEntity<PagedResources<TaskEntity>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
+                                                                                                  HttpMethod.GET,
+                                                                                                  keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                  PAGED_TASKS_RESPONSE_TYPE,
+                                                                                                  org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED.name());
 
             //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            Collection<Task> tasks = responseEntity.getBody().getContent();
-            assertThat(tasks)
-                    .extracting(Task::getId,
-                                Task::getStatus)
+            Collection<TaskEntity> taskEntities = responseEntity.getBody().getContent();
+            assertThat(taskEntities)
+                    .extracting(TaskEntity::getId,
+                                TaskEntity::getStatus)
                     .containsExactly(tuple(assignedTask.getId(),
                                            org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED.name()));
         });
@@ -164,16 +164,16 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+            ResponseEntity<PagedResources<TaskEntity>> responseEntity = executeRequestGetTasks();
 
             //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            Collection<Task> tasks = responseEntity.getBody().getContent();
-            assertThat(tasks)
-                    .extracting(Task::getId,
-                                Task::getStatus)
+            Collection<TaskEntity> taskEntities = responseEntity.getBody().getContent();
+            assertThat(taskEntities)
+                    .extracting(TaskEntity::getId,
+                                TaskEntity::getStatus)
                     .contains(tuple(taskWithCandidate.getId(),
                                     org.activiti.runtime.api.model.Task.TaskStatus.CREATED.name()));
         });
@@ -191,20 +191,20 @@ public class QueryTasksIT {
         Thread.sleep(300);
 
         //when
-        ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+        ResponseEntity<PagedResources<TaskEntity>> responseEntity = executeRequestGetTasks();
 
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        Collection<Task> tasks = responseEntity.getBody().getContent();
+        Collection<TaskEntity> taskEntities = responseEntity.getBody().getContent();
         //don't see the task as not for me
-        assertThat(tasks)
-                .extracting(Task::getId)
+        assertThat(taskEntities)
+                .extracting(TaskEntity::getId)
                 .doesNotContain(taskWithCandidate.getId());
     }
 
-    private ResponseEntity<PagedResources<Task>> executeRequestGetTasks() {
+    private ResponseEntity<PagedResources<TaskEntity>> executeRequestGetTasks() {
         return testRestTemplate.exchange(TASKS_URL,
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),

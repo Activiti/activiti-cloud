@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudProcessStartedEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
@@ -60,32 +60,32 @@ public class ProcessStartedEventHandlerTest {
     public void handleShouldUpdateProcessInstanceStatusToRunning() {
         //given
         CloudProcessStartedEvent event = buildProcessStartedEvent();
-        ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
-        given(currentProcessInstance.getStatus()).willReturn(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.CREATED.name());
-        given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstance));
+        ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
+        given(currentProcessInstanceEntity.getStatus()).willReturn(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.CREATED.name());
+        given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstanceEntity));
 
         //when
         handler.handle(event);
 
         //then
-        verify(processInstanceRepository).save(currentProcessInstance);
-        verify(currentProcessInstance).setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+        verify(processInstanceRepository).save(currentProcessInstanceEntity);
+        verify(currentProcessInstanceEntity).setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
     }
 
     @Test
     public void handleShouldIgnoreEventIfProcessInstanceIsAlreadyInRunningStatus() {
         //given
         CloudProcessStartedEvent event = buildProcessStartedEvent();
-        ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
-        given(currentProcessInstance.getStatus()).willReturn(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
-        given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstance));
+        ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
+        given(currentProcessInstanceEntity.getStatus()).willReturn(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+        given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstanceEntity));
 
         //when
         handler.handle(event);
 
         //then
-        verify(processInstanceRepository, never()).save(currentProcessInstance);
-        verify(currentProcessInstance, never()).setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+        verify(processInstanceRepository, never()).save(currentProcessInstanceEntity);
+        verify(currentProcessInstanceEntity, never()).setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
     }
 
     private CloudProcessStartedEvent buildProcessStartedEvent() {

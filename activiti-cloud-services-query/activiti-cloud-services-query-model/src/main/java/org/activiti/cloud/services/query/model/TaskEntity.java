@@ -1,0 +1,342 @@
+/*
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.activiti.cloud.services.query.model;
+
+import java.util.Date;
+import java.util.Set;
+import javax.persistence.ConstraintMode;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
+import org.activiti.runtime.api.model.CloudTask;
+import org.springframework.format.annotation.DateTimeFormat;
+
+@GraphQLDescription("TaskEntity Instance Entity Model")
+
+@Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
+
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    private String id;
+    private String assignee;
+    private String name;
+    private String description;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Date createdDate;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Date dueDate;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Date claimedDate;
+    private int priority;
+    private String category;
+    private String processDefinitionId;
+    private String processInstanceId;
+    private TaskStatus status;
+    private String owner;
+    private String parentTaskId;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private Date lastModified;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private Date lastModifiedTo;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private Date lastModifiedFrom;
+
+    @JsonIgnore
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private ProcessInstanceEntity processInstanceEntity;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private Set<TaskCandidateUser> taskCandidateUsers;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private Set<TaskCandidateGroup> taskCandidateGroups;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
+            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private Set<VariableEntity> variableEntities;
+
+    public TaskEntity() {
+    }
+
+    @JsonCreator
+    public TaskEntity(@JsonProperty("id") String id,
+                      @JsonProperty("assignee") String assignee,
+                      @JsonProperty("name") String name,
+                      @JsonProperty("description") String description,
+                      @JsonProperty("createdDate") Date createTime,
+                      @JsonProperty("dueDate") Date dueDate,
+                      @JsonProperty("priority") int priority,
+                      @JsonProperty("category") String category,
+                      @JsonProperty("processDefinitionId") String processDefinitionId,
+                      @JsonProperty("processInstanceId") String processInstanceId,
+                      @JsonProperty("serviceName") String serviceName,
+                      @JsonProperty("serviceFullName") String serviceFullName,
+                      @JsonProperty("serviceVersion") String serviceVersion,
+                      @JsonProperty("appName") String appName,
+                      @JsonProperty("appVersion") String appVersion,
+                      @JsonProperty("status") TaskStatus status,
+                      @JsonProperty("lastModified") Date lastModified,
+                      @JsonProperty("claimedDate") Date claimedDate,
+                      @JsonProperty("owner") String owner,
+                      @JsonProperty("parentTaskId") String parentTaskId) {
+        super(serviceName,serviceFullName,serviceVersion,appName,appVersion);
+        this.id = id;
+        this.assignee = assignee;
+        this.name = name;
+        this.description = description;
+        this.createdDate = createTime;
+        this.dueDate = dueDate;
+        this.priority = priority;
+        this.category = category;
+        this.processDefinitionId = processDefinitionId;
+        this.processInstanceId = processInstanceId;
+        this.status = status;
+        this.lastModified = lastModified;
+        this.claimedDate = claimedDate;
+        this.owner = owner;
+        this.parentTaskId = parentTaskId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public Date getDueDate() {
+        return dueDate;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public String getProcessDefinitionId() {
+        return processDefinitionId;
+    }
+
+    public String getProcessInstanceId() {
+        return processInstanceId;
+    }
+
+    public boolean isStandAlone() {
+        return processInstanceId == null;
+    }
+
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public void setDueDate(Date dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setProcessDefinitionId(String processDefinitionId) {
+        this.processDefinitionId = processDefinitionId;
+    }
+
+    public void setProcessInstanceId(String processInstanceId) {
+        this.processInstanceId = processInstanceId;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
+    }
+
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    @Transient
+    public Date getLastModifiedTo() {
+        return lastModifiedTo;
+    }
+
+    public void setLastModifiedTo(Date lastModifiedTo) {
+        this.lastModifiedTo = lastModifiedTo;
+    }
+
+    @Transient
+    public Date getLastModifiedFrom() {
+        return lastModifiedFrom;
+    }
+
+    public Date getClaimedDate() {
+        return claimedDate;
+    }
+
+    public void setClaimedDate(Date claimedDate) {
+        this.claimedDate = claimedDate;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public void setLastModifiedFrom(Date lastModifiedFrom) {
+        this.lastModifiedFrom = lastModifiedFrom;
+    }
+
+    /**
+     * @return the processInstanceEntity
+     */
+    public ProcessInstanceEntity getProcessInstance() {
+        return this.processInstanceEntity;
+    }
+
+    /**
+     * @param processInstanceEntity the processInstanceEntity to set
+     */
+    public void setProcessInstance(ProcessInstanceEntity processInstanceEntity) {
+        this.processInstanceEntity = processInstanceEntity;
+    }
+
+    /**
+     * @return the variableEntities
+     */
+    public Set<VariableEntity> getVariableEntities() {
+        return this.variableEntities;
+    }
+
+    /**
+     * @param variableEntities the variableEntities to set
+     */
+    public void setVariableEntities(Set<VariableEntity> variableEntities) {
+        this.variableEntities = variableEntities;
+    }
+
+    /**
+     * @return the taskCandidateUsers
+     */
+    public Set<TaskCandidateUser> getTaskCandidateUsers() {
+        return this.taskCandidateUsers;
+    }
+
+    /**
+     * @param taskCandidateUsers the taskCandidateUsers to set
+     */
+    public void setTaskCandidateUsers(Set<TaskCandidateUser> taskCandidateUsers) {
+        this.taskCandidateUsers = taskCandidateUsers;
+    }
+
+    /**
+     * @return the taskCandidateUsers
+     */
+    public Set<TaskCandidateGroup> getTaskCandidateGroups() {
+        return this.taskCandidateGroups;
+    }
+
+    /**
+     * @param taskCandidateGroups the taskCandidateGroups to set
+     */
+    public void setTaskCandidateGroups(Set<TaskCandidateGroup> taskCandidateGroups) {
+        this.taskCandidateGroups = taskCandidateGroups;
+    }
+
+    public String getParentTaskId() {
+        return parentTaskId;
+    }
+
+    public void setParentTaskId(String parentTaskId) {
+        this.parentTaskId = parentTaskId;
+    }
+}

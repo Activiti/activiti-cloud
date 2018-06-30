@@ -17,7 +17,7 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +37,15 @@ public class VariableUpdater {
         this.variableRepository = variableRepository;
     }
 
-    public void update(Variable updatedVariable, Predicate predicate, String notFoundMessage) {
-        Variable variable = entityFinder.findOne(variableRepository,
-                                            predicate,
-                                            notFoundMessage);
-        variable.setLastUpdatedTime(updatedVariable.getLastUpdatedTime());
-        variable.setType(updatedVariable.getType());
-        variable.setValue(updatedVariable.getValue());
+    public void update(VariableEntity updatedVariableEntity, Predicate predicate, String notFoundMessage) {
+        VariableEntity variableEntity = entityFinder.findOne(variableRepository,
+                                                             predicate,
+                                                             notFoundMessage);
+        variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
+        variableEntity.setType(updatedVariableEntity.getType());
+        variableEntity.setValue(updatedVariableEntity.getValue());
 
-        variableRepository.save(variable);
+        variableRepository.save(variableEntity);
     }
 
 }

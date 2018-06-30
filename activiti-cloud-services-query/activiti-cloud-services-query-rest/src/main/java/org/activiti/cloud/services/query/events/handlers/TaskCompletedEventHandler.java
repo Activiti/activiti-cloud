@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskCompletedEvent;
@@ -42,14 +42,14 @@ public class TaskCompletedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskCompletedEvent taskCompletedEvent = (CloudTaskCompletedEvent) event;
         org.activiti.runtime.api.model.Task eventTask = taskCompletedEvent.getEntity();
-        Optional<Task> findResult = taskRepository.findById(eventTask.getId());
-        Task queryTask = findResult.orElseThrow(
+        Optional<TaskEntity> findResult = taskRepository.findById(eventTask.getId());
+        TaskEntity queryTaskEntity = findResult.orElseThrow(
                 () -> new ActivitiException("Unable to find task with id: " + eventTask.getId())
         );
 
-        queryTask.setStatus(eventTask.getStatus().name());
-        queryTask.setLastModified(new Date(taskCompletedEvent.getTimestamp()));
-        taskRepository.save(queryTask);
+        queryTaskEntity.setStatus(eventTask.getStatus());
+        queryTaskEntity.setLastModified(new Date(taskCompletedEvent.getTimestamp()));
+        taskRepository.save(queryTaskEntity);
     }
 
     @Override

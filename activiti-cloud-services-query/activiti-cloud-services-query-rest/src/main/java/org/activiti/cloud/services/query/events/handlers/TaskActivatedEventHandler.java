@@ -20,11 +20,12 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskActivatedEvent;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
+import org.activiti.runtime.api.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,19 +43,19 @@ public class TaskActivatedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskActivatedEvent taskActivatedEvent = (CloudTaskActivatedEvent) event;
         org.activiti.runtime.api.model.Task eventTask = taskActivatedEvent.getEntity();
-        Optional<Task> findResult = taskRepository.findById(eventTask.getId());
-        Task task = findResult.orElseThrow(
-                () -> new ActivitiException("Unable to find task with id: " + eventTask.getId())
+        Optional<TaskEntity> findResult = taskRepository.findById(eventTask.getId());
+        TaskEntity taskEntity = findResult.orElseThrow(
+                () -> new ActivitiException("Unable to find taskEntity with id: " + eventTask.getId())
         );
-        if (task.getAssignee() != null && !task.getAssignee().isEmpty()) {
-            task.setStatus("ASSIGNED");
+        if (taskEntity.getAssignee() != null && !taskEntity.getAssignee().isEmpty()) {
+            taskEntity.setStatus(Task.TaskStatus.ASSIGNED);
         } else {
-            task.setStatus("CREATED");
+            taskEntity.setStatus(Task.TaskStatus.CREATED);
         }
-        task.setLastModified(new Date(taskActivatedEvent.getTimestamp()));
-        task.setOwner(taskActivatedEvent.getEntity().getOwner());
-        task.setClaimDate(taskActivatedEvent.getEntity().getClaimedDate());
-        taskRepository.save(task);
+        taskEntity.setLastModified(new Date(taskActivatedEvent.getTimestamp()));
+        taskEntity.setOwner(taskActivatedEvent.getEntity().getOwner());
+        taskEntity.setClaimedDate(taskActivatedEvent.getEntity().getClaimedDate());
+        taskRepository.save(taskEntity);
     }
 
     @Override

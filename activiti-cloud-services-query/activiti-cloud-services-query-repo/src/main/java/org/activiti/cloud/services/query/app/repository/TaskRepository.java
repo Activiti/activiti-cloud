@@ -17,8 +17,8 @@
 package org.activiti.cloud.services.query.app.repository;
 
 import com.querydsl.core.types.dsl.StringPath;
-import org.activiti.cloud.services.query.model.QTask;
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.QTaskEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -26,11 +26,13 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
-public interface TaskRepository extends PagingAndSortingRepository<Task, String>, QuerydslPredicateExecutor<Task>, QuerydslBinderCustomizer<QTask> {
+public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, String>,
+                                        QuerydslPredicateExecutor<TaskEntity>,
+                                        QuerydslBinderCustomizer<QTaskEntity> {
 
     @Override
     default void customize(QuerydslBindings bindings,
-                           QTask root) {
+                           QTaskEntity root) {
 
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
         bindings.bind(root.lastModifiedFrom).first((path, value) -> root.lastModified.after(value));

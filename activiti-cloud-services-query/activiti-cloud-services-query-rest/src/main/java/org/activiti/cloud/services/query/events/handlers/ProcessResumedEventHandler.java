@@ -20,11 +20,12 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudProcessResumedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,15 +43,15 @@ public class ProcessResumedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudProcessResumedEvent processResumedEvent = (CloudProcessResumedEvent) event;
         String processInstanceId = processResumedEvent.getEntity().getId();
-        Optional<ProcessInstance> findResult = processInstanceRepository.findById(processInstanceId);
-        ProcessInstance processInstance = findResult.orElseThrow(() -> new ActivitiException("Unable to find process instance with the given id: " + processInstanceId));
-        processInstance.setStatus("RUNNING");
-        processInstance.setLastModified(new Date(processResumedEvent.getTimestamp()));
-        processInstance.setProcessDefinitionKey(processResumedEvent.getEntity().getProcessDefinitionKey());
-        processInstance.setInitiator(processResumedEvent.getEntity().getInitiator());
-        processInstance.setStartDate(processResumedEvent.getEntity().getStartDate());
-        processInstance.setBusinessKey(processResumedEvent.getEntity().getBusinessKey());
-        processInstanceRepository.save(processInstance);
+        Optional<ProcessInstanceEntity> findResult = processInstanceRepository.findById(processInstanceId);
+        ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(() -> new ActivitiException("Unable to find process instance with the given id: " + processInstanceId));
+        processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        processInstanceEntity.setLastModified(new Date(processResumedEvent.getTimestamp()));
+        processInstanceEntity.setProcessDefinitionKey(processResumedEvent.getEntity().getProcessDefinitionKey());
+        processInstanceEntity.setInitiator(processResumedEvent.getEntity().getInitiator());
+        processInstanceEntity.setStartDate(processResumedEvent.getEntity().getStartDate());
+        processInstanceEntity.setBusinessKey(processResumedEvent.getEntity().getBusinessKey());
+        processInstanceRepository.save(processInstanceEntity);
     }
 
     @Override

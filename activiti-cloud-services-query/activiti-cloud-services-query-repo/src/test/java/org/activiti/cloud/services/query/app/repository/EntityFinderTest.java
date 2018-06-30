@@ -19,7 +19,7 @@ package org.activiti.cloud.services.query.app.repository;
 import java.util.Optional;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,16 +52,16 @@ public class EntityFinderTest {
     public void findByIdShouldReturnResultWhenIsPresent() throws Exception {
         //given
         String processInstanceId = "5";
-        ProcessInstance processInstance = mock(ProcessInstance.class);
-        given(repository.findById(processInstanceId)).willReturn(Optional.of(processInstance));
+        ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
+        given(repository.findById(processInstanceId)).willReturn(Optional.of(processInstanceEntity));
 
         //when
-        ProcessInstance retrieveProcessInstance = entityFinder.findById(repository,
-                                                                        processInstanceId,
-                                                                        "error");
+        ProcessInstanceEntity retrieveProcessInstanceEntity = entityFinder.findById(repository,
+                                                                                    processInstanceId,
+                                                                                    "error");
 
         //then
-        assertThat(retrieveProcessInstance).isEqualTo(processInstance);
+        assertThat(retrieveProcessInstanceEntity).isEqualTo(processInstanceEntity);
     }
 
     @Test
@@ -83,16 +83,16 @@ public class EntityFinderTest {
     public void findOneShouldReturnResultWhenIsPresent() throws Exception {
         //given
         Predicate predicate = mock(Predicate.class);
-        ProcessInstance processInstance = mock(ProcessInstance.class);
-        given(repository.findOne(predicate)).willReturn(Optional.of(processInstance));
+        ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
+        given(repository.findOne(predicate)).willReturn(Optional.of(processInstanceEntity));
 
         //when
-        ProcessInstance retrievedProcessInstance = entityFinder.findOne(repository,
-                                                                        predicate,
-                                                                        "error");
+        ProcessInstanceEntity retrievedProcessInstanceEntity = entityFinder.findOne(repository,
+                                                                                    predicate,
+                                                                                    "error");
 
         //then
-        assertThat(retrievedProcessInstance).isEqualTo(processInstance);
+        assertThat(retrievedProcessInstanceEntity).isEqualTo(processInstanceEntity);
     }
 
     @Test

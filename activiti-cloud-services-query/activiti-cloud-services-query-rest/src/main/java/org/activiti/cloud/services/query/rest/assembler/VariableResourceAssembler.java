@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.query.rest.assembler;
 
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.cloud.services.query.resources.VariableResource;
 import org.activiti.cloud.services.query.rest.VariableController;
 import org.springframework.hateoas.Link;
@@ -27,10 +27,10 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Component
-public class VariableResourceAssembler implements ResourceAssembler<Variable, VariableResource> {
+public class VariableResourceAssembler implements ResourceAssembler<VariableEntity, VariableResource> {
 
     @Override
-    public VariableResource toResource(Variable entity) {
+    public VariableResource toResource(VariableEntity entity) {
         Link selfRel = linkTo(methodOn(VariableController.class).findById(entity.getId())).withSelfRel();
         return new VariableResource(entity, selfRel);
     }

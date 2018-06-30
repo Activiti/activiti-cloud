@@ -19,11 +19,12 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudProcessSuspendedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,13 +43,13 @@ public class ProcessSuspendedEventHandler implements QueryEventHandler {
         CloudProcessSuspendedEvent suspendedEvent = (CloudProcessSuspendedEvent) event;
         String processInstanceId = suspendedEvent.getEntity().getId();
 
-        ProcessInstance processInstance = processInstanceRepository.findById(processInstanceId)
+        ProcessInstanceEntity processInstanceEntity = processInstanceRepository.findById(processInstanceId)
                 .orElseThrow(
                         () -> new ActivitiException("Unable to find process instance with the given id: " + processInstanceId)
                 );
-        processInstance.setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.SUSPENDED.name());
-        processInstance.setLastModified(new Date(suspendedEvent.getTimestamp()));
-        processInstanceRepository.save(processInstance);
+        processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
+        processInstanceEntity.setLastModified(new Date(suspendedEvent.getTimestamp()));
+        processInstanceRepository.save(processInstanceEntity);
     }
 
     @Override

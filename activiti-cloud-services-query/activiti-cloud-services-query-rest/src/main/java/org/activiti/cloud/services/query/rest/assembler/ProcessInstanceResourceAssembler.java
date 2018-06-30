@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.query.rest.assembler;
 
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.query.rest.ProcessInstanceController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceTasksController;
@@ -29,10 +29,10 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Component
-public class ProcessInstanceResourceAssembler implements ResourceAssembler<ProcessInstance, ProcessInstanceResource> {
+public class ProcessInstanceResourceAssembler implements ResourceAssembler<ProcessInstanceEntity, ProcessInstanceResource> {
 
     @Override
-    public ProcessInstanceResource toResource(ProcessInstance entity) {
+    public ProcessInstanceResource toResource(ProcessInstanceEntity entity) {
         Link selfRel = linkTo(methodOn(ProcessInstanceController.class).findById(entity.getId())).withSelfRel();
         Link tasksRel = linkTo(methodOn(ProcessInstanceTasksController.class).getTasks(entity.getId(), null)).withRel("tasks");
         Link variablesRel = linkTo(methodOn(ProcessInstanceVariableController.class).getVariables(entity.getId(),null,null)).withRel("variables");
