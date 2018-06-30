@@ -11,10 +11,6 @@
   <name>Activiti Cloud Query :: Services :: Query Model</name>
   <dependencies>
     <dependency>
-      <groupId>com.introproventures</groupId>
-      <artifactId>graphql-jpa-query-annotations</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
     </dependency>

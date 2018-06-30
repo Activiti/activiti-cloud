@@ -1,6 +1,6 @@
 # Query Service
 
-This service provides querying capabilities. It is distinct from the run-time API which is used to perform actions on engine items. This implementation contains REST endpoints and GraphQL.
+This service provides querying capabilities. It is distinct from the run-time API which is used to perform actions on engine items. This implementation contains REST endpoints.
 
 ## REST API Approach
 
@@ -14,4 +14,4 @@ If the Q* classes aren't present in the /target/generated-sources directory then
 
 The implementation is using spring data in as agnostic a way as available so that alternative databases could be used.
 
-The project has a split structure so that the activiti-cloud-services-query-repo module can be excluded and replaced with an alternative implementation (e.g. (https://www.mkyong.com/spring-boot/spring-boot-spring-data-elasticsearch-example/) at least for the REST API. For GraphQL the schema is dynamically generated from the JPA entities so an alternative approach for defining the schema would then be needed.
+The project has a split structure so that the activiti-cloud-services-query-repo module can be excluded and replaced with an alternative implementation (e.g. (https://www.mkyong.com/spring-boot/spring-boot-spring-data-elasticsearch-example/) at least for the REST API.

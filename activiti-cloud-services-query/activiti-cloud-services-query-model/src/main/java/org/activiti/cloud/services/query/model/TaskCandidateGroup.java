@@ -12,9 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
-
-@GraphQLDescription("Task Candidate Group Entity Model")
 
 @Entity
 @IdClass(TaskCandidateGroupId.class)

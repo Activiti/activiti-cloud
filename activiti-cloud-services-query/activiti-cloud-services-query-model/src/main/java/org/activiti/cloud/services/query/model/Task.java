@@ -33,10 +33,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
 import org.springframework.format.annotation.DateTimeFormat;
-
-@GraphQLDescription("Task Instance Entity Model")
 
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -124,7 +121,11 @@ public class Task extends ActivitiEntityMetadata implements Serializable {
                 @JsonProperty("claimDate") Date claimDate,
                 @JsonProperty("owner") String owner,
                 @JsonProperty("parentTaskId") String parentTaskId) {
-        super(serviceName,serviceFullName,serviceVersion,appName,appVersion);
+        super(serviceName,
+              serviceFullName,
+              serviceVersion,
+              appName,
+              appVersion);
         this.id = id;
         this.assignee = assignee;
         this.name = name;

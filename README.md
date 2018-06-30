@@ -12,14 +12,9 @@
 
 Activiti Cloud Query Service &amp; Spring Boot Starters.
 
-Implements a query service that can be added to an application using starter. Supports either REST or GraphQL.
+Implements a query service that can be added to an application using starter. 
 
 Structure:
-* graphiql - A UI client for testing graphQL requests.
-* graphql - This makes the graphql endpoint available - it has a dependency to model.
-* graphqlws - Configures websockes for graphql and sets up schema with event for subscribing to - needed for subscribing to notifications.
 * model - Basic JPA entity model for querying.
-* notifications - Transforms event stream for consumption by GraphQL - can be run as separate component (see module README).
 * repo - Enables persistence for the core model.
-* rest - Implementation for consuming event stream from runtime bundle and also provides REST endpoints (but not related to graphql). Uses * spring data.
-* stomp - Adds websocket dependency and /ws/stomp endpoint. Needed for subscribing to notifications.
+* rest - Implementation for consuming event stream from runtime bundle and also provides REST endpoints. Uses * spring data.
