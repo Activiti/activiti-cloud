@@ -58,9 +58,9 @@ public class TaskEntityCreatedEventHandlerTest {
     @Test
     public void handleShouldStoreNewTaskInstance() {
         //given
-        TaskImpl task = new TaskImpl(Task.TaskStatus.CREATED,
+        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
                                      "task",
-                                     UUID.randomUUID().toString());
+                                     Task.TaskStatus.CREATED);
         task.setCreatedDate(new Date());
         task.setProcessInstanceId(UUID.randomUUID().toString());
         CloudTaskCreatedEventImpl event = new CloudTaskCreatedEventImpl(
@@ -79,7 +79,7 @@ public class TaskEntityCreatedEventHandlerTest {
         //then
         ArgumentCaptor<TaskEntity> captor = ArgumentCaptor.forClass(TaskEntity.class);
         verify(taskRepository).save(captor.capture());
-        assertThat(captor.getValue().getStatus()).isEqualTo("CREATED");
+        assertThat(captor.getValue().getStatus()).isEqualTo(Task.TaskStatus.CREATED);
         assertThat(captor.getValue().getLastModified()).isNotNull();
         assertThat(captor.getValue().getProcessInstance()).isEqualTo(processInstanceEntity);
         assertThat(captor.getValue().getServiceName()).isEqualTo("runtime-bundle-a");

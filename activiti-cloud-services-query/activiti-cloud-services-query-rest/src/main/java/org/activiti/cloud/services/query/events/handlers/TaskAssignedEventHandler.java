@@ -20,8 +20,8 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
@@ -44,7 +44,7 @@ public class TaskAssignedEventHandler implements QueryEventHandler {
         org.activiti.runtime.api.model.Task eventTask = taskAssignedEvent.getEntity();
         Optional<TaskEntity> findResult = taskRepository.findById(eventTask.getId());
         TaskEntity queryTaskEntity = findResult.orElseThrow(
-                () -> new ActivitiException("Unable to find task with id: " + eventTask.getId())
+                () -> new QueryException("Unable to find task with id: " + eventTask.getId())
         );
         queryTaskEntity.setAssignee(eventTask.getAssignee());
         queryTaskEntity.setStatus(org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED);

@@ -21,8 +21,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudTaskAssignedEventImpl;
@@ -36,10 +36,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TaskEntityAssignedEventHandlerTest {
@@ -98,7 +98,7 @@ public class TaskEntityAssignedEventHandlerTest {
         given(taskRepository.findById(taskId)).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(ActivitiException.class);
+        expectedException.expect(QueryException.class);
         expectedException.expectMessage("Unable to find task with id: " + taskId);
 
         //when

@@ -22,7 +22,7 @@ import java.util.UUID;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.runtime.api.event.CloudProcessCompletedEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessCompletedEventImpl;
@@ -87,7 +87,7 @@ public class ProcessCompletedEventHandlerTest {
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(ActivitiException.class);
+        expectedException.expect(QueryException.class);
         expectedException.expectMessage("Unable to find process instance with the given id: ");
 
         //when

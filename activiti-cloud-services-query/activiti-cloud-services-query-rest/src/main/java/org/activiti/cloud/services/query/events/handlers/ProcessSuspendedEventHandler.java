@@ -20,7 +20,7 @@ import java.util.Date;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.runtime.api.event.CloudProcessSuspendedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
@@ -45,7 +45,7 @@ public class ProcessSuspendedEventHandler implements QueryEventHandler {
 
         ProcessInstanceEntity processInstanceEntity = processInstanceRepository.findById(processInstanceId)
                 .orElseThrow(
-                        () -> new ActivitiException("Unable to find process instance with the given id: " + processInstanceId)
+                        () -> new QueryException("Unable to find process instance with the given id: " + processInstanceId)
                 );
         processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
         processInstanceEntity.setLastModified(new Date(suspendedEvent.getTimestamp()));

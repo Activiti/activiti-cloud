@@ -21,10 +21,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudTaskActivatedEventImpl;
+import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.impl.TaskImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,10 +35,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TaskEntityActivatedEventHandlerTest {
@@ -73,7 +74,7 @@ public class TaskEntityActivatedEventHandlerTest {
 
         //then
         verify(taskRepository).save(taskEntity);
-        verify(taskEntity).setStatus("CREATED");
+        verify(taskEntity).setStatus(Task.TaskStatus.CREATED);
         verify(taskEntity).setLastModified(any(Date.class));
     }
 
@@ -90,20 +91,19 @@ public class TaskEntityActivatedEventHandlerTest {
 
         given(taskRepository.findById(taskId)).willReturn(Optional.of(taskEntity));
 
-
         //when
         handler.handle(event);
 
         //then
         verify(taskRepository).save(taskEntity);
-        verify(taskEntity).setStatus("ASSIGNED");
+        verify(taskEntity).setStatus(Task.TaskStatus.ASSIGNED);
         verify(taskEntity).setLastModified(any(Date.class));
     }
 
     private CloudTaskActivatedEventImpl buildActivatedEvent() {
-        return new CloudTaskActivatedEventImpl(new TaskImpl(org.activiti.runtime.api.model.Task.TaskStatus.SUSPENDED,
+        return new CloudTaskActivatedEventImpl(new TaskImpl(UUID.randomUUID().toString(),
                                                             "my task",
-                                                            UUID.randomUUID().toString()));
+                                                            Task.TaskStatus.SUSPENDED));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class TaskEntityActivatedEventHandlerTest {
         given(taskRepository.findById(taskId)).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(ActivitiException.class);
+        expectedException.expect(QueryException.class);
         expectedException.expectMessage("Unable to find taskEntity with id: " + taskId);
 
         //when

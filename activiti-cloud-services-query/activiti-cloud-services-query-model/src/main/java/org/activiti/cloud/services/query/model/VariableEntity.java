@@ -32,6 +32,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Table(name = "VARIABLE")
 public class VariableEntity extends ActivitiEntityMetadata implements CloudVariableInstance {
 
     @Id
@@ -54,13 +55,13 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
     @ManyToOne(optional=true)
     @JoinColumn(name="taskId", referencedColumnName="id", insertable=false, updatable=false, nullable=true
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
-    private TaskEntity taskEntity;
+    private TaskEntity task;
 
     @JsonIgnore
     @ManyToOne(optional=true)
     @JoinColumn(name="processInstanceId", referencedColumnName="id", insertable=false, updatable=false
     , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name="none"))
-    private ProcessInstanceEntity processInstanceEntity;
+    private ProcessInstanceEntity processInstance;
     
     public VariableEntity() {
     }
@@ -158,19 +159,19 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
     }
 
     public ProcessInstanceEntity getProcessInstance() {
-        return this.processInstanceEntity;
+        return this.processInstance;
     }
 
     public void setProcessInstance(ProcessInstanceEntity processInstanceEntity) {
-        this.processInstanceEntity = processInstanceEntity;
+        this.processInstance = processInstanceEntity;
     }
     
     public TaskEntity getTask() {
-        return this.taskEntity;
+        return this.task;
     }
 
     public void setTask(TaskEntity taskEntity) {
-        this.taskEntity = taskEntity;
+        this.task = taskEntity;
     }
 
     public Boolean getMarkedAsDeleted() {

@@ -72,7 +72,7 @@ public class ActivitiGraphQLControllerIT {
             .describedAs(result.getErrors().toString())
             .isTrue();
 
-        assertThat("{Tasks={select=[{id=1, assignee=assignee, priority=Normal}]}}")
+        assertThat("{Tasks={select=[{id=1, assignee=assignee, priority=5}]}}")
             .isEqualTo(result.getData().toString());
 
     }
@@ -135,7 +135,7 @@ public class ActivitiGraphQLControllerIT {
             .describedAs(result.getErrors().toString())
             .isTrue();
 
-        assertThat("{Tasks={select=[{id=1, assignee=assignee, priority=Normal}]}}")
+        assertThat("{Tasks={select=[{id=1, assignee=assignee, priority=5}]}}")
             .isEqualTo(result.getData().toString());
     }
 }

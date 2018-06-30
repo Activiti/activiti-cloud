@@ -23,6 +23,7 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.runtime.api.event.CloudProcessCreatedEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.activiti.test.Assertions;
 import org.junit.Before;
@@ -70,7 +71,7 @@ public class ProcessCreatedEventHandlerTest {
                 .hasProcessDefinitionId(event.getEntity().getProcessDefinitionId())
                 .hasServiceName(event.getServiceName())
                 .hasProcessDefinitionKey(event.getEntity().getProcessDefinitionKey())
-                .hasStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.CREATED.name());
+                .hasStatus(ProcessInstance.ProcessInstanceStatus.CREATED);
     }
 
     private CloudProcessCreatedEvent buildProcessCreatedEvent() {

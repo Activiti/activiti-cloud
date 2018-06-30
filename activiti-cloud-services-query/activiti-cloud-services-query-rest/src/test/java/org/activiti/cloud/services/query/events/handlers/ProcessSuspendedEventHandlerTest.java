@@ -22,10 +22,11 @@ import java.util.UUID;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.runtime.api.event.CloudProcessSuspendedEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessSuspendedEventImpl;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,8 +38,7 @@ import org.mockito.Mock;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessSuspendedEventHandlerTest {
@@ -70,7 +70,7 @@ public class ProcessSuspendedEventHandlerTest {
 
         //then
         verify(processInstanceRepository).save(currentProcessInstanceEntity);
-        verify(currentProcessInstanceEntity).setStatus("SUSPENDED");
+        verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
         verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
     }
 
@@ -88,12 +88,11 @@ public class ProcessSuspendedEventHandlerTest {
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(ActivitiException.class);
+        expectedException.expect(QueryException.class);
         expectedException.expectMessage("Unable to find process instance with the given id: ");
 
         //when
         handler.handle(event);
-
     }
 
     @Test

@@ -21,10 +21,11 @@ import java.util.UUID;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.runtime.api.event.CloudProcessStartedEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -35,9 +36,7 @@ import org.mockito.Mock;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessStartedEventHandlerTest {
@@ -61,7 +60,7 @@ public class ProcessStartedEventHandlerTest {
         //given
         CloudProcessStartedEvent event = buildProcessStartedEvent();
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(currentProcessInstanceEntity.getStatus()).willReturn(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.CREATED.name());
+        given(currentProcessInstanceEntity.getStatus()).willReturn(ProcessInstance.ProcessInstanceStatus.CREATED);
         given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstanceEntity));
 
         //when
@@ -69,7 +68,7 @@ public class ProcessStartedEventHandlerTest {
 
         //then
         verify(processInstanceRepository).save(currentProcessInstanceEntity);
-        verify(currentProcessInstanceEntity).setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+        verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
     }
 
     @Test
@@ -77,15 +76,17 @@ public class ProcessStartedEventHandlerTest {
         //given
         CloudProcessStartedEvent event = buildProcessStartedEvent();
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
-        given(currentProcessInstanceEntity.getStatus()).willReturn(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+        given(currentProcessInstanceEntity.getStatus()).willReturn(ProcessInstance.ProcessInstanceStatus.RUNNING);
         given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstanceEntity));
 
         //when
         handler.handle(event);
 
         //then
-        verify(processInstanceRepository, never()).save(currentProcessInstanceEntity);
-        verify(currentProcessInstanceEntity, never()).setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+        verify(processInstanceRepository,
+               never()).save(currentProcessInstanceEntity);
+        verify(currentProcessInstanceEntity,
+               never()).setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
     }
 
     private CloudProcessStartedEvent buildProcessStartedEvent() {
@@ -102,7 +103,7 @@ public class ProcessStartedEventHandlerTest {
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(ActivitiException.class);
+        expectedException.expect(QueryException.class);
         expectedException.expectMessage("Unable to find process instance with the given id: ");
 
         //when

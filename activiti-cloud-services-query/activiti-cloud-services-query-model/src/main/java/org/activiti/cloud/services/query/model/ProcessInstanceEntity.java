@@ -19,8 +19,11 @@ package org.activiti.cloud.services.query.model;
 import java.util.Date;
 import java.util.Set;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,6 +38,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Table(name = "PROCESS_INSTANCE")
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 
     @Id
@@ -47,6 +51,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private String initiator;
     private Date startDate;
     private String businessKey;
+    @Enumerated(EnumType.STRING)
     private ProcessInstanceStatus status;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -59,16 +64,16 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private Date lastModifiedFrom;
 
     @JsonIgnore
-    @GraphQLDescription("Associated taskEntities entities")
+    @GraphQLDescription("Associated task entities")
     @OneToMany(mappedBy = "processInstance")
     @org.hibernate.annotations.ForeignKey(name = "none")
-    private Set<TaskEntity> taskEntities;
+    private Set<TaskEntity> task;
 
     @JsonIgnore
-    @GraphQLDescription("Associated process instance variableEntities")
+    @GraphQLDescription("Associated process instance variable")
     @OneToMany(mappedBy = "processInstance")
     @org.hibernate.annotations.ForeignKey(name = "none")
-    private Set<VariableEntity> variableEntities;
+    private Set<VariableEntity> variable;
 
     public ProcessInstanceEntity() {
     }
@@ -135,20 +140,20 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.lastModifiedFrom = lastModifiedFrom;
     }
 
-    public Set<TaskEntity> getTaskEntities() {
-        return this.taskEntities;
+    public Set<TaskEntity> getTask() {
+        return this.task;
     }
 
-    public void setTaskEntities(Set<TaskEntity> taskEntities) {
-        this.taskEntities = taskEntities;
+    public void setTask(Set<TaskEntity> task) {
+        this.task = task;
     }
 
-    public Set<VariableEntity> getVariableEntities() {
-        return variableEntities;
+    public Set<VariableEntity> getVariable() {
+        return variable;
     }
 
-    public void setVariableEntities(Set<VariableEntity> variableEntities) {
-        this.variableEntities = variableEntities;
+    public void setVariable(Set<VariableEntity> variable) {
+        this.variable = variable;
     }
 
     public String getProcessDefinitionKey() {

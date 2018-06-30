@@ -21,11 +21,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudTaskCancelledEvent;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudTaskCancelledEventImpl;
+import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.impl.TaskImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -35,10 +36,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 /**
@@ -73,14 +74,14 @@ public class TaskEntityCancelledEventHandlerTest {
 
         //then
         verify(taskRepository).save(taskEntity);
-        verify(taskEntity).setStatus("CANCELLED");
+        verify(taskEntity).setStatus(Task.TaskStatus.CANCELLED);
         verify(taskEntity).setLastModified(any(Date.class));
     }
 
     private CloudTaskCancelledEvent buildTaskCancelledEvent() {
-        TaskImpl task = new TaskImpl(org.activiti.runtime.api.model.Task.TaskStatus.CANCELLED,
-                                                "to be cancelled",
-                                                UUID.randomUUID().toString());
+        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
+                                     "to be cancelled",
+                                     Task.TaskStatus.CANCELLED);
         return new CloudTaskCancelledEventImpl(task);
     }
 
@@ -92,7 +93,7 @@ public class TaskEntityCancelledEventHandlerTest {
         given(taskRepository.findById(taskId)).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(ActivitiException.class);
+        expectedException.expect(QueryException.class);
         expectedException.expectMessage("Unable to find task with id: " + taskId);
 
         //when

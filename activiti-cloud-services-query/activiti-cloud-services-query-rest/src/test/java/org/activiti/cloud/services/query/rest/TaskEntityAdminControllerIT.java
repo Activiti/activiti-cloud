@@ -23,6 +23,7 @@ import java.util.UUID;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.runtime.api.model.Task;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +107,7 @@ public class TaskEntityAdminControllerIT {
                               "Review the report",
                               new Date(),
                               new Date(),
-                              "20",
+                              20,
                               "My category",
                               UUID.randomUUID().toString(),
                               UUID.randomUUID().toString(),
@@ -115,7 +116,7 @@ public class TaskEntityAdminControllerIT {
                               "1",
                               null,
                               null,
-                              org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED.name(),
+                              Task.TaskStatus.ASSIGNED,
                               new Date(),
                               new Date(),
                               "peter",

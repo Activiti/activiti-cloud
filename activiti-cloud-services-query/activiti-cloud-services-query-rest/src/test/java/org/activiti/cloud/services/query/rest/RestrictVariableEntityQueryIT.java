@@ -97,7 +97,7 @@ public class RestrictVariableEntityQueryIT {
         variableEntity.setName("name");
         variableEntity.setValue("id");
         variableEntity.setTaskId("1");
-        variableEntity.setTaskEntity(taskEntity);
+        variableEntity.setTask(taskEntity);
         variableRepository.save(variableEntity);
 
         TaskCandidateUser taskCandidateUser = new TaskCandidateUser("1",

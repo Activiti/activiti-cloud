@@ -23,6 +23,7 @@ import java.util.UUID;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.security.AuthenticationWrapper;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -101,7 +102,7 @@ public class ProcessInstanceEntityAdminControllerIT {
         return new ProcessInstanceEntity("My-app", "My-app", "1", null, null,
                                          UUID.randomUUID().toString(),
                                          UUID.randomUUID().toString(),
-                                         org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING.name(),
+                                         ProcessInstance.ProcessInstanceStatus.RUNNING,
                                          new Date());
     }
 

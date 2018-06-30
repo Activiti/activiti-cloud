@@ -20,11 +20,14 @@ import java.util.Date;
 import java.util.Set;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -34,6 +37,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
 import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @GraphQLDescription("TaskEntity Instance Entity Model")
@@ -41,6 +45,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Table(name = "TASK")
 public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
 
     /**
@@ -63,6 +68,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     private String category;
     private String processDefinitionId;
     private String processInstanceId;
+    @Enumerated(EnumType.STRING)
     private TaskStatus status;
     private String owner;
     private String parentTaskId;
@@ -80,7 +86,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @ManyToOne(optional = true)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private ProcessInstanceEntity processInstanceEntity;
+    private ProcessInstanceEntity processInstance;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER)
@@ -277,17 +283,17 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     }
 
     /**
-     * @return the processInstanceEntity
+     * @return the processInstance
      */
-    public ProcessInstanceEntity getProcessInstance() {
-        return this.processInstanceEntity;
+    public ProcessInstance getProcessInstance() {
+        return this.processInstance;
     }
 
     /**
-     * @param processInstanceEntity the processInstanceEntity to set
+     * @param processInstance the processInstance to set
      */
-    public void setProcessInstance(ProcessInstanceEntity processInstanceEntity) {
-        this.processInstanceEntity = processInstanceEntity;
+    public void setProcessInstance(ProcessInstanceEntity processInstance) {
+        this.processInstance = processInstance;
     }
 
     /**

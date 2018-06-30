@@ -21,9 +21,9 @@ import javax.persistence.EntityManager;
 
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.VariableEntity;
-import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudVariableCreatedEvent;
 import org.activiti.runtime.api.event.VariableEvent;
@@ -81,8 +81,8 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
         try {
             variableRepository.save(variableEntity);
         } catch (Exception cause) {
-            throw new ActivitiException("Error handling VariableCreatedEvent[" + event + "]",
-                                        cause);
+            throw new QueryException("Error handling VariableCreatedEvent[" + event + "]",
+                                     cause);
         }
     }
 
@@ -91,7 +91,7 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
         if (variableCreatedEvent.getEntity().isTaskVariable()) {
             TaskEntity taskEntity = entityManager.getReference(TaskEntity.class,
                                                                variableCreatedEvent.getEntity().getTaskId());
-            variableEntity.setTaskEntity(taskEntity);
+            variableEntity.setTask(taskEntity);
         }
     }
 

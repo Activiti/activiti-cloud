@@ -25,7 +25,7 @@ import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.StaticDataFetcher;
 import org.activiti.cloud.services.query.graphql.web.ActivitiGraphQLController;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.qraphql.ws.schema.GraphQLSubscriptionSchemaBuilder;
 import org.activiti.cloud.services.query.qraphql.ws.schema.GraphQLSubscriptionSchemaProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,11 +53,10 @@ public class ActivitiGraphQLAutoConfiguration {
 
     /**
      * Provides default configuration of Activiti GraphQL JPA Query Components
-     *
      */
     @Configuration
     @Import(ActivitiGraphQLController.class)
-    @EntityScan(basePackageClasses = ProcessInstance.class)
+    @EntityScan(basePackageClasses = ProcessInstanceEntity.class)
     @EnableConfigurationProperties(ActivitiGraphQLSchemaProperties.class)
     @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
     public static class DefaultActivitiGraphQLJpaConfiguration implements ImportAware {
@@ -75,7 +74,8 @@ public class ActivitiGraphQLAutoConfiguration {
                                                final GraphQLSubscriptionSchemaBuilder subscriptionSchemaBuilder) {
 
             // Use NoOp DataFetcher for subscription schema fields via REST endpoint
-            subscriptionSchemaBuilder.withSubscription(subscriptionProperties.getSubscriptionFieldName(), new StaticDataFetcher(null));
+            subscriptionSchemaBuilder.withSubscription(subscriptionProperties.getSubscriptionFieldName(),
+                                                       new StaticDataFetcher(null));
 
             // Merge query and subscriptions schemas into one
             GraphQLSchema querySchema = GraphQLSchema
@@ -90,19 +90,19 @@ public class ActivitiGraphQLAutoConfiguration {
         @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
         @ConditionalOnMissingBean(GraphQLSchemaBuilder.class)
         public GraphQLSchemaBuilder graphQLSchemaBuilder(final EntityManager entityManager) {
-            Assert.notNull(properties.getName(), "GraphQL schema name cannot be null.");
-            Assert.notNull(properties.getDescription(), "GraphQL schema description cannot be null.");
+            Assert.notNull(properties.getName(),
+                           "GraphQL schema name cannot be null.");
+            Assert.notNull(properties.getDescription(),
+                           "GraphQL schema description cannot be null.");
 
             return new GraphQLJpaSchemaBuilder(entityManager)
-                 .name(properties.getName())
-                 .description(properties.getDescription());
+                    .name(properties.getName())
+                    .description(properties.getDescription());
         }
 
         @Override
         public void setImportMetadata(AnnotationMetadata importMetadata) {
             this.properties.setEnabled(true);
         }
-
     }
-
 }

@@ -21,10 +21,11 @@ import java.util.Optional;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.runtime.api.event.CloudProcessStartedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +51,8 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
 
         Optional<ProcessInstanceEntity> findResult = processInstanceRepository.findById(processInstanceId);
         ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(
-                () -> new ActivitiException("Unable to find process instance with the given id: " + processInstanceId));
-        if (org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.CREATED.name().equals(processInstanceEntity.getStatus())) {
+                () -> new QueryException("Unable to find process instance with the given id: " + processInstanceId));
+        if (ProcessInstance.ProcessInstanceStatus.CREATED.equals(processInstanceEntity.getStatus())) {
             processInstanceEntity.setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING);
             processInstanceEntity.setLastModified(new Date(startedEvent.getTimestamp()));
             processInstanceRepository.save(processInstanceEntity);

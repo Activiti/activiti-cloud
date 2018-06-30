@@ -38,7 +38,7 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
             return predicate;
         }
 
-        QProcessInstanceEntity processInstance = QVariableEntity.variableEntity.processInstanceEntity;
+        QProcessInstanceEntity processInstance = QVariableEntity.variableEntity.processInstance;
 
         BooleanExpression varIsProcInstVar = processInstance.isNotNull();
 

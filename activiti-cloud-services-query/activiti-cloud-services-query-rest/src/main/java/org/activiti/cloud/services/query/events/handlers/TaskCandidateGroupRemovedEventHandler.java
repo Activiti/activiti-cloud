@@ -17,8 +17,8 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
-import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskCandidateGroupRemovedEvent;
 import org.activiti.runtime.api.event.TaskCandidateGroupEvent;
@@ -45,8 +45,8 @@ public class TaskCandidateGroupRemovedEventHandler implements QueryEventHandler 
         try {
             taskCandidateGroupRepository.delete(taskCandidateGroup);
         } catch (Exception cause) {
-            throw new ActivitiException("Error handling TaskCandidateGroupRemovedEvent[" + event + "]",
-                                        cause);
+            throw new QueryException("Error handling TaskCandidateGroupRemovedEvent[" + event + "]",
+                                     cause);
         }
     }
 

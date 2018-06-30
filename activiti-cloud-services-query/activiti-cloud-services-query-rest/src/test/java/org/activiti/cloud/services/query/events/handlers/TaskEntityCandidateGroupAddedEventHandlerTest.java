@@ -19,7 +19,7 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.UUID;
 
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.runtime.api.event.CloudTaskCandidateGroupAddedEvent;
 import org.activiti.runtime.api.event.TaskCandidateGroupEvent;
 import org.activiti.runtime.api.event.impl.CloudTaskCandidateGroupAddedEventImpl;
@@ -32,11 +32,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TaskEntityCandidateGroupAddedEventHandlerTest {
@@ -81,7 +80,7 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
 
         //then
         assertThat(throwable)
-                .isInstanceOf(ActivitiException.class)
+                .isInstanceOf(QueryException.class)
                 .hasCause(cause)
                 .hasMessageContaining("Error handling TaskCandidateGroupAddedEvent[");
     }

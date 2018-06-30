@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.runtime.api.event.CloudProcessCompletedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
@@ -50,7 +50,7 @@ public class ProcessCompletedEventHandler implements QueryEventHandler {
             processInstanceEntity.setLastModified(new Date(completedEvent.getTimestamp()));
             processInstanceRepository.save(processInstanceEntity);
         } else {
-            throw new ActivitiException("Unable to find process instance with the given id: " + processInstanceId);
+            throw new QueryException("Unable to find process instance with the given id: " + processInstanceId);
         }
     }
 

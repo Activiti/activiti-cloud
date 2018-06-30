@@ -20,7 +20,7 @@ import java.util.Date;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.runtime.api.event.CloudProcessCancelledEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
@@ -48,7 +48,7 @@ public class ProcessCancelledEventHandler implements QueryEventHandler {
         updateProcessInstanceStatus(
                 processInstanceRepository
                         .findById(cancelledEvent.getEntity().getId())
-                        .orElseThrow(() -> new ActivitiException(
+                        .orElseThrow(() -> new QueryException(
                                 "Unable to find process instance with the given id: " + cancelledEvent.getEntity().getId())),
                 cancelledEvent.getTimestamp());
     }

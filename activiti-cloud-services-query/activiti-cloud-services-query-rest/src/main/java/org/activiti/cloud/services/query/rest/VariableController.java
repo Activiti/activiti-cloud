@@ -112,8 +112,8 @@ public class VariableController {
             }
         }
 
-        if (variableEntity.getTaskEntity() != null) {
-            TaskEntity taskEntity = variableEntity.getTaskEntity();
+        if (variableEntity.getTask() != null) {
+            TaskEntity taskEntity = variableEntity.getTask();
             //do restricted query and check if still able to see it
             Iterable<TaskEntity> taskIterable = taskRepository.findAll(taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq(taskEntity.getId())));
             if (!taskIterable.iterator().hasNext()) {

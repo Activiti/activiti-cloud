@@ -20,8 +20,8 @@ import javax.persistence.EntityManager;
 
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskCreatedEvent;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
@@ -34,7 +34,8 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
     private final TaskRepository taskRepository;
     private final EntityManager entityManager;
 
-    public TaskCreatedEventHandler(TaskRepository taskRepository, EntityManager entityManager) {
+    public TaskCreatedEventHandler(TaskRepository taskRepository,
+                                   EntityManager entityManager) {
         this.taskRepository = taskRepository;
         this.entityManager = entityManager;
     }
@@ -82,8 +83,8 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
         try {
             taskRepository.save(queryTaskEntity);
         } catch (Exception cause) {
-            throw new ActivitiException("Error handling TaskCreatedEvent[" + event + "]",
-                                        cause);
+            throw new QueryException("Error handling TaskCreatedEvent[" + event + "]",
+                                     cause);
         }
     }
 

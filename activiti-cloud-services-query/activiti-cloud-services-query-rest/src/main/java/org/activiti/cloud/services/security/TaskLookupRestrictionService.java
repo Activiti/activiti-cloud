@@ -35,7 +35,7 @@ public class TaskLookupRestrictionService {
 
     public Predicate restrictTaskVariableQuery(Predicate predicate){
 
-        QTaskEntity task = QVariableEntity.variableEntity.taskEntity;
+        QTaskEntity task = QVariableEntity.variableEntity.task;
 
         Predicate extendedPredicate = addAndConditionToPredicate(predicate,task.isNotNull());
 

@@ -19,8 +19,8 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskCancelledEvent;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
@@ -44,7 +44,7 @@ public class TaskCancelledEventHandler implements QueryEventHandler {
 
         updateTaskStatus(taskRepository
                                  .findById(eventTask.getId())
-                                 .orElseThrow(() -> new ActivitiException("Unable to find task with id: " + eventTask.getId())),
+                                 .orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId())),
                          taskCancelledEvent.getTimestamp());
     }
 

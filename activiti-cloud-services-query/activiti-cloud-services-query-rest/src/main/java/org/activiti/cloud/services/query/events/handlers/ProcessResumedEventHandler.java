@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.runtime.api.event.CloudProcessResumedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
@@ -44,7 +44,7 @@ public class ProcessResumedEventHandler implements QueryEventHandler {
         CloudProcessResumedEvent processResumedEvent = (CloudProcessResumedEvent) event;
         String processInstanceId = processResumedEvent.getEntity().getId();
         Optional<ProcessInstanceEntity> findResult = processInstanceRepository.findById(processInstanceId);
-        ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(() -> new ActivitiException("Unable to find process instance with the given id: " + processInstanceId));
+        ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(() -> new QueryException("Unable to find process instance with the given id: " + processInstanceId));
         processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
         processInstanceEntity.setLastModified(new Date(processResumedEvent.getTimestamp()));
         processInstanceEntity.setProcessDefinitionKey(processResumedEvent.getEntity().getProcessDefinitionKey());

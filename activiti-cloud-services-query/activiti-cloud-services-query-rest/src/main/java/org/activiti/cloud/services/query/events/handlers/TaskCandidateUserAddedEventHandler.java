@@ -17,8 +17,8 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
-import org.activiti.engine.ActivitiException;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskCandidateUserAddedEvent;
 import org.activiti.runtime.api.event.TaskCandidateUserEvent;
@@ -41,9 +41,11 @@ public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
         org.activiti.runtime.api.model.TaskCandidateUser taskCandidateUser = taskCandidateUserAddedEvent.getEntity();
 
         try {
-            taskCandidateUserRepository.save(new TaskCandidateUser(taskCandidateUser.getTaskId(), taskCandidateUser.getUserId()));
-        } catch(Exception cause) {
-        	throw new ActivitiException("Error handling TaskCandidateUserAddedEvent["+event+"]", cause);
+            taskCandidateUserRepository.save(new TaskCandidateUser(taskCandidateUser.getTaskId(),
+                                                                   taskCandidateUser.getUserId()));
+        } catch (Exception cause) {
+            throw new QueryException("Error handling TaskCandidateUserAddedEvent[" + event + "]",
+                                     cause);
         }
     }
 
