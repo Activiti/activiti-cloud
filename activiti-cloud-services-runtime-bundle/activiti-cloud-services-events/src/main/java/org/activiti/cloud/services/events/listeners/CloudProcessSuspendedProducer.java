@@ -18,9 +18,9 @@ package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 import org.activiti.runtime.api.event.ProcessSuspended;
-import org.activiti.runtime.api.event.listener.ProcessRuntimeEventListener;
+import org.activiti.runtime.api.event.listener.ProcessEventListener;
 
-public class CloudProcessSuspendedProducer implements ProcessRuntimeEventListener<ProcessSuspended> {
+public class CloudProcessSuspendedProducer implements ProcessEventListener<ProcessSuspended> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;

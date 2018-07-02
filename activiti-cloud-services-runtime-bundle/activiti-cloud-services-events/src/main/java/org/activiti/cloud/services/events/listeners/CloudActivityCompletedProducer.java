@@ -18,9 +18,9 @@ package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 import org.activiti.runtime.api.event.BPMNActivityCompleted;
-import org.activiti.runtime.api.event.listener.ProcessRuntimeEventListener;
+import org.activiti.runtime.api.event.listener.BPMNElementEventListener;
 
-public class CloudActivityCompletedProducer implements ProcessRuntimeEventListener<BPMNActivityCompleted> {
+public class CloudActivityCompletedProducer implements BPMNElementEventListener<BPMNActivityCompleted> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;

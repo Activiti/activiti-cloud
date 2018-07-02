@@ -17,10 +17,10 @@
 package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.cloud.services.events.converter.ToCloudVariableEventConverter;
-import org.activiti.runtime.api.event.RuntimeEventListener;
+import org.activiti.runtime.api.event.VariableEventListener;
 import org.activiti.runtime.api.event.VariableDeleted;
 
-public class CloudVariableDeletedProducer implements RuntimeEventListener<VariableDeleted> {
+public class CloudVariableDeletedProducer implements VariableEventListener<VariableDeleted> {
 
     private ToCloudVariableEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;

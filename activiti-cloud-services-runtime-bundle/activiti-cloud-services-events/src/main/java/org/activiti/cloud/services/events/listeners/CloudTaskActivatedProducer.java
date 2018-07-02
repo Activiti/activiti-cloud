@@ -18,9 +18,9 @@ package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
 import org.activiti.runtime.api.event.TaskActivated;
-import org.activiti.runtime.api.event.listener.TaskRuntimeEventListener;
+import org.activiti.runtime.api.event.listener.TaskEventListener;
 
-public class CloudTaskActivatedProducer implements TaskRuntimeEventListener<TaskActivated> {
+public class CloudTaskActivatedProducer implements TaskEventListener<TaskActivated> {
 
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;

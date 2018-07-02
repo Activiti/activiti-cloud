@@ -18,9 +18,9 @@ package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 import org.activiti.runtime.api.event.ProcessResumed;
-import org.activiti.runtime.api.event.listener.ProcessRuntimeEventListener;
+import org.activiti.runtime.api.event.listener.ProcessEventListener;
 
-public class CloudProcessResumedProducer implements ProcessRuntimeEventListener<ProcessResumed> {
+public class CloudProcessResumedProducer implements ProcessEventListener<ProcessResumed> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;

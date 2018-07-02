@@ -18,9 +18,9 @@ package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
 import org.activiti.runtime.api.event.TaskCandidateGroupAdded;
-import org.activiti.runtime.api.event.listener.TaskRuntimeEventListener;
+import org.activiti.runtime.api.event.listener.TaskCandidateEventListener;
 
-public class CloudTaskCandidateGroupAddedProducer implements TaskRuntimeEventListener<TaskCandidateGroupAdded> {
+public class CloudTaskCandidateGroupAddedProducer implements TaskCandidateEventListener<TaskCandidateGroupAdded> {
 
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;

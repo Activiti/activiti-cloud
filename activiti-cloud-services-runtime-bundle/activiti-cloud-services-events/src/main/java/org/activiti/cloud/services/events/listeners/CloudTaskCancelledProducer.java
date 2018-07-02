@@ -18,9 +18,9 @@ package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
 import org.activiti.runtime.api.event.TaskCancelled;
-import org.activiti.runtime.api.event.listener.TaskRuntimeEventListener;
+import org.activiti.runtime.api.event.listener.TaskEventListener;
 
-public class CloudTaskCancelledProducer implements TaskRuntimeEventListener<TaskCancelled> {
+public class CloudTaskCancelledProducer implements TaskEventListener<TaskCancelled> {
 
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
