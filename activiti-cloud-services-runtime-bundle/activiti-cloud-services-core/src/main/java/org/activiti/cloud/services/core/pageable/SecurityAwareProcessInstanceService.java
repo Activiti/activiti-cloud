@@ -54,6 +54,8 @@ public class SecurityAwareProcessInstanceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAwareProcessInstanceService.class);
 
+
+
     public SecurityAwareProcessInstanceService(ProcessRuntime processRuntime,
                                                SecurityPoliciesApplicationService securityPolicyApplicationService,
                                                SpringPageConverter springPageConverter,
