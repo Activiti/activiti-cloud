@@ -16,9 +16,11 @@
 
 package org.activiti.services.connectors.conf;
 
+import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.junit.Test;
@@ -50,6 +52,12 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockBean
     private ApplicationEventPublisher eventPublisher;
+
+    @MockBean
+    private ProcessEngineChannels processEngineChannels;
+
+    @MockBean
+    private TaskService taskService;
 
 
     @EnableAutoConfiguration
