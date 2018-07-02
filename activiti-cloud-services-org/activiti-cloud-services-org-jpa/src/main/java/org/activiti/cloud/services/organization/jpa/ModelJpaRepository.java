@@ -47,7 +47,7 @@ public interface ModelJpaRepository extends JpaRepository<Model, String>,
 
     @Override
     default Page<Model> getModels(Project project,
-                                    Pageable pageable) {
+                                  Pageable pageable) {
         return findAllByProjectId(project.getId(),
                                   pageable);
     }

@@ -16,10 +16,8 @@
 
 package org.activiti.cloud.organization.core.repository;
 
-import java.util.List;
 import java.util.Optional;
 
-import org.activiti.cloud.organization.core.model.Group;
 import org.activiti.cloud.organization.core.model.Project;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,10 +27,7 @@ import org.springframework.data.domain.Pageable;
  */
 public interface ProjectRepository {
 
-    Page<Project> getTopLevelProjects(Pageable pageable);
-
-    Page<Project> getProjects(Group group,
-                              Pageable pageable);
+    Page<Project> getProjects(Pageable pageable);
 
     Optional<Project> findProjectById(String projectId);
 
@@ -42,34 +37,10 @@ public interface ProjectRepository {
 
     void deleteProject(Project project);
 
-    default Project createProject(Group group,
-                                  Project project) {
-        project.setGroup(group);
-        return createProject(project);
-    }
-
     default Project updateProject(Project projectToUpdate,
                                   Project newProject) {
         projectToUpdate.setName(newProject.getName());
         return updateProject(projectToUpdate);
-    }
-
-    default Optional<Project> findProjectByLink(String link) {
-        return findProjectById(link.substring(link.lastIndexOf('/') + 1));
-    }
-
-    default void createProjectsReference(Group group,
-                                         List<String> projectsLinks) {
-        projectsLinks
-                .stream()
-                .distinct()
-                .map(this::findProjectByLink)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .forEach(project -> {
-                    project.setGroup(group);
-                    updateProject(project);
-                });
     }
 
 }

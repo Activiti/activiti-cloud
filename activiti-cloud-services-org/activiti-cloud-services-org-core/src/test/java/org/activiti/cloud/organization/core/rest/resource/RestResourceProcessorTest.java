@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.organization.core.rest.resource;
 
-import org.activiti.cloud.organization.core.model.Group;
 import org.activiti.cloud.organization.core.model.Model;
+import org.activiti.cloud.organization.core.model.Project;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -67,8 +67,10 @@ public class RestResourceProcessorTest {
     public void testProcessWithoutRestResource() {
 
         // GIVEN
-        Resource<Object> modelResource = new Resource<Object>(new Group());
-        doReturn(false).when(restResourceProcessor).isEntityWithRestResource(eq(Group.class));
+        Resource<Object> modelResource = new Resource<Object>(new Project());
+        doReturn(false)
+                .when(restResourceProcessor)
+                .isEntityWithRestResource(eq(Project.class));
 
         // WHEN
         restResourceProcessor.resourceProcessor().process(modelResource);

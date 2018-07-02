@@ -16,13 +16,6 @@
 
 package org.activiti.cloud.organization.core.repository;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.activiti.cloud.organization.core.model.Group;
 import org.activiti.cloud.organization.core.model.Project;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,14 +42,11 @@ public class ProjectRepositoryTest {
     @Test
     public void testCreateProject() {
         // GIVEN
-        Group parentGroup = new Group("parent_group_id",
-                                      "Parent Group");
         Project childProject = new Project("child_project_id",
                                            "Child Project");
 
         // WHEN
-        projectRepository.createProject(parentGroup,
-                                        childProject);
+        projectRepository.createProject(childProject);
 
         // THEN
         verify(projectRepository,
@@ -67,9 +57,6 @@ public class ProjectRepositoryTest {
         assertThat(createdProject).isNotNull();
         assertThat(createdProject.getId()).isEqualTo("child_project_id");
         assertThat(createdProject.getName()).isEqualTo("Child Project");
-        assertThat(createdProject.getGroup()).isNotNull();
-        assertThat(createdProject.getGroup().getId()).isEqualTo("parent_group_id");
-        assertThat(createdProject.getGroup().getName()).isEqualTo("Parent Group");
     }
 
     @Test
@@ -93,73 +80,5 @@ public class ProjectRepositoryTest {
         assertThat(updatedProject).isNotNull();
         assertThat(updatedProject.getId()).isEqualTo("project_id");
         assertThat(updatedProject.getName()).isEqualTo("New Project Name");
-    }
-
-    @Test
-    public void testFindProjectByLink() {
-        // GIVEN
-        String projectSelfLink = "http://localhost:8080:/projects/project_id";
-
-        // WHEN
-        projectRepository.findProjectByLink(projectSelfLink);
-
-        // THEN
-        verify(projectRepository,
-               times(1))
-                .findProjectById(eq("project_id"));
-    }
-
-    @Test
-    public void testCreateSubprojectReference() {
-        // GIVEN
-        Group parentGroup = new Group("parent_group_id",
-                                      "Parent Group");
-
-        Project project1 = new Project("project1",
-                                          "Project 1");
-
-        Project project2 = new Project("project2",
-                                          "Project 2");
-
-        List<String> subprojectLinks = Arrays.asList(
-                "http://localhost:8080/projects/project1",
-                "http://localhost:8080/projects/wrong_project_id",
-                "http://localhost:8080/projects/project2"
-        );
-
-        doReturn(Optional.of(project1)).when(projectRepository).findProjectById(eq("project1"));
-        doReturn(Optional.of(project2)).when(projectRepository).findProjectById(eq("project2"));
-
-        // WHEN
-        projectRepository.createProjectsReference(parentGroup,
-                                                  subprojectLinks);
-
-        // THEN
-        verify(projectRepository,
-               times(3))
-                .findProjectById(anyString());
-
-        verify(projectRepository,
-               times(2))
-                .updateProject(projectArgumentCaptor.capture());
-
-        List<Project> updatedProjects = projectArgumentCaptor.getAllValues();
-        assertThat(updatedProjects).hasSize(2);
-
-        assertThat(updatedProjects
-                           .stream()
-                           .map(Project::getId)
-                           .collect(Collectors.toList()))
-                .containsExactly("project1",
-                                 "project2");
-
-        assertThat(updatedProjects
-                           .stream()
-                           .map(Project::getGroup)
-                           .filter(Objects::nonNull)
-                           .map(Group::getId)
-                           .collect(Collectors.toList()))
-                .containsExactly("parent_group_id",
-                                 "parent_group_id");
     }
 }

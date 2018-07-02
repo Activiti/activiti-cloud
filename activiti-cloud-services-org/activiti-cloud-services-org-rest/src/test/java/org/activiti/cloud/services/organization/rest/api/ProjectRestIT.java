@@ -17,13 +17,11 @@
 package org.activiti.cloud.services.organization.rest.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.organization.core.model.Group;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.model.Project;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.services.organization.config.Application;
-import org.activiti.cloud.services.organization.jpa.GroupJpaRepository;
 import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.organization.jpa.ProjectJpaRepository;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
@@ -68,9 +66,6 @@ public class ProjectRestIT {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
-
-    @Autowired
-    private GroupJpaRepository groupRepository;
 
     @Autowired
     private ProjectJpaRepository projectRepository;
@@ -217,34 +212,11 @@ public class ProjectRestIT {
     }
 
     @Test
-    public void testCreateProjectInGroup() throws Exception {
-        //given
-        final String projectId = "project_id";
-        final String projectName = "Project";
-        Project project = new Project(projectId,
-                                      projectName);
-
-        String parentGroupId = "parent_group_id";
-        groupRepository.save(new Group(parentGroupId, "Parent Group"));
-
-        //when
-        mockMvc.perform(post("{version}/groups/{groupId}/projects",
-                             API_VERSION,
-                             parentGroupId)
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(project)))
-                .andExpect(status().isCreated());
-
-        //then
-        assertThat(projectRepository.findById(projectId)).isNotEmpty();
-    }
-
-    @Test
     public void testUpdateProject() throws Exception {
         //given
         final String projectId = "project_id";
         final Project savedProject = projectRepository.save(new Project(projectId,
-                                                                      "Project name"));
+                                                                        "Project name"));
         assertThat(savedProject).isNotNull();
 
         assertThat(projectRepository.findById(projectId))
@@ -253,12 +225,12 @@ public class ProjectRestIT {
                 });
 
         Project newProject = new Project(projectId,
-                                      "New project name");
+                                         "New project name");
 
         //when
         mockMvc.perform(put("{version}/projects/{projectId}",
-                             API_VERSION,
-                             projectId)
+                            API_VERSION,
+                            projectId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(newProject)))
                 .andExpect(status().isNoContent());
@@ -275,7 +247,7 @@ public class ProjectRestIT {
         //given
         final String projectId = "project_id";
         final Project savedProject = projectRepository.save(new Project(projectId,
-                                                                      "Project"));
+                                                                        "Project"));
         assertThat(savedProject).isNotNull();
 
         //when
@@ -287,5 +259,4 @@ public class ProjectRestIT {
         //then
         assertThat(projectRepository.findById(projectId)).isEmpty();
     }
-
 }

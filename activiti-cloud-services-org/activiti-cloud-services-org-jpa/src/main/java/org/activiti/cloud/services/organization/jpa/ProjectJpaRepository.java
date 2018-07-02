@@ -18,7 +18,6 @@ package org.activiti.cloud.services.organization.jpa;
 
 import java.util.Optional;
 
-import org.activiti.cloud.organization.core.model.Group;
 import org.activiti.cloud.organization.core.model.Project;
 import org.activiti.cloud.organization.core.repository.ProjectRepository;
 import org.springframework.data.domain.Page;
@@ -35,21 +34,9 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 public interface ProjectJpaRepository extends JpaRepository<Project, String>,
                                               ProjectRepository {
 
-    Page<Project> findAllByGroupIdIsNull(Pageable page);
-
-    Page<Project> findAllByGroupId(String groupId,
-                                   Pageable pageable);
-
     @Override
-    default Page<Project> getTopLevelProjects(Pageable pageable) {
-        return findAllByGroupIdIsNull(pageable);
-    }
-
-    @Override
-    default Page<Project> getProjects(Group group,
-                                      Pageable pageable) {
-        return findAllByGroupId(group.getId(),
-                                pageable);
+    default Page<Project> getProjects(Pageable pageable) {
+        return findAll(pageable);
     }
 
     @Override

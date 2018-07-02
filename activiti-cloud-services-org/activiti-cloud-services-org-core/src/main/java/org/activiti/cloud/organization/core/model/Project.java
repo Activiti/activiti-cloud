@@ -36,8 +36,6 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @JsonInclude(NON_NULL)
 public class Project extends AuditableEntity<String> {
 
-    @ManyToOne
-    private Group group;
     @OneToMany
     private List<Model> models;
     @Id
@@ -67,14 +65,6 @@ public class Project extends AuditableEntity<String> {
 
     public void setModels(List<Model> models) {
         this.models = models;
-    }
-
-    public Group getGroup() {
-        return group;
-    }
-
-    public void setGroup(Group group) {
-        this.group = group;
     }
 
     public String getName() {
