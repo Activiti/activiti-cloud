@@ -23,7 +23,7 @@ import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
-import org.activiti.cloud.services.core.AuthenticationWrapper;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskController;
@@ -53,7 +53,7 @@ public class TaskControllerImpl implements TaskController {
 
     private final TaskResourceAssembler taskResourceAssembler;
 
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     private final AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
 
@@ -63,7 +63,7 @@ public class TaskControllerImpl implements TaskController {
 
     @Autowired
     public TaskControllerImpl(TaskResourceAssembler taskResourceAssembler,
-                              AuthenticationWrapper authenticationWrapper,
+                              SpringSecurityAuthenticationWrapper authenticationWrapper,
                               AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler,
                               SecurityAwareTaskService securityAwareTaskService,
                               SpringPageConverter pageConverter) {
@@ -83,7 +83,9 @@ public class TaskControllerImpl implements TaskController {
     @Override
     public PagedResources<TaskResource> getTasks(Pageable pageable) {
         org.activiti.runtime.api.query.Page<FluentTask> taskPage = securityAwareTaskService.getAuthorizedTasks(pageConverter.toAPIPageable(pageable));
-        return pagedResourcesAssembler.toResource(pageable, pageConverter.toSpringPage(pageable, taskPage),
+        return pagedResourcesAssembler.toResource(pageable,
+                                                  pageConverter.toSpringPage(pageable,
+                                                                             taskPage),
                                                   taskResourceAssembler);
     }
 
@@ -101,7 +103,7 @@ public class TaskControllerImpl implements TaskController {
         }
 
         return taskResourceAssembler.toResource(securityAwareTaskService.claimTask(new ClaimTaskCmd(taskId,
-                                                                                         assignee)));
+                                                                                                    assignee)));
     }
 
     @Override
@@ -118,7 +120,7 @@ public class TaskControllerImpl implements TaskController {
             outputVariables = completeTaskCmd.getOutputVariables();
         }
         securityAwareTaskService.completeTask(new CompleteTaskCmd(taskId,
-                                                       outputVariables));
+                                                                  outputVariables));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -136,7 +138,7 @@ public class TaskControllerImpl implements TaskController {
     public ResponseEntity<Void> updateTask(@PathVariable String taskId,
                                            @RequestBody UpdateTaskCmd updateTaskCmd) {
         securityAwareTaskService.updateTask(taskId,
-                                 updateTaskCmd);
+                                            updateTaskCmd);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -154,5 +156,4 @@ public class TaskControllerImpl implements TaskController {
         return new Resources<>(taskResourceAssembler.toResources(securityAwareTaskService.getSubtasks(taskId)),
                                linkTo(TaskControllerImpl.class).withSelfRel());
     }
-
 }

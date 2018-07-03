@@ -23,7 +23,7 @@ import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
-import org.activiti.cloud.services.core.AuthenticationWrapper;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.runtime.api.TaskRuntime;
 import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.builder.CompleteTaskPayload;
@@ -32,12 +32,11 @@ import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.security.core.Authentication;
 
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class SecurityAwareTaskServiceTest {
@@ -49,7 +48,7 @@ public class SecurityAwareTaskServiceTest {
     private TaskRuntime taskRuntime;
 
     @Mock
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
 
     @Before
@@ -76,7 +75,6 @@ public class SecurityAwareTaskServiceTest {
         verify(task).delete(startsWith("Cancelled by"));
     }
 
-
     @Test
     public void claimShouldCallClaimOnFluentTask() {
         //given
@@ -84,12 +82,12 @@ public class SecurityAwareTaskServiceTest {
         given(taskRuntime.task("taskId")).willReturn(task);
 
         //when
-        taskService.claimTask(new ClaimTaskCmd("taskId", "user"));
+        taskService.claimTask(new ClaimTaskCmd("taskId",
+                                               "user"));
 
         //
         verify(task).claim("user");
     }
-
 
     @Test
     public void releaseTaskShouldCallReleaseOnFluentTask() {
@@ -104,19 +102,18 @@ public class SecurityAwareTaskServiceTest {
         verify(task).release();
     }
 
-
     @Test
     public void completeTaskShouldCallCompleteOnFluentTask() {
         FluentTask task = mock(FluentTask.class);
         given(taskRuntime.task("taskId")).willReturn(task);
 
         CompleteTaskPayload completeTaskPayload = mock(CompleteTaskPayload.class,
-                                        Answers.RETURNS_SELF);
+                                                       Answers.RETURNS_SELF);
         doReturn(null).when(completeTaskPayload).doIt();
         given(task.completeWith()).willReturn(completeTaskPayload);
 
         Map<String, Object> variables = Collections.singletonMap("name",
-                                                                       "paul");
+                                                                 "paul");
 
         //when
         taskService.completeTask(new CompleteTaskCmd("taskId",
@@ -157,5 +154,4 @@ public class SecurityAwareTaskServiceTest {
         //when
         verify(task).localVariables(cmd.getVariables());
     }
-
 }

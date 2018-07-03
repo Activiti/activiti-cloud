@@ -23,7 +23,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.api.commands.CreateTaskCmd;
-import org.activiti.cloud.services.core.AuthenticationWrapper;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.runtime.api.NotFoundException;
@@ -54,10 +54,9 @@ import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildStan
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildSubTask;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildTask;
 import static org.activiti.runtime.api.model.Task.TaskStatus.CREATED;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.halLinks;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
@@ -73,11 +72,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(TaskControllerImpl.class)
+@WebMvcTest(controllers = TaskControllerImpl.class, secure = false)
+
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
-@Import(CommonModelAutoConfiguration.class)
+@Import({CommonModelAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 public class TaskControllerImplIT {
 
@@ -88,8 +88,9 @@ public class TaskControllerImplIT {
 
     @SpyBean
     private ObjectMapper mapper;
+
     @MockBean
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @MockBean
     private SecurityAwareTaskService securityAwareTaskService;
@@ -202,7 +203,8 @@ public class TaskControllerImplIT {
 
     @Test
     public void createNewStandaloneTask() throws Exception {
-        FluentTaskImpl task = buildStandAloneTask("new-task", "New task to be performed");
+        FluentTaskImpl task = buildStandAloneTask("new-task",
+                                                  "New task to be performed");
         given(securityAwareTaskService.createNewTask(any())).willReturn(task);
 
         this.mockMvc.perform(post("/v1/tasks/",
@@ -239,7 +241,8 @@ public class TaskControllerImplIT {
         FluentTask subTask = buildSubTask("new-subtask",
                                           "subtask description",
                                           parentTaskId);
-        given(securityAwareTaskService.createNewSubtask(any(), any())).willReturn(subTask);
+        given(securityAwareTaskService.createNewSubtask(any(),
+                                                        any())).willReturn(subTask);
 
         this.mockMvc.perform(post("/v1/tasks/{taskId}/subtask",
                                   parentTaskId).contentType(MediaType.APPLICATION_JSON)

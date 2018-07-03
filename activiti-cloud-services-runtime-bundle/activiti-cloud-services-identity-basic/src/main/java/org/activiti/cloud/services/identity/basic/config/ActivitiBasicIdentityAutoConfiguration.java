@@ -12,12 +12,11 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 @Configuration
 @ConditionalOnProperty(name = "activiti.cloud.services.identity.basic.enabled", matchIfMissing = true)
-@Import(SecurityConfig.class)
 public class ActivitiBasicIdentityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(BasicIdentityLookup.class)
-    public BasicIdentityLookup basicUserGroupLookupProxy(InMemoryUserDetailsManager userDetailsService) {
+    public BasicIdentityLookup basicIdentityLookup(InMemoryUserDetailsManager userDetailsService) {
         return new BasicIdentityLookup(userDetailsService);
     }
 

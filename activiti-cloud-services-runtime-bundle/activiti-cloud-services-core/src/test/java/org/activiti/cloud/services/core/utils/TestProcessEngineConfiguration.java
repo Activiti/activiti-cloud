@@ -43,12 +43,16 @@ import org.springframework.messaging.MessageChannel;
         "org.activiti.image",
         "org.activiti.cloud.services.api.model.converter",
         "org.activiti.cloud.services.security",
+        "org.activiti.cloud.services.common.security",
         "org.activiti.cloud.services.events.listeners",
         "org.activiti.cloud.services.events.converter",
         "org.activiti.cloud.services.events.configuration",
         "org.activiti.cloud.services.core",
         "org.activiti.cloud.services.core.pageable",
-        "org.activiti.cloud.services.core.utils"
+        "org.activiti.cloud.services.core.utils",
+        "org.activiti.cloud.services.identity",
+
+
 })
 @EnableAutoConfiguration
 public class TestProcessEngineConfiguration {
@@ -92,7 +96,7 @@ public class TestProcessEngineConfiguration {
     }
 
     @Bean
-    public MessageChannel commandResults(){
+    public MessageChannel commandResults() {
         return new MockMessageChannel();
     }
 }

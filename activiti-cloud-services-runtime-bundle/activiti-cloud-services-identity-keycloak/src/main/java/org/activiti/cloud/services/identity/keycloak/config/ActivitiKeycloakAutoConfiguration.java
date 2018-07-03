@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ConditionalOnProperty(name = "activiti.cloud.services.keycloak.enabled", matchIfMissing = true)
 @EnableConfigurationProperties({ActivitiKeycloakProperties.class,KeycloakProperties.class})
-@Import(SecurityConfig.class)
 public class ActivitiKeycloakAutoConfiguration {
 
     @Bean
@@ -33,13 +32,13 @@ public class ActivitiKeycloakAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(KeycloakIdentityLookup.class)
-    public KeycloakIdentityLookup keycloakUserGroupLookupProxy(KeycloakLookupService keycloakLookupService){
+    public KeycloakIdentityLookup keycloakIdentityLookup(KeycloakLookupService keycloakLookupService){
         return new KeycloakIdentityLookup(keycloakLookupService);
     }
 
     @Bean
     @ConditionalOnMissingBean(KeycloakAuthorizationLookup.class)
-    public KeycloakAuthorizationLookup keycloakUserRoleLookupProxy(KeycloakLookupService keycloakLookupService){
+    public KeycloakAuthorizationLookup keycloakAuthorizationLookup(KeycloakLookupService keycloakLookupService){
         return new KeycloakAuthorizationLookup(keycloakLookupService);
     }
 }

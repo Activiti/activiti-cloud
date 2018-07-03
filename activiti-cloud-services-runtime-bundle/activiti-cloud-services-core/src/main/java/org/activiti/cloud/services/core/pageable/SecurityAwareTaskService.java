@@ -24,9 +24,9 @@ import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
-import org.activiti.cloud.services.core.AuthenticationWrapper;
-import org.activiti.engine.UserGroupLookupProxy;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.runtime.api.TaskRuntime;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.VariableInstance;
 import org.activiti.runtime.api.query.Page;
@@ -38,14 +38,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class SecurityAwareTaskService {
 
-    private final AuthenticationWrapper authenticationWrapper;
+    private final SpringSecurityAuthenticationWrapper authenticationWrapper;
+
     private final TaskRuntime taskRuntime;
 
-    @Autowired(required = false)
-    private UserGroupLookupProxy userGroupLookupProxy;
+    @Autowired
+    private IdentityLookup identityLookup;
 
     @Autowired
-    public SecurityAwareTaskService(AuthenticationWrapper authenticationWrapper,
+    public SecurityAwareTaskService(SpringSecurityAuthenticationWrapper authenticationWrapper,
                                     TaskRuntime taskRuntime) {
         this.authenticationWrapper = authenticationWrapper;
         this.taskRuntime = taskRuntime;
@@ -57,8 +58,8 @@ public class SecurityAwareTaskService {
         TaskFilter taskFilter;
         if (userId != null) {
             List<String> groups = null;
-            if (userGroupLookupProxy != null) {
-                groups = userGroupLookupProxy.getGroupsForCandidateUser(userId);
+            if (identityLookup != null) {
+                groups = identityLookup.getGroupsForCandidateUser(userId);
             }
             taskFilter = TaskFilter.filteredOnAssigneeOrCandiate(userId,
                                                                  groups);

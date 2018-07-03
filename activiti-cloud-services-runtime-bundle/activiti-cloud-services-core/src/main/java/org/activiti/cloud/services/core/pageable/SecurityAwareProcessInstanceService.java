@@ -24,8 +24,8 @@ import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
-import org.activiti.cloud.services.core.AuthenticationWrapper;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.engine.ActivitiObjectNotFoundException;
@@ -50,7 +50,7 @@ public class SecurityAwareProcessInstanceService {
 
     private final SpringPageConverter springPageConverter;
 
-    private final AuthenticationWrapper authenticationWrapper;
+    private final SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAwareProcessInstanceService.class);
 
@@ -59,7 +59,7 @@ public class SecurityAwareProcessInstanceService {
     public SecurityAwareProcessInstanceService(ProcessRuntime processRuntime,
                                                SecurityPoliciesApplicationService securityPolicyApplicationService,
                                                SpringPageConverter springPageConverter,
-                                               AuthenticationWrapper authenticationWrapper) {
+                                               SpringSecurityAuthenticationWrapper authenticationWrapper) {
         this.processRuntime = processRuntime;
         this.securityService = securityPolicyApplicationService;
         this.springPageConverter = springPageConverter;
@@ -149,7 +149,6 @@ public class SecurityAwareProcessInstanceService {
 
     public void deleteProcessInstance(String processInstanceId) {
         FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(processInstanceId);
-
         processInstance.delete("Cancelled by " + authenticationWrapper.getAuthenticatedUserId());
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.rest;
+package org.activiti.cloud.services.rest.controllers;
 
 import java.util.Date;
 import java.util.UUID;
