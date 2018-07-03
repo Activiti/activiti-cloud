@@ -16,25 +16,25 @@
 
 package org.activiti.cloud.qa.service;
 
-import org.activiti.cloud.qa.model.modeling.Project;
+import org.activiti.cloud.qa.model.modeling.Application;
 import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
 
 /**
  * Modeling groups service
  */
-public interface ModelingProjectsService extends FeignRestDataClient<ModelingProjectsService, Project> {
+public interface ModelingApplicationsService extends FeignRestDataClient<ModelingApplicationsService, Application> {
 
-    String PATH = "/v1/projects";
+    String PATH = "/v1/applications";
 
     @Override
-    default Class<ModelingProjectsService> getType() {
-        return ModelingProjectsService.class;
+    default Class<ModelingApplicationsService> getType() {
+        return ModelingApplicationsService.class;
     }
 
-    static ModelingProjectsService build(String baseUrl) {
+    static ModelingApplicationsService build(String baseUrl) {
         return FeignRestDataClient
                 .builder()
-                .target(ModelingProjectsService.class,
+                .target(ModelingApplicationsService.class,
                         baseUrl + PATH);
     }
 }

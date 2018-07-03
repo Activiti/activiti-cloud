@@ -17,13 +17,14 @@
 package org.activiti.cloud.qa.model.modeling;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Model for modeling process models, form models, ...
  */
 public class Model implements ModelingContext {
 
-    public static final String PROJECT_MODELS_REL = "models";
+    public static final String APPLICATION_MODELS_REL = "models";
 
     private String id;
 
@@ -113,8 +114,8 @@ public class Model implements ModelingContext {
     }
 
     @Override
-    public String getRel() {
-        return PROJECT_MODELS_REL;
+    public Optional<String> getRel() {
+        return Optional.of(APPLICATION_MODELS_REL);
     }
 
     public enum ModelType {

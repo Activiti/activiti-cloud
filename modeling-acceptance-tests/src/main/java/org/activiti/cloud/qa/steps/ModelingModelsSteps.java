@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.qa.steps;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import net.thucydides.core.annotations.Step;
@@ -49,29 +50,27 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     @Step
     public void editAndSaveCurrentModel() {
-        Resource<? extends ModelingContext> currentModel = getCurrentModelingContext();
-        assertThat(currentModel.getContent()).isInstanceOf(Model.class);
+        Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
+        assertThat(currentContext.getContent()).isInstanceOf(Model.class);
 
-        Model model = (Model) currentModel.getContent();
+        Model model = currentContext.getContent();
         model.setContent("updated content");
 
-        modelingModelsService.updateByUri(currentModel.getLink(REL_SELF).getHref(),
+        modelingModelsService.updateByUri(currentContext.getLink(REL_SELF).getHref(),
                                           model);
         updateCurrentModelingObject();
     }
 
     @Step
     public void checkCurrentModelVersion(String expectedModelVersion) {
-        Resource<? extends ModelingContext> currentModel = getCurrentModelingContext();
-        assertThat(currentModel.getContent()).isInstanceOf(Model.class);
-
-        Model model = (Model) currentModel.getContent();
+        Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
+        Model model = currentContext.getContent();
         assertThat(model.getVersion()).isEqualTo(expectedModelVersion);
     }
 
     @Override
-    protected String getRel() {
-        return Model.PROJECT_MODELS_REL;
+    protected Optional<String> getRel() {
+        return Optional.of(Model.APPLICATION_MODELS_REL);
     }
 
     @Override

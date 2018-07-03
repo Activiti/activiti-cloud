@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.qa.model.modeling;
 
+import java.util.Optional;
+
 /**
  * Modeling context
  */
@@ -25,6 +27,6 @@ public interface ModelingContext {
 
     String getName();
 
-    String getRel();
+    Optional<String> getRel();
 
 }

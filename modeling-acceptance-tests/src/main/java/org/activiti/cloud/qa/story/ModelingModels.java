@@ -18,8 +18,8 @@ package org.activiti.cloud.qa.story;
 
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.qa.model.modeling.Model;
+import org.activiti.cloud.qa.steps.ModelingApplicationsSteps;
 import org.activiti.cloud.qa.steps.ModelingModelsSteps;
-import org.activiti.cloud.qa.steps.ModelingProjectsSteps;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -29,12 +29,12 @@ import static org.activiti.cloud.qa.model.modeling.ModelIdentifier.identified;
 import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.named;
 
 /**
- * Modeling groups scenarios
+ * Modeling models scenarios
  */
 public class ModelingModels {
 
     @Steps
-    private ModelingProjectsSteps modelingProjectsSteps;
+    private ModelingApplicationsSteps modelingApplicationsSteps;
 
     @Steps
     private ModelingModelsSteps modelingModelsSteps;
@@ -44,23 +44,23 @@ public class ModelingModels {
                             String modelName) {
         Resource<Model> createdModel = modelingModelsSteps.create(modelName,
                                                                   modelType);
-        modelingProjectsSteps.addToCurrentContext(createdModel);
+        modelingApplicationsSteps.addToCurrentContext(createdModel);
     }
 
     @Then("the $modelType model '$modelName' is created")
-    public void checkModelExistsInCurrentProject(String modelType,
-                                                 String modelName) {
+    public void checkModelExistsInCurrentApplication(String modelType,
+                                                     String modelName) {
         modelingModelsSteps.checkExistsInCurrentContext(identified(modelName,
                                                                    modelType));
     }
 
     @Then("the version of the $modelType model '$modelName' is $modelVersion")
-    public void checkModelVersionInCurrentProject(String modelType,
-                                                  String modelName,
-                                                  String modelVersion) {
+    public void checkModelVersionInCurrentApplication(String modelType,
+                                                      String modelName,
+                                                      String modelVersion) {
         modelingModelsSteps.checkExistsInCurrentContext(identified(modelName,
-                                                                     modelType,
-                                                                     modelVersion));
+                                                                   modelType,
+                                                                   modelVersion));
     }
 
     @Then("delete model '$modelName'")
