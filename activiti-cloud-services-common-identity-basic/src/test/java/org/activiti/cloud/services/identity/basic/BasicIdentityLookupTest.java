@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 public class BasicIdentityLookupTest {
 
     @InjectMocks
-    private BasicIdentityLookup userGroupLookupProxy;
+    private BasicIdentityLookup identityLookup;
 
     @Mock
     private UserDetailsService userDetailsService;
@@ -41,6 +41,6 @@ public class BasicIdentityLookupTest {
         when(userDetailsService.loadUserByUsername("test"))
                 .thenReturn(user);
 
-        assertThat(userGroupLookupProxy.getGroupsForCandidateUser("test")).contains("testrole");
+        assertThat(identityLookup.getGroupsForCandidateUser("test")).contains("testrole");
     }
 }

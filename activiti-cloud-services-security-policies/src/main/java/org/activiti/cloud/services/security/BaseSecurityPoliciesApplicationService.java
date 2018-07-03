@@ -5,24 +5,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.activiti.engine.UserGroupLookupProxy;
-import org.activiti.engine.UserRoleLookupProxy;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
+import org.activiti.runtime.api.auth.AuthorizationLookup;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class BaseSecurityPoliciesApplicationService {
-
-    @Autowired(required = false)
-    protected UserGroupLookupProxy userGroupLookupProxy;
-
-    @Autowired(required = false)
-    protected UserRoleLookupProxy userRoleLookupProxy;
+public class BaseSecurityPoliciesApplicationService implements SecurityPoliciesApplicationService {
 
     @Autowired
-    protected BaseAuthenticationWrapper authenticationWrapper;
+    protected IdentityLookup identityLookup;
+
+    @Autowired
+    protected AuthorizationLookup authorizationLookup;
+
+    @Autowired
+    protected SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @Autowired
     protected SecurityPoliciesService securityPoliciesService;
-
 
     protected boolean noSecurityPoliciesOrNoUser() {
         return !securityPoliciesService.policiesDefined() || authenticationWrapper.getAuthenticatedUserId() == null;
@@ -31,8 +31,8 @@ public class BaseSecurityPoliciesApplicationService {
     protected Map<String, Set<String>> definitionKeysAllowedForPolicy(SecurityPolicy securityPolicy) {
         List<String> groups = null;
 
-        if (userGroupLookupProxy != null && authenticationWrapper.getAuthenticatedUserId() != null) {
-            groups = userGroupLookupProxy.getGroupsForCandidateUser(authenticationWrapper.getAuthenticatedUserId());
+        if (identityLookup != null && authenticationWrapper.getAuthenticatedUserId()!= null) {
+            groups = identityLookup.getGroupsForCandidateUser(authenticationWrapper.getAuthenticatedUserId());
         }
 
         return securityPoliciesService.getProcessDefinitionKeys(authenticationWrapper.getAuthenticatedUserId(),
@@ -40,6 +40,7 @@ public class BaseSecurityPoliciesApplicationService {
                 securityPolicy);
     }
 
+    @Override
     public boolean canRead(String processDefinitionKey,
                            String appName) {
         return hasPermission(processDefinitionKey,
@@ -48,7 +49,9 @@ public class BaseSecurityPoliciesApplicationService {
     }
 
 
-    public boolean canWrite(String processDefinitionKey, String appName){
+    @Override
+    public boolean canWrite(String processDefinitionKey,
+                            String appName){
         return hasPermission(processDefinitionKey, SecurityPolicy.WRITE,appName);
     }
 
@@ -57,11 +60,11 @@ public class BaseSecurityPoliciesApplicationService {
                                   SecurityPolicy securityPolicy,
                                   String appName) {
 
-        if (!securityPoliciesService.policiesDefined() || userGroupLookupProxy == null || authenticationWrapper.getAuthenticatedUserId() == null) {
+        if (!securityPoliciesService.policiesDefined() || identityLookup == null || authenticationWrapper.getAuthenticatedUserId() == null) {
             return true;
         }
 
-        if (userRoleLookupProxy != null && userRoleLookupProxy.isAdmin(authenticationWrapper.getAuthenticatedUserId())) {
+        if (authorizationLookup != null && authorizationLookup.isAdmin(authenticationWrapper.getAuthenticatedUserId())) {
             return true;
         }
 

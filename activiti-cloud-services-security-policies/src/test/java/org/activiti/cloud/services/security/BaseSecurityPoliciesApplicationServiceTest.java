@@ -1,12 +1,14 @@
 package org.activiti.cloud.services.security;
 
-import org.activiti.engine.UserGroupLookupProxy;
-import org.activiti.engine.UserRoleLookupProxy;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
+import org.activiti.runtime.api.auth.AuthorizationLookup;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.springframework.security.core.Authentication;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
 public class BaseSecurityPoliciesApplicationServiceTest {
 
     @InjectMocks
@@ -27,16 +30,16 @@ public class BaseSecurityPoliciesApplicationServiceTest {
     private BaseSecurityPoliciesApplicationService securityPoliciesApplicationService;
 
     @Mock
-    private UserGroupLookupProxy userGroupLookupProxy;
+    private IdentityLookup identityLookup;
 
     @Mock
-    private UserRoleLookupProxy userRoleLookupProxy;
+    private AuthorizationLookup authorizationLookup;
 
     @Mock
     private SecurityPoliciesService securityPoliciesService;
 
     @Mock
-    private BaseAuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @Before
     public void setUp() throws Exception {
@@ -55,10 +58,11 @@ public class BaseSecurityPoliciesApplicationServiceTest {
         List<String> groups = Arrays.asList("hr");
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
-        when(userRoleLookupProxy.isAdmin("bob")).thenReturn(false);
 
-        when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(groups);
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
+        when(authorizationLookup.isAdmin("bob")).thenReturn(false);
+
+        when(identityLookup.getGroupsForCandidateUser("bob")).thenReturn(groups);
         Map<String,Set<String>> map = new HashMap<String,Set<String>>();
         map.put("rb1",new HashSet(Arrays.asList("key")));
         when(securityPoliciesService.getProcessDefinitionKeys("bob",groups, SecurityPolicy.WRITE)).thenReturn(map);
@@ -74,9 +78,9 @@ public class BaseSecurityPoliciesApplicationServiceTest {
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
-        when(userRoleLookupProxy.isAdmin("bob")).thenReturn(false);
+        when(authorizationLookup.isAdmin("bob")).thenReturn(false);
 
-        when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(groups);
+        when(identityLookup.getGroupsForCandidateUser("bob")).thenReturn(groups);
         Map<String,Set<String>> map = new HashMap<String,Set<String>>();
         map.put("rb1",new HashSet(Arrays.asList("key")));
         when(securityPoliciesService.getProcessDefinitionKeys("bob",groups, SecurityPolicy.WRITE)).thenReturn(map);
@@ -89,10 +93,9 @@ public class BaseSecurityPoliciesApplicationServiceTest {
 
     @Test
     public void shouldHavePermissionWhenAdmin(){
-
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("admin");
-        when(userRoleLookupProxy.isAdmin("admin")).thenReturn(true);
+        when(authorizationLookup.isAdmin("admin")).thenReturn(true);
 
         assertThat(securityPoliciesApplicationService.canRead("key","rb1")).isTrue();
     }

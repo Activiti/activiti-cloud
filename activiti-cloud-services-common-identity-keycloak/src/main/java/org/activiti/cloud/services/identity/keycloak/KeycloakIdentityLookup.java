@@ -25,7 +25,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("usergrouplookuproxy")
+@Component("identitylookup")
 public class KeycloakIdentityLookup implements IdentityLookup {
 
     private KeycloakLookupService keycloakLookupService;

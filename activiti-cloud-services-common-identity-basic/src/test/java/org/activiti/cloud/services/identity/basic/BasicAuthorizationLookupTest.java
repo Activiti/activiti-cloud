@@ -18,7 +18,7 @@ public class BasicAuthorizationLookupTest {
     private BasicAuthorizationLookup userRoleLookupProxy;
 
     @Mock
-    private BasicIdentityLookup userGroupLookupProxy;
+    private BasicIdentityLookup identityLookup;
 
     @Before
     public void setUp() {
@@ -32,7 +32,7 @@ public class BasicAuthorizationLookupTest {
         List<String> roles = new ArrayList<>();
         roles.add("role");
 
-        when(userGroupLookupProxy.getGroupsForCandidateUser("test"))
+        when(identityLookup.getGroupsForCandidateUser("test"))
                 .thenReturn(roles);
 
         assertThat(userRoleLookupProxy.getRolesForUser("test")).contains("role");
@@ -45,7 +45,7 @@ public class BasicAuthorizationLookupTest {
         List<String> roles = new ArrayList<>();
         roles.add("admin");
 
-        when(userGroupLookupProxy.getGroupsForCandidateUser("admin"))
+        when(identityLookup.getGroupsForCandidateUser("admin"))
                 .thenReturn(roles);
 
         assertThat(userRoleLookupProxy.isAdmin("admin")).isTrue();

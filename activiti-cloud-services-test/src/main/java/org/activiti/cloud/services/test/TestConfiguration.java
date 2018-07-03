@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.test;
+package org.activiti.cloud.services.test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -25,6 +25,7 @@ import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.hal.Jackson2HalModule;
@@ -32,6 +33,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 @Configuration
+@ComponentScan({"org.activiti.cloud.services.test"})
 public class TestConfiguration {
 
     private final KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
