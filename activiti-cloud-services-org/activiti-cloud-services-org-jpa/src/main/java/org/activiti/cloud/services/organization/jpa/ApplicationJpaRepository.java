@@ -18,44 +18,44 @@ package org.activiti.cloud.services.organization.jpa;
 
 import java.util.Optional;
 
-import org.activiti.cloud.organization.core.model.Project;
-import org.activiti.cloud.organization.core.repository.ProjectRepository;
+import org.activiti.cloud.organization.core.model.Application;
+import org.activiti.cloud.organization.core.repository.ApplicationRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
- * JPA Repository for {@link Project} entity
+ * JPA Repository for {@link Application} entity
  */
-@RepositoryRestResource(path = "projects",
-        collectionResourceRel = "projects",
-        itemResourceRel = "projects")
-public interface ProjectJpaRepository extends JpaRepository<Project, String>,
-                                              ProjectRepository {
+@RepositoryRestResource(path = "applications",
+        collectionResourceRel = "applications",
+        itemResourceRel = "applications")
+public interface ApplicationJpaRepository extends JpaRepository<Application, String>,
+                                                  ApplicationRepository {
 
     @Override
-    default Page<Project> getProjects(Pageable pageable) {
+    default Page<Application> getApplications(Pageable pageable) {
         return findAll(pageable);
     }
 
     @Override
-    default Optional<Project> findProjectById(String projectId) {
-        return findById(projectId);
+    default Optional<Application> findApplicationById(String applicationId) {
+        return findById(applicationId);
     }
 
     @Override
-    default Project createProject(Project project) {
-        return save(project);
+    default Application createApplication(Application application) {
+        return save(application);
     }
 
     @Override
-    default Project updateProject(Project projectToUpdate) {
-        return save(projectToUpdate);
+    default Application updateApplication(Application applicationToUpdate) {
+        return save(applicationToUpdate);
     }
 
     @Override
-    default void deleteProject(Project project) {
-        delete(project);
+    default void deleteApplication(Application application) {
+        delete(application);
     }
 }

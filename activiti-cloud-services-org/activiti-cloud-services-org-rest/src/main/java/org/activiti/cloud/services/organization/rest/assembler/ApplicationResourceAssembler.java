@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.services.organization.rest.assembler;
 
-import org.activiti.cloud.organization.core.model.Project;
+import org.activiti.cloud.organization.core.model.Application;
 import org.activiti.cloud.services.organization.rest.controller.ModelController;
-import org.activiti.cloud.services.organization.rest.controller.ProjectController;
+import org.activiti.cloud.services.organization.rest.controller.ApplicationController;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
@@ -28,17 +28,17 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
- * Assembler for {@link Project} resource
+ * Assembler for {@link Application} resource
  */
 @Component
-public class ProjectResourceAssembler implements ResourceAssembler<Project, Resource<Project>> {
+public class ApplicationResourceAssembler implements ResourceAssembler<Application, Resource<Application>> {
 
     @Override
-    public Resource<Project> toResource(Project project) {
+    public Resource<Application> toResource(Application application) {
         return new Resource<>(
-                project,
-                linkTo(methodOn(ProjectController.class).getProject(project.getId())).withSelfRel(),
-                linkTo(methodOn(ModelController.class).getModels(project.getId(),
+                application,
+                linkTo(methodOn(ApplicationController.class).getApplication(application.getId())).withSelfRel(),
+                linkTo(methodOn(ModelController.class).getModels(application.getId(),
                                                                  Pageable.unpaged())).withRel("models")
         );
     }

@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.activiti.cloud.organization.core.model.Project;
+import org.activiti.cloud.organization.core.model.Application;
 import org.activiti.cloud.organization.core.model.Model;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,15 +50,15 @@ public class ModelRepositoryTest {
     @Test
     public void testCreateModel() {
         // GIVEN
-        Project parentProject = new Project("parent_project_id",
-                                      "Parent Project");
+        Application parentApplication = new Application("parent_application_id",
+                                                    "Parent Application");
         Model childModel = new Model("child_model_id",
                                      "Child Model",
                                      PROCESS_MODEL,
                                      "child_model_id");
 
         // WHEN
-        modelRepository.createModel(parentProject,
+        modelRepository.createModel(parentApplication,
                                       childModel);
 
         // THEN
@@ -69,8 +69,8 @@ public class ModelRepositoryTest {
         Model createdModel = modelArgumentCaptor.getValue();
         assertThat(createdModel).isNotNull();
         assertThat(createdModel.getId()).isEqualTo("child_model_id");
-        assertThat(createdModel.getProject()).isNotNull();
-        assertThat(createdModel.getProject().getId()).isEqualTo("parent_project_id");
+        assertThat(createdModel.getApplication()).isNotNull();
+        assertThat(createdModel.getApplication().getId()).isEqualTo("parent_application_id");
     }
 
     @Test
@@ -119,8 +119,8 @@ public class ModelRepositoryTest {
     @Test
     public void testCreateSubmodelReference() {
         // GIVEN
-        Project parentProject = new Project("parent_project_id",
-                                      "Parent Project");
+        Application parentApplication = new Application("parent_application_id",
+                                                    "Parent Application");
 
         Model model1 = new Model("model1",
                                         "Model 1",
@@ -142,7 +142,7 @@ public class ModelRepositoryTest {
         doReturn(Optional.of(model2)).when(modelRepository).findModelById(eq("model2"));
 
         // WHEN
-        modelRepository.createModelsReference(parentProject,
+        modelRepository.createModelsReference(parentApplication,
                                                 submodelLinks);
 
         // THEN
@@ -166,11 +166,11 @@ public class ModelRepositoryTest {
 
         assertThat(updatedModels
                            .stream()
-                           .map(Model::getProject)
+                           .map(Model::getApplication)
                            .filter(Objects::nonNull)
-                           .map(Project::getId)
+                           .map(Application::getId)
                            .collect(Collectors.toList()))
-                .containsExactly("parent_project_id",
-                                 "parent_project_id");
+                .containsExactly("parent_application_id",
+                                 "parent_application_id");
     }
 }

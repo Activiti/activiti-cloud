@@ -32,10 +32,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableJpaRepositories("org.activiti.cloud.services.organization.jpa")
 @EntityScan("org.activiti.cloud.organization.core.model")
 @SpringBootApplication
-public class Application {
+public class OrganizationApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class,
+        SpringApplication.run(OrganizationApplication.class,
                               args);
     }
 }

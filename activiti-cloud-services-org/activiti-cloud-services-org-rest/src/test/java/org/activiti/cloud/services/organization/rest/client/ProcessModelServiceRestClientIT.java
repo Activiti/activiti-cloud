@@ -19,14 +19,13 @@ package org.activiti.cloud.services.organization.rest.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.repository.ModelRepository;
-import org.activiti.cloud.services.organization.config.Application;
+import org.activiti.cloud.services.organization.config.OrganizationApplication;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
-import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
@@ -42,10 +41,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Consumer side tests for communication with process models service
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = OrganizationApplication.class)
 @WebAppConfiguration
 @AutoConfigureStubRunner(
-        stubsMode = StubRunnerProperties.StubsMode.LOCAL,
         ids = "org.activiti.cloud:activiti-cloud-services-process-model-rest:+:stubs:8088")
 public class ProcessModelServiceRestClientIT {
 

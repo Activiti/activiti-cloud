@@ -17,7 +17,7 @@
 package org.activiti.cloud.organization.core.rest.resource;
 
 import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.model.Project;
+import org.activiti.cloud.organization.core.model.Application;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -99,10 +99,10 @@ public class RestResourceEventHandlerTest {
         // GIVEN
         doReturn(false)
                 .when(restResourceEventHandler)
-                .isEntityWithRestResource(eq(Project.class));
+                .isEntityWithRestResource(eq(Application.class));
 
         // WHEN
-        restResourceEventHandler.handleBeforeCreates(new Project());
+        restResourceEventHandler.handleBeforeCreates(new Application());
 
         // THEN
         verify(restResourceService,
@@ -120,10 +120,10 @@ public class RestResourceEventHandlerTest {
         // GIVEN
         doReturn(false)
                 .when(restResourceEventHandler)
-                .isEntityWithRestResource(eq(Project.class));
+                .isEntityWithRestResource(eq(Application.class));
 
         // WHEN
-        restResourceEventHandler.handleBeforeUpdate(new Project());
+        restResourceEventHandler.handleBeforeUpdate(new Application());
 
         // THEN
         verify(restResourceService,

@@ -43,7 +43,7 @@ public class Model extends AuditableEntity<String> {
     private String id;
 
     @ManyToOne
-    private Project project;
+    private Application application;
 
     private ModelType type;
 
@@ -102,12 +102,12 @@ public class Model extends AuditableEntity<String> {
         this.data = data;
     }
 
-    public Project getProject() {
-        return project;
+    public Application getApplication() {
+        return application;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
+    public void setApplication(Application application) {
+        this.application = application;
     }
 
     public enum ModelType {

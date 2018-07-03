@@ -19,8 +19,8 @@ package org.activiti.cloud.services.organization.rest.controller;
 import java.util.stream.Collectors;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.organization.core.model.Application;
 import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.model.Project;
 import org.activiti.cloud.organization.core.repository.ModelRepository;
 import org.activiti.cloud.services.organization.rest.assembler.ModelResourceAssembler;
 import org.springframework.context.ApplicationEventPublisher;
@@ -65,16 +65,16 @@ public class ModelController implements ApplicationEventPublisherAware {
 
     private final AlfrescoPagedResourcesAssembler<Model> pagedResourcesAssembler;
 
-    private final ProjectController projectController;
+    private final ApplicationController applicationController;
 
     public ModelController(ModelRepository modelRepository,
                            ModelResourceAssembler resourceAssembler,
                            AlfrescoPagedResourcesAssembler<Model> pagedResourcesAssembler,
-                           ProjectController projectController) {
+                           ApplicationController applicationController) {
         this.modelRepository = modelRepository;
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
-        this.projectController = projectController;
+        this.applicationController = applicationController;
     }
 
     @Override
@@ -90,13 +90,13 @@ public class ModelController implements ApplicationEventPublisherAware {
                 resourceAssembler);
     }
 
-    @RequestMapping(method = GET, path = "/v1/projects/{projectId}/models")
-    public PagedResources<Resource<Model>> getModels(@PathVariable String projectId,
+    @RequestMapping(method = GET, path = "/v1/applications/{applicationId}/models")
+    public PagedResources<Resource<Model>> getModels(@PathVariable String applicationId,
                                                      Pageable pageable) {
-        Project project = projectController.findProjectById(projectId);
+        Application application = applicationController.findApplicationById(applicationId);
         return pagedResourcesAssembler.toResource(
                 pageable,
-                modelRepository.getModels(project,
+                modelRepository.getModels(application,
                                           pageable),
                 resourceAssembler);
     }
@@ -114,14 +114,14 @@ public class ModelController implements ApplicationEventPublisherAware {
                 modelRepository.createModel(model));
     }
 
-    @RequestMapping(method = POST, path = "/v1/projects/{projectId}/models")
+    @RequestMapping(method = POST, path = "/v1/applications/{applicationId}/models")
     @ResponseStatus(CREATED)
-    public Resource<Model> createModel(@PathVariable String projectId,
+    public Resource<Model> createModel(@PathVariable String applicationId,
                                        @RequestBody Model model) {
-        Project project = projectController.findProjectById(projectId);
+        Application application = applicationController.findApplicationById(applicationId);
         applicationEventPublisher.publishEvent(new BeforeCreateEvent(model));
         return resourceAssembler.toResource(
-                modelRepository.createModel(project,
+                modelRepository.createModel(application,
                                             model));
     }
 
@@ -136,12 +136,12 @@ public class ModelController implements ApplicationEventPublisherAware {
                                             model));
     }
 
-    @RequestMapping(method = {PUT, PATCH}, path = "/v1/projects/{projectId}/models", consumes = TEXT_URI_LIST_VALUE)
+    @RequestMapping(method = {PUT, PATCH}, path = "/v1/applications/{applicationId}/models", consumes = TEXT_URI_LIST_VALUE)
     @ResponseStatus(NO_CONTENT)
-    public void createModelsReference(@PathVariable String projectId,
+    public void createModelsReference(@PathVariable String applicationId,
                                       @RequestBody Resources<Object> modelsLinks) {
         modelRepository.createModelsReference(
-                projectController.findProjectById(projectId),
+                applicationController.findApplicationById(applicationId),
                 modelsLinks
                         .getLinks()
                         .stream()

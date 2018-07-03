@@ -19,7 +19,6 @@ package org.activiti.cloud.organization.core.model;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -29,24 +28,26 @@ import org.activiti.cloud.organization.core.audit.AuditableEntity;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
- * Project model entity
+ * Application model entity
  */
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class Project extends AuditableEntity<String> {
+public class Application extends AuditableEntity<String> {
 
     @OneToMany
     private List<Model> models;
+
     @Id
     private String id;
+
     private String name;
 
-    public Project() {  // for JPA
+    public Application() {  // for JPA
     }
 
-    public Project(String id,
-                   String name) {
+    public Application(String id,
+                       String name) {
         this.id = id;
         this.name = name;
     }

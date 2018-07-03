@@ -19,8 +19,8 @@ package org.activiti.cloud.organization.core.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.activiti.cloud.organization.core.model.Application;
 import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.model.Project;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -31,7 +31,7 @@ public interface ModelRepository {
 
     Page<Model> getTopLevelModels(Pageable pageable);
 
-    Page<Model> getModels(Project project,
+    Page<Model> getModels(Application application,
                           Pageable pageable);
 
     Optional<Model> findModelById(String modelId);
@@ -42,9 +42,9 @@ public interface ModelRepository {
 
     void deleteModel(Model model);
 
-    default Model createModel(Project project,
+    default Model createModel(Application application,
                               Model model) {
-        model.setProject(project);
+        model.setApplication(application);
         return createModel(model);
     }
 
@@ -58,16 +58,16 @@ public interface ModelRepository {
         return findModelById(link.substring(link.lastIndexOf('/') + 1));
     }
 
-    default void createModelsReference(Project project,
-                                       List<String> projectsLinks) {
-        projectsLinks
+    default void createModelsReference(Application application,
+                                       List<String> applicationsLinks) {
+        applicationsLinks
                 .stream()
                 .distinct()
                 .map(this::findModelByLink)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(model -> {
-                    model.setProject(project);
+                    model.setApplication(application);
                     updateModel(model);
                 });
     }

@@ -24,7 +24,7 @@ import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.repository.ModelRepository;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
-import org.activiti.cloud.services.organization.config.Application;
+import org.activiti.cloud.services.organization.config.OrganizationApplication;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
 import org.activiti.validation.ValidationError;
 import org.junit.Before;
@@ -50,7 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = OrganizationApplication.class)
 @WebAppConfiguration
 public class ValidateModelControllerIT {
 

@@ -18,29 +18,28 @@ package org.activiti.cloud.organization.core.repository;
 
 import java.util.Optional;
 
-import org.activiti.cloud.organization.core.model.Project;
+import org.activiti.cloud.organization.core.model.Application;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Interface for {@link Project} entities repository
+ * Interface for {@link Application} entities repository
  */
-public interface ProjectRepository {
+public interface ApplicationRepository {
 
-    Page<Project> getProjects(Pageable pageable);
+    Page<Application> getApplications(Pageable pageable);
 
-    Optional<Project> findProjectById(String projectId);
+    Optional<Application> findApplicationById(String applicationId);
 
-    Project createProject(Project project);
+    Application createApplication(Application application);
 
-    Project updateProject(Project projectToUpdate);
+    Application updateApplication(Application applicationToUpdate);
 
-    void deleteProject(Project project);
+    void deleteApplication(Application application);
 
-    default Project updateProject(Project projectToUpdate,
-                                  Project newProject) {
-        projectToUpdate.setName(newProject.getName());
-        return updateProject(projectToUpdate);
+    default Application updateApplication(Application applicationToUpdate,
+                                          Application newapplication) {
+        applicationToUpdate.setName(newapplication.getName());
+        return updateApplication(applicationToUpdate);
     }
-
 }
