@@ -24,10 +24,10 @@ import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
-import org.activiti.engine.UserGroupLookupProxy;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.impl.persistence.StrongUuidGenerator;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.activiti.spring.ProcessEngineFactoryBean;
 import org.activiti.spring.SpringAsyncExecutor;
 import org.activiti.spring.SpringCallerRunsRejectedJobsHandler;
@@ -69,7 +69,7 @@ public abstract class AbstractProcessEngineAutoConfiguration
   }
 
   protected SpringProcessEngineConfiguration baseSpringProcessEngineConfiguration(DataSource dataSource, PlatformTransactionManager platformTransactionManager,
-                                                                                  SpringAsyncExecutor springAsyncExecutor, UserGroupLookupProxy userGroupLookupProxy) throws IOException {
+                                                                                  SpringAsyncExecutor springAsyncExecutor, IdentityLookup identityLookup) throws IOException {
 
     List<Resource> procDefResources = this.discoverProcessDefinitionResources(
         this.resourceLoader, this.activitiProperties.getProcessDefinitionLocationPrefix(),
@@ -96,8 +96,8 @@ public abstract class AbstractProcessEngineAutoConfiguration
     conf.setMailServerUseSSL(activitiProperties.isMailServerUseSsl());
     conf.setMailServerUseTLS(activitiProperties.isMailServerUseTls());
 
-    if(userGroupLookupProxy!=null) {
-      conf.setUserGroupLookupProxy(userGroupLookupProxy);
+    if(identityLookup!=null) {
+      conf.setIdentityLookup(identityLookup);
     }
     
     conf.setHistoryLevel(activitiProperties.getHistoryLevel());

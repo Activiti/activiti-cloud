@@ -15,7 +15,7 @@ package org.activiti.spring.boot;
 import java.io.IOException;
 import javax.sql.DataSource;
 
-import org.activiti.engine.UserGroupLookupProxy;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.activiti.spring.SpringAsyncExecutor;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +32,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 @EnableConfigurationProperties(ActivitiProperties.class)
 public class ProcessEngineAutoConfiguration extends AbstractProcessEngineAutoConfiguration {
 
-    @Autowired(required = false)
-    protected UserGroupLookupProxy userGroupLookupProxy;
+    @Autowired
+    protected IdentityLookup identityLookup;
 
     @Bean
     @ConditionalOnMissingBean
@@ -45,7 +45,7 @@ public class ProcessEngineAutoConfiguration extends AbstractProcessEngineAutoCon
         return this.baseSpringProcessEngineConfiguration(dataSource,
                                                          transactionManager,
                                                          springAsyncExecutor,
-                                                         userGroupLookupProxy);
+                                                         identityLookup);
     }
 }
 
