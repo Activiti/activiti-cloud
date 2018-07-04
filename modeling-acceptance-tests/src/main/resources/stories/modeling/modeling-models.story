@@ -4,17 +4,10 @@ Narrative:
 As a user
 I want to manage process and form models
 
-Scenario: create a project
+Scenario: create a process model
 Given any authenticated user
-And an existing group 'Recruiting'
-When the user opens the group 'Recruiting'
-And creates a project 'Mars Team'
-Then the project 'Mars Team' is created
-
-Scenario: create a process model in a project
-Given any authenticated user
-And an existing project 'Mars Team'
-When the user opens the project 'Mars Team'
+And an existing application 'Mars Team'
+When the user opens the application 'Mars Team'
 And creates the process model 'Recruiting Crew for Mars'
 Then the process model 'Recruiting Crew for Mars' is created
 And the version of the process model 'Recruiting Crew for Mars' is 0.0.1

@@ -17,27 +17,24 @@
 package org.activiti.cloud.qa.model.modeling;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Model for modeling project
  */
-public class Project implements ModelingContext {
-
-    public static final String GROUP_PROJECTS_REL = "projects";
+public class Application implements ModelingContext {
 
     private String id;
 
     private String name;
 
-    private Group group;
-
     private List<Model> models;
 
-    public Project() {
+    public Application() {
 
     }
 
-    public Project(String id, String name) {
+    public Application(String id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -60,14 +57,6 @@ public class Project implements ModelingContext {
         this.name = name;
     }
 
-    public Group getGroup() {
-        return group;
-    }
-
-    public void setGroup(Group group) {
-        this.group = group;
-    }
-
     public List<Model> getModels() {
         return models;
     }
@@ -77,7 +66,7 @@ public class Project implements ModelingContext {
     }
 
     @Override
-    public String getRel() {
-        return GROUP_PROJECTS_REL;
+    public Optional<String> getRel() {
+        return Optional.empty();
     }
 }

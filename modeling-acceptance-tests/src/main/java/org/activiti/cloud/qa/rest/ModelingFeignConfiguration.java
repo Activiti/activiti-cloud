@@ -18,9 +18,8 @@ package org.activiti.cloud.qa.rest;
 
 import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.rest.feign.FeignConfiguration;
-import org.activiti.cloud.qa.service.ModelingGroupsService;
+import org.activiti.cloud.qa.service.ModelingApplicationsService;
 import org.activiti.cloud.qa.service.ModelingModelsService;
-import org.activiti.cloud.qa.service.ModelingProjectsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,14 +36,8 @@ public class ModelingFeignConfiguration {
     private ModelingTestsConfigurationProperties modelingTestsConfigurationProperties;
 
     @Bean
-    public ModelingGroupsService modelingGroupsService() {
-        return ModelingGroupsService
-                .build(modelingTestsConfigurationProperties.getModelingUrl());
-    }
-
-    @Bean
-    public ModelingProjectsService modelingProjectsService() {
-        return ModelingProjectsService
+    public ModelingApplicationsService modelingApplicationsService() {
+        return ModelingApplicationsService
                 .build(modelingTestsConfigurationProperties.getModelingUrl());
     }
 
@@ -53,5 +46,4 @@ public class ModelingFeignConfiguration {
         return ModelingModelsService
                 .build(modelingTestsConfigurationProperties.getModelingUrl());
     }
-
 }

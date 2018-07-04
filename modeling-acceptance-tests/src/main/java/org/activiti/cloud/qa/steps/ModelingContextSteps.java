@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Step;
+import org.activiti.cloud.qa.model.modeling.Model;
 import org.activiti.cloud.qa.model.modeling.ModelingContext;
 import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
 import org.activiti.cloud.qa.rest.DirtyContextHandler;
@@ -29,6 +30,7 @@ import org.activiti.cloud.qa.rest.EnableDirtyContext;
 import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 
 import static org.assertj.core.api.Assertions.*;
@@ -52,15 +54,19 @@ public abstract class ModelingContextSteps<M extends ModelingContext> {
 
     @Step
     public void addToCurrentContext(Resource<? extends ModelingContext> objectToAdd) {
-        Resource<? extends ModelingContext> currentContext = getCurrentModelingContext();
-        if (currentContext != null) {
-            String parentUri = currentContext.getLink(objectToAdd.getContent().getRel()).getHref();
-            String childUri = objectToAdd.getLink(REL_SELF).getHref();
-            service().addRelationByUri(parentUri,
-                                       childUri);
-            dirtyRelation(parentUri,
-                          childUri);
-        }
+        getCurrentModelingContext()
+                .ifPresent(resource -> {
+                    objectToAdd.getContent().getRel()
+                            .map(resource::getLink)
+                            .map(Link::getHref)
+                            .ifPresent(parentUri -> {
+                                String childUri = objectToAdd.getLink(REL_SELF).getHref();
+                                service().addRelationByUri(parentUri,
+                                                           childUri);
+                                dirtyRelation(parentUri,
+                                              childUri);
+                            });
+                });
     }
 
     @Step
@@ -92,30 +98,43 @@ public abstract class ModelingContextSteps<M extends ModelingContext> {
     }
 
     protected M findInCurrentContext(ModelingIdentifier identifier) {
-        Resource<? extends ModelingContext> currentObject = getCurrentModelingContext();
-        return service().findAllByUri(currentObject.getLink(getRel()).getHref())
-                .getContent()
-                .stream()
-                .map(Resource::getContent)
-                .filter(identifier)
-                .findFirst()
+        return getCurrentModelingContext()
+                .map(this::getRelUri)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(this::findAllByUri)
+                .map(PagedResources::getContent)
+                .flatMap(resources -> resources
+                        .stream()
+                        .map(Resource::getContent)
+                        .filter(identifier)
+                        .findFirst())
                 .orElse(null);
     }
 
+    protected Optional<String> getRelUri(Resource<? extends ModelingContext> resource) {
+        return getRel()
+                .map(resource::getLink)
+                .map(Link::getHref);
+    }
+
     protected void updateCurrentModelingObject() {
-        Resource<? extends ModelingContext> currentModelingContext = getCurrentModelingContext();
-        if (currentModelingContext != null) {
-            currentModelingContext = service().findByUri(currentModelingContext.getLink(REL_SELF).getHref());
-            setCurrentModelingObject(currentModelingContext);
-        }
+        getCurrentModelingContext()
+                .map(resource -> resource.getLink(REL_SELF))
+                .map(Link::getHref)
+                .map(this::findByUri)
+                .ifPresent(this::setCurrentModelingObject);
     }
 
-    protected String getCurrentContextUri() {
-        return getCurrentModelingContext().getLink(getRel()).getHref();
+    protected Optional<Resource<? extends ModelingContext>> getCurrentModelingContext() {
+        return Optional.ofNullable(Serenity.sessionVariableCalled(MODELING_CURRENT_CONTEXT));
     }
 
-    protected Resource<? extends ModelingContext> getCurrentModelingContext() {
-        return Serenity.sessionVariableCalled(MODELING_CURRENT_CONTEXT);
+    protected Resource<M> checkAndGetCurrentContext(Class<M> expetedCurrentContextClass) {
+        Optional<Resource<? extends ModelingContext>> currentModel = getCurrentModelingContext();
+        assertThat(currentModel).isNotEmpty();
+        assertThat(currentModel.get().getContent()).isInstanceOf(expetedCurrentContextClass);
+        return (Resource<M>) currentModel.get();
     }
 
     protected void setCurrentModelingObject(Resource<? extends ModelingContext> currentModelingObject) {
@@ -134,16 +153,25 @@ public abstract class ModelingContextSteps<M extends ModelingContext> {
     }
 
     protected Collection<Resource<M>> getAvailableModelingObjects() {
-        return getCurrentModelingContext() != null ?
-                service().findAllByUri(getCurrentContextUri()).getContent() :
-                service().findAll().getContent();
+        return getCurrentModelingContext()
+                .map(this::getRelUri)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(this::findAllByUri)
+                .map(PagedResources::getContent)
+                .orElseGet(() -> findAll().getContent());
     }
 
     protected boolean existsInCurrentContext(ModelingIdentifier identifier) {
-        return existsInCollection(identifier,
-                                  service()
-                                          .findAllByUri(getCurrentContextUri())
-                                          .getContent());
+        return getCurrentModelingContext()
+                .map(this::getRelUri)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(this::findAllByUri)
+                .map(PagedResources::getContent)
+                .map(resources -> existsInCollection(identifier,
+                                                     resources))
+                .orElse(false);
     }
 
     protected boolean existsInCollection(ModelingIdentifier identifier,
@@ -174,7 +202,19 @@ public abstract class ModelingContextSteps<M extends ModelingContext> {
         Serenity.setSessionVariable(MODELING_CURRENT_CONTEXT).to(null);
     }
 
-    protected abstract String getRel();
+    protected Resource<M> findByUri(String uri) {
+        return service().findByUri(uri);
+    }
+
+    protected PagedResources<Resource<M>> findAllByUri(String uri) {
+        return service().findAllByUri(uri);
+    }
+
+    protected PagedResources<Resource<M>> findAll() {
+        return service().findAll();
+    }
+
+    protected abstract Optional<String> getRel();
 
     public abstract <S extends FeignRestDataClient<S, M>> S service();
 }
