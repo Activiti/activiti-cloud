@@ -17,12 +17,9 @@
 package org.activiti.cloud.organization.core.model;
 
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -31,61 +28,28 @@ import org.activiti.cloud.organization.core.audit.AuditableEntity;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
- * Group model entity
+ * Application model entity
  */
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-@Table(name = "GROUPS")
-public class Group extends AuditableEntity<String> {
+public class Application extends AuditableEntity<String> {
+
+    @OneToMany
+    private List<Model> models;
 
     @Id
     private String id;
+
     private String name;
 
-    @ManyToOne
-    private Group parent;
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Group> subgroups;
-
-    @OneToMany
-    private List<Project> projects;
-
-    public Group() {    // for JPA
+    public Application() {  // for JPA
     }
 
-    public Group(String id) {
-        this.id = id;
-    }
-
-    public Group(String id,
-                 String name) {
+    public Application(String id,
+                       String name) {
         this.id = id;
         this.name = name;
-    }
-
-    public Group(String id,
-                 String name,
-                 Group parent) {
-        this.id = id;
-        this.name = name;
-        this.parent = parent;
-    }
-
-    public List<Group> getSubgroups() {
-        return subgroups;
-    }
-
-    public void setSubgroups(List<Group> subgroups) {
-        this.subgroups = subgroups;
-    }
-
-    public List<Project> getProjects() {
-        return projects;
-    }
-
-    public void setProjects(List<Project> projects) {
-        this.projects = projects;
     }
 
     public String getId() {
@@ -96,19 +60,19 @@ public class Group extends AuditableEntity<String> {
         this.id = id;
     }
 
+    public List<Model> getModels() {
+        return models;
+    }
+
+    public void setModels(List<Model> models) {
+        this.models = models;
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Group getParent() {
-        return parent;
-    }
-
-    public void setParent(Group parent) {
-        this.parent = parent;
     }
 }

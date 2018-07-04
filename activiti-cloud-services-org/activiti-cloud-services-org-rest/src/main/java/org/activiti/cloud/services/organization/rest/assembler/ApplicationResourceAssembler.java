@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.services.organization.rest.assembler;
 
-import org.activiti.cloud.organization.core.model.Group;
-import org.activiti.cloud.services.organization.rest.controller.GroupController;
-import org.activiti.cloud.services.organization.rest.controller.ProjectController;
+import org.activiti.cloud.organization.core.model.Application;
+import org.activiti.cloud.services.organization.rest.controller.ModelController;
+import org.activiti.cloud.services.organization.rest.controller.ApplicationController;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
@@ -28,19 +28,18 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
- * Assembler for {@link Group} resource
+ * Assembler for {@link Application} resource
  */
 @Component
-public class GroupResourceAssembler implements ResourceAssembler<Group, Resource<Group>> {
+public class ApplicationResourceAssembler implements ResourceAssembler<Application, Resource<Application>> {
 
     @Override
-    public Resource<Group> toResource(Group group) {
+    public Resource<Application> toResource(Application application) {
         return new Resource<>(
-                group,
-                linkTo(methodOn(GroupController.class).getGroup(group.getId())).withSelfRel(),
-                linkTo(methodOn(GroupController.class).getSubgroups(group.getId(),
-                                                                    Pageable.unpaged())).withRel("subgroups"),
-                linkTo(methodOn(ProjectController.class).getProjects(group.getId(),
-                                                                     Pageable.unpaged())).withRel("projects"));
+                application,
+                linkTo(methodOn(ApplicationController.class).getApplication(application.getId())).withSelfRel(),
+                linkTo(methodOn(ModelController.class).getModels(application.getId(),
+                                                                 Pageable.unpaged())).withRel("models")
+        );
     }
 }

@@ -17,15 +17,12 @@
 package org.activiti.cloud.services.organization.rest.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.organization.core.model.Group;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.model.Project;
+import org.activiti.cloud.organization.core.model.Application;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
-import org.activiti.cloud.services.organization.config.Application;
-import org.activiti.cloud.services.organization.jpa.GroupJpaRepository;
 import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
-import org.activiti.cloud.services.organization.jpa.ProjectJpaRepository;
+import org.activiti.cloud.services.organization.jpa.ApplicationJpaRepository;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
 import org.junit.After;
 import org.junit.Before;
@@ -57,9 +54,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = org.activiti.cloud.services.organization.config.OrganizationApplication.class)
 @WebAppConfiguration
-public class ProjectRestIT {
+public class ApplicationRestIT {
 
     private MockMvc mockMvc;
 
@@ -70,10 +67,7 @@ public class ProjectRestIT {
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private GroupJpaRepository groupRepository;
-
-    @Autowired
-    private ProjectJpaRepository projectRepository;
+    private ApplicationJpaRepository applicationRepository;
 
     @Autowired
     private ModelJpaRepository modelRepository;
@@ -89,35 +83,35 @@ public class ProjectRestIT {
     @After
     public void tearDown() {
         modelRepository.deleteAllInBatch();
-        projectRepository.deleteAllInBatch();
+        applicationRepository.deleteAllInBatch();
     }
 
     @Test
-    public void testGetProjects() throws Exception {
+    public void testGetApplications() throws Exception {
 
         //given
-        final String projectId = "project_id";
-        final String projectName = "Project";
-        Project project = new Project(projectId,
-                                      projectName);
+        final String applicationId = "application_id";
+        final String applicationName = "Application";
+        Application application = new Application(applicationId,
+                                              applicationName);
 
         //when
-        project = projectRepository.save(project);
-        assertThat(project).isNotNull();
+        application = applicationRepository.save(application);
+        assertThat(application).isNotNull();
 
         //then
-        mockMvc.perform(get("{version}/projects",
+        mockMvc.perform(get("{version}/applications",
                             RepositoryRestConfig.API_VERSION))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.projects",
+                .andExpect(jsonPath("$._embedded.applications",
                                     hasSize(1)))
-                .andExpect(jsonPath("$._embedded.projects[0].name",
-                                    is(projectName)));
+                .andExpect(jsonPath("$._embedded.applications[0].name",
+                                    is(applicationName)));
     }
 
     @Test
-    public void testCreateProjectsWithModels() throws Exception {
+    public void testCreateApplicationsWithModels() throws Exception {
         ModelReference expectedFormModel = new ModelReference("ref_model_form_id",
                                                               "Form Model");
         ModelReference expectedProcessModel = new ModelReference("ref_process_model_id",
@@ -128,16 +122,16 @@ public class ProjectRestIT {
                                                                       expectedProcessModel.getModelId());
 
         //given
-        final String projectWithModelsId = "project_with_models_id";
-        final String projectWithModelsName = "Project with models";
-        Project project = new Project(projectWithModelsId,
-                                      projectWithModelsName);
+        final String applicationWithModelsId = "application_with_models_id";
+        final String applicationWithModelsName = "application with models";
+        Application application = new Application(applicationWithModelsId,
+                                              applicationWithModelsName);
 
-        // create a project
-        mockMvc.perform(post("{version}/projects",
+        // create an application
+        mockMvc.perform(post("{version}/applications",
                              RepositoryRestConfig.API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(project)))
+                                .content(mapper.writeValueAsString(application)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
@@ -175,18 +169,18 @@ public class ProjectRestIT {
         String uriList = "http://localhost" + RepositoryRestConfig.API_VERSION + "/models/" + formModelId + "\n"
                 + "http://localhost" + RepositoryRestConfig.API_VERSION + "/models/" + processModelId;
 
-        mockMvc.perform(put("{version}/projects/{projectId}/models",
+        mockMvc.perform(put("{version}/applications/{applicationId}/models",
                             RepositoryRestConfig.API_VERSION,
-                            projectWithModelsId)
+                            applicationWithModelsId)
                                 .contentType("text/uri-list")
                                 .content(uriList))
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
         //then
-        mockMvc.perform(get("{version}/projects/{projectId}/models",
+        mockMvc.perform(get("{version}/applications/{applicationId}/models",
                             RepositoryRestConfig.API_VERSION,
-                            projectWithModelsId))
+                            applicationWithModelsId))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.models",
@@ -198,94 +192,70 @@ public class ProjectRestIT {
     }
 
     @Test
-    public void testGetProject() throws Exception {
+    public void testGetApplication() throws Exception {
         //given
-        final String projectId = "project_id";
-        final String projectName = "Project";
-        Project project = new Project(projectId,
-                                      projectName);
+        final String applicationId = "application_id";
+        final String applicationName = "Application";
+        Application application = new Application(applicationId,
+                                              applicationName);
 
         //when
-        project = projectRepository.save(project);
-        assertThat(project).isNotNull();
+        application = applicationRepository.save(application);
+        assertThat(application).isNotNull();
 
         //then
-        mockMvc.perform(get("{version}/projects/{projectId}",
+        mockMvc.perform(get("{version}/applications/{applicationId}",
                             API_VERSION,
-                            projectId))
+                            applicationId))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void testCreateProjectInGroup() throws Exception {
+    public void testUpdateApplication() throws Exception {
         //given
-        final String projectId = "project_id";
-        final String projectName = "Project";
-        Project project = new Project(projectId,
-                                      projectName);
+        final String applicationId = "application_id";
+        final Application savedApplication = applicationRepository.save(new Application(applicationId,
+                                                                                        "Application name"));
+        assertThat(savedApplication).isNotNull();
 
-        String parentGroupId = "parent_group_id";
-        groupRepository.save(new Group(parentGroupId, "Parent Group"));
-
-        //when
-        mockMvc.perform(post("{version}/groups/{groupId}/projects",
-                             API_VERSION,
-                             parentGroupId)
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(project)))
-                .andExpect(status().isCreated());
-
-        //then
-        assertThat(projectRepository.findById(projectId)).isNotEmpty();
-    }
-
-    @Test
-    public void testUpdateProject() throws Exception {
-        //given
-        final String projectId = "project_id";
-        final Project savedProject = projectRepository.save(new Project(projectId,
-                                                                      "Project name"));
-        assertThat(savedProject).isNotNull();
-
-        assertThat(projectRepository.findById(projectId))
-                .hasValueSatisfying(project -> {
-                    assertThat(project.getName()).isEqualTo("Project name");
+        assertThat(applicationRepository.findById(applicationId))
+                .hasValueSatisfying(application -> {
+                    assertThat(application.getName()).isEqualTo("Application name");
                 });
 
-        Project newProject = new Project(projectId,
-                                      "New project name");
+        Application newApplication = new Application(applicationId,
+                                                 "New application name");
 
         //when
-        mockMvc.perform(put("{version}/projects/{projectId}",
-                             API_VERSION,
-                             projectId)
+        mockMvc.perform(put("{version}/applications/{applicationId}",
+                            API_VERSION,
+                            applicationId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(newProject)))
+                                .content(mapper.writeValueAsString(newApplication)))
                 .andExpect(status().isNoContent());
 
         //then
-        assertThat(projectRepository.findById(projectId))
-                .hasValueSatisfying(project -> {
-                    assertThat(project.getName()).isEqualTo("New project name");
+        assertThat(applicationRepository.findById(applicationId))
+                .hasValueSatisfying(application -> {
+                    assertThat(application.getName()).isEqualTo("New application name");
                 });
     }
 
     @Test
-    public void testDeleteProject() throws Exception {
+    public void testDeleteApplication() throws Exception {
         //given
-        final String projectId = "project_id";
-        final Project savedProject = projectRepository.save(new Project(projectId,
-                                                                      "Project"));
-        assertThat(savedProject).isNotNull();
+        final String applicationId = "application_id";
+        final Application savedApplication = applicationRepository.save(new Application(applicationId,
+                                                                                    "Application"));
+        assertThat(savedApplication).isNotNull();
 
         //when
-        mockMvc.perform(delete("{version}/projects/{projectId}",
+        mockMvc.perform(delete("{version}/applications/{applicationId}",
                                API_VERSION,
-                               projectId))
+                               applicationId))
                 .andExpect(status().isNoContent());
 
         //then
-        assertThat(projectRepository.findById(projectId)).isEmpty();
+        assertThat(applicationRepository.findById(applicationId)).isEmpty();
     }
-
 }

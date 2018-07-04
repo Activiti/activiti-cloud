@@ -19,11 +19,10 @@ package org.activiti.cloud.services.organization.rest.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.Model;
 import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.model.Project;
+import org.activiti.cloud.organization.core.model.Application;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
-import org.activiti.cloud.services.organization.config.Application;
 import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
-import org.activiti.cloud.services.organization.jpa.ProjectJpaRepository;
+import org.activiti.cloud.services.organization.jpa.ApplicationJpaRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = org.activiti.cloud.services.organization.config.OrganizationApplication.class)
 @WebAppConfiguration
 public class ModelRestIT {
 
@@ -71,7 +70,7 @@ public class ModelRestIT {
     private ObjectMapper mapper;
 
     @Autowired
-    private ProjectJpaRepository projectRepository;
+    private ApplicationJpaRepository applicationRepository;
 
     @Autowired
     private ModelJpaRepository modelRepository;
@@ -85,6 +84,7 @@ public class ModelRestIT {
     @After
     public void tearDown() {
         modelRepository.deleteAllInBatch();
+        applicationRepository.deleteAllInBatch();
     }
 
     @Test
@@ -172,7 +172,7 @@ public class ModelRestIT {
     }
 
     @Test
-    public void testCreateProcessModelInProject() throws Exception {
+    public void testCreateProcessModelInApplication() throws Exception {
         //given
         final String processModelId = "process_model_id";
         Model processModel = new Model(processModelId,
@@ -180,13 +180,13 @@ public class ModelRestIT {
                                        Model.ModelType.PROCESS_MODEL,
                                        "process_model_refId");
 
-        String parentProjectId = "parent_project_id";
-        projectRepository.save(new Project(parentProjectId, "Parent Project"));
+        String parentApplicationId = "parent_application_id";
+        applicationRepository.save(new Application(parentApplicationId, "Parent Application"));
 
         //when
-        mockMvc.perform(post("{version}/projects/{projectId}/models",
+        mockMvc.perform(post("{version}/applications/{applicationId}/models",
                              API_VERSION,
-                             parentProjectId)
+                             parentApplicationId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel)))
                 .andExpect(status().isCreated());
@@ -196,7 +196,7 @@ public class ModelRestIT {
     }
 
     @Test
-    public void testUpdateProject() throws Exception {
+    public void testUpdateApplication() throws Exception {
         //given
         final String processModelId = "process_model_id";
         Model processModel = new Model(processModelId,
@@ -220,7 +220,7 @@ public class ModelRestIT {
     }
 
     @Test
-    public void testDeleteProject() throws Exception {
+    public void testDeleteApplication() throws Exception {
         //given
         final String processModelId = "process_model_id";
         Model processModel = new Model(processModelId,

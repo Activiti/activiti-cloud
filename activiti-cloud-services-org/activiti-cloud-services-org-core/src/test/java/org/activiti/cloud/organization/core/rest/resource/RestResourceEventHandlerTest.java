@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.organization.core.rest.resource;
 
-import org.activiti.cloud.organization.core.model.Group;
 import org.activiti.cloud.organization.core.model.Model;
+import org.activiti.cloud.organization.core.model.Application;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -51,7 +51,9 @@ public class RestResourceEventHandlerTest {
         processModel.setType(PROCESS_MODEL);
         processModel.setRefId("process_model_refId");
 
-        doReturn(true).when(restResourceEventHandler).isEntityWithRestResource(eq(Model.class));
+        doReturn(true)
+                .when(restResourceEventHandler)
+                .isEntityWithRestResource(eq(Model.class));
 
         // WHEN
         restResourceEventHandler.handleBeforeCreates(processModel);
@@ -74,7 +76,9 @@ public class RestResourceEventHandlerTest {
         processModel.setType(PROCESS_MODEL);
         processModel.setRefId("process_model_refId");
 
-        doReturn(true).when(restResourceEventHandler).isEntityWithRestResource(eq(Model.class));
+        doReturn(true)
+                .when(restResourceEventHandler)
+                .isEntityWithRestResource(eq(Model.class));
 
         // WHEN
         restResourceEventHandler.handleBeforeUpdate(processModel);
@@ -93,10 +97,12 @@ public class RestResourceEventHandlerTest {
     public void testHandleBeforeCreateForEntityWithoutRestResource() {
 
         // GIVEN
-        doReturn(false).when(restResourceEventHandler).isEntityWithRestResource(eq(Group.class));
+        doReturn(false)
+                .when(restResourceEventHandler)
+                .isEntityWithRestResource(eq(Application.class));
 
         // WHEN
-        restResourceEventHandler.handleBeforeCreates(new Group());
+        restResourceEventHandler.handleBeforeCreates(new Application());
 
         // THEN
         verify(restResourceService,
@@ -112,10 +118,12 @@ public class RestResourceEventHandlerTest {
     public void testHandleBeforeUpdateForEntityWithoutRestResource() {
 
         // GIVEN
-        doReturn(false).when(restResourceEventHandler).isEntityWithRestResource(eq(Group.class));
+        doReturn(false)
+                .when(restResourceEventHandler)
+                .isEntityWithRestResource(eq(Application.class));
 
         // WHEN
-        restResourceEventHandler.handleBeforeUpdate(new Group());
+        restResourceEventHandler.handleBeforeUpdate(new Application());
 
         // THEN
         verify(restResourceService,
