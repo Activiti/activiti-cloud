@@ -4,18 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud</groupId>
-    <artifactId>activiti-cloud-services-audit</artifactId>
+    <artifactId>activiti-cloud-audit-service-parent</artifactId>
     <version>7-201803-EA-SNAPSHOT</version>
   </parent>
-  <artifactId>activiti-cloud-services-audit-jpa</artifactId>
-  <name>Activiti Cloud Audit :: Services :: Audit JPA</name>
+  <artifactId>activiti-cloud-services-audit-api</artifactId>
+  <name>Activiti Cloud Audit :: Services :: Audit API</name>
   <dependencies>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-audit-api</artifactId>
-      <!-- Todo:  dependency management-->
-      <version>${project.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-cloud-task-model-api-impl</artifactId>
@@ -32,22 +26,7 @@
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-dbp-rest</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
-      <!-- Todo:  dependency management-->
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-common-security</artifactId>
-      <!-- Todo:  dependency management-->
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-security-policies</artifactId>
-    </dependency>
+
     <dependency>
       <groupId>org.springframework.hateoas</groupId>
       <artifactId>spring-hateoas</artifactId>
@@ -92,18 +71,7 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-hateoas</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-rest</artifactId>
-    </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
@@ -128,11 +96,7 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>23.0</version>
-    </dependency>
+
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
