@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.starters.test;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -35,11 +34,7 @@ public class MyProducer {
         this.producer = producer;
     }
 
-    public void send(ProcessEngineEvent[] newEvents) {
-        producer.send(MessageBuilder.withPayload(newEvents).build());
-    }
-
-    public void send(CloudRuntimeEvent<?, ?> ... newEvents) {
+    public void send(CloudRuntimeEvent<?, ?>... newEvents) {
         producer.send(MessageBuilder.withPayload(newEvents).build());
     }
 }
