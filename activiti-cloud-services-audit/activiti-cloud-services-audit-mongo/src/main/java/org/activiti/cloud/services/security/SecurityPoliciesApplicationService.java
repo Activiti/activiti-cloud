@@ -4,8 +4,9 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import org.activiti.cloud.services.audit.mongo.events.QProcessEngineEventDocument;
-import org.activiti.engine.UserGroupLookupProxy;
-import org.activiti.engine.UserRoleLookupProxy;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
+import org.activiti.runtime.api.auth.AuthorizationLookup;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,14 +21,14 @@ import java.util.Set;
 @Component
 public class SecurityPoliciesApplicationService {
 
-    @Autowired(required = false)
-    private UserGroupLookupProxy userGroupLookupProxy;
-
-    @Autowired(required = false)
-    private UserRoleLookupProxy userRoleLookupProxy;
+    @Autowired
+    private IdentityLookup identityLookup;
 
     @Autowired
-    private AuthenticationWrapper authenticationWrapper;
+    private AuthorizationLookup authorizationLookup;
+
+    @Autowired
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @Autowired
     private SecurityPoliciesService securityPoliciesService;
@@ -111,8 +112,8 @@ public class SecurityPoliciesApplicationService {
     private Map<String, Set<String>> definitionKeysAllowedForPolicy(SecurityPolicy securityPolicy) {
         List<String> groups = null;
 
-        if (userGroupLookupProxy != null && authenticationWrapper.getAuthenticatedUserId() != null) {
-            groups = userGroupLookupProxy.getGroupsForCandidateUser(authenticationWrapper.getAuthenticatedUserId());
+        if (identityLookup != null && authenticationWrapper.getAuthenticatedUserId() != null) {
+            groups = identityLookup.getGroupsForCandidateUser(authenticationWrapper.getAuthenticatedUserId());
         }
 
         return securityPoliciesService.getProcessDefinitionKeys(authenticationWrapper.getAuthenticatedUserId(),
@@ -131,11 +132,11 @@ public class SecurityPoliciesApplicationService {
                                   SecurityPolicy securityPolicy,
                                   String appName) {
 
-        if (!securityPoliciesService.policiesDefined() || userGroupLookupProxy == null || authenticationWrapper.getAuthenticatedUserId() == null) {
+        if (!securityPoliciesService.policiesDefined() || identityLookup == null || authenticationWrapper.getAuthenticatedUserId() == null) {
             return true;
         }
 
-        if (userRoleLookupProxy != null && userRoleLookupProxy.isAdmin(authenticationWrapper.getAuthenticatedUserId())) {
+        if (authorizationLookup != null && authorizationLookup.isAdmin(authenticationWrapper.getAuthenticatedUserId())) {
             return true;
         }
 

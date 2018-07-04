@@ -18,14 +18,10 @@ package org.activiti.cloud.services.audit.jpa.streams;
 
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
-import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.events.TaskCancelledEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.model.Task;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

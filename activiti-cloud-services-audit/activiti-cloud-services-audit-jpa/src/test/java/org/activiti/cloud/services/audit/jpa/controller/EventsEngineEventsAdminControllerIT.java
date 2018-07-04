@@ -55,7 +55,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 public class EventsEngineEventsAdminControllerIT {
 

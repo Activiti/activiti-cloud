@@ -1,6 +1,5 @@
 package org.activiti.cloud.services.audit.jpa.security;
 
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,11 +8,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.activiti.cloud.services.audit.jpa.repository.EventSpecification;
-import org.activiti.cloud.services.security.BaseAuthenticationWrapper;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.security.SecurityPoliciesService;
 import org.activiti.cloud.services.security.SecurityPolicy;
-import org.activiti.engine.UserGroupLookupProxy;
-import org.activiti.engine.UserRoleLookupProxy;
+import org.activiti.runtime.api.auth.AuthorizationLookup;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -33,16 +32,16 @@ public class SecurityPoliciesApplicationServiceTest {
     private SecurityPoliciesApplicationService securityPoliciesApplicationService;
 
     @Mock
-    private UserGroupLookupProxy userGroupLookupProxy;
+    private IdentityLookup identityLookup;
 
     @Mock
-    private UserRoleLookupProxy userRoleLookupProxy;
+    private AuthorizationLookup authorizationLookup;
 
     @Mock
     private SecurityPoliciesService securityPoliciesService;
 
     @Mock
-    private BaseAuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @Before
     public void setUp() throws Exception {
@@ -83,7 +82,7 @@ public class SecurityPoliciesApplicationServiceTest {
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
 
-        when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(Arrays.asList("hr"));
+        when(identityLookup.getGroupsForCandidateUser("bob")).thenReturn(Arrays.asList("hr"));
 
         Map<String, Set<String>> policies = new HashMap<String, Set<String>>();
         policies.put("rb1",
@@ -110,7 +109,7 @@ public class SecurityPoliciesApplicationServiceTest {
         when(securityPoliciesService.getWildcard()).thenReturn("*");
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
 
-        when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(Arrays.asList("hr"));
+        when(identityLookup.getGroupsForCandidateUser("bob")).thenReturn(Arrays.asList("hr"));
 
         Map<String, Set<String>> policies = new HashMap<String, Set<String>>();
         policies.put("rb1",
@@ -136,9 +135,9 @@ public class SecurityPoliciesApplicationServiceTest {
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
-        when(userRoleLookupProxy.isAdmin("bob")).thenReturn(false);
+        when(authorizationLookup.isAdmin("bob")).thenReturn(false);
 
-        when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(groups);
+        when(identityLookup.getGroupsForCandidateUser("bob")).thenReturn(groups);
         Map<String, Set<String>> map = new HashMap<String, Set<String>>();
         map.put("rb1",
                 new HashSet(Arrays.asList("key")));
@@ -158,7 +157,7 @@ public class SecurityPoliciesApplicationServiceTest {
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("admin");
-        when(userRoleLookupProxy.isAdmin("admin")).thenReturn(true);
+        when(authorizationLookup.isAdmin("admin")).thenReturn(true);
 
         assertThat(securityPoliciesApplicationService.canRead("key",
                                                               "rb1")).isTrue();
@@ -170,9 +169,9 @@ public class SecurityPoliciesApplicationServiceTest {
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
-        when(userRoleLookupProxy.isAdmin("bob")).thenReturn(false);
+        when(authorizationLookup.isAdmin("bob")).thenReturn(false);
 
-        when(userGroupLookupProxy.getGroupsForCandidateUser("bob")).thenReturn(groups);
+        when(identityLookup.getGroupsForCandidateUser("bob")).thenReturn(groups);
         Map<String, Set<String>> map = new HashMap<String, Set<String>>();
         map.put("rb1",
                 new HashSet(Arrays.asList("key")));
@@ -196,9 +195,9 @@ public class SecurityPoliciesApplicationServiceTest {
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("intruder");
-        when(userRoleLookupProxy.isAdmin("intruder")).thenReturn(false);
+        when(authorizationLookup.isAdmin("intruder")).thenReturn(false);
 
-        when(userGroupLookupProxy.getGroupsForCandidateUser("intruder")).thenReturn(null);
+        when(identityLookup.getGroupsForCandidateUser("intruder")).thenReturn(null);
         Map<String, Set<String>> map = new HashMap<String, Set<String>>();
 
         when(securityPoliciesService.getProcessDefinitionKeys("intruder",

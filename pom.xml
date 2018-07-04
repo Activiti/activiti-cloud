@@ -15,7 +15,7 @@
   <modules>
     <module>activiti-cloud-services-audit</module>
     <module>activiti-cloud-starter-audit</module>
-    <module>activiti-cloud-starter-audit-mongo</module>
+    <!--<module>activiti-cloud-starter-audit-mongo</module>-->
   </modules>
   <scm>
     <url>https://github.com/Activiti/activiti-cloud-audit-service</url>

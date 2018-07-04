@@ -16,20 +16,26 @@
 
 package org.activiti.cloud.starter.audit.tests;
 
-import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.starter.audit.configuration.EnableActivitiAudit;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableActivitiAudit
-public class JpaAuditApplication  {
+@ComponentScan({
+        "org.activiti.cloud.services.audit.api",
+        "org.activiti.cloud.services.audit.jpa",
+        "org.activiti.cloud.services.security",
+        "org.activiti.cloud.services.common.security",
+        "org.activiti.cloud.starters",
+        "org.activiti.cloud.starter",
+        "org.activiti.cloud.services.identity",
+        "org.activiti.cloud.alfresco"})
+public class JpaAuditApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(JpaAuditApplication.class,
                               args);
     }
-
 }
