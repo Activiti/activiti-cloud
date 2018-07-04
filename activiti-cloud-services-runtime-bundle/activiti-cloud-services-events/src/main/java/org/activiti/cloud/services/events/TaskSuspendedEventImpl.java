@@ -21,7 +21,7 @@ package org.activiti.cloud.services.events;
 
 import org.activiti.cloud.services.api.model.Task;
 
-public class TaskSuspendedEventImpl extends AbstractProcessEngineEvent implements TaskSuspendedEvent {
+public class TaskSuspendedEventImpl extends AbstractProcessEngineEvent implements   TaskSuspendedEvent {
 
     private Task task;
 
