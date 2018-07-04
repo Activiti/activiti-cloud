@@ -19,10 +19,9 @@ package org.activiti.cloud.services.query.rest;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
-
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +40,6 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,7 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceAdminController.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @ComponentScan(basePackages = {"org.activiti.cloud.services.query.rest.assembler", "org.activiti.cloud.alfresco"})
 public class ProcessInstanceEntityAdminControllerIT {
@@ -68,7 +66,7 @@ public class ProcessInstanceEntityAdminControllerIT {
     private ProcessInstanceRepository processInstanceRepository;
 
     @MockBean
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @Before
     public void setUp() throws Exception {

@@ -22,10 +22,10 @@ import java.util.UUID;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.runtime.api.model.Task;
 import org.junit.Ignore;
@@ -62,7 +62,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(TaskController.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @ComponentScan(basePackages = {"org.activiti.cloud.services.query.rest.assembler", "org.activiti.cloud.alfresco"})
 public class TaskEntityControllerIT {
@@ -82,7 +82,7 @@ public class TaskEntityControllerIT {
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
     @MockBean
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @Test
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {

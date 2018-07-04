@@ -4,9 +4,10 @@ import java.util.List;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QVariableEntity;
-import org.activiti.engine.UserGroupLookupProxy;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,11 +19,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaskLookupRestrictionService {
 
-    @Autowired(required = false)
-    private UserGroupLookupProxy userGroupLookupProxy;
+    @Autowired
+    private IdentityLookup identityLookup;
 
     @Autowired
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @Value("${activiti.cloud.security.task.restrictions.enabled:true}")
     private boolean restrictionsEnabled;
@@ -64,8 +65,8 @@ public class TaskLookupRestrictionService {
             //or one of user's group is candidate
 
             List<String> groups = null;
-            if (userGroupLookupProxy != null) {
-                groups = userGroupLookupProxy.getGroupsForCandidateUser(userId);
+            if (identityLookup != null) {
+                groups = identityLookup.getGroupsForCandidateUser(userId);
             }
             if(groups!=null && groups.size()>0) {
                 restriction = addOrConditionToExpression(restriction,task.taskCandidateGroups.any().groupId.in(groups));

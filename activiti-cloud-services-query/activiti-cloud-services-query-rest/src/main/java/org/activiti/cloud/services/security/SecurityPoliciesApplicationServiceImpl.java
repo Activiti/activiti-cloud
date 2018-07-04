@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * Applies permissions/restrictions to ProcessInstanceEntity data (and Proc Inst Variables) based upon property file
  */
 @Component
-public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesApplicationService {
+public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPoliciesApplicationService {
 
     @Autowired
     private SecurityPoliciesService securityPoliciesService;

@@ -12,7 +12,13 @@
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
+      <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -90,12 +96,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <!-- Adding services APIs to simulate the engine sending events, only for test scope -->
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-api</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -3,6 +3,9 @@ package org.activiti.cloud.services.query.rest;
 import java.util.Arrays;
 
 import com.querydsl.core.types.Predicate;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
+import org.activiti.cloud.services.identity.basic.BasicAuthorizationLookup;
+import org.activiti.cloud.services.identity.basic.BasicIdentityLookup;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -13,13 +16,12 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
 import org.activiti.cloud.services.query.model.VariableEntity;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
-import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.SecurityPoliciesService;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.cloud.services.security.VariableLookupRestrictionService;
 import org.activiti.cloud.services.security.conf.SecurityProperties;
-import org.activiti.engine.UserGroupLookupProxy;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,8 +45,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = {TaskRepository.class, TaskEntity.class, TaskCandidateUserRepository.class, TaskCandidateUser.class, TaskCandidateGroupRepository.class, TaskCandidateGroup.class, TaskLookupRestrictionService.class,
-        ProcessInstanceRepository.class, SecurityPoliciesApplicationService.class, SecurityPoliciesService.class, SecurityProperties.class, ProcessInstanceEntity.class,
-        VariableEntity.class, VariableRepository.class, VariableLookupRestrictionService.class})
+        ProcessInstanceRepository.class, SecurityPoliciesApplicationServiceImpl.class, SecurityPoliciesService.class, SecurityProperties.class, ProcessInstanceEntity.class,
+        VariableEntity.class, VariableRepository.class, VariableLookupRestrictionService.class,
+        BasicIdentityLookup.class, BasicAuthorizationLookup.class})
 @EnableConfigurationProperties
 @EnableJpaRepositories(basePackages = "org.activiti")
 @EntityScan("org.activiti")
@@ -59,10 +62,10 @@ public class RestrictVariableEntityQueryIT {
     private TaskCandidateUserRepository taskCandidateUserRepository;
 
     @MockBean
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @MockBean
-    private UserGroupLookupProxy userGroupLookupProxy;
+    private IdentityLookup identityLookup;
 
     @Autowired
     private ProcessInstanceRepository processInstanceRepository;
@@ -105,7 +108,7 @@ public class RestrictVariableEntityQueryIT {
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
-        when(userGroupLookupProxy.getGroupsForCandidateUser("testuser")).thenReturn(Arrays.asList("testgroup"));
+        when(identityLookup.getGroupsForCandidateUser("testuser")).thenReturn(Arrays.asList("testgroup"));
 
         Predicate predicate = variableLookupRestrictionService.restrictTaskVariableQuery(null);
 

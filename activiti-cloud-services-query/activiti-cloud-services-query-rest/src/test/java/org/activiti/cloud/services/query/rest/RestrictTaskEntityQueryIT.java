@@ -1,6 +1,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -9,9 +10,8 @@ import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
-import org.activiti.engine.UserGroupLookupProxy;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,10 +51,10 @@ public class RestrictTaskEntityQueryIT {
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
     @MockBean
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @MockBean
-    private UserGroupLookupProxy userGroupLookupProxy;
+    private IdentityLookup identityLookup;
 
     @Before
     public void setUp() throws Exception {
@@ -72,7 +72,7 @@ public class RestrictTaskEntityQueryIT {
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
-        when(userGroupLookupProxy.getGroupsForCandidateUser("testuser")).thenReturn(Arrays.asList("testgroup"));
+        when(identityLookup.getGroupsForCandidateUser("testuser")).thenReturn(Arrays.asList("testgroup"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -128,7 +128,7 @@ public class RestrictTaskEntityQueryIT {
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
-        when(userGroupLookupProxy.getGroupsForCandidateUser("hruser")).thenReturn(Arrays.asList("hr"));
+        when(identityLookup.getGroupsForCandidateUser("hruser")).thenReturn(Arrays.asList("hr"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -147,7 +147,7 @@ public class RestrictTaskEntityQueryIT {
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
-        when(userGroupLookupProxy.getGroupsForCandidateUser("hruser")).thenReturn(Arrays.asList("hr"));
+        when(identityLookup.getGroupsForCandidateUser("hruser")).thenReturn(Arrays.asList("hr"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -219,7 +219,7 @@ public class RestrictTaskEntityQueryIT {
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
-        when(userGroupLookupProxy.getGroupsForCandidateUser("hruser")).thenReturn(Arrays.asList("hr"));
+        when(identityLookup.getGroupsForCandidateUser("hruser")).thenReturn(Arrays.asList("hr"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq("7"));
 

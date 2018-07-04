@@ -21,11 +21,11 @@ import java.util.Date;
 import java.util.UUID;
 
 import com.querydsl.core.types.Predicate;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
-import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.Before;
@@ -62,7 +62,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceController.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @ComponentScan(basePackages = {"org.activiti.cloud.services.query.rest.assembler", "org.activiti.cloud.alfresco"})
 public class ProcessInstanceEntityControllerIT {
@@ -76,10 +76,10 @@ public class ProcessInstanceEntityControllerIT {
     private ProcessInstanceRepository processInstanceRepository;
 
     @MockBean
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     @MockBean
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @MockBean
     private EntityFinder entityFinder;

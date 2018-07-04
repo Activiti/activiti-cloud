@@ -19,12 +19,12 @@ package org.activiti.cloud.services.query.rest;
 import java.util.Date;
 import java.util.UUID;
 
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.VariableEntity;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
-import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(VariableController.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @ComponentScan(basePackages = {"org.activiti.cloud.services.query.rest.assembler", "org.activiti.cloud.alfresco"})
 public class VariableEntityControllerIT {
@@ -68,10 +68,10 @@ public class VariableEntityControllerIT {
     private EntityFinder entityFinder;
 
     @MockBean
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     @MockBean
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @MockBean
     private TaskRepository taskRepository;

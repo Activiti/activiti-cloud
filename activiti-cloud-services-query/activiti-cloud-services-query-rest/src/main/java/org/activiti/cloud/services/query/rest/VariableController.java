@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.query.rest;
 
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -26,8 +27,7 @@ import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.cloud.services.query.resources.VariableResource;
 import org.activiti.cloud.services.query.rest.assembler.VariableResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
-import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,9 +57,9 @@ public class VariableController {
 
     private EntityFinder entityFinder;
 
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     private TaskRepository taskRepository;
 
@@ -83,8 +83,8 @@ public class VariableController {
     public VariableController(VariableRepository variableRepository,
                               VariableResourceAssembler variableResourceAssembler,
                               EntityFinder entityFinder,
-                              SecurityPoliciesApplicationService securityPoliciesApplicationService,
-                              AuthenticationWrapper authenticationWrapper,
+                              SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService,
+                              SpringSecurityAuthenticationWrapper authenticationWrapper,
                               TaskRepository taskRepository,
                               TaskLookupRestrictionService taskLookupRestrictionService) {
         this.variableRepository = variableRepository;

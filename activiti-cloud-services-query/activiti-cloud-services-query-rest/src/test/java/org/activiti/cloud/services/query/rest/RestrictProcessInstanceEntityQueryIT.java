@@ -1,15 +1,17 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
+import org.activiti.cloud.services.identity.basic.BasicAuthorizationLookup;
+import org.activiti.cloud.services.identity.basic.BasicIdentityLookup;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
-import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.SecurityPoliciesService;
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.cloud.services.security.conf.SecurityProperties;
-import org.activiti.engine.UserGroupLookupProxy;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +34,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestPropertySource("classpath:test-application.properties")
-@SpringBootTest(classes = { ProcessInstanceRepository.class, SecurityPoliciesApplicationService.class, SecurityPoliciesService.class, SecurityProperties.class, ProcessInstanceEntity.class})
+@SpringBootTest(classes = { ProcessInstanceRepository.class, SecurityPoliciesApplicationServiceImpl.class,
+        SecurityPoliciesService.class, SecurityProperties.class, ProcessInstanceEntity.class,
+        BasicIdentityLookup.class, BasicAuthorizationLookup.class})
 @EnableConfigurationProperties
 @EnableJpaRepositories(basePackages = "org.activiti")
 @EntityScan("org.activiti")
@@ -43,13 +47,13 @@ public class RestrictProcessInstanceEntityQueryIT {
     private ProcessInstanceRepository processInstanceRepository;
 
     @Autowired
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     @MockBean
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @MockBean
-    private UserGroupLookupProxy userGroupLookupProxy;
+    private IdentityLookup identityLookup;
 
     @Before
     public void setUp() throws Exception {
@@ -107,7 +111,7 @@ public class RestrictProcessInstanceEntityQueryIT {
         processInstanceRepository.save(processInstanceEntity);
 
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bobinhr");
-        when(userGroupLookupProxy.getGroupsForCandidateUser("bobinhr")).thenReturn(Collections.singletonList("hRgRoUp"));
+        when(identityLookup.getGroupsForCandidateUser("bobinhr")).thenReturn(Collections.singletonList("hRgRoUp"));
 
         Predicate predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(null, SecurityPolicy.READ);
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);

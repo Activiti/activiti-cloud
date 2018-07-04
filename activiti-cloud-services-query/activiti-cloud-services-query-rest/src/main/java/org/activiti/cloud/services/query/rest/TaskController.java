@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QTaskEntity;
@@ -25,7 +26,6 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.resources.TaskResource;
 import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +63,7 @@ public class TaskController {
 
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskController.class);
 
@@ -73,7 +73,7 @@ public class TaskController {
                           AlfrescoPagedResourcesAssembler<TaskEntity> pagedResourcesAssembler,
                           EntityFinder entityFinder,
                           TaskLookupRestrictionService taskLookupRestrictionService,
-                          AuthenticationWrapper authenticationWrapper) {
+                          SpringSecurityAuthenticationWrapper authenticationWrapper) {
         this.taskRepository = taskRepository;
         this.taskResourceAssembler = taskResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;

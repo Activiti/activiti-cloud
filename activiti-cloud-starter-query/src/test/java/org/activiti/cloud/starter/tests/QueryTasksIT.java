@@ -21,7 +21,6 @@ import java.util.Collection;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;

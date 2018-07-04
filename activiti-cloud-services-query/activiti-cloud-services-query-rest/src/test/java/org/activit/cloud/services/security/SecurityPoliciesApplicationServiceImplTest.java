@@ -1,12 +1,12 @@
 package org.activit.cloud.services.security;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
-import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
-import org.activiti.engine.UserGroupLookupProxy;
-import org.activiti.engine.UserRoleLookupProxy;
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
+import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.SecurityPoliciesService;
 import org.activiti.cloud.services.security.SecurityPolicy;
+import org.activiti.runtime.api.auth.AuthorizationLookup;
+import org.activiti.runtime.api.identity.IdentityLookup;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -30,23 +30,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class SecurityPoliciesApplicationServiceTest {
+public class SecurityPoliciesApplicationServiceImplTest {
 
     @InjectMocks
     @Spy
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     @Mock
-    private UserGroupLookupProxy userGroupLookupProxy;
+    private IdentityLookup userGroupLookupProxy;
 
     @Mock
-    private UserRoleLookupProxy userRoleLookupProxy;
+    private AuthorizationLookup userRoleLookupProxy;
 
     @Mock
     private SecurityPoliciesService securityPoliciesService;
 
     @Mock
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     @Before
     public void setUp() throws Exception {
