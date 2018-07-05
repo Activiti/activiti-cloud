@@ -16,18 +16,20 @@
 
 package org.activiti.services.connectors.channel;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEvent;
+import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
-import org.activiti.services.connectors.model.IntegrationResultEvent;
+import org.activiti.runtime.api.connector.IntegrationContextImpl;
+import org.activiti.runtime.api.event.impl.CloudIntegrationResultReceivedImpl;
+import org.activiti.runtime.api.model.IntegrationResult;
+import org.activiti.runtime.api.model.impl.IntegrationResultImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -70,16 +72,19 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private RuntimeBundleProperties runtimeBundleProperties;
 
     @Mock
+    private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+
+    @Mock
     private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
 
     @Captor
-    private ArgumentCaptor<Message<IntegrationResultReceivedEvent[]>> messageCaptor;
+    private ArgumentCaptor<Message<CloudIntegrationResultReceivedImpl>> messageCaptor;
 
     @Mock
     private ExecutionQuery executionQuery;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
         when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
         when(runtimeBundleProperties.getServiceFullName()).thenReturn("myApp");
@@ -89,124 +94,107 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     }
 
     @Test
-    public void receiveShouldTriggerTheExecutionAndDeleteTheRelatedIntegrationContext() throws Exception {
+    public void receiveShouldTriggerTheExecutionAndDeleteTheRelatedIntegrationContext() {
         //given
-        IntegrationContextEntityImpl integrationContext = new IntegrationContextEntityImpl();
-        integrationContext.setExecutionId(EXECUTION_ID);
-        integrationContext.setId(ENTITY_ID);
-        integrationContext.setProcessInstanceId(PROC_INST_ID);
-        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
+        IntegrationContextEntityImpl integrationContextEntity = new IntegrationContextEntityImpl();
+        integrationContextEntity.setExecutionId(EXECUTION_ID);
+        integrationContextEntity.setId(ENTITY_ID);
+        integrationContextEntity.setProcessInstanceId(PROC_INST_ID);
+        integrationContextEntity.setProcessDefinitionId(PROC_DEF_ID);
 
-        given(integrationContextService.findIntegrationContextByExecutionId(EXECUTION_ID))
-                .willReturn(Arrays.asList(integrationContext));
+        given(integrationContextService.findById(ENTITY_ID))
+                .willReturn(integrationContextEntity);
         given(executionQuery.list()).willReturn(Collections.singletonList(mock(Execution.class)));
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
 
-        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
-                                                                                   variables,
-                runtimeBundleProperties.getAppName(),
-                runtimeBundleProperties.getAppVersion(),
-                runtimeBundleProperties.getServiceName(),
-                runtimeBundleProperties.getServiceFullName(),
-                runtimeBundleProperties.getServiceType(),
-                runtimeBundleProperties.getServiceVersion());
+        IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
 
         //when
-        handler.receive(integrationResultEvent);
+        handler.receive(new IntegrationResultImpl(integrationContext));
 
         //then
-        verify(integrationContextService).deleteIntegrationContext(integrationContext);
+        verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
         verify(runtimeService).trigger(EXECUTION_ID,
                                        variables);
     }
 
     @Test
-    public void receiveShouldDoNothingWhenIntegrationContextsIsNull() throws Exception {
+    public void receiveShouldDoNothingWhenIntegrationContextsIsNull() {
         //given
-        given(integrationContextService.findIntegrationContextByExecutionId(EXECUTION_ID))
+        given(integrationContextService.findById(ENTITY_ID))
                 .willReturn(null);
         given(executionQuery.list()).willReturn(Collections.singletonList(mock(Execution.class)));
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
 
-        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
-                                                                                   variables,
-                runtimeBundleProperties.getAppName(),
-                runtimeBundleProperties.getAppVersion(),
-                runtimeBundleProperties.getServiceName(),
-                runtimeBundleProperties.getServiceFullName(),
-                runtimeBundleProperties.getServiceType(),
-                runtimeBundleProperties.getServiceVersion());
+        IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
 
         //when
-        handler.receive(integrationResultEvent);
+        handler.receive(new IntegrationResultImpl(integrationContext));
 
         //then
         verify(integrationContextService, never()).deleteIntegrationContext(any());
     }
 
     @Test
-    public void receiveShouldSendIntegrationAuditEventWhenIntegrationAuditEventsAreEnabled() throws Exception {
+    public void receiveShouldSendIntegrationAuditEventWhenIntegrationAuditEventsAreEnabled() {
         //given
-        IntegrationContextEntityImpl integrationContext = new IntegrationContextEntityImpl();
-        integrationContext.setExecutionId(EXECUTION_ID);
-        integrationContext.setId(ENTITY_ID);
-        integrationContext.setProcessInstanceId(PROC_INST_ID);
-        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
+        IntegrationContextEntityImpl integrationContextEntity = new IntegrationContextEntityImpl();
+        integrationContextEntity.setExecutionId(EXECUTION_ID);
+        integrationContextEntity.setId(ENTITY_ID);
+        integrationContextEntity.setProcessInstanceId(PROC_INST_ID);
+        integrationContextEntity.setProcessDefinitionId(PROC_DEF_ID);
 
-        given(integrationContextService.findIntegrationContextByExecutionId(EXECUTION_ID)).willReturn(Arrays.asList(integrationContext));
+        given(integrationContextService.findById(ENTITY_ID)).willReturn(integrationContextEntity);
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
 
         given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
-        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(EXECUTION_ID,
-                                                                                   variables,
-                runtimeBundleProperties.getAppName(),
-                runtimeBundleProperties.getAppVersion(),
-                runtimeBundleProperties.getServiceName(),
-                runtimeBundleProperties.getServiceFullName(),
-                runtimeBundleProperties.getServiceType(),
-                runtimeBundleProperties.getServiceVersion());
+        IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
+
+        IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationContext);
 
         //when
         handler.receive(integrationResultEvent);
 
         //then
         verify(auditProducer).send(messageCaptor.capture());
-        Message<IntegrationResultReceivedEvent[]> message = messageCaptor.getValue();
-        assertThat(message.getPayload()).hasSize(1);
-        IntegrationResultReceivedEvent integrationResultReceivedEvent = message.getPayload()[0];
-        assertThat(integrationResultReceivedEvent.getIntegrationContextId()).isEqualTo(ENTITY_ID);
-        assertThat(integrationResultReceivedEvent.getServiceFullName()).isEqualTo("myApp");
-        assertThat(integrationResultReceivedEvent.getExecutionId()).isEqualTo(EXECUTION_ID);
-        assertThat(integrationResultReceivedEvent.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
-        assertThat(integrationResultReceivedEvent.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
+        Message<CloudIntegrationResultReceivedImpl> message = messageCaptor.getValue();
+        CloudIntegrationResultReceivedImpl event = message.getPayload();
+        assertThat(event.getEntity().getId()).isEqualTo(ENTITY_ID);
+        assertThat(event.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
+        assertThat(event.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(event);
     }
 
+    private IntegrationContextImpl buildIntegrationContext(Map<String, Object> variables) {
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setId(ENTITY_ID);
+        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
+        integrationContext.setProcessInstanceId(PROC_INST_ID);
+        integrationContext.addOutBoundVariables(variables);
+        return integrationContext;
+    }
 
     @Test
-    public void retrieveShouldNotSentAuditEventWhenIntegrationAuditEventsAreDisabled() throws Exception {
+    public void retrieveShouldNotSentAuditEventWhenIntegrationAuditEventsAreDisabled() {
         //given
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(false);
 
-        IntegrationContextEntityImpl integrationContext = new IntegrationContextEntityImpl();
+        IntegrationContextEntityImpl integrationContextEntity = new IntegrationContextEntityImpl();
         String executionId = "execId";
 
-        given(integrationContextService.findIntegrationContextByExecutionId(executionId)).willReturn(Arrays.asList(integrationContext));
+        given(integrationContextService.findById(executionId)).willReturn(integrationContextEntity);
         Map<String, Object> variables = Collections.singletonMap("var1",
                                                                  "v");
 
-        IntegrationResultEvent integrationResultEvent = new IntegrationResultEvent(executionId,
-                                                                                   variables,
-                runtimeBundleProperties.getAppName(),
-                runtimeBundleProperties.getAppVersion(),
-                runtimeBundleProperties.getServiceName(),
-                runtimeBundleProperties.getServiceFullName(),
-                runtimeBundleProperties.getServiceType(),
-                runtimeBundleProperties.getServiceVersion());
+        IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
+
+
+        IntegrationResultImpl integrationResultEvent = new IntegrationResultImpl(integrationContext);
 
         //when
         handler.receive(integrationResultEvent);

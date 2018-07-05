@@ -16,9 +16,10 @@
 
 package org.conf.activiti.services.connectors;
 
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
+import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.conf.activiti.runtime.api.ConnectorsAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -37,10 +38,14 @@ public class CloudConnectorsAutoConfiguration {
     @Bean(name = DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME)
     @ConditionalOnMissingBean(name = DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME)
     public MQServiceTaskBehavior mqServiceTaskBehavior(IntegrationContextManager integrationContextManager,
-                                                       RuntimeBundleProperties runtimeBundleProperties,
                                                        ApplicationEventPublisher eventPublisher,
-                                                       ApplicationContext applicationContext) {
-        return new MQServiceTaskBehavior(integrationContextManager, runtimeBundleProperties, eventPublisher, applicationContext);
+                                                       ApplicationContext applicationContext,
+                                                       IntegrationContextBuilder integrationContextBuilder,
+                                                       RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+        return new MQServiceTaskBehavior(integrationContextManager,
+                                         eventPublisher,
+                                         applicationContext,
+                                         integrationContextBuilder,
+                                         runtimeBundleInfoAppender);
     }
-
 }

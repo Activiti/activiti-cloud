@@ -18,6 +18,7 @@ package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.runtime.api.event.impl.CloudRuntimeEventImpl;
+import org.activiti.runtime.api.model.impl.CloudRuntimeEntityImpl;
 
 public class RuntimeBundleInfoAppender {
 
@@ -34,6 +35,15 @@ public class RuntimeBundleInfoAppender {
         cloudProcessStartedEvent.setServiceFullName(properties.getServiceFullName());
         cloudProcessStartedEvent.setServiceType(properties.getServiceType());
         cloudProcessStartedEvent.setServiceVersion(properties.getServiceVersion());
+    }
+
+    public void appendRuntimeBundleInfoTo(CloudRuntimeEntityImpl cloudRuntimeEntity) {
+        cloudRuntimeEntity.setAppName(properties.getAppName());
+        cloudRuntimeEntity.setAppVersion(properties.getAppVersion());
+        cloudRuntimeEntity.setServiceName(properties.getServiceName());
+        cloudRuntimeEntity.setServiceFullName(properties.getServiceFullName());
+        cloudRuntimeEntity.setServiceType(properties.getServiceType());
+        cloudRuntimeEntity.setServiceVersion(properties.getServiceVersion());
     }
 
 }

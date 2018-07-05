@@ -46,7 +46,7 @@ public class MQServiceTaskIT {
     private TaskService taskService;
 
     @Test
-    public void shouldContinueExecution() throws Exception {
+    public void shouldContinueExecution() {
         //given
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName",
@@ -92,7 +92,7 @@ public class MQServiceTaskIT {
     }
 
     @Test
-    public void integrationContextShouldBeDeletedWhenTheTaskIsCancelled() throws Exception {
+    public void integrationContextShouldBeDeletedWhenTheTaskIsCancelled() {
         //given
         ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskWithBoundaryProcess");
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(procInst.getProcessInstanceId()).list();

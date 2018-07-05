@@ -1,9 +1,9 @@
 package org.activiti.services.connectors;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.integration.IntegrationRequestSentEventImpl;
-import org.activiti.services.connectors.model.IntegrationRequestEvent;
+import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.runtime.api.event.impl.CloudIntegrationRequestedImpl;
+import org.activiti.runtime.api.model.IntegrationRequest;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -19,45 +19,39 @@ public class IntegrationRequestSender {
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final MessageChannel auditProducer;
     private final BinderAwareChannelResolver resolver;
+    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     public IntegrationRequestSender(RuntimeBundleProperties runtimeBundleProperties,
                                     MessageChannel auditProducer,
-                                    BinderAwareChannelResolver resolver) {
+                                    BinderAwareChannelResolver resolver,
+                                    RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.auditProducer = auditProducer;
         this.resolver = resolver;
+        this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void sendIntegrationRequest(IntegrationRequestEvent event) {
+    public void sendIntegrationRequest(IntegrationRequest event) {
 
-        resolver.resolveDestination(event.getConnectorType()).send(buildIntegrationRequestMessage(event));
+        resolver.resolveDestination(event.getIntegrationContext().getConnectorType()).send(buildIntegrationRequestMessage(event));
         sendAuditEvent(event);
     }
 
-    private void sendAuditEvent(IntegrationRequestEvent integrationRequestEvent) {
+    private void sendAuditEvent(IntegrationRequest integrationRequest) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            IntegrationRequestSentEventImpl event = new IntegrationRequestSentEventImpl(runtimeBundleProperties.getAppName(),
-                                                                                        runtimeBundleProperties.getAppVersion(),
-                                                                                        runtimeBundleProperties.getServiceName(),
-                                                                                        runtimeBundleProperties.getServiceFullName(),
-                                                                                        runtimeBundleProperties.getServiceType(),
-                                                                                        runtimeBundleProperties.getServiceVersion(),
-                                                                                        integrationRequestEvent.getExecutionId(),
-                                                                                        integrationRequestEvent.getProcessDefinitionId(),
-                                                                                        integrationRequestEvent.getProcessInstanceId(),
-                                                                                        integrationRequestEvent.getIntegrationContextId(),
-                                                                                        integrationRequestEvent.getFlowNodeId());
+            CloudIntegrationRequestedImpl integrationRequested = new CloudIntegrationRequestedImpl(integrationRequest.getIntegrationContext());
+            runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequested);
             auditProducer.send(
-                    MessageBuilder.withPayload(new ProcessEngineEvent[]{event}).build()
+                    MessageBuilder.withPayload(integrationRequested).build()
             );
         }
     }
 
-    private Message<IntegrationRequestEvent> buildIntegrationRequestMessage(IntegrationRequestEvent event) {
+    private Message<IntegrationRequest> buildIntegrationRequestMessage(IntegrationRequest event) {
         return MessageBuilder.withPayload(event)
                 .setHeader(CONNECTOR_TYPE,
-                           event.getConnectorType())
+                           event.getIntegrationContext().getConnectorType())
                 .build();
     }
 }

@@ -16,15 +16,13 @@
 
 package org.activiti.services.connectors.channel;
 
-import java.util.List;
-
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEvent;
-import org.activiti.cloud.services.events.integration.IntegrationResultReceivedEventImpl;
+import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
-import org.activiti.services.connectors.model.IntegrationResultEvent;
+import org.activiti.runtime.api.event.impl.CloudIntegrationResultReceivedImpl;
+import org.activiti.runtime.api.model.IntegrationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -44,63 +42,47 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final IntegrationContextService integrationContextService;
     private final MessageChannel auditProducer;
     private final RuntimeBundleProperties runtimeBundleProperties;
+    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     public ServiceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
                                                     IntegrationContextService integrationContextService,
                                                     MessageChannel auditProducer,
-                                                    RuntimeBundleProperties runtimeBundleProperties) {
+                                                    RuntimeBundleProperties runtimeBundleProperties,
+                                                    RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
         this.auditProducer = auditProducer;
         this.runtimeBundleProperties = runtimeBundleProperties;
+        this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
-    public void receive(IntegrationResultEvent integrationResultEvent) {
-        List<IntegrationContextEntity> integrationContexts = integrationContextService.findIntegrationContextByExecutionId(integrationResultEvent.getExecutionId());
+    public void receive(IntegrationResult integrationResult) {
+        IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationResult.getIntegrationContext().getId());
 
-        if (integrationContexts == null || integrationContexts.size() == 0) {
-            LOGGER.debug("No integration contexts found in this RB for execution Id `" + integrationResultEvent.getExecutionId() +
-                                ", flow node id `" + integrationResultEvent.getFlowNodeId() + "`");
-        }
+        if (integrationContextEntity != null) {
+            integrationContextService.deleteIntegrationContext(integrationContextEntity);
 
-        if (integrationContexts != null) {
-            for (IntegrationContextEntity integrationContext : integrationContexts) {
-                if (integrationContext != null) {
-                    integrationContextService.deleteIntegrationContext(integrationContext);
-                }
-                sendAuditMessage(integrationContext);
+            if (runtimeService.createExecutionQuery().executionId(integrationContextEntity.getExecutionId()).list().size() > 0) {
+                runtimeService.trigger(integrationContextEntity.getExecutionId(),
+                                       integrationResult.getIntegrationContext().getOutBoundVariables());
+            } else {
+                String message = "No task is in this RB is waiting for integration result with execution id `" +
+                        integrationContextEntity.getExecutionId() +
+                        ", flow node id `" + integrationResult.getIntegrationContext().getActivityElementId() +
+                        "`. The integration result for the integration context `" + integrationResult.getIntegrationContext().getId() + "` will be ignored.";
+                LOGGER.debug(message);
             }
-        }
-
-        if (runtimeService.createExecutionQuery().executionId(integrationResultEvent.getExecutionId()).list().size() > 0) {
-            runtimeService.trigger(integrationResultEvent.getExecutionId(),
-                                   integrationResultEvent.getVariables());
-        } else {
-            String message = "No task is in this RB is waiting for integration result with execution id `" +
-                    integrationResultEvent.getExecutionId() +
-                    ", flow node id `" + integrationResultEvent.getFlowNodeId() +
-                    "`. The integration result `" + integrationResultEvent.getId() + "` will be ignored.";
-            LOGGER.debug(message);
+            sendAuditMessage(integrationResult);
         }
     }
 
-    private void sendAuditMessage(IntegrationContextEntity integrationContext) {
+    private void sendAuditMessage(IntegrationResult integrationResult) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            Message<IntegrationResultReceivedEvent[]> message = MessageBuilder.withPayload(
-                    new IntegrationResultReceivedEvent[]{
-                            new IntegrationResultReceivedEventImpl(runtimeBundleProperties.getAppName(),
-                                                                   runtimeBundleProperties.getAppVersion(),
-                                                                   runtimeBundleProperties.getServiceName(),
-                                                                   runtimeBundleProperties.getServiceFullName(),
-                                                                   runtimeBundleProperties.getServiceType(),
-                                                                   runtimeBundleProperties.getServiceVersion(),
-                                                                   integrationContext.getExecutionId(),
-                                                                   integrationContext.getProcessDefinitionId(),
-                                                                   integrationContext.getProcessInstanceId(),
-                                                                   integrationContext.getId(),
-                                                                   integrationContext.getFlowNodeId())
-                    }).build();
+            CloudIntegrationResultReceivedImpl integrationResultReceived = new CloudIntegrationResultReceivedImpl(integrationResult.getIntegrationContext());
+            runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationResultReceived);
+            Message<CloudIntegrationResultReceivedImpl> message = MessageBuilder.withPayload(
+                    integrationResultReceived).build();
 
             auditProducer.send(message);
         }

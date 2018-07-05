@@ -71,6 +71,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-cloud-process-model-api-impl</artifactId>
+      <version>7-201803-EA-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -114,8 +119,8 @@
         </executions>
         <configuration>
           <packages>
-            <package>org.activiti.services.connectors.model</package>
             <package>org.activiti.engine.impl.persistence.entity.integration</package>
+            <package>org.activiti.runtime.api.model</package>
           </packages>
 
           <!-- whether generated assertions classes can be inherited with consistent assertion chaining -->

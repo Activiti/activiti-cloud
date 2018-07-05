@@ -17,15 +17,16 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.runtime.api.event.CloudProcessStartedEvent;
+import org.activiti.runtime.api.event.impl.CloudRuntimeEventImpl;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
 import org.activiti.runtime.api.model.impl.FluentProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -65,7 +66,7 @@ public class ToCloudProcessRuntimeEventConverterTest {
         assertThat(processStarted.getNestedProcessDefinitionId()).isEqualTo("myParentProcessDef");
         assertThat(processStarted.getNestedProcessInstanceId()).isEqualTo("2");
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any());
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
     }
 
 }

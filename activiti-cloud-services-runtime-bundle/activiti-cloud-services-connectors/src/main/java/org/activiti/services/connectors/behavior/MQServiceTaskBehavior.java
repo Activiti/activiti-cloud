@@ -17,14 +17,17 @@
 package org.activiti.services.connectors.behavior;
 
 import java.util.Date;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+
+import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.delegate.TriggerableActivityBehavior;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
+import org.activiti.runtime.api.connector.IntegrationContextBuilder;
+import org.activiti.runtime.api.model.IntegrationRequest;
+import org.activiti.runtime.api.model.impl.IntegrationRequestImpl;
 import org.activiti.services.connectors.IntegrationRequestSender;
-import org.activiti.services.connectors.model.IntegrationRequestEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.event.TransactionPhase;
@@ -33,17 +36,21 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class MQServiceTaskBehavior extends DefaultServiceTaskBehavior implements TriggerableActivityBehavior {
 
     private final IntegrationContextManager integrationContextManager;
-    private final RuntimeBundleProperties runtimeBundleProperties;
     private final ApplicationEventPublisher eventPublisher;
+    private final IntegrationContextBuilder integrationContextBuilder;
+    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     public MQServiceTaskBehavior(IntegrationContextManager integrationContextManager,
-                                 RuntimeBundleProperties runtimeBundleProperties,
                                  ApplicationEventPublisher eventPublisher,
-                                 ApplicationContext applicationContext) {
-        super(applicationContext);
+                                 ApplicationContext applicationContext,
+                                 IntegrationContextBuilder integrationContextBuilder,
+                                 RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+        super(applicationContext,
+              integrationContextBuilder);
         this.integrationContextManager = integrationContextManager;
-        this.runtimeBundleProperties = runtimeBundleProperties;
         this.eventPublisher = eventPublisher;
+        this.integrationContextBuilder = integrationContextBuilder;
+        this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
     @Override
@@ -61,23 +68,18 @@ public class MQServiceTaskBehavior extends DefaultServiceTaskBehavior implements
 
     /**
      * Publishes an custom event using the Spring {@link ApplicationEventPublisher}. This event will be caught by
-     * {@link IntegrationRequestSender#sendIntegrationRequest(IntegrationRequestEvent)} which is annotated with
+     * {@link IntegrationRequestSender#sendIntegrationRequest(IntegrationRequest)} which is annotated with
      * {@link TransactionalEventListener} on phase {@link TransactionPhase#AFTER_COMMIT}.
      * @param execution the related execution
      * @param integrationContext the related integration context
      */
     private void publishSpringEvent(DelegateExecution execution,
                                       IntegrationContextEntity integrationContext) {
-        IntegrationRequestEvent event = new IntegrationRequestEvent(execution,
-                                                                    integrationContext,
-                runtimeBundleProperties.getAppName(),
-                runtimeBundleProperties.getAppVersion(),
-                runtimeBundleProperties.getServiceName(),
-                runtimeBundleProperties.getServiceFullName(),
-                runtimeBundleProperties.getServiceType(),
-                runtimeBundleProperties.getServiceVersion());
+        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContextBuilder.from(integrationContext,
+                                                                                                              execution));
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequest);
 
-        eventPublisher.publishEvent(event);
+        eventPublisher.publishEvent(integrationRequest);
     }
 
 

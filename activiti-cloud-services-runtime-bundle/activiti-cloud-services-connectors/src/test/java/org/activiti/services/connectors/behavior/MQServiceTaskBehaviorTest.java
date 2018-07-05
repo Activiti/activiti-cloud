@@ -18,11 +18,13 @@ package org.activiti.services.connectors.behavior;
 
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
-import org.activiti.services.connectors.model.IntegrationRequestEvent;
-import org.assertj.core.api.AssertionsForInterfaceTypes;
+import org.activiti.runtime.api.connector.IntegrationContextBuilder;
+import org.activiti.runtime.api.model.IntegrationContext;
+import org.activiti.runtime.api.model.impl.IntegrationRequestImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -64,13 +66,22 @@ public class MQServiceTaskBehaviorTest {
     @Mock
     private ApplicationContext applicationContext;
 
+    @Mock
+    private IntegrationContextBuilder integrationContextBuilder;
+
+    @Mock
+    private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+
     @Captor
-    private ArgumentCaptor<IntegrationRequestEvent> integrationRequestCaptor;
+    private ArgumentCaptor<IntegrationRequestImpl> integrationRequestCaptor;
 
     @Before
     public void setUp() {
         initMocks(this);
-        behavior = spy(new MQServiceTaskBehavior(integrationContextManager, runtimeBundleProperties, eventPublisher, applicationContext));
+        behavior = spy(new MQServiceTaskBehavior(integrationContextManager,
+                                                 eventPublisher, applicationContext,
+                                                 integrationContextBuilder,
+                                                 runtimeBundleInfoAppender));
     }
 
     @Test
@@ -93,6 +104,9 @@ public class MQServiceTaskBehaviorTest {
 
         given(applicationContext.containsBean(CONNECTOR_TYPE)).willReturn(false);
 
+        IntegrationContext integrationContext = mock(IntegrationContext.class);
+        given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
+
         //when
         behavior.execute(execution);
 
@@ -103,15 +117,11 @@ public class MQServiceTaskBehaviorTest {
                 .hasProcessInstanceId(PROC_INST_ID);
 
         verify(eventPublisher).publishEvent(integrationRequestCaptor.capture());
-        IntegrationRequestEvent event = integrationRequestCaptor.getValue();
-        assertThat(event)
-                .hasConnectorType(CONNECTOR_TYPE)
-                .hasExecutionId(EXECUTION_ID)
-                .hasProcessInstanceId(PROC_INST_ID)
-                .hasProcessDefinitionId(PROC_DEF_ID)
-                .hasIntegrationContextId(INTEGRATION_CONTEXT_ID)
-                .hasFlowNodeId(FLOW_NODE_ID);
-        AssertionsForInterfaceTypes.assertThat(event.getServiceFullName()).isEqualTo(APP_NAME);
+        IntegrationRequestImpl integrationRequest = integrationRequestCaptor.getValue();
+        assertThat(integrationRequest.getIntegrationContext())
+                .isEqualTo(integrationContext);
+
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequest);
     }
 
     @Test

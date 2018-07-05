@@ -18,9 +18,11 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.services.connectors.model.IntegrationRequestEvent;
-import org.activiti.services.connectors.model.IntegrationResultEvent;
+import org.activiti.runtime.api.model.IntegrationContext;
+import org.activiti.runtime.api.model.IntegrationRequest;
+import org.activiti.runtime.api.model.impl.IntegrationResultImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -37,27 +39,25 @@ public class ServiceTaskConsumerHandler {
     private final RuntimeBundleProperties runtimeBundleProperties;
 
     @Autowired
-    public ServiceTaskConsumerHandler(BinderAwareChannelResolver resolver, RuntimeBundleProperties runtimeBundleProperties) {
+    public ServiceTaskConsumerHandler(BinderAwareChannelResolver resolver,
+                                      RuntimeBundleProperties runtimeBundleProperties) {
         this.resolver = resolver;
         this.runtimeBundleProperties = runtimeBundleProperties;
     }
 
     @StreamListener(value = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER)
-    public void receive(IntegrationRequestEvent integrationRequestEvent) {
-        Map<String, Object> requestVariables = integrationRequestEvent.getVariables();
+    public void receive(IntegrationRequest integrationRequest) {
+        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+        Map<String, Object> requestVariables = integrationContext.getInBoundVariables();
         String variableToUpdate = "age";
 
         HashMap<String, Object> resultVariables = new HashMap<>();
         resultVariables.put(variableToUpdate,
                             ((Integer) requestVariables.get(variableToUpdate)) + 1);
-        Message<IntegrationResultEvent> message = MessageBuilder.withPayload(new IntegrationResultEvent(integrationRequestEvent.getExecutionId(),
-                                                                                                        resultVariables,
-                                                                                                        runtimeBundleProperties.getAppName(),
-                                                                                                        runtimeBundleProperties.getAppVersion(),
-                                                                                                        runtimeBundleProperties.getServiceName(),
-                                                                                                        runtimeBundleProperties.getServiceFullName(),
-                                                                                                        runtimeBundleProperties.getServiceType(),
-                                                                                                        runtimeBundleProperties.getServiceVersion())).build();
+        integrationContext.addOutBoundVariables(resultVariables);
+
+        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationContext);
+        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
         resolver.resolveDestination("integrationResult:" + runtimeBundleProperties.getServiceFullName()).send(message);
     }
 }
