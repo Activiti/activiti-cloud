@@ -23,13 +23,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
-import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.api.model.ProcessInstance;
-import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.VariableInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,8 +67,6 @@ public class ProcessVariablesIT {
 
     private static final String SIMPLE_PROCESS_WITH_VARIABLES = "ProcessWithVariables";
 
-    private ObjectMapper mapper;
-
     @Before
     public void setUp() {
         ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
@@ -96,8 +93,8 @@ public class ProcessVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<Resources<ProcessInstanceVariable>> variablesEntity = processInstanceRestTemplate.getVariables(startResponse);
-            Collection<ProcessInstanceVariable> variableCollection = variablesEntity.getBody().getContent();
+            ResponseEntity<Resources<VariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(startResponse);
+            Collection<VariableInstance> variableCollection = variablesEntity.getBody().getContent();
 
             assertThat(variableCollection).isNotEmpty();
             assertThat(variablesContainEntry("firstName","Pedro",variableCollection)).isTrue();
@@ -109,10 +106,10 @@ public class ProcessVariablesIT {
 
     }
 
-    private boolean variablesContainEntry(String key, Object value, Collection<ProcessInstanceVariable> variableCollection){
-        Iterator<ProcessInstanceVariable> iterator = variableCollection.iterator();
+    private boolean variablesContainEntry(String key, Object value, Collection<VariableInstance> variableCollection){
+        Iterator<VariableInstance> iterator = variableCollection.iterator();
         while(iterator.hasNext()){
-            ProcessInstanceVariable variable = iterator.next();
+            VariableInstance variable = iterator.next();
             if(variable.getName().equalsIgnoreCase(key) && variable.getValue().equals(value)){
                 assertThat(variable.getType()).isEqualToIgnoringCase(variable.getValue().getClass().getSimpleName());
                 return true;
@@ -178,10 +175,10 @@ public class ProcessVariablesIT {
 
 
             // when
-        ResponseEntity<Resources<ProcessInstanceVariable>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
+        ResponseEntity<Resources<VariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
 
         // then
-        Collection<ProcessInstanceVariable> variableCollection = variablesResponse.getBody().getContent();
+        Collection<VariableInstance> variableCollection = variablesResponse.getBody().getContent();
 
         assertThat(variableCollection).isNotEmpty();
         assertThat(variablesContainEntry("firstName","Kermit",variableCollection)).isTrue();

@@ -22,12 +22,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
-import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.api.model.ProcessInstance;
-import org.activiti.cloud.services.api.model.ProcessInstanceVariable;
-import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.VariableInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -115,11 +115,11 @@ public class SignalIT {
         assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
 
         await().untilAsserted(() -> {
-            ResponseEntity<Resources<ProcessInstanceVariable>> variablesEntity = processInstanceRestTemplate.getVariables(startProcessEntity);
-            Collection<ProcessInstanceVariable> variableCollection = variablesEntity.getBody().getContent();
-            ProcessInstanceVariable variable = variableCollection.iterator().next();
+            ResponseEntity<Resources<VariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(startProcessEntity);
+            Collection<VariableInstance> variableCollection = variablesEntity.getBody().getContent();
+            VariableInstance variable = variableCollection.iterator().next();
             assertThat(variable.getName()).isEqualToIgnoringCase("myVar");
-            assertThat(variable.getValue()).isEqualTo("myContent");
+            assertThat(variable.<Object>getValue()).isEqualTo("myContent");
         });
 
     }

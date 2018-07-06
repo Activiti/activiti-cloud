@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.starter.tests.definition;
 
-import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.runtime.api.model.ProcessDefinition;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class ProcessDefinitionAccessControlIT {
     private static final String PROCESS_POOL_LANE = "process_pool1";
 
     @Test
-    public void shouldRetrieveListOfProcessDefinition() throws Exception {
+    public void shouldRetrieveListOfProcessDefinition() {
         //given
         //processes are automatically deployed from src/test/resources/processes
 

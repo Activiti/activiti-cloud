@@ -16,17 +16,25 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.converter.util.InputStreamProvider;
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.api.model.ProcessInstance;
-
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
-import org.activiti.engine.impl.util.IoUtil;
-import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
+import org.activiti.engine.impl.util.IoUtil;
+import org.activiti.image.ProcessDiagramGenerator;
+import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpMethod;
@@ -49,22 +56,13 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource({"classpath:application-test.properties","classpath:access-control.properties"})
+@TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ProcessInstanceIT {
 
@@ -89,19 +87,18 @@ public class ProcessInstanceIT {
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
     @Before
-    public void setUp(){
+    public void setUp() {
         keycloakTestUser = "hruser";
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
         ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
-            processDefinitionIds.put(pd.getName(), pd.getId());
+            processDefinitionIds.put(pd.getName(),
+                                     pd.getId());
         }
     }
-
 
     @Test
     public void shouldStartProcess() {
@@ -125,8 +122,8 @@ public class ProcessInstanceIT {
     public void shouldStartProcessByKey() {
         //when
         ResponseEntity<ProcessInstance> entity = processInstanceRestTemplate.startProcessByKey(SIMPLE_PROCESS,
-                                                                                          null,
-                                                                                          "business_key");
+                                                                                               null,
+                                                                                               "business_key");
 
         //then
         assertThat(entity).isNotNull();
@@ -144,13 +141,11 @@ public class ProcessInstanceIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
 
         assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
-                        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS)));
-
+                                                                                processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS)));
     }
 
     @Test
     public void shouldRetrieveProcessInstanceById() {
-
 
         //given
         ResponseEntity<ProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
@@ -187,26 +182,30 @@ public class ProcessInstanceIT {
         assertThat(responseData).isNotNull();
 
         final InputStream byteArrayInputStream = new ByteArrayInputStream(TestResourceUtil.getProcessXml(startedProcessEntity.getBody()
-                .getProcessDefinitionId()
-                .split(":")[0]).getBytes());
+                                                                                                                 .getProcessDefinitionId()
+                                                                                                                 .split(":")[0]).getBytes());
         BpmnModel sourceModel = new BpmnXMLConverter().convertToBpmnModel(new InputStreamProvider() {
 
-            @Override
-            public InputStream getInputStream() {
-                return byteArrayInputStream;
-            }
-        }, false, false);
+                                                                              @Override
+                                                                              public InputStream getInputStream() {
+                                                                                  return byteArrayInputStream;
+                                                                              }
+                                                                          },
+                                                                          false,
+                                                                          false);
         String activityFontName = processDiagramGenerator.getDefaultActivityFontName();
         String labelFontName = processDiagramGenerator.getDefaultLabelFontName();
         String annotationFontName = processDiagramGenerator.getDefaultAnnotationFontName();
         List<String> activityIds = Arrays.asList("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94");
         try (InputStream is = processDiagramGenerator.generateDiagram(sourceModel,
-                activityIds,
-                Collections.emptyList(),
-                activityFontName,
-                labelFontName,
-                annotationFontName)) {
-            String sourceSvg = new String(IoUtil.readInputStream(is, null), "UTF-8");
+                                                                      activityIds,
+                                                                      Collections.emptyList(),
+                                                                      activityFontName,
+                                                                      labelFontName,
+                                                                      annotationFontName)) {
+            String sourceSvg = new String(IoUtil.readInputStream(is,
+                                                                 null),
+                                          "UTF-8");
             assertThat(responseData).isEqualTo(sourceSvg);
         }
     }
@@ -221,10 +220,10 @@ public class ProcessInstanceIT {
 
         //when
         ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "?page=0&size=2",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
-                });
+                                                                                                     HttpMethod.GET,
+                                                                                                     null,
+                                                                                                     new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
+                                                                                                     });
 
         //then
         assertThat(processInstancesPage).isNotNull();
@@ -232,7 +231,6 @@ public class ProcessInstanceIT {
         assertThat(processInstancesPage.getBody().getContent()).hasSize(2);
         assertThat(processInstancesPage.getBody().getMetadata().getTotalPages()).isGreaterThanOrEqualTo(2);
     }
-
 
     @Test
     public void suspendShouldPutProcessInstanceInSuspendedState() {
@@ -250,10 +248,10 @@ public class ProcessInstanceIT {
 
     private ResponseEntity<Void> executeRequestSuspendProcess(ResponseEntity<ProcessInstance> processInstanceEntity) {
         ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/suspend",
-                HttpMethod.POST,
-                null,
-                new ParameterizedTypeReference<Void>() {
-                });
+                                                                    HttpMethod.POST,
+                                                                    null,
+                                                                    new ParameterizedTypeReference<Void>() {
+                                                                    });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
@@ -278,30 +276,34 @@ public class ProcessInstanceIT {
         };
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,
-                HttpMethod.GET,
-                null,
-                responseType);
+                                     HttpMethod.GET,
+                                     null,
+                                     responseType);
     }
 
-    private String executeRequest(String url, HttpMethod method, String contentType) {
+    private String executeRequest(String url,
+                                  HttpMethod method,
+                                  String contentType) {
         return restTemplate.execute(url,
-                method,
-                new RequestCallback() {
-                    @Override
-                    public void doWithRequest(ClientHttpRequest request) throws IOException {
-                        if (contentType != null && !contentType.isEmpty()) {
-                            request.getHeaders().add("Content-Type", contentType);
-                        }
-                    }
-                },
-                new ResponseExtractor<String>() {
+                                    method,
+                                    new RequestCallback() {
+                                        @Override
+                                        public void doWithRequest(ClientHttpRequest request) throws IOException {
+                                            if (contentType != null && !contentType.isEmpty()) {
+                                                request.getHeaders().add("Content-Type",
+                                                                         contentType);
+                                            }
+                                        }
+                                    },
+                                    new ResponseExtractor<String>() {
 
-                    @Override
-                    public String extractData(ClientHttpResponse response)
-                            throws IOException {
-                        return new String(IoUtil.readInputStream(response.getBody(),
-                                null), "UTF-8");
-                    }
-                });
+                                        @Override
+                                        public String extractData(ClientHttpResponse response)
+                                                throws IOException {
+                                            return new String(IoUtil.readInputStream(response.getBody(),
+                                                                                     null),
+                                                              "UTF-8");
+                                        }
+                                    });
     }
 }

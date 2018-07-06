@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.api.model.ProcessInstance;
-import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.runtime.api.event.CloudBPMNActivityStartedEvent;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.Task;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -99,7 +99,7 @@ public class AuditProducerIT {
     public void shouldProduceEventsDuringSimpleProcessExecution() {
         //when
         ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                      Collections.singletonMap("name",
+                                                                                                                                     Collections.singletonMap("name",
                                                                                                                                "peter"));
 
         //then

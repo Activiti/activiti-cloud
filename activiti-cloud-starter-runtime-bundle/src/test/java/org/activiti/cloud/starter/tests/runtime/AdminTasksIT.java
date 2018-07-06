@@ -20,10 +20,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.Task;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +65,7 @@ public class AdminTasksIT {
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
         ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
@@ -79,7 +79,7 @@ public class AdminTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableTasks() throws Exception {
+    public void shouldGetAvailableTasks() {
         //we are hruser who is in hr group so we can see tasks
 
         //given

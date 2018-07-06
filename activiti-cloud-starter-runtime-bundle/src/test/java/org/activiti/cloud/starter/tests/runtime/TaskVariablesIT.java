@@ -16,14 +16,16 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.api.model.ProcessInstance;
-import org.activiti.cloud.services.api.model.Task;
-import org.activiti.cloud.services.api.model.TaskVariable;
-import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
-import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
+import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.VariableInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +34,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -40,11 +41,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -79,14 +75,14 @@ public class TaskVariablesIT {
     }
 
     @Test
-    public void shouldRetrieveTaskVariables() throws Exception {
+    public void shouldRetrieveTaskVariables() {
         //given
         Map<String, Object> variables = new HashMap<>();
         variables.put("var1",
                       "test1");
-        ResponseEntity<ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                 variables);
-        ResponseEntity<PagedResources<Task>> tasks = processInstanceRestTemplate.getTasks(startResponse);
+        ResponseEntity<org.activiti.runtime.api.model.ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                                                                variables);
+        ResponseEntity<PagedResources<org.activiti.runtime.api.model.Task>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
         Map<String, Object> taskVariables = new HashMap<>();
@@ -95,7 +91,7 @@ public class TaskVariablesIT {
         taskRestTemplate.setVariablesLocal(taskId, taskVariables);
 
         //when
-        ResponseEntity<Resources<TaskVariable>> variablesResponse = taskRestTemplate.getVariablesLocal(taskId);
+        ResponseEntity<Resources<VariableInstance>> variablesResponse = taskRestTemplate.getVariablesLocal(taskId);
 
         //then
         assertThat(variablesResponse).isNotNull();
@@ -137,10 +133,10 @@ public class TaskVariablesIT {
 
     }
 
-    private boolean variablesContainEntry(String key, Object value, Collection<TaskVariable> variableCollection){
-        Iterator<TaskVariable> iterator = variableCollection.iterator();
+    private boolean variablesContainEntry(String key, Object value, Collection<VariableInstance> variableCollection){
+        Iterator<VariableInstance> iterator = variableCollection.iterator();
         while(iterator.hasNext()){
-            TaskVariable variable = iterator.next();
+            VariableInstance variable = iterator.next();
             if(variable.getName().equalsIgnoreCase(key) && variable.getValue().equals(value)){
                 assertThat(variable.getType()).isEqualToIgnoringCase(variable.getValue().getClass().getSimpleName());
                 return true;
@@ -149,10 +145,10 @@ public class TaskVariablesIT {
         return false;
     }
 
-    private boolean variablesDoNotContainKeys(Collection<TaskVariable> variableCollection, String... keys){
-        Iterator<TaskVariable> iterator = variableCollection.iterator();
+    private boolean variablesDoNotContainKeys(Collection<VariableInstance> variableCollection, String... keys){
+        Iterator<VariableInstance> iterator = variableCollection.iterator();
         while(iterator.hasNext()){
-            TaskVariable variable = iterator.next();
+            VariableInstance variable = iterator.next();
             for(String key:keys){
                 if(variable.getName().equalsIgnoreCase(key)){
                     return false;

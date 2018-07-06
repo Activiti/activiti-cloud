@@ -26,9 +26,10 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
-import org.activiti.runtime.api.connector.IntegrationContextImpl;
+import org.activiti.runtime.api.model.impl.IntegrationContextImpl;
 import org.activiti.runtime.api.event.impl.CloudIntegrationResultReceivedImpl;
 import org.activiti.runtime.api.model.IntegrationResult;
+import org.activiti.runtime.api.model.impl.IntegrationRequestImpl;
 import org.activiti.runtime.api.model.impl.IntegrationResultImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -111,7 +112,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
 
         //when
-        handler.receive(new IntegrationResultImpl(integrationContext));
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
         //then
         verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
@@ -131,7 +132,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
 
         //when
-        handler.receive(new IntegrationResultImpl(integrationContext));
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
         //then
         verify(integrationContextService, never()).deleteIntegrationContext(any());
@@ -155,7 +156,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
         IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
 
-        IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationContext);
+        IntegrationResult integrationResultEvent = new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext);
 
         //when
         handler.receive(integrationResultEvent);
@@ -194,7 +195,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
 
 
-        IntegrationResultImpl integrationResultEvent = new IntegrationResultImpl(integrationContext);
+        IntegrationResultImpl integrationResultEvent = new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext);
 
         //when
         handler.receive(integrationResultEvent);

@@ -16,14 +16,18 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.api.model.ProcessInstance;
-import org.activiti.cloud.services.api.model.Task;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.Task;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,11 +43,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

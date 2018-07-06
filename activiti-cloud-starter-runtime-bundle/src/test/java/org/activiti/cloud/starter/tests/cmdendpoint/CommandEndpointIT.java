@@ -29,10 +29,10 @@ import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
-import org.activiti.cloud.services.api.model.ProcessDefinition;
-import org.activiti.cloud.services.api.model.ProcessInstance;
-import org.activiti.cloud.services.api.model.Task;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.Task;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,9 +50,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.activiti.cloud.services.api.model.Task.TaskStatus.ASSIGNED;
-import static org.activiti.cloud.services.api.model.Task.TaskStatus.CREATED;
-import static org.assertj.core.api.Assertions.*;
+import static org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED;
+import static org.activiti.runtime.api.model.Task.TaskStatus.CREATED;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
@@ -231,10 +231,10 @@ public class CommandEndpointIT {
         assertThat(processInstance.getProcessDefinitionId()).isEqualTo(processDefinitionId);
         assertThat(processInstance.getId()).isNotNull();
         assertThat(processInstance.getStartDate()).isNotNull();
-        assertThat(processInstance.getStatus()).isEqualToIgnoringCase(ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+        assertThat(processInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
     }
 
-    private void suspendProcessInstance(SuspendProcessInstanceCmd suspendProcessInstanceCmd) throws InterruptedException {
+    private void suspendProcessInstance(SuspendProcessInstanceCmd suspendProcessInstanceCmd) {
         //given
 
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(suspendProcessInstanceCmd).build());
@@ -246,10 +246,10 @@ public class CommandEndpointIT {
         //then
         assertThat(processInstance.getId()).isEqualTo(suspendProcessInstanceCmd.getProcessInstanceId());
         assertThat(processInstance.getStartDate()).isNotNull();
-        assertThat(processInstance.getStatus()).isEqualToIgnoringCase(ProcessInstance.ProcessInstanceStatus.SUSPENDED.name());
+        assertThat(processInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
     }
 
-    private String startProcessInstance(StartProcessInstanceCmd startProcessInstanceCmd) throws InterruptedException {
+    private String startProcessInstance(StartProcessInstanceCmd startProcessInstanceCmd) {
         //given
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(startProcessInstanceCmd).build());
 
@@ -264,7 +264,7 @@ public class CommandEndpointIT {
         assertThat(processInstance.getProcessDefinitionId()).isEqualTo(startProcessInstanceCmd.getProcessDefinitionId());
         assertThat(processInstance.getId()).isNotNull();
         assertThat(processInstance.getStartDate()).isNotNull();
-        assertThat(processInstance.getStatus()).isEqualToIgnoringCase(ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+        assertThat(processInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
         return processInstance.getId();
     }
 

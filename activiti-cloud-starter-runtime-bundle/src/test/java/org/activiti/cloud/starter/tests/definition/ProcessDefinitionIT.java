@@ -24,12 +24,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
-import org.activiti.cloud.services.api.model.ProcessDefinition;
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
+import org.activiti.runtime.api.model.ProcessDefinition;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +63,7 @@ public class ProcessDefinitionIT {
     private static final String PROCESS_POOL_LANE = "process_pool1";
 
     @Test
-    public void shouldRetrieveListOfProcessDefinition() throws Exception {
+    public void shouldRetrieveListOfProcessDefinition() {
         //given
         //processes are automatically deployed from src/test/resources/processes
 
@@ -102,7 +102,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void shouldReturnProcessDefinitionById() throws Exception {
+    public void shouldReturnProcessDefinitionById() {
         //given
         ParameterizedTypeReference<ProcessDefinition> responseType = new ParameterizedTypeReference<ProcessDefinition>() {
         };
@@ -126,7 +126,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void shouldReturnProcessDefinitionMetadata() throws Exception {
+    public void shouldReturnProcessDefinitionMetadata() {
         //given
         ParameterizedTypeReference<ProcessDefinitionMeta> responseType = new ParameterizedTypeReference<ProcessDefinitionMeta>() {
         };
@@ -149,7 +149,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void shouldReturnProcessDefinitionMetadataForPoolLane() throws Exception {
+    public void shouldReturnProcessDefinitionMetadataForPoolLane() {
         //given
         ParameterizedTypeReference<ProcessDefinitionMeta> responseType = new ParameterizedTypeReference<ProcessDefinitionMeta>() {
         };

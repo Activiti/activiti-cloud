@@ -16,10 +16,6 @@
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
-      <artifactId>activiti-engine</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti</groupId>
       <artifactId>activiti-process-runtime-api</artifactId>
       <!-- todo: use dependency management-->
       <version>${project.version}</version>
