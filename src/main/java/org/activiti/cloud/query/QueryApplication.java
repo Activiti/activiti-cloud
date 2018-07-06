@@ -15,21 +15,19 @@
  */
 
 package org.activiti.cloud.query;
-import org.activiti.cloud.services.query.graphql.autoconfigure.EnableActivitiGraphQLQueryService;
-import org.activiti.cloud.services.query.notifications.config.EnableActivitiNotificationsGateway;
+
 import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableActivitiQuery
-@EnableActivitiNotificationsGateway
-@EnableActivitiGraphQLQueryService
+@ComponentScan("org.activiti.cloud.services.common.security")
 public class QueryApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(QueryApplication.class,
-                args);
+                              args);
     }
-
 }
