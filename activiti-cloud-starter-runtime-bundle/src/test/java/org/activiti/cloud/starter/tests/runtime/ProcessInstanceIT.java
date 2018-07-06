@@ -243,7 +243,7 @@ public class ProcessInstanceIT {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         ResponseEntity<ProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
-        assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED.name());
+        assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
     }
 
     private ResponseEntity<Void> executeRequestSuspendProcess(ResponseEntity<ProcessInstance> processInstanceEntity) {
@@ -268,7 +268,7 @@ public class ProcessInstanceIT {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         ResponseEntity<ProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
-        assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING.name());
+        assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
     }
 
     private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
