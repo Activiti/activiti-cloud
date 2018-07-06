@@ -13,7 +13,6 @@
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-common-runtime-api</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
