@@ -13,14 +13,10 @@
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-cloud-task-model-api-impl</artifactId>
-      <!-- Todo:  dependency management-->
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-cloud-process-model-api-impl</artifactId>
-      <!-- Todo:  dependency management-->
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

@@ -13,20 +13,14 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-audit-api</artifactId>
-      <!-- Todo:  dependency management-->
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-cloud-task-model-api-impl</artifactId>
-      <!-- Todo:  dependency management-->
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-cloud-process-model-api-impl</artifactId>
-      <!-- Todo:  dependency management-->
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -35,14 +29,10 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
-      <!-- Todo:  dependency management-->
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-common-security</artifactId>
-      <!-- Todo:  dependency management-->
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
