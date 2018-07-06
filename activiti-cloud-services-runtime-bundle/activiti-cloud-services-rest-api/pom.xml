@@ -17,14 +17,10 @@
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-process-runtime-api</artifactId>
-      <!-- todo: dependency management -->
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-task-runtime-api</artifactId>
-      <!-- todo: dependency management -->
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.hateoas</groupId>

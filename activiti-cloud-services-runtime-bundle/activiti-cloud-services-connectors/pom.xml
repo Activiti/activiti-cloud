@@ -67,13 +67,10 @@
       shoud be moved inside Activiti/Activiti so that we no longer need this dependency-->
       <groupId>org.activiti</groupId>
       <artifactId>activiti-process-runtime-api-impl</artifactId>
-      <!-- TODO dependency management-->
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-cloud-process-model-api-impl</artifactId>
-      <version>7-201803-EA-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
