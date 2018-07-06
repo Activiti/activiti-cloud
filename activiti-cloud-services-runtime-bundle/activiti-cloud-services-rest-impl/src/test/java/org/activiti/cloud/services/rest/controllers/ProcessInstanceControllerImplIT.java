@@ -22,7 +22,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
+import org.activiti.cloud.services.api.commands.SignalCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
@@ -228,7 +228,7 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void sendSignal() throws Exception {
-        SignalProcessInstancesCmd cmd = new SignalProcessInstancesCmd("signalInstance");
+        SignalCmd cmd = new SignalCmd("signalInstance");
 
         this.mockMvc.perform(get("/v1/process-instances/signal").contentType(MediaType.APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(cmd)))

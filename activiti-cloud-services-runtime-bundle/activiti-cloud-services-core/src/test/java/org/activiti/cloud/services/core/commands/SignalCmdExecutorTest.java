@@ -1,6 +1,6 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
+import org.activiti.cloud.services.api.commands.SignalCmd;
 import org.activiti.cloud.services.api.commands.results.SignalProcessInstancesResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.junit.Before;
@@ -15,10 +15,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class SignalProcessInstancesCmdExecutorTest {
+public class SignalCmdExecutorTest {
 
     @InjectMocks
-    private SignalProcessInstancesCmdExecutor signalProcessInstancesCmdExecutor;
+    private SignalCmdExecutor signalCmdExecutor;
 
     @Mock
     private SecurityAwareProcessInstanceService processInstanceService;
@@ -33,11 +33,11 @@ public class SignalProcessInstancesCmdExecutorTest {
 
     @Test
     public void signalProcessInstancesCmdExecutorTest() {
-        SignalProcessInstancesCmd signalProcessInstancesCmd = new SignalProcessInstancesCmd("x");
+        SignalCmd signalProcessInstancesCmd = new SignalCmd("x");
 
-        assertThat(signalProcessInstancesCmdExecutor.getHandledType()).isEqualTo(SignalProcessInstancesCmd.class);
+        assertThat(signalCmdExecutor.getHandledType()).isEqualTo(SignalCmd.class);
 
-        signalProcessInstancesCmdExecutor.execute(signalProcessInstancesCmd);
+        signalCmdExecutor.execute(signalProcessInstancesCmd);
 
         verify(processInstanceService).signal(signalProcessInstancesCmd);
 

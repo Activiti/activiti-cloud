@@ -14,6 +14,7 @@
     <module>activiti-cloud-services-api</module>
     <module>activiti-cloud-services-core</module>
     <module>activiti-cloud-services-events</module>
+    <module>activiti-cloud-services-subscriptions</module>
     <module>activiti-cloud-services-connectors</module>
     <module>activiti-cloud-services-rest-api</module>
     <module>activiti-cloud-services-rest-impl</module>

@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
-import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
+import org.activiti.cloud.services.api.commands.SignalCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
@@ -160,8 +160,8 @@ public class SecurityAwareProcessInstanceServiceTest {
         Map<String, Object> inputVariables = Collections.singletonMap("var",
                                                                       "value");
         //when
-        securityAwareProcessInstanceService.signal(new SignalProcessInstancesCmd(name,
-                                                                                 inputVariables));
+        securityAwareProcessInstanceService.signal(new SignalCmd(name,
+                                                                 inputVariables));
         verify(signalPayload).name(name);
         verify(signalPayload).variables(inputVariables);
     }

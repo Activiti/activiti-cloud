@@ -20,6 +20,10 @@
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
+      <artifactId>activiti-bpmn-model</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-process-runtime-api-impl</artifactId>
       <!-- TODO dependency management-->
       <version>${project.version}</version>

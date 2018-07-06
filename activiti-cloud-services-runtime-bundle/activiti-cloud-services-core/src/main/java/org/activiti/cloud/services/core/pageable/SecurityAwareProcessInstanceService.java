@@ -21,7 +21,7 @@ import java.util.List;
 import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
-import org.activiti.cloud.services.api.commands.SignalProcessInstancesCmd;
+import org.activiti.cloud.services.api.commands.SignalCmd;
 import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
@@ -109,13 +109,13 @@ public class SecurityAwareProcessInstanceService {
         return processInstance;
     }
 
-    public void signal(SignalProcessInstancesCmd signalProcessInstancesCmd) {
+    public void signal(SignalCmd signaCmd) {
         //TODO: plan is to restrict access to events using a new security policy on events
         // - that's another piece of work though so for now no security here
 
         processRuntime.sendSignalWith()
-                .name(signalProcessInstancesCmd.getName())
-                .variables(signalProcessInstancesCmd.getInputVariables())
+                .name(signaCmd.getName())
+                .variables(signaCmd.getInputVariables())
                 .doIt();
     }
 

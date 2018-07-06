@@ -26,6 +26,7 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.engine.integration.IntegrationContextService;
+import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.persistence.StrongUuidGenerator;
 import org.activiti.runtime.api.identity.IdentityLookup;
 import org.activiti.spring.ProcessEngineFactoryBean;
@@ -33,6 +34,7 @@ import org.activiti.spring.SpringAsyncExecutor;
 import org.activiti.spring.SpringCallerRunsRejectedJobsHandler;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.SpringRejectedJobsHandler;
+import org.activiti.spring.bpmn.parser.CloudActivityBehaviorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -117,6 +119,8 @@ public abstract class AbstractProcessEngineAutoConfiguration
     if (activitiProperties.isUseStrongUuids()) {
       conf.setIdGenerator(new StrongUuidGenerator());
     }
+    
+    ((ProcessEngineConfigurationImpl) conf).setActivityBehaviorFactory(new CloudActivityBehaviorFactory());
     
     if (processEngineConfigurationConfigurer != null) {
     	processEngineConfigurationConfigurer.configure(conf);
