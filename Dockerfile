@@ -1,20 +1,6 @@
-# requires Docker version 17.05.0-ce-rc1, build 2878a85
-FROM maven:3.5-jdk-8 as BUILDQ
-
-COPY src /usr/src/myapp/src
-COPY pom.xml /usr/src/myapp
-COPY .git .git
-RUN mvn -f /usr/src/myapp/pom.xml clean package -DskipTests
-
-FROM openjdk:alpine
-
-COPY --from=BUILDQ /usr/src/myapp/target/*.jar /maven/
-
-# set debug=true to get spring boot debug-level logging
-ENV debug=false
-# set REMOTE_DEBUG=true to enable connections to remote debug port
-ENV REMOTE_DEBUG=false
-
-EXPOSE 8182
-
-CMD if [ "x$REMOTE_DEBUG" = "xfalse" ] ; then java $JAVA_OPTS -jar maven/*.jar ; else java $JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n -jar maven/*.jar ; fi
+FROM openjdk:8-jdk-alpine
+ENV PORT 8080
+EXPOSE 8080
+COPY target/*.jar /opt/app.jar
+WORKDIR /opt
+ENTRYPOINT exec java $JAVA_OPTS -jar app.jar
