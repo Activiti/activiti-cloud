@@ -29,8 +29,6 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-common-security</artifactId>
-      <!-- Todo use dependency management-->
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -117,15 +115,11 @@
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-process-runtime-api-impl</artifactId>
-      <!--todo: dependency management-->
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-task-runtime-api-impl</artifactId>
-      <!--todo: dependency management-->
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
