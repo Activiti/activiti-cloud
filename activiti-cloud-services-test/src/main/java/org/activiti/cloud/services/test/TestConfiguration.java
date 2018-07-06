@@ -18,11 +18,12 @@ package org.activiti.cloud.services.test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -38,9 +39,12 @@ public class TestConfiguration {
 
     private final KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
 
-    @Autowired
-    public TestConfiguration(KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor) {
+    private final List<Module> modules;
+
+    public TestConfiguration(KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor,
+                             List<Module> modules) {
         this.keycloakSecurityContextClientRequestInterceptor = keycloakSecurityContextClientRequestInterceptor;
+        this.modules = modules;
     }
 
     @Bean
@@ -49,6 +53,11 @@ public class TestConfiguration {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
                          false);
         mapper.registerModule(new Jackson2HalModule());
+        for (Module module : modules) {
+            if (module.getModuleName().startsWith("map")) {
+                mapper.registerModule(module);
+            }
+        }
 
         MappingJackson2HttpMessageConverter jackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
         jackson2HttpMessageConverter.setSupportedMediaTypes(Collections.singletonList(MediaTypes.HAL_JSON));
