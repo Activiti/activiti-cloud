@@ -10,20 +10,27 @@
   <artifactId>activiti-cloud-starter-connector</artifactId>
   <dependencies>
     <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-cloud-process-model-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-cloud-process-model-api-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-process-model-api-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-metadata</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-monitoring</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
@@ -118,7 +125,7 @@
         </executions>
         <configuration>
           <packages>
-            <package>org.activiti.cloud.connectors.starter.model</package>
+            <package>org.activiti.runtime.api.model</package>
           </packages>
 
           <!-- whether generated assertions classes can be inherited with consistent assertion chaining -->
@@ -136,4 +143,14 @@
       </plugin>
     </plugins>
   </build>
+  <repositories>
+    <repository>
+      <id>activiti-snapshots</id>
+      <name>Activiti Snapshots</name>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+  </repositories>
 </project>

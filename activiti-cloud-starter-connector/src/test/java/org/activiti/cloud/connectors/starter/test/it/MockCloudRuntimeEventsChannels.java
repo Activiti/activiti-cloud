@@ -5,7 +5,7 @@ import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
-public interface MockProcessEngineChannels {
+public interface MockCloudRuntimeEventsChannels {
 
     String COMMAND_CONSUMER = "commandConsumer";
 

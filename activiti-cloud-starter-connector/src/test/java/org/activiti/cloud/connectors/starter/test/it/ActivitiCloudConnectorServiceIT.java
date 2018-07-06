@@ -20,7 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.activiti.cloud.connectors.starter.model.IntegrationRequestEvent;
+
+import org.activiti.runtime.api.model.IntegrationRequest;
+import org.activiti.runtime.api.model.impl.IntegrationContextImpl;
+import org.activiti.runtime.api.model.impl.IntegrationRequestImpl;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -35,7 +38,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
@@ -55,11 +58,11 @@ public class ActivitiCloudConnectorServiceIT {
 
     private final static String PROCESS_INSTANCE_ID = "processInstanceId-" + UUID.randomUUID().toString();
     private final static String PROCESS_DEFINITION_ID = "myProcessDefinitionId";
-    private final static String EXECUTION_ID = "executionId-" + UUID.randomUUID().toString();
+    private final static String INTEGRATION_ID = "integrationId-" + UUID.randomUUID().toString();
 
     @Before
     public void setUp() throws Exception {
-        streamHandler.setExecutionId(EXECUTION_ID);
+        streamHandler.setIntegrationId(INTEGRATION_ID);
     }
 
     @Test
@@ -72,33 +75,34 @@ public class ActivitiCloudConnectorServiceIT {
         variables.put("var2",
                       1L);
 
-        IntegrationRequestEvent ire = new IntegrationRequestEvent(PROCESS_INSTANCE_ID,
-                                                                  PROCESS_DEFINITION_ID,
-                                                                  EXECUTION_ID,
-                                                                  variables,
-                "mock-rb","mock-rb","runtime-bundle","1",
-                null,null);
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setId(INTEGRATION_ID);
+        integrationContext.setProcessInstanceId(PROCESS_INSTANCE_ID);
+        integrationContext.setProcessDefinitionId(PROCESS_DEFINITION_ID);
+        integrationContext.setInBoundVariables(variables);
+        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
+        integrationRequest.setAppName("mock-rb");
+        integrationRequest.setServiceFullName("mock-rb");
+        integrationRequest.setServiceType("runtime-bundle");
+        integrationRequest.setServiceVersion("1");
+        integrationRequest.setAppVersion("1");
 
-        Message<IntegrationRequestEvent> message = MessageBuilder.withPayload(ire)
+        Message<IntegrationRequest> message = MessageBuilder.withPayload((IntegrationRequest)integrationRequest)
                 .setHeader("type",
                            "Mock")
                 .build();
         integrationEventsProducer.send(message);
 
-        message = MessageBuilder.withPayload(ire)
+        message = MessageBuilder.withPayload((IntegrationRequest)integrationRequest)
                 .setHeader("type",
                            "MockProcessRuntime")
                 .build();
         integrationEventsProducer.send(message);
 
-        await("Command should arrive")
-                .untilAsserted(() ->
-                                       assertThat(streamHandler.isStartProcessInstanceCmdArrived()).isTrue()
-                );
 
         await("Should receive at least 2 integration results")
                 .untilAsserted(() ->
-                                       assertThat(streamHandler.getIntegrationResultEventsCounter().get()).isGreaterThanOrEqualTo(2)
+                                       assertThat(streamHandler.getIntegrationResultEventsCounter().get()).isGreaterThanOrEqualTo(1)
                 );
     }
 }

@@ -16,11 +16,11 @@
 
 package org.activiti.cloud.connectors.starter.channels;
 
-import org.activiti.cloud.connectors.starter.model.IntegrationResultEvent;
+import org.activiti.runtime.api.model.IntegrationRequest;
+import org.activiti.runtime.api.model.IntegrationResult;
 import org.springframework.messaging.Message;
 
 public interface IntegrationResultSender {
 
-    void send(Message<IntegrationResultEvent> message);
-
+    void send(Message<IntegrationResult> message);
 }

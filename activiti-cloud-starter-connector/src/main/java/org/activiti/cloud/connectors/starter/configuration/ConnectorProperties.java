@@ -16,10 +16,10 @@ public class ConnectorProperties {
     private String serviceVersion;
 
     @Value("${activiti.cloud.application.name:}")
-    private String activitiAppName;
+    private String appName;
 
     @Value("${activiti.cloud.application.version:}")
-    private String activitiAppVersion;
+    private String appVersion;
 
     public String getServiceName() {
         return serviceName;
@@ -37,11 +37,11 @@ public class ConnectorProperties {
         return serviceVersion;
     }
 
-    public String getActivitiAppName() {
-        return activitiAppName;
+    public String getAppName() {
+        return appName;
     }
 
-    public String getActivitiAppVersion() {
-        return activitiAppVersion;
+    public String getAppVersion() {
+        return appVersion;
     }
 }

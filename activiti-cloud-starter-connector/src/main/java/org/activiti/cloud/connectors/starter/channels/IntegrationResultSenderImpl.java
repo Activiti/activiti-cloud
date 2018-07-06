@@ -16,14 +16,12 @@
 
 package org.activiti.cloud.connectors.starter.channels;
 
-import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.activiti.cloud.connectors.starter.model.IntegrationResultEvent;
+import org.activiti.runtime.api.model.IntegrationResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
-
 
 @Component
 public class IntegrationResultSenderImpl implements IntegrationResultSender {
@@ -33,29 +31,15 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
     private final BinderAwareChannelResolver resolver;
 
-    private ConnectorProperties connectorProperties;
-
     @Autowired
-    public IntegrationResultSenderImpl(BinderAwareChannelResolver resolver, ConnectorProperties connectorProperties) {
+    public IntegrationResultSenderImpl(BinderAwareChannelResolver resolver) {
         this.resolver = resolver;
-        this.connectorProperties = connectorProperties;
     }
 
     @Override
-    public void send(Message<IntegrationResultEvent> message) {
-
-        message.getPayload().setAppName(connectorProperties.getActivitiAppName());
-        message.getPayload().setAppVersion(connectorProperties.getActivitiAppVersion());
-        message.getPayload().setServiceName(connectorProperties.getServiceName());
-        message.getPayload().setServiceFullName(connectorProperties.getServiceFullName());
-        message.getPayload().setServiceType(connectorProperties.getServiceType());
-        message.getPayload().setServiceVersion(connectorProperties.getServiceVersion());
-
+    public void send(Message<IntegrationResult> message) {
         String destination = (resultDestinationOverride == null || resultDestinationOverride.isEmpty())
-                                ? "integrationResult:" + message.getPayload().getTargetApplication() : resultDestinationOverride;
-
+                ? "integrationResult:" + message.getPayload().getIntegrationRequest().getServiceFullName() : resultDestinationOverride;
         resolver.resolveDestination(destination).send(message);
-
     }
-
 }
