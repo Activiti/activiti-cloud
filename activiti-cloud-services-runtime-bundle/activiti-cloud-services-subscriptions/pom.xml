@@ -9,8 +9,8 @@
 
 
   <artifactId>activiti-cloud-services-subscriptions</artifactId>
-  <name>Activiti - Services :: Subscriptions</name>
-  <description>Activiti Subscriptions service</description>
+  <name>Activiti Cloud Services :: Subscriptions</name>
+  <description>Activiti Cloud Services :: Subscriptions Service</description>
 
   <dependencies>
     <dependency>
