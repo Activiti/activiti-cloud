@@ -35,6 +35,10 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
      */
     public Specification<AuditEventEntity> createSpecWithSecurity(Specification<AuditEventEntity> spec,
                                                                   SecurityPolicy securityPolicy) {
+        if(spec == null){
+            throw new IllegalStateException("Spec cannot be null to apply security filters.");
+        }
+
         if (noSecurityPoliciesOrNoUser()) {
             return spec;
         }
@@ -43,8 +47,8 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
         for (String serviceName : restrictions.keySet()) {
 
             Set<String> defKeys = restrictions.get(serviceName);
-            //will filter by app name and will also filter by definition keys if no wildcard
-            if (defKeys != null || !defKeys.contains(securityPoliciesService.getWildcard())) {
+            //will filter by app name and will also filter by definition keys if no wildcard,
+            if (defKeys != null && !defKeys.contains(securityPoliciesService.getWildcard())) {
                 return spec.and(new ApplicationProcessDefSecuritySpecification(serviceName,
                                                                                defKeys));
             } else {  //will filter by app name if wildcard is set

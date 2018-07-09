@@ -49,6 +49,30 @@ public class SecurityPoliciesApplicationServiceTest {
     }
 
     @Test
+    public void testWithNullKeysSpec() {
+        EventSpecification search = mock(EventSpecification.class);
+
+        List<String> groups = Arrays.asList("hr");
+
+        when(securityPoliciesService.policiesDefined()).thenReturn(true);
+        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
+        when(authorizationLookup.isAdmin("bob")).thenReturn(false);
+        when(securityPoliciesService.getWildcard()).thenReturn("*");
+
+        when(identityLookup.getGroupsForCandidateUser("bob")).thenReturn(groups);
+        Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+        map.put("rb1",
+                null);
+
+        when(securityPoliciesService.getProcessDefinitionKeys("bob",
+                                                              groups,
+                                                              SecurityPolicy.READ)).thenReturn(map);
+
+        securityPoliciesApplicationService.createSpecWithSecurity(search,
+                                                                  SecurityPolicy.READ);
+    }
+
+    @Test
     public void shouldNotModifyQueryWhenNoPoliciesDefined() {
 
         EventSpecification search = mock(EventSpecification.class);
@@ -214,4 +238,6 @@ public class SecurityPoliciesApplicationServiceTest {
 
         assertThat(securitySpecArgumentCaptor.getValue()).isInstanceOf(ImpossibleSpecification.class);
     }
+
+
 }
