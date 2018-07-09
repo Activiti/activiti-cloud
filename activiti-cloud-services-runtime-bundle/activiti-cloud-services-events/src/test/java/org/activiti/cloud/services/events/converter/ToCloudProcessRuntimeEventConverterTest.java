@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.events.converter;
 
-import org.activiti.runtime.api.event.CloudProcessStartedEvent;
+import org.activiti.runtime.api.event.CloudProcessStarted;
 import org.activiti.runtime.api.event.impl.CloudRuntimeEventImpl;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
 import org.activiti.runtime.api.model.impl.FluentProcessInstanceImpl;
@@ -56,10 +56,10 @@ public class ToCloudProcessRuntimeEventConverterTest {
 
 
         //when
-        CloudProcessStartedEvent processStarted = converter.from(event);
+        CloudProcessStarted processStarted = converter.from(event);
 
         //then
-        assertThat(processStarted).isInstanceOf(CloudProcessStartedEvent.class);
+        assertThat(processStarted).isInstanceOf(CloudProcessStarted.class);
 
         assertThat(processStarted.getEntity().getId()).isEqualTo("10");
         assertThat(processStarted.getEntity().getProcessDefinitionId()).isEqualTo("myProcessDef");
