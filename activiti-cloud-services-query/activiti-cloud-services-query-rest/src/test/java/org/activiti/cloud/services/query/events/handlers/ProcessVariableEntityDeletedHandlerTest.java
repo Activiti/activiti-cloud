@@ -22,7 +22,7 @@ import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.VariableEntity;
-import org.activiti.runtime.api.event.CloudVariableDeletedEvent;
+import org.activiti.runtime.api.event.CloudVariableDeleted;
 import org.activiti.runtime.api.event.impl.CloudVariableDeletedEventImpl;
 import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.junit.Before;
@@ -57,7 +57,7 @@ public class ProcessVariableEntityDeletedHandlerTest {
     @Test
     public void handleRemoveVariableFromProcessAndSoftDeleteIt() {
         //given
-        CloudVariableDeletedEvent event = buildVariableDeletedEvent();
+        CloudVariableDeleted event = buildVariableDeletedEvent();
 
         VariableEntity variableEntity = new VariableEntity();
         given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variableEntity);
@@ -70,7 +70,7 @@ public class ProcessVariableEntityDeletedHandlerTest {
         assertThat(variableEntity.getMarkedAsDeleted()).isTrue();
     }
 
-    private CloudVariableDeletedEvent buildVariableDeletedEvent() {
+    private CloudVariableDeleted buildVariableDeletedEvent() {
         return new CloudVariableDeletedEventImpl(new VariableInstanceImpl<>("var", "string", "test",
                                                                             UUID.randomUUID().toString()));
     }

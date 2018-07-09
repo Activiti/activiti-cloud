@@ -22,7 +22,7 @@ import java.util.Optional;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessCompletedEvent;
+import org.activiti.runtime.api.event.CloudProcessCompleted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -41,7 +41,7 @@ public class ProcessCompletedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessCompletedEvent completedEvent = (CloudProcessCompletedEvent) event;
+        CloudProcessCompleted completedEvent = (CloudProcessCompleted) event;
         String processInstanceId = completedEvent.getEntity().getId();
         Optional<ProcessInstanceEntity> findResult = processInstanceRepository.findById(processInstanceId);
         if (findResult.isPresent()) {

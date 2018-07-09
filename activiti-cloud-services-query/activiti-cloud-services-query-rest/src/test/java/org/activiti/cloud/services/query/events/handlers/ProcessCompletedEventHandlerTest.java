@@ -23,7 +23,7 @@ import java.util.UUID;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessCompletedEvent;
+import org.activiti.runtime.api.event.CloudProcessCompleted;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessCompletedEventImpl;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -60,7 +60,7 @@ public class ProcessCompletedEventHandlerTest {
     @Test
     public void handleShouldUpdateCurrentProcessInstanceStateToCompleted() {
         //given
-        CloudProcessCompletedEvent event = createProcessCompletedEvent();
+        CloudProcessCompleted event = createProcessCompletedEvent();
 
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
         given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstanceEntity));
@@ -74,7 +74,7 @@ public class ProcessCompletedEventHandlerTest {
         verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
     }
 
-    private CloudProcessCompletedEvent createProcessCompletedEvent() {
+    private CloudProcessCompleted createProcessCompletedEvent() {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId(UUID.randomUUID().toString());
         return new CloudProcessCompletedEventImpl(processInstance);
@@ -83,7 +83,7 @@ public class ProcessCompletedEventHandlerTest {
     @Test
     public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
         //given
-        CloudProcessCompletedEvent event = createProcessCompletedEvent();
+        CloudProcessCompleted event = createProcessCompletedEvent();
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
 
         //then

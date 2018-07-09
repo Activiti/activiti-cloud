@@ -20,7 +20,7 @@ import java.util.Date;
 
 import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudVariableUpdatedEvent;
+import org.activiti.runtime.api.event.CloudVariableUpdated;
 import org.activiti.runtime.api.event.VariableEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,7 +41,7 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudVariableUpdatedEvent variableUpdatedEvent = (CloudVariableUpdatedEvent) event;
+        CloudVariableUpdated variableUpdatedEvent = (CloudVariableUpdated) event;
         VariableEntity variableEntity = new VariableEntity(variableUpdatedEvent.getEntity().getType(),
                                                            variableUpdatedEvent.getEntity().getName(),
                                                            variableUpdatedEvent.getEntity().getProcessInstanceId(),
@@ -60,7 +60,6 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
         } else {
             processVariableUpdateEventHandler.handle(variableEntity);
         }
-
     }
 
     @Override

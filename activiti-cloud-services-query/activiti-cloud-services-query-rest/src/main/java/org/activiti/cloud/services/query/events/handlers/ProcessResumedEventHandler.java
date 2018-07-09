@@ -22,7 +22,7 @@ import java.util.Optional;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessResumedEvent;
+import org.activiti.runtime.api.event.CloudProcessResumed;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -41,7 +41,7 @@ public class ProcessResumedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessResumedEvent processResumedEvent = (CloudProcessResumedEvent) event;
+        CloudProcessResumed processResumedEvent = (CloudProcessResumed) event;
         String processInstanceId = processResumedEvent.getEntity().getId();
         Optional<ProcessInstanceEntity> findResult = processInstanceRepository.findById(processInstanceId);
         ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(() -> new QueryException("Unable to find process instance with the given id: " + processInstanceId));

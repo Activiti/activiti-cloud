@@ -21,7 +21,7 @@ import java.util.Date;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessCancelledEvent;
+import org.activiti.runtime.api.event.CloudProcessCancelled;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class ProcessCancelledEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessCancelledEvent cancelledEvent = (CloudProcessCancelledEvent) event;
+        CloudProcessCancelled cancelledEvent = (CloudProcessCancelled) event;
         LOGGER.debug("Handling cancel of process Instance " + cancelledEvent.getEntity().getId());
         updateProcessInstanceStatus(
                 processInstanceRepository

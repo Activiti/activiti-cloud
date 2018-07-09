@@ -23,7 +23,7 @@ import java.util.UUID;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessResumedEvent;
+import org.activiti.runtime.api.event.CloudProcessResumed;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessResumedEventImpl;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -62,7 +62,7 @@ public class ProcessResumedEventHandlerTest {
         //given
         ProcessInstanceImpl eventProcessInstance = new ProcessInstanceImpl();
         eventProcessInstance.setId(UUID.randomUUID().toString());
-        CloudProcessResumedEvent event = new CloudProcessResumedEventImpl(eventProcessInstance);
+        CloudProcessResumed event = new CloudProcessResumedEventImpl(eventProcessInstance);
 
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
         given(processInstanceRepository.findById(eventProcessInstance.getId())).willReturn(Optional.of(currentProcessInstanceEntity));
@@ -81,7 +81,7 @@ public class ProcessResumedEventHandlerTest {
         //given
         ProcessInstanceImpl eventProcessInstance = new ProcessInstanceImpl();
         eventProcessInstance.setId(UUID.randomUUID().toString());
-        CloudProcessResumedEvent event = new CloudProcessResumedEventImpl(eventProcessInstance);
+        CloudProcessResumed event = new CloudProcessResumedEventImpl(eventProcessInstance);
 
         given(processInstanceRepository.findById(eventProcessInstance.getId())).willReturn(Optional.empty());
 

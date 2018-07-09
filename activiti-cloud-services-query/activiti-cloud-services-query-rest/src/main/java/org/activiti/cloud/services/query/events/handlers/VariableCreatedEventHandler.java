@@ -25,7 +25,7 @@ import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudVariableCreatedEvent;
+import org.activiti.runtime.api.event.CloudVariableCreated;
 import org.activiti.runtime.api.event.VariableEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudVariableCreatedEvent variableCreatedEvent = (CloudVariableCreatedEvent) event;
+        CloudVariableCreated variableCreatedEvent = (CloudVariableCreated) event;
         LOGGER.debug("Handling variableEntity created event: " + variableCreatedEvent.getEntity().getName());
         VariableEntity variableEntity = new VariableEntity(variableCreatedEvent.getEntity().getType(),
                                                            variableCreatedEvent.getEntity().getName(),
@@ -86,7 +86,7 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
         }
     }
 
-    private void setTask(CloudVariableCreatedEvent variableCreatedEvent,
+    private void setTask(CloudVariableCreated variableCreatedEvent,
                          VariableEntity variableEntity) {
         if (variableCreatedEvent.getEntity().isTaskVariable()) {
             TaskEntity taskEntity = entityManager.getReference(TaskEntity.class,
@@ -95,7 +95,7 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
         }
     }
 
-    private void setProcessInstance(CloudVariableCreatedEvent variableCreatedEvent,
+    private void setProcessInstance(CloudVariableCreated variableCreatedEvent,
                                     VariableEntity variableEntity) {
         ProcessInstanceEntity processInstanceEntity = entityManager
                 .getReference(ProcessInstanceEntity.class,

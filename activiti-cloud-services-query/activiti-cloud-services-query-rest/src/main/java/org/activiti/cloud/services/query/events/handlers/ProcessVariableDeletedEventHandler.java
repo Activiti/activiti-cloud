@@ -21,7 +21,7 @@ import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.QVariableEntity;
 import org.activiti.cloud.services.query.model.VariableEntity;
-import org.activiti.runtime.api.event.CloudVariableDeletedEvent;
+import org.activiti.runtime.api.event.CloudVariableDeleted;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +39,7 @@ public class ProcessVariableDeletedEventHandler {
         this.entityFinder = entityFinder;
     }
 
-    public void handle(CloudVariableDeletedEvent event) {
+    public void handle(CloudVariableDeleted event) {
         String variableName = event.getEntity().getName();
         String processInstanceId = event.getEntity().getProcessInstanceId();
         BooleanExpression predicate = QVariableEntity.variableEntity.processInstanceId.eq(processInstanceId)

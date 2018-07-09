@@ -20,7 +20,7 @@ import java.util.Date;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.runtime.api.event.CloudProcessCreatedEvent;
+import org.activiti.runtime.api.event.CloudProcessCreated;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -42,7 +42,7 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessCreatedEvent createdEvent = (CloudProcessCreatedEvent) event;
+        CloudProcessCreated createdEvent = (CloudProcessCreated) event;
         LOGGER.debug("Handling created process Instance " + createdEvent.getEntity().getId());
 
         ProcessInstanceEntity createdProcessInstanceEntity = new ProcessInstanceEntity();
