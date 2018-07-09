@@ -10,7 +10,7 @@
 
   <artifactId>activiti-cloud-services-subscriptions</artifactId>
   <name>Activiti Cloud Services :: Subscriptions</name>
-  <description>Activiti Cloud Services :: Subscriptions Service</description>
+  <description>Activiti Cloud Services :: Subscriptions Snervice</description>
 
   <dependencies>
     <dependency>
