@@ -17,7 +17,7 @@
 package org.activiti.cloud.services.audit.api.tests;
 
 import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
-import org.activiti.runtime.api.event.CloudProcessStartedEvent;
+import org.activiti.runtime.api.event.CloudProcessStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.junit.Test;
 
@@ -42,7 +42,7 @@ public class EventsRelProviderTest {
     @Test
     public void shouldSupportCloudRuntimeEventSubClasses() throws Exception {
         //given
-        Class<CloudProcessStartedEvent> aClass = CloudProcessStartedEvent.class;
+        Class<CloudProcessStarted> aClass = CloudProcessStarted.class;
 
         //when
         boolean supports = relProvider.supports(aClass);
