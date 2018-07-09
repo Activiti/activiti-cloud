@@ -22,7 +22,7 @@ import java.util.Optional;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessStartedEvent;
+import org.activiti.runtime.api.event.CloudProcessStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -45,7 +45,7 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessStartedEvent startedEvent = (CloudProcessStartedEvent) event;
+        CloudProcessStarted startedEvent = (CloudProcessStarted) event;
         String processInstanceId = startedEvent.getEntity().getId();
         LOGGER.debug("Handling start of process Instance " + processInstanceId);
 

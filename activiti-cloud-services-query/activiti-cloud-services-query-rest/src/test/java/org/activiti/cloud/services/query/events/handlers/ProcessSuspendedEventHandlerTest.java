@@ -23,7 +23,7 @@ import java.util.UUID;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessSuspendedEvent;
+import org.activiti.runtime.api.event.CloudProcessSuspended;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessSuspendedEventImpl;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -60,7 +60,7 @@ public class ProcessSuspendedEventHandlerTest {
     @Test
     public void handleShouldUpdateCurrentProcessInstanceStateToSuspended() {
         //given
-        CloudProcessSuspendedEvent event = buildProcessSuspendedEvent();
+        CloudProcessSuspended event = buildProcessSuspendedEvent();
 
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
         given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstanceEntity));
@@ -74,7 +74,7 @@ public class ProcessSuspendedEventHandlerTest {
         verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
     }
 
-    private CloudProcessSuspendedEvent buildProcessSuspendedEvent() {
+    private CloudProcessSuspended buildProcessSuspendedEvent() {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId(UUID.randomUUID().toString());
         return new CloudProcessSuspendedEventImpl(processInstance);
@@ -83,7 +83,7 @@ public class ProcessSuspendedEventHandlerTest {
     @Test
     public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
         //given
-        CloudProcessSuspendedEvent event = buildProcessSuspendedEvent();
+        CloudProcessSuspended event = buildProcessSuspendedEvent();
 
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
 

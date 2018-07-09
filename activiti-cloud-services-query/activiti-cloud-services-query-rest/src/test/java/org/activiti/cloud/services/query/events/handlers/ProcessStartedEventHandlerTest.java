@@ -22,7 +22,7 @@ import java.util.UUID;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessStartedEvent;
+import org.activiti.runtime.api.event.CloudProcessStarted;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -58,7 +58,7 @@ public class ProcessStartedEventHandlerTest {
     @Test
     public void handleShouldUpdateProcessInstanceStatusToRunning() {
         //given
-        CloudProcessStartedEvent event = buildProcessStartedEvent();
+        CloudProcessStarted event = buildProcessStartedEvent();
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
         given(currentProcessInstanceEntity.getStatus()).willReturn(ProcessInstance.ProcessInstanceStatus.CREATED);
         given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstanceEntity));
@@ -74,7 +74,7 @@ public class ProcessStartedEventHandlerTest {
     @Test
     public void handleShouldIgnoreEventIfProcessInstanceIsAlreadyInRunningStatus() {
         //given
-        CloudProcessStartedEvent event = buildProcessStartedEvent();
+        CloudProcessStarted event = buildProcessStartedEvent();
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
         given(currentProcessInstanceEntity.getStatus()).willReturn(ProcessInstance.ProcessInstanceStatus.RUNNING);
         given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstanceEntity));
@@ -89,7 +89,7 @@ public class ProcessStartedEventHandlerTest {
                never()).setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
     }
 
-    private CloudProcessStartedEvent buildProcessStartedEvent() {
+    private CloudProcessStarted buildProcessStartedEvent() {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId(UUID.randomUUID().toString());
         return new CloudProcessStartedEventImpl(processInstance);
@@ -98,7 +98,7 @@ public class ProcessStartedEventHandlerTest {
     @Test
     public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
         //given
-        CloudProcessStartedEvent event = buildProcessStartedEvent();
+        CloudProcessStarted event = buildProcessStartedEvent();
 
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
 
