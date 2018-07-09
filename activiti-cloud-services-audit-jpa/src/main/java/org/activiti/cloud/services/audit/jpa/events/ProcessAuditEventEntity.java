@@ -16,8 +16,10 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -26,6 +28,8 @@ import org.activiti.runtime.api.model.ProcessInstance;
 public abstract class ProcessAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = ProcessInstanceJpaJsonConverter.class)
+    @Lob
+    @Column
     private ProcessInstance processInstance;
 
     private String nestedProcessDefinitionId;

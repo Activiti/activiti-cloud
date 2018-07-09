@@ -44,7 +44,7 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
 
             Set<String> defKeys = restrictions.get(serviceName);
             //will filter by app name and will also filter by definition keys if no wildcard
-            if (!defKeys.contains(securityPoliciesService.getWildcard())) {
+            if (defKeys != null || !defKeys.contains(securityPoliciesService.getWildcard())) {
                 return spec.and(new ApplicationProcessDefSecuritySpecification(serviceName,
                                                                                defKeys));
             } else {  //will filter by app name if wildcard is set
