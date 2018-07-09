@@ -3,7 +3,7 @@ package org.activiti.cloud.services.audit.jpa.converters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCompletedEventEntity;
-import org.activiti.runtime.api.event.CloudProcessCompletedEvent;
+import org.activiti.runtime.api.event.CloudProcessCompleted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudProcessCompletedEventImpl;
@@ -19,7 +19,7 @@ public class ProcessCompletedEventConverter implements EventToEntityConverter<Au
 
     @Override
     public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudProcessCompletedEvent cloudProcessCompletedEvent = (CloudProcessCompletedEvent) cloudRuntimeEvent;
+        CloudProcessCompleted cloudProcessCompletedEvent = (CloudProcessCompleted) cloudRuntimeEvent;
         ProcessCompletedEventEntity processCompletedEventEntity = new ProcessCompletedEventEntity(cloudProcessCompletedEvent.getId(),
                                                                                                   cloudProcessCompletedEvent.getTimestamp(),
                                                                                                   cloudProcessCompletedEvent.getAppName(),

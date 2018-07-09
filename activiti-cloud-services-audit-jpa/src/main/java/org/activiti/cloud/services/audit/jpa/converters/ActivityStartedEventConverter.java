@@ -4,7 +4,7 @@ import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.ActivityStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.runtime.api.event.BPMNActivityEvent;
-import org.activiti.runtime.api.event.CloudBPMNActivityStartedEvent;
+import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudBPMNActivityStartedEventImpl;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class ActivityStartedEventConverter implements EventToEntityConverter<Aud
 
     @Override
     public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudBPMNActivityStartedEvent cloudActivityStartedEvent = (CloudBPMNActivityStartedEvent) cloudRuntimeEvent;
+        CloudBPMNActivityStarted cloudActivityStartedEvent = (CloudBPMNActivityStarted) cloudRuntimeEvent;
         ActivityStartedAuditEventEntity activityStartedAuditEventEntity = new ActivityStartedAuditEventEntity(cloudActivityStartedEvent.getId(),
                                                                                                               cloudActivityStartedEvent.getTimestamp(),
                                                                                                               cloudActivityStartedEvent.getAppName(),

@@ -4,7 +4,7 @@ import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableUpdatedEventEntity;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudVariableUpdatedEvent;
+import org.activiti.runtime.api.event.CloudVariableUpdated;
 import org.activiti.runtime.api.event.VariableEvent;
 import org.activiti.runtime.api.event.impl.CloudVariableUpdatedEventImpl;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class VariableUpdatedEventConverter implements EventToEntityConverter<Aud
 
     @Override
     public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudVariableUpdatedEvent cloudVariableUpdatedEvent = (CloudVariableUpdatedEvent) cloudRuntimeEvent;
+        CloudVariableUpdated cloudVariableUpdatedEvent = (CloudVariableUpdated) cloudRuntimeEvent;
         VariableUpdatedEventEntity variableUpdatedEventEntity = new VariableUpdatedEventEntity(cloudVariableUpdatedEvent.getId(),
                                                                                                cloudVariableUpdatedEvent.getTimestamp(),
                                                                                                cloudVariableUpdatedEvent.getAppName(),

@@ -24,7 +24,7 @@ import java.util.UUID;
 
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.runtime.api.event.BPMNActivityEvent;
-import org.activiti.runtime.api.event.CloudBPMNActivityStartedEvent;
+import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
@@ -38,13 +38,9 @@ import org.activiti.runtime.api.event.impl.CloudRuntimeEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskAssignedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCompletedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCreatedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudVariableCreatedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudVariableDeletedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudVariableUpdatedEventImpl;
 import org.activiti.runtime.api.model.impl.BPMNActivityImpl;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.activiti.runtime.api.model.impl.TaskImpl;
-import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.conf.activiti.runtime.IgnoredRuntimeEvent;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +52,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
@@ -121,7 +118,7 @@ public class AuditServiceIT {
             //then
             Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
-            CloudBPMNActivityStartedEvent cloudProcessStartedEvent = (CloudBPMNActivityStartedEvent) retrievedEvents.iterator().next();
+            CloudBPMNActivityStarted cloudProcessStartedEvent = (CloudBPMNActivityStarted) retrievedEvents.iterator().next();
             assertThat(cloudProcessStartedEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
             assertThat(cloudProcessStartedEvent.getProcessDefinitionId()).isEqualTo("3");
             assertThat(cloudProcessStartedEvent.getProcessInstanceId()).isEqualTo("4");
@@ -176,9 +173,9 @@ public class AuditServiceIT {
             //then
             CloudRuntimeEvent event = responseEntity.getBody();
 
-            assertThat(event).isInstanceOf(CloudBPMNActivityStartedEvent.class);
+            assertThat(event).isInstanceOf(CloudBPMNActivityStarted.class);
 
-            CloudBPMNActivityStartedEvent cloudProcessStartedEvent = (CloudBPMNActivityStartedEvent) event;
+            CloudBPMNActivityStarted cloudProcessStartedEvent = (CloudBPMNActivityStarted) event;
             assertThat(cloudProcessStartedEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
             assertThat(cloudProcessStartedEvent.getProcessDefinitionId()).isEqualTo("3");
             assertThat(cloudProcessStartedEvent.getProcessInstanceId()).isEqualTo("4");
@@ -219,9 +216,9 @@ public class AuditServiceIT {
             assertThat(retrievedEvents).hasSize(1);
             CloudRuntimeEvent event = retrievedEvents.iterator().next();
             //when
-            assertThat(event).isInstanceOf(CloudBPMNActivityStartedEvent.class);
+            assertThat(event).isInstanceOf(CloudBPMNActivityStarted.class);
 
-            CloudBPMNActivityStartedEvent cloudProcessStartedEvent = (CloudBPMNActivityStartedEvent) event;
+            CloudBPMNActivityStarted cloudProcessStartedEvent = (CloudBPMNActivityStarted) event;
             assertThat(cloudProcessStartedEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
             assertThat(cloudProcessStartedEvent.getProcessDefinitionId()).isEqualTo("3");
             assertThat(cloudProcessStartedEvent.getProcessInstanceId()).isEqualTo("4");

@@ -4,7 +4,7 @@ import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableDeletedEventEntity;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudVariableDeletedEvent;
+import org.activiti.runtime.api.event.CloudVariableDeleted;
 import org.activiti.runtime.api.event.VariableEvent;
 import org.activiti.runtime.api.event.impl.CloudVariableDeletedEventImpl;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class VariableDeletedEventConverter implements EventToEntityConverter<Aud
 
     @Override
     public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudVariableDeletedEvent cloudVariableDeletedEvent = (CloudVariableDeletedEvent) cloudRuntimeEvent;
+        CloudVariableDeleted cloudVariableDeletedEvent = (CloudVariableDeleted) cloudRuntimeEvent;
         VariableDeletedEventEntity variableDeletedEventEntity = new VariableDeletedEventEntity(cloudVariableDeletedEvent.getId(),
                                                                                                cloudVariableDeletedEvent.getTimestamp(),
                                                                                                cloudVariableDeletedEvent.getAppName(),
