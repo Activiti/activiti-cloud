@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
-import org.activiti.runtime.api.event.CloudBPMNActivityStartedEvent;
+import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -120,7 +120,7 @@ public class AuditProducerIT {
                                      TASK_CREATED.name());
             assertThat(receivedEvents)
                     .filteredOn(event -> ACTIVITY_STARTED.equals(event.getEventType()))
-                    .extracting(event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType())
+                    .extracting(event -> ((CloudBPMNActivityStarted) event).getEntity().getActivityType())
                     .containsExactly("startEvent",
                                      "userTask");
         });
