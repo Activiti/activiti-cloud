@@ -93,8 +93,8 @@ public class VariableEntityControllerIT {
                                                            UUID.randomUUID().toString(),
                                                            new Date(),
                                                            new Date(),
-                                                           UUID.randomUUID().toString(),
-                                                           "John");
+                                                           UUID.randomUUID().toString());
+        variableEntity.setValue("John");
         given(entityFinder.findById(eq(variableRepository),
                                     eq(variableEntity.getId()),
                                     anyString()))

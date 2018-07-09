@@ -19,11 +19,13 @@ package org.activiti.cloud.services.query.model;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -42,17 +44,28 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     private String type;
+
     private String name;
+
     private String processInstanceId;
+
     private String taskId;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date createTime;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastUpdatedTime;
+
     private String executionId;
-    @Column(columnDefinition = "TEXT", length = 5000)
-    private String value;
+
+    @Convert(converter = VariableValueJsonConverter.class)
+    @Lob
+    @Column
+    private VariableValue<?> value;
+
     private Boolean markedAsDeleted = false;
 
     @JsonIgnore
@@ -81,8 +94,7 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
                           String taskId,
                           Date createTime,
                           Date lastUpdatedTime,
-                          String executionId,
-                          String value) {
+                          String executionId) {
         super(serviceName,
               serviceFullName,
               serviceVersion,
@@ -95,7 +107,6 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
         this.createTime = createTime;
         this.lastUpdatedTime = lastUpdatedTime;
         this.executionId = executionId;
-        this.value = value;
     }
 
     public long getId() {
@@ -158,12 +169,12 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
         this.executionId = executionId;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public <T> void setValue(T value) {
+        this.value = new VariableValue<>(value);
     }
 
-    public String getValue() {
-        return value;
+    public <T> T getValue() {
+        return (T) value.getValue();
     }
 
     public ProcessInstanceEntity getProcessInstance() {

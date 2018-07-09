@@ -23,6 +23,7 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -100,9 +101,9 @@ public class QueryProcessInstancesITEntity {
                     .extracting(ProcessInstanceEntity::getId,
                                 ProcessInstanceEntity::getStatus)
                     .contains(tuple(completedProcess.getId(),
-                                    "COMPLETED"),
+                                    ProcessInstance.ProcessInstanceStatus.COMPLETED),
                               tuple(runningProcess.getId(),
-                                    "RUNNING"));
+                                    ProcessInstance.ProcessInstanceStatus.RUNNING));
         });
 
         await().untilAsserted(() -> {
@@ -113,7 +114,7 @@ public class QueryProcessInstancesITEntity {
                                                                                                                      HttpMethod.GET,
                                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                                      PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
-                                                                                                                     "COMPLETED");
+                                                                                                                     ProcessInstance.ProcessInstanceStatus.COMPLETED);
 
             //then
             assertThat(responseEntityFiltered).isNotNull();
@@ -124,7 +125,7 @@ public class QueryProcessInstancesITEntity {
                     .extracting(ProcessInstanceEntity::getId,
                                 ProcessInstanceEntity::getStatus)
                     .containsExactly(tuple(completedProcess.getId(),
-                                           "COMPLETED"));
+                                           ProcessInstance.ProcessInstanceStatus.COMPLETED));
         });
     }
 

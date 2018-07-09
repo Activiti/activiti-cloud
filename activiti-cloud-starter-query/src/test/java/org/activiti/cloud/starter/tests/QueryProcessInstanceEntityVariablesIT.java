@@ -142,6 +142,40 @@ public class QueryProcessInstanceEntityVariablesIT {
     }
 
     @Test
+    public void shouldSupportIntegerVariables() {
+        //given
+        variableEventContainedBuilder.aCreatedVariable("intVar",
+                                                       10,
+                                                       "integer")
+                .onProcessInstance(runningProcessInstance);
+
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<VariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
+                                                                                                      HttpMethod.GET,
+                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                      PAGED_VARIABLE_RESPONSE_TYPE,
+                                                                                                      runningProcessInstance.getId());
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(
+                            VariableEntity::getName,
+                            VariableEntity::getValue)
+                    .containsExactly(
+                            tuple(
+                                    "intVar",
+                                    10)
+                    );
+        });
+    }
+
+    @Test
     public void shouldFilterOnVariableName() {
         //given
         variableEventContainedBuilder.aCreatedVariable("var1",

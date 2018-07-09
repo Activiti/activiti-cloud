@@ -85,8 +85,9 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
                                                            null,
                                                            new Date(),
                                                            new Date(),
-                                                           UUID.randomUUID().toString(),
-                                                           "John");
+                                                           UUID.randomUUID().toString());
+        variableEntity.setValue("John");
+
         given(variableRepository.findAll(any(),
                                          eq(pageRequest)))
                 .willReturn(new PageImpl<>(Collections.singletonList(variableEntity),

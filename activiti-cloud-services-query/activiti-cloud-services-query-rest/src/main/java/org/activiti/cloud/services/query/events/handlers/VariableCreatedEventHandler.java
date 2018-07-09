@@ -63,8 +63,8 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
                                                            variableCreatedEvent.getEntity().getTaskId(),
                                                            new Date(variableCreatedEvent.getTimestamp()),
                                                            new Date(variableCreatedEvent.getTimestamp()),
-                                                           null,
-                                                           variableCreatedEvent.getEntity().getValue());
+                                                           null);
+        variableEntity.setValue(variableCreatedEvent.getEntity().getValue());
 
         setProcessInstance(variableCreatedEvent,
                            variableEntity);

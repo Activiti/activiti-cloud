@@ -84,8 +84,8 @@ public class TaskEntityVariableEntityControllerIT {
                                                            UUID.randomUUID().toString(),
                                                            new Date(),
                                                            new Date(),
-                                                           UUID.randomUUID().toString(),
-                                                           "John");
+                                                           UUID.randomUUID().toString());
+        variableEntity.setValue("John");
         given(variableRepository.findAll(any(), eq(pageRequest)))
                 .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12));
 
