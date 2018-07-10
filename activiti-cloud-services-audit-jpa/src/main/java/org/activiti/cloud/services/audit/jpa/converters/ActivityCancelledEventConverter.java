@@ -10,7 +10,7 @@ import org.activiti.runtime.api.event.impl.CloudBPMNActivityCancelledEventImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ActivityCancelledEventConverter implements EventToEntityConverter<AuditEventEntity> {
+public class   ActivityCancelledEventConverter implements EventToEntityConverter<AuditEventEntity> {
 
     @Override
     public String getSupportedEvent() {

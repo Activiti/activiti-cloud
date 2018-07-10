@@ -36,9 +36,8 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
     public Specification<AuditEventEntity> createSpecWithSecurity(Specification<AuditEventEntity> spec,
                                                                   SecurityPolicy securityPolicy) {
         if(spec == null){
-            throw new IllegalStateException("Spec cannot be null to apply security filters.");
+            spec = new AlwaysTrueSpecification();
         }
-
         if (noSecurityPoliciesOrNoUser()) {
             return spec;
         }
