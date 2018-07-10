@@ -10,7 +10,6 @@
   </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>acceptance-tests-parent</artifactId>
-  <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
     <module>shared-acceptance-tests</module>
