@@ -31,10 +31,12 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.cloud.services.audit.api.AuditException;
 import org.activiti.runtime.api.model.BPMNActivity;
 import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.SequenceFlow;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.VariableInstance;
 import org.activiti.runtime.api.model.impl.BPMNActivityImpl;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
+import org.activiti.runtime.api.model.impl.SequenceFlowImpl;
 import org.activiti.runtime.api.model.impl.TaskImpl;
 import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 
@@ -66,6 +68,8 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
                                 TaskImpl.class);
             resolver.addMapping(BPMNActivity.class,
                                 BPMNActivityImpl.class);
+            resolver.addMapping(SequenceFlow.class,
+                                SequenceFlowImpl.class);
             module.setAbstractTypes(resolver);
 
             objectMapper.registerModule(module);

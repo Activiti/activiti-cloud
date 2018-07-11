@@ -2,10 +2,13 @@ package org.activiti.cloud.services.audit.jpa.converters;
 
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.ProcessCreatedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
+import org.activiti.runtime.api.event.CloudProcessCreated;
 import org.activiti.runtime.api.event.CloudProcessStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
 import org.springframework.stereotype.Component;
 
@@ -19,34 +22,32 @@ public class ProcessCreatedEventConverter implements EventToEntityConverter<Audi
 
     @Override
     public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudProcessStarted cloudProcessStartedEvent = (CloudProcessStarted) cloudRuntimeEvent;
-        ProcessStartedAuditEventEntity processStartedEventEntity = new ProcessStartedAuditEventEntity(cloudProcessStartedEvent.getId(),
-                                                                                                      cloudProcessStartedEvent.getTimestamp(),
-                                                                                                      cloudProcessStartedEvent.getAppName(),
-                                                                                                      cloudProcessStartedEvent.getAppVersion(),
-                                                                                                      cloudProcessStartedEvent.getServiceFullName(),
-                                                                                                      cloudProcessStartedEvent.getServiceName(),
-                                                                                                      cloudProcessStartedEvent.getServiceType(),
-                                                                                                      cloudProcessStartedEvent.getServiceVersion(),
-                                                                                                      cloudProcessStartedEvent.getEntity(),
-                                                                                                      cloudProcessStartedEvent.getNestedProcessDefinitionId(),
-                                                                                                      cloudProcessStartedEvent.getNestedProcessInstanceId());
+        CloudProcessCreated cloudProcessCreated = (CloudProcessCreated) cloudRuntimeEvent;
+        ProcessCreatedAuditEventEntity processCreatedAuditEventEntity = new ProcessCreatedAuditEventEntity(cloudProcessCreated.getId(),
+                                                                                                           cloudProcessCreated.getTimestamp(),
+                                                                                                           cloudProcessCreated.getAppName(),
+                                                                                                           cloudProcessCreated.getAppVersion(),
+                                                                                                           cloudProcessCreated.getServiceFullName(),
+                                                                                                           cloudProcessCreated.getServiceName(),
+                                                                                                           cloudProcessCreated.getServiceType(),
+                                                                                                           cloudProcessCreated.getServiceVersion(),
+                                                                                                           cloudProcessCreated.getEntity());
 
-        return processStartedEventEntity;
+        return processCreatedAuditEventEntity;
     }
 
     @Override
     public CloudRuntimeEvent convertToAPI(AuditEventEntity auditEventEntity) {
-        ProcessStartedAuditEventEntity processStartedAuditEventEntity = (ProcessStartedAuditEventEntity) auditEventEntity;
-        CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl(processStartedAuditEventEntity.getEventId(),
-                                                                                                 processStartedAuditEventEntity.getTimestamp(),
-                                                                                                 processStartedAuditEventEntity.getProcessInstance());
-        cloudProcessStartedEvent.setAppName(processStartedAuditEventEntity.getAppName());
-        cloudProcessStartedEvent.setAppVersion(processStartedAuditEventEntity.getAppVersion());
-        cloudProcessStartedEvent.setServiceFullName(processStartedAuditEventEntity.getServiceFullName());
-        cloudProcessStartedEvent.setServiceName(processStartedAuditEventEntity.getServiceName());
-        cloudProcessStartedEvent.setServiceType(processStartedAuditEventEntity.getServiceType());
-        cloudProcessStartedEvent.setServiceVersion(processStartedAuditEventEntity.getServiceVersion());
-        return cloudProcessStartedEvent;
+        ProcessCreatedAuditEventEntity processCreatedAuditEventEntity = (ProcessCreatedAuditEventEntity) auditEventEntity;
+        CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl(processCreatedAuditEventEntity.getEventId(),
+                                                                                                 processCreatedAuditEventEntity.getTimestamp(),
+                                                                                                 processCreatedAuditEventEntity.getProcessInstance());
+        processCreatedEvent.setAppName(processCreatedAuditEventEntity.getAppName());
+        processCreatedEvent.setAppVersion(processCreatedAuditEventEntity.getAppVersion());
+        processCreatedEvent.setServiceFullName(processCreatedAuditEventEntity.getServiceFullName());
+        processCreatedEvent.setServiceName(processCreatedAuditEventEntity.getServiceName());
+        processCreatedEvent.setServiceType(processCreatedAuditEventEntity.getServiceType());
+        processCreatedEvent.setServiceVersion(processCreatedAuditEventEntity.getServiceVersion());
+        return processCreatedEvent;
     }
 }
