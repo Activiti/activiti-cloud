@@ -35,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.runtime.api.model.CloudVariableInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
-@Entity
+@Entity(name="Variable")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "VARIABLE")

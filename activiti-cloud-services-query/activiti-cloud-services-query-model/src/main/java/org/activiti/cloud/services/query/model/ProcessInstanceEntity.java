@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
-@Entity
+@Entity(name="ProcessInstance")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "PROCESS_INSTANCE")

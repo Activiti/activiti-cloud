@@ -39,7 +39,7 @@ import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
-@Entity
+@Entity(name="Task")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "TASK")
