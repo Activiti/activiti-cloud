@@ -1,8 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
 import org.activiti.cloud.services.api.commands.results.ClaimTaskResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
+import org.activiti.runtime.api.cmd.TaskCommands;
+import org.activiti.runtime.api.cmd.impl.ClaimTaskImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -34,10 +35,10 @@ public class ClaimTaskCmdExecutorTest {
     @Test
     public void claimTaskCmdExecutorTest() {
         //given
-        ClaimTaskCmd claimTaskCmd = new ClaimTaskCmd("taskId",
-                                                     "assignee");
+        ClaimTaskImpl claimTaskCmd = new ClaimTaskImpl("taskId",
+                                                       "assignee");
 
-        assertThat(claimTaskCmdExecutor.getHandledType()).isEqualTo(ClaimTaskCmd.class);
+        assertThat(claimTaskCmdExecutor.getHandledType()).isEqualTo(TaskCommands.CLAIM_TASK.name());
 
         //when
         claimTaskCmdExecutor.execute(claimTaskCmd);

@@ -4,11 +4,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
-import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
-import org.activiti.cloud.services.api.commands.SignalCmd;
-import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
@@ -16,6 +11,12 @@ import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.engine.RuntimeService;
 import org.activiti.runtime.api.NotFoundException;
 import org.activiti.runtime.api.ProcessRuntime;
+import org.activiti.runtime.api.cmd.StartProcess;
+import org.activiti.runtime.api.cmd.impl.ResumeProcessImpl;
+import org.activiti.runtime.api.cmd.impl.SendSignalImpl;
+import org.activiti.runtime.api.cmd.impl.SetProcessVariablesImpl;
+import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
+import org.activiti.runtime.api.cmd.impl.SuspendProcessImpl;
 import org.activiti.runtime.api.model.FluentProcessDefinition;
 import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -32,10 +33,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import static org.activiti.cloud.services.core.utils.MockUtils.selfReturningMock;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class SecurityAwareProcessInstanceServiceTest {
@@ -113,16 +118,19 @@ public class SecurityAwareProcessInstanceServiceTest {
         FluentProcessInstance processInstance = mock(FluentProcessInstance.class);
         given(starter.doIt()).willReturn(processInstance);
 
-        StartProcessInstanceCmd startProcessInstanceCmd = new StartProcessInstanceCmd(processDefinitionKey,
-                                                                                      null,
-                                                                                      null,
-                                                                                      null);
+        StartProcess startProcess = buildStartProcessCmd(processDefinitionKey);
 
         //when
-        ProcessInstance startedInstance = securityAwareProcessInstanceService.startProcess(startProcessInstanceCmd);
+        ProcessInstance startedInstance = securityAwareProcessInstanceService.startProcess(startProcess);
 
         //then
         assertThat(startedInstance).isEqualTo(processInstance);
+    }
+
+    private StartProcess buildStartProcessCmd(String processDefinitionKey) {
+        StartProcess startProcess = new StartProcessImpl();
+        ((StartProcessImpl) startProcess).setProcessDefinitionKey(processDefinitionKey);
+        return startProcess;
     }
 
     private FluentProcessDefinition buildProcessDefinition(String processDefinitionKey) {
@@ -143,10 +151,7 @@ public class SecurityAwareProcessInstanceServiceTest {
         //then
         assertThatExceptionOfType(ActivitiForbiddenException.class).isThrownBy(
                 //when
-                () -> securityAwareProcessInstanceService.startProcess(new StartProcessInstanceCmd(processDefinitionKey,
-                                                                                                   null,
-                                                                                                   null,
-                                                                                                   null))
+                () -> securityAwareProcessInstanceService.startProcess(buildStartProcessCmd(processDefinitionKey))
         );
     }
 
@@ -160,8 +165,8 @@ public class SecurityAwareProcessInstanceServiceTest {
         Map<String, Object> inputVariables = Collections.singletonMap("var",
                                                                       "value");
         //when
-        securityAwareProcessInstanceService.signal(new SignalCmd(name,
-                                                                 inputVariables));
+        securityAwareProcessInstanceService.signal(new SendSignalImpl(name,
+                                                                      inputVariables));
         verify(signalPayload).name(name);
         verify(signalPayload).variables(inputVariables);
     }
@@ -174,7 +179,7 @@ public class SecurityAwareProcessInstanceServiceTest {
         //then
         assertThatExceptionOfType(ActivitiForbiddenException.class).isThrownBy(
                 //when
-                () -> securityAwareProcessInstanceService.suspend(new SuspendProcessInstanceCmd(processInstance.getId()))
+                () -> securityAwareProcessInstanceService.suspend(new SuspendProcessImpl(processInstance.getId()))
         );
     }
 
@@ -217,7 +222,7 @@ public class SecurityAwareProcessInstanceServiceTest {
         //then
         assertThatExceptionOfType(ActivitiForbiddenException.class).isThrownBy(
                 //when
-                () -> securityAwareProcessInstanceService.activate(new ActivateProcessInstanceCmd(processInstance.getId()))
+                () -> securityAwareProcessInstanceService.activate(new ResumeProcessImpl(processInstance.getId()))
         );
     }
 
@@ -229,8 +234,8 @@ public class SecurityAwareProcessInstanceServiceTest {
         Map<String, Object> variables = Collections.singletonMap("var",
                                                                  "value");
         //when
-        securityAwareProcessInstanceService.setProcessVariables(new SetProcessVariablesCmd(processInstance.getId(),
-                                                                                           variables));
+        securityAwareProcessInstanceService.setProcessVariables(new SetProcessVariablesImpl(processInstance.getId(),
+                                                                                            variables));
 
         //then
         verify(runtimeService).setVariables(processInstance.getId(),
@@ -245,7 +250,7 @@ public class SecurityAwareProcessInstanceServiceTest {
         //then
         assertThatExceptionOfType(ActivitiForbiddenException.class).isThrownBy(
                 //when
-                () -> securityAwareProcessInstanceService.setProcessVariables(new SetProcessVariablesCmd(processInstance.getId(),
+                () -> securityAwareProcessInstanceService.setProcessVariables(new SetProcessVariablesImpl(processInstance.getId(),
                                                                                                          Collections.emptyMap()))
         );
     }

@@ -1,15 +1,16 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
-import org.activiti.cloud.services.api.commands.results.SetProcessVariablesResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.runtime.api.cmd.ProcessCommands;
+import org.activiti.runtime.api.cmd.SetProcessVariables;
+import org.activiti.runtime.api.cmd.result.impl.SetProcessVariablesResultImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SetProcessVariablesCmdExecutor implements CommandExecutor<SetProcessVariablesCmd> {
+public class SetProcessVariablesCmdExecutor implements CommandExecutor<SetProcessVariables> {
 
     private SecurityAwareProcessInstanceService processInstanceService;
     private MessageChannel commandResults;
@@ -22,14 +23,15 @@ public class SetProcessVariablesCmdExecutor implements CommandExecutor<SetProces
     }
 
     @Override
-    public Class getHandledType() {
-        return SetProcessVariablesCmd.class;
+    public String getHandledType() {
+        return ProcessCommands.SET_PROCESS_VARIABLES.name();
     }
 
     @Override
-    public void execute(SetProcessVariablesCmd cmd) {
+    public void execute(SetProcessVariables cmd) {
         processInstanceService.setProcessVariables(cmd);
-        SetProcessVariablesResults cmdResult = new SetProcessVariablesResults(cmd.getId());
+        SetProcessVariablesResultImpl cmdResult = new SetProcessVariablesResultImpl(cmd);
         commandResults.send(MessageBuilder.withPayload(cmdResult).build());
     }
+
 }

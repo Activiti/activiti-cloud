@@ -18,7 +18,7 @@ package org.activiti.cloud.starter.tests.helper;
 
 import java.util.Map;
 
-import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
+import org.activiti.runtime.api.cmd.impl.SetTaskVariablesImpl;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.VariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,9 +63,9 @@ public class TaskRestTemplate {
     }
 
     public ResponseEntity<Void> setVariables(String taskId, Map<String, Object> variables) {
-        SetTaskVariablesCmd setTaskVariablesCmd = new SetTaskVariablesCmd(taskId, variables);
+        SetTaskVariablesImpl setTaskVariablesCmd = new SetTaskVariablesImpl(taskId, variables);
 
-        HttpEntity<SetTaskVariablesCmd> requestEntity = new HttpEntity<>(
+        HttpEntity<SetTaskVariablesImpl> requestEntity = new HttpEntity<>(
                 setTaskVariablesCmd,
                 null);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/",
@@ -78,9 +78,9 @@ public class TaskRestTemplate {
     }
 
     public ResponseEntity<Void> setVariablesLocal(String taskId, Map<String, Object> variables) {
-        SetTaskVariablesCmd setTaskVariablesCmd = new SetTaskVariablesCmd(taskId, variables);
+        SetTaskVariablesImpl setTaskVariablesCmd = new SetTaskVariablesImpl(taskId, variables);
 
-        HttpEntity<SetTaskVariablesCmd> requestEntity = new HttpEntity<>(
+        HttpEntity<SetTaskVariablesImpl> requestEntity = new HttpEntity<>(
                 setTaskVariablesCmd,
                 null);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/local",

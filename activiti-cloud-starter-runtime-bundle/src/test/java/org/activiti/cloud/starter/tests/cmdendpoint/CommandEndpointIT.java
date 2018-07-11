@@ -19,20 +19,27 @@
 package org.activiti.cloud.starter.tests.cmdendpoint;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
-import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
-import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
-import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
-import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.runtime.api.cmd.impl.ClaimTaskImpl;
+import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
+import org.activiti.runtime.api.cmd.impl.ReleaseTaskImpl;
+import org.activiti.runtime.api.cmd.impl.RemoveProcessVariablesImpl;
+import org.activiti.runtime.api.cmd.impl.ResumeProcessImpl;
+import org.activiti.runtime.api.cmd.impl.SendSignalImpl;
+import org.activiti.runtime.api.cmd.impl.SetProcessVariablesImpl;
+import org.activiti.runtime.api.cmd.impl.SetTaskVariablesImpl;
+import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
+import org.activiti.runtime.api.cmd.impl.SuspendProcessImpl;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.VariableInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +48,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +61,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED;
 import static org.activiti.runtime.api.model.Task.TaskStatus.CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
@@ -69,6 +78,12 @@ public class CommandEndpointIT {
     private TestRestTemplate restTemplate;
 
     @Autowired
+    private ProcessInstanceRestTemplate processInstanceRestTemplate;
+
+    @Autowired
+    private TaskRestTemplate taskRestTemplate;
+
+    @Autowired
     private CommandEndPointITStreamHandler streamHandler;
 
     private static final ParameterizedTypeReference<PagedResources<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Task>>() {
@@ -81,12 +96,13 @@ public class CommandEndpointIT {
     private static final String TASKS_URL = "/v1/tasks/";
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
+    private static final String SIGNAL_PROCESS = "ProcessWithBoundarySignal";
 
     @Autowired
     private KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
         // Get Available Process Definitions
@@ -107,22 +123,21 @@ public class CommandEndpointIT {
                  "one");
 
         String simpleProcessDefinitionId = processDefinitionIds.get(SIMPLE_PROCESS);
-        StartProcessInstanceCmd startProcessInstanceCmd = new StartProcessInstanceCmd(simpleProcessDefinitionId,
-                                                                                      vars);
+        StartProcessImpl startProcessInstanceCmd = new StartProcessImpl(simpleProcessDefinitionId,
+                                                                        vars);
 
         String processInstanceId = startProcessInstance(startProcessInstanceCmd);
 
-        SuspendProcessInstanceCmd suspendProcessInstanceCmd = new SuspendProcessInstanceCmd(processInstanceId);
+        SuspendProcessImpl suspendProcessInstanceCmd = new SuspendProcessImpl(processInstanceId);
         suspendProcessInstance(suspendProcessInstanceCmd);
 
-        activateProcessInstance(simpleProcessDefinitionId,
-                                processInstanceId);
-
+        resumeProcessInstance(simpleProcessDefinitionId,
+                              processInstanceId);
 
         // Get Tasks
 
         //when
-        ResponseEntity<PagedResources<Task>> responseEntity = getTasks();
+        ResponseEntity<PagedResources<Task>> responseEntity = getTasks(processInstanceId);
 
         //then
         assertThat(responseEntity).isNotNull();
@@ -132,36 +147,40 @@ public class CommandEndpointIT {
 
         Task task = tasks.iterator().next();
 
-        // Claim Task
+        setTaskVariables(task);
+
+        setAndRemoveProcessVariables(processInstanceId);
+
         claimTask(task);
 
-        // Release Task
         releaseTask(task);
 
-        // Reclaim Task to be able to complete it
         claimTask(task);
 
-        // Complete Task
         completeTask(task);
 
-        responseEntity = getTasks();
+        responseEntity = getTasks(processInstanceId);
         tasks = responseEntity.getBody().getContent();
         assertThat(tasks)
                 .filteredOn(t -> t.getId().equals(task.getId()))
                 .isEmpty();
 
-        // Checking that the process is finished
-        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "?page={page}&size={size}",
-                                                                                                     HttpMethod.GET,
-                                                                                                     null,
-                                                                                                     new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
-                                                                                                     },
-                                                                                                     "0",
-                                                                                                     "2");
 
-        assertThat(processInstancesPage.getBody().getContent())
-                .filteredOn(processInstance -> processInstance.getId().equals(processInstanceId))
-                .isEmpty();
+        Thread.sleep(1000);
+        await().untilAsserted(() -> {
+            // Checking that the process is finished
+            ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "?page={page}&size={size}",
+                                                                                                         HttpMethod.GET,
+                                                                                                         null,
+                                                                                                         new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
+                                                                                                         },
+                                                                                                         "0",
+                                                                                                         "2");
+
+            assertThat(processInstancesPage.getBody().getContent())
+                    .filteredOn(processInstance -> processInstance.getId().equals(processInstanceId))
+                    .isEmpty();
+        });
 
         assertThat(streamHandler.getStartedProcessInstanceAck()).isTrue();
         assertThat(streamHandler.getSuspendedProcessInstanceAck()).isTrue();
@@ -171,34 +190,79 @@ public class CommandEndpointIT {
         assertThat(streamHandler.getCompletedTaskAck()).isTrue();
     }
 
-    private void completeTask(Task task) throws InterruptedException {
+    private void completeTask(Task task) {
         Map<String, Object> variables = new HashMap<>();
 
-        CompleteTaskCmd completeTaskCmd = new CompleteTaskCmd(task.getId(),
-                                                              variables);
-        String cmdId = UUID.randomUUID().toString();
+        CompleteTaskImpl completeTaskCmd = new CompleteTaskImpl(task.getId(),
+                                                                variables);
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(completeTaskCmd).setHeader("cmdId",
-                                                                                 cmdId).build());
+                                                                                                completeTaskCmd.getId()).build());
         await("task to be completed").untilTrue(streamHandler.getCompletedTaskAck());
     }
 
-    private void releaseTask(Task task) throws InterruptedException {
-        ReleaseTaskCmd releaseTaskCmd = new ReleaseTaskCmd(task.getId());
-        String cmdId = UUID.randomUUID().toString();
+    private void releaseTask(Task task) {
+        ReleaseTaskImpl releaseTaskCmd = new ReleaseTaskImpl(task.getId());
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(releaseTaskCmd).setHeader("cmdId",
-                                                                                cmdId).build());
+                                                                                               releaseTaskCmd.getId()).build());
         await("task to be released").untilTrue(streamHandler.getReleasedTaskAck());
 
         assertThatTaskHasStatus(task.getId(),
                                 CREATED);
     }
 
-    private void claimTask(Task task) throws InterruptedException {
-        ClaimTaskCmd claimTaskCmd = new ClaimTaskCmd(task.getId(),
-                                                     "hruser");
-        String cmdId = UUID.randomUUID().toString();
+    private void setTaskVariables(Task task) {
+        Map<String, Object> variables = Collections.singletonMap("taskVar", "v1");
+        SetTaskVariablesImpl setTaskVariables = new SetTaskVariablesImpl(task.getId(),
+                                                                         variables);
+
+        clientStream.myCmdProducer().send(MessageBuilder.withPayload(setTaskVariables).setHeader("cmdId",
+                                                                                               setTaskVariables.getId()).build());
+
+        await("Variable to be set").untilTrue(streamHandler.getSetTaskVariablesAck());
+
+        ResponseEntity<Resources<VariableInstance>> retrievedVars = taskRestTemplate.getVariables(task.getId());
+        assertThat(retrievedVars.getBody().getContent())
+                .extracting(VariableInstance::getName,
+                            VariableInstance::getValue)
+                .contains(tuple("taskVar", "v1"));
+    }
+
+    private void setAndRemoveProcessVariables(String proInstanceId) {
+        Map<String, Object> variables = Collections.singletonMap("procVar", "v2");
+        SetProcessVariablesImpl setProcessVariables = new SetProcessVariablesImpl(proInstanceId,
+                                                                               variables);
+
+        clientStream.myCmdProducer().send(MessageBuilder.withPayload(setProcessVariables).setHeader("cmdId",
+                                                                                               setProcessVariables.getId()).build());
+
+        await("Variable to be set").untilTrue(streamHandler.getSetProcessVariablesAck());
+
+        ResponseEntity<Resources<VariableInstance>> retrievedVars = processInstanceRestTemplate.getVariables(proInstanceId);
+        assertThat(retrievedVars.getBody().getContent())
+                .extracting(VariableInstance::getName,
+                            VariableInstance::getValue)
+                .contains(tuple("procVar", "v2"));
+
+        RemoveProcessVariablesImpl removeProcessVariables = new RemoveProcessVariablesImpl(proInstanceId,
+                                                                            Collections.singletonList("procVar"));
+
+        clientStream.myCmdProducer().send(MessageBuilder.withPayload(removeProcessVariables).setHeader("cmdId",
+                                                                                                    removeProcessVariables.getId()).build());
+
+        await("Variable to be removed").untilTrue(streamHandler.getRemoveProcessVariablesAck());
+
+        retrievedVars = processInstanceRestTemplate.getVariables(proInstanceId);
+        assertThat(retrievedVars.getBody().getContent())
+                .extracting(VariableInstance::getName,
+                            VariableInstance::getValue)
+                .doesNotContain(tuple("procVar", "v2"));
+    }
+
+    private void claimTask(Task task) {
+        ClaimTaskImpl claimTaskCmd = new ClaimTaskImpl(task.getId(),
+                                                       "hruser");
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(claimTaskCmd).setHeader("cmdId",
-                                                                              cmdId).build());
+                                                                                             claimTaskCmd.getId()).build());
 
         await("task to be claimed").untilTrue(streamHandler.getClaimedTaskAck());
 
@@ -214,13 +278,12 @@ public class CommandEndpointIT {
         assertThat(retrievedTask.getStatus()).isEqualTo(status);
     }
 
-    private void activateProcessInstance(String processDefinitionId,
-                                         String processInstanceId) throws InterruptedException {
+    private void resumeProcessInstance(String processDefinitionId,
+                                       String processInstanceId) {
         //given
-        ActivateProcessInstanceCmd activateProcessInstanceCmd = new ActivateProcessInstanceCmd(processInstanceId);
-        String cmdId = UUID.randomUUID().toString();
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(activateProcessInstanceCmd).setHeader("cmdId",
-                                                                                            cmdId).build());
+        ResumeProcessImpl resumeProcess = new ResumeProcessImpl(processInstanceId);
+        clientStream.myCmdProducer().send(MessageBuilder.withPayload(resumeProcess).setHeader("cmdId",
+                                                                                              resumeProcess.getId()).build());
 
         await("process to be activated").untilTrue(streamHandler.getActivatedProcessInstanceAck());
         //when
@@ -234,7 +297,7 @@ public class CommandEndpointIT {
         assertThat(processInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
     }
 
-    private void suspendProcessInstance(SuspendProcessInstanceCmd suspendProcessInstanceCmd) {
+    private void suspendProcessInstance(SuspendProcessImpl suspendProcessInstanceCmd) {
         //given
 
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(suspendProcessInstanceCmd).build());
@@ -249,7 +312,7 @@ public class CommandEndpointIT {
         assertThat(processInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
     }
 
-    private String startProcessInstance(StartProcessInstanceCmd startProcessInstanceCmd) {
+    private String startProcessInstance(StartProcessImpl startProcessInstanceCmd) {
         //given
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(startProcessInstanceCmd).build());
 
@@ -273,7 +336,7 @@ public class CommandEndpointIT {
                                                                                               HttpMethod.GET,
                                                                                               null,
                                                                                               new ParameterizedTypeReference<ProcessInstance>() {
-                                                                                                     },
+                                                                                              },
                                                                                               processInstanceId);
 
         assertThat(processInstanceResponseEntity).isNotNull();
@@ -284,19 +347,16 @@ public class CommandEndpointIT {
         return processInstance;
     }
 
-    private ResponseEntity<PagedResources<Task>> getTasks() {
-        return restTemplate.exchange(TASKS_URL,
-                                     HttpMethod.GET,
-                                     null,
-                                     PAGED_TASKS_RESPONSE_TYPE);
+    private ResponseEntity<PagedResources<Task>> getTasks(String processInstanceId) {
+        return processInstanceRestTemplate.getTasks(processInstanceId);
     }
 
     private ResponseEntity<Task> getTask(String taskId) {
         ResponseEntity<Task> responseEntity = restTemplate.exchange(TASKS_URL + taskId,
-                                                              HttpMethod.GET,
-                                                              null,
-                                                              new ParameterizedTypeReference<Task>() {
-                                                              });
+                                                                    HttpMethod.GET,
+                                                                    null,
+                                                                    new ParameterizedTypeReference<Task>() {
+                                                                    });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
@@ -309,5 +369,22 @@ public class CommandEndpointIT {
                                      HttpMethod.GET,
                                      null,
                                      responseType);
+    }
+
+    @Test
+    public void shouldSendSignalViaCommand() {
+        //given
+        ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIGNAL_PROCESS));
+        SendSignalImpl sendSignal = new SendSignalImpl("go");
+
+        //when
+        clientStream.myCmdProducer().send(MessageBuilder.withPayload(sendSignal).setHeader("cmdId",
+                                                                                           sendSignal.getId()).build());
+        //then
+        await("signal to be sent")
+                .untilTrue(streamHandler.getSendSignalAck());
+
+        ResponseEntity<PagedResources<Task>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
+        assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
     }
 }

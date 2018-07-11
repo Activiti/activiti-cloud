@@ -1,8 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.SignalCmd;
 import org.activiti.cloud.services.api.commands.results.SignalProcessInstancesResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.runtime.api.cmd.RuntimeCommands;
+import org.activiti.runtime.api.cmd.impl.SendSignalImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -33,9 +34,9 @@ public class SignalCmdExecutorTest {
 
     @Test
     public void signalProcessInstancesCmdExecutorTest() {
-        SignalCmd signalProcessInstancesCmd = new SignalCmd("x");
+        SendSignalImpl signalProcessInstancesCmd = new SendSignalImpl("x");
 
-        assertThat(signalCmdExecutor.getHandledType()).isEqualTo(SignalCmd.class);
+        assertThat(signalCmdExecutor.getHandledType()).isEqualTo(RuntimeCommands.SEND_SIGNAL.name());
 
         signalCmdExecutor.execute(signalProcessInstancesCmd);
 

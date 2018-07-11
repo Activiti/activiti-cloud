@@ -22,28 +22,29 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.cloud.services.api.commands.SignalCmd;
-import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.NotFoundException;
+import org.activiti.runtime.api.cmd.impl.SendSignalImpl;
+import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
 import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.conf.CommonModelAutoConfiguration;
+import org.conf.activiti.runtime.ProcessModelAutoConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -75,6 +76,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
+@Import({CommonModelAutoConfiguration.class,
+        ProcessModelAutoConfiguration.class,
+        ServicesRestAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 public class ProcessInstanceControllerImplIT {
 
@@ -134,7 +138,7 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void startProcess() throws Exception {
-        StartProcessInstanceCmd cmd = new StartProcessInstanceCmd("1");
+        StartProcessImpl cmd = new StartProcessImpl("1");
 
         when(securityAwareProcessInstanceService.startProcess(any())).thenReturn(defaultProcessInstance());
 
@@ -147,7 +151,7 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void startProcessForbidden() throws Exception {
-        StartProcessInstanceCmd cmd = new StartProcessInstanceCmd("1");
+        StartProcessImpl cmd = new StartProcessImpl("1");
 
         when(securityAwareProcessInstanceService.startProcess(any())).thenThrow(new ActivitiForbiddenException("Not permitted"));
 
@@ -228,7 +232,7 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void sendSignal() throws Exception {
-        SignalCmd cmd = new SignalCmd("signalInstance");
+        SendSignalImpl cmd = new SendSignalImpl("signalInstance");
 
         this.mockMvc.perform(get("/v1/process-instances/signal").contentType(MediaType.APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(cmd)))

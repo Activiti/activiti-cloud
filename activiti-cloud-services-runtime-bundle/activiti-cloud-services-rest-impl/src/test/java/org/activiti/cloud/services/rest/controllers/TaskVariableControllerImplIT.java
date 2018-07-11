@@ -21,22 +21,23 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
+import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.runtime.api.cmd.impl.SetTaskVariablesImpl;
 import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
+import org.activiti.runtime.conf.CommonModelAutoConfiguration;
+import org.activiti.runtime.conf.TaskModelAutoConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -58,6 +59,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableSpringDataWebSupport()
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
+@Import({CommonModelAutoConfiguration.class,
+        TaskModelAutoConfiguration.class,
+        ServicesRestAutoConfiguration.class})
 public class TaskVariableControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "task-variable";
@@ -139,8 +143,8 @@ public class TaskVariableControllerImplIT {
     @Test
     public void setVariables() throws Exception {
         this.mockMvc.perform(post("/v1/tasks/{taskId}/variables/",
-                                  TASK_ID).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new SetTaskVariablesCmd(TASK_ID,
-                                                                                                                                             Collections.emptyMap()))))
+                                  TASK_ID).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new SetTaskVariablesImpl(TASK_ID,
+                                                                                                                                              Collections.emptyMap()))))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/set",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
@@ -151,7 +155,7 @@ public class TaskVariableControllerImplIT {
     @Test
     public void setVariablesLocalVariables() throws Exception {
         this.mockMvc.perform(post("/v1/tasks/{taskId}/variables/local",
-                                  TASK_ID).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new SetTaskVariablesCmd(TASK_ID,
+                                  TASK_ID).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new SetTaskVariablesImpl(TASK_ID,
                                                                                                                                              Collections.emptyMap()))))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/set/local",

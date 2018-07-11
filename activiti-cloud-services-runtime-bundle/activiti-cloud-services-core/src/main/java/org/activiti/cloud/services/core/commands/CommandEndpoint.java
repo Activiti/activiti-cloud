@@ -5,8 +5,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.activiti.cloud.services.api.commands.Command;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.runtime.api.cmd.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,29 +14,29 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CommandEndpoint {
+public class CommandEndpoint<T extends Command<?>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandEndpoint.class);
-    private Map<Class, CommandExecutor> commandExecutors;
+    private Map<String, CommandExecutor<T>> commandExecutors;
 
     @Autowired
-    public CommandEndpoint(Set<CommandExecutor> cmdExecutors) {
+    public CommandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
         this.commandExecutors = cmdExecutors.stream().collect(Collectors.toMap(CommandExecutor::getHandledType,
                                                                                Function.identity()));
     }
 
     @StreamListener(ProcessEngineChannels.COMMAND_CONSUMER)
-    public void consumeActivateProcessInstanceCmd(Command cmd) {
+    public void consumeActivateProcessInstanceCmd(T cmd) {
         processCommand(cmd);
     }
 
-    private void processCommand(Command cmd) {
-        CommandExecutor cmdExecutor = commandExecutors.get(cmd.getClass());
+    private void processCommand(T cmd) {
+        CommandExecutor<T> cmdExecutor = commandExecutors.get(cmd.getCommandType().name());
         if (cmdExecutor != null) {
             cmdExecutor.execute(cmd);
             return;
         }
 
-        LOGGER.debug(">>> No Command Found for type: " + cmd.getClass());
+        LOGGER.warn(">>> No Command Found for type: " + cmd.getClass());
     }
 }

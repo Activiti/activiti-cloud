@@ -23,9 +23,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.runtime.api.cmd.RemoveProcessVariables;
+import org.activiti.runtime.api.cmd.impl.RemoveProcessVariablesImpl;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.VariableInstance;
@@ -133,7 +134,7 @@ public class ProcessVariablesIT {
 
         List<String> variablesNames = new ArrayList<>(variables.keySet());
 
-        HttpEntity<RemoveProcessVariablesCmd> entity = new HttpEntity<>(new RemoveProcessVariablesCmd(startResponse.getBody().getId(),variablesNames));
+        HttpEntity<RemoveProcessVariables> entity = new HttpEntity<>(new RemoveProcessVariablesImpl(startResponse.getBody().getId(), variablesNames));
 
         //when
         ResponseEntity<Resource<Map<String, Object>>> variablesResponse = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startResponse.getBody().getId() + "/variables",

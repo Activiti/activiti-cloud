@@ -16,16 +16,45 @@
 
 package org.activiti.cloud.services.rest.conf;
 
+import java.util.List;
+
 import org.activiti.cloud.services.rest.controllers.ResourcesAssembler;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class ServicesRestAutoConfiguration {
+@AutoConfigureAfter(WebMvcAutoConfiguration.class)
+public class ServicesRestAutoConfiguration implements WebMvcConfigurer {
+
+    private final Jackson2ObjectMapperBuilder objectMapperBuilder;
+
+    public ServicesRestAutoConfiguration(Jackson2ObjectMapperBuilder objectMapperBuilder) {
+        this.objectMapperBuilder = objectMapperBuilder;
+    }
 
     @Bean
-    public ResourcesAssembler resourcesAssembler(){
+    public ResourcesAssembler resourcesAssembler() {
         return new ResourcesAssembler();
     }
 
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        // for some, not yet identified, reason the ObjectMapper used by MappingJackson2HttpMessageConverter
+        // does not contains the object mapper customizations provided by custom Module beans.
+        // need to call configure here to ensure that the customisations are registered
+        for (HttpMessageConverter<?> converter : converters) {
+            //should exclude TypeConstrainedMappingJackson2HttpMessageConverter from configuration
+            if(converter instanceof MappingJackson2HttpMessageConverter && !(converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter)) {
+                objectMapperBuilder.configure(((MappingJackson2HttpMessageConverter) converter).getObjectMapper());
+            }
+        }
+
+    }
 }

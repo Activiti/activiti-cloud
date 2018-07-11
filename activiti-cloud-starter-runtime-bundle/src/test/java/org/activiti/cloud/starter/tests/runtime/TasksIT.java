@@ -21,10 +21,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.Task;
@@ -249,8 +249,8 @@ public class TasksIT  {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = executeRequestGetTasks().getBody().iterator().next();
 
-        CompleteTaskCmd completeTaskCmd = new CompleteTaskCmd(task.getId(), Collections.singletonMap("myVar",
-                "any"));
+        CompleteTaskImpl completeTaskCmd = new CompleteTaskImpl(task.getId(), Collections.singletonMap("myVar",
+                                                                                                      "any"));
 
         //when
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId() + "/complete",

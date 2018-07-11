@@ -18,14 +18,14 @@ package org.activiti.cloud.services.core.pageable;
 
 import java.util.List;
 
-import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
-import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
-import org.activiti.cloud.services.api.commands.CreateTaskCmd;
-import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
-import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.runtime.api.TaskRuntime;
+import org.activiti.runtime.api.cmd.ClaimTask;
+import org.activiti.runtime.api.cmd.CompleteTask;
+import org.activiti.runtime.api.cmd.CreateTask;
+import org.activiti.runtime.api.cmd.ReleaseTask;
+import org.activiti.runtime.api.cmd.SetTaskVariables;
 import org.activiti.runtime.api.identity.IdentityLookup;
 import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.VariableInstance;
@@ -84,19 +84,19 @@ public class SecurityAwareTaskService {
         return taskRuntime.task(taskId);
     }
 
-    public FluentTask claimTask(ClaimTaskCmd claimTaskCmd) {
+    public FluentTask claimTask(ClaimTask claimTaskCmd) {
         taskRuntime.task(claimTaskCmd.getTaskId())
                 .claim(claimTaskCmd.getAssignee());
         return taskRuntime.task(claimTaskCmd.getTaskId());
     }
 
-    public FluentTask releaseTask(ReleaseTaskCmd releaseTaskCmd) {
+    public FluentTask releaseTask(ReleaseTask releaseTaskCmd) {
         taskRuntime.task(releaseTaskCmd.getTaskId())
                 .release();
         return taskRuntime.task(releaseTaskCmd.getTaskId());
     }
 
-    public void completeTask(CompleteTaskCmd completeTaskCmd) {
+    public void completeTask(CompleteTask completeTaskCmd) {
         if (completeTaskCmd != null) {
             taskRuntime.task(completeTaskCmd.getTaskId())
                     .completeWith()
@@ -105,7 +105,7 @@ public class SecurityAwareTaskService {
         }
     }
 
-    public FluentTask createNewTask(CreateTaskCmd createTaskCmd) {
+    public FluentTask createNewTask(CreateTask createTaskCmd) {
         return taskRuntime
                 .createTaskWith()
                 .name(createTaskCmd.getName())
@@ -117,7 +117,7 @@ public class SecurityAwareTaskService {
     }
 
     public FluentTask createNewSubtask(String parentTaskId,
-                                       CreateTaskCmd createSubtaskCmd) {
+                                       CreateTask createSubtaskCmd) {
         return taskRuntime.task(parentTaskId)
                 .createSubTaskWith()
                 .name(createSubtaskCmd.getName())
@@ -160,12 +160,12 @@ public class SecurityAwareTaskService {
         }
     }
 
-    public void setTaskVariables(SetTaskVariablesCmd setTaskVariablesCmd) {
+    public void setTaskVariables(SetTaskVariables setTaskVariablesCmd) {
         taskRuntime.task(setTaskVariablesCmd.getTaskId())
                 .variables(setTaskVariablesCmd.getVariables());
     }
 
-    public void setTaskVariablesLocal(SetTaskVariablesCmd setTaskVariablesCmd) {
+    public void setTaskVariablesLocal(SetTaskVariables setTaskVariablesCmd) {
         taskRuntime.task(setTaskVariablesCmd.getTaskId())
                 .localVariables(setTaskVariablesCmd.getVariables());
     }

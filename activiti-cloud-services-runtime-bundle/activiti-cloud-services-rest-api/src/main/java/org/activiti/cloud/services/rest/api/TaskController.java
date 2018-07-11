@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.rest.api;
 
-import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
-import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
+import org.activiti.runtime.api.cmd.CompleteTask;
+import org.activiti.runtime.api.cmd.CreateTask;
 import org.activiti.runtime.api.model.Task;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
@@ -34,13 +34,13 @@ public interface TaskController {
 
     @RequestMapping(value = "/{taskId}/complete", method = RequestMethod.POST)
     ResponseEntity<Void> completeTask(@PathVariable String taskId,
-                                      @RequestBody(required = false) CompleteTaskCmd completeTaskCmd);
+                                      @RequestBody(required = false) CompleteTask completeTask);
 
     @RequestMapping(value = "/{taskId}", method = RequestMethod.DELETE)
     void deleteTask(@PathVariable String taskId);
 
     @RequestMapping(method = RequestMethod.POST)
-    Resource<Task> createNewTask(@RequestBody CreateTaskCmd createTaskCmd);
+    Resource<Task> createNewTask(@RequestBody CreateTask createTaskCmd);
 
     @RequestMapping(value = "/{taskId}", method = RequestMethod.PUT)
     ResponseEntity<Void> updateTask(@PathVariable("taskId") String taskId,
@@ -48,7 +48,7 @@ public interface TaskController {
 
     @RequestMapping(value = "/{taskId}/subtask", method = RequestMethod.POST)
     Resource<Task> createSubtask(@PathVariable String taskId,
-                                 @RequestBody CreateTaskCmd createSubtaskCmd);
+                                 @RequestBody CreateTask createSubtaskCmd);
 
     @RequestMapping(value = "/{taskId}/subtasks", method = RequestMethod.GET)
     Resources getSubtasks(@PathVariable String taskId);

@@ -19,12 +19,12 @@ package org.activiti.cloud.services.core.pageable;
 import java.util.Collections;
 import java.util.Map;
 
-import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
-import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
-import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
-import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.runtime.api.TaskRuntime;
+import org.activiti.runtime.api.cmd.impl.ClaimTaskImpl;
+import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
+import org.activiti.runtime.api.cmd.impl.ReleaseTaskImpl;
+import org.activiti.runtime.api.cmd.impl.SetTaskVariablesImpl;
 import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.builder.CompleteTaskPayload;
 import org.junit.Before;
@@ -32,11 +32,12 @@ import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.security.core.Authentication;
 
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class SecurityAwareTaskServiceTest {
@@ -49,7 +50,6 @@ public class SecurityAwareTaskServiceTest {
 
     @Mock
     private SpringSecurityAuthenticationWrapper authenticationWrapper;
-
 
     @Before
     public void setUp() {
@@ -82,8 +82,8 @@ public class SecurityAwareTaskServiceTest {
         given(taskRuntime.task("taskId")).willReturn(task);
 
         //when
-        taskService.claimTask(new ClaimTaskCmd("taskId",
-                                               "user"));
+        taskService.claimTask(new ClaimTaskImpl("taskId",
+                                                "user"));
 
         //
         verify(task).claim("user");
@@ -96,7 +96,7 @@ public class SecurityAwareTaskServiceTest {
         given(taskRuntime.task("taskId")).willReturn(task);
 
         //when
-        taskService.releaseTask(new ReleaseTaskCmd("taskId"));
+        taskService.releaseTask(new ReleaseTaskImpl("taskId"));
 
         //then
         verify(task).release();
@@ -116,8 +116,8 @@ public class SecurityAwareTaskServiceTest {
                                                                  "paul");
 
         //when
-        taskService.completeTask(new CompleteTaskCmd("taskId",
-                                                     variables));
+        taskService.completeTask(new CompleteTaskImpl("taskId",
+                                                      variables));
         verify(completeTaskPayload).variables(variables);
         verify(completeTaskPayload).doIt();
     }
@@ -125,9 +125,9 @@ public class SecurityAwareTaskServiceTest {
     @Test
     public void setTaskVariablesShouldSetVariablesOnFluentTask() {
         //given
-        SetTaskVariablesCmd setTaskVariablesCmd = new SetTaskVariablesCmd("taskId",
-                                                                          Collections.singletonMap("name",
-                                                                                                   "john"));
+        SetTaskVariablesImpl setTaskVariablesCmd = new SetTaskVariablesImpl("taskId",
+                                                                            Collections.singletonMap("name",
+                                                                                                     "john"));
         FluentTask task = mock(FluentTask.class);
         given(taskRuntime.task(setTaskVariablesCmd.getTaskId())).willReturn(task);
 
@@ -141,9 +141,9 @@ public class SecurityAwareTaskServiceTest {
     @Test
     public void shouldSetTaskVariablesLocal() {
         //given
-        SetTaskVariablesCmd cmd = new SetTaskVariablesCmd("taskId",
-                                                          Collections.singletonMap("local",
-                                                                                   "myLocalVar"));
+        SetTaskVariablesImpl cmd = new SetTaskVariablesImpl("taskId",
+                                                            Collections.singletonMap("local",
+                                                                                     "myLocalVar"));
 
         FluentTask task = mock(FluentTask.class);
         given(taskRuntime.task(cmd.getTaskId())).willReturn(task);

@@ -15,14 +15,14 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
-import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
 import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
+import org.activiti.runtime.api.cmd.RemoveProcessVariables;
+import org.activiti.runtime.api.cmd.SetProcessVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
@@ -79,14 +79,14 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
 
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
-                                             @RequestBody SetProcessVariablesCmd setProcessVariablesCmd) {
+                                             @RequestBody SetProcessVariables setProcessVariablesCmd) {
         securityAwareProcessInstanceService.setProcessVariables(setProcessVariablesCmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
-                                                @RequestBody RemoveProcessVariablesCmd removeProcessVariablesCmd) {
+                                                @RequestBody RemoveProcessVariables removeProcessVariablesCmd) {
         securityAwareProcessInstanceService.removeProcessVariables(removeProcessVariablesCmd);
 
         return new ResponseEntity<>(HttpStatus.OK);

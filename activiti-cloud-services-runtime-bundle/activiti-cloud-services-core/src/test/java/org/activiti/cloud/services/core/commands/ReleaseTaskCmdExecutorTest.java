@@ -1,8 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.results.CompleteTaskResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
+import org.activiti.runtime.api.cmd.TaskCommands;
+import org.activiti.runtime.api.cmd.impl.ReleaseTaskImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -34,8 +35,8 @@ public class ReleaseTaskCmdExecutorTest {
     @Test
     public void releaseTaskCmdExecutorTest() {
         //given
-        ReleaseTaskCmd releaseTaskCmd = new ReleaseTaskCmd("taskId");
-        assertThat(releaseTaskCmdExecutor.getHandledType()).isEqualTo(ReleaseTaskCmd.class);
+        ReleaseTaskImpl releaseTaskCmd = new ReleaseTaskImpl("taskId");
+        assertThat(releaseTaskCmdExecutor.getHandledType()).isEqualTo(TaskCommands.RELEASE_TASK.name());
 
         //when
         releaseTaskCmdExecutor.execute(releaseTaskCmd);

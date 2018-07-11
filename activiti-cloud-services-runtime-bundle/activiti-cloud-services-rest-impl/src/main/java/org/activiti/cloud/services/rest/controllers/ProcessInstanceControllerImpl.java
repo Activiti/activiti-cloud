@@ -19,10 +19,6 @@ import java.nio.charset.StandardCharsets;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.SignalCmd;
-import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
@@ -33,6 +29,10 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.NotFoundException;
+import org.activiti.runtime.api.cmd.SendSignal;
+import org.activiti.runtime.api.cmd.StartProcess;
+import org.activiti.runtime.api.cmd.impl.ResumeProcessImpl;
+import org.activiti.runtime.api.cmd.impl.SuspendProcessImpl;
 import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -100,7 +100,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-    public ProcessInstanceResource startProcess(@RequestBody StartProcessInstanceCmd cmd) {
+    public ProcessInstanceResource startProcess(@RequestBody StartProcess cmd) {
 
         return resourceAssembler.toResource(securityAwareProcessInstanceService.startProcess(cmd));
     }
@@ -123,20 +123,20 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     @Transactional
-    public ResponseEntity<Void> sendSignal(@RequestBody SignalCmd cmd) {
+    public ResponseEntity<Void> sendSignal(@RequestBody SendSignal cmd) {
         securityAwareProcessInstanceService.signal(cmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> suspend(@PathVariable String processInstanceId) {
-        securityAwareProcessInstanceService.suspend(new SuspendProcessInstanceCmd(processInstanceId));
+        securityAwareProcessInstanceService.suspend(new SuspendProcessImpl(processInstanceId));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> activate(@PathVariable String processInstanceId) {
-        securityAwareProcessInstanceService.activate(new ActivateProcessInstanceCmd(processInstanceId));
+        securityAwareProcessInstanceService.activate(new ResumeProcessImpl(processInstanceId));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

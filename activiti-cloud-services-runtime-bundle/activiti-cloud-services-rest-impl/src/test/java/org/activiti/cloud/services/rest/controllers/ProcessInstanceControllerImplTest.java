@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.runtime.api.cmd.ResumeProcess;
+import org.activiti.runtime.api.cmd.SuspendProcess;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -50,7 +50,7 @@ public class ProcessInstanceControllerImplTest {
         controller.suspend(processInstanceId);
 
         //then
-        verify(processInstanceService).suspend(any(SuspendProcessInstanceCmd.class));
+        verify(processInstanceService).suspend(any(SuspendProcess.class));
     }
 
     @Test
@@ -62,6 +62,6 @@ public class ProcessInstanceControllerImplTest {
         controller.activate(processInstanceId);
 
         //then
-        verify(processInstanceService).activate(any(ActivateProcessInstanceCmd.class));
+        verify(processInstanceService).activate(any(ResumeProcess.class));
     }
 }

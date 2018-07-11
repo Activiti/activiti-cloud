@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.rest.api;
 
-import org.activiti.cloud.services.api.commands.SignalCmd;
-import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
+import org.activiti.runtime.api.cmd.SendSignal;
+import org.activiti.runtime.api.cmd.StartProcess;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
@@ -21,7 +21,7 @@ public interface ProcessInstanceController {
     PagedResources<ProcessInstanceResource> getProcessInstances(Pageable pageable);
 
     @RequestMapping(method = RequestMethod.POST)
-    ProcessInstanceResource startProcess(@RequestBody StartProcessInstanceCmd cmd);
+    ProcessInstanceResource startProcess(@RequestBody StartProcess cmd);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     ProcessInstanceResource getProcessInstanceById(@PathVariable String processInstanceId);
@@ -34,7 +34,7 @@ public interface ProcessInstanceController {
     String getProcessDiagram(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "/signal")
-    ResponseEntity<Void> sendSignal(@RequestBody SignalCmd cmd);
+    ResponseEntity<Void> sendSignal(@RequestBody SendSignal cmd);
 
     @RequestMapping(value = "{processInstanceId}/suspend")
     ResponseEntity<Void> suspend(@PathVariable String processInstanceId);

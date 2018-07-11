@@ -1,8 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.results.StartProcessInstanceResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.runtime.api.cmd.ProcessCommands;
+import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
 import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,13 +38,13 @@ public class StartProcessInstanceCmdExecutorTest {
 
     @Test
     public void startProcessInstanceCmdExecutorTest() {
-        StartProcessInstanceCmd startProcessInstanceCmd = new StartProcessInstanceCmd("x");
+        StartProcessImpl startProcessInstanceCmd = new StartProcessImpl("x");
 
         FluentProcessInstance fakeProcessInstance = mock(FluentProcessInstance.class);
 
         given(securityAwareProcessInstanceService.startProcess(any())).willReturn(fakeProcessInstance);
 
-        assertThat(startProcessInstanceCmdExecutor.getHandledType()).isEqualTo(StartProcessInstanceCmd.class);
+        assertThat(startProcessInstanceCmdExecutor.getHandledType()).isEqualTo(ProcessCommands.START_PROCESS.name());
 
         startProcessInstanceCmdExecutor.execute(startProcessInstanceCmd);
 

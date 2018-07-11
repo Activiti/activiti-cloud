@@ -18,10 +18,6 @@ package org.activiti.cloud.services.rest.controllers;
 import java.util.Map;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.services.api.commands.ClaimTaskCmd;
-import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
-import org.activiti.cloud.services.api.commands.CreateTaskCmd;
-import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
 import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
@@ -31,6 +27,11 @@ import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.runtime.api.NotFoundException;
+import org.activiti.runtime.api.cmd.CompleteTask;
+import org.activiti.runtime.api.cmd.CreateTask;
+import org.activiti.runtime.api.cmd.impl.ClaimTaskImpl;
+import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
+import org.activiti.runtime.api.cmd.impl.ReleaseTaskImpl;
 import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,25 +103,25 @@ public class TaskControllerImpl implements TaskController {
             throw new IllegalStateException("Assignee must be resolved from the Identity/Security Layer");
         }
 
-        return taskResourceAssembler.toResource(securityAwareTaskService.claimTask(new ClaimTaskCmd(taskId,
-                                                                                                    assignee)));
+        return taskResourceAssembler.toResource(securityAwareTaskService.claimTask(new ClaimTaskImpl(taskId,
+                                                                                                     assignee)));
     }
 
     @Override
     public Resource<Task> releaseTask(@PathVariable String taskId) {
 
-        return taskResourceAssembler.toResource(securityAwareTaskService.releaseTask(new ReleaseTaskCmd(taskId)));
+        return taskResourceAssembler.toResource(securityAwareTaskService.releaseTask(new ReleaseTaskImpl(taskId)));
     }
 
     @Override
     public ResponseEntity<Void> completeTask(@PathVariable String taskId,
-                                             @RequestBody(required = false) CompleteTaskCmd completeTaskCmd) {
+                                             @RequestBody(required = false) CompleteTask completeTaskCmd) {
         Map<String, Object> outputVariables = null;
         if (completeTaskCmd != null) {
             outputVariables = completeTaskCmd.getOutputVariables();
         }
-        securityAwareTaskService.completeTask(new CompleteTaskCmd(taskId,
-                                                                  outputVariables));
+        securityAwareTaskService.completeTask(new CompleteTaskImpl(taskId,
+                                                                   outputVariables));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -130,7 +131,7 @@ public class TaskControllerImpl implements TaskController {
     }
 
     @Override
-    public Resource<Task> createNewTask(@RequestBody CreateTaskCmd createTaskCmd) {
+    public Resource<Task> createNewTask(@RequestBody CreateTask createTaskCmd) {
         return taskResourceAssembler.toResource(securityAwareTaskService.createNewTask(createTaskCmd));
     }
 
@@ -144,7 +145,7 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public Resource<Task> createSubtask(@PathVariable String taskId,
-                                        @RequestBody CreateTaskCmd createSubtaskCmd) {
+                                        @RequestBody CreateTask createSubtaskCmd) {
 
         return taskResourceAssembler.toResource(securityAwareTaskService.createNewSubtask(taskId,
                                                                                           createSubtaskCmd));

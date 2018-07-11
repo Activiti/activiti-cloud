@@ -22,15 +22,17 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.services.api.commands.CreateTaskCmd;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
+import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
 import org.activiti.runtime.api.NotFoundException;
+import org.activiti.runtime.api.cmd.impl.CreateTaskImpl;
 import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.impl.FluentTaskImpl;
 import org.activiti.runtime.conf.CommonModelAutoConfiguration;
+import org.activiti.runtime.conf.TaskModelAutoConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,9 +56,10 @@ import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildStan
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildSubTask;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildTask;
 import static org.activiti.runtime.api.model.Task.TaskStatus.CREATED;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.halLinks;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
@@ -77,7 +80,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
-@Import({CommonModelAutoConfiguration.class})
+@Import({CommonModelAutoConfiguration.class,
+        TaskModelAutoConfiguration.class,
+        ServicesRestAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 public class TaskControllerImplIT {
 
@@ -207,14 +212,12 @@ public class TaskControllerImplIT {
                                                   "New task to be performed");
         given(securityAwareTaskService.createNewTask(any())).willReturn(task);
 
+        CreateTaskImpl createTask = new CreateTaskImpl("new-task",
+                                                        "description");
+        createTask.setPriority(50);
         this.mockMvc.perform(post("/v1/tasks/",
                                   1).contentType(MediaType.APPLICATION_JSON)
-                                     .content(mapper.writeValueAsString(new CreateTaskCmd("new-task",
-                                                                                          "description",
-                                                                                          null,
-                                                                                          50,
-                                                                                          null,
-                                                                                          null))))
+                                     .content(mapper.writeValueAsString(createTask)))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/new",
                                 links(linkWithRel("self").ignored(),
@@ -244,14 +247,12 @@ public class TaskControllerImplIT {
         given(securityAwareTaskService.createNewSubtask(any(),
                                                         any())).willReturn(subTask);
 
+        CreateTaskImpl createTaskCmd = new CreateTaskImpl("new-task",
+                                                          "description");
+        createTaskCmd.setPriority(50);
         this.mockMvc.perform(post("/v1/tasks/{taskId}/subtask",
                                   parentTaskId).contentType(MediaType.APPLICATION_JSON)
-                                     .content(mapper.writeValueAsString(new CreateTaskCmd("new-task",
-                                                                                          "description",
-                                                                                          null,
-                                                                                          50,
-                                                                                          null,
-                                                                                          null))))
+                                     .content(mapper.writeValueAsString(createTaskCmd)))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/subtasks/get",
                                 links(linkWithRel("self").ignored(),

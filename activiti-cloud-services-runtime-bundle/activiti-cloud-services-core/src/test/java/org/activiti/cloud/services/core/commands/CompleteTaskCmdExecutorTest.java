@@ -3,9 +3,10 @@ package org.activiti.cloud.services.core.commands;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.services.api.commands.CompleteTaskCmd;
 import org.activiti.cloud.services.api.commands.results.CompleteTaskResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
+import org.activiti.runtime.api.cmd.TaskCommands;
+import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -37,10 +38,10 @@ public class CompleteTaskCmdExecutorTest {
     @Test
     public void completeTaskCmdExecutorTest() {
         Map<String, Object> variables = new HashMap<>();
-        CompleteTaskCmd completeTaskCmd = new CompleteTaskCmd("taskId",
-                                                              variables);
+        CompleteTaskImpl completeTaskCmd = new CompleteTaskImpl("taskId",
+                                                                variables);
 
-        assertThat(completeTaskCmdExecutor.getHandledType()).isEqualTo(CompleteTaskCmd.class);
+        assertThat(completeTaskCmdExecutor.getHandledType()).isEqualTo(TaskCommands.COMPLETE_TASK.name());
 
         completeTaskCmdExecutor.execute(completeTaskCmd);
 

@@ -1,15 +1,16 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.results.SuspendProcessInstanceResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.runtime.api.cmd.ProcessCommands;
+import org.activiti.runtime.api.cmd.SuspendProcess;
+import org.activiti.runtime.api.cmd.result.impl.SuspendProcessResultImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SuspendProcessInstanceCmdExecutor implements CommandExecutor<SuspendProcessInstanceCmd> {
+public class SuspendProcessInstanceCmdExecutor implements CommandExecutor<SuspendProcess> {
 
     private SecurityAwareProcessInstanceService processInstanceService;
     private MessageChannel commandResults;
@@ -22,14 +23,14 @@ public class SuspendProcessInstanceCmdExecutor implements CommandExecutor<Suspen
     }
 
     @Override
-    public Class getHandledType() {
-        return SuspendProcessInstanceCmd.class;
+    public String getHandledType() {
+        return ProcessCommands.SUSPEND_PROCESS.name();
     }
 
     @Override
-    public void execute(SuspendProcessInstanceCmd cmd) {
+    public void execute(SuspendProcess cmd) {
         processInstanceService.suspend(cmd);
-        SuspendProcessInstanceResults cmdResult = new SuspendProcessInstanceResults(cmd.getId());
+        SuspendProcessResultImpl cmdResult = new SuspendProcessResultImpl(cmd);
         commandResults.send(MessageBuilder.withPayload(cmdResult).build());
     }
 }

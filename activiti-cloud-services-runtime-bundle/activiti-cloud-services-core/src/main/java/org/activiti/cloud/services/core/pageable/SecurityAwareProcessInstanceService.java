@@ -18,18 +18,18 @@ package org.activiti.cloud.services.core.pageable;
 import java.util.HashMap;
 import java.util.List;
 
-import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
-import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
-import org.activiti.cloud.services.api.commands.SignalCmd;
-import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
-import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.runtime.api.ProcessRuntime;
+import org.activiti.runtime.api.cmd.RemoveProcessVariables;
+import org.activiti.runtime.api.cmd.ResumeProcess;
+import org.activiti.runtime.api.cmd.SendSignal;
+import org.activiti.runtime.api.cmd.SetProcessVariables;
+import org.activiti.runtime.api.cmd.StartProcess;
+import org.activiti.runtime.api.cmd.SuspendProcess;
 import org.activiti.runtime.api.model.FluentProcessDefinition;
 import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.activiti.runtime.api.model.ProcessInstance;
@@ -81,7 +81,7 @@ public class SecurityAwareProcessInstanceService {
                                                 processRuntime.processInstances(springPageConverter.toAPIPageable(pageable)));
     }
 
-    public ProcessInstance startProcess(StartProcessInstanceCmd cmd) {
+    public ProcessInstance startProcess(StartProcess cmd) {
 
         FluentProcessDefinition processDefinition;
         if (cmd.getProcessDefinitionKey() != null) {
@@ -109,7 +109,7 @@ public class SecurityAwareProcessInstanceService {
         return processInstance;
     }
 
-    public void signal(SignalCmd signaCmd) {
+    public void signal(SendSignal signaCmd) {
         //TODO: plan is to restrict access to events using a new security policy on events
         // - that's another piece of work though so for now no security here
 
@@ -131,17 +131,17 @@ public class SecurityAwareProcessInstanceService {
         return processInstance;
     }
 
-    public void suspend(SuspendProcessInstanceCmd suspendProcessInstanceCmd) {
+    public void suspend(SuspendProcess suspendProcessInstanceCmd) {
         FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(suspendProcessInstanceCmd.getProcessInstanceId());
         processInstance.suspend();
     }
 
-    public void activate(ActivateProcessInstanceCmd activateProcessInstanceCmd) {
-        FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(activateProcessInstanceCmd.getProcessInstanceId());
+    public void activate(ResumeProcess resumeProcess) {
+        FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(resumeProcess.getProcessInstanceId());
         processInstance.resume();
     }
 
-    public void setProcessVariables(SetProcessVariablesCmd setProcessVariablesCmd) {
+    public void setProcessVariables(SetProcessVariables setProcessVariablesCmd) {
         FluentProcessInstance processInstance = getAuthorizedProcessInstanceById(setProcessVariablesCmd.getProcessInstanceId());
         verifyCanWriteToProcessInstance(processInstance.getId());
         processInstance.variables(new HashMap<>(setProcessVariablesCmd.getVariables()));
@@ -152,7 +152,7 @@ public class SecurityAwareProcessInstanceService {
         processInstance.delete("Cancelled by " + authenticationWrapper.getAuthenticatedUserId());
     }
 
-    public void removeProcessVariables(RemoveProcessVariablesCmd removeProcessVariablesCmd) {
+    public void removeProcessVariables(RemoveProcessVariables removeProcessVariablesCmd) {
         FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(removeProcessVariablesCmd.getProcessInstanceId());
         processInstance.removeVariables(removeProcessVariablesCmd.getVariableNames());
     }

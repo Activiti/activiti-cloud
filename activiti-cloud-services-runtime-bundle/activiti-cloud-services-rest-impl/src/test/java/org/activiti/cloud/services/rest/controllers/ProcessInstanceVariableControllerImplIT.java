@@ -23,10 +23,13 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
-import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.runtime.api.cmd.impl.RemoveProcessVariablesImpl;
+import org.activiti.runtime.api.cmd.impl.SetProcessVariablesImpl;
 import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
+import org.activiti.runtime.conf.CommonModelAutoConfiguration;
+import org.conf.activiti.runtime.ProcessModelAutoConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +40,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -61,6 +65,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
+@Import({CommonModelAutoConfiguration.class,
+        ProcessModelAutoConfiguration.class,
+        ServicesRestAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 public class ProcessInstanceVariableControllerImplIT {
 
@@ -133,8 +140,8 @@ public class ProcessInstanceVariableControllerImplIT {
                 "varObj2");
 
         this.mockMvc.perform(post("/v1/process-instances/{processInstanceId}/variables",
-                1).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new SetProcessVariablesCmd("1",
-                variables))))
+                1).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new SetProcessVariablesImpl("1",
+                                                                                                                         variables))))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/upsert",
                         pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
@@ -148,8 +155,8 @@ public class ProcessInstanceVariableControllerImplIT {
                                     PROCESS_INSTANCE_ID)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(new RemoveProcessVariablesCmd(PROCESS_INSTANCE_ID, Arrays.asList("varName1",
-                                                                                                                    "varName2")))))
+                .content(mapper.writeValueAsString(new RemoveProcessVariablesImpl(PROCESS_INSTANCE_ID, Arrays.asList("varName1",
+                                                                                                                     "varName2")))))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",

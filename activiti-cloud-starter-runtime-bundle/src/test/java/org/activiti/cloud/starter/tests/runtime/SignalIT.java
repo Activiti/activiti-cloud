@@ -16,11 +16,12 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.activiti.cloud.services.api.commands.SignalCmd;
-import org.activiti.runtime.api.model.ProcessDefinition;
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.VariableInstance;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.engine.ProcessEngineConfiguration;
@@ -29,6 +30,11 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.runtime.api.cmd.impl.SendSignalImpl;
+import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.VariableInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,12 +51,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -149,7 +149,7 @@ public class SignalIT {
     public void processShouldTakeExceptionPathWhenSignalIsSent() {
         //given
         ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIGNAL_PROCESS));
-        SignalCmd signalProcessInstancesCmd = new SignalCmd("go");
+        SendSignalImpl signalProcessInstancesCmd = new SendSignalImpl("go");
 
         //when
         ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/signal",
@@ -168,7 +168,7 @@ public class SignalIT {
     public void processShouldHaveVariablesSetWhenSignalCarriesVariables() {
         //given
         ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIGNAL_PROCESS));
-        SignalCmd signalProcessInstancesCmd = new SignalCmd("go",
+        SendSignalImpl signalProcessInstancesCmd = new SendSignalImpl("go",
                 Collections.singletonMap("myVar",
                         "myContent"));
 

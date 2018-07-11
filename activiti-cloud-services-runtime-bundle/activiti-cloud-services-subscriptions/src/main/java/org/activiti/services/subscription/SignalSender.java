@@ -1,6 +1,6 @@
 package org.activiti.services.subscription;
 
-import org.activiti.cloud.services.api.commands.SignalCmd;
+import org.activiti.runtime.api.cmd.SendSignal;
 import org.activiti.services.subscription.channel.BroadcastSignaEventHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -16,7 +16,7 @@ public class SignalSender {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void sendSignal(SignalCmd signalCmd) {
+    public void sendSignal(SendSignal signalCmd) {
         eventHandler.broadcastSignal(signalCmd);
     }
 }

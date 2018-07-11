@@ -1,8 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.SuspendProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.results.SuspendProcessInstanceResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.runtime.api.cmd.ProcessCommands;
+import org.activiti.runtime.api.cmd.impl.SuspendProcessImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -34,8 +35,8 @@ public class SuspendProcessInstanceCmdExecutorTest {
     @Test
     public void suspendProcessInstanceCmdExecutorTest() {
         //given
-        SuspendProcessInstanceCmd suspendProcessInstanceCmd = new SuspendProcessInstanceCmd("x");
-        assertThat(suspendProcessInstanceCmdExecutor.getHandledType()).isEqualTo(SuspendProcessInstanceCmd.class);
+        SuspendProcessImpl suspendProcessInstanceCmd = new SuspendProcessImpl("x");
+        assertThat(suspendProcessInstanceCmdExecutor.getHandledType()).isEqualTo(ProcessCommands.SUSPEND_PROCESS.name());
 
         //when
         suspendProcessInstanceCmdExecutor.execute(suspendProcessInstanceCmd);

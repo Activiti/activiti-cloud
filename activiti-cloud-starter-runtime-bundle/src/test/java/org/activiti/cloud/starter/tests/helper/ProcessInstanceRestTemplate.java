@@ -19,9 +19,12 @@ package org.activiti.cloud.starter.tests.helper;
 import java.util.List;
 import java.util.Map;
 
-import org.activiti.cloud.services.api.commands.RemoveProcessVariablesCmd;
-import org.activiti.cloud.services.api.commands.SetProcessVariablesCmd;
-import org.activiti.cloud.services.api.commands.StartProcessInstanceCmd;
+import org.activiti.runtime.api.cmd.RemoveProcessVariables;
+import org.activiti.runtime.api.cmd.SetProcessVariables;
+import org.activiti.runtime.api.cmd.StartProcess;
+import org.activiti.runtime.api.cmd.impl.RemoveProcessVariablesImpl;
+import org.activiti.runtime.api.cmd.impl.SetProcessVariablesImpl;
+import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.VariableInstance;
@@ -52,12 +55,12 @@ public class ProcessInstanceRestTemplate {
                                                          Map<String, Object> variables,
                                                          String businessKey) {
 
-        StartProcessInstanceCmd cmd = new StartProcessInstanceCmd(processDefinitionKey,
-                                                                  processDefinitionId,
-                                                                  variables,
-                                                                  businessKey);
+        StartProcessImpl startProcess = new StartProcessImpl(processDefinitionId,
+                                                             variables);
+        startProcess.setProcessDefinitionKey(processDefinitionKey);
+        startProcess.setBusinessKey(businessKey);
 
-        HttpEntity<StartProcessInstanceCmd> requestEntity = new HttpEntity<>(cmd);
+        HttpEntity<StartProcess> requestEntity = new HttpEntity<>(startProcess);
 
         ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL,
                 HttpMethod.POST,
@@ -105,11 +108,14 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<PagedResources<Task>> getTasks(ResponseEntity<ProcessInstance> processInstanceEntity) {
 
+        return getTasks(processInstanceEntity.getBody().getId());
+    }
 
-        ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/tasks",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<PagedResources<Task>>() {
+    public ResponseEntity<PagedResources<Task>> getTasks(String processInstanceId) {
+        ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/tasks",
+                                                                                        HttpMethod.GET,
+                                                                                        null,
+                                                                                        new ParameterizedTypeReference<PagedResources<Task>>() {
                 });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
@@ -117,10 +123,14 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<Resources<VariableInstance>> getVariables(ResponseEntity<ProcessInstance> processInstanceEntity) {
 
-        ResponseEntity<Resources<VariableInstance>> responseEntity = testRestTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/variables",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<Resources<VariableInstance>>() {
+        return getVariables(processInstanceEntity.getBody().getId());
+    }
+
+    public ResponseEntity<Resources<VariableInstance>> getVariables(String processInstanceId) {
+        ResponseEntity<Resources<VariableInstance>> responseEntity = testRestTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
+                                                                                               HttpMethod.GET,
+                                                                                               null,
+                                                                                               new ParameterizedTypeReference<Resources<VariableInstance>>() {
                 });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
@@ -172,9 +182,9 @@ public class ProcessInstanceRestTemplate {
 
 
     public ResponseEntity<Void> setVariables(String processInstanceId, Map<String, Object> variables) {
-        SetProcessVariablesCmd processVariablesCmd = new SetProcessVariablesCmd(processInstanceId, variables);
+        SetProcessVariablesImpl processVariablesCmd = new SetProcessVariablesImpl(processInstanceId, variables);
 
-        HttpEntity<SetProcessVariablesCmd> requestEntity = new HttpEntity<>(
+        HttpEntity<SetProcessVariables> requestEntity = new HttpEntity<>(
                 processVariablesCmd,
                 null);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables/",
@@ -187,9 +197,9 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<Void> removeVariables(String processId, List<String> variableNames) {
-        RemoveProcessVariablesCmd processVariablesCmd = new RemoveProcessVariablesCmd(processId, variableNames);
+        RemoveProcessVariablesImpl processVariablesCmd = new RemoveProcessVariablesImpl(processId, variableNames);
 
-        HttpEntity<RemoveProcessVariablesCmd> requestEntity = new HttpEntity<>(
+        HttpEntity<RemoveProcessVariables> requestEntity = new HttpEntity<>(
                 processVariablesCmd,
                 null);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processId + "/variables/",

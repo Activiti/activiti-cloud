@@ -1,8 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.ActivateProcessInstanceCmd;
 import org.activiti.cloud.services.api.commands.results.ActivateProcessInstanceResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.runtime.api.cmd.ProcessCommands;
+import org.activiti.runtime.api.cmd.impl.ResumeProcessImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -18,7 +19,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class ActivateProcessInstanceCmdExecutorTest {
 
     @InjectMocks
-    private ActivateProcessInstanceCmdExecutor activateProcessInstanceCmdExecutor;
+    private ResumeProcessInstanceCmdExecutor activateProcessInstanceCmdExecutor;
 
     @Mock
     private SecurityAwareProcessInstanceService processInstanceService;
@@ -33,9 +34,9 @@ public class ActivateProcessInstanceCmdExecutorTest {
 
     @Test
     public void activateProcessInstanceCmdExecutorTest() {
-        ActivateProcessInstanceCmd activateProcessInstanceCmd = new ActivateProcessInstanceCmd("x");
+        ResumeProcessImpl activateProcessInstanceCmd = new ResumeProcessImpl("x");
 
-        assertThat(activateProcessInstanceCmdExecutor.getHandledType()).isEqualTo(ActivateProcessInstanceCmd.class);
+        assertThat(activateProcessInstanceCmdExecutor.getHandledType()).isEqualTo(ProcessCommands.RESUME_PROCESS.name());
 
         activateProcessInstanceCmdExecutor.execute(activateProcessInstanceCmd);
 

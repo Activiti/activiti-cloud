@@ -1,15 +1,16 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.ReleaseTaskCmd;
-import org.activiti.cloud.services.api.commands.results.ReleaseTaskResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
+import org.activiti.runtime.api.cmd.ReleaseTask;
+import org.activiti.runtime.api.cmd.TaskCommands;
+import org.activiti.runtime.api.cmd.result.impl.ReleaseTaskResultImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ReleaseTaskCmdExecutor implements CommandExecutor<ReleaseTaskCmd> {
+public class ReleaseTaskCmdExecutor implements CommandExecutor<ReleaseTask> {
 
     private SecurityAwareTaskService securityAwareTaskService;
     private MessageChannel commandResults;
@@ -22,14 +23,14 @@ public class ReleaseTaskCmdExecutor implements CommandExecutor<ReleaseTaskCmd> {
     }
 
     @Override
-    public Class getHandledType() {
-        return ReleaseTaskCmd.class;
+    public String getHandledType() {
+        return TaskCommands.RELEASE_TASK.name();
     }
 
     @Override
-    public void execute(ReleaseTaskCmd cmd) {
+    public void execute(ReleaseTask cmd) {
         securityAwareTaskService.releaseTask(cmd);
-        ReleaseTaskResults cmdResult = new ReleaseTaskResults(cmd.getId());
+        ReleaseTaskResultImpl cmdResult = new ReleaseTaskResultImpl(cmd);
         commandResults.send(MessageBuilder.withPayload(cmdResult).build());
     }
 }

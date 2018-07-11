@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.rest.api;
 
 
-import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
+import org.activiti.runtime.api.cmd.SetTaskVariables;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +24,10 @@ public interface TaskVariableController {
 
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<Void> setVariables(@PathVariable String taskId,
-                                      @RequestBody SetTaskVariablesCmd setTaskVariablesCmd);
+                                      @RequestBody SetTaskVariables setTaskVariablesCmd);
 
     @RequestMapping(value = "/local",
             method = RequestMethod.POST)
     ResponseEntity<Void> setVariablesLocal(@PathVariable String taskId,
-                                           @RequestBody SetTaskVariablesCmd setTaskVariablesCmd);
+                                           @RequestBody SetTaskVariables setTaskVariablesCmd);
 }

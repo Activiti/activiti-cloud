@@ -15,11 +15,11 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import org.activiti.cloud.services.api.commands.SetTaskVariablesCmd;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
 import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
+import org.activiti.runtime.api.cmd.SetTaskVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
@@ -58,14 +58,14 @@ public class TaskVariableControllerImpl implements TaskVariableController {
 
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String taskId,
-                                             @RequestBody SetTaskVariablesCmd setTaskVariablesCmd) {
+                                             @RequestBody SetTaskVariables setTaskVariablesCmd) {
         securityAwareTaskService.setTaskVariables(setTaskVariablesCmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> setVariablesLocal(@PathVariable String taskId,
-                                                  @RequestBody SetTaskVariablesCmd setTaskVariablesCmd) {
+                                                  @RequestBody SetTaskVariables setTaskVariablesCmd) {
         securityAwareTaskService.setTaskVariablesLocal(setTaskVariablesCmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
