@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
 import java.util.Set;
+
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -101,7 +102,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private Set<VariableEntity> variableEntities;
+    private Set<VariableEntity> variables;
 
     public TaskEntity() {
     }
@@ -149,30 +150,37 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.parentTaskId = parentTaskId;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public String getAssignee() {
         return assignee;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
 
+    @Override
     public Date getCreatedDate() {
         return createdDate;
     }
 
+    @Override
     public Date getDueDate() {
         return dueDate;
     }
 
+    @Override
     public int getPriority() {
         return priority;
     }
@@ -181,10 +189,12 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         return category;
     }
 
+    @Override
     public String getProcessDefinitionId() {
         return processDefinitionId;
     }
 
+    @Override
     public String getProcessInstanceId() {
         return processInstanceId;
     }
@@ -193,6 +203,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         return processInstanceId == null;
     }
 
+    @Override
     public TaskStatus getStatus() {
         return status;
     }
@@ -263,6 +274,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         return lastModifiedFrom;
     }
 
+    @Override
     public Date getClaimedDate() {
         return claimedDate;
     }
@@ -271,6 +283,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.claimedDate = claimedDate;
     }
 
+    @Override
     public String getOwner() {
         return owner;
     }
@@ -300,15 +313,15 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     /**
      * @return the variableEntities
      */
-    public Set<VariableEntity> getVariableEntities() {
-        return this.variableEntities;
+    public Set<VariableEntity> getVariables() {
+        return this.variables;
     }
 
     /**
-     * @param variableEntities the variableEntities to set
+     * @param variables the variableEntities to set
      */
-    public void setVariableEntities(Set<VariableEntity> variableEntities) {
-        this.variableEntities = variableEntities;
+    public void setVariables(Set<VariableEntity> variables) {
+        this.variables = variables;
     }
 
     /**
@@ -339,6 +352,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.taskCandidateGroups = taskCandidateGroups;
     }
 
+    @Override
     public String getParentTaskId() {
         return parentTaskId;
     }

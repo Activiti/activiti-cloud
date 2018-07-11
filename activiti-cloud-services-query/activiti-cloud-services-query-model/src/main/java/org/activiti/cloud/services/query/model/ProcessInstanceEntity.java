@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
 import java.util.Set;
+
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -62,12 +63,12 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @JsonIgnore
     @OneToMany(mappedBy = "processInstance")
     @org.hibernate.annotations.ForeignKey(name = "none")
-    private Set<TaskEntity> task;
+    private Set<TaskEntity> tasks;
 
     @JsonIgnore
     @OneToMany(mappedBy = "processInstance")
     @org.hibernate.annotations.ForeignKey(name = "none")
-    private Set<VariableEntity> variable;
+    private Set<VariableEntity> variables;
 
     public ProcessInstanceEntity() {
     }
@@ -92,10 +93,12 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.lastModified = lastModified;
     }
 
+    @Override
     public String getProcessDefinitionId() {
         return processDefinitionId;
     }
 
+    @Override
     public ProcessInstanceStatus getStatus() {
         return status;
     }
@@ -134,22 +137,23 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.lastModifiedFrom = lastModifiedFrom;
     }
 
-    public Set<TaskEntity> getTask() {
-        return this.task;
+    public Set<TaskEntity> getTasks() {
+        return this.tasks;
     }
 
-    public void setTask(Set<TaskEntity> task) {
-        this.task = task;
+    public void setTasks(Set<TaskEntity> tasks) {
+        this.tasks = tasks;
     }
 
-    public Set<VariableEntity> getVariable() {
-        return variable;
+    public Set<VariableEntity> getVariables() {
+        return variables;
     }
 
-    public void setVariable(Set<VariableEntity> variable) {
-        this.variable = variable;
+    public void setVariables(Set<VariableEntity> variable) {
+        this.variables = variable;
     }
 
+    @Override
     public String getProcessDefinitionKey() {
         return processDefinitionKey;
     }
@@ -158,6 +162,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.processDefinitionKey = processDefinitionKey;
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -166,6 +171,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.id = id;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -174,6 +180,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.name = name;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
@@ -182,6 +189,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.description = description;
     }
 
+    @Override
     public String getInitiator() {
         return initiator;
     }
@@ -190,6 +198,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.initiator = initiator;
     }
 
+    @Override
     public Date getStartDate() {
         return startDate;
     }
@@ -198,6 +207,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.startDate = startDate;
     }
 
+    @Override
     public String getBusinessKey() {
         return businessKey;
     }

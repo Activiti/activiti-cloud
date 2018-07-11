@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Convert;
@@ -113,6 +114,7 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
         return id;
     }
 
+    @Override
     public String getType() {
         return type;
     }
@@ -121,6 +123,7 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
         this.type = type;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -129,6 +132,7 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
         this.name = name;
     }
 
+    @Override
     public String getProcessInstanceId() {
         return processInstanceId;
     }
@@ -137,6 +141,7 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
         this.processInstanceId = processInstanceId;
     }
 
+    @Override
     public String getTaskId() {
         return taskId;
     }
@@ -173,6 +178,7 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
         this.value = new VariableValue<>(value);
     }
 
+    @Override
     public <T> T getValue() {
         return (T) value.getValue();
     }
