@@ -19,9 +19,10 @@ package org.activiti.cloud.qa.service;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import org.activiti.cloud.qa.model.ProcessInstance;
-import org.activiti.cloud.qa.model.Task;
-import org.activiti.cloud.qa.model.TaskStatus;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.Task;
 import org.springframework.hateoas.PagedResources;
 
 /**
@@ -31,12 +32,12 @@ public interface QueryService extends BaseService {
 
     @RequestLine("GET /v1/process-instances/{processInstanceId}")
     @Headers("Content-Type: application/json")
-    ProcessInstance getProcessInstance(@Param("processInstanceId") String processInstanceId);
+    CloudProcessInstance getProcessInstance(@Param("processInstanceId") String processInstanceId);
 
     @RequestLine("GET /v1/tasks?status={status}&id={taskId}")
-    PagedResources<Task> queryTasksByIdAnsStatus(@Param("taskId") String taskId,
-                                                 @Param("status") TaskStatus taskStatus);
+    PagedResources<CloudTask> queryTasksByIdAnsStatus(@Param("taskId") String taskId,
+                                                      @Param("status") Task.TaskStatus taskStatus);
 
     @RequestLine("GET /v1/tasks?id={taskId}")
-    PagedResources<Task> queryTasksById(@Param("taskId") String taskId);
+    PagedResources<CloudTask> queryTasksById(@Param("taskId") String taskId);
 }

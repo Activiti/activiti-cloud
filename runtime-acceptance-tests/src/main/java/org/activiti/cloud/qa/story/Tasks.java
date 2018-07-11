@@ -19,11 +19,10 @@ package org.activiti.cloud.qa.story;
 import java.util.Collection;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.model.Task;
-import org.activiti.cloud.qa.model.TaskStatus;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
+import org.activiti.runtime.api.model.Task;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -62,12 +61,12 @@ public class Tasks {
     public void taskIsCreatedAndAssigned() throws Exception {
         final Task assignedTask = runtimeBundleSteps.getTaskById(newTask.getId());
         assertThat(assignedTask).isNotNull();
-        assertThat(assignedTask.getStatus()).isEqualTo(TaskStatus.ASSIGNED);
+        assertThat(assignedTask.getStatus()).isEqualTo(Task.TaskStatus.ASSIGNED);
         runtimeBundleSteps.waitForMessagesToBeConsumed();
 
         auditSteps.checkTaskCreatedAndAssignedEvents(assignedTask.getId());
         querySteps.checkTaskStatus(assignedTask.getId(),
-                                   TaskStatus.ASSIGNED);
+                                   Task.TaskStatus.ASSIGNED);
     }
 
     @When("the user cancel the task")
@@ -81,7 +80,7 @@ public class Tasks {
         runtimeBundleSteps.waitForMessagesToBeConsumed();
         auditSteps.checkTaskDeletedEvent(newTask.getId());
         querySteps.checkTaskStatus(newTask.getId(),
-                                   TaskStatus.CANCELLED);
+                                   Task.TaskStatus.CANCELLED);
     }
 
     @When("user creates a subtask for the previously created task")

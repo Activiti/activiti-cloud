@@ -20,12 +20,12 @@ import java.util.Collection;
 import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.qa.model.ProcessInstance;
-import org.activiti.cloud.qa.model.ProcessInstanceStatus;
-import org.activiti.cloud.qa.model.Task;
-import org.activiti.cloud.qa.model.TaskStatus;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.QueryService;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.*;
@@ -50,16 +50,16 @@ public class QuerySteps {
     }
 
     @Step
-    public ProcessInstance getProcessInstance(String processInstanceId) throws Exception {
+    public CloudProcessInstance getProcessInstance(String processInstanceId) throws Exception {
         return queryService.getProcessInstance(processInstanceId);
     }
 
     @Step
     public void checkProcessInstanceStatus(String processInstanceId,
-                                           ProcessInstanceStatus expectedStatus) throws Exception {
+                                           ProcessInstance.ProcessInstanceStatus expectedStatus) throws Exception {
         assertThat(expectedStatus).isNotNull();
 
-        ProcessInstance processInstance = getProcessInstance(processInstanceId);
+        CloudProcessInstance processInstance = getProcessInstance(processInstanceId);
         assertThat(processInstance).isNotNull();
         assertThat(processInstance.getStatus()).isEqualTo(expectedStatus);
         assertThat(processInstance.getServiceName()).isNotEmpty();
@@ -68,7 +68,7 @@ public class QuerySteps {
 
     @Step
     public void checkTaskStatus(String taskId,
-                                TaskStatus expectedStatus) {
+                                Task.TaskStatus expectedStatus) {
         assertThat(queryService.queryTasksByIdAnsStatus(taskId,
                                                         expectedStatus).getContent())
                 .isNotNull()
@@ -79,7 +79,7 @@ public class QuerySteps {
     @Step
     public void checkSubtaskHasParentTaskId(String subtaskId,
                                             String parentTaskId) {
-        final Collection<Task> tasks = queryService.queryTasksById(subtaskId).getContent();
+        final Collection<CloudTask> tasks = queryService.queryTasksById(subtaskId).getContent();
         assertThat(tasks).isNotNull().isNotEmpty().hasSize(1).extracting(Task::getId,
                                                                          Task::getParentTaskId).containsOnly(tuple(subtaskId,
                                                                                                                    parentTaskId));

@@ -18,11 +18,11 @@ package org.activiti.cloud.qa.story;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.activiti.cloud.qa.model.ProcessInstance;
-import org.activiti.cloud.qa.model.ProcessInstanceStatus;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.MultipleRuntimeBundleSteps;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
@@ -39,7 +39,7 @@ public class ProcessInstanceTasks {
     @Steps
     private QuerySteps querySteps;
 
-    private ProcessInstance processInstance;
+    private CloudProcessInstance processInstance;
 
     @When("the user starts signal catch process on primary runtime and starts signal throw process on secondary runtime")
     public void startSignalCatchProcessInstance() {
@@ -52,6 +52,6 @@ public class ProcessInstanceTasks {
     public void startSignalThrowProcessInstance() throws Exception {
         runtimeBundleSteps.waitForMessagesToBeConsumed();
         querySteps.checkProcessInstanceStatus(processInstance.getId(),
-                ProcessInstanceStatus.COMPLETED);
+                                              ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
 }

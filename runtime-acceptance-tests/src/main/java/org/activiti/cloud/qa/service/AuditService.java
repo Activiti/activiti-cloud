@@ -19,7 +19,7 @@ package org.activiti.cloud.qa.service;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import org.activiti.cloud.qa.model.Event;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.springframework.hateoas.PagedResources;
 
 /**
@@ -29,10 +29,10 @@ public interface AuditService extends BaseService {
 
     @RequestLine("GET /v1/events?processInstanceId={processInstanceId}&eventType={eventType}")
     @Headers("Content-Type: application/json")
-    PagedResources<Event> getProcessInstanceEvents(@Param("processInstanceId") String processInstanceId,
-                                                   @Param("eventType") String eventType);
+    PagedResources<CloudRuntimeEvent> getProcessInstanceEvents(@Param("processInstanceId") String processInstanceId,
+                                                               @Param("eventType") String eventType);
 
     @RequestLine("GET /v1/events?sort=timestamp,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
-    PagedResources<Event> getEvents();
+    PagedResources<CloudRuntimeEvent> getEvents();
 }

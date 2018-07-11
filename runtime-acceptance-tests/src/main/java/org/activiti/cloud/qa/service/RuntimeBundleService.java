@@ -19,9 +19,12 @@ package org.activiti.cloud.qa.service;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import org.activiti.cloud.qa.model.ProcessInstance;
-import org.activiti.cloud.qa.model.Task;
-import org.activiti.cloud.qa.model.commands.CreateTaskCmd;
+import org.activiti.runtime.api.cmd.CreateTask;
+import org.activiti.runtime.api.cmd.StartProcess;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.Task;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
 
@@ -36,7 +39,7 @@ public interface RuntimeBundleService extends BaseService {
 
     @RequestLine("POST /v1/process-instances")
     @Headers("Content-Type: application/json")
-    ProcessInstance startProcess(ProcessInstance processInstance);
+    CloudProcessInstance startProcess(StartProcess startProcess);
 
     @RequestLine("POST /v1/process-instances/{id}/suspend")
     @Headers("Content-Type: application/json")
@@ -51,7 +54,7 @@ public interface RuntimeBundleService extends BaseService {
             "Content-Type: application/json",
             "Accept: application/hal+json;charset=UTF-8"
     })
-    PagedResources<Task> getProcessInstanceTasks(@Param("id") String id);
+    PagedResources<CloudTask> getProcessInstanceTasks(@Param("id") String id);
 
     @RequestLine("POST /v1/tasks/{id}/claim")
     @Headers("Content-Type: application/x-www-form-urlencoded")
@@ -68,14 +71,14 @@ public interface RuntimeBundleService extends BaseService {
 
     @RequestLine("GET /v1/process-instances/{id}")
     @Headers("Content-Type: application/json")
-    ProcessInstance getProcessInstance(@Param("id") String id);
+    CloudProcessInstance getProcessInstance(@Param("id") String id);
 
     @RequestLine("POST /v1/tasks/")
     @Headers("Content-Type: application/json")
-    Task createNewTask(CreateTaskCmd task);
+    CloudTask createNewTask(CreateTask task);
 
     @RequestLine("GET /v1/tasks/{id}")
-    Task getTaskById(@Param("id") String id);
+    CloudTask getTaskById(@Param("id") String id);
 
     @RequestLine("DELETE /v1/tasks/{id}")
     void deleteTask(@Param("id") String id);
@@ -85,8 +88,8 @@ public interface RuntimeBundleService extends BaseService {
             "Content-Type: application/json",
             "Accept: application/hal+json;charset=UTF-8"
     })
-    Task createSubtask(@Param("parentTaskId") String parentTaskId,
-                       CreateTaskCmd createTaskCmd);
+    CloudTask createSubtask(@Param("parentTaskId") String parentTaskId,
+                       CreateTask createTaskCmd);
 
     @RequestLine("GET /v1/tasks/{parentTaskId}/subtasks")
     Resources getSubtasks(@Param("parentTaskId") String parentTaskId);

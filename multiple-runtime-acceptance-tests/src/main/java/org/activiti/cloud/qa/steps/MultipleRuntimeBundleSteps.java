@@ -16,26 +16,16 @@
 
 package org.activiti.cloud.qa.steps;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.qa.model.ProcessInstance;
-import org.activiti.cloud.qa.model.Task;
-import org.activiti.cloud.qa.model.commands.CreateTaskCmd;
 import org.activiti.cloud.qa.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
-import org.activiti.cloud.qa.service.RuntimeBundleDiagramService;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
-import org.apache.batik.transcoder.TranscoderException;
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resources;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -69,16 +59,14 @@ public class MultipleRuntimeBundleSteps {
     }
 
     @Step
-    public ProcessInstance startProcess(String process, boolean isPrimaryService) {
+    public CloudProcessInstance startProcess(String process, boolean isPrimaryService) {
 
-        ProcessInstance processInstance = new ProcessInstance();
-        processInstance.setCommandType(DEFAULT_PROCESS_INSTANCE_COMMAND_TYPE);
-        processInstance.setProcessDefinitionKey(process);
+        StartProcessImpl startProcessCmd = new StartProcessImpl(process);
 
         if (isPrimaryService) {
-            return dirtyContextHandler.dirty(runtimeBundleService.startProcess(processInstance));
+            return dirtyContextHandler.dirty(runtimeBundleService.startProcess(startProcessCmd));
         } else {
-        	return dirtyContextHandler.dirty(runtimeBundleAnotherService.startProcess(processInstance));
+        	return dirtyContextHandler.dirty(runtimeBundleAnotherService.startProcess(startProcessCmd));
         }
     }
 

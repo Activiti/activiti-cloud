@@ -23,13 +23,16 @@ import java.util.Collection;
 import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.qa.model.ProcessInstance;
-import org.activiti.cloud.qa.model.Task;
-import org.activiti.cloud.qa.model.commands.CreateTaskCmd;
+
 import org.activiti.cloud.qa.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.RuntimeBundleDiagramService;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
+import org.activiti.runtime.api.cmd.CreateTask;
+import org.activiti.runtime.api.cmd.impl.CreateTaskImpl;
+import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.CloudTask;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
@@ -69,22 +72,20 @@ public class RuntimeBundleSteps {
     }
 
     @Step
-    public ProcessInstance startProcess() {
+    public CloudProcessInstance startProcess() {
         return this.startProcess(DEFAULT_PROCESS_INSTANCE_KEY);
     }
 
     @Step
-    public ProcessInstance startProcess(String process) {
+    public CloudProcessInstance startProcess(String process) {
 
-        ProcessInstance processInstance = new ProcessInstance();
-        processInstance.setCommandType(DEFAULT_PROCESS_INSTANCE_COMMAND_TYPE);
-        processInstance.setProcessDefinitionKey(process);
+        StartProcessImpl startProcessCmd = new StartProcessImpl(process);
 
-        return dirtyContextHandler.dirty(runtimeBundleService.startProcess(processInstance));
+        return dirtyContextHandler.dirty(runtimeBundleService.startProcess(startProcessCmd));
     }
 
     @Step
-    public Collection<Task> getTaskByProcessInstanceId(String processInstanceId) throws Exception {
+    public Collection<CloudTask> getTaskByProcessInstanceId(String processInstanceId) throws Exception {
 
         return runtimeBundleService
                 .getProcessInstanceTasks(processInstanceId).getContent();
@@ -124,18 +125,19 @@ public class RuntimeBundleSteps {
     }
 
     @Step
-    public Task createNewTask() {
+    public CloudTask createNewTask() {
+
+        CreateTaskImpl createTask = new CreateTaskImpl("new-task",
+                                                       "task-description");
         return dirtyContextHandler.dirty(
-                runtimeBundleService.createNewTask(new CreateTaskCmd("new-task",
-                                                                     "task-description",
-                                                                     "CreateTaskCmd")));
+                runtimeBundleService.createNewTask(createTask));
     }
 
-    public Task createSubtask(String parentTaskId) {
+    public CloudTask createSubtask(String parentTaskId) {
+        CreateTaskImpl subtask = new CreateTaskImpl("subtask",
+                                                    "subtask-description");
         return runtimeBundleService.createSubtask(parentTaskId,
-                                                  new CreateTaskCmd("subtask",
-                                                                    "subtask-description",
-                                                                    "CreateTaskCmd"));
+                                                  subtask);
     }
 
     public Resources getSubtasks(String parentTaskId) {
@@ -143,7 +145,7 @@ public class RuntimeBundleSteps {
     }
 
     @Step
-    public Task getTaskById(String id) {
+    public CloudTask getTaskById(String id) {
         return runtimeBundleService.getTaskById(id);
     }
 

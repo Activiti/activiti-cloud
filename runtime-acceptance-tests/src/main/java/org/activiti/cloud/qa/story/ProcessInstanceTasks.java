@@ -20,14 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.model.EventType;
-import org.activiti.cloud.qa.model.ProcessInstance;
-import org.activiti.cloud.qa.model.ProcessInstanceStatus;
-import org.activiti.cloud.qa.model.Task;
 import org.activiti.cloud.qa.rest.error.ExpectRestError;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
+import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.event.TaskRuntimeEvent;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
@@ -47,11 +48,11 @@ public class ProcessInstanceTasks {
     @Steps
     private QuerySteps querySteps;
 
-    private ProcessInstance processInstance;
+    private CloudProcessInstance processInstance;
 
     private String processInstanceDiagram;
 
-    private Task currentTask;
+    private CloudTask currentTask;
 
     @When("services are started")
     public void checkServicesStatus() {
@@ -65,7 +66,7 @@ public class ProcessInstanceTasks {
         processInstance = runtimeBundleSteps.startProcess(process);
         assertThat(processInstance).isNotNull();
 
-        List<Task> tasks = new ArrayList<>(
+        List<CloudTask> tasks = new ArrayList<>(
                 runtimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId()));
 
         assertThat(tasks).isNotEmpty();
@@ -98,10 +99,10 @@ public class ProcessInstanceTasks {
     public void verifyProcessStatus() throws Exception {
         runtimeBundleSteps.waitForMessagesToBeConsumed();
         querySteps.checkProcessInstanceStatus(processInstance.getId(),
-                                              ProcessInstanceStatus.COMPLETED);
+                                              ProcessInstance.ProcessInstanceStatus.COMPLETED);
         auditSteps.checkProcessInstanceTaskEvent(processInstance.getId(),
                                                  currentTask.getId(),
-                                                 EventType.TASK_COMPLETED);
+                                                 TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
     }
 
     @When("the user cancel the process")
@@ -115,9 +116,9 @@ public class ProcessInstanceTasks {
         runtimeBundleSteps.checkProcessInstanceNotFound(processInstance.getId());
         runtimeBundleSteps.waitForMessagesToBeConsumed();
         querySteps.checkProcessInstanceStatus(processInstance.getId(),
-                                              ProcessInstanceStatus.CANCELLED);
+                                              ProcessInstance.ProcessInstanceStatus.CANCELLED);
         auditSteps.checkProcessInstanceEvent(processInstance.getId(),
-                                             EventType.PROCESS_CANCELLED);
+                                             ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED);
     }
 
     @When("open the process diagram")
