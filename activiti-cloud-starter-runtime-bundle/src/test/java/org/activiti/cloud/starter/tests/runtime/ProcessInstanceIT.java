@@ -28,11 +28,14 @@ import java.util.Map;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.converter.util.InputStreamProvider;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
+import org.activiti.runtime.api.model.CloudProcessDefinition;
+import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.Before;
@@ -86,11 +89,14 @@ public class ProcessInstanceIT {
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
+    @Autowired
+    private RuntimeBundleProperties runtimeBundleProperties;
+
     @Before
     public void setUp() {
         keycloakTestUser = "hruser";
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
@@ -103,27 +109,33 @@ public class ProcessInstanceIT {
     @Test
     public void shouldStartProcess() {
         //when
-        ResponseEntity<ProcessInstance> entity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                          null,
-                                                                                          "business_key");
+        ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                               null,
+                                                                                               "business_key");
 
         //then
         assertThat(entity).isNotNull();
-        ProcessInstance returnedProcInst = entity.getBody();
+        CloudProcessInstance returnedProcInst = entity.getBody();
         assertThat(returnedProcInst).isNotNull();
         assertThat(returnedProcInst.getId()).isNotNull();
         assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
         assertThat(returnedProcInst.getInitiator()).isNotNull();
         assertThat(returnedProcInst.getInitiator()).isEqualTo(keycloakTestUser);//will only match if using username not id
         assertThat(returnedProcInst.getBusinessKey()).isEqualTo("business_key");
+        assertThat(returnedProcInst.getAppName()).isEqualTo(runtimeBundleProperties.getAppName());
+        assertThat(returnedProcInst.getAppVersion()).isEqualTo(runtimeBundleProperties.getAppVersion());
+        assertThat(returnedProcInst.getServiceName()).isEqualTo(runtimeBundleProperties.getServiceName());
+        assertThat(returnedProcInst.getServiceFullName()).isEqualTo(runtimeBundleProperties.getServiceFullName());
+        assertThat(returnedProcInst.getServiceType()).isEqualTo(runtimeBundleProperties.getServiceType());
+        assertThat(returnedProcInst.getServiceVersion()).isEqualTo(runtimeBundleProperties.getServiceVersion());
     }
 
     @Test
     public void shouldStartProcessByKey() {
         //when
-        ResponseEntity<ProcessInstance> entity = processInstanceRestTemplate.startProcessByKey(SIMPLE_PROCESS,
-                                                                                               null,
-                                                                                               "business_key");
+        ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.startProcessByKey(SIMPLE_PROCESS,
+                                                                                                    null,
+                                                                                                    "business_key");
 
         //then
         assertThat(entity).isNotNull();
@@ -148,15 +160,15 @@ public class ProcessInstanceIT {
     public void shouldRetrieveProcessInstanceById() {
 
         //given
-        ResponseEntity<ProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<CloudProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
 
-        ResponseEntity<ProcessInstance> retrievedEntity = restTemplate.exchange(
+        ResponseEntity<CloudProcessInstance> retrievedEntity = restTemplate.exchange(
                 PROCESS_INSTANCES_RELATIVE_URL + startedProcessEntity.getBody().getId(),
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<ProcessInstance>() {
+                new ParameterizedTypeReference<CloudProcessInstance>() {
                 });
 
         //then
@@ -169,7 +181,7 @@ public class ProcessInstanceIT {
     public void shouldRetrieveProcessInstanceDiagram() throws Exception {
 
         //given
-        ResponseEntity<ProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<CloudProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
         String responseData = executeRequest(
@@ -235,18 +247,18 @@ public class ProcessInstanceIT {
     @Test
     public void suspendShouldPutProcessInstanceInSuspendedState() {
         //given
-        ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
         ResponseEntity<Void> responseEntity = executeRequestSuspendProcess(startProcessEntity);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        ResponseEntity<ProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
     }
 
-    private ResponseEntity<Void> executeRequestSuspendProcess(ResponseEntity<ProcessInstance> processInstanceEntity) {
+    private ResponseEntity<Void> executeRequestSuspendProcess(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
         ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/suspend",
                                                                     HttpMethod.POST,
                                                                     null,
@@ -259,7 +271,7 @@ public class ProcessInstanceIT {
     @Test
     public void activateShouldPutASuspendedProcessInstanceBackToActiveState() {
         //given
-        ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         executeRequestSuspendProcess(startProcessEntity);
 
         //when
@@ -267,12 +279,12 @@ public class ProcessInstanceIT {
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        ResponseEntity<ProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
     }
 
-    private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<ProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<ProcessDefinition>>() {
+    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,

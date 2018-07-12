@@ -18,6 +18,16 @@ package org.activiti.cloud.services.rest.conf;
 
 import java.util.List;
 
+import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ToCloudProcessDefinitionConverter;
+import org.activiti.cloud.services.rest.assemblers.ToCloudProcessInstanceConverter;
+import org.activiti.cloud.services.rest.assemblers.ToCloudTaskConverter;
+import org.activiti.cloud.services.rest.assemblers.ToCloudVariableInstanceConverter;
 import org.activiti.cloud.services.rest.controllers.ResourcesAssembler;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
@@ -42,6 +52,36 @@ public class ServicesRestAutoConfiguration implements WebMvcConfigurer {
     @Bean
     public ResourcesAssembler resourcesAssembler() {
         return new ResourcesAssembler();
+    }
+
+    @Bean
+    public ProcessInstanceResourceAssembler processInstanceResourceAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+        return new ProcessInstanceResourceAssembler(new ToCloudProcessInstanceConverter(runtimeBundleInfoAppender));
+    }
+
+    @Bean
+    public ProcessDefinitionResourceAssembler processDefinitionResourceAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+        return new ProcessDefinitionResourceAssembler(new ToCloudProcessDefinitionConverter(runtimeBundleInfoAppender));
+    }
+
+    @Bean
+    public TaskResourceAssembler taskResourceAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+        return new TaskResourceAssembler(new ToCloudTaskConverter(runtimeBundleInfoAppender));
+    }
+
+    @Bean
+    public ToCloudVariableInstanceConverter cloudVariableInstanceConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender){
+        return new ToCloudVariableInstanceConverter(runtimeBundleInfoAppender);
+    }
+
+    @Bean
+    public ProcessInstanceVariableResourceAssembler processInstanceVariableResourceAssembler(ToCloudVariableInstanceConverter converter) {
+        return new ProcessInstanceVariableResourceAssembler(converter);
+    }
+
+    @Bean
+    public TaskVariableInstanceResourceAssembler taskVariableInstanceResourceAssembler(ToCloudVariableInstanceConverter converter) {
+        return new TaskVariableInstanceResourceAssembler(converter);
     }
 
     @Override

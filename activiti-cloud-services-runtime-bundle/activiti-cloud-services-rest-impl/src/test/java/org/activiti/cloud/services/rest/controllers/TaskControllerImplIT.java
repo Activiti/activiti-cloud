@@ -25,6 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
+import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
 import org.activiti.runtime.api.NotFoundException;
 import org.activiti.runtime.api.cmd.impl.CreateTaskImpl;
@@ -82,6 +85,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
+        RuntimeBundleProperties.class,
+        CloudEventsAutoConfiguration.class,
         ServicesRestAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 public class TaskControllerImplIT {
@@ -103,9 +108,13 @@ public class TaskControllerImplIT {
     @SpyBean
     private SpringPageConverter springPageConverter;
 
+    @MockBean
+    private ProcessEngineChannels processEngineChannels;
+
     @Before
     public void setUp() {
         assertThat(springPageConverter).isNotNull();
+        assertThat(processEngineChannels).isNotNull();
     }
 
     @Test
@@ -234,6 +243,12 @@ public class TaskControllerImplIT {
                                         subsectionWithPath("description").description("Task description."),
                                         subsectionWithPath("priority").description("Task priority. Can have values between 0 and 100."),
                                         subsectionWithPath("status").description("Task status (can be " + Arrays.asList(Task.TaskStatus.values()) + ")"),
+                                        subsectionWithPath("appName").description("The application name"),
+                                        subsectionWithPath("appVersion").description("The application version"),
+                                        subsectionWithPath("serviceName").description("The service name"),
+                                        subsectionWithPath("serviceFullName").description("The full service name"),
+                                        subsectionWithPath("serviceType").description("The service type"),
+                                        subsectionWithPath("serviceVersion").description("The service version"),
                                         subsectionWithPath("_links").ignored()
                                 )));
     }
@@ -271,6 +286,12 @@ public class TaskControllerImplIT {
                                         subsectionWithPath("description").description("Task description."),
                                         subsectionWithPath("priority").description("Task priority. Can have values between 0 and 100."),
                                         subsectionWithPath("status").description("Task status (can be " + Arrays.asList(Task.TaskStatus.values()) + ")"),
+                                        subsectionWithPath("appName").description("The application name"),
+                                        subsectionWithPath("appVersion").description("The application version"),
+                                        subsectionWithPath("serviceName").description("The service name"),
+                                        subsectionWithPath("serviceFullName").description("The full service name"),
+                                        subsectionWithPath("serviceType").description("The service type"),
+                                        subsectionWithPath("serviceVersion").description("The service version"),
                                         subsectionWithPath("_links").ignored()
                                 )));
     }

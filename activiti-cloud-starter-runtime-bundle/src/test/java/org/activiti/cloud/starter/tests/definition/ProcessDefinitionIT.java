@@ -29,6 +29,7 @@ import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
+import org.activiti.runtime.api.model.CloudProcessDefinition;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,7 +69,7 @@ public class ProcessDefinitionIT {
         //processes are automatically deployed from src/test/resources/processes
 
         //when
-        ResponseEntity<PagedResources<ProcessDefinition>> entity = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> entity = getProcessDefinitions();
 
         //then
         assertThat(entity).isNotNull();
@@ -82,8 +83,8 @@ public class ProcessDefinitionIT {
     }
 
     private ProcessDefinition getProcessDefinition(String name) {
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
-        Iterator<ProcessDefinition> it = processDefinitionsEntity.getBody().getContent().iterator();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
+        Iterator<CloudProcessDefinition> it = processDefinitionsEntity.getBody().getContent().iterator();
         ProcessDefinition aProcessDefinition;
         do {
             aProcessDefinition = it.next();
@@ -92,8 +93,8 @@ public class ProcessDefinitionIT {
         return aProcessDefinition;
     }
 
-    private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<ProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<ProcessDefinition>>() {
+    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,
                                      HttpMethod.GET,
@@ -104,17 +105,17 @@ public class ProcessDefinitionIT {
     @Test
     public void shouldReturnProcessDefinitionById() {
         //given
-        ParameterizedTypeReference<ProcessDefinition> responseType = new ParameterizedTypeReference<ProcessDefinition>() {
+        ParameterizedTypeReference<CloudProcessDefinition> responseType = new ParameterizedTypeReference<CloudProcessDefinition>() {
         };
 
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
         assertThat(processDefinitionsEntity).isNotNull();
         assertThat(processDefinitionsEntity.getBody()).isNotNull();
         assertThat(processDefinitionsEntity.getBody().getContent()).isNotEmpty();
         ProcessDefinition aProcessDefinition = processDefinitionsEntity.getBody().getContent().iterator().next();
 
         //when
-        ResponseEntity<ProcessDefinition> entity = restTemplate.exchange(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId(),
+        ResponseEntity<CloudProcessDefinition> entity = restTemplate.exchange(PROCESS_DEFINITIONS_URL + aProcessDefinition.getId(),
                                                                          HttpMethod.GET,
                                                                          null,
                                                                          responseType);
@@ -205,9 +206,9 @@ public class ProcessDefinitionIT {
         BpmnModel sourceModel = new BpmnXMLConverter().convertToBpmnModel(() -> byteArrayInputStream,
                                                                           false,
                                                                           false);
-        assertThat(targetModel.getMainProcess().getId().equals(sourceModel.getMainProcess().getId()));
+        assertThat(targetModel.getMainProcess().getId()).isEqualTo(sourceModel.getMainProcess().getId());
         for (FlowElement element : targetModel.getMainProcess().getFlowElements()) {
-            assertThat(sourceModel.getFlowElement(element.getId()) != null);
+            assertThat(sourceModel.getFlowElement(element.getId())).isNotNull();
         }
     }
 

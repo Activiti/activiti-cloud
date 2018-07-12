@@ -15,13 +15,13 @@
 
 package org.activiti.cloud.services.rest.api.resources;
 
-import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.CloudProcessDefinition;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
-public class ProcessDefinitionResource extends Resource<ProcessDefinition> {
+public class ProcessDefinitionResource extends Resource<CloudProcessDefinition> {
 
-    public ProcessDefinitionResource(ProcessDefinition content,
+    public ProcessDefinitionResource(CloudProcessDefinition content,
                                      Link... links) {
         super(content,
               links);

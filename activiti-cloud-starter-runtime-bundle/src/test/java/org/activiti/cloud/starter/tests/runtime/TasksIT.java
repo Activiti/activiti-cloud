@@ -25,8 +25,10 @@ import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSe
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
+import org.activiti.runtime.api.model.CloudProcessDefinition;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.ProcessDefinition;
-import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.Task;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,8 +57,8 @@ public class TasksIT  {
     private static final String TASKS_URL = "/v1/tasks/";
     private static final String ADMIN_TASKS_URL = "/admin/v1/tasks/";
     private static final String SIMPLE_PROCESS = "SimpleProcess";
-    private static final ParameterizedTypeReference<Task> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {};
-    private static final ParameterizedTypeReference<PagedResources<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Task>>() {
+    private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudTask>() {};
+    private static final ParameterizedTypeReference<PagedResources<CloudTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<CloudTask>>() {
     };
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
 
@@ -81,7 +83,7 @@ public class TasksIT  {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
 
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
@@ -99,11 +101,11 @@ public class TasksIT  {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = executeRequestGetTasks();
 
         //then
         assertThat(responseEntity).isNotNull();
-        Collection<Task> tasks = responseEntity.getBody().getContent();
+        Collection<CloudTask> tasks = responseEntity.getBody().getContent();
         assertThat(tasks).extracting(Task::getName).contains("Perform action");
         assertThat(tasks.size()).isGreaterThanOrEqualTo(2);
     }
@@ -119,11 +121,11 @@ public class TasksIT  {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = executeRequestGetTasks();
 
         //then
         assertThat(responseEntity).isNotNull();
-        Collection<Task> tasks = responseEntity.getBody().getContent();
+        Collection<CloudTask> tasks = responseEntity.getBody().getContent();
         assertThat(tasks.size()).isEqualTo(0);
 
     }
@@ -136,20 +138,20 @@ public class TasksIT  {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetAdminTasks();
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = executeRequestGetAdminTasks();
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
-    private ResponseEntity<PagedResources<Task>> executeRequestGetTasks() {
+    private ResponseEntity<PagedResources<CloudTask>> executeRequestGetTasks() {
         return testRestTemplate.exchange(TASKS_URL,
                 HttpMethod.GET,
                 null,
                 PAGED_TASKS_RESPONSE_TYPE);
     }
 
-    private ResponseEntity<PagedResources<Task>> executeRequestGetAdminTasks() {
+    private ResponseEntity<PagedResources<CloudTask>> executeRequestGetAdminTasks() {
         return testRestTemplate.exchange(ADMIN_TASKS_URL,
                 HttpMethod.GET,
                 null,
@@ -160,10 +162,10 @@ public class TasksIT  {
     @Test
     public void shouldGetTasksRelatedToTheGivenProcessInstance() {
         //given
-        ResponseEntity<ProcessInstance> startProcessResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<CloudProcessInstance> startProcessResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<PagedResources<Task>> tasksEntity = testRestTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + startProcessResponse.getBody().getId() + "/tasks",
+        ResponseEntity<PagedResources<CloudTask>> tasksEntity = testRestTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + startProcessResponse.getBody().getId() + "/tasks",
                 HttpMethod.GET,
                 null,
                 PAGED_TASKS_RESPONSE_TYPE);
@@ -181,7 +183,7 @@ public class TasksIT  {
         Task task = executeRequestGetTasks().getBody().iterator().next();
 
         //when
-        ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId(),
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId(),
                 HttpMethod.GET,
                 null,
                 TASK_RESPONSE_TYPE);
@@ -199,7 +201,7 @@ public class TasksIT  {
         Task task = executeRequestGetTasks().getBody().iterator().next();
 
         //when
-        ResponseEntity<Task> responseEntity = taskRestTemplate.claim(task);
+        ResponseEntity<CloudTask> responseEntity = taskRestTemplate.claim(task);
 
 
         //then
@@ -217,7 +219,7 @@ public class TasksIT  {
         taskRestTemplate.claim(task);
 
         //when
-        ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId() + "/release",
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId() + "/release",
                 HttpMethod.POST,
                 null,
                 TASK_RESPONSE_TYPE);
@@ -263,8 +265,8 @@ public class TasksIT  {
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
     }
 
-    private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<ProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<ProcessDefinition>>() {
+    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
 
         return testRestTemplate.exchange(PROCESS_DEFINITIONS_URL,

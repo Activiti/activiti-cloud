@@ -19,28 +19,31 @@ import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
 import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessDefinitionControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
+import org.activiti.runtime.api.model.CloudProcessDefinition;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
-import org.springframework.stereotype.Component;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-@Component
 public class ProcessDefinitionResourceAssembler extends ResourceAssemblerSupport<ProcessDefinition, ProcessDefinitionResource> {
 
-    public ProcessDefinitionResourceAssembler() {
+    private ToCloudProcessDefinitionConverter converter;
+
+    public ProcessDefinitionResourceAssembler(ToCloudProcessDefinitionConverter converter) {
         super(ProcessDefinitionControllerImpl.class,
               ProcessDefinitionResource.class);
+        this.converter = converter;
     }
 
     @Override
     public ProcessDefinitionResource toResource(ProcessDefinition processDefinition) {
-        Link selfRel = linkTo(methodOn(ProcessDefinitionControllerImpl.class).getProcessDefinition(processDefinition.getId())).withSelfRel();
+        CloudProcessDefinition cloudProcessDefinition = converter.from(processDefinition);
+        Link selfRel = linkTo(methodOn(ProcessDefinitionControllerImpl.class).getProcessDefinition(cloudProcessDefinition.getId())).withSelfRel();
         Link startProcessLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).startProcess(null)).withRel("startProcess");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
-        return new ProcessDefinitionResource(processDefinition,
+        return new ProcessDefinitionResource(cloudProcessDefinition,
                                              selfRel,
                                              startProcessLink,
                                              homeLink);

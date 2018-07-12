@@ -19,8 +19,9 @@ package org.activiti.cloud.starter.tests.helper;
 import java.util.Map;
 
 import org.activiti.runtime.api.cmd.impl.SetTaskVariablesImpl;
+import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.CloudVariableInstance;
 import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.VariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
@@ -38,7 +39,7 @@ public class TaskRestTemplate {
 
     private static final String TASK_VAR_RELATIVE_URL = "/v1/tasks/";
 
-    private static final ParameterizedTypeReference<Task> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {};
+    private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudTask>() {};
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -53,8 +54,8 @@ public class TaskRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Task> claim(Task task) {
-        ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId() + "/claim",
+    public ResponseEntity<CloudTask> claim(Task task) {
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId() + "/claim",
                                                                         HttpMethod.POST,
                                                                         null,
                                                                         TASK_RESPONSE_TYPE);
@@ -92,23 +93,23 @@ public class TaskRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Resources<VariableInstance>> getVariables(String taskId) {
+    public ResponseEntity<Resources<CloudVariableInstance>> getVariables(String taskId) {
 
-        ResponseEntity<Resources<VariableInstance>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/",
+        ResponseEntity<Resources<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/",
                                                                                                  HttpMethod.GET,
                                                                                                  null,
-                                                                                                 new ParameterizedTypeReference<Resources<VariableInstance>>() {
+                                                                                                 new ParameterizedTypeReference<Resources<CloudVariableInstance>>() {
                                                                                                  });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<Resources<VariableInstance>> getVariablesLocal(String taskId) {
+    public ResponseEntity<Resources<CloudVariableInstance>> getVariablesLocal(String taskId) {
 
-        ResponseEntity<Resources<VariableInstance>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/local",
+        ResponseEntity<Resources<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/local",
                                                                                                  HttpMethod.GET,
                                                                                                  null,
-                                                                                                 new ParameterizedTypeReference<Resources<VariableInstance>>() {
+                                                                                                 new ParameterizedTypeReference<Resources<CloudVariableInstance>>() {
                                                                                                  });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;

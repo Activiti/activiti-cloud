@@ -9,8 +9,10 @@ import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.model.CloudProcessDefinition;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.ProcessDefinition;
-import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.Task;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,7 +87,7 @@ public class AuditProducerIT {
 
     @Before
     public void setUp() {
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
@@ -98,8 +100,8 @@ public class AuditProducerIT {
     @Test
     public void shouldProduceEventsDuringSimpleProcessExecution() {
         //when
-        ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                                                     Collections.singletonMap("name",
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                                           Collections.singletonMap("name",
                                                                                                                                "peter"));
 
         //then
@@ -154,7 +156,7 @@ public class AuditProducerIT {
                 .containsExactly(VARIABLE_UPDATED.name()));
 
         //given
-        ResponseEntity<PagedResources<Task>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);
+        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);
         Task task = tasks.getBody().iterator().next();
 
         //when
@@ -183,7 +185,7 @@ public class AuditProducerIT {
     @Test
     public void shouldProduceEventsForAProcessDeletion() {
         //given
-        ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
         processInstanceRestTemplate.delete(startProcessEntity);
@@ -201,8 +203,8 @@ public class AuditProducerIT {
         });
     }
 
-    private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<ProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<ProcessDefinition>>() {
+    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,

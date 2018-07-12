@@ -17,6 +17,7 @@
 package org.activiti.cloud.starter.tests.definition;
 
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.runtime.api.model.CloudProcessDefinition;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +54,7 @@ public class ProcessDefinitionAccessControlIT {
         //processes are automatically deployed from src/test/resources/processes
 
         //when
-        ResponseEntity<PagedResources<ProcessDefinition>> entity = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> entity = getProcessDefinitions();
 
         //then - should only see process defs visible to this user (testuser)
         assertThat(entity).isNotNull();
@@ -76,8 +77,8 @@ public class ProcessDefinitionAccessControlIT {
                 "ProcessWithBoundarySignal");
     }
 
-    private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<ProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<ProcessDefinition>>() {
+    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,
                 HttpMethod.GET,

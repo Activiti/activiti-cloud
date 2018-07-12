@@ -36,6 +36,10 @@ import org.activiti.runtime.api.cmd.impl.SetProcessVariablesImpl;
 import org.activiti.runtime.api.cmd.impl.SetTaskVariablesImpl;
 import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
 import org.activiti.runtime.api.cmd.impl.SuspendProcessImpl;
+import org.activiti.runtime.api.model.CloudProcessDefinition;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.CloudVariableInstance;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.Task;
@@ -86,7 +90,7 @@ public class CommandEndpointIT {
     @Autowired
     private CommandEndPointITStreamHandler streamHandler;
 
-    private static final ParameterizedTypeReference<PagedResources<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Task>>() {
+    private static final ParameterizedTypeReference<PagedResources<CloudTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<CloudTask>>() {
     };
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
@@ -106,7 +110,7 @@ public class CommandEndpointIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
         // Get Available Process Definitions
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
@@ -137,11 +141,11 @@ public class CommandEndpointIT {
         // Get Tasks
 
         //when
-        ResponseEntity<PagedResources<Task>> responseEntity = getTasks(processInstanceId);
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = getTasks(processInstanceId);
 
         //then
         assertThat(responseEntity).isNotNull();
-        Collection<Task> tasks = responseEntity.getBody().getContent();
+        Collection<CloudTask> tasks = responseEntity.getBody().getContent();
         assertThat(tasks).extracting(Task::getName).contains("Perform action");
         assertThat(tasks).extracting(Task::getStatus).contains(CREATED);
 
@@ -164,7 +168,6 @@ public class CommandEndpointIT {
         assertThat(tasks)
                 .filteredOn(t -> t.getId().equals(task.getId()))
                 .isEmpty();
-
 
         Thread.sleep(1000);
         await().untilAsserted(() -> {
@@ -211,43 +214,47 @@ public class CommandEndpointIT {
     }
 
     private void setTaskVariables(Task task) {
-        Map<String, Object> variables = Collections.singletonMap("taskVar", "v1");
+        Map<String, Object> variables = Collections.singletonMap("taskVar",
+                                                                 "v1");
         SetTaskVariablesImpl setTaskVariables = new SetTaskVariablesImpl(task.getId(),
                                                                          variables);
 
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(setTaskVariables).setHeader("cmdId",
-                                                                                               setTaskVariables.getId()).build());
+                                                                                                 setTaskVariables.getId()).build());
 
         await("Variable to be set").untilTrue(streamHandler.getSetTaskVariablesAck());
 
-        ResponseEntity<Resources<VariableInstance>> retrievedVars = taskRestTemplate.getVariables(task.getId());
+        ResponseEntity<Resources<CloudVariableInstance>> retrievedVars = taskRestTemplate.getVariables(task.getId());
         assertThat(retrievedVars.getBody().getContent())
                 .extracting(VariableInstance::getName,
                             VariableInstance::getValue)
-                .contains(tuple("taskVar", "v1"));
+                .contains(tuple("taskVar",
+                                "v1"));
     }
 
     private void setAndRemoveProcessVariables(String proInstanceId) {
-        Map<String, Object> variables = Collections.singletonMap("procVar", "v2");
+        Map<String, Object> variables = Collections.singletonMap("procVar",
+                                                                 "v2");
         SetProcessVariablesImpl setProcessVariables = new SetProcessVariablesImpl(proInstanceId,
-                                                                               variables);
+                                                                                  variables);
 
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(setProcessVariables).setHeader("cmdId",
-                                                                                               setProcessVariables.getId()).build());
+                                                                                                    setProcessVariables.getId()).build());
 
         await("Variable to be set").untilTrue(streamHandler.getSetProcessVariablesAck());
 
-        ResponseEntity<Resources<VariableInstance>> retrievedVars = processInstanceRestTemplate.getVariables(proInstanceId);
+        ResponseEntity<Resources<CloudVariableInstance>> retrievedVars = processInstanceRestTemplate.getVariables(proInstanceId);
         assertThat(retrievedVars.getBody().getContent())
                 .extracting(VariableInstance::getName,
                             VariableInstance::getValue)
-                .contains(tuple("procVar", "v2"));
+                .contains(tuple("procVar",
+                                "v2"));
 
         RemoveProcessVariablesImpl removeProcessVariables = new RemoveProcessVariablesImpl(proInstanceId,
-                                                                            Collections.singletonList("procVar"));
+                                                                                           Collections.singletonList("procVar"));
 
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(removeProcessVariables).setHeader("cmdId",
-                                                                                                    removeProcessVariables.getId()).build());
+                                                                                                       removeProcessVariables.getId()).build());
 
         await("Variable to be removed").untilTrue(streamHandler.getRemoveProcessVariablesAck());
 
@@ -255,7 +262,8 @@ public class CommandEndpointIT {
         assertThat(retrievedVars.getBody().getContent())
                 .extracting(VariableInstance::getName,
                             VariableInstance::getValue)
-                .doesNotContain(tuple("procVar", "v2"));
+                .doesNotContain(tuple("procVar",
+                                      "v2"));
     }
 
     private void claimTask(Task task) {
@@ -273,7 +281,7 @@ public class CommandEndpointIT {
 
     private void assertThatTaskHasStatus(String taskId,
                                          Task.TaskStatus status) {
-        ResponseEntity<Task> responseEntity = getTask(taskId);
+        ResponseEntity<CloudTask> responseEntity = getTask(taskId);
         Task retrievedTask = responseEntity.getBody();
         assertThat(retrievedTask.getStatus()).isEqualTo(status);
     }
@@ -332,12 +340,12 @@ public class CommandEndpointIT {
     }
 
     private ProcessInstance executeGetProcessInstanceRequest(String processInstanceId) {
-        ResponseEntity<ProcessInstance> processInstanceResponseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "{processInstanceId}",
-                                                                                              HttpMethod.GET,
-                                                                                              null,
-                                                                                              new ParameterizedTypeReference<ProcessInstance>() {
-                                                                                              },
-                                                                                              processInstanceId);
+        ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "{processInstanceId}",
+                                                                                                   HttpMethod.GET,
+                                                                                                   null,
+                                                                                                   new ParameterizedTypeReference<CloudProcessInstance>() {
+                                                                                                   },
+                                                                                                   processInstanceId);
 
         assertThat(processInstanceResponseEntity).isNotNull();
         assertThat(processInstanceResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -347,22 +355,22 @@ public class CommandEndpointIT {
         return processInstance;
     }
 
-    private ResponseEntity<PagedResources<Task>> getTasks(String processInstanceId) {
+    private ResponseEntity<PagedResources<CloudTask>> getTasks(String processInstanceId) {
         return processInstanceRestTemplate.getTasks(processInstanceId);
     }
 
-    private ResponseEntity<Task> getTask(String taskId) {
-        ResponseEntity<Task> responseEntity = restTemplate.exchange(TASKS_URL + taskId,
+    private ResponseEntity<CloudTask> getTask(String taskId) {
+        ResponseEntity<CloudTask> responseEntity = restTemplate.exchange(TASKS_URL + taskId,
                                                                     HttpMethod.GET,
                                                                     null,
-                                                                    new ParameterizedTypeReference<Task>() {
+                                                                    new ParameterizedTypeReference<CloudTask>() {
                                                                     });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<ProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<ProcessDefinition>>() {
+    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,
@@ -374,7 +382,7 @@ public class CommandEndpointIT {
     @Test
     public void shouldSendSignalViaCommand() {
         //given
-        ResponseEntity<ProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIGNAL_PROCESS));
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIGNAL_PROCESS));
         SendSignalImpl sendSignal = new SendSignalImpl("go");
 
         //when
@@ -384,7 +392,7 @@ public class CommandEndpointIT {
         await("signal to be sent")
                 .untilTrue(streamHandler.getSendSignalAck());
 
-        ResponseEntity<PagedResources<Task>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
+        ResponseEntity<PagedResources<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
         assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
     }
 }

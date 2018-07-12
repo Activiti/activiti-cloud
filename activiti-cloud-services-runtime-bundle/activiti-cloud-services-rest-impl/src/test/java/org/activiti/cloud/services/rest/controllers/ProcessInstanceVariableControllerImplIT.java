@@ -24,6 +24,9 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
 import org.activiti.runtime.api.cmd.impl.RemoveProcessVariablesImpl;
 import org.activiti.runtime.api.cmd.impl.SetProcessVariablesImpl;
@@ -67,6 +70,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({CommonModelAutoConfiguration.class,
         ProcessModelAutoConfiguration.class,
+        RuntimeBundleProperties.class,
+        CloudEventsAutoConfiguration.class,
         ServicesRestAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 public class ProcessInstanceVariableControllerImplIT {
@@ -86,6 +91,10 @@ public class ProcessInstanceVariableControllerImplIT {
     @SpyBean
     private ResourcesAssembler resourcesAssembler;
 
+    @MockBean
+    private ProcessEngineChannels processEngineChannels;
+
+
     @Before
     public void setUp() {
         //this assertion is not really necessary. It's only here to remove warning
@@ -93,6 +102,7 @@ public class ProcessInstanceVariableControllerImplIT {
         //using it in the test we need to to declare it as @SpyBean so it get inject
         //in the controller
         assertThat(resourcesAssembler).isNotNull();
+        assertThat(processEngineChannels).isNotNull();
     }
 
     @Test

@@ -4,11 +4,9 @@ import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.runtime.api.cmd.CompleteTask;
 import org.activiti.runtime.api.cmd.CreateTask;
-import org.activiti.runtime.api.model.Task;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +22,13 @@ public interface TaskController {
     PagedResources<TaskResource> getTasks(Pageable pageable);
 
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    Resource<Task> getTaskById(@PathVariable String taskId);
+    TaskResource getTaskById(@PathVariable String taskId);
 
     @RequestMapping(value = "/{taskId}/claim", method = RequestMethod.POST)
-    Resource<Task> claimTask(@PathVariable String taskId);
+    TaskResource claimTask(@PathVariable String taskId);
 
     @RequestMapping(value = "/{taskId}/release", method = RequestMethod.POST)
-    Resource<Task> releaseTask(@PathVariable String taskId);
+    TaskResource releaseTask(@PathVariable String taskId);
 
     @RequestMapping(value = "/{taskId}/complete", method = RequestMethod.POST)
     ResponseEntity<Void> completeTask(@PathVariable String taskId,
@@ -40,14 +38,14 @@ public interface TaskController {
     void deleteTask(@PathVariable String taskId);
 
     @RequestMapping(method = RequestMethod.POST)
-    Resource<Task> createNewTask(@RequestBody CreateTask createTaskCmd);
+    TaskResource createNewTask(@RequestBody CreateTask createTaskCmd);
 
     @RequestMapping(value = "/{taskId}", method = RequestMethod.PUT)
     ResponseEntity<Void> updateTask(@PathVariable("taskId") String taskId,
             @RequestBody UpdateTaskCmd updateTaskCmd);
 
     @RequestMapping(value = "/{taskId}/subtask", method = RequestMethod.POST)
-    Resource<Task> createSubtask(@PathVariable String taskId,
+    TaskResource createSubtask(@PathVariable String taskId,
                                  @RequestBody CreateTask createSubtaskCmd);
 
     @RequestMapping(value = "/{taskId}/subtasks", method = RequestMethod.GET)

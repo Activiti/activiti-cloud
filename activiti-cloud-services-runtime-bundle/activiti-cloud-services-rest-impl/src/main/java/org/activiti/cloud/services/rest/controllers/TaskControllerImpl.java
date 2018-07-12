@@ -37,7 +37,6 @@ import org.activiti.runtime.api.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -91,13 +90,13 @@ public class TaskControllerImpl implements TaskController {
     }
 
     @Override
-    public Resource<Task> getTaskById(@PathVariable String taskId) {
+    public TaskResource getTaskById(@PathVariable String taskId) {
         Task task = securityAwareTaskService.getTaskById(taskId);
         return taskResourceAssembler.toResource(task);
     }
 
     @Override
-    public Resource<Task> claimTask(@PathVariable String taskId) {
+    public TaskResource claimTask(@PathVariable String taskId) {
         String assignee = authenticationWrapper.getAuthenticatedUserId();
         if (assignee == null) {
             throw new IllegalStateException("Assignee must be resolved from the Identity/Security Layer");
@@ -108,7 +107,7 @@ public class TaskControllerImpl implements TaskController {
     }
 
     @Override
-    public Resource<Task> releaseTask(@PathVariable String taskId) {
+    public TaskResource releaseTask(@PathVariable String taskId) {
 
         return taskResourceAssembler.toResource(securityAwareTaskService.releaseTask(new ReleaseTaskImpl(taskId)));
     }
@@ -131,7 +130,7 @@ public class TaskControllerImpl implements TaskController {
     }
 
     @Override
-    public Resource<Task> createNewTask(@RequestBody CreateTask createTaskCmd) {
+    public TaskResource createNewTask(@RequestBody CreateTask createTaskCmd) {
         return taskResourceAssembler.toResource(securityAwareTaskService.createNewTask(createTaskCmd));
     }
 
@@ -144,7 +143,7 @@ public class TaskControllerImpl implements TaskController {
     }
 
     @Override
-    public Resource<Task> createSubtask(@PathVariable String taskId,
+    public TaskResource createSubtask(@PathVariable String taskId,
                                         @RequestBody CreateTask createSubtaskCmd) {
 
         return taskResourceAssembler.toResource(securityAwareTaskService.createNewSubtask(taskId,

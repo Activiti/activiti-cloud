@@ -27,8 +27,10 @@ import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.runtime.api.cmd.RemoveProcessVariables;
 import org.activiti.runtime.api.cmd.impl.RemoveProcessVariablesImpl;
+import org.activiti.runtime.api.model.CloudProcessDefinition;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.CloudVariableInstance;
 import org.activiti.runtime.api.model.ProcessDefinition;
-import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.VariableInstance;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +72,7 @@ public class ProcessVariablesIT {
 
     @Before
     public void setUp() {
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(), pd.getId());
@@ -87,15 +89,15 @@ public class ProcessVariablesIT {
                 "Silva");
         variables.put("age",
                 15);
-        ResponseEntity<ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
-                                                                                                 variables);
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
+                                                                                                      variables);
 
 
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<Resources<VariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(startResponse);
-            Collection<VariableInstance> variableCollection = variablesEntity.getBody().getContent();
+            ResponseEntity<Resources<CloudVariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(startResponse);
+            Collection<CloudVariableInstance> variableCollection = variablesEntity.getBody().getContent();
 
             assertThat(variableCollection).isNotEmpty();
             assertThat(variablesContainEntry("firstName","Pedro",variableCollection)).isTrue();
@@ -107,8 +109,8 @@ public class ProcessVariablesIT {
 
     }
 
-    private boolean variablesContainEntry(String key, Object value, Collection<VariableInstance> variableCollection){
-        Iterator<VariableInstance> iterator = variableCollection.iterator();
+    private boolean variablesContainEntry(String key, Object value, Collection<CloudVariableInstance> variableCollection){
+        Iterator<CloudVariableInstance> iterator = variableCollection.iterator();
         while(iterator.hasNext()){
             VariableInstance variable = iterator.next();
             if(variable.getName().equalsIgnoreCase(key) && variable.getValue().equals(value)){
@@ -129,7 +131,7 @@ public class ProcessVariablesIT {
                 "Silver");
         variables.put("age",
                 19);
-        ResponseEntity<ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
                 variables);
 
         List<String> variablesNames = new ArrayList<>(variables.keySet());
@@ -158,7 +160,7 @@ public class ProcessVariablesIT {
                 "Silver");
         variables.put("age",
                 19);
-        ResponseEntity<ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
                 variables);
 
         variables.put("firstName",
@@ -176,10 +178,10 @@ public class ProcessVariablesIT {
 
 
             // when
-        ResponseEntity<Resources<VariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
+        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
 
         // then
-        Collection<VariableInstance> variableCollection = variablesResponse.getBody().getContent();
+        Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
 
         assertThat(variableCollection).isNotEmpty();
         assertThat(variablesContainEntry("firstName","Kermit",variableCollection)).isTrue();
@@ -190,8 +192,8 @@ public class ProcessVariablesIT {
 
     }
 
-    private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<ProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<ProcessDefinition>>() {
+    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
         return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL,
                 HttpMethod.GET,

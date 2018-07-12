@@ -15,13 +15,13 @@
 
 package org.activiti.cloud.services.rest.api.resources;
 
-import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.CloudTask;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
-public class TaskResource extends Resource<Task> {
+public class TaskResource extends Resource<CloudTask> {
 
-    public TaskResource(Task content,
+    public TaskResource(CloudTask content,
                         Iterable<Link> links) {
         super(content,
               links);

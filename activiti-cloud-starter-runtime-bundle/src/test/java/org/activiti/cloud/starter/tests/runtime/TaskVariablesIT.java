@@ -24,6 +24,10 @@ import java.util.Map;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.runtime.api.model.CloudProcessDefinition;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.CloudVariableInstance;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.VariableInstance;
 import org.junit.Before;
@@ -66,8 +70,8 @@ public class TaskVariablesIT {
     public static final String TASK_VARIABLES_URL = "/v1/taskId/";
 
     @Before
-    public void setUp() throws Exception {
-        ResponseEntity<PagedResources<ProcessDefinition>> processDefinitions = getProcessDefinitions();
+    public void setUp() {
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(), pd.getId());
@@ -80,9 +84,9 @@ public class TaskVariablesIT {
         Map<String, Object> variables = new HashMap<>();
         variables.put("var1",
                       "test1");
-        ResponseEntity<org.activiti.runtime.api.model.ProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                                                variables);
-        ResponseEntity<PagedResources<org.activiti.runtime.api.model.Task>> tasks = processInstanceRestTemplate.getTasks(startResponse);
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                                      variables);
+        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
         Map<String, Object> taskVariables = new HashMap<>();
@@ -91,7 +95,7 @@ public class TaskVariablesIT {
         taskRestTemplate.setVariablesLocal(taskId, taskVariables);
 
         //when
-        ResponseEntity<Resources<VariableInstance>> variablesResponse = taskRestTemplate.getVariablesLocal(taskId);
+        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariablesLocal(taskId);
 
         //then
         assertThat(variablesResponse).isNotNull();
@@ -133,8 +137,8 @@ public class TaskVariablesIT {
 
     }
 
-    private boolean variablesContainEntry(String key, Object value, Collection<VariableInstance> variableCollection){
-        Iterator<VariableInstance> iterator = variableCollection.iterator();
+    private boolean variablesContainEntry(String key, Object value, Collection<CloudVariableInstance> variableCollection){
+        Iterator<CloudVariableInstance> iterator = variableCollection.iterator();
         while(iterator.hasNext()){
             VariableInstance variable = iterator.next();
             if(variable.getName().equalsIgnoreCase(key) && variable.getValue().equals(value)){
@@ -145,8 +149,8 @@ public class TaskVariablesIT {
         return false;
     }
 
-    private boolean variablesDoNotContainKeys(Collection<VariableInstance> variableCollection, String... keys){
-        Iterator<VariableInstance> iterator = variableCollection.iterator();
+    private boolean variablesDoNotContainKeys(Collection<CloudVariableInstance> variableCollection, String... keys){
+        Iterator<CloudVariableInstance> iterator = variableCollection.iterator();
         while(iterator.hasNext()){
             VariableInstance variable = iterator.next();
             for(String key:keys){
@@ -158,8 +162,8 @@ public class TaskVariablesIT {
         return true;
     }
 
-    private ResponseEntity<PagedResources<ProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<ProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<ProcessDefinition>>() {
+    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
+        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
         return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL,
                                      HttpMethod.GET,

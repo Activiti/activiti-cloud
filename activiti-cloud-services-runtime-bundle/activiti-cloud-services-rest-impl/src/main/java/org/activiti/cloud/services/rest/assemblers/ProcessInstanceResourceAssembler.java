@@ -19,30 +19,33 @@ import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceVariableControllerImpl;
+import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
-import org.springframework.stereotype.Component;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-@Component
 public class ProcessInstanceResourceAssembler extends ResourceAssemblerSupport<ProcessInstance, ProcessInstanceResource> {
 
-    public ProcessInstanceResourceAssembler() {
+    private ToCloudProcessInstanceConverter toCloudProcessInstanceConverter;
+
+    public ProcessInstanceResourceAssembler(ToCloudProcessInstanceConverter toCloudProcessInstanceConverter) {
         super(ProcessInstanceControllerImpl.class,
               ProcessInstanceResource.class);
+        this.toCloudProcessInstanceConverter = toCloudProcessInstanceConverter;
     }
 
     @Override
     public ProcessInstanceResource toResource(ProcessInstance processInstance) {
+        CloudProcessInstance cloudProcessInstance = toCloudProcessInstanceConverter.from(processInstance);
         Link processInstancesRel = linkTo(methodOn(ProcessInstanceControllerImpl.class).getProcessInstances(null))
                 .withRel("processInstances");
-        Link selfLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).getProcessInstanceById(processInstance.getId())).withSelfRel();
-        Link variablesLink = linkTo(methodOn(ProcessInstanceVariableControllerImpl.class).getVariables(processInstance.getId())).withRel("variables");
+        Link selfLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).getProcessInstanceById(cloudProcessInstance.getId())).withSelfRel();
+        Link variablesLink = linkTo(methodOn(ProcessInstanceVariableControllerImpl.class).getVariables(cloudProcessInstance.getId())).withRel("variables");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
-        return new ProcessInstanceResource(processInstance,
+        return new ProcessInstanceResource(cloudProcessInstance,
                                            selfLink,
                                            variablesLink,
                                            processInstancesRel,

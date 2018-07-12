@@ -1,22 +1,36 @@
 package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
-import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.model.impl.CloudProcessDefinitionImpl;
+import org.activiti.runtime.api.model.impl.ProcessDefinitionImpl;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.hateoas.Link;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessDefinitionResourceAssemblerTest {
 
-    private ProcessDefinitionResourceAssembler resourceAssembler = new ProcessDefinitionResourceAssembler();
+    @InjectMocks
+    private ProcessDefinitionResourceAssembler resourceAssembler;
+
+    @Mock
+    private ToCloudProcessDefinitionConverter converter;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+    }
 
     @Test
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {
-        ProcessDefinition processDefinition = mock(ProcessDefinition.class);
-        when(processDefinition.getId()).thenReturn("my-identifier");
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId("my-identifier");
+        given(converter.from(processDefinition)).willReturn(new CloudProcessDefinitionImpl(processDefinition));
 
         ProcessDefinitionResource processDefinitionResource = resourceAssembler.toResource(processDefinition);
 

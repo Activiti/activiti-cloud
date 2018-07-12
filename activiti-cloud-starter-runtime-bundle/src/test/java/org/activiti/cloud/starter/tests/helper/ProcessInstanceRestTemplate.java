@@ -25,9 +25,9 @@ import org.activiti.runtime.api.cmd.StartProcess;
 import org.activiti.runtime.api.cmd.impl.RemoveProcessVariablesImpl;
 import org.activiti.runtime.api.cmd.impl.SetProcessVariablesImpl;
 import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.VariableInstance;
+import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.CloudVariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
@@ -50,10 +50,10 @@ public class ProcessInstanceRestTemplate {
     private TestRestTemplate testRestTemplate;
 
 
-    private ResponseEntity<ProcessInstance> startProcess(String processDefinitionKey,
-                                                         String processDefinitionId,
-                                                         Map<String, Object> variables,
-                                                         String businessKey) {
+    private ResponseEntity<CloudProcessInstance> startProcess(String processDefinitionKey,
+                                                              String processDefinitionId,
+                                                              Map<String, Object> variables,
+                                                              String businessKey) {
 
         StartProcessImpl startProcess = new StartProcessImpl(processDefinitionId,
                                                              variables);
@@ -62,34 +62,34 @@ public class ProcessInstanceRestTemplate {
 
         HttpEntity<StartProcess> requestEntity = new HttpEntity<>(startProcess);
 
-        ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL,
+        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL,
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<ProcessInstance>() {
+                new ParameterizedTypeReference<CloudProcessInstance>() {
                 });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody().getId()).isNotNull();
         return responseEntity;
     }
 
-    public ResponseEntity<ProcessInstance> startProcess(String processDefinitionId) {
+    public ResponseEntity<CloudProcessInstance> startProcess(String processDefinitionId) {
 
         return startProcess(processDefinitionId,
                 null,
                 null);
     }
 
-    public ResponseEntity<ProcessInstance> startProcess(String processDefinitionId,
-                                                        Map<String, Object> variables) {
+    public ResponseEntity<CloudProcessInstance> startProcess(String processDefinitionId,
+                                                             Map<String, Object> variables) {
 
         return startProcess(processDefinitionId,
                             variables,
                             null);
     }
 
-    public ResponseEntity<ProcessInstance> startProcess(String processDefinitionId,
-                                                        Map<String, Object> variables,
-                                                        String businessKey) {
+    public ResponseEntity<CloudProcessInstance> startProcess(String processDefinitionId,
+                                                             Map<String, Object> variables,
+                                                             String businessKey) {
         
         return startProcess(null,
                             processDefinitionId,
@@ -97,58 +97,58 @@ public class ProcessInstanceRestTemplate {
                             businessKey);
     }
 
-    public ResponseEntity<ProcessInstance> startProcessByKey(String processDefinitionKey,
-                                                        Map<String, Object> variables,
-                                                        String businessKey) {
+    public ResponseEntity<CloudProcessInstance> startProcessByKey(String processDefinitionKey,
+                                                                  Map<String, Object> variables,
+                                                                  String businessKey) {
         return startProcess(processDefinitionKey,
                             null,
                             variables,
                             businessKey);
     }
 
-    public ResponseEntity<PagedResources<Task>> getTasks(ResponseEntity<ProcessInstance> processInstanceEntity) {
+    public ResponseEntity<PagedResources<CloudTask>> getTasks(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
 
         return getTasks(processInstanceEntity.getBody().getId());
     }
 
-    public ResponseEntity<PagedResources<Task>> getTasks(String processInstanceId) {
-        ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/tasks",
+    public ResponseEntity<PagedResources<CloudTask>> getTasks(String processInstanceId) {
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/tasks",
                                                                                         HttpMethod.GET,
                                                                                         null,
-                                                                                        new ParameterizedTypeReference<PagedResources<Task>>() {
+                                                                                        new ParameterizedTypeReference<PagedResources<CloudTask>>() {
                 });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<Resources<VariableInstance>> getVariables(ResponseEntity<ProcessInstance> processInstanceEntity) {
+    public ResponseEntity<Resources<CloudVariableInstance>> getVariables(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
 
         return getVariables(processInstanceEntity.getBody().getId());
     }
 
-    public ResponseEntity<Resources<VariableInstance>> getVariables(String processInstanceId) {
-        ResponseEntity<Resources<VariableInstance>> responseEntity = testRestTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
+    public ResponseEntity<Resources<CloudVariableInstance>> getVariables(String processInstanceId) {
+        ResponseEntity<Resources<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
                                                                                                HttpMethod.GET,
                                                                                                null,
-                                                                                               new ParameterizedTypeReference<Resources<VariableInstance>>() {
+                                                                                               new ParameterizedTypeReference<Resources<CloudVariableInstance>>() {
                 });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<ProcessInstance> getProcessInstance(ResponseEntity<ProcessInstance> processInstanceEntity) {
+    public ResponseEntity<CloudProcessInstance> getProcessInstance(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
 
 
-        ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId(),
+        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId(),
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<ProcessInstance>() {
+                new ParameterizedTypeReference<CloudProcessInstance>() {
                 });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<Void> delete(ResponseEntity<ProcessInstance> processInstanceEntity) {
+    public ResponseEntity<Void> delete(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
 
 
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId(),
@@ -160,7 +160,7 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Void> suspend(ResponseEntity<ProcessInstance> processInstanceEntity) {
+    public ResponseEntity<Void> suspend(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/suspend",
                                                                     HttpMethod.POST,
                                                                     null,
@@ -170,7 +170,7 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Void> resume(ResponseEntity<ProcessInstance> startProcessEntity) {
+    public ResponseEntity<Void> resume(ResponseEntity<CloudProcessInstance> startProcessEntity) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startProcessEntity.getBody().getId() + "/activate",
                                                                     HttpMethod.POST,
                                                                     null,
