@@ -18,7 +18,6 @@ package org.activiti.cloud.services.rest.controllers;
 import java.util.Map;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
@@ -29,6 +28,7 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.runtime.api.NotFoundException;
 import org.activiti.runtime.api.cmd.CompleteTask;
 import org.activiti.runtime.api.cmd.CreateTask;
+import org.activiti.runtime.api.cmd.UpdateTask;
 import org.activiti.runtime.api.cmd.impl.ClaimTaskImpl;
 import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
 import org.activiti.runtime.api.cmd.impl.ReleaseTaskImpl;
@@ -136,7 +136,7 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public ResponseEntity<Void> updateTask(@PathVariable String taskId,
-                                           @RequestBody UpdateTaskCmd updateTaskCmd) {
+                                           @RequestBody UpdateTask updateTaskCmd) {
         securityAwareTaskService.updateTask(taskId,
                                             updateTaskCmd);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

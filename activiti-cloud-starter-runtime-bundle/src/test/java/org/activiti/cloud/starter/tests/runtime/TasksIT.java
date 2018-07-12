@@ -25,6 +25,7 @@ import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSe
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
+import org.activiti.runtime.api.cmd.impl.UpdateTaskImpl;
 import org.activiti.runtime.api.model.CloudProcessDefinition;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
@@ -111,6 +112,28 @@ public class TasksIT  {
     }
 
     @Test
+    public void shouldUpdateDescription() {
+        //given
+        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = executeRequestGetTasks();
+        assertThat(responseEntity).isNotNull();
+        Collection<CloudTask> tasks = responseEntity.getBody().getContent();
+        CloudTask task = tasks.iterator().next();
+
+        UpdateTaskImpl updateTask = new UpdateTaskImpl();
+        updateTask.setDescription("Updated description");
+
+        //when
+        taskRestTemplate.updateTask(task, updateTask);
+
+        //then
+        ResponseEntity<CloudTask> taskResponseEntity = taskRestTemplate.getTask(task.getId());
+
+        assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("Updated description");
+
+    }
+
+    @Test
     public void shouldNotGetTasksWithoutPermission() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
 
@@ -183,10 +206,7 @@ public class TasksIT  {
         Task task = executeRequestGetTasks().getBody().iterator().next();
 
         //when
-        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId(),
-                HttpMethod.GET,
-                null,
-                TASK_RESPONSE_TYPE);
+        ResponseEntity<CloudTask> responseEntity = taskRestTemplate.getTask(task.getId());
 
         //then
         assertThat(responseEntity).isNotNull();
@@ -257,7 +277,7 @@ public class TasksIT  {
         //when
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId() + "/complete",
                 HttpMethod.POST,
-                new HttpEntity(completeTaskCmd),
+                new HttpEntity<>(completeTaskCmd),
                 new ParameterizedTypeReference<Void>() {
                 });
 

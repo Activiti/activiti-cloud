@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.tests.helper;
 
 import java.util.Map;
 
+import org.activiti.runtime.api.cmd.UpdateTask;
 import org.activiti.runtime.api.cmd.impl.SetTaskVariablesImpl;
 import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.CloudVariableInstance;
@@ -61,6 +62,24 @@ public class TaskRestTemplate {
                                                                         TASK_RESPONSE_TYPE);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
+    }
+
+    public ResponseEntity<CloudTask> getTask(String taskId) {
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + taskId,
+                                                                             HttpMethod.GET,
+                                                                             null,
+                                                                             TASK_RESPONSE_TYPE);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+
+    public void updateTask(Task task, UpdateTask updateTask) {
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId(),
+                                                                        HttpMethod.PUT,
+                                                                        new HttpEntity<>(updateTask),
+                                                                        new ParameterizedTypeReference<Void>() {
+                                                                             });
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
 
     public ResponseEntity<Void> setVariables(String taskId, Map<String, Object> variables) {

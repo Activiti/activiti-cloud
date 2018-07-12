@@ -18,7 +18,6 @@ package org.activiti.cloud.services.core.pageable;
 
 import java.util.List;
 
-import org.activiti.cloud.services.api.commands.UpdateTaskCmd;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.runtime.api.TaskRuntime;
 import org.activiti.runtime.api.cmd.ClaimTask;
@@ -26,6 +25,7 @@ import org.activiti.runtime.api.cmd.CompleteTask;
 import org.activiti.runtime.api.cmd.CreateTask;
 import org.activiti.runtime.api.cmd.ReleaseTask;
 import org.activiti.runtime.api.cmd.SetTaskVariables;
+import org.activiti.runtime.api.cmd.UpdateTask;
 import org.activiti.runtime.api.identity.IdentityLookup;
 import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.VariableInstance;
@@ -138,7 +138,7 @@ public class SecurityAwareTaskService {
     }
 
     public void updateTask(String taskId,
-                           UpdateTaskCmd updateTaskCmd) {
+                           UpdateTask updateTaskCmd) {
         FluentTask task = taskRuntime.task(taskId);
         if (updateTaskCmd.getAssignee() != null) {
             task.claim(updateTaskCmd.getAssignee());

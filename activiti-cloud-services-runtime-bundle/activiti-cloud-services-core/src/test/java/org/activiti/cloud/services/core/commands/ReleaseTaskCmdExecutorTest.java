@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.results.CompleteTaskResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.runtime.api.cmd.TaskCommands;
 import org.activiti.runtime.api.cmd.impl.ReleaseTaskImpl;
+import org.activiti.runtime.api.cmd.result.CompleteTaskResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -43,6 +43,6 @@ public class ReleaseTaskCmdExecutorTest {
 
         //then
         verify(securityAwareTaskService).releaseTask(releaseTaskCmd);
-        verify(commandResults).send(ArgumentMatchers.<Message<CompleteTaskResults>>any());
+        verify(commandResults).send(ArgumentMatchers.<Message<CompleteTaskResult>>any());
     }
 }

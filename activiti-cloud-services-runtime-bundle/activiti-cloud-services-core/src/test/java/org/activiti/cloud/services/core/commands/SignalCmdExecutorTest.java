@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.results.SignalProcessInstancesResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.runtime.api.cmd.RuntimeCommands;
 import org.activiti.runtime.api.cmd.impl.SendSignalImpl;
+import org.activiti.runtime.api.cmd.result.SendSignalResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -42,6 +42,6 @@ public class SignalCmdExecutorTest {
 
         verify(processInstanceService).signal(signalProcessInstancesCmd);
 
-        verify(commandResults).send(ArgumentMatchers.<Message<SignalProcessInstancesResults>>any());
+        verify(commandResults).send(ArgumentMatchers.<Message<SendSignalResult>>any());
     }
 }

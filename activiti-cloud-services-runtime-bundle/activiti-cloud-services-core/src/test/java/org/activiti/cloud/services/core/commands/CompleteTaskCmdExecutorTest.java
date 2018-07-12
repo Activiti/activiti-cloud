@@ -3,10 +3,10 @@ package org.activiti.cloud.services.core.commands;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.services.api.commands.results.CompleteTaskResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.runtime.api.cmd.TaskCommands;
 import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
+import org.activiti.runtime.api.cmd.result.CompleteTaskResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -47,6 +47,6 @@ public class CompleteTaskCmdExecutorTest {
 
         verify(securityAwareTaskService).completeTask(completeTaskCmd);
 
-        verify(commandResults).send(ArgumentMatchers.<Message<CompleteTaskResults>>any());
+        verify(commandResults).send(ArgumentMatchers.<Message<CompleteTaskResult>>any());
     }
 }

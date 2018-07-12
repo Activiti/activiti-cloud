@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.results.ActivateProcessInstanceResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.runtime.api.cmd.ProcessCommands;
 import org.activiti.runtime.api.cmd.impl.ResumeProcessImpl;
+import org.activiti.runtime.api.cmd.result.ResumeProcessResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -42,6 +42,6 @@ public class ActivateProcessInstanceCmdExecutorTest {
 
         verify(processInstanceService).activate(activateProcessInstanceCmd);
 
-        verify(commandResults).send(ArgumentMatchers.<Message<ActivateProcessInstanceResults>>any());
+        verify(commandResults).send(ArgumentMatchers.<Message<ResumeProcessResult>>any());
     }
 }

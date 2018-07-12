@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.results.StartProcessInstanceResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.runtime.api.cmd.ProcessCommands;
 import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
+import org.activiti.runtime.api.cmd.result.StartProcessResult;
 import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +50,6 @@ public class StartProcessInstanceCmdExecutorTest {
 
         verify(securityAwareProcessInstanceService).startProcess(startProcessInstanceCmd);
 
-        verify(commandResults).send(ArgumentMatchers.<Message<StartProcessInstanceResults>>any());
+        verify(commandResults).send(ArgumentMatchers.<Message<StartProcessResult>>any());
     }
 }

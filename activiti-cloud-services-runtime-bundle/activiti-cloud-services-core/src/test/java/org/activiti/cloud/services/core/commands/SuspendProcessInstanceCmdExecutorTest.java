@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.api.commands.results.SuspendProcessInstanceResults;
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.runtime.api.cmd.ProcessCommands;
 import org.activiti.runtime.api.cmd.impl.SuspendProcessImpl;
+import org.activiti.runtime.api.cmd.result.SuspendProcessResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -43,6 +43,6 @@ public class SuspendProcessInstanceCmdExecutorTest {
 
         //then
         verify(processInstanceService).suspend(suspendProcessInstanceCmd);
-        verify(commandResults).send(ArgumentMatchers.<Message<SuspendProcessInstanceResults>>any());
+        verify(commandResults).send(ArgumentMatchers.<Message<SuspendProcessResult>>any());
     }
 }
