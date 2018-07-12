@@ -19,7 +19,6 @@ package org.activiti.cloud.qa.rest;
 import org.activiti.cloud.qa.config.RuntimeTestsConfigurationProperties;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.activiti.cloud.qa.service.RuntimeBundleService.PROCESS_INSTANCES_PATH;
@@ -55,5 +54,4 @@ public class RuntimeDirtyContextHandler {
         dirtyContextHandler.dirty(configurationProperties.getRuntimeBundleUrl() + TASKS_PATH + task.getId());
         return task;
     }
-
 }

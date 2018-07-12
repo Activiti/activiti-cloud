@@ -23,8 +23,6 @@ import org.activiti.runtime.api.cmd.CreateTask;
 import org.activiti.runtime.api.cmd.StartProcess;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.Task;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
 
@@ -89,7 +87,7 @@ public interface RuntimeBundleService extends BaseService {
             "Accept: application/hal+json;charset=UTF-8"
     })
     CloudTask createSubtask(@Param("parentTaskId") String parentTaskId,
-                       CreateTask createTaskCmd);
+                            CreateTask createTaskCmd);
 
     @RequestLine("GET /v1/tasks/{parentTaskId}/subtasks")
     Resources getSubtasks(@Param("parentTaskId") String parentTaskId);

@@ -22,6 +22,7 @@ import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
+import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.Task;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
@@ -43,7 +44,7 @@ public class Tasks {
     /**
      * standalone task
      */
-    private Task newTask;
+    private CloudTask newTask;
 
     /**
      * subtask of {@link #newTask}
@@ -59,7 +60,7 @@ public class Tasks {
 
     @Then("the task is created and the status is assigned")
     public void taskIsCreatedAndAssigned() throws Exception {
-        final Task assignedTask = runtimeBundleSteps.getTaskById(newTask.getId());
+        final CloudTask assignedTask = runtimeBundleSteps.getTaskById(newTask.getId());
         assertThat(assignedTask).isNotNull();
         assertThat(assignedTask.getStatus()).isEqualTo(Task.TaskStatus.ASSIGNED);
         runtimeBundleSteps.waitForMessagesToBeConsumed();
@@ -91,7 +92,7 @@ public class Tasks {
 
     @Then("the subtask is created and references another task")
     public void taskWithSubtaskIsCreated()  throws Exception {
-        final Task createdSubtask = runtimeBundleSteps.getTaskById(subtask.getId());
+        final CloudTask createdSubtask = runtimeBundleSteps.getTaskById(subtask.getId());
         assertThat(createdSubtask).isNotNull();
         assertThat(createdSubtask.getParentTaskId()).isNotEmpty().isEqualToIgnoringCase(newTask.getId());
         runtimeBundleSteps.waitForMessagesToBeConsumed();

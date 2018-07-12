@@ -29,6 +29,7 @@ import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.Task;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
@@ -48,11 +49,11 @@ public class ProcessInstanceTasks {
     @Steps
     private QuerySteps querySteps;
 
-    private CloudProcessInstance processInstance;
+    private ProcessInstance processInstance;
 
     private String processInstanceDiagram;
 
-    private CloudTask currentTask;
+    private Task currentTask;
 
     @When("services are started")
     public void checkServicesStatus() {
@@ -66,7 +67,7 @@ public class ProcessInstanceTasks {
         processInstance = runtimeBundleSteps.startProcess(process);
         assertThat(processInstance).isNotNull();
 
-        List<CloudTask> tasks = new ArrayList<>(
+        List<Task> tasks = new ArrayList<>(
                 runtimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId()));
 
         assertThat(tasks).isNotEmpty();

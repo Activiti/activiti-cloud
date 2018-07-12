@@ -24,8 +24,10 @@ import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.QueryService;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus;
+
 import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.Task.TaskStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.*;
@@ -56,7 +58,7 @@ public class QuerySteps {
 
     @Step
     public void checkProcessInstanceStatus(String processInstanceId,
-                                           ProcessInstance.ProcessInstanceStatus expectedStatus) throws Exception {
+                                           ProcessInstanceStatus expectedStatus) throws Exception {
         assertThat(expectedStatus).isNotNull();
 
         CloudProcessInstance processInstance = getProcessInstance(processInstanceId);
@@ -68,7 +70,7 @@ public class QuerySteps {
 
     @Step
     public void checkTaskStatus(String taskId,
-                                Task.TaskStatus expectedStatus) {
+                                TaskStatus expectedStatus) {
         assertThat(queryService.queryTasksByIdAnsStatus(taskId,
                                                         expectedStatus).getContent())
                 .isNotNull()

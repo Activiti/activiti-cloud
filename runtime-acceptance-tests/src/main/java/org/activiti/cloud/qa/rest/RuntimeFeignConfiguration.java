@@ -16,9 +16,12 @@
 
 package org.activiti.cloud.qa.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Feign;
 import feign.Logger;
 import feign.gson.GsonEncoder;
+import feign.jackson.JacksonDecoder;
+import feign.jackson.JacksonEncoder;
 import org.activiti.cloud.qa.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.qa.rest.feign.FeignConfiguration;
 import org.activiti.cloud.qa.rest.feign.FeignErrorDecoder;
@@ -28,6 +31,12 @@ import org.activiti.cloud.qa.service.AuditService;
 import org.activiti.cloud.qa.service.QueryService;
 import org.activiti.cloud.qa.service.RuntimeBundleDiagramService;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
+import org.activiti.runtime.conf.CloudTaskModelAutoConfiguration;
+import org.activiti.runtime.conf.CommonModelAutoConfiguration;
+import org.activiti.runtime.conf.TaskModelAutoConfiguration;
+import org.conf.activiti.runtime.CloudCommonModelAutoConfiguration;
+import org.conf.activiti.runtime.CloudProcessModelAutoConfiguration;
+import org.conf.activiti.runtime.ProcessModelAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,17 +45,28 @@ import org.springframework.context.annotation.Import;
 /**
  * Feign Configuration
  */
-@Import(FeignConfiguration.class)
 @Configuration
+@Import({FeignConfiguration.class,
+        CloudCommonModelAutoConfiguration.class,
+        CloudProcessModelAutoConfiguration.class,
+        CloudTaskModelAutoConfiguration.class,
+        CommonModelAutoConfiguration.class,
+        ProcessModelAutoConfiguration.class,
+        TaskModelAutoConfiguration.class})
 public class RuntimeFeignConfiguration {
 
     @Autowired
     private RuntimeTestsConfigurationProperties runtimeTestsConfigurationProperties;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Bean
     public RuntimeBundleService runtimeBundleService() {
         return FeignRestDataClient
                 .builder()
+                .encoder(new JacksonEncoder(objectMapper))
+                .decoder(new JacksonDecoder(objectMapper))
                 .target(RuntimeBundleService.class,
                         runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
@@ -67,6 +87,8 @@ public class RuntimeFeignConfiguration {
     public AuditService auditClient() {
         return FeignRestDataClient
                 .builder()
+                .encoder(new JacksonEncoder(objectMapper))
+                .decoder(new JacksonDecoder(objectMapper))
                 .target(AuditService.class,
                         runtimeTestsConfigurationProperties.getAuditEventUrl());
     }
@@ -75,8 +97,9 @@ public class RuntimeFeignConfiguration {
     public QueryService queryService() {
         return FeignRestDataClient
                 .builder()
+                .encoder(new JacksonEncoder(objectMapper))
+                .decoder(new JacksonDecoder(objectMapper))
                 .target(QueryService.class,
                         runtimeTestsConfigurationProperties.getQueryUrl());
     }
-
 }
