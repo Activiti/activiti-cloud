@@ -17,11 +17,11 @@
 package org.activiti.cloud.services.organization.rest.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
-import org.activiti.cloud.organization.repository.entity.Model;
 import org.activiti.cloud.services.organization.entity.ApplicationEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.jpa.ApplicationJpaRepository;
@@ -40,8 +40,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.activiti.cloud.organization.repository.entity.ModelType.FORM;
-import static org.activiti.cloud.organization.repository.entity.ModelType.PROCESS;
+import static org.activiti.cloud.organization.api.ModelType.FORM;
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.hasSize;

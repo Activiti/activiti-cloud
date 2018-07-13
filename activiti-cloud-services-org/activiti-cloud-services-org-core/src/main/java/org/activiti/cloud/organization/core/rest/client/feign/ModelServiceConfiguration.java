@@ -19,14 +19,14 @@ package org.activiti.cloud.organization.core.rest.client.feign;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.repository.entity.ModelType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.activiti.cloud.organization.repository.entity.ModelType.FORM;
-import static org.activiti.cloud.organization.repository.entity.ModelType.PROCESS;
+import static org.activiti.cloud.organization.api.ModelType.FORM;
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 
 /**
  * Model service configuration

@@ -20,9 +20,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.repository.ModelRepository;
-import org.activiti.cloud.organization.repository.entity.Application;
-import org.activiti.cloud.organization.repository.entity.Model;
 import org.activiti.cloud.services.organization.rest.assembler.ModelResourceAssembler;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;

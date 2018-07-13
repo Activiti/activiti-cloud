@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.organization.core.rest.resource;
 
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
-import org.activiti.cloud.organization.repository.entity.ModelType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

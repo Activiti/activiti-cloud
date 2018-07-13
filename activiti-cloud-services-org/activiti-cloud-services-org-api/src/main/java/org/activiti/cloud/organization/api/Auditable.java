@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.repository.entity;
+package org.activiti.cloud.organization.api;
 
 import java.util.Date;
 

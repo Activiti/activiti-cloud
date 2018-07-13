@@ -32,9 +32,9 @@ import org.mockito.Captor;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.activiti.cloud.organization.repository.entity.ModelType.PROCESS;
 
 /**
  * Tests for {@link ModelRepository}

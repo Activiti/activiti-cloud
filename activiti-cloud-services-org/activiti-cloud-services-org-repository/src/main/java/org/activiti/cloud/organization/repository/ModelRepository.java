@@ -19,8 +19,8 @@ package org.activiti.cloud.organization.repository;
 import java.util.List;
 import java.util.Optional;
 
-import org.activiti.cloud.organization.repository.entity.Application;
-import org.activiti.cloud.organization.repository.entity.Model;
+import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Model;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

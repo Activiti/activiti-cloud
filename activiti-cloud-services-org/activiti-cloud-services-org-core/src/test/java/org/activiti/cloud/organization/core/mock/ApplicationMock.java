@@ -18,7 +18,7 @@ package org.activiti.cloud.organization.core.mock;
 
 import java.util.List;
 
-import org.activiti.cloud.organization.repository.entity.Application;
+import org.activiti.cloud.organization.api.Application;
 
 /**
  * Application mock
@@ -36,7 +36,7 @@ public class ApplicationMock extends AuditableMock implements Application<String
     }
 
     public ApplicationMock(String id,
-                             String name) {
+                           String name) {
         this.id = id;
         this.name = name;
     }

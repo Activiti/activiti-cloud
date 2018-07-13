@@ -27,8 +27,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.resource.EntityWithRestResource;
 import org.activiti.cloud.organization.core.rest.resource.RestResource;
-import org.activiti.cloud.organization.repository.entity.Model;
-import org.activiti.cloud.organization.repository.entity.ModelType;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;

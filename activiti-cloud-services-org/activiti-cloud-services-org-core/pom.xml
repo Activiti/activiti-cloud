@@ -12,7 +12,7 @@
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-org-repository</artifactId>
+      <artifactId>activiti-cloud-services-org-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>

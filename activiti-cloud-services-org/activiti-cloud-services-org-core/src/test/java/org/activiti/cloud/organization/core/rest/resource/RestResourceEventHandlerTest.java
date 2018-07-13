@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.activiti.cloud.organization.repository.entity.ModelType.PROCESS;
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;

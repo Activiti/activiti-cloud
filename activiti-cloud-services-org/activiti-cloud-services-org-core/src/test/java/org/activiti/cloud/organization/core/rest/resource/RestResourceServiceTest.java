@@ -16,10 +16,10 @@
 
 package org.activiti.cloud.organization.core.rest.resource;
 
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.mock.ModelMock;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
-import org.activiti.cloud.organization.repository.entity.ModelType;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -30,7 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.activiti.cloud.organization.repository.entity.ModelType.PROCESS;
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;

@@ -21,7 +21,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import org.activiti.cloud.organization.repository.entity.Model;
+import org.activiti.cloud.organization.api.Model;
 import org.springframework.stereotype.Component;
 
 /**

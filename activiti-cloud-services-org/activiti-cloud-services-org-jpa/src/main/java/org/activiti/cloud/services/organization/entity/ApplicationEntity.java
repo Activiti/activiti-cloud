@@ -23,7 +23,7 @@ import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.activiti.cloud.organization.repository.entity.Application;
+import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;

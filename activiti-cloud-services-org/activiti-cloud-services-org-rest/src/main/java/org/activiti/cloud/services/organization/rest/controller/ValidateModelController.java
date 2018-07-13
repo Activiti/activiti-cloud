@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import org.activiti.cloud.organization.repository.ModelRepository;
-import org.activiti.cloud.organization.core.rest.client.ModelService;
+import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
-import org.activiti.cloud.organization.repository.entity.Model;
+import org.activiti.cloud.organization.core.rest.client.ModelService;
+import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.rest.assembler.ValidationErrorResourceAssembler;
 import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.springframework.beans.factory.annotation.Autowired;

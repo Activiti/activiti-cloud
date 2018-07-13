@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.repository.entity;
-
-import java.util.List;
+package org.activiti.cloud.organization.api;
 
 /**
- * Interface for applications
+ * Interface for models
  */
-public interface Application<U> extends Auditable<U> {
+public interface Model<A extends Application, U> extends Auditable<U> {
 
     String getId();
 
@@ -31,6 +29,23 @@ public interface Application<U> extends Auditable<U> {
 
     void setName(String name);
 
-    List<? extends Model> getModels();
+    ModelType getType();
 
+    void setType(ModelType type);
+
+    A getApplication();
+
+    void setApplication(A application);
+
+    String getVersion();
+
+    void setVersion(String version);
+
+    String getContentType();
+
+    void setContentType(String contentType);
+
+    String getContent();
+
+    void setContent(String content);
 }

@@ -19,15 +19,15 @@ package org.activiti.cloud.organization.core.rest.client.feign;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.repository.entity.ModelType;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import static org.activiti.cloud.organization.repository.entity.ModelType.FORM;
-import static org.activiti.cloud.organization.repository.entity.ModelType.PROCESS;
+import static org.activiti.cloud.organization.api.ModelType.FORM;
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -153,7 +153,7 @@ public class FeignModelServiceTest {
     public void testvalidateResourceContent() {
         // WHEN
         feignModelService.validateResourceContent(PROCESS,
-                                         "processModelConent".getBytes());
+                                                  "processModelConent".getBytes());
 
         // THEN
         verify(processModelService,
@@ -162,7 +162,7 @@ public class FeignModelServiceTest {
 
         // WHEN
         feignModelService.validateResourceContent(FORM,
-                                         "formModelConent".getBytes());
+                                                  "formModelConent".getBytes());
 
         // THEN
         verify(formModelService,

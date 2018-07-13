@@ -17,8 +17,8 @@
 package org.activiti.cloud.services.organization.rest.config;
 
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import org.activiti.cloud.organization.repository.entity.Application;
-import org.activiti.cloud.organization.repository.entity.Model;
+import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;

@@ -19,8 +19,8 @@ package org.activiti.cloud.services.organization.rest.controller;
 import java.util.Optional;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
-import org.activiti.cloud.organization.repository.entity.Application;
 import org.activiti.cloud.services.organization.rest.assembler.ApplicationResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;

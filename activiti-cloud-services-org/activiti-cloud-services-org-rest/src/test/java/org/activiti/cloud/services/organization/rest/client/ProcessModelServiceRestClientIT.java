@@ -17,8 +17,8 @@
 package org.activiti.cloud.services.organization.rest.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.repository.ModelRepository;
-import org.activiti.cloud.organization.repository.entity.Model;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.junit.Before;
@@ -33,7 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
-import static org.activiti.cloud.organization.repository.entity.ModelType.PROCESS;
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.repository.entity;
+package org.activiti.cloud.organization.api;
+
+import java.util.List;
 
 /**
- * Model types enum
+ * Interface for applications
  */
-public enum ModelType {
-    FORM,
-    PROCESS
+public interface Application<U> extends Auditable<U> {
+
+    String getId();
+
+    void setId(String id);
+
+    String getName();
+
+    void setName(String name);
+
+    List<? extends Model> getModels();
+
 }
