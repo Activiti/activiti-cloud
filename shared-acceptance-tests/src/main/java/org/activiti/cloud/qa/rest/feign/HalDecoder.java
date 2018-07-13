@@ -28,9 +28,11 @@ import org.springframework.hateoas.hal.Jackson2HalModule;
 public class HalDecoder extends ResponseEntityDecoder {
 
     public HalDecoder() {
-        super(new JacksonDecoder(
-                new ObjectMapper()
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                        .registerModule(new Jackson2HalModule())));
+        this(new ObjectMapper());
+    }
+
+    public HalDecoder(ObjectMapper objectMapper) {
+        super(new JacksonDecoder(objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                                         .registerModule(new Jackson2HalModule())));
     }
 }

@@ -90,5 +90,5 @@ public interface RuntimeBundleService extends BaseService {
                             CreateTask createTaskCmd);
 
     @RequestLine("GET /v1/tasks/{parentTaskId}/subtasks")
-    Resources getSubtasks(@Param("parentTaskId") String parentTaskId);
+    Resources<CloudTask> getSubtasks(@Param("parentTaskId") String parentTaskId);
 }

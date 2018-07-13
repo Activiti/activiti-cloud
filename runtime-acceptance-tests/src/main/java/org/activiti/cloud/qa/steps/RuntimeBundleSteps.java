@@ -77,14 +77,14 @@ public class RuntimeBundleSteps {
     @Step
     public CloudProcessInstance startProcess(String process) {
 
-        StartProcessImpl startProcessCmd = new StartProcessImpl(process);
+        StartProcessImpl startProcessCmd = new StartProcessImpl();
+        startProcessCmd.setProcessDefinitionKey(process);
 
         return dirtyContextHandler.dirty(runtimeBundleService.startProcess(startProcessCmd));
     }
 
     @Step
     public Collection<CloudTask> getTaskByProcessInstanceId(String processInstanceId) throws Exception {
-
         return runtimeBundleService
                 .getProcessInstanceTasks(processInstanceId).getContent();
     }
@@ -114,7 +114,7 @@ public class RuntimeBundleSteps {
     public void checkProcessInstanceNotFound(String processInstanceId) {
         assertThatExceptionOfType(Exception.class).isThrownBy(
                 () -> runtimeBundleService.getProcessInstance(processInstanceId)
-        ).withMessageContaining("Unable to find process definition for the given id:");
+        ).withMessageContaining("Unable to find process instance for the given id:");
     }
 
     @Step
@@ -138,7 +138,7 @@ public class RuntimeBundleSteps {
                                                   subtask);
     }
 
-    public Resources getSubtasks(String parentTaskId) {
+    public Resources<CloudTask> getSubtasks(String parentTaskId) {
         return runtimeBundleService.getSubtasks(parentTaskId);
     }
 

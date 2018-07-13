@@ -20,12 +20,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Feign;
 import feign.Logger;
 import feign.gson.GsonEncoder;
-import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import org.activiti.cloud.qa.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.qa.rest.feign.FeignConfiguration;
 import org.activiti.cloud.qa.rest.feign.FeignErrorDecoder;
 import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
+import org.activiti.cloud.qa.rest.feign.HalDecoder;
 import org.activiti.cloud.qa.rest.feign.OAuth2FeignRequestInterceptor;
 import org.activiti.cloud.qa.service.AuditService;
 import org.activiti.cloud.qa.service.QueryService;
@@ -37,7 +37,6 @@ import org.activiti.runtime.conf.TaskModelAutoConfiguration;
 import org.conf.activiti.runtime.CloudCommonModelAutoConfiguration;
 import org.conf.activiti.runtime.CloudProcessModelAutoConfiguration;
 import org.conf.activiti.runtime.ProcessModelAutoConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -72,7 +71,7 @@ public class RuntimeFeignConfiguration {
         return FeignRestDataClient
                 .builder()
                 .encoder(new JacksonEncoder(objectMapper))
-                .decoder(new JacksonDecoder(objectMapper))
+                .decoder(new HalDecoder(objectMapper))
                 .target(RuntimeBundleService.class,
                         runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
@@ -94,7 +93,7 @@ public class RuntimeFeignConfiguration {
         return FeignRestDataClient
                 .builder()
                 .encoder(new JacksonEncoder())
-                .decoder(new JacksonDecoder())
+                .decoder(new HalDecoder(objectMapper))
                 .target(AuditService.class,
                         runtimeTestsConfigurationProperties.getAuditEventUrl());
     }
@@ -104,7 +103,7 @@ public class RuntimeFeignConfiguration {
         return FeignRestDataClient
                 .builder()
                 .encoder(new JacksonEncoder())
-                .decoder(new JacksonDecoder())
+                .decoder(new HalDecoder(objectMapper))
                 .target(QueryService.class,
                         runtimeTestsConfigurationProperties.getQueryUrl());
     }

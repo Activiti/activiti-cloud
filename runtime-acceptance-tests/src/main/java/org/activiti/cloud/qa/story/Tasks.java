@@ -105,7 +105,7 @@ public class Tasks {
 
     @Then("a list of one subtask should be available for the task")
     public void getSubtasksForTask() {
-        final Collection subtasks = runtimeBundleSteps.getSubtasks(newTask.getId()).getContent();
+        final Collection<CloudTask> subtasks = runtimeBundleSteps.getSubtasks(newTask.getId()).getContent();
         assertThat(subtasks).isNotNull().hasSize(1);
         assertThat(subtasks.iterator().hasNext()).isTrue();
         assertThat(subtasks.iterator().next()).extracting("id").containsOnly(subtask.getId());
