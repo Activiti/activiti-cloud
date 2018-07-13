@@ -49,5 +49,5 @@ public interface TaskController {
                                  @RequestBody CreateTask createSubtaskCmd);
 
     @RequestMapping(value = "/{taskId}/subtasks", method = RequestMethod.GET)
-    Resources getSubtasks(@PathVariable String taskId);
+    Resources<TaskResource> getSubtasks(@PathVariable String taskId);
 }
