@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.tests.helper;
 
 import java.util.Map;
 
+import org.activiti.runtime.api.cmd.CreateTask;
 import org.activiti.runtime.api.cmd.UpdateTask;
 import org.activiti.runtime.api.cmd.impl.SetTaskVariablesImpl;
 import org.activiti.runtime.api.model.CloudTask;
@@ -26,6 +27,7 @@ import org.activiti.runtime.api.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -62,6 +64,34 @@ public class TaskRestTemplate {
                                                                         TASK_RESPONSE_TYPE);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
+    }
+
+    public CloudTask createSubTask(CreateTask createTask) {
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + createTask.getParentTaskId() +  "/subtask",
+                                                                        HttpMethod.POST,
+                                                                        new HttpEntity<>(createTask),
+                                                                        TASK_RESPONSE_TYPE);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity.getBody();
+    }
+
+    public PagedResources<CloudTask> getSubTasks(CloudTask parentTask) {
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + parentTask.getId() + "/subtasks",
+                                                                                             HttpMethod.GET,
+                                                                                             null,
+                                                                                             new ParameterizedTypeReference<PagedResources<CloudTask>>() {
+                                                                             });
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity.getBody();
+    }
+
+    public CloudTask createTask(CreateTask createTask) {
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL,
+                                                                        HttpMethod.POST,
+                                                                        new HttpEntity<>(createTask),
+                                                                        TASK_RESPONSE_TYPE);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity.getBody();
     }
 
     public ResponseEntity<CloudTask> getTask(String taskId) {

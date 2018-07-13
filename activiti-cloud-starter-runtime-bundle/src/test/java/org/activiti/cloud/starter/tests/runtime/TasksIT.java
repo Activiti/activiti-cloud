@@ -25,6 +25,7 @@ import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSe
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
+import org.activiti.runtime.api.cmd.impl.CreateTaskImpl;
 import org.activiti.runtime.api.cmd.impl.UpdateTaskImpl;
 import org.activiti.runtime.api.model.CloudProcessDefinition;
 import org.activiti.runtime.api.model.CloudProcessInstance;
@@ -198,6 +199,23 @@ public class TasksIT  {
         assertThat(tasksEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Perform action");
     }
 
+    @Test
+    public void shouldGetSubTasks() {
+        //given
+        CloudTask parentTask = taskRestTemplate.createTask(new CreateTaskImpl("parent task",
+                                                                                    "This is my parent task"));
+
+        CreateTaskImpl createSubTask = new CreateTaskImpl("sub task",
+                                                     "This is my sub-task");
+        createSubTask.setParentTaskId(parentTask.getId());
+        CloudTask subTask = taskRestTemplate.createSubTask(createSubTask);
+
+        //when
+        PagedResources<CloudTask> subTasks = taskRestTemplate.getSubTasks(parentTask);
+
+        //then
+        assertThat(subTasks.getContent()).extracting(CloudTask::getId).containsExactly(subTask.getId());
+    }
 
     @Test
     public void shouldGetTaskById() {
