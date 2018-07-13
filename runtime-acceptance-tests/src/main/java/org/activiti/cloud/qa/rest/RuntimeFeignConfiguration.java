@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.qa.rest;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Feign;
 import feign.Logger;
@@ -38,15 +40,22 @@ import org.conf.activiti.runtime.CloudCommonModelAutoConfiguration;
 import org.conf.activiti.runtime.CloudProcessModelAutoConfiguration;
 import org.conf.activiti.runtime.ProcessModelAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Feign Configuration
  */
 @Configuration
-@Import({FeignConfiguration.class,
+@Import({JacksonAutoConfiguration.class,
+        FeignConfiguration.class,
         CloudCommonModelAutoConfiguration.class,
         CloudProcessModelAutoConfiguration.class,
         CloudTaskModelAutoConfiguration.class,
@@ -58,13 +67,15 @@ public class RuntimeFeignConfiguration {
     @Autowired
     private RuntimeTestsConfigurationProperties runtimeTestsConfigurationProperties;
 
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Bean
     public RuntimeBundleService runtimeBundleService() {
         return FeignRestDataClient
                 .builder()
-                .encoder(new JacksonEncoder())
-                .decoder(new JacksonDecoder())
+                .encoder(new JacksonEncoder(objectMapper))
+                .decoder(new JacksonDecoder(objectMapper))
                 .target(RuntimeBundleService.class,
                         runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
