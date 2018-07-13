@@ -89,7 +89,7 @@ public class EventsRestTemplate {
                     .append(":{")
                     .append(filter)
                     .append("}")
-                    .append("|");
+                    .append(",");
         }
 
         ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(endPointBuilder.toString(),
