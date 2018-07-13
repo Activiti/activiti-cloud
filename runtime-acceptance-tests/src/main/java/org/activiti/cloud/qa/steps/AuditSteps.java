@@ -17,7 +17,9 @@
 package org.activiti.cloud.qa.steps;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
@@ -31,7 +33,8 @@ import org.activiti.runtime.api.model.Task;
 import org.assertj.core.api.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 /**
  * Audit steps
@@ -55,8 +58,7 @@ public class AuditSteps {
     @Step
     public Collection<CloudRuntimeEvent> getEventsByProcessInstanceIdAndEventType(String processInstanceId,
                                                                                   String eventType) throws Exception {
-        return auditService.getProcessInstanceEvents(processInstanceId,
-                                                     eventType).getContent();
+        return auditService.getProcessInstanceEvents("eventType:" + eventType).getContent();
     }
 
     @Step
@@ -70,7 +72,6 @@ public class AuditSteps {
         CloudRuntimeEvent resultingEvent = events.iterator().next();
         assertThat(resultingEvent).isNotNull();
         assertThat(resultingEvent).isInstanceOf(CloudProcessRuntimeEvent.class);
-        assertThat(((CloudProcessRuntimeEvent)resultingEvent).getEntity().getId()).isEqualTo(processInstanceId);
         assertThat(resultingEvent.getServiceName()).isNotEmpty();
         assertThat(resultingEvent.getServiceFullName()).isNotEmpty();
     }
@@ -84,7 +85,10 @@ public class AuditSteps {
                                                                             eventType.name());
 
         assertThat(events).isNotEmpty();
-        CloudRuntimeEvent resultingEvent = events.iterator().next();
+        assertThat(events).extracting( e -> e.getEventType()).containsOnly(eventType);
+        List<CloudRuntimeEvent> processInstanceTasks = events.stream().filter(e -> ((CloudTaskRuntimeEvent) e).getEntity().getProcessInstanceId().equals(processInstanceId)).collect(Collectors.toList());
+        assertThat(processInstanceTasks).hasSize(1);
+        CloudRuntimeEvent resultingEvent = processInstanceTasks.get(0);
         assertThat(resultingEvent).isNotNull();
         assertThat(resultingEvent).isInstanceOf(CloudTaskRuntimeEvent.class);
         assertThat(((CloudTaskRuntimeEvent)resultingEvent).getEntity().getId()).isEqualTo(taskId);

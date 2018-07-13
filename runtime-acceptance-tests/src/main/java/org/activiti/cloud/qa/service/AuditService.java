@@ -27,10 +27,9 @@ import org.springframework.hateoas.PagedResources;
  */
 public interface AuditService extends BaseService {
 
-    @RequestLine("GET /v1/events?processInstanceId={processInstanceId}&eventType={eventType}")
+    @RequestLine("GET /v1/events?search={search}")
     @Headers("Content-Type: application/json")
-    PagedResources<CloudRuntimeEvent> getProcessInstanceEvents(@Param("processInstanceId") String processInstanceId,
-                                                               @Param("eventType") String eventType);
+    PagedResources<CloudRuntimeEvent> getProcessInstanceEvents(@Param("search") String search);
 
     @RequestLine("GET /v1/events?sort=timestamp,desc&sort=id,desc")
     @Headers("Content-Type: application/json")

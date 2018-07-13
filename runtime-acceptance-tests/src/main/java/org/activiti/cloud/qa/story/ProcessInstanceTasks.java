@@ -26,8 +26,6 @@ import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
-import org.activiti.runtime.api.model.CloudProcessInstance;
-import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.Task;
 import org.jbehave.core.annotations.Alias;
@@ -36,7 +34,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.DEFAULT_PROCESS_INSTANCE_KEY;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProcessInstanceTasks {
 
@@ -144,13 +142,13 @@ public class ProcessInstanceTasks {
 
     @When("activate the process")
     public void activateCurrentProcessInstance() {
-        runtimeBundleSteps.suspendProcessInstance(processInstance.getId());
+        runtimeBundleSteps.activateProcessInstance(processInstance.getId());
     }
 
     @Then("the process cannot be activated anymore")
     @ExpectRestError("Unable to find process instance for the given id")
     public void cannotActivateProcessInstance() {
-        runtimeBundleSteps.suspendProcessInstance(processInstance.getId());
+        runtimeBundleSteps.activateProcessInstance(processInstance.getId());
     }
 
 }
