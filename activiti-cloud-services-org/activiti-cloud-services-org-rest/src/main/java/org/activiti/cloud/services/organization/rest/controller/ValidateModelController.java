@@ -18,11 +18,12 @@ package org.activiti.cloud.services.organization.rest.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
-import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.repository.ModelRepository;
+import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
+import org.activiti.cloud.organization.repository.entity.Model;
 import org.activiti.cloud.services.organization.rest.assembler.ValidationErrorResourceAssembler;
 import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,8 +67,8 @@ public class ValidateModelController {
                                                             @RequestParam("file") MultipartFile file) throws IOException {
 
         byte[] fileContent = file.getBytes();
-        List<ValidationErrorRepresentation> validationResult = modelRepository
-                .findModelById(modelId)
+        Optional<Model> optionalModel = modelRepository.findModelById(modelId);
+        List<ValidationErrorRepresentation> validationResult = optionalModel
                 .map(model -> modelService.validateResourceContent(model.getType(),
                                                                    fileContent))
                 .orElseThrow(ResourceNotFoundException::new);

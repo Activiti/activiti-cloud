@@ -20,11 +20,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.repository.ModelRepository;
-import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
-import org.activiti.cloud.services.organization.config.OrganizationApplication;
+import org.activiti.cloud.organization.core.rest.client.ModelService;
+import org.activiti.cloud.organization.repository.ModelRepository;
+import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
+import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
 import org.activiti.validation.ValidationError;
 import org.junit.Before;
@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
+import static org.activiti.cloud.organization.repository.entity.ModelType.PROCESS;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -50,7 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = OrganizationApplication.class)
+@SpringBootTest(classes = OrganizationRestApplication.class)
 @WebAppConfiguration
 public class ValidateModelControllerIT {
 
@@ -79,16 +79,16 @@ public class ValidateModelControllerIT {
                                                        "diagram.bpm",
                                                        "text/plain",
                                                        "BPMN diagram".getBytes());
-        when(modelRepository.findModelById("model_id")).thenReturn(Optional.of(new Model("model_id",
-                                                                                         "Process-Model",
-                                                                                         PROCESS_MODEL,
-                                                                                         "model_ref_id")));
+        when(modelRepository.findModelById("model_id")).thenReturn(Optional.of(new ModelEntity("model_id",
+                                                                                               "Process-Model",
+                                                                                               PROCESS,
+                                                                                               "model_ref_id")));
 
         List<ValidationErrorRepresentation> expectedValidationErrors =
                 Arrays.asList(new ValidationErrorRepresentation(new ValidationError()),
                               new ValidationErrorRepresentation(new ValidationError()));
 
-        doReturn(expectedValidationErrors).when(modelService).validateResourceContent(PROCESS_MODEL,
+        doReturn(expectedValidationErrors).when(modelService).validateResourceContent(PROCESS,
                                                                                       file.getBytes());
 
         // when

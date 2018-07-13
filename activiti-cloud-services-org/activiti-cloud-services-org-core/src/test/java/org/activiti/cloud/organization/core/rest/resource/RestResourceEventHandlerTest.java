@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.organization.core.rest.resource;
 
-import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.model.Application;
+import org.activiti.cloud.organization.core.mock.ApplicationMock;
+import org.activiti.cloud.organization.core.mock.ModelMock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
+import static org.activiti.cloud.organization.repository.entity.ModelType.PROCESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -44,41 +44,16 @@ public class RestResourceEventHandlerTest {
     private RestResourceEventHandler restResourceEventHandler;
 
     @Test
-    public void testHandleBeforeCreates() {
-
-        // GIVEN
-        Model processModel = new Model();
-        processModel.setType(PROCESS_MODEL);
-        processModel.setRefId("process_model_refId");
-
-        doReturn(true)
-                .when(restResourceEventHandler)
-                .isEntityWithRestResource(eq(Model.class));
-
-        // WHEN
-        restResourceEventHandler.handleBeforeCreates(processModel);
-
-        // THEN
-        verify(restResourceService,
-               times(1))
-                .saveRestResourceFromEntityField(any(Model.class),
-                                                 eq("data"),
-                                                 eq("type"),
-                                                 eq("refId"),
-                                                 eq(false));
-    }
-
-    @Test
     public void testHandleBeforeUpdate() {
 
         // GIVEN
-        Model processModel = new Model();
-        processModel.setType(PROCESS_MODEL);
+        ModelMock processModel = new ModelMock();
+        processModel.setType(PROCESS);
         processModel.setRefId("process_model_refId");
 
         doReturn(true)
                 .when(restResourceEventHandler)
-                .isEntityWithRestResource(eq(Model.class));
+                .isEntityWithRestResource(eq(ModelMock.class));
 
         // WHEN
         restResourceEventHandler.handleBeforeUpdate(processModel);
@@ -86,11 +61,36 @@ public class RestResourceEventHandlerTest {
         // THEN
         verify(restResourceService,
                times(1))
-                .saveRestResourceFromEntityField(any(Model.class),
+                .saveRestResourceFromEntityField(any(ModelMock.class),
                                                  eq("data"),
                                                  eq("type"),
                                                  eq("refId"),
                                                  eq(true));
+    }
+
+    @Test
+    public void testHandleBeforeCreates() {
+
+        // GIVEN
+        ModelMock processModel = new ModelMock();
+        processModel.setType(PROCESS);
+        processModel.setRefId("process_model_refId");
+
+        doReturn(true)
+                .when(restResourceEventHandler)
+                .isEntityWithRestResource(eq(ModelMock.class));
+
+        // WHEN
+        restResourceEventHandler.handleBeforeCreates(processModel);
+
+        // THEN
+        verify(restResourceService,
+               times(1))
+                .saveRestResourceFromEntityField(any(ModelMock.class),
+                                                 eq("data"),
+                                                 eq("type"),
+                                                 eq("refId"),
+                                                 eq(false));
     }
 
     @Test
@@ -99,10 +99,10 @@ public class RestResourceEventHandlerTest {
         // GIVEN
         doReturn(false)
                 .when(restResourceEventHandler)
-                .isEntityWithRestResource(eq(Application.class));
+                .isEntityWithRestResource(eq(ApplicationMock.class));
 
         // WHEN
-        restResourceEventHandler.handleBeforeCreates(new Application());
+        restResourceEventHandler.handleBeforeCreates(new ApplicationMock());
 
         // THEN
         verify(restResourceService,
@@ -120,10 +120,10 @@ public class RestResourceEventHandlerTest {
         // GIVEN
         doReturn(false)
                 .when(restResourceEventHandler)
-                .isEntityWithRestResource(eq(Application.class));
+                .isEntityWithRestResource(eq(ApplicationMock.class));
 
         // WHEN
-        restResourceEventHandler.handleBeforeUpdate(new Application());
+        restResourceEventHandler.handleBeforeUpdate(new ApplicationMock());
 
         // THEN
         verify(restResourceService,

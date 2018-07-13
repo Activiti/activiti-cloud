@@ -16,9 +16,11 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
+import java.util.Optional;
+
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.organization.core.model.Application;
-import org.activiti.cloud.organization.core.repository.ApplicationRepository;
+import org.activiti.cloud.organization.repository.ApplicationRepository;
+import org.activiti.cloud.organization.repository.entity.Application;
 import org.activiti.cloud.services.organization.rest.assembler.ApplicationResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -97,8 +99,8 @@ public class ApplicationController {
     }
 
     public Application findApplicationById(String applicationId) {
-        return applicationRepository
-                .findApplicationById(applicationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Organization application not found: " + applicationId));
+        Optional<Application> optionalApplication = applicationRepository.findApplicationById(applicationId);
+        return optionalApplication
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found: " + applicationId));
     }
 }

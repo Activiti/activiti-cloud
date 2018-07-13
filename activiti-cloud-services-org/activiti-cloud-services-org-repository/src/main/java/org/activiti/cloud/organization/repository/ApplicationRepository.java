@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.repository;
+package org.activiti.cloud.organization.repository;
 
 import java.util.Optional;
 
-import org.activiti.cloud.organization.core.model.Application;
+import org.activiti.cloud.organization.repository.entity.Application;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
  * Interface for {@link Application} entities repository
  */
-public interface ApplicationRepository {
+public interface ApplicationRepository<A extends Application> {
 
-    Page<Application> getApplications(Pageable pageable);
+    Page<A> getApplications(Pageable pageable);
 
-    Optional<Application> findApplicationById(String applicationId);
+    Optional<A> findApplicationById(String applicationId);
 
-    Application createApplication(Application application);
+    A createApplication(A application);
 
-    Application updateApplication(Application applicationToUpdate);
+    A updateApplication(A applicationToUpdate);
 
-    void deleteApplication(Application application);
+    void deleteApplication(A application);
 
-    default Application updateApplication(Application applicationToUpdate,
-                                          Application newapplication) {
-        applicationToUpdate.setName(newapplication.getName());
+    default A updateApplication(A applicationToUpdate,
+                                A newApplication) {
+        applicationToUpdate.setName(newApplication.getName());
         return updateApplication(applicationToUpdate);
     }
 }

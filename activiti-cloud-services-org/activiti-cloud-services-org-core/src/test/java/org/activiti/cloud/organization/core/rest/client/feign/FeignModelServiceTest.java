@@ -19,15 +19,15 @@ package org.activiti.cloud.organization.core.rest.client.feign;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.organization.core.model.Model.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
+import org.activiti.cloud.organization.repository.entity.ModelType;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import static org.activiti.cloud.organization.core.model.Model.ModelType.FORM;
-import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
+import static org.activiti.cloud.organization.repository.entity.ModelType.FORM;
+import static org.activiti.cloud.organization.repository.entity.ModelType.PROCESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -50,7 +50,7 @@ public class FeignModelServiceTest {
         initMocks(this);
 
         Map<ModelType, BaseModelService<ModelReference>> modelServices = new HashMap<>();
-        modelServices.put(PROCESS_MODEL,
+        modelServices.put(PROCESS,
                           processModelService);
         modelServices.put(FORM,
                           formModelService);
@@ -64,7 +64,7 @@ public class FeignModelServiceTest {
     @Test
     public void testGetResource() {
         // WHEN
-        feignModelService.getResource(PROCESS_MODEL,
+        feignModelService.getResource(PROCESS,
                                       "process_model_refId");
 
         // THEN
@@ -85,7 +85,7 @@ public class FeignModelServiceTest {
     @Test
     public void testCreateResource() {
         // WHEN
-        feignModelService.createResource(PROCESS_MODEL,
+        feignModelService.createResource(PROCESS,
                                          mock(ModelReference.class));
 
         // THEN
@@ -106,7 +106,7 @@ public class FeignModelServiceTest {
     @Test
     public void testUpdateResource() {
         // WHEN
-        feignModelService.updateResource(PROCESS_MODEL,
+        feignModelService.updateResource(PROCESS,
                                          "process_model_refId",
                                          mock(ModelReference.class));
 
@@ -131,7 +131,7 @@ public class FeignModelServiceTest {
     @Test
     public void testDeleteResource() {
         // WHEN
-        feignModelService.deleteResource(PROCESS_MODEL,
+        feignModelService.deleteResource(PROCESS,
                                          "process_model_refId");
 
         // THEN
@@ -152,7 +152,7 @@ public class FeignModelServiceTest {
     @Test
     public void testvalidateResourceContent() {
         // WHEN
-        feignModelService.validateResourceContent(PROCESS_MODEL,
+        feignModelService.validateResourceContent(PROCESS,
                                          "processModelConent".getBytes());
 
         // THEN

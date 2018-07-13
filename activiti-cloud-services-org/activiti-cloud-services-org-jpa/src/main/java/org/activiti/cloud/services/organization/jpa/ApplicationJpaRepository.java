@@ -18,44 +18,44 @@ package org.activiti.cloud.services.organization.jpa;
 
 import java.util.Optional;
 
-import org.activiti.cloud.organization.core.model.Application;
-import org.activiti.cloud.organization.core.repository.ApplicationRepository;
+import org.activiti.cloud.organization.repository.ApplicationRepository;
+import org.activiti.cloud.services.organization.entity.ApplicationEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
- * JPA Repository for {@link Application} entity
+ * JPA Repository for {@link ApplicationEntity} entity
  */
 @RepositoryRestResource(path = "applications",
         collectionResourceRel = "applications",
         itemResourceRel = "applications")
-public interface ApplicationJpaRepository extends JpaRepository<Application, String>,
-                                                  ApplicationRepository {
+public interface ApplicationJpaRepository extends JpaRepository<ApplicationEntity, String>,
+                                                  ApplicationRepository<ApplicationEntity> {
 
     @Override
-    default Page<Application> getApplications(Pageable pageable) {
+    default Page<ApplicationEntity> getApplications(Pageable pageable) {
         return findAll(pageable);
     }
 
     @Override
-    default Optional<Application> findApplicationById(String applicationId) {
+    default Optional<ApplicationEntity> findApplicationById(String applicationId) {
         return findById(applicationId);
     }
 
     @Override
-    default Application createApplication(Application application) {
+    default ApplicationEntity createApplication(ApplicationEntity application) {
         return save(application);
     }
 
     @Override
-    default Application updateApplication(Application applicationToUpdate) {
+    default ApplicationEntity updateApplication(ApplicationEntity applicationToUpdate) {
         return save(applicationToUpdate);
     }
 
     @Override
-    default void deleteApplication(Application application) {
+    default void deleteApplication(ApplicationEntity application) {
         delete(application);
     }
 }

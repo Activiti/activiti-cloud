@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.organization.rest.assembler;
 
-import org.activiti.cloud.organization.core.model.Application;
+import org.activiti.cloud.organization.repository.entity.Application;
 import org.activiti.cloud.services.organization.rest.controller.ModelController;
 import org.activiti.cloud.services.organization.rest.controller.ApplicationController;
 import org.springframework.data.domain.Pageable;

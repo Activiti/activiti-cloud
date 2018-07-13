@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.rest.client;
+package org.activiti.cloud.organization.repository.entity;
 
 import java.util.List;
 
-import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
-import org.activiti.cloud.organization.repository.entity.ModelType;
-
 /**
- * Model rest client service interface
+ * Interface for applications
  */
-public interface ModelService extends RestClientService<ModelType, ModelReference, String> {
+public interface Application<U> extends Auditable<U> {
 
-    List<ValidationErrorRepresentation> validateResourceContent(ModelType modelType,
-                                                                byte[] file);
+    String getId();
+
+    void setId(String id);
+
+    String getName();
+
+    void setName(String name);
+
+    List<? extends Model> getModels();
+
 }

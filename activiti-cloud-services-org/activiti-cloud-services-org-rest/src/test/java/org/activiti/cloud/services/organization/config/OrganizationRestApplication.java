@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.config;
+package org.activiti.cloud.services.organization.config;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -22,19 +22,20 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-/**
- * Organization Test Configuration
- */
+@EnableWebMvc
 @EnableAutoConfiguration
-@ComponentScan("org.activiti.cloud.organization.core")
+@ComponentScan("org.activiti")
 @EnableFeignClients("org.activiti.cloud.organization.core.rest.client.feign")
-@EntityScan("org.activiti.cloud.organization.core.model")
+@EnableJpaRepositories("org.activiti.cloud.services.organization.jpa")
+@EntityScan("org.activiti.cloud.services.organization.entity")
 @SpringBootApplication
-public class OrganizationCoreApplication {
+public class OrganizationRestApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(OrganizationCoreApplication.class,
+        SpringApplication.run(OrganizationRestApplication.class,
                               args);
     }
 }

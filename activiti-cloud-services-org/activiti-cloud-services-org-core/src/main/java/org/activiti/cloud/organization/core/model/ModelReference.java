@@ -32,6 +32,8 @@ public class ModelReference {
 
     private String name;
 
+    private String contentType;
+
     private String content;
 
     private String version;
@@ -68,6 +70,14 @@ public class ModelReference {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public String getVersion() {

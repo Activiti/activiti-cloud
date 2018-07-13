@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.repository;
+package org.activiti.cloud.services.organization.jpa;
 
-import org.activiti.cloud.organization.core.model.Application;
+import org.activiti.cloud.organization.repository.ApplicationRepository;
+import org.activiti.cloud.services.organization.entity.ApplicationEntity;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -37,13 +38,13 @@ public class ApplicationRepositoryTest {
     private ApplicationRepository applicationRepository;
 
     @Captor
-    private ArgumentCaptor<Application> applicationArgumentCaptor;
+    private ArgumentCaptor<ApplicationEntity> applicationArgumentCaptor;
 
     @Test
     public void testCreateApplication() {
         // GIVEN
-        Application applicationToCreate = new Application("new_application_id",
-                                                   "New Application");
+        ApplicationEntity applicationToCreate = new ApplicationEntity("new_application_id",
+                                                                      "New Application");
 
         // WHEN
         applicationRepository.createApplication(applicationToCreate);
@@ -53,7 +54,7 @@ public class ApplicationRepositoryTest {
                times(1))
                 .createApplication(applicationArgumentCaptor.capture());
 
-        Application application = applicationArgumentCaptor.getValue();
+        ApplicationEntity application = applicationArgumentCaptor.getValue();
         assertThat(application).isNotNull();
         assertThat(application.getId()).isEqualTo("new_application_id");
         assertThat(application.getName()).isEqualTo("New Application");
@@ -62,10 +63,10 @@ public class ApplicationRepositoryTest {
     @Test
     public void testUpdateApplication() {
         // GIVEN
-        Application applcationToUpdate = new Application("application_id",
-                                                      "Application Name");
-        Application application = new Application("new_application_id",
-                                              "New Application Name");
+        ApplicationEntity applcationToUpdate = new ApplicationEntity("application_id",
+                                                                     "Application Name");
+        ApplicationEntity application = new ApplicationEntity("new_application_id",
+                                                              "New Application Name");
 
         // WHEN
         applicationRepository.updateApplication(applcationToUpdate,
@@ -76,7 +77,7 @@ public class ApplicationRepositoryTest {
                times(1))
                 .updateApplication(applicationArgumentCaptor.capture());
 
-        Application updatedApplication = applicationArgumentCaptor.getValue();
+        ApplicationEntity updatedApplication = applicationArgumentCaptor.getValue();
         assertThat(updatedApplication).isNotNull();
         assertThat(updatedApplication.getId()).isEqualTo("application_id");
         assertThat(updatedApplication.getName()).isEqualTo("New Application Name");

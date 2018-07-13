@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.audit;
+package org.activiti.cloud.services.organization.jpa.audit;
 
 import java.util.Optional;
 

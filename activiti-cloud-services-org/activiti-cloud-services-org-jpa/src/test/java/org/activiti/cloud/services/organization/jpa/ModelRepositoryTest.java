@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.repository;
+package org.activiti.cloud.services.organization.jpa;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,8 +22,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.activiti.cloud.organization.core.model.Application;
-import org.activiti.cloud.organization.core.model.Model;
+import org.activiti.cloud.organization.repository.ModelRepository;
+import org.activiti.cloud.services.organization.entity.ApplicationEntity;
+import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -33,7 +34,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
+import static org.activiti.cloud.organization.repository.entity.ModelType.PROCESS;
 
 /**
  * Tests for {@link ModelRepository}
@@ -45,28 +46,28 @@ public class ModelRepositoryTest {
     private ModelRepository modelRepository;
 
     @Captor
-    private ArgumentCaptor<Model> modelArgumentCaptor;
+    private ArgumentCaptor<ModelEntity> modelArgumentCaptor;
 
     @Test
     public void testCreateModel() {
         // GIVEN
-        Application parentApplication = new Application("parent_application_id",
-                                                    "Parent Application");
-        Model childModel = new Model("child_model_id",
-                                     "Child Model",
-                                     PROCESS_MODEL,
-                                     "child_model_id");
+        ApplicationEntity parentApplication = new ApplicationEntity("parent_application_id",
+                                                                    "Parent Application");
+        ModelEntity childModel = new ModelEntity("child_model_id",
+                                                 "Child Model",
+                                                 PROCESS,
+                                                 "child_model_id");
 
         // WHEN
         modelRepository.createModel(parentApplication,
-                                      childModel);
+                                    childModel);
 
         // THEN
         verify(modelRepository,
                times(1))
                 .createModel(modelArgumentCaptor.capture());
 
-        Model createdModel = modelArgumentCaptor.getValue();
+        ModelEntity createdModel = modelArgumentCaptor.getValue();
         assertThat(createdModel).isNotNull();
         assertThat(createdModel.getId()).isEqualTo("child_model_id");
         assertThat(createdModel.getApplication()).isNotNull();
@@ -76,29 +77,28 @@ public class ModelRepositoryTest {
     @Test
     public void testUpdateModel() {
         // GIVEN
-        Model modelToUpdate = new Model("model_id",
-                                        "Model Name",
-                                        PROCESS_MODEL,
-                                        "model_id");
-        Model model = new Model("new_model_id",
-                                "New Model Name",
-                                PROCESS_MODEL,
-                                "new_model_id");
+        ModelEntity modelToUpdate = new ModelEntity("model_id",
+                                                    "Model Name",
+                                                    PROCESS,
+                                                    "model_id");
+        ModelEntity model = new ModelEntity("new_model_id",
+                                            "New Model Name",
+                                            PROCESS,
+                                            "new_model_id");
 
         // WHEN
         modelRepository.updateModel(modelToUpdate,
-                                      model);
+                                    model);
 
         // THEN
         verify(modelRepository,
                times(1))
                 .updateModel(modelArgumentCaptor.capture());
 
-        Model updatedModel = modelArgumentCaptor.getValue();
+        ModelEntity updatedModel = modelArgumentCaptor.getValue();
         assertThat(updatedModel).isNotNull();
         assertThat(updatedModel.getId()).isEqualTo("model_id");
         assertThat(updatedModel.getData()).isNotNull();
-        assertThat(updatedModel.getData().getModelId()).isEqualTo("new_model_id");
         assertThat(updatedModel.getData().getName()).isEqualTo("New Model Name");
     }
 
@@ -119,18 +119,18 @@ public class ModelRepositoryTest {
     @Test
     public void testCreateSubmodelReference() {
         // GIVEN
-        Application parentApplication = new Application("parent_application_id",
-                                                    "Parent Application");
+        ApplicationEntity parentApplication = new ApplicationEntity("parent_application_id",
+                                                                    "Parent Application");
 
-        Model model1 = new Model("model1",
-                                        "Model 1",
-                                        PROCESS_MODEL,
-                                        "model1");
+        ModelEntity model1 = new ModelEntity("model1",
+                                             "Model 1",
+                                             PROCESS,
+                                             "model1");
 
-        Model model2 = new Model("model2",
-                                 "Model 2",
-                                 PROCESS_MODEL,
-                                 "model2");
+        ModelEntity model2 = new ModelEntity("model2",
+                                             "Model 2",
+                                             PROCESS,
+                                             "model2");
 
         List<String> submodelLinks = Arrays.asList(
                 "http://localhost:8080/models/model1",
@@ -143,7 +143,7 @@ public class ModelRepositoryTest {
 
         // WHEN
         modelRepository.createModelsReference(parentApplication,
-                                                submodelLinks);
+                                              submodelLinks);
 
         // THEN
         verify(modelRepository,
@@ -154,21 +154,21 @@ public class ModelRepositoryTest {
                times(2))
                 .updateModel(modelArgumentCaptor.capture());
 
-        List<Model> updatedModels = modelArgumentCaptor.getAllValues();
+        List<ModelEntity> updatedModels = modelArgumentCaptor.getAllValues();
         assertThat(updatedModels).hasSize(2);
 
         assertThat(updatedModels
                            .stream()
-                           .map(Model::getId)
+                           .map(ModelEntity::getId)
                            .collect(Collectors.toList()))
                 .containsExactly("model1",
                                  "model2");
 
         assertThat(updatedModels
                            .stream()
-                           .map(Model::getApplication)
+                           .map(ModelEntity::getApplication)
                            .filter(Objects::nonNull)
-                           .map(Application::getId)
+                           .map(ApplicationEntity::getId)
                            .collect(Collectors.toList()))
                 .containsExactly("parent_application_id",
                                  "parent_application_id");

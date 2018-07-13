@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.model;
+package org.activiti.cloud.services.organization.entity;
 
 import java.util.List;
 import javax.persistence.Entity;
@@ -23,7 +23,8 @@ import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.activiti.cloud.organization.core.audit.AuditableEntity;
+import org.activiti.cloud.organization.repository.entity.Application;
+import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
@@ -33,45 +34,50 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class Application extends AuditableEntity<String> {
+public class ApplicationEntity extends AuditableEntity<String> implements Application<String> {
 
     @OneToMany
-    private List<Model> models;
+    private List<ModelEntity> models;
 
     @Id
     private String id;
 
     private String name;
 
-    public Application() {  // for JPA
+    public ApplicationEntity() {  // for JPA
     }
 
-    public Application(String id,
-                       String name) {
+    public ApplicationEntity(String id,
+                             String name) {
         this.id = id;
         this.name = name;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public void setId(String id) {
         this.id = id;
     }
 
-    public List<Model> getModels() {
+    @Override
+    public List<ModelEntity> getModels() {
         return models;
     }
 
-    public void setModels(List<Model> models) {
+    public void setModels(List<ModelEntity> models) {
         this.models = models;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }

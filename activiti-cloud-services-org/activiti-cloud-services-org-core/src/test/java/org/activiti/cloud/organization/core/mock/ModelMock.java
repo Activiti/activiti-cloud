@@ -14,55 +14,52 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.model;
+package org.activiti.cloud.organization.core.mock;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import org.activiti.cloud.organization.core.audit.AuditableEntity;
+import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.resource.EntityWithRestResource;
 import org.activiti.cloud.organization.core.rest.resource.RestResource;
+import org.activiti.cloud.organization.repository.entity.Model;
+import org.activiti.cloud.organization.repository.entity.ModelType;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
- * Model model entity
+ *
  */
-@Entity
 @EntityWithRestResource
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class Model extends AuditableEntity<String> {
+public class ModelMock extends AuditableMock implements Model<ApplicationMock, String> {
 
-    @Id
     private String id;
 
-    @ManyToOne
-    private Application application;
+    private ApplicationMock application;
 
     private ModelType type;
 
     private String refId;
 
     @Transient
-    @JsonUnwrapped
+    @JsonIgnore
     @RestResource(
             resourceIdField = "refId",
             resourceKeyField = "type")
     private ModelReference data;
 
-    public Model() { // for JPA
+    public ModelMock() { // for JPA
+        this.data = new ModelReference();
     }
 
-    public Model(String id,
-                 String name,
-                 ModelType type,
-                 String refId) {
+    public ModelMock(String id,
+                     String name,
+                     ModelType type,
+                     String refId) {
         this.id = id;
         this.type = type;
         this.refId = refId;
@@ -70,18 +67,32 @@ public class Model extends AuditableEntity<String> {
                                        name);
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public void setId(String id) {
         this.id = id;
     }
 
+    @Override
+    public String getName() {
+        return data.getName();
+    }
+
+    @Override
+    public void setName(String name) {
+        data.setName(name);
+    }
+
+    @Override
     public ModelType getType() {
         return type;
     }
 
+    @Override
     public void setType(ModelType type) {
         this.type = type;
     }
@@ -92,6 +103,7 @@ public class Model extends AuditableEntity<String> {
 
     public void setRefId(String refId) {
         this.refId = refId;
+        data.setModelId(refId);
     }
 
     public ModelReference getData() {
@@ -102,16 +114,43 @@ public class Model extends AuditableEntity<String> {
         this.data = data;
     }
 
-    public Application getApplication() {
+    @Override
+    public ApplicationMock getApplication() {
         return application;
     }
 
-    public void setApplication(Application application) {
+    @Override
+    public void setApplication(ApplicationMock application) {
         this.application = application;
     }
 
-    public enum ModelType {
-        FORM,
-        PROCESS_MODEL
+    @Override
+    public String getVersion() {
+        return data.getVersion();
+    }
+
+    @Override
+    public void setVersion(String version) {
+        data.setVersion(version);
+    }
+
+    @Override
+    public String getContentType() {
+        return data.getContentType();
+    }
+
+    @Override
+    public void setContentType(String contentType) {
+        data.setContentType(contentType);
+    }
+
+    @Override
+    public String getContent() {
+        return data.getContent();
+    }
+
+    @Override
+    public void setContent(String content) {
+        data.setContent(content);
     }
 }

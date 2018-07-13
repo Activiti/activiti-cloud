@@ -35,7 +35,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan("org.activiti")
 @EnableFeignClients("org.activiti.cloud.organization.core.rest.client.feign")
 @EnableJpaRepositories("org.activiti.cloud.services.organization.jpa")
-@EntityScan("org.activiti.cloud.organization.core.model")
+@EntityScan("org.activiti.cloud.services.organization.entity")
 @Inherited
 @EnableDiscoveryClient
 public @interface EnableActivitiOrganization {
