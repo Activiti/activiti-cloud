@@ -218,6 +218,18 @@ public class TasksIT  {
     }
 
     @Test
+    public void shouldBeAbleToDeleteTask() {
+        //given
+        CloudTask standaloneTask = taskRestTemplate.createTask(new CreateTaskImpl("parent task",
+                                                                              "This is my parent task"));
+        //when
+        ResponseEntity<Void> delete = taskRestTemplate.delete(standaloneTask);
+
+        //then
+        assertThat(delete.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+    }
+
+    @Test
     public void shouldGetTaskById() {
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));

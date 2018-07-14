@@ -75,7 +75,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @ExceptionHandler(ActivitiInterchangeInfoNotFoundException.class)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String handleActivitiInterchangeInfoNotFoundException(ActivitiInterchangeInfoNotFoundException ex) {
+        public String handleActivitiInterchangeInfoNotFoundException(ActivitiInterchangeInfoNotFoundException ex) {
         return ex.getMessage();
     }
 

@@ -57,6 +57,16 @@ public class TaskRestTemplate {
         return responseEntity;
     }
 
+    public ResponseEntity<Void> delete(Task task) {
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId() + "",
+                                                                        HttpMethod.DELETE,
+                                                                        null,
+                                                                        new ParameterizedTypeReference<Void>() {
+                                                                        });
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        return responseEntity;
+    }
+
     public ResponseEntity<CloudTask> claim(Task task) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId() + "/claim",
                                                                         HttpMethod.POST,
