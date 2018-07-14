@@ -39,6 +39,7 @@ import org.activiti.runtime.api.event.impl.CloudProcessCompletedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudRuntimeEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskAssignedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudTaskCancelledEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCompletedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCreatedEventImpl;
 import org.activiti.runtime.api.model.impl.BPMNActivityImpl;
@@ -196,6 +197,25 @@ public class AuditServiceIT {
                 CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStarted) event;
                 assertThat(cloudBPMNActivityEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
             }
+        });
+    }
+
+    @Test
+    public void shouldBeAbleToFilterOnEventTypeTaskCancelled() throws Exception {
+        //given
+        List<CloudRuntimeEvent> coveredEvents = getTestEvents();
+        producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
+                                                                                                                                             TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name()));
+
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            assertThat(retrievedEvents).hasSize(1);
+
         });
     }
 
@@ -387,6 +407,17 @@ public class AuditServiceIT {
                                                                                         System.currentTimeMillis(),
                                                                                         taskCreated);
         testEvents.add(cloudTaskCreatedEvent);
+
+
+        TaskImpl taskCancelled = new TaskImpl();
+        taskCancelled.setProcessDefinitionId("28");
+        taskCancelled.setProcessInstanceId("47");
+        CloudTaskCancelledEventImpl cloudTaskCancelledEvent = new CloudTaskCancelledEventImpl("TaskCancelledEventId",
+                                                                                            System.currentTimeMillis(),
+                                                                                            taskCancelled);
+        testEvents.add(cloudTaskCancelledEvent);
+
+
 
 //        VariableInstanceImpl variableCreated = new VariableInstanceImpl("name", "string", "value of string", "49" );
 //        CloudVariableCreatedEventImpl cloudVariableCreatedEvent = new CloudVariableCreatedEventImpl("VariableCreatedEventId",
