@@ -58,7 +58,7 @@ public class AuditSteps {
     @Step
     public Collection<CloudRuntimeEvent> getEventsByProcessInstanceIdAndEventType(String processInstanceId,
                                                                                   String eventType) throws Exception {
-        return auditService.getProcessInstanceEvents("eventType:" + eventType).getContent();
+        return auditService.getProcessInstanceEvents("eventType:" + eventType + ",processInstanceId:"+processInstanceId).getContent();
     }
 
     @Step
@@ -122,8 +122,8 @@ public class AuditSteps {
         assertThat(events).isNotNull()
                 .isNotEmpty()
                 .filteredOn(taskIsMatched).hasSize(2)
-                .extracting("task.id",
-                            "task.status",
+                .extracting("entity.id",
+                            "entity.status",
                             "eventType")
                 .containsExactly(
                         tuple(taskId,
@@ -145,8 +145,8 @@ public class AuditSteps {
                 .filteredOn(event -> event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent)event).getEntity() != null
                         && taskId.equals(((CloudTaskRuntimeEvent)event).getEntity().getId()))
                 .hasSize(3)
-                .extracting("task.id",
-                            "task.status",
+                .extracting("entity.id",
+                            "entity.status",
                             "eventType")
                 .containsExactly(
                         tuple(taskId,
@@ -182,8 +182,8 @@ public class AuditSteps {
         assertThat(events).isNotNull()
                 .isNotEmpty()
                 .filteredOn(taskIsMatched).hasSize(2)
-                .extracting("task.id",
-                            "task.parentTaskId")
+                .extracting("entity.id",
+                            "entity.parentTaskId")
                 .contains(tuple(subtaskId,
                                 parentTaskId),
                           tuple(subtaskId,

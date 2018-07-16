@@ -21,6 +21,7 @@ import java.util.Map;
 
 import net.thucydides.core.steps.StepEventBus;
 import org.activiti.cloud.qa.rest.error.ExpectRestError;
+import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.qa.rest.error.ExpectedRestException;
 import org.activiti.cloud.qa.serenity.exception.ExpectException;
 import org.activiti.cloud.qa.serenity.exception.ExpectedException;
@@ -107,6 +108,11 @@ public class ExtendedStepCreator extends StepCreator {
                                                         expectRestError.value());
         }
 
+        ExpectRestNotFound expectRestNotFound = method.getAnnotation(ExpectRestNotFound.class);
+        if (expectRestNotFound != null) {
+            expectedException = new ExpectedRestException(expectRestNotFound.statusCode(),
+                                                          expectRestNotFound.value());
+        }
         return expectedException;
     }
 

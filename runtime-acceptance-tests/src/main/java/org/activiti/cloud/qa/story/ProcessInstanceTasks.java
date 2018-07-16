@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.rest.error.ExpectRestError;
+import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
@@ -34,7 +34,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.DEFAULT_PROCESS_INSTANCE_KEY;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 public class ProcessInstanceTasks {
 
@@ -134,6 +134,7 @@ public class ProcessInstanceTasks {
     public void checkProcessInstanceNoDiagram() throws Exception {
         runtimeBundleSteps.checkProcessInstanceNoDiagram(processInstanceDiagram);
     }
+
     @Given("any suspended process instance")
     public void suspendCurrentProcessInstance() {
         processInstance = runtimeBundleSteps.startProcess();
@@ -146,9 +147,8 @@ public class ProcessInstanceTasks {
     }
 
     @Then("the process cannot be activated anymore")
-    @ExpectRestError("Unable to find process instance for the given id")
+    @ExpectRestNotFound("Unable to find process instance for the given id")
     public void cannotActivateProcessInstance() {
         runtimeBundleSteps.activateProcessInstance(processInstance.getId());
     }
-
 }
