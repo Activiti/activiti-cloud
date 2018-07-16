@@ -45,6 +45,15 @@ public class TaskEventContainedBuilder {
         return task;
     }
 
+    public Task aCreatedStandaloneTaskWithParent(String taskName) {
+        Task task = buildTask(taskName,
+                              Task.TaskStatus.CREATED,
+                              null);
+        ((TaskImpl) task).setParentTaskId(UUID.randomUUID().toString());
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
+        return task;
+    }
+
     public Task anAssignedTask(String taskName,
                                String username,
                                ProcessInstance processInstance) {
@@ -87,7 +96,9 @@ public class TaskEventContainedBuilder {
         TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
                                      taskName,
                                      status);
-        task.setProcessInstanceId(processInstance.getId());
+        if(processInstance != null) {
+            task.setProcessInstanceId(processInstance.getId());
+        }
         return task;
     }
 }
