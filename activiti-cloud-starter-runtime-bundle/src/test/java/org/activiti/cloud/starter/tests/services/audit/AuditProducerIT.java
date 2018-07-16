@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.runtime.api.cmd.CreateTask;
+import org.activiti.runtime.api.cmd.impl.CreateTaskImpl;
 import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.model.CloudProcessDefinition;
@@ -14,6 +16,8 @@ import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.impl.CloudTaskImpl;
+import org.activiti.runtime.api.model.impl.TaskImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -200,6 +204,23 @@ public class AuditProducerIT {
                                      TASK_CANDIDATE_GROUP_REMOVED.name(),
                                      TASK_CANDIDATE_USER_REMOVED.name(),
                                      PROCESS_CANCELLED.name());
+        });
+    }
+
+    @Test
+    public void shouldEmitEventsForTaskDelete() {
+        //given
+        CloudTask task = taskRestTemplate.createTask(new CreateTaskImpl("my task name", "long description here"));
+
+        //when
+        taskRestTemplate.delete(task);
+
+        //then
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getReceivedEvents();
+            assertThat(receivedEvents)
+                    .extracting(event -> event.getEventType().name())
+                    .containsExactly(TASK_CANCELLED.name());
         });
     }
 
