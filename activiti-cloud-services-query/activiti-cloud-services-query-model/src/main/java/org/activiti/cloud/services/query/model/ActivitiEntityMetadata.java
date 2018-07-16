@@ -2,13 +2,9 @@ package org.activiti.cloud.services.query.model;
 
 import javax.persistence.MappedSuperclass;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.runtime.api.model.CloudRuntimeEntity;
 
 @MappedSuperclass
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class ActivitiEntityMetadata implements CloudRuntimeEntity {
 
     protected String serviceName;

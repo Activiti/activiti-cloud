@@ -17,7 +17,6 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Convert;
@@ -31,14 +30,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.runtime.api.model.CloudVariableInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name="Variable")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "VARIABLE")
 public class VariableEntity extends ActivitiEntityMetadata implements CloudVariableInstance {
 

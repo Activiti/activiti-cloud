@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
 import java.util.Set;
-
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -31,18 +30,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name="Task")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "TASK")
 public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
 
@@ -107,27 +100,26 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public TaskEntity() {
     }
 
-    @JsonCreator
-    public TaskEntity(@JsonProperty("id") String id,
-                      @JsonProperty("assignee") String assignee,
-                      @JsonProperty("name") String name,
-                      @JsonProperty("description") String description,
-                      @JsonProperty("createdDate") Date createTime,
-                      @JsonProperty("dueDate") Date dueDate,
-                      @JsonProperty("priority") int priority,
-                      @JsonProperty("category") String category,
-                      @JsonProperty("processDefinitionId") String processDefinitionId,
-                      @JsonProperty("processInstanceId") String processInstanceId,
-                      @JsonProperty("serviceName") String serviceName,
-                      @JsonProperty("serviceFullName") String serviceFullName,
-                      @JsonProperty("serviceVersion") String serviceVersion,
-                      @JsonProperty("appName") String appName,
-                      @JsonProperty("appVersion") String appVersion,
-                      @JsonProperty("status") TaskStatus status,
-                      @JsonProperty("lastModified") Date lastModified,
-                      @JsonProperty("claimedDate") Date claimedDate,
-                      @JsonProperty("owner") String owner,
-                      @JsonProperty("parentTaskId") String parentTaskId) {
+    public TaskEntity(String id,
+                      String assignee,
+                      String name,
+                      String description,
+                      Date createTime,
+                      Date dueDate,
+                      int priority,
+                      String category,
+                      String processDefinitionId,
+                      String processInstanceId,
+                      String serviceName,
+                      String serviceFullName,
+                      String serviceVersion,
+                      String appName,
+                      String appVersion,
+                      TaskStatus status,
+                      Date lastModified,
+                      Date claimedDate,
+                      String owner,
+                      String parentTaskId) {
         super(serviceName,
               serviceFullName,
               serviceVersion,

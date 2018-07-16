@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
 import java.util.Set;
-
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -28,14 +27,10 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name="ProcessInstance")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "PROCESS_INSTANCE")
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 

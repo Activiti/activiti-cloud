@@ -151,6 +151,37 @@ public class QueryTasksIT {
         });
     }
 
+
+    @Test
+    public void shouldGetAvailableTasksAndFilterParentId() {
+        //given
+        Task createdTask = taskEventContainedBuilder.aCreatedStandaloneTaskWithParent("Created task with parent");
+
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<Task> task = responseEntity.getBody().getContent();
+            assertThat(task)
+                    .extracting(Task::getId,
+                                Task::getStatus,
+                                Task::getParentTaskId)
+                    .contains(tuple(createdTask.getId(),
+                                    Task.TaskStatus.CREATED,
+                                    createdTask.getParentTaskId()));
+        });
+
+
+    }
+
     @Test
     public void shouldGetRestrictedTasksWithPermission() {
         //given
