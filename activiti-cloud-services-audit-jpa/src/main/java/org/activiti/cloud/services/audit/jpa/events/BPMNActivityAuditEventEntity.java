@@ -20,11 +20,12 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import javax.persistence.MappedSuperclass;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.ActivityJpaJsonConverter;
 import org.activiti.runtime.api.model.BPMNActivity;
 
-@Entity
+@MappedSuperclass
 public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = ActivityJpaJsonConverter.class)

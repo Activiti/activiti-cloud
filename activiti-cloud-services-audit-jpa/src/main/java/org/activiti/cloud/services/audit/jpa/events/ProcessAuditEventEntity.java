@@ -20,11 +20,12 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import javax.persistence.MappedSuperclass;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
 import org.activiti.runtime.api.model.ProcessInstance;
 
-@Entity
+@MappedSuperclass
 public abstract class ProcessAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = ProcessInstanceJpaJsonConverter.class)

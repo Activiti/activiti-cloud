@@ -4,11 +4,12 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import javax.persistence.MappedSuperclass;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 import org.activiti.runtime.api.model.VariableInstance;
 
-@Entity
+@MappedSuperclass
 public abstract class VariableAuditEventEntity extends AuditEventEntity {
 
     private String variableName;

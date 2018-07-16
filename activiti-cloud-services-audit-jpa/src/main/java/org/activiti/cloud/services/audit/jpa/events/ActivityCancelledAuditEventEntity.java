@@ -18,6 +18,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
 
 import org.activiti.runtime.api.event.BPMNActivityEvent;
 import org.activiti.runtime.api.model.BPMNActivity;

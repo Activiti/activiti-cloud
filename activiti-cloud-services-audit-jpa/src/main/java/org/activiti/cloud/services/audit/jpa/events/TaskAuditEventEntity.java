@@ -4,11 +4,12 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import javax.persistence.MappedSuperclass;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
 import org.activiti.runtime.api.model.Task;
 
-@Entity
+@MappedSuperclass
 public abstract class TaskAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = TaskJpaJsonConverter.class)

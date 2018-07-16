@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
-import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
 
-@Entity
+@MappedSuperclass
 public abstract class IntegrationEventEntity extends AuditEventEntity {
 
     private String integrationContextId;
