@@ -29,6 +29,7 @@
     <feign-form.version>3.2.2</feign-form.version>
     <serenity.version>1.9.6</serenity.version>
     <serenity-jbehave.version>1.38.0</serenity-jbehave.version>
+    <awaitility.version>3.1.1</awaitility.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -36,6 +37,11 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>23.6-jre</version>
+      </dependency>
+      <dependency>
+        <groupId>org.awaitility</groupId>
+        <artifactId>awaitility</artifactId>
+        <version>${awaitility.version}</version>
       </dependency>
       <dependency>
         <groupId>net.serenity-bdd</groupId>

@@ -19,6 +19,7 @@ package org.activiti.cloud.qa.steps;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import net.thucydides.core.annotations.Step;
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Audit steps
@@ -140,6 +142,9 @@ public class AuditSteps {
      */
     @Step
     public void checkTaskDeletedEvent(String taskId) {
+
+        await().untilAsserted(() ->
+
         assertThat(getEvents())
                 .isNotEmpty()
                 .filteredOn(event -> event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent)event).getEntity() != null
@@ -157,7 +162,8 @@ public class AuditSteps {
                               TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED),
                         tuple(taskId,
                               Task.TaskStatus.ASSIGNED,
-                              TaskRuntimeEvent.TaskEvents.TASK_CREATED));
+                              TaskRuntimeEvent.TaskEvents.TASK_CREATED))
+        );
     }
 
     /**
