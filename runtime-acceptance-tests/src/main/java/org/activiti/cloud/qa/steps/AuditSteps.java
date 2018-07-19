@@ -70,12 +70,16 @@ public class AuditSteps {
         Collection<CloudRuntimeEvent> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
                 eventType.name());
 
-        assertThat(events).isNotEmpty();
-        CloudRuntimeEvent resultingEvent = events.iterator().next();
-        assertThat(resultingEvent).isNotNull();
-        assertThat(resultingEvent).isInstanceOf(CloudProcessRuntimeEvent.class);
-        assertThat(resultingEvent.getServiceName()).isNotEmpty();
-        assertThat(resultingEvent.getServiceFullName()).isNotEmpty();
+        await().untilAsserted(() -> {
+
+            assertThat(events).isNotEmpty();
+            CloudRuntimeEvent resultingEvent = events.iterator().next();
+            assertThat(resultingEvent).isNotNull();
+            assertThat(resultingEvent).isInstanceOf(CloudProcessRuntimeEvent.class);
+            assertThat(resultingEvent.getServiceName()).isNotEmpty();
+            assertThat(resultingEvent.getServiceFullName()).isNotEmpty();
+
+        });
     }
 
     @Step
@@ -86,16 +90,21 @@ public class AuditSteps {
         Collection<CloudRuntimeEvent> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
                                                                             eventType.name());
 
-        assertThat(events).isNotEmpty();
-        assertThat(events).extracting( e -> e.getEventType()).containsOnly(eventType);
-        List<CloudRuntimeEvent> processInstanceTasks = events.stream().filter(e -> ((CloudTaskRuntimeEvent) e).getEntity().getProcessInstanceId().equals(processInstanceId)).collect(Collectors.toList());
-        assertThat(processInstanceTasks).hasSize(1);
-        CloudRuntimeEvent resultingEvent = processInstanceTasks.get(0);
-        assertThat(resultingEvent).isNotNull();
-        assertThat(resultingEvent).isInstanceOf(CloudTaskRuntimeEvent.class);
-        assertThat(((CloudTaskRuntimeEvent)resultingEvent).getEntity().getId()).isEqualTo(taskId);
-        assertThat(resultingEvent.getServiceName()).isNotEmpty();
-        assertThat(resultingEvent.getServiceFullName()).isNotEmpty();
+
+        await().untilAsserted(() -> {
+
+            assertThat(events).isNotEmpty();
+            assertThat(events).extracting(e -> e.getEventType()).containsOnly(eventType);
+            List<CloudRuntimeEvent> processInstanceTasks = events.stream().filter(e -> ((CloudTaskRuntimeEvent) e).getEntity().getProcessInstanceId().equals(processInstanceId)).collect(Collectors.toList());
+            assertThat(processInstanceTasks).hasSize(1);
+            CloudRuntimeEvent resultingEvent = processInstanceTasks.get(0);
+            assertThat(resultingEvent).isNotNull();
+            assertThat(resultingEvent).isInstanceOf(CloudTaskRuntimeEvent.class);
+            assertThat(((CloudTaskRuntimeEvent) resultingEvent).getEntity().getId()).isEqualTo(taskId);
+            assertThat(resultingEvent.getServiceName()).isNotEmpty();
+            assertThat(resultingEvent.getServiceFullName()).isNotEmpty();
+
+        });
     }
 
     @Step
@@ -121,19 +130,19 @@ public class AuditSteps {
             }
         };
 
-        assertThat(events).isNotNull()
-                .isNotEmpty()
-                .filteredOn(taskIsMatched).hasSize(2)
-                .extracting("entity.id",
-                            "entity.status",
-                            "eventType")
-                .containsExactly(
-                        tuple(taskId,
-                              Task.TaskStatus.ASSIGNED,
-                              TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED),
-                        tuple(taskId,
-                              Task.TaskStatus.ASSIGNED,
-                              TaskRuntimeEvent.TaskEvents.TASK_CREATED));
+        await().untilAsserted(() -> assertThat(events).isNotNull()
+                                    .isNotEmpty()
+                                    .filteredOn(taskIsMatched).hasSize(2)
+                                    .extracting("entity.id",
+                                            "entity.status",
+                                            "eventType")
+                                    .containsExactly(
+                                            tuple(taskId,
+                                                    Task.TaskStatus.ASSIGNED,
+                                                    TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED),
+                                            tuple(taskId,
+                                                    Task.TaskStatus.ASSIGNED,
+                                                    TaskRuntimeEvent.TaskEvents.TASK_CREATED)));
     }
 
     /**
@@ -143,27 +152,64 @@ public class AuditSteps {
     @Step
     public void checkTaskDeletedEvent(String taskId) {
 
-        await().untilAsserted(() ->
+        await().untilAsserted(() -> {
 
-        assertThat(getEvents())
-                .isNotEmpty()
-                .filteredOn(event -> event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent)event).getEntity() != null
-                        && taskId.equals(((CloudTaskRuntimeEvent)event).getEntity().getId()))
-                .hasSize(3)
-                .extracting("entity.id",
+            final Collection<CloudRuntimeEvent> events = getEvents();
+
+            for (CloudRuntimeEvent event: events){
+                if (event instanceof CloudTaskRuntimeEvent) {
+                    System.out.println("Here it is: " + event.getId());
+                    System.out.println("Task id is: " + ((CloudTaskRuntimeEvent)event).getEntity().getId());
+                    System.out.println(taskId);
+                    System.out.println("/n");
+                }
+            }
+
+            System.out.println("............");
+
+            assertThat(getEvents())
+                    .isNotEmpty()
+                    .filteredOn(event -> event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent)event).getEntity() != null
+                            && taskId.equals(((CloudTaskRuntimeEvent)event).getEntity().getId()))
+                    .extracting("entity.id",
                             "entity.status",
                             "eventType")
-                .containsExactly(
-                        tuple(taskId,
-                                Task.TaskStatus.CANCELLED,
-                              TaskRuntimeEvent.TaskEvents.TASK_CANCELLED),
-                        tuple(taskId,
-                              Task.TaskStatus.ASSIGNED,
-                              TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED),
-                        tuple(taskId,
-                              Task.TaskStatus.ASSIGNED,
-                              TaskRuntimeEvent.TaskEvents.TASK_CREATED))
-        );
+                    .contains(
+                            tuple(taskId,
+                                    Task.TaskStatus.CANCELLED,
+                                    TaskRuntimeEvent.TaskEvents.TASK_CANCELLED));
+
+            assertThat(getEvents())
+                    .isNotEmpty()
+                    .filteredOn(event -> event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent)event).getEntity() != null
+                            && taskId.equals(((CloudTaskRuntimeEvent)event).getEntity().getId()))
+                    .extracting("entity.id",
+                            "entity.status",
+                            "eventType")
+                    .contains(
+                            tuple(taskId,
+                                    Task.TaskStatus.ASSIGNED,
+                                    TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED));
+
+            assertThat(getEvents())
+                    .isNotEmpty()
+                    .filteredOn(event -> event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent)event).getEntity() != null
+                            && taskId.equals(((CloudTaskRuntimeEvent)event).getEntity().getId()))
+                    .extracting("entity.id",
+                            "entity.status",
+                            "eventType")
+                    .contains(
+                            tuple(taskId,
+                                    Task.TaskStatus.ASSIGNED,
+                                    TaskRuntimeEvent.TaskEvents.TASK_CREATED));
+
+            assertThat(getEvents())
+                    .isNotEmpty()
+                    .filteredOn(event -> event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent)event).getEntity() != null
+                            && taskId.equals(((CloudTaskRuntimeEvent)event).getEntity().getId()))
+                    .hasSize(3);
+
+        });
     }
 
     /**
@@ -185,14 +231,15 @@ public class AuditSteps {
             }
         };
 
-        assertThat(events).isNotNull()
-                .isNotEmpty()
-                .filteredOn(taskIsMatched).hasSize(2)
-                .extracting("entity.id",
-                            "entity.parentTaskId")
-                .contains(tuple(subtaskId,
-                                parentTaskId),
-                          tuple(subtaskId,
-                                parentTaskId));
+
+        await().untilAsserted(() -> assertThat(events).isNotNull()
+                                    .isNotEmpty()
+                                    .filteredOn(taskIsMatched).hasSize(2)
+                                    .extracting("entity.id",
+                                                "entity.parentTaskId")
+                                    .contains(tuple(subtaskId,
+                                                    parentTaskId),
+                                              tuple(subtaskId,
+                                                    parentTaskId)));
     }
 }

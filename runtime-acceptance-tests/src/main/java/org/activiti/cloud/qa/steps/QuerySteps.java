@@ -60,13 +60,17 @@ public class QuerySteps {
     @Step
     public void checkProcessInstanceStatus(String processInstanceId,
                                            ProcessInstanceStatus expectedStatus) throws Exception {
-        assertThat(expectedStatus).isNotNull();
 
-        CloudProcessInstance processInstance = getProcessInstance(processInstanceId);
-        assertThat(processInstance).isNotNull();
-        assertThat(processInstance.getStatus()).isEqualTo(expectedStatus);
-        assertThat(processInstance.getServiceName()).isNotEmpty();
-        assertThat(processInstance.getServiceFullName()).isNotEmpty();
+        await().untilAsserted(() -> {
+
+            assertThat(expectedStatus).isNotNull();
+            CloudProcessInstance processInstance = getProcessInstance(processInstanceId);
+            assertThat(processInstance).isNotNull();
+            assertThat(processInstance.getStatus()).isEqualTo(expectedStatus);
+            assertThat(processInstance.getServiceName()).isNotEmpty();
+            assertThat(processInstance.getServiceFullName()).isNotEmpty();
+
+        });
     }
 
     @Step

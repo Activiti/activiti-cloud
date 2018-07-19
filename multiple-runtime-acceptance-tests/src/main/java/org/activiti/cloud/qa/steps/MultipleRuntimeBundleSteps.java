@@ -70,8 +70,4 @@ public class MultipleRuntimeBundleSteps {
         }
     }
 
-    @Step
-    public void waitForMessagesToBeConsumed() throws InterruptedException {
-        Thread.sleep(220);
-    }
 }

@@ -86,7 +86,7 @@ public class ProcessInstanceTasks {
     @When("the user claims a task")
     public void claimTask() throws Exception {
         runtimeBundleSteps.assignTaskToUser(currentTask.getId(),
-                                            "hruser");
+                                            "testuser");
     }
 
     @When("the user completes the task")
@@ -96,7 +96,7 @@ public class ProcessInstanceTasks {
 
     @Then("the status of the process is changed to completed")
     public void verifyProcessStatus() throws Exception {
-        runtimeBundleSteps.waitForMessagesToBeConsumed();
+
         querySteps.checkProcessInstanceStatus(processInstance.getId(),
                                               ProcessInstance.ProcessInstanceStatus.COMPLETED);
         auditSteps.checkProcessInstanceTaskEvent(processInstance.getId(),
@@ -113,7 +113,6 @@ public class ProcessInstanceTasks {
     @Then("the process instance is cancelled")
     public void verifyProcessInstanceIsDeleted() throws Exception {
         runtimeBundleSteps.checkProcessInstanceNotFound(processInstance.getId());
-        runtimeBundleSteps.waitForMessagesToBeConsumed();
         querySteps.checkProcessInstanceStatus(processInstance.getId(),
                                               ProcessInstance.ProcessInstanceStatus.CANCELLED);
         auditSteps.checkProcessInstanceEvent(processInstance.getId(),
