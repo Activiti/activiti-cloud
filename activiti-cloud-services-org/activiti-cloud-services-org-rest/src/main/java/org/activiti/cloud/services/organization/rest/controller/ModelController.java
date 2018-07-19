@@ -131,6 +131,7 @@ public class ModelController implements ApplicationEventPublisherAware {
     public void updateModel(@PathVariable String modelId,
                             @RequestBody Model model) {
         Model modelToUpdate = findModelById(modelId);
+        model.setId(modelId);
         applicationEventPublisher.publishEvent(new BeforeSaveEvent(model));
         resourceAssembler.toResource(
                 modelRepository.updateModel(modelToUpdate,

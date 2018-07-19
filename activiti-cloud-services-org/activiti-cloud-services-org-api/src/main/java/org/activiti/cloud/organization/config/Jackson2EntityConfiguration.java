@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.rest.config;
+package org.activiti.cloud.organization.config;
 
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.activiti.cloud.organization.api.Application;

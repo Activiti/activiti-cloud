@@ -61,22 +61,22 @@ public class RestResourceServiceTest {
         // GIVEN
         ModelMock processModel = new ModelMock();
         processModel.setType(PROCESS);
-        processModel.setRefId("process_model_refId");
+        processModel.setId("process_model_id");
 
-        ModelReference processModelReference = new ModelReference("process_model_refId",
+        ModelReference processModelReference = new ModelReference("process_model_id",
                                                                   "Process Model");
         doReturn(processModelReference).when(modelService).getResource(eq(PROCESS),
-                                                                       eq("process_model_refId"));
+                                                                       eq("process_model_id"));
 
         // WHEN
         restResourceService.loadRestResourceIntoEntityField(processModel,
                                                             "data",
                                                             "type",
-                                                            "refId");
+                                                            "id");
 
         // THEN
         assertThat(processModel.getData()).isNotNull();
-        assertThat(processModel.getData().getModelId()).isEqualTo("process_model_refId");
+        assertThat(processModel.getData().getModelId()).isEqualTo("process_model_id");
         assertThat(processModel.getData().getName()).isEqualTo("Process Model");
     }
 
@@ -86,23 +86,23 @@ public class RestResourceServiceTest {
         // GIVEN
         ModelMock processModel = new ModelMock();
         processModel.setType(PROCESS);
-        processModel.setRefId("process_model_refId");
+        processModel.setId("process_model_id");
         processModel.setData(null);
 
         doThrow(RuntimeException.class).when(modelService).getResource(eq(PROCESS),
-                                                                       eq("process_model_refId"));
+                                                                       eq("process_model_id"));
 
         // WHEN
         restResourceService.loadRestResourceIntoEntityField(processModel,
                                                             "data",
                                                             "type",
-                                                            "refId");
+                                                            "id");
 
         // THEN
         verify(modelService,
                times(1))
                 .getResource(PROCESS,
-                             "process_model_refId");
+                             "process_model_id");
 
         assertThat(processModel.getData()).isNull();
     }
@@ -119,7 +119,7 @@ public class RestResourceServiceTest {
         restResourceService.loadRestResourceIntoEntityField(new ModelMock(),
                                                             "data",
                                                             "invalid_field_name",
-                                                            "refId");
+                                                            "id");
     }
 
     @Test
@@ -149,7 +149,7 @@ public class RestResourceServiceTest {
         restResourceService.loadRestResourceIntoEntityField(new ModelMock(),
                                                             "invalid_field_name",
                                                             "type",
-                                                            "refId");
+                                                            "id");
     }
 
     @Test
@@ -158,12 +158,12 @@ public class RestResourceServiceTest {
         // GIVEN
         ModelMock processModel = new ModelMock();
         processModel.setType(PROCESS);
-        processModel.setRefId("process_model_refId");
+        processModel.setId("process_model_id");
 
-        ModelReference processModelReference = new ModelReference("process_model_refId",
+        ModelReference processModelReference = new ModelReference("process_model_id",
                                                                   "Process Model");
         doReturn(processModelReference).when(modelService).getResource(eq(PROCESS),
-                                                                       eq("process_model_refId"));
+                                                                       eq("process_model_id"));
 
         // THEN
         expectedException.expect(RuntimeException.class);
@@ -174,7 +174,7 @@ public class RestResourceServiceTest {
         restResourceService.loadRestResourceIntoEntityField(processModel,
                                                             "id",
                                                             "type",
-                                                            "refId");
+                                                            "id");
     }
 
     @Test
@@ -183,21 +183,20 @@ public class RestResourceServiceTest {
         // GIVEN
         ModelMock processModel = new ModelMock("process_model_id",
                                                "Process Model",
-                                               PROCESS,
-                                               "process_model_refId");
+                                               PROCESS);
 
         // WHEN
         restResourceService.saveRestResourceFromEntityField(processModel,
                                                             "data",
                                                             "type",
-                                                            "refId",
+                                                            "id",
                                                             false);
 
         // THEN
         verify(modelService,
                never())
                 .updateResource(eq(PROCESS),
-                                eq("process_model_refId"),
+                                eq("process_model_id"),
                                 any(ModelReference.class));
 
         verify(modelService,
@@ -207,7 +206,7 @@ public class RestResourceServiceTest {
 
         ModelReference createdModelReference = modelReferenceCaptor.getValue();
         assertThat(createdModelReference).isNotNull();
-        assertThat(createdModelReference.getModelId()).isEqualTo("process_model_refId");
+        assertThat(createdModelReference.getModelId()).isEqualTo("process_model_id");
         assertThat(createdModelReference.getName()).isEqualTo("Process Model");
     }
 
@@ -217,14 +216,13 @@ public class RestResourceServiceTest {
         // GIVEN
         ModelMock processModel = new ModelMock("process_model_id",
                                                "Process Model",
-                                               PROCESS,
-                                               "process_model_refId");
+                                               PROCESS);
 
         // WHEN
         restResourceService.saveRestResourceFromEntityField(processModel,
                                                             "data",
                                                             "type",
-                                                            "refId",
+                                                            "id",
                                                             true);
 
         // THEN
@@ -236,12 +234,12 @@ public class RestResourceServiceTest {
         verify(modelService,
                times(1))
                 .updateResource(eq(PROCESS),
-                                eq("process_model_refId"),
+                                eq("process_model_id"),
                                 modelReferenceCaptor.capture());
 
         ModelReference updatedModelReference = modelReferenceCaptor.getValue();
         assertThat(updatedModelReference).isNotNull();
-        assertThat(updatedModelReference.getModelId()).isEqualTo("process_model_refId");
+        assertThat(updatedModelReference.getModelId()).isEqualTo("process_model_id");
         assertThat(updatedModelReference.getName()).isEqualTo("Process Model");
     }
 
@@ -255,7 +253,7 @@ public class RestResourceServiceTest {
         restResourceService.saveRestResourceFromEntityField(processModel,
                                                             "data",
                                                             "type",
-                                                            "refId",
+                                                            "id",
                                                             false);
 
         // THEN

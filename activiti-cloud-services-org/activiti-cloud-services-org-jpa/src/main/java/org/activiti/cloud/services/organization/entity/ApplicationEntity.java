@@ -31,7 +31,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 /**
  * Application model entity
  */
-@Entity
+@Entity(name = "Application")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
 public class ApplicationEntity extends AuditableEntity<String> implements Application<String> {

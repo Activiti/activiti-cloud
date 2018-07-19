@@ -92,9 +92,15 @@ public class ModelRestIT {
 
     @Test
     public void testGetModels() throws Exception {
-        ModelReference expectedFormModel = new ModelReference("form_model_refId",
+        final String formModelId = "form_model_id";
+        final String formModelName = "Form Model";
+
+        final String processModelId = "process_model_id";
+        final String processModelName = "Process Model";
+
+        ModelReference expectedFormModel = new ModelReference(formModelId,
                                                               "Form Model");
-        ModelReference expectedProcessModel = new ModelReference("process_model_refId",
+        ModelReference expectedProcessModel = new ModelReference(processModelId,
                                                                  "Process Model");
 
         doReturn(expectedFormModel).when(modelService).getResource(eq(FORM),
@@ -103,21 +109,15 @@ public class ModelRestIT {
                                                                       eq(expectedProcessModel.getModelId()));
 
         //given
-        final String formModelId = "form_model_id";
-        final String formModelName = "Form Model";
         Model formModel = new ModelEntity(formModelId,
                                           formModelName,
-                                          FORM,
-                                          "form_model_refId");
+                                          FORM);
         formModel = modelRepository.createModel(formModel);
         assertThat(formModel).isNotNull();
 
-        final String processModelId = "process_model_id";
-        final String processModelName = "Process Model";
         Model processModel = new ModelEntity(processModelId,
                                              processModelName,
-                                             PROCESS,
-                                             "process_model_refId");
+                                             PROCESS);
         processModel = modelRepository.createModel(processModel);
         assertThat(processModel).isNotNull();
 
@@ -144,13 +144,12 @@ public class ModelRestIT {
         final String formModelName = "Form Model";
         Model formModel = new ModelEntity(formModelId,
                                           formModelName,
-                                          FORM,
-                                          "form_model_refId");
+                                          FORM);
 
-        ModelReference expectedProcessModel = new ModelReference("form_model_refId",
+        ModelReference expectedProcessModel = new ModelReference(formModelId,
                                                                  "Form Model");
         doReturn(expectedProcessModel).when(modelService).getResource(eq(FORM),
-                                                                      eq("form_model_refId"));
+                                                                      eq(formModelId));
 
         mockMvc.perform(post("{version}/models",
                              API_VERSION)
@@ -166,8 +165,7 @@ public class ModelRestIT {
         final String processModelId = "process_model_id";
         Model processModel = new ModelEntity(processModelId,
                                              "Process Model",
-                                             PROCESS,
-                                             processModelId);
+                                             PROCESS);
 
         ModelReference expectedProcessModel = new ModelReference(processModelId,
                                                                  "Process Model");
@@ -180,6 +178,7 @@ public class ModelRestIT {
         mockMvc.perform(get("{version}/models/{modelId}",
                             API_VERSION,
                             processModelId))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 
@@ -189,13 +188,12 @@ public class ModelRestIT {
         final String processModelId = "process_model_id";
         Model processModel = new ModelEntity(processModelId,
                                              "Process Model",
-                                             PROCESS,
-                                             "process_model_refId");
+                                             PROCESS);
 
-        ModelReference expectedProcessModel = new ModelReference("process_model_refId",
+        ModelReference expectedProcessModel = new ModelReference(processModelId,
                                                                  "Process Model");
         doReturn(expectedProcessModel).when(modelService).getResource(eq(PROCESS),
-                                                                      eq("process_model_refId"));
+                                                                      eq(processModelId));
 
         String parentApplicationId = "parent_application_id";
         applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
@@ -219,14 +217,12 @@ public class ModelRestIT {
         final String processModelId = "process_model_id";
         Model processModel = new ModelEntity(processModelId,
                                              "Process Model",
-                                             PROCESS,
-                                             "process_model_refId");
+                                             PROCESS);
         assertThat(modelRepository.createModel(processModel)).isNotNull();
 
-        Model newModel = new ModelEntity(processModelId,
-                                         "New Process Model",
-                                         PROCESS,
-                                         "process_model_refId");
+        Model newModel = new ModelEntity();
+        newModel.setType(PROCESS);
+        newModel.setName("New Process Model");
 
         //when
         mockMvc.perform(put("{version}/models/{modelId}",
@@ -243,8 +239,7 @@ public class ModelRestIT {
         final String processModelId = "process_model_id";
         Model processModel = new ModelEntity(processModelId,
                                              "Process Model",
-                                             PROCESS,
-                                             "process_model_refId");
+                                             PROCESS);
         assertThat(modelRepository.createModel(processModel)).isNotNull();
 
         //when

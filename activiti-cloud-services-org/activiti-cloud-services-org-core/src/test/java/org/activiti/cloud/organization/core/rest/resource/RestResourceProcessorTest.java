@@ -60,7 +60,7 @@ public class RestResourceProcessorTest {
                 .loadRestResourceIntoEntityField(any(ModelMock.class),
                                                  eq("data"),
                                                  eq("type"),
-                                                 eq("refId"));
+                                                 eq("id"));
     }
 
     @Test

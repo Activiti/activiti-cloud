@@ -21,6 +21,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.webmvc.convert.UriListHttpMessageConverter;
+import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -43,6 +44,7 @@ public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.stream()
                 .filter(MappingJackson2HttpMessageConverter.class::isInstance)
+                .filter(converter -> !(converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter))
                 .map(MappingJackson2HttpMessageConverter.class::cast)
                 .map(MappingJackson2HttpMessageConverter::getObjectMapper)
                 .forEach(objectMapperBuilder::configure);

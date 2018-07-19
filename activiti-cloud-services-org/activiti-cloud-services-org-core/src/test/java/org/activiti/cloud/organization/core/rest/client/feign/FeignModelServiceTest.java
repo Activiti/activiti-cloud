@@ -65,21 +65,21 @@ public class FeignModelServiceTest {
     public void testGetResource() {
         // WHEN
         feignModelService.getResource(PROCESS,
-                                      "process_model_refId");
+                                      "process_model_id");
 
         // THEN
         verify(processModelService,
                times(1))
-                .getResource("process_model_refId");
+                .getResource("process_model_id");
 
         // WHEN
         feignModelService.getResource(FORM,
-                                      "form_model_refId");
+                                      "form_model_id");
 
         // THEN
         verify(formModelService,
                times(1))
-                .getResource("form_model_refId");
+                .getResource("form_model_id");
     }
 
     @Test
@@ -107,24 +107,24 @@ public class FeignModelServiceTest {
     public void testUpdateResource() {
         // WHEN
         feignModelService.updateResource(PROCESS,
-                                         "process_model_refId",
+                                         "process_model_id",
                                          mock(ModelReference.class));
 
         // THEN
         verify(processModelService,
                times(1))
-                .updateResource(eq("process_model_refId"),
+                .updateResource(eq("process_model_id"),
                                 any(ModelReference.class));
 
         // WHEN
         feignModelService.updateResource(FORM,
-                                         "form_model_refId",
+                                         "form_model_id",
                                          mock(ModelReference.class));
 
         // THEN
         verify(formModelService,
                times(1))
-                .updateResource(eq("form_model_refId"),
+                .updateResource(eq("form_model_id"),
                                 any(ModelReference.class));
     }
 
@@ -132,21 +132,21 @@ public class FeignModelServiceTest {
     public void testDeleteResource() {
         // WHEN
         feignModelService.deleteResource(PROCESS,
-                                         "process_model_refId");
+                                         "process_model_id");
 
         // THEN
         verify(processModelService,
                times(1))
-                .deleteResource(eq("process_model_refId"));
+                .deleteResource(eq("process_model_id"));
 
         // WHEN
         feignModelService.deleteResource(FORM,
-                                         "form_model_refId");
+                                         "form_model_id");
 
         // THEN
         verify(formModelService,
                times(1))
-                .deleteResource(eq("form_model_refId"));
+                .deleteResource(eq("form_model_id"));
     }
 
     @Test

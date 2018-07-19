@@ -55,8 +55,7 @@ public class ModelRepositoryTest {
                                                                     "Parent Application");
         ModelEntity childModel = new ModelEntity("child_model_id",
                                                  "Child Model",
-                                                 PROCESS,
-                                                 "child_model_id");
+                                                 PROCESS);
 
         // WHEN
         modelRepository.createModel(parentApplication,
@@ -79,12 +78,10 @@ public class ModelRepositoryTest {
         // GIVEN
         ModelEntity modelToUpdate = new ModelEntity("model_id",
                                                     "Model Name",
-                                                    PROCESS,
-                                                    "model_id");
+                                                    PROCESS);
         ModelEntity model = new ModelEntity("new_model_id",
                                             "New Model Name",
-                                            PROCESS,
-                                            "new_model_id");
+                                            PROCESS);
 
         // WHEN
         modelRepository.updateModel(modelToUpdate,
@@ -124,13 +121,11 @@ public class ModelRepositoryTest {
 
         ModelEntity model1 = new ModelEntity("model1",
                                              "Model 1",
-                                             PROCESS,
-                                             "model1");
+                                             PROCESS);
 
         ModelEntity model2 = new ModelEntity("model2",
                                              "Model 2",
-                                             PROCESS,
-                                             "model2");
+                                             PROCESS);
 
         List<String> submodelLinks = Arrays.asList(
                 "http://localhost:8080/models/model1",

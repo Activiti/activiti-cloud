@@ -49,7 +49,7 @@ public class RestResourceEventHandlerTest {
         // GIVEN
         ModelMock processModel = new ModelMock();
         processModel.setType(PROCESS);
-        processModel.setRefId("process_model_refId");
+        processModel.setId("process_model_id");
 
         doReturn(true)
                 .when(restResourceEventHandler)
@@ -64,7 +64,7 @@ public class RestResourceEventHandlerTest {
                 .saveRestResourceFromEntityField(any(ModelMock.class),
                                                  eq("data"),
                                                  eq("type"),
-                                                 eq("refId"),
+                                                 eq("id"),
                                                  eq(true));
     }
 
@@ -74,7 +74,7 @@ public class RestResourceEventHandlerTest {
         // GIVEN
         ModelMock processModel = new ModelMock();
         processModel.setType(PROCESS);
-        processModel.setRefId("process_model_refId");
+        processModel.setId("process_model_id");
 
         doReturn(true)
                 .when(restResourceEventHandler)
@@ -89,7 +89,7 @@ public class RestResourceEventHandlerTest {
                 .saveRestResourceFromEntityField(any(ModelMock.class),
                                                  eq("data"),
                                                  eq("type"),
-                                                 eq("refId"),
+                                                 eq("id"),
                                                  eq(false));
     }
 

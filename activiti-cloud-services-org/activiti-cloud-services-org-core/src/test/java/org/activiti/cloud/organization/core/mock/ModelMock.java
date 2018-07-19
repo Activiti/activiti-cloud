@@ -43,12 +43,10 @@ public class ModelMock extends AuditableMock implements Model<ApplicationMock, S
 
     private ModelType type;
 
-    private String refId;
-
     @Transient
     @JsonIgnore
     @RestResource(
-            resourceIdField = "refId",
+            resourceIdField = "id",
             resourceKeyField = "type")
     private ModelReference data;
 
@@ -58,12 +56,10 @@ public class ModelMock extends AuditableMock implements Model<ApplicationMock, S
 
     public ModelMock(String id,
                      String name,
-                     ModelType type,
-                     String refId) {
+                     ModelType type) {
         this.id = id;
         this.type = type;
-        this.refId = refId;
-        this.data = new ModelReference(refId,
+        this.data = new ModelReference(id,
                                        name);
     }
 
@@ -75,6 +71,7 @@ public class ModelMock extends AuditableMock implements Model<ApplicationMock, S
     @Override
     public void setId(String id) {
         this.id = id;
+        data.setModelId(id);
     }
 
     @Override
@@ -95,15 +92,6 @@ public class ModelMock extends AuditableMock implements Model<ApplicationMock, S
     @Override
     public void setType(ModelType type) {
         this.type = type;
-    }
-
-    public String getRefId() {
-        return refId;
-    }
-
-    public void setRefId(String refId) {
-        this.refId = refId;
-        data.setModelId(refId);
     }
 
     public ModelReference getData() {

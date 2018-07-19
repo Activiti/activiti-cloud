@@ -118,14 +118,24 @@ public class ApplicationRestIT {
 
     @Test
     public void testCreateApplicationsWithModels() throws Exception {
-        ModelReference expectedFormModel = new ModelReference("ref_model_form_id",
-                                                              "Form Model");
-        ModelReference expectedProcessModel = new ModelReference("ref_process_model_id",
-                                                                 "Process Model");
-        doReturn(expectedFormModel).when(modelService).getResource(FORM,
-                                                                   expectedFormModel.getModelId());
-        doReturn(expectedProcessModel).when(modelService).getResource(PROCESS,
-                                                                      expectedProcessModel.getModelId());
+        final String formModelId = "form_model_id";
+        final String formModelName = "Form Model";
+
+        final String processModelId = "process_model_id";
+        final String processModelName = "Process Model";
+
+        ModelReference expectedFormModel = new ModelReference(formModelId,
+                                                              formModelName);
+        ModelReference expectedProcessModel = new ModelReference(processModelId,
+                                                                 processModelName);
+        doReturn(expectedFormModel)
+                .when(modelService)
+                .getResource(eq(FORM),
+                             eq(expectedFormModel.getModelId()));
+        doReturn(expectedProcessModel)
+                .when(modelService)
+                .getResource(eq(PROCESS),
+                             eq(expectedProcessModel.getModelId()));
 
         //given
         final String applicationWithModelsId = "application_with_models_id";
@@ -142,12 +152,9 @@ public class ApplicationRestIT {
                 .andExpect(status().isCreated());
 
         // create a form model
-        final String formModelId = "form_model_id";
-        final String formModelName = "Form Model";
         Model modelForm = new ModelEntity(formModelId,
                                           formModelName,
-                                          FORM,
-                                          "ref_model_form_id");
+                                          FORM);
 
         mockMvc.perform(post("{version}/models",
                              RepositoryRestConfig.API_VERSION)
@@ -157,12 +164,10 @@ public class ApplicationRestIT {
                 .andExpect(status().isCreated());
 
         // create a process-model
-        final String processModelId = "process_model_id";
-        final String processModelName = "Process Model";
         Model processModel = new ModelEntity(processModelId,
                                              processModelName,
-                                             PROCESS,
-                                             "ref_process_model_id");
+                                             PROCESS
+        );
 
         mockMvc.perform(post("{version}/models",
                              RepositoryRestConfig.API_VERSION)

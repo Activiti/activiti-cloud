@@ -31,7 +31,8 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
  */
 @RepositoryRestResource(path = "models",
         collectionResourceRel = "models",
-        itemResourceRel = "models")
+        itemResourceRel = "models",
+        exported = false)
 public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
                                             ModelRepository<ApplicationEntity, ModelEntity> {
 

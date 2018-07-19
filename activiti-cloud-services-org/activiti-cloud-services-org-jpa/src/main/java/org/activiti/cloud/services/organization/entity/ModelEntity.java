@@ -24,11 +24,11 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.resource.EntityWithRestResource;
 import org.activiti.cloud.organization.core.rest.resource.RestResource;
-import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -36,7 +36,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 /**
  * Model model entity
  */
-@Entity
+@Entity(name = "Model")
 @EntityWithRestResource
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
@@ -50,12 +50,10 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
 
     private ModelType type;
 
-    private String refId;
-
     @Transient
     @JsonIgnore
     @RestResource(
-            resourceIdField = "refId",
+            resourceIdField = "id",
             resourceKeyField = "type")
     private ModelReference data;
 
@@ -65,12 +63,10 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
 
     public ModelEntity(String id,
                        String name,
-                       ModelType type,
-                       String refId) {
+                       ModelType type) {
         this.id = id;
         this.type = type;
-        this.refId = refId;
-        this.data = new ModelReference(refId,
+        this.data = new ModelReference(id,
                                        name);
     }
 
@@ -82,6 +78,7 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
     @Override
     public void setId(String id) {
         this.id = id;
+        data.setModelId(id);
     }
 
     @Override
@@ -102,15 +99,6 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
     @Override
     public void setType(ModelType type) {
         this.type = type;
-    }
-
-    public String getRefId() {
-        return refId;
-    }
-
-    public void setRefId(String refId) {
-        this.refId = refId;
-        data.setModelId(refId);
     }
 
     public ModelReference getData() {

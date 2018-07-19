@@ -81,8 +81,7 @@ public class ValidateModelControllerIT {
                                                        "BPMN diagram".getBytes());
         when(modelRepository.findModelById("model_id")).thenReturn(Optional.of(new ModelEntity("model_id",
                                                                                                "Process-Model",
-                                                                                               PROCESS,
-                                                                                               "model_ref_id")));
+                                                                                               PROCESS)));
 
         List<ValidationErrorRepresentation> expectedValidationErrors =
                 Arrays.asList(new ValidationErrorRepresentation(new ValidationError()),

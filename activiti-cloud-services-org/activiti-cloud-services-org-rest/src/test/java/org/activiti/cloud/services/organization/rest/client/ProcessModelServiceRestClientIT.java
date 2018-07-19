@@ -63,10 +63,10 @@ public class ProcessModelServiceRestClientIT {
 
     @Test
     public void testCreateProcessModel() throws Exception {
-        Model processModel = new ModelEntity("newprocessModel",
+        Model processModel = new ModelEntity("newProcesModelId",
                                              "newProcesModelName",
-                                             PROCESS,
-                                             "newProcesModelId");
+                                             PROCESS
+        );
 
         given()
                 .contentType(APPLICATION_JSON_VALUE)
@@ -77,31 +77,35 @@ public class ProcessModelServiceRestClientIT {
 
     @Test
     public void testUpdateProcessModel() throws Exception {
-        Model processModel = new ModelEntity("processModel_id2",
+        Model processModel = new ModelEntity("contractUpdateProcesModelId",
                                              "newProcesModelNameUpdated",
-                                             PROCESS,
-                                             "contractUpdateProcesModelId");
+                                             PROCESS
+        );
         processModel.setContent("someContent");
         modelRepository.createModel(processModel);
 
+        Model newProcessModel = new ModelEntity();
+        newProcessModel.setType(PROCESS);
+        newProcessModel.setName("newProcesModelNameUpdated");
+        newProcessModel.setContent("newContent");
+
         given()
                 .contentType(APPLICATION_JSON_VALUE)
-                .body(mapper.writeValueAsString(processModel))
-                .put("/v1/models/processModel_id2")
+                .body(mapper.writeValueAsString(newProcessModel))
+                .put("/v1/models/contractUpdateProcesModelId")
                 .then().expect(status().isNoContent());
     }
 
     @Test
     public void testGetProcessModel() throws Exception {
-        Model processModel = new ModelEntity("processModel_id",
+        Model processModel = new ModelEntity("contractUpdateProcesModelId",
                                              "testProcesModelName",
-                                             PROCESS,
-                                             "contractUpdateProcesModelId");
+                                             PROCESS);
         modelRepository.createModel(processModel);
 
         given()
                 .contentType(APPLICATION_JSON_VALUE)
-                .get("/v1/models/processModel_id")
+                .get("/v1/models/contractUpdateProcesModelId")
                 .then().expect(status().isOk())
                 .and().body("name",
                             equalTo("contractUpdateProcesModelNameUpdated"))

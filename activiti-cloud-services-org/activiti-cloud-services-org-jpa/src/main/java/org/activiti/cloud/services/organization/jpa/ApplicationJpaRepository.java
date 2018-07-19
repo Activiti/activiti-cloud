@@ -30,7 +30,8 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
  */
 @RepositoryRestResource(path = "applications",
         collectionResourceRel = "applications",
-        itemResourceRel = "applications")
+        itemResourceRel = "applications",
+        exported = false)
 public interface ApplicationJpaRepository extends JpaRepository<ApplicationEntity, String>,
                                                   ApplicationRepository<ApplicationEntity> {
 
