@@ -16,17 +16,17 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.TaskEntity;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TaskBuilder {
 
-    private Task task;
+    private TaskEntity taskEntity;
 
     private TaskBuilder() {
-        this.task = mock(Task.class);
+        this.taskEntity = mock(TaskEntity.class);
     }
 
     public static TaskBuilder aTask() {
@@ -34,16 +34,16 @@ public class TaskBuilder {
     }
 
     public TaskBuilder withId(String taskId) {
-        when(task.getId()).thenReturn(taskId);
+        when(taskEntity.getId()).thenReturn(taskId);
         return this;
     }
 
     public TaskBuilder withAssignee(String assignee) {
-        when(task.getAssignee()).thenReturn(assignee);
+        when(taskEntity.getAssignee()).thenReturn(assignee);
         return this;
     }
 
-    public Task build() {
-        return task;
+    public TaskEntity build() {
+        return taskEntity;
     }
 }

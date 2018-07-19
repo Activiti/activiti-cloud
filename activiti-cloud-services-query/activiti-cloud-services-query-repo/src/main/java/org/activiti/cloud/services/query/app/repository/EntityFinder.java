@@ -36,11 +36,7 @@ public class EntityFinder {
 
     private <T> T getEntity(Optional<T> result,
                             String notFoundMessage) {
-        if (result.isPresent()) {
-            return result.get();
-        } else {
-            throw new IllegalStateException(notFoundMessage);
-        }
+        return result.orElseThrow(() -> new IllegalStateException(notFoundMessage));
     }
 
     public <T> T findOne(QuerydslPredicateExecutor<T> predicateExecutor,

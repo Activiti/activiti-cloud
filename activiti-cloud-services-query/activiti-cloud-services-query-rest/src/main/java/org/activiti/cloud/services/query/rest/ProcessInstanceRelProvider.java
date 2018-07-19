@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.RelProvider;
@@ -42,6 +42,6 @@ public class ProcessInstanceRelProvider implements RelProvider {
 
     @Override
     public boolean supports(Class<?> aClass) {
-        return ProcessInstance.class.isAssignableFrom(aClass);
+        return ProcessInstanceEntity.class.isAssignableFrom(aClass);
     }
 }

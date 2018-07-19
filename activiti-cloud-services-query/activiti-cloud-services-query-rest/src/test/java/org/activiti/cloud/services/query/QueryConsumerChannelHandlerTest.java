@@ -16,19 +16,17 @@
 
 package org.activiti.cloud.services.query;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
-import org.activiti.cloud.services.query.events.AbstractProcessEngineEvent;
-import org.activiti.cloud.services.query.events.TaskCancelledEvent;
-import org.activiti.cloud.services.query.events.ProcessCancelledEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
+import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
+import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class QueryConsumerChannelHandlerTest {
 
@@ -39,46 +37,21 @@ public class QueryConsumerChannelHandlerTest {
     private QueryEventHandlerContext eventHandlerContext;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
     @Test
-    public void receiveShouldHandleReceivedEvent() throws Exception {
+    public void receiveShouldHandleReceivedEvent() {
         //given
-        AbstractProcessEngineEvent event = mock(AbstractProcessEngineEvent.class);
+        CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
+        CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
 
         //when
-        AbstractProcessEngineEvent[] events = {event};
-        consumer.receive(events);
+        consumer.receive(processCreatedEvent, processStartedEvent);
 
         //then
-        verify(eventHandlerContext).handle(events);
+        verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
     }
 
-    @Test
-    public void testHandleProcessCancelledEvent() throws Exception {
-        //given
-        AbstractProcessEngineEvent event = mock(ProcessCancelledEvent.class);
-
-        //when
-        AbstractProcessEngineEvent[] events = {event};
-        consumer.receive(events);
-
-        //then
-        verify(eventHandlerContext).handle(events);
-    }
-
-    @Test
-    public void testHandleTestCancelledEvent() {
-        //given
-        AbstractProcessEngineEvent event = mock(TaskCancelledEvent.class);
-
-        //when
-        AbstractProcessEngineEvent[] events = {event};
-        consumer.receive(events);
-
-        //then
-        verify(eventHandlerContext).handle(events);
-    }
 }

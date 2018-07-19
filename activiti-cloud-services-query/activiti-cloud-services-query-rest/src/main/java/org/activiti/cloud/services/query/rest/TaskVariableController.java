@@ -20,8 +20,8 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.QVariable;
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.QVariableEntity;
+import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.cloud.services.query.resources.VariableResource;
 import org.activiti.cloud.services.query.rest.assembler.VariableResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +49,12 @@ public class TaskVariableController {
 
     private VariableResourceAssembler variableResourceAssembler;
 
-    private AlfrescoPagedResourcesAssembler<Variable> pagedResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<VariableEntity> pagedResourcesAssembler;
 
     @Autowired
     public TaskVariableController(VariableRepository variableRepository,
                                   VariableResourceAssembler variableResourceAssembler,
-                                  AlfrescoPagedResourcesAssembler<Variable> pagedResourcesAssembler) {
+                                  AlfrescoPagedResourcesAssembler<VariableEntity> pagedResourcesAssembler) {
         this.variableRepository = variableRepository;
         this.variableResourceAssembler = variableResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
@@ -62,10 +62,10 @@ public class TaskVariableController {
 
     @RequestMapping(value = "/variables", method = RequestMethod.GET)
     public PagedResources<VariableResource> getVariables(@PathVariable String taskId,
-                                                         @QuerydslPredicate(root = Variable.class) Predicate predicate,
+                                                         @QuerydslPredicate(root = VariableEntity.class) Predicate predicate,
                                                          Pageable pageable) {
 
-        QVariable variable = QVariable.variable;
+        QVariableEntity variable = QVariableEntity.variableEntity;
         BooleanExpression expression = variable.taskId.eq(taskId);
 
         Predicate extendedPredicated = expression;
@@ -73,8 +73,8 @@ public class TaskVariableController {
             extendedPredicated = expression.and(predicate);
         }
 
-        Page<Variable> variables = variableRepository.findAll(extendedPredicated,
-                                                              pageable);
+        Page<VariableEntity> variables = variableRepository.findAll(extendedPredicated,
+                                                                    pageable);
 
         return pagedResourcesAssembler.toResource(pageable,
                                                   variables,

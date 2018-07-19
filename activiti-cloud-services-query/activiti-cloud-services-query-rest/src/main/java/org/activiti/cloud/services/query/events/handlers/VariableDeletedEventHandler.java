@@ -16,8 +16,9 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.query.events.VariableDeletedEvent;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudVariableDeleted;
+import org.activiti.runtime.api.event.VariableEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,18 +37,17 @@ public class VariableDeletedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        VariableDeletedEvent variableDeletedEvent = (VariableDeletedEvent) event;
-        if (variableDeletedEvent.getTaskId() == null) {
-            processVariableDeletedHandler.handle(variableDeletedEvent);
-        } else {
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudVariableDeleted variableDeletedEvent = (CloudVariableDeleted) event;
+        if (variableDeletedEvent.getEntity().isTaskVariable()) {
             taskVariableDeletedEventHandler.handle(variableDeletedEvent);
+        } else {
+            processVariableDeletedHandler.handle(variableDeletedEvent);
         }
-
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return VariableDeletedEvent.class;
+    public String getHandledEvent() {
+        return VariableEvent.VariableEvents.VARIABLE_DELETED.name();
     }
 }

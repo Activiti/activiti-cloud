@@ -16,14 +16,14 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
-import org.activiti.cloud.services.query.events.TaskCandidateUserRemovedEvent;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
-import org.activiti.engine.ActivitiException;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudTaskCandidateUserRemovedEvent;
+import org.activiti.runtime.api.event.TaskCandidateUserEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 
 @Component
 public class TaskCandidateUserRemovedEventHandler implements QueryEventHandler {
@@ -36,20 +36,22 @@ public class TaskCandidateUserRemovedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        TaskCandidateUserRemovedEvent taskCandidateUserRemovedEvent = (TaskCandidateUserRemovedEvent) event;
-        TaskCandidateUser taskCandidateUser = taskCandidateUserRemovedEvent.getTaskCandidateUser();
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudTaskCandidateUserRemovedEvent taskCandidateUserRemovedEvent = (CloudTaskCandidateUserRemovedEvent) event;
+        TaskCandidateUser taskCandidateUser = new TaskCandidateUser(taskCandidateUserRemovedEvent.getEntity().getTaskId(),
+                                                                    taskCandidateUserRemovedEvent.getEntity().getUserId());
 
         // remove from database
         try {
             taskCandidateUserRepository.delete(taskCandidateUser);
-        } catch(Exception cause) {
-        	throw new ActivitiException("Error handling TaskCandidateUserRemovedEvent["+event+"]", cause);
+        } catch (Exception cause) {
+            throw new QueryException("Error handling TaskCandidateUserRemovedEvent[" + event + "]",
+                                     cause);
         }
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return TaskCandidateUserRemovedEvent.class;
+    public String getHandledEvent() {
+        return TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name();
     }
 }

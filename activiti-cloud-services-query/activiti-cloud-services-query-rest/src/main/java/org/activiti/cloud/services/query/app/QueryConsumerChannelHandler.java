@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.services.query.app;
 
-import org.activiti.cloud.services.query.events.AbstractProcessEngineEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -35,7 +35,7 @@ public class QueryConsumerChannelHandler {
     }
 
     @StreamListener(QueryConsumerChannels.QUERY_CONSUMER)
-    public synchronized void receive(AbstractProcessEngineEvent[] events) {
+    public synchronized void receive(CloudRuntimeEvent<?, ?> ... events) {
         eventHandlerContext.handle(events);
     }
 

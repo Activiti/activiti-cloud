@@ -16,11 +16,12 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
-import org.activiti.cloud.services.query.events.TaskCandidateGroupAddedEvent;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
-import org.activiti.engine.ActivitiException;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudTaskCandidateGroupAddedEvent;
+import org.activiti.runtime.api.event.TaskCandidateGroupEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,23 +36,25 @@ public class TaskCandidateGroupAddedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        TaskCandidateGroupAddedEvent taskCandidateGroupAddedEvent = (TaskCandidateGroupAddedEvent) event;
-        TaskCandidateGroup taskCandidateGroup = taskCandidateGroupAddedEvent.getTaskCandidateGroup();
-        
-        // not going to look up task as candidate can be created before task
+    public void handle(CloudRuntimeEvent<?, ?> event) {
 
+        CloudTaskCandidateGroupAddedEvent taskCandidateGroupAddedEvent = (CloudTaskCandidateGroupAddedEvent) event;
+        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup(taskCandidateGroupAddedEvent.getEntity().getTaskId(),
+                                                                       taskCandidateGroupAddedEvent.getEntity().getGroupId());
+
+        // not going to look up task as candidate can be created before task
 
         // Persist into database
         try {
             taskCandidateGroupRepository.save(taskCandidateGroup);
-        } catch(Exception cause) {
-        	throw new ActivitiException("Error handling TaskCandidateGroupAddedEvent["+event+"]", cause);
+        } catch (Exception cause) {
+            throw new QueryException("Error handling TaskCandidateGroupAddedEvent[" + event + "]",
+                                     cause);
         }
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return TaskCandidateGroupAddedEvent.class;
+    public String getHandledEvent() {
+        return TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name();
     }
 }

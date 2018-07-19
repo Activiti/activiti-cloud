@@ -19,11 +19,13 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 import java.util.Optional;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.events.ProcessStartedEvent;
-import org.activiti.cloud.services.query.model.ProcessInstance;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.runtime.api.event.CloudProcessStarted;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,28 +44,23 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent startedEvent) {
-        LOGGER.debug("Handling start of process Instance " + startedEvent.getProcessInstanceId());
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudProcessStarted startedEvent = (CloudProcessStarted) event;
+        String processInstanceId = startedEvent.getEntity().getId();
+        LOGGER.debug("Handling start of process Instance " + processInstanceId);
 
-        String processInstanceId = startedEvent.getProcessInstanceId();
-        Optional<ProcessInstance> findResult = processInstanceRepository.findById(processInstanceId);
-        if (findResult.isPresent()) {
-            ProcessInstance processInstance = findResult.get();
-            if(processInstance.getStatus() == null || !processInstance.getStatus().equals("CREATED")){
-                throw new ActivitiException("Unable to start process instance in wrong status: " + processInstance.getStatus());
-            }
-            processInstance.setStatus("RUNNING");
-            processInstance.setLastModified(new Date(startedEvent.getTimestamp()));
-            processInstanceRepository.save(processInstance);
-        } else {
-            throw new ActivitiException("Unable to find process instance with the given id: " + processInstanceId);
+        Optional<ProcessInstanceEntity> findResult = processInstanceRepository.findById(processInstanceId);
+        ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(
+                () -> new QueryException("Unable to find process instance with the given id: " + processInstanceId));
+        if (ProcessInstance.ProcessInstanceStatus.CREATED.equals(processInstanceEntity.getStatus())) {
+            processInstanceEntity.setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING);
+            processInstanceEntity.setLastModified(new Date(startedEvent.getTimestamp()));
+            processInstanceRepository.save(processInstanceEntity);
         }
-
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return ProcessStartedEvent.class;
+    public String getHandledEvent() {
+        return ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name();
     }
-
 }

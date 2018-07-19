@@ -17,8 +17,8 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import org.activiti.cloud.services.query.model.QVariable;
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.QVariableEntity;
+import org.activiti.cloud.services.query.model.VariableEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,14 +32,14 @@ public class TaskVariableUpdatedEventHandler {
         this.variableUpdater = variableUpdater;
     }
 
-    public void handle(Variable updatedVariable) {
-        String variableName = updatedVariable.getName();
-        String taskId = updatedVariable.getTaskId();
-        BooleanExpression predicate = QVariable.variable.name.eq(variableName)
+    public void handle(VariableEntity updatedVariableEntity) {
+        String variableName = updatedVariableEntity.getName();
+        String taskId = updatedVariableEntity.getTaskId();
+        BooleanExpression predicate = QVariableEntity.variableEntity.name.eq(variableName)
                 .and(
-                        QVariable.variable.taskId.eq(String.valueOf(taskId))
+                        QVariableEntity.variableEntity.taskId.eq(String.valueOf(taskId))
                 );
-        variableUpdater.update(updatedVariable,
+        variableUpdater.update(updatedVariableEntity,
                                predicate,
                                "Unable to find variable named '" + variableName + "' for task '" + taskId + "'");
     }

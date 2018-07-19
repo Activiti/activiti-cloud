@@ -1,34 +1,33 @@
 package org.activiti.cloud.services.query.model;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import javax.persistence.MappedSuperclass;
 
+import org.activiti.runtime.api.model.CloudRuntimeEntity;
+
 @MappedSuperclass
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class ActivitiEntityMetadata {
+public abstract class ActivitiEntityMetadata implements CloudRuntimeEntity {
 
     protected String serviceName;
     protected String serviceFullName;
     protected String serviceVersion;
     protected String appName;
     protected String appVersion;
+    protected String serviceType;
 
-    public ActivitiEntityMetadata(){
+    public ActivitiEntityMetadata() {
 
     }
 
-    public ActivitiEntityMetadata(String serviceName, String serviceFullName, String serviceVersion,
-                                  String appName, String appVersion){
+    public ActivitiEntityMetadata(String serviceName,
+                                  String serviceFullName,
+                                  String serviceVersion,
+                                  String appName,
+                                  String appVersion) {
         this.serviceName = serviceName;
         this.serviceFullName = serviceFullName;
         this.serviceVersion = serviceVersion;
         this.appName = appName;
         this.appVersion = appVersion;
-
     }
 
     public String getServiceName() {
@@ -69,5 +68,14 @@ public abstract class ActivitiEntityMetadata {
 
     public void setAppVersion(String appVersion) {
         this.appVersion = appVersion;
+    }
+
+    @Override
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
     }
 }

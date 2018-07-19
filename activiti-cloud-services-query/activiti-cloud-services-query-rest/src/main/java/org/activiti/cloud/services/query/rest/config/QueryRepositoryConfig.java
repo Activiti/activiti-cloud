@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.services.query.rest.config;
 
-import org.activiti.cloud.services.query.model.ProcessInstance;
-import org.activiti.cloud.services.query.model.Task;
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.VariableEntity;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy.RepositoryDetectionStrategies;
@@ -34,9 +34,9 @@ public class QueryRepositoryConfig extends RepositoryRestConfigurerAdapter {
     	config.setRepositoryDetectionStrategy(RepositoryDetectionStrategies.ANNOTATED);
     	
         //by default the ids are not exposed the the REST API
-        config.exposeIdsFor(ProcessInstance.class);
-        config.exposeIdsFor(Task.class);
-        config.exposeIdsFor(Variable.class);
+        config.exposeIdsFor(ProcessInstanceEntity.class);
+        config.exposeIdsFor(TaskEntity.class);
+        config.exposeIdsFor(VariableEntity.class);
     }
 
 }

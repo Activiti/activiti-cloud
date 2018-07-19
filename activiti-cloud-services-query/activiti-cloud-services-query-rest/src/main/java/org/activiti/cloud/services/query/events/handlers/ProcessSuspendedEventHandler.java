@@ -17,13 +17,14 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
-import java.util.Optional;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.events.ProcessSuspendedEvent;
-import org.activiti.cloud.services.query.model.ProcessInstance;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.runtime.api.event.CloudProcessSuspended;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,21 +39,21 @@ public class ProcessSuspendedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent suspendedEvent) {
-        String processInstanceId = suspendedEvent.getProcessInstanceId();
-        Optional<ProcessInstance> findResult = processInstanceRepository.findById(processInstanceId);
-        if (findResult.isPresent()) {
-            ProcessInstance processInstance = findResult.get();
-            processInstance.setStatus("SUSPENDED");
-            processInstance.setLastModified(new Date(suspendedEvent.getTimestamp()));
-            processInstanceRepository.save(processInstance);
-        } else {
-            throw new ActivitiException("Unable to find process instance with the given id: " + processInstanceId);
-        }
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudProcessSuspended suspendedEvent = (CloudProcessSuspended) event;
+        String processInstanceId = suspendedEvent.getEntity().getId();
+
+        ProcessInstanceEntity processInstanceEntity = processInstanceRepository.findById(processInstanceId)
+                .orElseThrow(
+                        () -> new QueryException("Unable to find process instance with the given id: " + processInstanceId)
+                );
+        processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
+        processInstanceEntity.setLastModified(new Date(suspendedEvent.getTimestamp()));
+        processInstanceRepository.save(processInstanceEntity);
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return ProcessSuspendedEvent.class;
+    public String getHandledEvent() {
+        return ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name();
     }
 }

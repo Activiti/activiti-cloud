@@ -16,14 +16,14 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
-import org.activiti.cloud.services.query.events.TaskCandidateUserAddedEvent;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
-import org.activiti.engine.ActivitiException;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudTaskCandidateUserAddedEvent;
+import org.activiti.runtime.api.event.TaskCandidateUserEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 
 @Component
 public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
@@ -36,23 +36,21 @@ public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        TaskCandidateUserAddedEvent taskCandidateUserAddedEvent = (TaskCandidateUserAddedEvent) event;
-        TaskCandidateUser taskCandidateUser = taskCandidateUserAddedEvent.getTaskCandidateUser();
-        
-        // not going to look up task as candidate can be created before task
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudTaskCandidateUserAddedEvent taskCandidateUserAddedEvent = (CloudTaskCandidateUserAddedEvent) event;
+        org.activiti.runtime.api.model.TaskCandidateUser taskCandidateUser = taskCandidateUserAddedEvent.getEntity();
 
-
-        // Persist into database
         try {
-            taskCandidateUserRepository.save(taskCandidateUser);
-        } catch(Exception cause) {
-        	throw new ActivitiException("Error handling TaskCandidateUserAddedEvent["+event+"]", cause);
+            taskCandidateUserRepository.save(new TaskCandidateUser(taskCandidateUser.getTaskId(),
+                                                                   taskCandidateUser.getUserId()));
+        } catch (Exception cause) {
+            throw new QueryException("Error handling TaskCandidateUserAddedEvent[" + event + "]",
+                                     cause);
         }
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return TaskCandidateUserAddedEvent.class;
+    public String getHandledEvent() {
+        return TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name();
     }
 }

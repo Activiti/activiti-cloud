@@ -16,11 +16,12 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
-import org.activiti.cloud.services.query.events.TaskCandidateGroupRemovedEvent;
+import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
-import org.activiti.engine.ActivitiException;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudTaskCandidateGroupRemovedEvent;
+import org.activiti.runtime.api.event.TaskCandidateGroupEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,20 +36,22 @@ public class TaskCandidateGroupRemovedEventHandler implements QueryEventHandler 
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        TaskCandidateGroupRemovedEvent taskCandidateGroupRemovedEvent = (TaskCandidateGroupRemovedEvent) event;
-        TaskCandidateGroup taskCandidateGroup = taskCandidateGroupRemovedEvent.getTaskCandidateGroup();
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudTaskCandidateGroupRemovedEvent taskCandidateGroupRemovedEvent = (CloudTaskCandidateGroupRemovedEvent) event;
+        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup(taskCandidateGroupRemovedEvent.getEntity().getTaskId(),
+                                                                       taskCandidateGroupRemovedEvent.getEntity().getGroupId());
 
         // remove from database
         try {
             taskCandidateGroupRepository.delete(taskCandidateGroup);
-        } catch(Exception cause) {
-        	throw new ActivitiException("Error handling TaskCandidateGroupRemovedEvent["+event+"]", cause);
+        } catch (Exception cause) {
+            throw new QueryException("Error handling TaskCandidateGroupRemovedEvent[" + event + "]",
+                                     cause);
         }
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return TaskCandidateGroupRemovedEvent.class;
+    public String getHandledEvent() {
+        return TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name();
     }
 }

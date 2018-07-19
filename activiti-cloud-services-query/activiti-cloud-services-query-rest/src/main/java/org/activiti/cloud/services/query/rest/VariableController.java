@@ -16,18 +16,18 @@
 
 package org.activiti.cloud.services.query.rest;
 
+import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.ProcessInstance;
-import org.activiti.cloud.services.query.model.QTask;
-import org.activiti.cloud.services.query.model.Task;
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QTaskEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.cloud.services.query.resources.VariableResource;
 import org.activiti.cloud.services.query.rest.assembler.VariableResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
-import org.activiti.cloud.services.security.AuthenticationWrapper;
-import org.activiti.cloud.services.security.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,9 +57,9 @@ public class VariableController {
 
     private EntityFinder entityFinder;
 
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
-    private AuthenticationWrapper authenticationWrapper;
+    private SpringSecurityAuthenticationWrapper authenticationWrapper;
 
     private TaskRepository taskRepository;
 
@@ -83,8 +83,8 @@ public class VariableController {
     public VariableController(VariableRepository variableRepository,
                               VariableResourceAssembler variableResourceAssembler,
                               EntityFinder entityFinder,
-                              SecurityPoliciesApplicationService securityPoliciesApplicationService,
-                              AuthenticationWrapper authenticationWrapper,
+                              SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService,
+                              SpringSecurityAuthenticationWrapper authenticationWrapper,
                               TaskRepository taskRepository,
                               TaskLookupRestrictionService taskLookupRestrictionService) {
         this.variableRepository = variableRepository;
@@ -99,29 +99,29 @@ public class VariableController {
     @RequestMapping(value = "/{variableId}", method = RequestMethod.GET)
     public VariableResource findById(@PathVariable long variableId) {
 
-        Variable variable = entityFinder.findById(variableRepository,
-                                                  variableId,
-                                                  "Unable to find variable for the given id:'" + variableId + "'");
+        VariableEntity variableEntity = entityFinder.findById(variableRepository,
+                                                              variableId,
+                                                              "Unable to find variableEntity for the given id:'" + variableId + "'");
 
-        if (variable.getProcessInstance() != null) {
-            ProcessInstance processInstance = variable.getProcessInstance();
-            if (!securityPoliciesApplicationService.canRead(processInstance.getProcessDefinitionKey(),
-                                                            processInstance.getServiceName())) {
-                LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processInstance.getProcessDefinitionKey());
-                throw new ActivitiForbiddenException("Operation not permitted for " + processInstance.getProcessDefinitionKey());
+        if (variableEntity.getProcessInstance() != null) {
+            ProcessInstanceEntity processInstanceEntity = variableEntity.getProcessInstance();
+            if (!securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(),
+                                                            processInstanceEntity.getServiceName())) {
+                LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey());
+                throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey());
             }
         }
 
-        if (variable.getTask() != null) {
-            Task task = variable.getTask();
+        if (variableEntity.getTask() != null) {
+            TaskEntity taskEntity = variableEntity.getTask();
             //do restricted query and check if still able to see it
-            Iterable<Task> taskIterable = taskRepository.findAll(taskLookupRestrictionService.restrictTaskQuery(QTask.task.id.eq(task.getId())));
+            Iterable<TaskEntity> taskIterable = taskRepository.findAll(taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq(taskEntity.getId())));
             if (!taskIterable.iterator().hasNext()) {
-                LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access task " + task.getId());
-                throw new ActivitiForbiddenException("Operation not permitted for " + task.getId());
+                LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskEntity.getId());
+                throw new ActivitiForbiddenException("Operation not permitted for " + taskEntity.getId());
             }
         }
 
-        return variableResourceAssembler.toResource(variable);
+        return variableResourceAssembler.toResource(variableEntity);
     }
 }

@@ -16,12 +16,12 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
 
 public interface QueryEventHandler {
 
-    void handle(ProcessEngineEvent event);
+    void handle(CloudRuntimeEvent<?, ?> event);
 
-    Class<? extends ProcessEngineEvent> getHandledEventClass();
+    String getHandledEvent();
 
 }

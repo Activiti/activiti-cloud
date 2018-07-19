@@ -14,7 +14,7 @@ public class VariableLookupRestrictionService {
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
     @Autowired
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
 
     public Predicate restrictTaskVariableQuery(Predicate predicate){

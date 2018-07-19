@@ -19,13 +19,13 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 import java.util.Optional;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.events.TaskActivatedEvent;
-import org.activiti.cloud.services.query.events.TaskCompletedEvent;
-import org.activiti.cloud.services.query.events.TaskSuspendedEvent;
-import org.activiti.cloud.services.query.model.Task;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudTaskActivatedEvent;
+import org.activiti.runtime.api.event.TaskRuntimeEvent;
+import org.activiti.runtime.api.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,28 +40,26 @@ public class TaskActivatedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        TaskActivatedEvent taskActivatedEvent = (TaskActivatedEvent) event;
-        Task eventTask = taskActivatedEvent.getTask();
-        Optional<Task> findResult = taskRepository.findById(eventTask.getId());
-        if (findResult.isPresent()) {
-            Task task = findResult.get();
-            if(task.getAssignee() != null && !task.getAssignee().isEmpty()) {
-                task.setStatus("ASSIGNED");
-            }else{
-                task.setStatus("CREATED");
-            }
-            task.setLastModified(new Date(taskActivatedEvent.getTimestamp()));
-            task.setOwner(taskActivatedEvent.getTask().getOwner());
-            task.setClaimDate(taskActivatedEvent.getTask().getClaimDate());
-            taskRepository.save(task);
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudTaskActivatedEvent taskActivatedEvent = (CloudTaskActivatedEvent) event;
+        org.activiti.runtime.api.model.Task eventTask = taskActivatedEvent.getEntity();
+        Optional<TaskEntity> findResult = taskRepository.findById(eventTask.getId());
+        TaskEntity taskEntity = findResult.orElseThrow(
+                () -> new QueryException("Unable to find taskEntity with id: " + eventTask.getId())
+        );
+        if (taskEntity.getAssignee() != null && !taskEntity.getAssignee().isEmpty()) {
+            taskEntity.setStatus(Task.TaskStatus.ASSIGNED);
         } else {
-            throw new ActivitiException("Unable to find task with id: " + eventTask.getId());
+            taskEntity.setStatus(Task.TaskStatus.CREATED);
         }
+        taskEntity.setLastModified(new Date(taskActivatedEvent.getTimestamp()));
+        taskEntity.setOwner(taskActivatedEvent.getEntity().getOwner());
+        taskEntity.setClaimedDate(taskActivatedEvent.getEntity().getClaimedDate());
+        taskRepository.save(taskEntity);
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return TaskActivatedEvent.class;
+    public String getHandledEvent() {
+        return TaskRuntimeEvent.TaskEvents.TASK_ACTIVATED.name();
     }
 }

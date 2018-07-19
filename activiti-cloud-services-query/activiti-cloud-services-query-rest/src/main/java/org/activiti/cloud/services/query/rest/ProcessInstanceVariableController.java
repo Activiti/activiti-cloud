@@ -20,8 +20,8 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.QVariable;
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.QVariableEntity;
+import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.cloud.services.query.resources.VariableResource;
 import org.activiti.cloud.services.query.rest.assembler.VariableResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +49,12 @@ public class ProcessInstanceVariableController {
 
     private VariableResourceAssembler variableResourceAssembler;
 
-    private AlfrescoPagedResourcesAssembler<Variable> pagedResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<VariableEntity> pagedResourcesAssembler;
 
     @Autowired
     public ProcessInstanceVariableController(VariableResourceAssembler variableResourceAssembler,
                                              VariableRepository variableRepository,
-                                             AlfrescoPagedResourcesAssembler<Variable> pagedResourcesAssembler) {
+                                             AlfrescoPagedResourcesAssembler<VariableEntity> pagedResourcesAssembler) {
         this.variableRepository = variableRepository;
         this.variableResourceAssembler = variableResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
@@ -62,10 +62,10 @@ public class ProcessInstanceVariableController {
 
     @RequestMapping(value = "/variables", method = RequestMethod.GET)
     public PagedResources<VariableResource> getVariables(@PathVariable String processInstanceId,
-                                                         @QuerydslPredicate(root = Variable.class) Predicate predicate,
+                                                         @QuerydslPredicate(root = VariableEntity.class) Predicate predicate,
                                                          Pageable pageable) {
 
-        QVariable variable = QVariable.variable;
+        QVariableEntity variable = QVariableEntity.variableEntity;
         BooleanExpression expression = variable.processInstanceId.eq(processInstanceId);
 
         Predicate extendedPredicate = expression;
@@ -73,8 +73,8 @@ public class ProcessInstanceVariableController {
             extendedPredicate = expression.and(predicate);
         }
 
-        Page<Variable> variables = variableRepository.findAll(extendedPredicate,
-                                                              pageable);
+        Page<VariableEntity> variables = variableRepository.findAll(extendedPredicate,
+                                                                    pageable);
 
         return pagedResourcesAssembler.toResource(pageable,
                                                   variables,

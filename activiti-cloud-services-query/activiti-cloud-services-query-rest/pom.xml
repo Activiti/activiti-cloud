@@ -10,11 +10,11 @@
   <artifactId>activiti-cloud-services-query-rest</artifactId>
   <name>Activiti Cloud Query :: Services :: Query REST</name>
   <dependencies>
-    <!-- keycloak included as default identity provider to be excluded if overridden -->
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-api</artifactId>
+      <artifactId>activiti-cloud-services-common-security</artifactId>
     </dependency>
+    <!-- keycloak included as default identity provider to be excluded if overridden -->
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-security-policies</artifactId>
@@ -53,7 +53,11 @@
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
-      <artifactId>activiti-engine</artifactId>
+      <artifactId>activiti-cloud-task-model-api-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-cloud-process-model-api-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
@@ -166,6 +170,11 @@
     <dependency>
       <groupId>org.springframework.restdocs</groupId>
       <artifactId>spring-restdocs-mockmvc</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-common-identity-basic</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -18,11 +18,16 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 import java.util.Optional;
-import org.activiti.engine.ActivitiException;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.query.model.ProcessInstance;
+import java.util.UUID;
+
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.events.ProcessCompletedEvent;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.runtime.api.event.CloudProcessCompleted;
+import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.event.impl.CloudProcessCompletedEventImpl;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,7 +35,8 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -47,71 +53,53 @@ public class ProcessCompletedEventHandlerTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
     @Test
-    public void handleShouldUpdateCurrentProcessInstanceStateToCompleted() throws Exception {
+    public void handleShouldUpdateCurrentProcessInstanceStateToCompleted() {
         //given
-        ProcessCompletedEvent event = new ProcessCompletedEvent(System.currentTimeMillis(),
-                                                                                "ProcessCompletedEvent",
-                                                                                "10",
-                                                                                "100",
-                                                                                "200",
-                "runtime-bundle-a",
-                "runtime-bundle-a",
-                "runtime-bundle",
-                "1",
-                null,
-                null,
-                                                                                new ProcessInstance());
+        CloudProcessCompleted event = createProcessCompletedEvent();
 
-        ProcessInstance currentProcessInstance = mock(ProcessInstance.class);
-        given(processInstanceRepository.findById("200")).willReturn(Optional.of(currentProcessInstance));
+        ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
+        given(processInstanceRepository.findById(event.getEntity().getId())).willReturn(Optional.of(currentProcessInstanceEntity));
 
         //when
         handler.handle(event);
 
         //then
-        verify(processInstanceRepository).save(currentProcessInstance);
-        verify(currentProcessInstance).setStatus("COMPLETED");
-        verify(currentProcessInstance).setLastModified(any(Date.class));
+        verify(processInstanceRepository).save(currentProcessInstanceEntity);
+        verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
+    }
+
+    private CloudProcessCompleted createProcessCompletedEvent() {
+        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
+        processInstance.setId(UUID.randomUUID().toString());
+        return new CloudProcessCompletedEventImpl(processInstance);
     }
 
     @Test
-    public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() throws Exception {
+    public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
         //given
-        ProcessCompletedEvent event = new ProcessCompletedEvent(System.currentTimeMillis(),
-                                                                                "ProcessCompletedEvent",
-                                                                                "10",
-                                                                                "100",
-                                                                                "200",
-                "runtime-bundle-a",
-                "runtime-bundle-a",
-                "runtime-bundle",
-                "1",
-                null,
-                null,
-                                                                                new ProcessInstance());
-
+        CloudProcessCompleted event = createProcessCompletedEvent();
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(ActivitiException.class);
+        expectedException.expect(QueryException.class);
         expectedException.expectMessage("Unable to find process instance with the given id: ");
 
         //when
         handler.handle(event);
-
     }
 
     @Test
-    public void getHandledEventClassShouldReturnProcessCompletedEvent() throws Exception {
+    public void getHandledEventShouldReturnProcessCompletedEvent() {
         //when
-        Class<? extends ProcessEngineEvent> handledEventClass = handler.getHandledEventClass();
+        String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEventClass).isEqualTo(ProcessCompletedEvent.class);
+        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name());
     }
 }

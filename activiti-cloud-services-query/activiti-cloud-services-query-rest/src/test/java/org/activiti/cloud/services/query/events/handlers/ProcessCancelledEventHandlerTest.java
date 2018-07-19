@@ -19,11 +19,14 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 import java.util.Optional;
 
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.events.ProcessCancelledEvent;
-import org.activiti.cloud.services.query.model.ProcessInstance;
-import org.activiti.engine.ActivitiException;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.event.impl.CloudProcessCancelledEventImpl;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,15 +34,12 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.activiti.cloud.services.query.events.handlers.MockEventsFactory.createProcessCancelledEvent;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-/**
- * Tests for ProcessCancelledEventHandler
- */
 public class ProcessCancelledEventHandlerTest {
 
     @InjectMocks
@@ -52,7 +52,7 @@ public class ProcessCancelledEventHandlerTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
@@ -62,32 +62,37 @@ public class ProcessCancelledEventHandlerTest {
      * - lastModified to the event time
      */
     @Test
-    public void testUpdateExistingProcessInstanceWhenCancelled() throws Exception {
+    public void testUpdateExistingProcessInstanceWhenCancelled() {
         //given
-        Long eventTime = System.currentTimeMillis();
-        ProcessInstance processInstance = mock(ProcessInstance.class);
-        given(processInstanceRepository.findById("200")).willReturn(Optional.of(processInstance));
+        ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
+        given(processInstanceRepository.findById("200")).willReturn(Optional.of(processInstanceEntity));
 
         //when
-        handler.handle(createProcessCancelledEvent("200",
-                                                   eventTime));
+        handler.handle(createProcessCancelledEvent("200"
+        ));
 
         //then
-        verify(processInstanceRepository).save(processInstance);
-        verify(processInstance).setStatus("CANCELLED");
-        verify(processInstance).setLastModified(eq(new Date(eventTime)));
+        verify(processInstanceRepository).save(processInstanceEntity);
+        verify(processInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.CANCELLED);
+        verify(processInstanceEntity).setLastModified(any(Date.class));
+    }
+
+    private CloudRuntimeEvent<?, ?> createProcessCancelledEvent(String processInstanceId) {
+        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
+        processInstance.setId(processInstanceId);
+        return new CloudProcessCancelledEventImpl(processInstance);
     }
 
     /**
-     * Test that ProcessCancelledEventHandler throws ActivitiException when the related process instance is not found
+     * Test that ProcessCancelledEventHandler throws QueryException when the related process instance is not found
      */
     @Test
-    public void testThrowExceptionWhenProcessInstanceNotFound() throws Exception {
+    public void testThrowExceptionWhenProcessInstanceNotFound() {
         //given
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
 
         //then
-        expectedException.expect(ActivitiException.class);
+        expectedException.expect(QueryException.class);
         expectedException.expectMessage("Unable to find process instance with the given id: ");
 
         //when
@@ -98,11 +103,11 @@ public class ProcessCancelledEventHandlerTest {
      * Test that ProcessCancelledEventHandler is handling ProcessCancelledEvent events
      */
     @Test
-    public void testHandleProcessCancelledEvent() {
+    public void getHandledEventShouldReturnProcessCancelledEvent() {
         //when
-        Class<? extends ProcessEngineEvent> handledEventClass = handler.getHandledEventClass();
+        String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEventClass).isEqualTo(ProcessCancelledEvent.class);
+        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name());
     }
 }

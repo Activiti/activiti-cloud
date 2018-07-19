@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Entity
+@Entity(name="TaskCandidateUser")
 @IdClass(TaskCandidateUserId.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -29,7 +29,7 @@ public class TaskCandidateUser {
     @ManyToOne(optional = true)
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private Task task;
+    private TaskEntity task;
 
     @JsonCreator
     public TaskCandidateUser(@JsonProperty("taskId") String taskid,
@@ -58,11 +58,11 @@ public class TaskCandidateUser {
         this.userId = userId;
     }
 
-    public Task getTask() {
+    public TaskEntity getTask() {
         return this.task;
     }
 
-    public void setTask(Task task) {
+    public void setTask(TaskEntity task) {
         this.task = task;
     }
 }

@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.RelProvider;
@@ -42,6 +42,6 @@ public class TaskRelProvider implements RelProvider {
 
     @Override
     public boolean supports(Class<?> aClass) {
-        return Task.class.isAssignableFrom(aClass);
+        return TaskEntity.class.isAssignableFrom(aClass);
     }
 }

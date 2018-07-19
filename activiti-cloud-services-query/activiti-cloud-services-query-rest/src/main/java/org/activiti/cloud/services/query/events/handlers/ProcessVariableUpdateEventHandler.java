@@ -17,8 +17,8 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import org.activiti.cloud.services.query.model.QVariable;
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.QVariableEntity;
+import org.activiti.cloud.services.query.model.VariableEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,14 +32,14 @@ public class ProcessVariableUpdateEventHandler {
         this.variableUpdater = variableUpdater;
     }
 
-    public void handle(Variable updatedVariable) {
-        String variableName = updatedVariable.getName();
-        String processInstanceId = updatedVariable.getProcessInstanceId();
-        BooleanExpression predicate = QVariable.variable.name.eq(variableName)
+    public void handle(VariableEntity updatedVariableEntity) {
+        String variableName = updatedVariableEntity.getName();
+        String processInstanceId = updatedVariableEntity.getProcessInstanceId();
+        BooleanExpression predicate = QVariableEntity.variableEntity.name.eq(variableName)
                 .and(
-                        QVariable.variable.processInstanceId.eq(String.valueOf(processInstanceId))
+                        QVariableEntity.variableEntity.processInstanceId.eq(String.valueOf(processInstanceId))
                 );
-        variableUpdater.update(updatedVariable,
+        variableUpdater.update(updatedVariableEntity,
                                predicate,
                                "Unable to find variable named '" + variableName + "' for process instance '" + processInstanceId + "'");
     }

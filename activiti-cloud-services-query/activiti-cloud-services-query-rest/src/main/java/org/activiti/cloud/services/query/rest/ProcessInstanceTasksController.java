@@ -18,8 +18,8 @@ package org.activiti.cloud.services.query.rest;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.QTask;
-import org.activiti.cloud.services.query.model.Task;
+import org.activiti.cloud.services.query.model.QTaskEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.resources.TaskResource;
 import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,14 +44,14 @@ public class ProcessInstanceTasksController {
 
     private TaskResourceAssembler taskResourceAssembler;
 
-    private AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<TaskEntity> pagedResourcesAssembler;
 
     private final TaskRepository taskRepository;
 
     @Autowired
     public ProcessInstanceTasksController(TaskRepository taskRepository,
                                           TaskResourceAssembler taskResourceAssembler,
-                                          AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler) {
+                                          AlfrescoPagedResourcesAssembler<TaskEntity> pagedResourcesAssembler) {
         this.taskRepository = taskRepository;
         this.taskResourceAssembler = taskResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
@@ -60,8 +60,8 @@ public class ProcessInstanceTasksController {
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
     public PagedResources<TaskResource> getTasks(@PathVariable String processInstanceId,
                                                  Pageable pageable) {
-        Page<Task> page = taskRepository.findAll(QTask.task.processInstanceId.eq(processInstanceId),
-                                                 pageable);
+        Page<TaskEntity> page = taskRepository.findAll(QTaskEntity.taskEntity.processInstanceId.eq(processInstanceId),
+                                                       pageable);
         return pagedResourcesAssembler.toResource(pageable,
                                                   page,
                                                   taskResourceAssembler);

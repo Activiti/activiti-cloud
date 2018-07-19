@@ -19,11 +19,12 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 import java.util.Optional;
 
-import org.activiti.engine.ActivitiException;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
-import org.activiti.cloud.services.query.model.Task;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.events.TaskCompletedEvent;
+import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudTaskCompletedEvent;
+import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,22 +39,21 @@ public class TaskCompletedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        TaskCompletedEvent taskCompletedEvent = (TaskCompletedEvent) event;
-        Task eventTask = taskCompletedEvent.getTask();
-        Optional<Task> findResult = taskRepository.findById(eventTask.getId());
-        if (findResult.isPresent()) {
-            Task task = findResult.get();
-            task.setStatus("COMPLETED");
-            task.setLastModified(new Date(taskCompletedEvent.getTimestamp()));
-            taskRepository.save(task);
-        } else {
-            throw new ActivitiException("Unable to find task with id: " + eventTask.getId());
-        }
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudTaskCompletedEvent taskCompletedEvent = (CloudTaskCompletedEvent) event;
+        org.activiti.runtime.api.model.Task eventTask = taskCompletedEvent.getEntity();
+        Optional<TaskEntity> findResult = taskRepository.findById(eventTask.getId());
+        TaskEntity queryTaskEntity = findResult.orElseThrow(
+                () -> new QueryException("Unable to find task with id: " + eventTask.getId())
+        );
+
+        queryTaskEntity.setStatus(eventTask.getStatus());
+        queryTaskEntity.setLastModified(new Date(taskCompletedEvent.getTimestamp()));
+        taskRepository.save(queryTaskEntity);
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return TaskCompletedEvent.class;
+    public String getHandledEvent() {
+        return TaskRuntimeEvent.TaskEvents.TASK_COMPLETED.name();
     }
 }

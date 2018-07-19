@@ -17,21 +17,25 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
-
 import javax.persistence.EntityManager;
 
-import org.activiti.engine.ActivitiException;
-import org.activiti.cloud.services.api.events.ProcessEngineEvent;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.events.VariableCreatedEvent;
-import org.activiti.cloud.services.query.model.ProcessInstance;
-import org.activiti.cloud.services.query.model.Task;
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.CloudVariableCreated;
+import org.activiti.runtime.api.event.VariableEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class VariableCreatedEventHandler implements QueryEventHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VariableCreatedEventHandler.class);
 
     private final VariableRepository variableRepository;
 
@@ -45,46 +49,63 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
     }
 
     @Override
-    public void handle(ProcessEngineEvent event) {
-        VariableCreatedEvent variableCreatedEvent = (VariableCreatedEvent) event;
-        Date now = new Date();
-        Variable variable = new Variable(variableCreatedEvent.getVariableType(),
-                                         variableCreatedEvent.getVariableName(),
-                                         variableCreatedEvent.getProcessInstanceId(),
-                                        variableCreatedEvent.getServiceName(),
-                                        variableCreatedEvent.getServiceFullName(),
-                                        variableCreatedEvent.getServiceVersion(),
-                                        variableCreatedEvent.getAppName(),
-                                        variableCreatedEvent.getAppVersion(),
-                                         variableCreatedEvent.getTaskId(),
-                                         now,
-                                         now,
-                                         variableCreatedEvent.getExecutionId(),
-                                         variableCreatedEvent.getVariableValue());
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudVariableCreated variableCreatedEvent = (CloudVariableCreated) event;
+        LOGGER.debug("Handling variableEntity created event: " + variableCreatedEvent.getEntity().getName());
+        VariableEntity variableEntity = new VariableEntity(variableCreatedEvent.getEntity().getType(),
+                                                           variableCreatedEvent.getEntity().getName(),
+                                                           variableCreatedEvent.getEntity().getProcessInstanceId(),
+                                                           variableCreatedEvent.getServiceName(),
+                                                           variableCreatedEvent.getServiceFullName(),
+                                                           variableCreatedEvent.getServiceVersion(),
+                                                           variableCreatedEvent.getAppName(),
+                                                           variableCreatedEvent.getAppVersion(),
+                                                           variableCreatedEvent.getEntity().getTaskId(),
+                                                           new Date(variableCreatedEvent.getTimestamp()),
+                                                           new Date(variableCreatedEvent.getTimestamp()),
+                                                           null);
+        variableEntity.setValue(variableCreatedEvent.getEntity().getValue());
 
-        // Set required parent processInstance reference
-        ProcessInstance processInstance = entityManager
-        		.getReference(ProcessInstance.class, variableCreatedEvent.getProcessInstanceId());
+        setProcessInstance(variableCreatedEvent,
+                           variableEntity);
 
-        variable.setProcessInstance(processInstance);
+        setTask(variableCreatedEvent,
+                variableEntity);
 
-        // Set optional task reference
-        if (variableCreatedEvent.getTaskId() != null) {
-            Task task = entityManager.getReference(Task.class, variableCreatedEvent.getTaskId());
-            variable.setTask(task);
-        }
+        persist(event,
+                variableEntity);
+    }
 
-        // Persist to database
+    private void persist(CloudRuntimeEvent<?, ?> event,
+                         VariableEntity variableEntity) {
         try {
-            variableRepository.save(variable);
+            variableRepository.save(variableEntity);
         } catch (Exception cause) {
-            throw new ActivitiException("Error handling VariableCreatedEvent[" + event + "]", cause);
+            throw new QueryException("Error handling VariableCreatedEvent[" + event + "]",
+                                     cause);
         }
+    }
 
+    private void setTask(CloudVariableCreated variableCreatedEvent,
+                         VariableEntity variableEntity) {
+        if (variableCreatedEvent.getEntity().isTaskVariable()) {
+            TaskEntity taskEntity = entityManager.getReference(TaskEntity.class,
+                                                               variableCreatedEvent.getEntity().getTaskId());
+            variableEntity.setTask(taskEntity);
+        }
+    }
+
+    private void setProcessInstance(CloudVariableCreated variableCreatedEvent,
+                                    VariableEntity variableEntity) {
+        ProcessInstanceEntity processInstanceEntity = entityManager
+                .getReference(ProcessInstanceEntity.class,
+                              variableCreatedEvent.getEntity().getProcessInstanceId());
+
+        variableEntity.setProcessInstance(processInstanceEntity);
     }
 
     @Override
-    public Class<? extends ProcessEngineEvent> getHandledEventClass() {
-        return VariableCreatedEvent.class;
+    public String getHandledEvent() {
+        return VariableEvent.VariableEvents.VARIABLE_CREATED.name();
     }
 }

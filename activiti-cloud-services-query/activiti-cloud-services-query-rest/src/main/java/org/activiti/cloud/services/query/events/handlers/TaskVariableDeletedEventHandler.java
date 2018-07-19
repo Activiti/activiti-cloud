@@ -19,9 +19,9 @@ package org.activiti.cloud.services.query.events.handlers;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.events.VariableDeletedEvent;
-import org.activiti.cloud.services.query.model.QVariable;
-import org.activiti.cloud.services.query.model.Variable;
+import org.activiti.cloud.services.query.model.QVariableEntity;
+import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.runtime.api.event.CloudVariableDeleted;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,18 +39,18 @@ public class TaskVariableDeletedEventHandler {
         this.entityFinder = entityFinder;
     }
 
-    public void handle(VariableDeletedEvent event) {
-        String variableName = event.getVariableName();
-        String taskId = event.getTaskId();
-        BooleanExpression predicate = QVariable.variable.taskId.eq(taskId)
+    public void handle(CloudVariableDeleted event) {
+        String variableName = event.getEntity().getName();
+        String taskId = event.getEntity().getTaskId();
+        BooleanExpression predicate = QVariableEntity.variableEntity.taskId.eq(taskId)
                 .and(
-                        QVariable.variable.name.eq(variableName)
+                        QVariableEntity.variableEntity.name.eq(variableName)
 
-                ).and(QVariable.variable.markedAsDeleted.eq(new Boolean(false)));
-        Variable variable = entityFinder.findOne(variableRepository,
-                                            predicate,
-                                            "Unable to find variable with name '" + variableName + "' for task '" + taskId + "'");
-        variable.setMarkedAsDeleted(true);
-        variableRepository.save(variable);
+                ).and(QVariableEntity.variableEntity.markedAsDeleted.eq(Boolean.FALSE));
+        VariableEntity variableEntity = entityFinder.findOne(variableRepository,
+                                                             predicate,
+                                                             "Unable to find variableEntity with name '" + variableName + "' for task '" + taskId + "'");
+        variableEntity.setMarkedAsDeleted(true);
+        variableRepository.save(variableEntity);
     }
 }
