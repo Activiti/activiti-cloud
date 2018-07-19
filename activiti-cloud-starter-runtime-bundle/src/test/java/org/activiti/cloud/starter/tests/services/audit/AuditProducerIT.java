@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
-import org.activiti.runtime.api.cmd.CreateTask;
 import org.activiti.runtime.api.cmd.impl.CreateTaskImpl;
 import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
@@ -16,8 +15,6 @@ import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.impl.CloudTaskImpl;
-import org.activiti.runtime.api.model.impl.TaskImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +55,7 @@ import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_SU
 import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_CREATED;
 import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_DELETED;
 import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_UPDATED;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
@@ -106,7 +103,7 @@ public class AuditProducerIT {
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
                                                                                                            Collections.singletonMap("name",
-                                                                                                                               "peter"));
+                                                                                                                                    "peter"));
 
         //then
         await().untilAsserted(() -> {
@@ -210,7 +207,8 @@ public class AuditProducerIT {
     @Test
     public void shouldEmitEventsForTaskDelete() {
         //given
-        CloudTask task = taskRestTemplate.createTask(new CreateTaskImpl("my task name", "long description here"));
+        CloudTask task = taskRestTemplate.createTask(new CreateTaskImpl("my task name",
+                                                                        "long description here"));
 
         //when
         taskRestTemplate.delete(task);
@@ -219,8 +217,16 @@ public class AuditProducerIT {
         await().untilAsserted(() -> {
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getReceivedEvents();
             assertThat(receivedEvents)
-                    .extracting(event -> event.getEventType().name())
-                    .containsExactly(TASK_CANCELLED.name());
+                    .hasSize(1)
+                    .extracting(CloudRuntimeEvent::getEventType,
+                                CloudRuntimeEvent::getEntityId)
+                    .contains(tuple(TASK_CANCELLED,
+                                    task.getId()));
+            assertThat(receivedEvents.get(0).getEntity()).isNotNull();
+            assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(Task.class);
+            assertThat(((Task) receivedEvents.get(0).getEntity()).getStatus()).isEqualTo(Task.TaskStatus.CANCELLED);
+            assertThat(((Task) receivedEvents.get(0).getEntity()).getId()).isEqualTo(task.getId());
+            assertThat(receivedEvents.get(0).getEntityId()).isEqualTo(task.getId());
         });
     }
 

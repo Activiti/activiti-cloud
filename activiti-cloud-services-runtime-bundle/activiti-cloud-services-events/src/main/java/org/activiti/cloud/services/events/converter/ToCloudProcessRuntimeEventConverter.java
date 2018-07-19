@@ -94,19 +94,26 @@ public class ToCloudProcessRuntimeEventConverter {
     }
 
     public CloudBPMNActivityStarted from(BPMNActivityStarted event) {
-        CloudBPMNActivityStartedEventImpl cloudEvent = new CloudBPMNActivityStartedEventImpl(event.getEntity());
+        CloudBPMNActivityStartedEventImpl cloudEvent = new CloudBPMNActivityStartedEventImpl(event.getEntity(),
+                                                                                             event.getEntity().getProcessDefinitionId(),
+                                                                                             event.getEntity().getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
     public CloudBPMNActivityCompleted from(BPMNActivityCompleted event) {
-        CloudBPMNActivityCompletedEventImpl cloudEvent = new CloudBPMNActivityCompletedEventImpl(event.getEntity());
+        CloudBPMNActivityCompletedEventImpl cloudEvent = new CloudBPMNActivityCompletedEventImpl(event.getEntity(),
+                                                                                                 event.getEntity().getProcessDefinitionId(),
+                                                                                                 event.getEntity().getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
     public CloudBPMNActivityCancelled from(BPMNActivityCancelled event) {
-        CloudBPMNActivityCancelledEventImpl cloudEvent = new CloudBPMNActivityCancelledEventImpl(event.getEntity());
+        CloudBPMNActivityCancelledEventImpl cloudEvent = new CloudBPMNActivityCancelledEventImpl(event.getEntity(),
+                                                                                                 event.getEntity().getProcessDefinitionId(),
+                                                                                                 event.getEntity().getProcessInstanceId(),
+                                                                                                 "");
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
