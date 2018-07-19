@@ -30,6 +30,7 @@ import org.activiti.runtime.api.event.CloudBPMNActivityEvent;
 import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
+import org.activiti.runtime.api.event.CloudTaskCancelledEvent;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.activiti.runtime.api.event.impl.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.runtime.api.event.impl.CloudBPMNActivityCompletedEventImpl;
@@ -42,6 +43,7 @@ import org.activiti.runtime.api.event.impl.CloudTaskAssignedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCancelledEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCompletedEventImpl;
 import org.activiti.runtime.api.event.impl.CloudTaskCreatedEventImpl;
+import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.impl.BPMNActivityImpl;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.activiti.runtime.api.model.impl.TaskImpl;
@@ -116,7 +118,7 @@ public class AuditServiceIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("processInstanceId",
+            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("entityId",
                                                                                                                                              "4"));
 
             //then
@@ -136,11 +138,12 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+
+       await().untilAsserted(() -> {
 
             //when
             Map<String, Object> filters = new HashMap<>();
-            filters.put("processInstanceId", "4");
+            filters.put("entityId","4");
             filters.put("eventType", BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name());
             ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
 
@@ -150,8 +153,31 @@ public class AuditServiceIT {
             for(CloudRuntimeEvent event : retrievedEvents) {
                 CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStarted) event;
                 assertThat(cloudBPMNActivityEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
-                assertThat(cloudBPMNActivityEvent.getProcessInstanceId()).isEqualTo("4");
             }
+        });
+    }
+
+    @Test
+    public void shouldGetEventsForACancelledTask() throws Exception {
+        //given
+        List<CloudRuntimeEvent> coveredEvents = getTaskCancelledEvents();
+        producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
+
+        await().untilAsserted(() -> {
+
+            //when
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("entityId","1234-abc-5678-def");
+
+            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            assertThat(retrievedEvents).hasSize(3);
+            for(CloudRuntimeEvent e : retrievedEvents){
+                assertThat(e.getEntityId()).isEqualTo("1234-abc-5678-def");
+            }
+
         });
     }
 
@@ -201,6 +227,29 @@ public class AuditServiceIT {
     }
 
     @Test
+    public void shouldBeAbleToFilterOnEventEntityId() throws Exception {
+        //given
+        List<CloudRuntimeEvent> coveredEvents = getTestEvents();
+        producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
+
+
+       await().untilAsserted(() -> {
+
+            //when
+
+            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("entityId",
+                                                                                                                                             "1234-abc-5678-def"));
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            assertThat(retrievedEvents).hasSize(4);
+            for(CloudRuntimeEvent event : retrievedEvents) {
+
+                assertThat(event.getEntityId()).isEqualTo("1234-abc-5678-def");
+            }
+       });
+    }
+
+    @Test
     public void shouldBeAbleToFilterOnEventTypeTaskCancelled() throws Exception {
         //given
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
@@ -215,6 +264,11 @@ public class AuditServiceIT {
             //then
             Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
             assertThat(retrievedEvents).hasSize(1);
+            CloudTaskCancelledEvent cloudBPMNTaskCancelled = (CloudTaskCancelledEvent) retrievedEvents.iterator().next();
+            assertThat(cloudBPMNTaskCancelled.getEventType()).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED);
+            assertThat(cloudBPMNTaskCancelled.getEntityId()).isEqualTo("1234-abc-5678-def");
+            assertThat(cloudBPMNTaskCancelled.getEntity()).isInstanceOf(Task.class);
+            assertThat(((Task)cloudBPMNTaskCancelled.getEntity()).getId()).isEqualTo("1234-abc-5678-def");
 
         });
     }
@@ -229,9 +283,10 @@ public class AuditServiceIT {
         String eventId = "ActivityStartedEventId" + UUID.randomUUID().toString();
         CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent = new CloudBPMNActivityStartedEventImpl(eventId,
                                                                                                                 System.currentTimeMillis(),
-                                                                                                                bpmnActivityStarted);
-        cloudBPMNActivityStartedEvent.setProcessDefinitionId("3");
-        cloudBPMNActivityStartedEvent.setProcessInstanceId("4");
+                                                                                                                bpmnActivityStarted,
+                                                                                                                "3",
+                                                                                                                "4");
+
 
         events[0] = cloudBPMNActivityStartedEvent;
 
@@ -265,9 +320,10 @@ public class AuditServiceIT {
         String eventId = "ActivityStartedEventId" + UUID.randomUUID().toString();
         CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent = new CloudBPMNActivityStartedEventImpl(eventId,
                                                                                                                 System.currentTimeMillis(),
-                                                                                                                bpmnActivityStarted);
-        cloudBPMNActivityStartedEvent.setProcessDefinitionId("3");
-        cloudBPMNActivityStartedEvent.setProcessInstanceId("4");
+                                                                                                                bpmnActivityStarted,
+                                                                                                                "3",
+                                                                                                                "4");
+
 
         events[0] = cloudBPMNActivityStartedEvent;
         events[1] = new CloudRuntimeEventImpl() {
@@ -298,6 +354,39 @@ public class AuditServiceIT {
         });
     }
 
+    private List<CloudRuntimeEvent> getTaskCancelledEvents(){
+        List<CloudRuntimeEvent> testEvents = new ArrayList<>();
+        TaskImpl taskCreated = new TaskImpl("1234-abc-5678-def", "my task",
+                                            Task.TaskStatus.CREATED);
+        taskCreated.setProcessDefinitionId("proc-def");
+        taskCreated.setProcessInstanceId("100");
+        CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl("TaskCreatedEventId",
+                                                                                        System.currentTimeMillis(),
+                                                                                        taskCreated);
+        testEvents.add(cloudTaskCreatedEvent);
+
+
+        TaskImpl taskAssigned = new TaskImpl("1234-abc-5678-def", "my task",
+                                             Task.TaskStatus.ASSIGNED);
+        taskAssigned.setProcessDefinitionId("proc-def");
+        taskAssigned.setProcessInstanceId("100");
+        CloudTaskAssignedEventImpl cloudTaskAssignedEvent = new CloudTaskAssignedEventImpl("TaskAssignedEventId",
+                                                                                           System.currentTimeMillis(),
+                                                                                           taskAssigned);
+        testEvents.add(cloudTaskAssignedEvent);
+
+        TaskImpl taskCancelled = new TaskImpl("1234-abc-5678-def", "my task",
+                                              Task.TaskStatus.CANCELLED);
+        taskCancelled.setProcessDefinitionId("proc-def");
+        taskCancelled.setProcessInstanceId("100");
+        CloudTaskCancelledEventImpl cloudTaskCancelledEvent = new CloudTaskCancelledEventImpl("TaskCancelledEventId",
+                                                                                              System.currentTimeMillis(),
+                                                                                              taskCancelled);
+        testEvents.add(cloudTaskCancelledEvent);
+        return testEvents;
+
+    }
+
     private List<CloudRuntimeEvent> getTestEvents() {
         List<CloudRuntimeEvent> testEvents = new ArrayList<>();
 
@@ -305,9 +394,11 @@ public class AuditServiceIT {
 
         CloudBPMNActivityCancelledEventImpl cloudBPMNActivityCancelledEvent = new CloudBPMNActivityCancelledEventImpl("ActivityCancelledEventId",
                                                                                                                       System.currentTimeMillis(),
-                                                                                                                      bpmnActivityCancelled);
-        cloudBPMNActivityCancelledEvent.setProcessDefinitionId("103");
-        cloudBPMNActivityCancelledEvent.setProcessInstanceId("104");
+                                                                                                                      bpmnActivityCancelled,
+                                                                                                                      "103",
+                                                                                                                      "104",
+                                                                                                                      "manually cancelled");
+
 
         testEvents.add(cloudBPMNActivityCancelledEvent);
 
@@ -316,9 +407,10 @@ public class AuditServiceIT {
 
         CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent = new CloudBPMNActivityStartedEventImpl("ActivityStartedEventId",
                                                                                                                 System.currentTimeMillis(),
-                                                                                                                bpmnActivityStarted);
-        cloudBPMNActivityStartedEvent.setProcessDefinitionId("3");
-        cloudBPMNActivityStartedEvent.setProcessInstanceId("4");
+                                                                                                                bpmnActivityStarted,
+                                                                                                                "3",
+                                                                                                                "4");
+
 
         testEvents.add(cloudBPMNActivityStartedEvent);
 
@@ -327,9 +419,10 @@ public class AuditServiceIT {
 
         CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent2 = new CloudBPMNActivityStartedEventImpl("ActivityStartedEventId2",
                                                                                                                 System.currentTimeMillis(),
-                                                                                                                 bpmnActivityStarted2);
-        cloudBPMNActivityStartedEvent2.setProcessDefinitionId("3");
-        cloudBPMNActivityStartedEvent2.setProcessInstanceId("4");
+                                                                                                                 bpmnActivityStarted2,
+                                                                                                                 "3",
+                                                                                                                 "4");
+
 
         testEvents.add(cloudBPMNActivityStartedEvent2);
 
@@ -338,9 +431,10 @@ public class AuditServiceIT {
 
         CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent3 = new CloudBPMNActivityStartedEventImpl("ActivityStartedEventId3",
                                                                                                                  System.currentTimeMillis(),
-                                                                                                                 bpmnActivityStarted3);
-        cloudBPMNActivityStartedEvent3.setProcessDefinitionId("3");
-        cloudBPMNActivityStartedEvent3.setProcessInstanceId("5");
+                                                                                                                 bpmnActivityStarted3,
+                                                                                                                 "3",
+                                                                                                                 "5");
+
 
         testEvents.add(cloudBPMNActivityStartedEvent3);
 
@@ -348,9 +442,9 @@ public class AuditServiceIT {
 
         CloudBPMNActivityCompletedEventImpl cloudBPMNActivityCompletedEvent = new CloudBPMNActivityCompletedEventImpl("ActivityCompletedEventId",
                                                                                                                       System.currentTimeMillis(),
-                                                                                                                      bpmnActivityCompleted);
-        cloudBPMNActivityCompletedEvent.setProcessDefinitionId("23");
-        cloudBPMNActivityCompletedEvent.setProcessInstanceId("42");
+                                                                                                                      bpmnActivityCompleted,
+                                                                                                                      "23",
+                                                                                                                      "42");
 
         testEvents.add(cloudBPMNActivityCompletedEvent);
 
@@ -384,7 +478,8 @@ public class AuditServiceIT {
 
         testEvents.add(cloudProcessStartedEvent);
 
-        TaskImpl taskAssigned = new TaskImpl();
+        TaskImpl taskAssigned = new TaskImpl("1234-abc-5678-def", "task assigned",
+                                             Task.TaskStatus.ASSIGNED);
         taskAssigned.setProcessDefinitionId("27");
         taskAssigned.setProcessInstanceId("46");
         CloudTaskAssignedEventImpl cloudTaskAssignedEvent = new CloudTaskAssignedEventImpl("TaskAssignedEventId",
@@ -392,7 +487,8 @@ public class AuditServiceIT {
                                                                                            taskAssigned);
         testEvents.add(cloudTaskAssignedEvent);
 
-        TaskImpl taskCompleted = new TaskImpl();
+        TaskImpl taskCompleted = new TaskImpl("1234-abc-5678-def", "task completed",
+                                              Task.TaskStatus.COMPLETED);
         taskCompleted.setProcessDefinitionId("28");
         taskCompleted.setProcessInstanceId("47");
         CloudTaskCompletedEventImpl cloudTaskCompletedEvent = new CloudTaskCompletedEventImpl("TaskCompletedEventId",
@@ -400,7 +496,8 @@ public class AuditServiceIT {
                                                                                               taskCompleted);
         testEvents.add(cloudTaskCompletedEvent);
 
-        TaskImpl taskCreated = new TaskImpl();
+        TaskImpl taskCreated = new TaskImpl("1234-abc-5678-def", "task created",
+                                            Task.TaskStatus.CREATED);
         taskCreated.setProcessDefinitionId("28");
         taskCreated.setProcessInstanceId("47");
         CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl("TaskCreatedEventId",
@@ -409,7 +506,8 @@ public class AuditServiceIT {
         testEvents.add(cloudTaskCreatedEvent);
 
 
-        TaskImpl taskCancelled = new TaskImpl();
+        TaskImpl taskCancelled = new TaskImpl("1234-abc-5678-def", "task cancelled",
+                                              Task.TaskStatus.CANCELLED);
         taskCancelled.setProcessDefinitionId("28");
         taskCancelled.setProcessInstanceId("47");
         CloudTaskCancelledEventImpl cloudTaskCancelledEvent = new CloudTaskCancelledEventImpl("TaskCancelledEventId",

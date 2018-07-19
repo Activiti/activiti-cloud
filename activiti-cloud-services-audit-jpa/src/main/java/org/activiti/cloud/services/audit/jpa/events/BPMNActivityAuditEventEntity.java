@@ -25,7 +25,7 @@ import javax.persistence.MappedSuperclass;
 import org.activiti.cloud.services.audit.jpa.converters.json.ActivityJpaJsonConverter;
 import org.activiti.runtime.api.model.BPMNActivity;
 
-@MappedSuperclass
+@Entity
 public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = ActivityJpaJsonConverter.class)
@@ -65,6 +65,7 @@ public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
         this.bpmnActivity = bpmnActivity;
+        setEntityId(bpmnActivity.getProcessInstanceId());
     }
 
     public BPMNActivity getBpmnActivity() {

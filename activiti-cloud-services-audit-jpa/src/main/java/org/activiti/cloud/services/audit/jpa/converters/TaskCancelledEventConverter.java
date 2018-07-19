@@ -30,6 +30,9 @@ public class TaskCancelledEventConverter implements EventToEntityConverter<Audit
                                                                                          cloudTaskCancelledEvent.getServiceVersion(),
                                                                                          cloudTaskCancelledEvent.getEntity(),
                                                                                          cloudTaskCancelledEvent.getCause());
+        taskCancelledEventEntity.setProcessDefinitionId((cloudTaskCancelledEvent.getEntity() != null) ? cloudTaskCancelledEvent.getEntity().getProcessDefinitionId() : null);
+        taskCancelledEventEntity.setProcessInstanceId((cloudTaskCancelledEvent.getEntity() != null) ? cloudTaskCancelledEvent.getEntity().getProcessInstanceId() : null);
+        taskCancelledEventEntity.setEntityId(cloudTaskCancelledEvent.getEntityId());
         return taskCancelledEventEntity;
     }
 

@@ -29,6 +29,7 @@ public class ProcessCancelledEventConverter implements EventToEntityConverter<Au
         processCancelledEventEntity.setServiceName(cloudProcessCancelledEvent.getServiceName());
         processCancelledEventEntity.setServiceType(cloudProcessCancelledEvent.getServiceType());
         processCancelledEventEntity.setServiceVersion(cloudProcessCancelledEvent.getServiceVersion());
+        processCancelledEventEntity.setProcessInstance(cloudProcessCancelledEvent.getEntity());
         processCancelledEventEntity.setProcessDefinitionId(cloudProcessCancelledEvent.getEntity().getProcessDefinitionId());
         processCancelledEventEntity.setProcessInstanceId(cloudProcessCancelledEvent.getEntity().getId());
 

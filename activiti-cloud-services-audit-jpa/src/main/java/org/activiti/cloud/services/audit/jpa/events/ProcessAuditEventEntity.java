@@ -25,7 +25,7 @@ import javax.persistence.MappedSuperclass;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
 import org.activiti.runtime.api.model.ProcessInstance;
 
-@MappedSuperclass
+@Entity
 public abstract class ProcessAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = ProcessInstanceJpaJsonConverter.class)
@@ -75,6 +75,7 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
         this.processInstance = processInstance;
         this.nestedProcessDefinitionId = nestedProcessDefinitionId;
         this.nestedProcessInstanceId = nestedProcessInstanceId;
+        setEntityId(processInstance.getId());
     }
 
     public ProcessAuditEventEntity(String eventId,
@@ -100,6 +101,7 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
         setProcessInstanceId((processInstance != null) ? processInstance.getId() : null);
 
         this.processInstance = processInstance;
+        setEntityId(processInstance.getId());
     }
 
     public ProcessInstance getProcessInstance() {

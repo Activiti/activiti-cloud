@@ -30,6 +30,7 @@ public class   ActivityCancelledEventConverter implements EventToEntityConverter
                                                                                                                     cloudBPMNActivityCancelledEvent.getServiceVersion(),
                                                                                                                     cloudBPMNActivityCancelledEvent.getEntity(),
                                                                                                                     cloudBPMNActivityCancelledEvent.getCause());
+        activityCancelledAuditEventEntity.setEntityId(cloudBPMNActivityCancelledEvent.getProcessInstanceId());
         activityCancelledAuditEventEntity.setProcessDefinitionId(cloudBPMNActivityCancelledEvent.getProcessDefinitionId());
         activityCancelledAuditEventEntity.setProcessInstanceId(cloudBPMNActivityCancelledEvent.getProcessInstanceId());
         return activityCancelledAuditEventEntity;
@@ -41,16 +42,17 @@ public class   ActivityCancelledEventConverter implements EventToEntityConverter
 
         CloudBPMNActivityCancelledEventImpl bpmnActivityCancelledEvent = new CloudBPMNActivityCancelledEventImpl(activityCancelledAuditEventEntity.getEventId(),
                                                                                                                  activityCancelledAuditEventEntity.getTimestamp(),
-                                                                                                                 activityCancelledAuditEventEntity.getBpmnActivity());
+                                                                                                                 activityCancelledAuditEventEntity.getBpmnActivity(),
+                                                                                                                 activityCancelledAuditEventEntity.getProcessDefinitionId(),
+                                                                                                                 activityCancelledAuditEventEntity.getProcessInstanceId(),
+                                                                                                                 activityCancelledAuditEventEntity.getCause());
         bpmnActivityCancelledEvent.setAppName(activityCancelledAuditEventEntity.getAppName());
         bpmnActivityCancelledEvent.setAppVersion(activityCancelledAuditEventEntity.getAppVersion());
         bpmnActivityCancelledEvent.setServiceFullName(activityCancelledAuditEventEntity.getServiceFullName());
         bpmnActivityCancelledEvent.setServiceName(activityCancelledAuditEventEntity.getServiceName());
         bpmnActivityCancelledEvent.setServiceType(activityCancelledAuditEventEntity.getServiceType());
         bpmnActivityCancelledEvent.setServiceVersion(activityCancelledAuditEventEntity.getServiceVersion());
-        bpmnActivityCancelledEvent.setCause(bpmnActivityCancelledEvent.getCause());
-        bpmnActivityCancelledEvent.setProcessDefinitionId(bpmnActivityCancelledEvent.getProcessDefinitionId());
-        bpmnActivityCancelledEvent.setProcessInstanceId(bpmnActivityCancelledEvent.getProcessInstanceId());
+
         return bpmnActivityCancelledEvent;
     }
 }

@@ -132,7 +132,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
         if (search != null && !search.isEmpty()) {
             String operationSetExper = Joiner.on("|")
                     .join(SearchOperation.SIMPLE_OPERATION_SET);
-            Pattern pattern = Pattern.compile("(\\w+?)(" + operationSetExper + ")(\\p{Punct}?)(\\w+?)(\\p{Punct}?),");
+            Pattern pattern = Pattern.compile("(\\w+?)(" + operationSetExper + ")(\\p{Punct}?)([a-zA-Z0-9-_]+?)(\\p{Punct}?),");
             Matcher matcher = pattern.matcher(search + ",");
             while (matcher.find()) {
                 builder.with(matcher.group(1),

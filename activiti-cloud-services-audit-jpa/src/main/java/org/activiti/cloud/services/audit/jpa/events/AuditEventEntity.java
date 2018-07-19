@@ -22,7 +22,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.MappedSuperclass;
 
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "TYPE")
@@ -47,6 +46,7 @@ public abstract class AuditEventEntity {
     /* base Process Data */
     private String processDefinitionId;
     private String processInstanceId;
+    private String entityId;
 
     public AuditEventEntity() {
     }
@@ -153,5 +153,13 @@ public abstract class AuditEventEntity {
 
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
+    }
+
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
     }
 }

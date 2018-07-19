@@ -57,6 +57,7 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
             this.variableName = variableInstance.getName();
             this.variableType = variableInstance.getType();
             this.taskId = variableInstance.getTaskId();
+            setEntityId(variableInstance.getName());
         }
     }
 

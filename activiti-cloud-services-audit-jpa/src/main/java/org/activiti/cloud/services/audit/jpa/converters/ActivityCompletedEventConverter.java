@@ -29,6 +29,7 @@ public class ActivityCompletedEventConverter implements EventToEntityConverter<A
                                                                                                                     cloudBPMNActivityCompletedEvent.getServiceType(),
                                                                                                                     cloudBPMNActivityCompletedEvent.getServiceVersion(),
                                                                                                                     cloudBPMNActivityCompletedEvent.getEntity());
+        activityCompletedAuditEventEntity.setEntityId(cloudBPMNActivityCompletedEvent.getProcessInstanceId());
         activityCompletedAuditEventEntity.setProcessDefinitionId(cloudBPMNActivityCompletedEvent.getProcessDefinitionId());
         activityCompletedAuditEventEntity.setProcessInstanceId(cloudBPMNActivityCompletedEvent.getProcessInstanceId());
         return activityCompletedAuditEventEntity;
@@ -40,15 +41,15 @@ public class ActivityCompletedEventConverter implements EventToEntityConverter<A
 
         CloudBPMNActivityCompletedEventImpl bpmnActivityCompletedEvent = new CloudBPMNActivityCompletedEventImpl(activityCompletedAuditEventEntity.getEventId(),
                                                                                                                  activityCompletedAuditEventEntity.getTimestamp(),
-                                                                                                                 activityCompletedAuditEventEntity.getBpmnActivity());
+                                                                                                                 activityCompletedAuditEventEntity.getBpmnActivity(),
+                                                                                                                 activityCompletedAuditEventEntity.getProcessDefinitionId(),
+                                                                                                                 activityCompletedAuditEventEntity.getProcessInstanceId());
         bpmnActivityCompletedEvent.setAppName(activityCompletedAuditEventEntity.getAppName());
         bpmnActivityCompletedEvent.setAppVersion(activityCompletedAuditEventEntity.getAppVersion());
         bpmnActivityCompletedEvent.setServiceFullName(activityCompletedAuditEventEntity.getServiceFullName());
         bpmnActivityCompletedEvent.setServiceName(activityCompletedAuditEventEntity.getServiceName());
         bpmnActivityCompletedEvent.setServiceType(activityCompletedAuditEventEntity.getServiceType());
         bpmnActivityCompletedEvent.setServiceVersion(activityCompletedAuditEventEntity.getServiceVersion());
-        bpmnActivityCompletedEvent.setProcessDefinitionId(activityCompletedAuditEventEntity.getProcessDefinitionId());
-        bpmnActivityCompletedEvent.setProcessInstanceId(activityCompletedAuditEventEntity.getProcessInstanceId());
         return bpmnActivityCompletedEvent;
     }
 }

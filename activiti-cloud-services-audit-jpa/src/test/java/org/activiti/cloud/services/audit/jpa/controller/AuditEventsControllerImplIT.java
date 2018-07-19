@@ -229,6 +229,7 @@ public class AuditEventsControllerImplIT {
                                         subsectionWithPath("timestamp").description("The event timestamp"),
                                         subsectionWithPath("eventType").description("The event type"),
                                         subsectionWithPath("serviceName").description("The service name"),
+                                        subsectionWithPath("entityId").description("the entity idCloudProcessSuspendedEventImpl"),
                                         subsectionWithPath("entity").description("the process instance entity"),
                                         subsectionWithPath("entity.processDefinitionId").description("The process definition id"),
                                         subsectionWithPath("entity.id").description("The process instance id")
