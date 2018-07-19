@@ -85,6 +85,8 @@ public class Tasks {
     public void createASubtask() throws Exception {
         subtask = runtimeBundleSteps.createSubtask(newTask.getId());
         assertThat(subtask).isNotNull();
+        assertThat(subtask.getParentTaskId()).isNotNull();
+        assertThat(subtask.getParentTaskId()).isNotEmpty();
     }
 
     @Then("the subtask is created and references another task")
@@ -95,7 +97,7 @@ public class Tasks {
         auditSteps.checkSubtaskCreated(createdSubtask.getId(),
                                        newTask.getId());
         querySteps.checkSubtaskHasParentTaskId(subtask.getId(),
-                                               newTask.getId());
+                                               subtask.getParentTaskId());
     }
 
     @Then("a list of one subtask should be available for the task")
