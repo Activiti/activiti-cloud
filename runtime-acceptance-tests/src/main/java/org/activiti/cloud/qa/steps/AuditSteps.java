@@ -125,7 +125,7 @@ public class AuditSteps {
     @Step
     public void checkTaskCreatedAndAssignedEvents(String taskId) {
 
-        final Collection<CloudRuntimeEvent> events = getEvents();
+        final Collection<CloudRuntimeEvent> events = getEventsByEntityId(taskId);
         Condition<CloudRuntimeEvent> taskIsMatched = new Condition<CloudRuntimeEvent>() {
             @Override
             public boolean matches(CloudRuntimeEvent event) {
@@ -144,10 +144,10 @@ public class AuditSteps {
                                     .containsExactly(
                                             tuple(taskId,
                                                     Task.TaskStatus.ASSIGNED,
-                                                    TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED),
+                                                    TaskRuntimeEvent.TaskEvents.TASK_CREATED),
                                             tuple(taskId,
-                                                    Task.TaskStatus.ASSIGNED,
-                                                    TaskRuntimeEvent.TaskEvents.TASK_CREATED)));
+                                                  Task.TaskStatus.ASSIGNED,
+                                                  TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED)));
     }
 
     /**
@@ -189,7 +189,7 @@ public class AuditSteps {
     public void checkSubtaskCreated(String subtaskId,
                                     String parentTaskId) {
 
-        final Collection<CloudRuntimeEvent> events = getEvents();
+        final Collection<CloudRuntimeEvent> events = getEventsByEntityId(subtaskId);
         Condition<CloudRuntimeEvent> taskIsMatched = new Condition<CloudRuntimeEvent>() {
             @Override
             public boolean matches(CloudRuntimeEvent event) {
