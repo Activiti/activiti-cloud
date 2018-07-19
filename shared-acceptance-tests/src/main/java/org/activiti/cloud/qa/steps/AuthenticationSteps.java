@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.qa.steps;
 
-import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.model.AuthToken;
+import org.activiti.cloud.qa.rest.TokenHolder;
 import org.activiti.cloud.qa.rest.feign.EnableFeignContext;
 import org.activiti.cloud.qa.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +31,9 @@ import static org.assertj.core.api.Assertions.*;
 @EnableFeignContext
 public class AuthenticationSteps {
 
-    private static final String AUTH_TOKEN = "authToken";
-
     private static final String AUTH_CLIENT_ID = "activiti";
     private static final String AUTH_GRANT_TYPE = "password";
-    private static final String AUTH_USERNAME = "hruser";
+    private static final String AUTH_USERNAME = "testuser";
     private static final String AUTH_PASSWORD = "password";
 
     @Autowired
@@ -45,15 +43,15 @@ public class AuthenticationSteps {
     public void authenticateDefaultUser() {
         AuthToken authToken = authenticationService
                 .authenticate(AUTH_CLIENT_ID,
-                              AUTH_GRANT_TYPE,
-                              AUTH_USERNAME,
-                              AUTH_PASSWORD);
-        Serenity.setSessionVariable(AUTH_TOKEN).to(authToken);
+                        AUTH_GRANT_TYPE,
+                        AUTH_USERNAME,
+                        AUTH_PASSWORD);
+        TokenHolder.setAuthToken(authToken);
     }
 
     @Step
     public void ensureUserIsAuthenticated() {
-        AuthToken authToken = Serenity.sessionVariableCalled(AUTH_TOKEN);
+        AuthToken authToken = TokenHolder.getAuthToken();
         assertThat(authToken).isNotNull();
         assertThat(authToken.getAccess_token()).isNotNull();
     }

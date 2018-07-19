@@ -50,7 +50,6 @@ public class ProcessInstanceTasks {
 
     @Then("a signal was received and the signal catch process was completed")
     public void startSignalThrowProcessInstance() throws Exception {
-        runtimeBundleSteps.waitForMessagesToBeConsumed();
         querySteps.checkProcessInstanceStatus(processInstance.getId(),
                                               ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }

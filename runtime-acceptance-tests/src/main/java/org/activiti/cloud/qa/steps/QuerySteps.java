@@ -31,6 +31,7 @@ import org.activiti.runtime.api.model.Task.TaskStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Query steps
@@ -59,31 +60,44 @@ public class QuerySteps {
     @Step
     public void checkProcessInstanceStatus(String processInstanceId,
                                            ProcessInstanceStatus expectedStatus) throws Exception {
-        assertThat(expectedStatus).isNotNull();
 
-        CloudProcessInstance processInstance = getProcessInstance(processInstanceId);
-        assertThat(processInstance).isNotNull();
-        assertThat(processInstance.getStatus()).isEqualTo(expectedStatus);
-        assertThat(processInstance.getServiceName()).isNotEmpty();
-        assertThat(processInstance.getServiceFullName()).isNotEmpty();
+        await().untilAsserted(() -> {
+
+            assertThat(expectedStatus).isNotNull();
+            CloudProcessInstance processInstance = getProcessInstance(processInstanceId);
+            assertThat(processInstance).isNotNull();
+            assertThat(processInstance.getStatus()).isEqualTo(expectedStatus);
+            assertThat(processInstance.getServiceName()).isNotEmpty();
+            assertThat(processInstance.getServiceFullName()).isNotEmpty();
+
+        });
     }
 
     @Step
     public void checkTaskStatus(String taskId,
                                 TaskStatus expectedStatus) {
-        assertThat(queryService.queryTasksByIdAnsStatus(taskId,
-                                                        expectedStatus).getContent())
+
+        await().untilAsserted(() -> assertThat(queryService.queryTasksByIdAnsStatus(taskId,
+                expectedStatus).getContent())
                 .isNotNull()
                 .isNotEmpty()
-                .hasSize(1);
+                .hasSize(1));
     }
 
     @Step
     public void checkSubtaskHasParentTaskId(String subtaskId,
                                             String parentTaskId) {
-        final Collection<CloudTask> tasks = queryService.queryTasksById(subtaskId).getContent();
-        assertThat(tasks).isNotNull().isNotEmpty().hasSize(1).extracting(Task::getId,
-                                                                         Task::getParentTaskId).containsOnly(tuple(subtaskId,
-                                                                                                                   parentTaskId));
+
+        await().untilAsserted(() -> {
+
+            final Collection<CloudTask> tasks = queryService.queryTasksById(subtaskId).getContent();
+
+            assertThat(tasks).isNotNull().isNotEmpty().hasSize(1).extracting(Task::getId,
+                    Task::getParentTaskId).containsOnly(tuple(subtaskId,
+                    parentTaskId));
+
+        });
+
+
     }
 }

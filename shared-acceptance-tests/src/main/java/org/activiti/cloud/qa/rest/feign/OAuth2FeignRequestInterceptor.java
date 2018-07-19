@@ -19,6 +19,7 @@ package org.activiti.cloud.qa.rest.feign;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import net.serenitybdd.core.Serenity;
+import org.activiti.cloud.qa.rest.TokenHolder;
 
 /**
  * Feign RequestInterceptor to add Bearer token in all headers
@@ -32,8 +33,8 @@ public class OAuth2FeignRequestInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate template) {
         template.header(AUTHORIZATION,
-                        String.format("%s %s",
-                                      BEARER,
-                                      Serenity.sessionVariableCalled("authToken")));
+                String.format("%s %s",
+                        BEARER,
+                        TokenHolder.getAuthToken()));
     }
 }

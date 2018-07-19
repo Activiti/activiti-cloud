@@ -118,11 +118,6 @@ public class RuntimeBundleSteps {
     }
 
     @Step
-    public void waitForMessagesToBeConsumed() throws InterruptedException {
-        Thread.sleep(220);
-    }
-
-    @Step
     public CloudTask createNewTask() {
 
         CreateTaskImpl createTask = new CreateTaskImpl("new-task",

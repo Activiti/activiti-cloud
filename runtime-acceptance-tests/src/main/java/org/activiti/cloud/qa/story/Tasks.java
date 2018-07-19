@@ -63,8 +63,6 @@ public class Tasks {
         final CloudTask assignedTask = runtimeBundleSteps.getTaskById(newTask.getId());
         assertThat(assignedTask).isNotNull();
         assertThat(assignedTask.getStatus()).isEqualTo(Task.TaskStatus.ASSIGNED);
-        runtimeBundleSteps.waitForMessagesToBeConsumed();
-
         auditSteps.checkTaskCreatedAndAssignedEvents(assignedTask.getId());
         querySteps.checkTaskStatus(assignedTask.getId(),
                                    Task.TaskStatus.ASSIGNED);
@@ -78,7 +76,6 @@ public class Tasks {
     @Then("the task is cancelled")
     public void checkTaskIsCancelled() throws Exception {
         runtimeBundleSteps.checkTaskNotFound(newTask.getId());
-        runtimeBundleSteps.waitForMessagesToBeConsumed();
         auditSteps.checkTaskDeletedEvent(newTask.getId());
         querySteps.checkTaskStatus(newTask.getId(),
                                    Task.TaskStatus.CANCELLED);
@@ -95,8 +92,6 @@ public class Tasks {
         final CloudTask createdSubtask = runtimeBundleSteps.getTaskById(subtask.getId());
         assertThat(createdSubtask).isNotNull();
         assertThat(createdSubtask.getParentTaskId()).isNotEmpty().isEqualToIgnoringCase(newTask.getId());
-        runtimeBundleSteps.waitForMessagesToBeConsumed();
-
         auditSteps.checkSubtaskCreated(createdSubtask.getId(),
                                        newTask.getId());
         querySteps.checkSubtaskHasParentTaskId(subtask.getId(),

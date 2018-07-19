@@ -18,7 +18,7 @@ When the user creates a standalone task
 Then the task is created and the status is assigned
 
 Scenario: delete a standalone task
-Given any authenticated user
+Given the user is authenticated
 And an existing standalone task
 When the user cancel the task
 Then the task is cancelled
