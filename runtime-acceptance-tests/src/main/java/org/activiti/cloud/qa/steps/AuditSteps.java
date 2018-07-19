@@ -190,24 +190,17 @@ public class AuditSteps {
                                     String parentTaskId) {
 
         final Collection<CloudRuntimeEvent> events = getEventsByEntityId(subtaskId);
-        Condition<CloudRuntimeEvent> taskIsMatched = new Condition<CloudRuntimeEvent>() {
-            @Override
-            public boolean matches(CloudRuntimeEvent event) {
-
-                return event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent) event).getEntity() != null
-                        && subtaskId.equals(((CloudTaskRuntimeEvent) event).getEntity().getId());
-            }
-        };
-
 
         await().untilAsserted(() -> assertThat(events).isNotNull()
                                     .isNotEmpty()
-                                    .filteredOn(taskIsMatched).hasSize(2)
-                                    .extracting("entity.id",
+                                    .hasSize(2)
+                                    .extracting("entityId", "entity.id",
                                                 "entity.parentTaskId")
                                     .contains(tuple(subtaskId,
+                                                    subtaskId,
                                                     parentTaskId),
                                               tuple(subtaskId,
+                                                    subtaskId,
                                                     parentTaskId)));
     }
 }
