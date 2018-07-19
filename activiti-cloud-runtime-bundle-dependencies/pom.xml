@@ -55,7 +55,7 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-starter-test</artifactId>
+        <artifactId>activiti-cloud-services-test</artifactId>
         <version>${activiti-cloud-runtime-bundle.version}</version>
         <scope>test</scope>
       </dependency>

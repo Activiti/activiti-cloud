@@ -38,6 +38,11 @@
         <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
         <version>${activiti-cloud-audit.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-audit-api</artifactId>
+        <version>${activiti-cloud-audit.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>

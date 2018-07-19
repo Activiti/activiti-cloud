@@ -25,6 +25,26 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-common-security</artifactId>
+        <version>${activiti-cloud-service-common.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
+        <version>${activiti-cloud-service-common.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-common-identity-basic</artifactId>
+        <version>${activiti-cloud-service-common.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
+        <version>${activiti-cloud-service-common.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-test</artifactId>
         <version>${activiti-cloud-service-common.version}</version>
       </dependency>
