@@ -82,7 +82,10 @@ public class BaseSecurityPoliciesApplicationService implements SecurityPoliciesA
                                      processDefinitionKey) || keys.contains(securityPoliciesService.getWildcard());
     }
 
-    private boolean anEntryInSetStartsKey(Set<String> keys, String processDefinitionKey){
+    //startsWith logic supports the case of audit where only definition id might be available and it would start with the key
+    //protected scope means we can override where exact matching more appropriate (consider keys ProcessWithVariables and ProcessWithVariables2)
+    //even for audit would be better if we had a known separator which cant be part of key - this seems best we can do for now
+    protected boolean anEntryInSetStartsKey(Set<String> keys, String processDefinitionKey){
         for(String key:keys){
             if(processDefinitionKey.startsWith(key)){
                 return true;
