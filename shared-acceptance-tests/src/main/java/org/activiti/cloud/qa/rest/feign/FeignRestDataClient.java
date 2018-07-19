@@ -24,6 +24,8 @@ import feign.Headers;
 import feign.Logger;
 import feign.Param;
 import feign.RequestLine;
+import feign.codec.Decoder;
+import feign.codec.Encoder;
 import feign.gson.GsonEncoder;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
@@ -106,10 +108,24 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
                                 uri);
     }
 
-    static Feign.Builder builder() {
+    default Encoder encoder() {
+        return new GsonEncoder();
+    }
+
+    default Decoder decoder() {
+        return new HalDecoder();
+    }
+
+    default Feign.Builder builder() {
+        return builder(encoder(),
+                       decoder());
+    }
+
+    static Feign.Builder builder(Encoder encoder,
+                                 Decoder decoder) {
         return Feign.builder()
-                .encoder(new GsonEncoder())
-                .decoder(new HalDecoder())
+                .encoder(encoder)
+                .decoder(decoder)
                 .errorDecoder(new FeignErrorDecoder())
                 .logger(new Logger.ErrorLogger())
                 .logLevel(Logger.Level.FULL)

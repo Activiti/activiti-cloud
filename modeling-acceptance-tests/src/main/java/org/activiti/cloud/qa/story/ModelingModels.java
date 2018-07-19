@@ -16,8 +16,11 @@
 
 package org.activiti.cloud.qa.story;
 
+import java.util.Arrays;
+
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.model.modeling.Model;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.qa.steps.ModelingApplicationsSteps;
 import org.activiti.cloud.qa.steps.ModelingModelsSteps;
 import org.jbehave.core.annotations.Given;
@@ -26,7 +29,7 @@ import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.Resource;
 
 import static org.activiti.cloud.qa.model.modeling.ModelIdentifier.identified;
-import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.named;
+import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.modelNamed;
 
 /**
  * Modeling models scenarios
@@ -43,15 +46,15 @@ public class ModelingModels {
     public void createModel(String modelType,
                             String modelName) {
         Resource<Model> createdModel = modelingModelsSteps.create(modelName,
-                                                                  modelType);
-        modelingApplicationsSteps.addToCurrentContext(createdModel);
+                                                                  toModelType(modelType));
+        modelingApplicationsSteps.addModelToCurrentContext(createdModel);
     }
 
     @Then("the $modelType model '$modelName' is created")
     public void checkModelExistsInCurrentApplication(String modelType,
                                                      String modelName) {
         modelingModelsSteps.checkExistsInCurrentContext(identified(modelName,
-                                                                   modelType));
+                                                                   toModelType(modelType)));
     }
 
     @Then("the version of the $modelType model '$modelName' is $modelVersion")
@@ -59,13 +62,13 @@ public class ModelingModels {
                                                       String modelName,
                                                       String modelVersion) {
         modelingModelsSteps.checkExistsInCurrentContext(identified(modelName,
-                                                                   modelType,
+                                                                   toModelType(modelType),
                                                                    modelVersion));
     }
 
     @Then("delete model '$modelName'")
     public void deleteModel(String modelName) {
-        modelingModelsSteps.deleteAll(named(modelName));
+        modelingModelsSteps.deleteAll(modelNamed(modelName));
     }
 
     @Given("an existing $modelType model '$modelName' with version $modelVersion")
@@ -73,10 +76,10 @@ public class ModelingModels {
                                          String modelName,
                                          String modelVersion) {
         if (!modelingModelsSteps.exists(identified(modelName,
-                                                   modelType,
+                                                   toModelType(modelType),
                                                    modelVersion))) {
             modelingModelsSteps.create(modelName,
-                                       modelType);
+                                       toModelType(modelType));
         }
     }
 
@@ -84,7 +87,7 @@ public class ModelingModels {
     public void openModel(String modelType,
                           String modelName) {
         modelingModelsSteps.openModelingObject(identified(modelName,
-                                                          modelType));
+                                                          toModelType(modelType)));
     }
 
     @When("edits and saves the model")
@@ -95,5 +98,13 @@ public class ModelingModels {
     @Then("the model is saved with the version $modelVersion")
     public void checkCurrentModelVersion(String modelVersion) {
         modelingModelsSteps.checkCurrentModelVersion(modelVersion);
+    }
+
+    protected ModelType toModelType(String modelType) {
+        return Arrays.asList(ModelType.values())
+                .stream()
+                .filter(type -> type.name().equalsIgnoreCase(modelType))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Unknown model type: " + modelType));
     }
 }

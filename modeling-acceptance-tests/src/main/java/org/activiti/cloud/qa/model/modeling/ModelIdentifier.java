@@ -16,12 +16,13 @@
 
 package org.activiti.cloud.qa.model.modeling;
 
-import org.activiti.cloud.qa.model.modeling.Model.ModelType;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelType;
 
 /**
  * Modeling model identifier
  */
-public class ModelIdentifier implements ModelingIdentifier {
+public class ModelIdentifier<M> implements ModelingIdentifier<M> {
 
     private String modelName;
 
@@ -31,7 +32,9 @@ public class ModelIdentifier implements ModelingIdentifier {
 
     public ModelIdentifier(String modelName,
                            ModelType modelType) {
-        this(modelName, modelType, null);
+        this(modelName,
+             modelType,
+             null);
     }
 
     public ModelIdentifier(String modelName,
@@ -43,24 +46,24 @@ public class ModelIdentifier implements ModelingIdentifier {
     }
 
     @Override
-    public boolean test(ModelingContext modelingContext) {
+    public boolean test(M modelingContext) {
         return modelingContext instanceof Model &&
-                modelName.equals(modelingContext.getName()) &&
+                modelName.equals(((Model) modelingContext).getName()) &&
                 modelType == ((Model) modelingContext).getType() &&
                 (modelVersion == null || modelVersion.equals(((Model) modelingContext).getVersion()));
     }
 
     public static ModelIdentifier identified(String modelName,
-                                             String modelType) {
+                                             ModelType modelType) {
         return new ModelIdentifier(modelName,
-                                   ModelType.forText(modelType));
+                                   modelType);
     }
 
     public static ModelIdentifier identified(String modelName,
-                                             String modelType,
+                                             ModelType modelType,
                                              String modelVersion) {
         return new ModelIdentifier(modelName,
-                                   ModelType.forText(modelType),
+                                   modelType,
                                    modelVersion);
     }
 }
