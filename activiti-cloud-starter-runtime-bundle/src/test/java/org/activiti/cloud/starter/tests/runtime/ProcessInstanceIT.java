@@ -59,6 +59,7 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 
+import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_ADMIN_RELATIVE_URL;
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -150,10 +151,31 @@ public class ProcessInstanceIT {
 
     @Test
     public void shouldNotStartProcessWithoutPermission() {
+        //testuser does not have access to SIMPLE_PROCESS according to access-control.properties
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
 
         assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
                                                                                 processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS)));
+    }
+
+    @Test
+    public void shouldStartProcessIfAdmin() {
+        //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties but admin role trumps this
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+
+        ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.startProcessByKey(SIMPLE_PROCESS,
+                null,
+                "business_key");
+
+        //then
+        assertThat(entity).isNotNull();
+        ProcessInstance returnedProcInst = entity.getBody();
+        assertThat(returnedProcInst).isNotNull();
+        assertThat(returnedProcInst.getId()).isNotNull();
+        assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
+        assertThat(returnedProcInst.getInitiator()).isNotNull();
+        assertThat(returnedProcInst.getInitiator()).isEqualTo("testadmin");//will only match if using username not id
+        assertThat(returnedProcInst.getBusinessKey()).isEqualTo("business_key");
     }
 
     @Test
@@ -236,6 +258,44 @@ public class ProcessInstanceIT {
                                                                                                      null,
                                                                                                      new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
                                                                                                      });
+
+        //then
+        assertThat(processInstancesPage).isNotNull();
+        assertThat(processInstancesPage.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(processInstancesPage.getBody().getContent()).hasSize(2);
+        assertThat(processInstancesPage.getBody().getMetadata().getTotalPages()).isGreaterThanOrEqualTo(2);
+    }
+
+    @Test
+    public void shouldNotSeeProcessInstancesWithoutPermission() {
+
+        //given
+        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+
+        //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties but admin role trumps this
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+
+        //when
+        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "?page=0&size=2",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
+                });
+
+        //then
+        assertThat(processInstancesPage).isNotNull();
+        assertThat(processInstancesPage.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(processInstancesPage.getBody().getContent()).hasSize(0);
+
+        //but testadmin should see process instances at admin endpoitn
+        //when
+        processInstancesPage = restTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + "?page=0&size=2",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
+                });
 
         //then
         assertThat(processInstancesPage).isNotNull();

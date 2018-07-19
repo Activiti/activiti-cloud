@@ -25,6 +25,7 @@ import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.impl.util.IoUtil;
@@ -50,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource("classpath:application-test.properties")
+@TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 public class ProcessDefinitionIT {
 
     @Autowired
@@ -59,7 +60,14 @@ public class ProcessDefinitionIT {
     @Autowired
     private ProcessDiagramGenerator processDiagramGenerator;
 
+    @Autowired
+    private KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
+
+
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
+
+    public static final String ADMIN_PROCESS_DEFINITIONS_URL = "/admin/v1/process-definitions/";
+
     private static final String PROCESS_WITH_VARIABLES_2 = "ProcessWithVariables2";
     private static final String PROCESS_POOL_LANE = "process_pool1";
 
@@ -68,8 +76,10 @@ public class ProcessDefinitionIT {
         //given
         //processes are automatically deployed from src/test/resources/processes
 
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+
         //when
-        ResponseEntity<PagedResources<CloudProcessDefinition>> entity = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
 
         //then
         assertThat(entity).isNotNull();
@@ -83,7 +93,7 @@ public class ProcessDefinitionIT {
     }
 
     private ProcessDefinition getProcessDefinition(String name) {
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
         Iterator<CloudProcessDefinition> it = processDefinitionsEntity.getBody().getContent().iterator();
         ProcessDefinition aProcessDefinition;
         do {
@@ -93,10 +103,10 @@ public class ProcessDefinitionIT {
         return aProcessDefinition;
     }
 
-    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
+    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions(String url) {
         ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
-        return restTemplate.exchange(PROCESS_DEFINITIONS_URL,
+        return restTemplate.exchange(url,
                                      HttpMethod.GET,
                                      null,
                                      responseType);
@@ -108,7 +118,7 @@ public class ProcessDefinitionIT {
         ParameterizedTypeReference<CloudProcessDefinition> responseType = new ParameterizedTypeReference<CloudProcessDefinition>() {
         };
 
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
         assertThat(processDefinitionsEntity).isNotNull();
         assertThat(processDefinitionsEntity.getBody()).isNotNull();
         assertThat(processDefinitionsEntity.getBody().getContent()).isNotEmpty();
@@ -173,7 +183,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void shouldRetriveProcessModel() throws Exception {
+    public void shouldRetrieveProcessModel() throws Exception {
 
         ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_POOL_LANE);
 
@@ -254,5 +264,67 @@ public class ProcessDefinitionIT {
                                                                 String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         return response.getBody();
+    }
+
+    @Test
+    public void shouldRetrieveDifferentListOfProcessDefinitionAccordingToUserPolicies() {
+        //given
+        //processes are automatically deployed from src/test/resources/processes
+
+
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
+        //when
+        ResponseEntity<PagedResources<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
+
+        //then - should only see process defs visible to this user (testuser)
+        assertThat(entity).isNotNull();
+        assertThat(entity.getBody()).isNotNull();
+        assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).contains(
+                "ProcessWithVariables",
+                PROCESS_POOL_LANE);
+        assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).doesNotContain(
+                PROCESS_WITH_VARIABLES_2,
+                "SimpleProcess",
+                "ProcessWithBoundarySignal");
+
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+
+        //but hruser should see different set according to access-control.properties
+        entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
+        assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).contains(
+                PROCESS_WITH_VARIABLES_2,
+                "SimpleProcess",
+                "ProcessWithBoundarySignal");
+    }
+
+    @Test
+    public void adminShouldSeeLargerListAtAdminEndpoint() {
+        //given
+        //processes are automatically deployed from src/test/resources/processes
+
+
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+
+        //testadmin should see restricted set at non-admin endpoint
+        //when
+        ResponseEntity<PagedResources<CloudProcessDefinition>> entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
+
+        assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).doesNotContain(
+                PROCESS_WITH_VARIABLES_2,
+                "SimpleProcess",
+                "ProcessWithBoundarySignal");
+
+        assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).contains(
+                "ProcessWithVariables",
+                PROCESS_POOL_LANE);
+
+        //and a larger set at admin endpoint
+        entity = getProcessDefinitions(ADMIN_PROCESS_DEFINITIONS_URL);
+        assertThat(entity).isNotNull();
+        assertThat(entity.getBody()).isNotNull();
+        assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).contains(
+                PROCESS_WITH_VARIABLES_2,
+                "SimpleProcess",
+                "ProcessWithBoundarySignal");
     }
 }

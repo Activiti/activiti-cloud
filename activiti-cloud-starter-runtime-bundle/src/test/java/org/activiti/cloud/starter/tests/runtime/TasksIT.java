@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource("classpath:application-test.properties")
+@TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class TasksIT  {
 
@@ -136,13 +136,13 @@ public class TasksIT  {
 
     @Test
     public void shouldNotGetTasksWithoutPermission() {
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
-
-        //now authenticated as testuser who is not in hr group
 
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+
+        //SIMPLE_PROCESS not visible to testuser according to access-control.properties
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
 
         //when
         ResponseEntity<PagedResources<CloudTask>> responseEntity = executeRequestGetTasks();
@@ -166,6 +166,25 @@ public class TasksIT  {
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void adminShouldGetAvailableTasksAtAdminEndpoint() {
+
+        //given
+        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+
+        //when
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = executeRequestGetAdminTasks();
+
+        //then
+        assertThat(responseEntity).isNotNull();
+        Collection<CloudTask> tasks = responseEntity.getBody().getContent();
+        assertThat(tasks).extracting(Task::getName).contains("Perform action");
+        assertThat(tasks.size()).isGreaterThanOrEqualTo(2);
     }
 
     private ResponseEntity<PagedResources<CloudTask>> executeRequestGetTasks() {

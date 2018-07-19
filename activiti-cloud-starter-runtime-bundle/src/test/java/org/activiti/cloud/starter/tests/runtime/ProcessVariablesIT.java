@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.runtime.api.cmd.RemoveProcessVariables;
@@ -56,7 +57,7 @@ import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource("classpath:application-test.properties")
+@TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ProcessVariablesIT {
 
@@ -64,14 +65,20 @@ public class ProcessVariablesIT {
     private TestRestTemplate restTemplate;
 
     @Autowired
+    private KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
+
+
+    @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
-    private static final String SIMPLE_PROCESS_WITH_VARIABLES = "ProcessWithVariables";
+    private static final String PROCESS_WITH_VARIABLES2 = "ProcessWithVariables2";
 
     @Before
     public void setUp() {
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+
         ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
@@ -80,7 +87,7 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    public void shouldRetrieveProcessVariables() {
+    public void shouldRetrieveProcessVariablesWithPermission() {
         //given
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName",
@@ -89,7 +96,7 @@ public class ProcessVariablesIT {
                 "Silva");
         variables.put("age",
                 15);
-        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
                                                                                                       variables);
 
 
@@ -108,6 +115,8 @@ public class ProcessVariablesIT {
 
 
     }
+
+
 
     private boolean variablesContainEntry(String key, Object value, Collection<CloudVariableInstance> variableCollection){
         Iterator<CloudVariableInstance> iterator = variableCollection.iterator();
@@ -131,7 +140,7 @@ public class ProcessVariablesIT {
                 "Silver");
         variables.put("age",
                 19);
-        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
                 variables);
 
         List<String> variablesNames = new ArrayList<>(variables.keySet());
@@ -160,7 +169,7 @@ public class ProcessVariablesIT {
                 "Silver");
         variables.put("age",
                 19);
-        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS_WITH_VARIABLES),
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
                 variables);
 
         variables.put("firstName",
@@ -187,6 +196,75 @@ public class ProcessVariablesIT {
         assertThat(variablesContainEntry("firstName","Kermit",variableCollection)).isTrue();
         assertThat(variablesContainEntry("lastName","Frog",variableCollection)).isTrue();
         assertThat(variablesContainEntry("age",100,variableCollection)).isTrue();
+
+        });
+
+    }
+
+
+    @Test
+    public void shouldNotRetrieveProcessVariablesWithoutPermission() {
+        //given
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("firstName",
+                "Fozzy");
+        variables.put("lastName",
+                "Bear");
+        variables.put("age",
+                22);
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
+                variables);
+
+
+        //testuser doesn't have permission according to access-control.properties
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
+
+        await().untilAsserted(() -> {
+
+            ResponseEntity<String> variablesEntity = restTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + startResponse.getBody().getId() + "/variables",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<String>() {
+                    });
+            assertThat(variablesEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+
+        });
+
+
+    }
+
+
+    @Test
+    public void adminShouldSeeVariables() {
+        //given
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("firstName",
+                "Rowlf");
+        variables.put("lastName",
+                "Dog");
+        variables.put("age",
+                5);
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
+                variables);
+
+
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+
+        //should see at /{processInstanceId}/variables
+        await().untilAsserted(() -> {
+
+
+            // when
+            ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
+
+            // then
+            Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
+
+            assertThat(variableCollection).isNotEmpty();
+            assertThat(variablesContainEntry("firstName","Rowlf",variableCollection)).isTrue();
+            assertThat(variablesContainEntry("lastName","Dog",variableCollection)).isTrue();
+            assertThat(variablesContainEntry("age",5,variableCollection)).isTrue();
 
         });
 

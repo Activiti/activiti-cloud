@@ -46,6 +46,8 @@ public class ProcessInstanceRestTemplate {
 
     public static final String PROCESS_INSTANCES_RELATIVE_URL = "/v1/process-instances/";
 
+    public static final String PROCESS_INSTANCES_ADMIN_RELATIVE_URL = "/admin/v1/process-instances/";
+
     @Autowired
     private TestRestTemplate testRestTemplate;
 

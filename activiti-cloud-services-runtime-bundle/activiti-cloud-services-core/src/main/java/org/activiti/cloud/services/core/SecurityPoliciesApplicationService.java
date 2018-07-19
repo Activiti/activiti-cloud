@@ -72,8 +72,8 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
         }
 
         //policies are in place but if we've got here then none for this user
-        if(keys != null && securityPoliciesService.policiesDefined()) {
-            restrictionApplier.denyAll();
+        if((keys == null || keys.isEmpty()) && securityPoliciesService.policiesDefined()) {
+            return restrictionApplier.denyAll();
         }
 
         return restrictionApplier.allowAll();
@@ -89,5 +89,14 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
                 || hasPermission(processDefinitionKey, SecurityPolicy.WRITE,runtimeBundleProperties.getServiceFullName());
     }
 
+    protected boolean anEntryInSetStartsKey(Set<String> keys, String processDefinitionKey){
+        for(String key:keys){
+            //override the base class with exact matching as startsWith is only preferable for audit where id might be used that would start with key
+            if(processDefinitionKey.equalsIgnoreCase(key)){
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

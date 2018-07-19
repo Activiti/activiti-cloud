@@ -158,11 +158,13 @@ public class SecurityAwareProcessInstanceService {
     }
 
     public List<VariableInstance> getVariableInstances(String processInstanceId) {
-        return processRuntime.processInstance(processInstanceId).variables();
+        FluentProcessInstance processInstance = getAuthorizedProcessInstanceById(processInstanceId);
+        return processRuntime.processInstance(processInstance.getId()).variables();
     }
 
     public List<VariableInstance> getLocalVariableInstances(String processInstanceId) {
-        return processRuntime.processInstance(processInstanceId).localVariables();
+        FluentProcessInstance processInstance = getAuthorizedProcessInstanceById(processInstanceId);
+        return processRuntime.processInstance(processInstance.getId()).localVariables();
     }
 
 }
