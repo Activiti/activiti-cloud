@@ -159,8 +159,6 @@ public class AuditSteps {
         await().untilAsserted(() -> {
         assertThat(getEventsByEntityId(taskId))
                 .isNotEmpty()
-//                .filteredOn(event -> event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent) event).getEntity() != null
-//                        && taskId.equals(((CloudTaskRuntimeEvent) event).getEntity().getId()))
                 .hasSize(3)
                 .extracting("entityId",
                             "entity.id",
