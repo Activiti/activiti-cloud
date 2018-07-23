@@ -63,7 +63,6 @@ public class ApplicationEntity extends AuditableEntity<String> implements Applic
         this.id = id;
     }
 
-    @Override
     public List<ModelEntity> getModels() {
         return models;
     }

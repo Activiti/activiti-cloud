@@ -31,6 +31,4 @@ public interface Application<U> extends Auditable<U> {
 
     void setName(String name);
 
-    List<? extends Model> getModels();
-
 }

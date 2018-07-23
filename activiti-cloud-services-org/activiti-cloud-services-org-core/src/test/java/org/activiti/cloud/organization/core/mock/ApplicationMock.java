@@ -51,7 +51,6 @@ public class ApplicationMock extends AuditableMock implements Application<String
         this.id = id;
     }
 
-    @Override
     public List<ModelMock> getModels() {
         return models;
     }
