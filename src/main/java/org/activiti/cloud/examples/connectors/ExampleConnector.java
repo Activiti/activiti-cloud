@@ -28,7 +28,7 @@ public class ExampleConnector {
     @Value("${spring.application.name}")
     private String appName;
 
-    //just a convenience - remove this var in real implementations
+    //just a convenience - not recommended in real implementations
     private String var1Copy = "";
 
     @Autowired
@@ -50,7 +50,7 @@ public class ExampleConnector {
 
         String var1 = ExampleConnector.class.getName()+" was called for instance " + event.getIntegrationContext().getProcessInstanceId();
 
-        var1Copy = var1;
+        var1Copy = String.valueOf(var1);
 
         Map<String, Object> results = new HashMap<>();
         results.put("var1",
