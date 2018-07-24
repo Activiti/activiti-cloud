@@ -28,8 +28,8 @@ public class ExampleConnector {
     @Value("${spring.application.name}")
     private String appName;
 
-    //track whether this instance of this connector has been called
-    private boolean connectorCalled;
+    //just a convenience - remove this var in real implementations
+    private String var1Copy = "";
 
     @Autowired
     private ConnectorProperties connectorProperties;
@@ -44,24 +44,25 @@ public class ExampleConnector {
     @StreamListener(value = ExampleConnectorChannels.EXAMPLE_CONNECTOR_CONSUMER)
     public void performTask(IntegrationRequest event) throws InterruptedException {
 
-        String text = String.valueOf(event.getIntegrationContext().getInBoundVariables().get("text"));
         logger.info(append("service-name",
                            appName),
                     ">>> In example-cloud-connector");
 
-        connectorCalled = true;
-        text += " "+ExampleConnector.class.getName()+" has been called";
+        String var1 = ExampleConnector.class.getName()+" was called for instance " + event.getIntegrationContext().getProcessInstanceId();
+
+        var1Copy = var1;
 
         Map<String, Object> results = new HashMap<>();
-        results.put("text",
-                    text);
+        results.put("var1",
+                    var1);
         Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(event, connectorProperties)
                 .withOutboundVariables(results)
                 .buildMessage();
         integrationResultSender.send(message);
     }
 
-    public boolean isConnectorCalled() {
-        return connectorCalled;
+    public String getVar1Copy() {
+        return var1Copy;
     }
+
 }

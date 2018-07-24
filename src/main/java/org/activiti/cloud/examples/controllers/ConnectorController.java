@@ -15,7 +15,7 @@ public class ConnectorController {
     @RequestMapping(method = RequestMethod.GET, path = "/")
     public String welcome() {
         return " { \"welcome\" : \"This is Example Cloud Connector\"," +
-                "  \"hasBeenCalled\" : "+exampleConnector.isConnectorCalled()+" }";
+                "  \"var1\" : "+exampleConnector.getVar1Copy()+" }";
     }
 
 }
