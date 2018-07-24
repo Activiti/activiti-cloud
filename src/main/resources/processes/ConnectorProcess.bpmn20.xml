@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:modeler="http://activiti.com/modeler" targetNamespace="http://www.activiti.org/processdef" modeler:version="1.0en" modeler:exportDateTime="20170630121556884" modeler:modelId="31032" modeler:modelVersion="1" modeler:modelLastUpdated="1498821282568">
+  <process id="ConnectorProcess" name="ConnectorProcess" isExecutable="true">
+    <startEvent id="startEvent1">
+      <extensionElements>
+        <modeler:editor-resource-id>startEvent1</modeler:editor-resource-id>
+      </extensionElements>
+    </startEvent>
+    <sequenceFlow id="sid-68945AF1-396F-4B8A-B836-FC318F62313F" sourceRef="startEvent1" targetRef="sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94">
+      <extensionElements>
+        <modeler:editor-resource-id>sid-68945AF1-396F-4B8A-B836-FC318F62313F</modeler:editor-resource-id>
+      </extensionElements>
+    </sequenceFlow>
+    <endEvent id="sid-9F938772-895F-436D-A7D1-051B7A69D676">
+      <extensionElements>
+        <modeler:editor-resource-id>sid-9F938772-895F-436D-A7D1-051B7A69D676</modeler:editor-resource-id>
+      </extensionElements>
+    </endEvent>
+    <sequenceFlow id="sid-3C0516C4-1BF7-48F8-88CF-04C41810FE00" sourceRef="sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94" targetRef="sid-9F938772-895F-436D-A7D1-051B7A69D676">
+      <extensionElements>
+        <modeler:editor-resource-id>sid-3C0516C4-1BF7-48F8-88CF-04C41810FE00</modeler:editor-resource-id>
+      </extensionElements>
+    </sequenceFlow>
+    <serviceTask id="sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94" name="Connector Task" implementation="Example Connector">
+      <incoming>sid-68945AF1-396F-4B8A-B836-FC318F62313F</incoming>
+      <outgoing>sid-3C0516C4-1BF7-48F8-88CF-04C41810FE00</outgoing>
+    </serviceTask>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ConnectorProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_ConnectorProcess" bpmnElement="ConnectorProcess">
+      <bpmndi:BPMNShape id="BPMNShape_startEvent1" bpmnElement="startEvent1">
+        <omgdc:Bounds x="100" y="163" width="30" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_sid-9F938772-895F-436D-A7D1-051B7A69D676" bpmnElement="sid-9F938772-895F-436D-A7D1-051B7A69D676">
+        <omgdc:Bounds x="360" y="164" width="28" height="28" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_sid-68945AF1-396F-4B8A-B836-FC318F62313F" bpmnElement="sid-68945AF1-396F-4B8A-B836-FC318F62313F">
+        <omgdi:waypoint x="130" y="178" />
+        <omgdi:waypoint x="162.5" y="178" />
+        <omgdi:waypoint x="162.5" y="175" />
+        <omgdi:waypoint x="195" y="175" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_sid-3C0516C4-1BF7-48F8-88CF-04C41810FE00" bpmnElement="sid-3C0516C4-1BF7-48F8-88CF-04C41810FE00">
+        <omgdi:waypoint x="295" y="175" />
+        <omgdi:waypoint x="327.5" y="175" />
+        <omgdi:waypoint x="327.5" y="178" />
+        <omgdi:waypoint x="360" y="178" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0m9s52t_di" bpmnElement="sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94">
+        <omgdc:Bounds x="195" y="135" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
