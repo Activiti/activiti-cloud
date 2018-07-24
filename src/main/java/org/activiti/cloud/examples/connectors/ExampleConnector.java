@@ -28,6 +28,9 @@ public class ExampleConnector {
     @Value("${spring.application.name}")
     private String appName;
 
+    //track whether this instance of this connector has been called
+    private boolean connectorCalled;
+
     @Autowired
     private ConnectorProperties connectorProperties;
 
@@ -39,21 +42,26 @@ public class ExampleConnector {
     }
 
     @StreamListener(value = ExampleConnectorChannels.EXAMPLE_CONNECTOR_CONSUMER)
-    public void processEnglish(IntegrationRequest event) throws InterruptedException {
+    public void performTask(IntegrationRequest event) throws InterruptedException {
 
-        String tweet = String.valueOf(event.getIntegrationContext().getInBoundVariables().get("text"));
+        String text = String.valueOf(event.getIntegrationContext().getInBoundVariables().get("text"));
         logger.info(append("service-name",
                            appName),
-                    ">>> Doing cleaning/processing of posted content sized " + (tweet == null ? "null" : tweet.length()));
+                    ">>> In example-cloud-connector");
 
-        //@TODO: perform processing here
+        connectorCalled = true;
+        text += " "+ExampleConnector.class.getName()+" has been called";
 
         Map<String, Object> results = new HashMap<>();
         results.put("text",
-                    tweet);
+                    text);
         Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(event, connectorProperties)
                 .withOutboundVariables(results)
                 .buildMessage();
         integrationResultSender.send(message);
+    }
+
+    public boolean isConnectorCalled() {
+        return connectorCalled;
     }
 }
