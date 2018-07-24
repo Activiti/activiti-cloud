@@ -48,7 +48,7 @@ public class ExampleConnector {
                            appName),
                     ">>> In example-cloud-connector");
 
-        String var1 = ExampleConnector.class.getName()+" was called for instance " + event.getIntegrationContext().getProcessInstanceId();
+        String var1 = ExampleConnector.class.getSimpleName()+" was called for instance " + event.getIntegrationContext().getProcessInstanceId();
 
         var1Copy = String.valueOf(var1);
 
