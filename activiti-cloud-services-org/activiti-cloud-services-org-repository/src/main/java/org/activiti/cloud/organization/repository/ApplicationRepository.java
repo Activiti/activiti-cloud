@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.activiti.cloud.organization.api.Application;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Interface for {@link Application} entities repository
@@ -37,9 +38,5 @@ public interface ApplicationRepository<A extends Application> {
 
     void deleteApplication(A application);
 
-    default A updateApplication(A applicationToUpdate,
-                                A newApplication) {
-        applicationToUpdate.setName(newApplication.getName());
-        return updateApplication(applicationToUpdate);
-    }
+    Class<A> getApplicationType();
 }

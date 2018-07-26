@@ -21,8 +21,8 @@ import java.util.Optional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.rest.client.ModelService;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
+import org.activiti.cloud.organization.core.rest.client.ModelReferenceService;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
@@ -68,7 +68,7 @@ public class ApplicationControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private ModelService modelService;
+    private ModelReferenceService modelService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -244,7 +244,7 @@ public class ApplicationControllerIT {
                             applicationId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(newApplication)))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
         //then
         assertThat((Optional<Application>) applicationRepository.findApplicationById(applicationId))

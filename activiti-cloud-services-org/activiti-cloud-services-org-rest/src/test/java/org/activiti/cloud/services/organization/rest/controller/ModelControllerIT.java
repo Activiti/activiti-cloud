@@ -18,8 +18,8 @@ package org.activiti.cloud.services.organization.rest.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.rest.client.ModelService;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
+import org.activiti.cloud.organization.core.rest.client.ModelReferenceService;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
@@ -29,7 +29,9 @@ import org.activiti.cloud.services.organization.jpa.ApplicationJpaRepository;
 import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +42,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.util.NestedServletException;
 
 import static org.activiti.cloud.organization.api.ModelType.FORM;
 import static org.activiti.cloud.organization.api.ModelType.PROCESS;
@@ -65,7 +68,7 @@ public class ModelControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private ModelService modelService;
+    private ModelReferenceService modelService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -78,6 +81,9 @@ public class ModelControllerIT {
 
     @Autowired
     private ModelRepository modelRepository;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -161,6 +167,28 @@ public class ModelControllerIT {
     }
 
     @Test
+    public void testCreateModelFeignException() throws Exception {
+
+        //given
+        final String formModelId = "form_model_id";
+        final String formModelName = "Form Model";
+        Model formModel = new ModelEntity(formModelId,
+                                          formModelName,
+                                          FORM);
+
+        doThrow(new RuntimeException()).when(modelService).createResource(eq(FORM),
+                                                                          any(ModelReference.class));
+
+        expectedException.expect(NestedServletException.class);
+        mockMvc.perform(post("{version}/models",
+                             API_VERSION)
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(formModel)))
+                .andDo(print())
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
     public void testGetModel() throws Exception {
         //given
         final String processModelId = "process_model_id";
@@ -221,6 +249,12 @@ public class ModelControllerIT {
                                              PROCESS);
         assertThat(modelRepository.createModel(processModel)).isNotNull();
 
+        ModelReference expectedProcessModel = new ModelReference(processModelId,
+                                                                 "Process Model");
+
+        doReturn(expectedProcessModel).when(modelService).getResource(eq(PROCESS),
+                                                                      eq(expectedProcessModel.getModelId()));
+
         Model newModel = new ModelEntity();
         newModel.setType(PROCESS);
         newModel.setName("New Process Model");
@@ -231,7 +265,7 @@ public class ModelControllerIT {
                             processModelId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(newModel)))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 
     @Test

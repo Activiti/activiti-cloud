@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.core.model.ModelReference;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,17 +33,17 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 /**
- * Tests for {@link FeignModelService}
+ * Tests for {@link FeignModelReferenceService}
  */
 public class FeignModelServiceTest {
 
     @Mock
-    private ProcessModelService processModelService;
+    private ProcessModelReferenceService processModelService;
 
     @Mock
-    private FormModelService formModelService;
+    private FormModelReferenceService formModelService;
 
-    private FeignModelService feignModelService = new FeignModelService();
+    private FeignModelReferenceService feignModelService = new FeignModelReferenceService();
 
     @Before
     public void setUp() throws Exception {

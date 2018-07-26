@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.rest.client.feign;
-
-import org.activiti.cloud.organization.core.model.ModelReference;
-import org.springframework.cloud.openfeign.FeignClient;
+package org.activiti.cloud.organization.core.error;
 
 /**
- * Feign client for forms REST service
+ * Generic modeling exception
  */
-@FeignClient(value = "modeling-app", path = "/v1/forms")
-public interface FormModelService extends BaseModelService<ModelReference> {
+public class ModelingException extends RuntimeException {
 
+    public ModelingException(String message) {
+        super(message);
+    }
+
+    public ModelingException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -16,15 +16,25 @@
 
 package org.activiti.cloud.services.organization.jpa;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-import org.activiti.cloud.services.organization.entity.ModelEntity;
-import org.activiti.cloud.services.organization.entity.ApplicationEntity;
+import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.repository.ModelRepository;
+import org.activiti.cloud.services.organization.entity.ApplicationEntity;
+import org.activiti.cloud.services.organization.entity.ModelEntity;
+import org.activiti.cloud.services.organization.entity.ModelEntityHandler;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.createModelReference;
+import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.deleteModelReference;
+import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.loadModelReference;
+import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.updateModelReference;
+import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.validateModelReference;
 
 /**
  * JPA Repository for {@link ModelEntity} entity
@@ -43,33 +53,51 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
 
     @Override
     default Page<ModelEntity> getTopLevelModels(Pageable pageable) {
-        return findAllByApplicationIdIsNull(pageable);
+        return loadModelReference(findAllByApplicationIdIsNull(pageable));
     }
 
     @Override
     default Page<ModelEntity> getModels(ApplicationEntity application,
                                         Pageable pageable) {
-        return findAllByApplicationId(application.getId(),
-                                      pageable);
+        return loadModelReference(findAllByApplicationId(application.getId(),
+                                                         pageable));
     }
 
     @Override
     default Optional<ModelEntity> findModelById(String id) {
-        return findById(id);
+        return findById(id).map(ModelEntityHandler::loadModelReference);
     }
 
     @Override
     default ModelEntity createModel(ModelEntity model) {
-        return save(model);
+        if (model.getId() == null) {
+            model.setId(UUID.randomUUID().toString());
+        }
+        createModelReference(model);
+        return loadModelReference(save(model));
     }
 
     @Override
     default ModelEntity updateModel(ModelEntity model) {
-        return save(model);
+        updateModelReference(model);
+        return loadModelReference(save(model));
     }
 
     @Override
     default void deleteModel(ModelEntity model) {
+        deleteModelReference(model);
         delete(model);
+    }
+
+    @Override
+    default List<ModelValidationError> validateModelContent(ModelEntity model,
+                                                            byte[] content) {
+        return validateModelReference(model,
+                                    content);
+    }
+
+    @Override
+    default Class<ModelEntity> getModelType() {
+        return ModelEntity.class;
     }
 }

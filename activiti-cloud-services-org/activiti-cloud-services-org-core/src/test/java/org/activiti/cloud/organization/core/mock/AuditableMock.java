@@ -18,7 +18,7 @@ package org.activiti.cloud.organization.core.mock;
 
 import java.util.Date;
 
-import org.activiti.cloud.organization.api.Auditable;
+import org.activiti.cloud.services.auditable.Auditable;
 
 /**
  * Mock implmentation for {@link Auditable}

@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.organization.rest.assembler;
 
 import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.services.organization.rest.controller.ApplicationController;
 import org.activiti.cloud.services.organization.rest.controller.ModelController;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +40,7 @@ public class ApplicationResourceAssembler implements ResourceAssembler<Applicati
                 application,
                 linkTo(methodOn(ApplicationController.class).getApplication(application.getId())).withSelfRel(),
                 linkTo(methodOn(ModelController.class).getModels(application.getId(),
+                                                                 ModelType.PROCESS,
                                                                  Pageable.unpaged())).withRel("models")
         );
     }

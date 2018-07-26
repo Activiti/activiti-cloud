@@ -16,15 +16,16 @@
 
 package org.activiti.cloud.organization.core.rest.client.feign;
 
-import org.activiti.cloud.organization.core.model.ModelReference;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.springframework.cloud.openfeign.FeignClient;
 
 /**
- * Feign client for process model REST service
+ * Feign client for forms REST service
  */
 @FeignClient(
         value = "modeling-app",
-        path = "/v1/process-models")
-public interface ProcessModelService extends BaseModelService<ModelReference> {
+        url = "http://localhost:8088",
+        path = "/v1/forms")
+public interface FormModelReferenceService extends BaseModelService<ModelReference> {
 
 }

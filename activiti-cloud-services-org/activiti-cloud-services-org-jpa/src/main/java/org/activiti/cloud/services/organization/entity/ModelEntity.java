@@ -26,9 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.rest.resource.EntityWithRestResource;
-import org.activiti.cloud.organization.core.rest.resource.RestResource;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -37,7 +35,6 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
  * Model model entity
  */
 @Entity(name = "Model")
-@EntityWithRestResource
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
 public class ModelEntity extends AuditableEntity<String> implements Model<ApplicationEntity, String> {
@@ -52,9 +49,6 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
 
     @Transient
     @JsonIgnore
-    @RestResource(
-            resourceIdField = "id",
-            resourceKeyField = "type")
     private ModelReference data;
 
     public ModelEntity() { // for JPA
@@ -110,6 +104,7 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
     }
 
     @Override
+    @JsonIgnore
     public ApplicationEntity getApplication() {
         return application;
     }
@@ -130,6 +125,7 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
     }
 
     @Override
+    @JsonIgnore
     public String getContentType() {
         return data.getContentType();
     }
@@ -140,6 +136,7 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
     }
 
     @Override
+    @JsonIgnore
     public String getContent() {
         return data.getContent();
     }

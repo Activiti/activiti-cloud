@@ -23,16 +23,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.rest.resource.EntityWithRestResource;
-import org.activiti.cloud.organization.core.rest.resource.RestResource;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  *
  */
-@EntityWithRestResource
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
 public class ModelMock extends AuditableMock implements Model<ApplicationMock, String> {
@@ -45,9 +42,6 @@ public class ModelMock extends AuditableMock implements Model<ApplicationMock, S
 
     @Transient
     @JsonIgnore
-    @RestResource(
-            resourceIdField = "id",
-            resourceKeyField = "type")
     private ModelReference data;
 
     public ModelMock() { // for JPA

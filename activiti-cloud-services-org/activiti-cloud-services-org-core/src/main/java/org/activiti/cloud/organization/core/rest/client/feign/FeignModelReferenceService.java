@@ -21,9 +21,9 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
-import org.activiti.cloud.organization.core.rest.client.ModelService;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
+import org.activiti.cloud.organization.api.ModelValidationError;
+import org.activiti.cloud.organization.core.rest.client.ModelReferenceService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @ConditionalOnClass(FeignClient.class)
-public class FeignModelService implements ModelService {
+public class FeignModelReferenceService implements ModelReferenceService {
 
     @Resource
     private Map<ModelType, BaseModelService<ModelReference>> modelServices;
@@ -65,8 +65,8 @@ public class FeignModelService implements ModelService {
     }
 
     @Override
-    public List<ValidationErrorRepresentation> validateResourceContent(ModelType modelType,
-                                                                       byte[] file) {
+    public List<ModelValidationError> validateResourceContent(ModelType modelType,
+                                                              byte[] file) {
         return modelServices.get(modelType).validateResourceContent(file);
     }
 }

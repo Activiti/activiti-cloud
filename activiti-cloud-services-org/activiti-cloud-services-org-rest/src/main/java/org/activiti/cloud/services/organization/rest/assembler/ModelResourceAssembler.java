@@ -32,17 +32,9 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Component
 public class ModelResourceAssembler implements ResourceAssembler<Model, Resource<Model>> {
 
-    private final ResourceProcessor<Resource<?>> resourceProcessor;
-
-    public ModelResourceAssembler(ResourceProcessor<Resource<?>> resourceProcessors) {
-        this.resourceProcessor = resourceProcessors;
-    }
-
     @Override
     public Resource<Model> toResource(Model model) {
-        Resource<Model> modelResource = new Resource<>(
-                model,
-                linkTo(methodOn(ModelController.class).getModel(model.getId())).withSelfRel());
-        return (Resource<Model>) resourceProcessor.process(modelResource);
+        return new Resource<>(model,
+                              linkTo(methodOn(ModelController.class).getModel(model.getId())).withSelfRel());
     }
 }

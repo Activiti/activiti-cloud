@@ -14,28 +14,19 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.model;
+package org.activiti.cloud.organization.api;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.activiti.validation.ValidationError;
 
 /**
- * Representation for {@link ValidationError} with relevant fields for clients
+ * Model validation error
  */
-public class ValidationErrorRepresentation {
+public class ModelValidationError {
 
     private String validatorSetName;
     private String problem;
     private String description;
     private boolean isWarning;
-
-    @JsonCreator
-    public ValidationErrorRepresentation(ValidationError validationError) {
-        this.validatorSetName = validationError.getValidatorSetName();
-        this.problem = validationError.getProblem();
-        this.description = validationError.getDefaultDescription();
-        this.isWarning = validationError.isWarning();
-    }
 
     public String getValidatorSetName() {
         return validatorSetName;

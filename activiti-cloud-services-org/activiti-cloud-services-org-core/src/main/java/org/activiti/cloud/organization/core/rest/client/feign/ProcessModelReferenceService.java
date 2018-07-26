@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.rest.resource;
+package org.activiti.cloud.organization.core.rest.client.feign;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
+import org.springframework.cloud.openfeign.FeignClient;
 
 /**
- * Rest resource annotation.
+ * Feign client for process model REST service
  */
-@Target(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface RestResource {
-
-    String resourceIdField() default "";
-
-    String resourceKeyField() default "";
-
-    String targetField() default "";
+@FeignClient(
+        value = "modeling-app",
+        url = "http://localhost:8088",
+        path = "/v1/process-models")
+public interface ProcessModelReferenceService extends BaseModelService<ModelReference> {
 
 }
