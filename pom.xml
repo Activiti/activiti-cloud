@@ -22,6 +22,8 @@
     <module>activiti-cloud-services-rest-docs</module>
     <module>activiti-cloud-services-common-security-keycloak</module>
     <module>activiti-cloud-services-common-identity-keycloak</module>
+    <module>activiti-cloud-services-auditable</module>
+    <module>activiti-cloud-services-commons-io</module>
   </modules>
   <scm>
     <url>https://github.com/Activiti/activiti-cloud-service-common</url>
