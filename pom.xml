@@ -149,6 +149,11 @@
         <artifactId>springfox-swagger-ui</artifactId>
         <version>${springfox.version}</version>
       </dependency>
+      <dependency>
+        <groupId>io.swagger</groupId>
+        <artifactId>swagger-annotations</artifactId>
+        <version>1.5.14</version>
+      </dependency>
       <!-- GraphQL-JPA-Query dependencies + schema generation https://github.com/introproventures/graphql-jpa-query -->
       <dependency>
         <groupId>com.introproventures</groupId>

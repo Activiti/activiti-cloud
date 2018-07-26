@@ -15,6 +15,16 @@
     <dependencies>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-auditable</artifactId>
+        <version>${activiti-cloud-service-common.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-commons-io</artifactId>
+        <version>${activiti-cloud-service-common.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-identity-basic</artifactId>
         <version>${activiti-cloud-service-common.version}</version>
       </dependency>
