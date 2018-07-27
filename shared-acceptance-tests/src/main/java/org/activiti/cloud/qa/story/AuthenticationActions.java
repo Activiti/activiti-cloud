@@ -20,6 +20,7 @@ import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.qa.steps.AuthenticationSteps;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
+import org.jbehave.core.annotations.When;
 
 /**
  * Authentication actions
@@ -30,10 +31,23 @@ public class AuthenticationActions {
     private AuthenticationSteps authenticationSteps;
 
     @Given("any authenticated user")
-    @Alias("the user is authenticated")
-    public void authenticate() throws Exception {
-        authenticationSteps.authenticateDefaultUser();
+    @Alias("the user is authenticated as a testuser")
+    public void authenticateTestUser() throws Exception {
+        authenticationSteps.authenticateTestUser();
         authenticationSteps.ensureUserIsAuthenticated();
     }
+
+    @Given("the user is authenticated as a hruser")
+    public void authenticateHrUser() throws Exception {
+        authenticationSteps.authenticateHrUser();
+        authenticationSteps.ensureUserIsAuthenticated();
+    }
+
+    @Given("the user is authenticated as a hradmin")
+    public void authenticateHrAdmin() throws Exception {
+        authenticationSteps.authenticateHrAdmin();
+        authenticationSteps.ensureUserIsAuthenticated();
+    }
+
 
 }

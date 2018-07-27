@@ -37,7 +37,7 @@ public class MultipleRuntimeBundleSteps {
 
     public static final String DEFAULT_PROCESS_INSTANCE_COMMAND_TYPE = "StartProcessInstanceCmd";
 
-    public static final String DEFAULT_PROCESS_INSTANCE_KEY = "ProcessWithVariables";
+    public static final String SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY = "ProcessWithVariables";
 
     @Autowired
     private RuntimeDirtyContextHandler dirtyContextHandler;

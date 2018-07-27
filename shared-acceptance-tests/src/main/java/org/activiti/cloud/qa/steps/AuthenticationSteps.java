@@ -33,18 +33,40 @@ public class AuthenticationSteps {
 
     private static final String AUTH_CLIENT_ID = "activiti";
     private static final String AUTH_GRANT_TYPE = "password";
-    private static final String AUTH_USERNAME = "testuser";
+    private static final String AUTH_USERNAME_TESTUSER = "testuser";
+    private static final String AUTH_USERNAME_HRUSER = "hruser";
+    private static final String AUTH_USERNAME_HRADMIN = "hradmin";
     private static final String AUTH_PASSWORD = "password";
 
     @Autowired
     private AuthenticationService authenticationService;
 
     @Step
-    public void authenticateDefaultUser() {
+    public void authenticateTestUser() {
+        AuthToken authToken = authenticationService
+                    .authenticate(AUTH_CLIENT_ID,
+                            AUTH_GRANT_TYPE,
+                            AUTH_USERNAME_TESTUSER,
+                            AUTH_PASSWORD);
+        TokenHolder.setAuthToken(authToken);
+    }
+
+    @Step
+    public void authenticateHrUser() {
         AuthToken authToken = authenticationService
                 .authenticate(AUTH_CLIENT_ID,
                         AUTH_GRANT_TYPE,
-                        AUTH_USERNAME,
+                        AUTH_USERNAME_HRUSER,
+                        AUTH_PASSWORD);
+        TokenHolder.setAuthToken(authToken);
+    }
+
+    @Step
+    public void authenticateHrAdmin() {
+        AuthToken authToken = authenticationService
+                .authenticate(AUTH_CLIENT_ID,
+                        AUTH_GRANT_TYPE,
+                        AUTH_USERNAME_HRADMIN,
                         AUTH_PASSWORD);
         TokenHolder.setAuthToken(authToken);
     }

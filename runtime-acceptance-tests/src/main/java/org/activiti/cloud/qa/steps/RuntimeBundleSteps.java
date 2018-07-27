@@ -46,9 +46,11 @@ import static org.assertj.core.api.Assertions.*;
 @EnableRuntimeFeignContext
 public class RuntimeBundleSteps {
 
-    public static final String DEFAULT_PROCESS_INSTANCE_COMMAND_TYPE = "StartProcessInstanceCmd";
+    public static final String DEFAULT_PROCESS_INSTANCE_COMMAND_TYPE = "START_PROCESS";
 
-    public static final String DEFAULT_PROCESS_INSTANCE_KEY = "ProcessWithVariables";
+    public static final String SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY = "SimpleProcess";
+
+    public static final String PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY = "ProcessWithVariables";
 
     @Autowired
     private RuntimeDirtyContextHandler dirtyContextHandler;
@@ -71,7 +73,7 @@ public class RuntimeBundleSteps {
 
     @Step
     public CloudProcessInstance startProcess() {
-        return this.startProcess(DEFAULT_PROCESS_INSTANCE_KEY);
+        return this.startProcess(SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY);
     }
 
     @Step

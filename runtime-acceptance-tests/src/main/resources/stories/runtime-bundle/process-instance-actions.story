@@ -6,7 +6,7 @@ I want to perform operations on process instances
 
 Scenario: cancel a process instance
 Given any authenticated user
-When the user starts a random process
+When the user starts a process with variables
 And cancel the process
 Then the process instance is cancelled
 
@@ -18,7 +18,7 @@ Then the process cannot be activated anymore
 
 Scenario: show a process instance diagram
 Given any authenticated user
-When the user starts a random process
+When the user starts a process with variables
 And open the process diagram
 Then the diagram is shown
 

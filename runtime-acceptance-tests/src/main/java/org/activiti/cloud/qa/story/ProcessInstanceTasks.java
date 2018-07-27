@@ -32,8 +32,10 @@ import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
-import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.DEFAULT_PROCESS_INSTANCE_KEY;
+import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY;
+import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
 import static org.assertj.core.api.Assertions.*;
 
 public class ProcessInstanceTasks {
@@ -62,7 +64,9 @@ public class ProcessInstanceTasks {
 
     @When("the user starts process '$process'")
     public void startProcess(String process) throws Exception {
+
         processInstance = runtimeBundleSteps.startProcess(process);
+
         assertThat(processInstance).isNotNull();
 
         List<Task> tasks = new ArrayList<>(
@@ -73,9 +77,14 @@ public class ProcessInstanceTasks {
         assertThat(currentTask).isNotNull();
     }
 
-    @When("the user starts a random process")
-    public void startProcess() throws Exception {
-        this.startProcess(DEFAULT_PROCESS_INSTANCE_KEY);
+    @When("the user starts a simple process")
+    public void startSimpleProcess() throws Exception {
+        this.startProcess(SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY);
+    }
+
+    @When("the user starts a process with variables")
+    public void startProcessWithVariables() throws Exception {
+        this.startProcess(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
     }
 
     @When("the user starts a process without graphic info")

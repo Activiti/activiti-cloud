@@ -17,6 +17,7 @@
     <module>runtime-acceptance-tests</module>
     <module>multiple-runtime-acceptance-tests</module>
     <module>apps-acceptance-tests</module>
+    <module>security-policies-acceptance-tests</module>
   </modules>
   <scm>
     <url>https://github.com/Activiti/activiti-cloud-acceptance-tests</url>
