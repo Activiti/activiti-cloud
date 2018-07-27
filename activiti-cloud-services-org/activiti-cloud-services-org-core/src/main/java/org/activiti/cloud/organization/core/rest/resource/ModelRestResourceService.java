@@ -16,15 +16,14 @@
 
 package org.activiti.cloud.organization.core.rest.resource;
 
-import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.model.Model.ModelType;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation for {@link RestResourceService} for the rest resource associated with the {@link Model} entity
+ * Implementation for {@link RestResourceService} for the rest resource associated with a model
  */
 @Service
 public class ModelRestResourceService extends RestResourceService<ModelReference, ModelType, String> {

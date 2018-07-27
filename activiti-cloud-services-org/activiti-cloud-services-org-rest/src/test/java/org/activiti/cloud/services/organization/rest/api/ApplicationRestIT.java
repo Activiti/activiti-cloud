@@ -16,13 +16,19 @@
 
 package org.activiti.cloud.services.organization.rest.api;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.organization.core.model.Model;
+import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.model.Application;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
-import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
+import org.activiti.cloud.organization.repository.ApplicationRepository;
+import org.activiti.cloud.organization.repository.ModelRepository;
+import org.activiti.cloud.services.organization.entity.ApplicationEntity;
+import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.jpa.ApplicationJpaRepository;
+import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
 import org.junit.After;
 import org.junit.Before;
@@ -37,8 +43,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.activiti.cloud.organization.core.model.Model.ModelType.FORM;
-import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
+import static org.activiti.cloud.organization.api.ModelType.FORM;
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.is;
@@ -54,7 +60,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = org.activiti.cloud.services.organization.config.OrganizationApplication.class)
+@SpringBootTest(classes = org.activiti.cloud.services.organization.config.OrganizationRestApplication.class)
 @WebAppConfiguration
 public class ApplicationRestIT {
 
@@ -67,10 +73,10 @@ public class ApplicationRestIT {
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private ApplicationJpaRepository applicationRepository;
+    private ApplicationRepository applicationRepository;
 
     @Autowired
-    private ModelJpaRepository modelRepository;
+    private ModelRepository modelRepository;
 
     @Autowired
     private ObjectMapper mapper;
@@ -82,8 +88,8 @@ public class ApplicationRestIT {
 
     @After
     public void tearDown() {
-        modelRepository.deleteAllInBatch();
-        applicationRepository.deleteAllInBatch();
+        ((ModelJpaRepository) modelRepository).deleteAllInBatch();
+        ((ApplicationJpaRepository) applicationRepository).deleteAllInBatch();
     }
 
     @Test
@@ -92,11 +98,11 @@ public class ApplicationRestIT {
         //given
         final String applicationId = "application_id";
         final String applicationName = "Application";
-        Application application = new Application(applicationId,
-                                              applicationName);
+        Application application = new ApplicationEntity(applicationId,
+                                                        applicationName);
 
         //when
-        application = applicationRepository.save(application);
+        application = applicationRepository.createApplication(application);
         assertThat(application).isNotNull();
 
         //then
@@ -112,20 +118,30 @@ public class ApplicationRestIT {
 
     @Test
     public void testCreateApplicationsWithModels() throws Exception {
-        ModelReference expectedFormModel = new ModelReference("ref_model_form_id",
-                                                              "Form Model");
-        ModelReference expectedProcessModel = new ModelReference("ref_process_model_id",
-                                                                 "Process Model");
-        doReturn(expectedFormModel).when(modelService).getResource(FORM,
-                                                                   expectedFormModel.getModelId());
-        doReturn(expectedProcessModel).when(modelService).getResource(PROCESS_MODEL,
-                                                                      expectedProcessModel.getModelId());
+        final String formModelId = "form_model_id";
+        final String formModelName = "Form Model";
+
+        final String processModelId = "process_model_id";
+        final String processModelName = "Process Model";
+
+        ModelReference expectedFormModel = new ModelReference(formModelId,
+                                                              formModelName);
+        ModelReference expectedProcessModel = new ModelReference(processModelId,
+                                                                 processModelName);
+        doReturn(expectedFormModel)
+                .when(modelService)
+                .getResource(eq(FORM),
+                             eq(expectedFormModel.getModelId()));
+        doReturn(expectedProcessModel)
+                .when(modelService)
+                .getResource(eq(PROCESS),
+                             eq(expectedProcessModel.getModelId()));
 
         //given
         final String applicationWithModelsId = "application_with_models_id";
         final String applicationWithModelsName = "application with models";
-        Application application = new Application(applicationWithModelsId,
-                                              applicationWithModelsName);
+        Application application = new ApplicationEntity(applicationWithModelsId,
+                                                        applicationWithModelsName);
 
         // create an application
         mockMvc.perform(post("{version}/applications",
@@ -136,12 +152,9 @@ public class ApplicationRestIT {
                 .andExpect(status().isCreated());
 
         // create a form model
-        final String formModelId = "form_model_id";
-        final String formModelName = "Form Model";
-        Model modelForm = new Model(formModelId,
-                                    formModelName,
-                                    Model.ModelType.FORM,
-                                    "ref_model_form_id");
+        Model modelForm = new ModelEntity(formModelId,
+                                          formModelName,
+                                          FORM);
 
         mockMvc.perform(post("{version}/models",
                              RepositoryRestConfig.API_VERSION)
@@ -151,12 +164,10 @@ public class ApplicationRestIT {
                 .andExpect(status().isCreated());
 
         // create a process-model
-        final String processModelId = "process_model_id";
-        final String processModelName = "Process Model";
-        Model processModel = new Model(processModelId,
-                                       processModelName,
-                                       Model.ModelType.PROCESS_MODEL,
-                                       "ref_process_model_id");
+        Model processModel = new ModelEntity(processModelId,
+                                             processModelName,
+                                             PROCESS
+        );
 
         mockMvc.perform(post("{version}/models",
                              RepositoryRestConfig.API_VERSION)
@@ -196,11 +207,11 @@ public class ApplicationRestIT {
         //given
         final String applicationId = "application_id";
         final String applicationName = "Application";
-        Application application = new Application(applicationId,
-                                              applicationName);
+        Application application = new ApplicationEntity(applicationId,
+                                                        applicationName);
 
         //when
-        application = applicationRepository.save(application);
+        application = applicationRepository.createApplication(application);
         assertThat(application).isNotNull();
 
         //then
@@ -214,17 +225,17 @@ public class ApplicationRestIT {
     public void testUpdateApplication() throws Exception {
         //given
         final String applicationId = "application_id";
-        final Application savedApplication = applicationRepository.save(new Application(applicationId,
-                                                                                        "Application name"));
+        final Application savedApplication = applicationRepository.createApplication(new ApplicationEntity(applicationId,
+                                                                                                           "Application name"));
         assertThat(savedApplication).isNotNull();
 
-        assertThat(applicationRepository.findById(applicationId))
+        assertThat((Optional<Application>) applicationRepository.findApplicationById(applicationId))
                 .hasValueSatisfying(application -> {
                     assertThat(application.getName()).isEqualTo("Application name");
                 });
 
-        Application newApplication = new Application(applicationId,
-                                                 "New application name");
+        Application newApplication = new ApplicationEntity(applicationId,
+                                                           "New application name");
 
         //when
         mockMvc.perform(put("{version}/applications/{applicationId}",
@@ -235,7 +246,7 @@ public class ApplicationRestIT {
                 .andExpect(status().isNoContent());
 
         //then
-        assertThat(applicationRepository.findById(applicationId))
+        assertThat((Optional<Application>) applicationRepository.findApplicationById(applicationId))
                 .hasValueSatisfying(application -> {
                     assertThat(application.getName()).isEqualTo("New application name");
                 });
@@ -245,8 +256,8 @@ public class ApplicationRestIT {
     public void testDeleteApplication() throws Exception {
         //given
         final String applicationId = "application_id";
-        final Application savedApplication = applicationRepository.save(new Application(applicationId,
-                                                                                    "Application"));
+        final Application savedApplication = applicationRepository.createApplication(new ApplicationEntity(applicationId,
+                                                                                                           "Application"));
         assertThat(savedApplication).isNotNull();
 
         //when
@@ -256,6 +267,6 @@ public class ApplicationRestIT {
                 .andExpect(status().isNoContent());
 
         //then
-        assertThat(applicationRepository.findById(applicationId)).isEmpty();
+        assertThat(applicationRepository.findApplicationById(applicationId)).isEmpty();
     }
 }

@@ -16,12 +16,13 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.organization.core.model.Application;
-import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.repository.ModelRepository;
+import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.rest.assembler.ModelResourceAssembler;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -130,6 +131,7 @@ public class ModelController implements ApplicationEventPublisherAware {
     public void updateModel(@PathVariable String modelId,
                             @RequestBody Model model) {
         Model modelToUpdate = findModelById(modelId);
+        model.setId(modelId);
         applicationEventPublisher.publishEvent(new BeforeSaveEvent(model));
         resourceAssembler.toResource(
                 modelRepository.updateModel(modelToUpdate,
@@ -156,8 +158,8 @@ public class ModelController implements ApplicationEventPublisherAware {
     }
 
     public Model findModelById(String modelId) {
-        return modelRepository
-                .findModelById(modelId)
+        Optional<Model> optionalModel = modelRepository.findModelById(modelId);
+        return optionalModel
                 .orElseThrow(() -> new ResourceNotFoundException("Organization model not found: " + modelId));
     }
 }

@@ -14,64 +14,57 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.model;
+package org.activiti.cloud.organization.core.mock;
 
 import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import org.activiti.cloud.organization.core.audit.AuditableEntity;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import org.activiti.cloud.organization.api.Application;
 
 /**
- * Application model entity
+ * Application mock
  */
-@Entity
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-public class Application extends AuditableEntity<String> {
+public class ApplicationMock extends AuditableMock implements Application<String> {
 
-    @OneToMany
-    private List<Model> models;
-
-    @Id
     private String id;
 
     private String name;
 
-    public Application() {  // for JPA
+    private List<ModelMock> models;
+
+    public ApplicationMock() {
+
     }
 
-    public Application(String id,
-                       String name) {
+    public ApplicationMock(String id,
+                           String name) {
         this.id = id;
         this.name = name;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public void setId(String id) {
         this.id = id;
     }
 
-    public List<Model> getModels() {
+    public List<ModelMock> getModels() {
         return models;
     }
 
-    public void setModels(List<Model> models) {
+    public void setModels(List<ModelMock> models) {
         this.models = models;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }

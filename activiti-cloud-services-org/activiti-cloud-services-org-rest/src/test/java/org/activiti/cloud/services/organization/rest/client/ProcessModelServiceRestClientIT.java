@@ -17,9 +17,10 @@
 package org.activiti.cloud.services.organization.rest.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.repository.ModelRepository;
-import org.activiti.cloud.services.organization.config.OrganizationApplication;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.repository.ModelRepository;
+import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
+import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
-import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Consumer side tests for communication with process models service
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = OrganizationApplication.class)
+@SpringBootTest(classes = OrganizationRestApplication.class)
 @WebAppConfiguration
 @AutoConfigureStubRunner(
         ids = "org.activiti.cloud:activiti-cloud-services-process-model-rest:+:stubs:8088")
@@ -62,10 +63,10 @@ public class ProcessModelServiceRestClientIT {
 
     @Test
     public void testCreateProcessModel() throws Exception {
-        Model processModel = new Model("newprocessModel",
-                                       "newProcesModelName",
-                                       PROCESS_MODEL,
-                                       "newProcesModelId");
+        Model processModel = new ModelEntity("newProcesModelId",
+                                             "newProcesModelName",
+                                             PROCESS
+        );
 
         given()
                 .contentType(APPLICATION_JSON_VALUE)
@@ -76,31 +77,35 @@ public class ProcessModelServiceRestClientIT {
 
     @Test
     public void testUpdateProcessModel() throws Exception {
-        Model processModel = new Model("processModel_id2",
-                                       "newProcesModelNameUpdated",
-                                       PROCESS_MODEL,
-                                       "contractUpdateProcesModelId");
-        processModel.getData().setContent("someContent");
+        Model processModel = new ModelEntity("contractUpdateProcesModelId",
+                                             "newProcesModelNameUpdated",
+                                             PROCESS
+        );
+        processModel.setContent("someContent");
         modelRepository.createModel(processModel);
+
+        Model newProcessModel = new ModelEntity();
+        newProcessModel.setType(PROCESS);
+        newProcessModel.setName("newProcesModelNameUpdated");
+        newProcessModel.setContent("newContent");
 
         given()
                 .contentType(APPLICATION_JSON_VALUE)
-                .body(mapper.writeValueAsString(processModel))
-                .put("/v1/models/processModel_id2")
+                .body(mapper.writeValueAsString(newProcessModel))
+                .put("/v1/models/contractUpdateProcesModelId")
                 .then().expect(status().isNoContent());
     }
 
     @Test
     public void testGetProcessModel() throws Exception {
-        Model processModel = new Model("processModel_id",
-                                       "testProcesModelName",
-                                       PROCESS_MODEL,
-                                       "contractUpdateProcesModelId");
+        Model processModel = new ModelEntity("contractUpdateProcesModelId",
+                                             "testProcesModelName",
+                                             PROCESS);
         modelRepository.createModel(processModel);
 
         given()
                 .contentType(APPLICATION_JSON_VALUE)
-                .get("/v1/models/processModel_id")
+                .get("/v1/models/contractUpdateProcesModelId")
                 .then().expect(status().isOk())
                 .and().body("name",
                             equalTo("contractUpdateProcesModelNameUpdated"))

@@ -18,9 +18,13 @@ package org.activiti.cloud.services.organization.rest.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.webmvc.convert.UriListHttpMessageConverter;
+import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -29,8 +33,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
 
+    private final Jackson2ObjectMapperBuilder objectMapperBuilder;
+
+    @Autowired
+    public ExtendedWebMvcConfigurer(Jackson2ObjectMapperBuilder objectMapperBuilder) {
+        this.objectMapperBuilder = objectMapperBuilder;
+    }
+
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.stream()
+                .filter(MappingJackson2HttpMessageConverter.class::isInstance)
+                .filter(converter -> !(converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter))
+                .map(MappingJackson2HttpMessageConverter.class::cast)
+                .map(MappingJackson2HttpMessageConverter::getObjectMapper)
+                .forEach(objectMapperBuilder::configure);
         converters.add(new UriListHttpMessageConverter());
     }
 }

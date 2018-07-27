@@ -14,51 +14,53 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.repository;
+package org.activiti.cloud.organization.repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.activiti.cloud.organization.core.model.Application;
-import org.activiti.cloud.organization.core.model.Model;
+import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Model;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
  * Interface for {@link Model} entities repository
  */
-public interface ModelRepository {
+public interface ModelRepository<A extends Application, M extends Model<A, ?>> {
 
-    Page<Model> getTopLevelModels(Pageable pageable);
+    Page<M> getTopLevelModels(Pageable pageable);
 
-    Page<Model> getModels(Application application,
-                          Pageable pageable);
+    Page<M> getModels(A application,
+                      Pageable pageable);
 
-    Optional<Model> findModelById(String modelId);
+    Optional<M> findModelById(String modelId);
 
-    Model createModel(Model model);
+    M createModel(M model);
 
-    Model updateModel(Model modelToUpdate);
+    M updateModel(M modelToUpdate);
 
-    void deleteModel(Model model);
+    void deleteModel(M model);
 
-    default Model createModel(Application application,
-                              Model model) {
+    default M createModel(A application,
+                          M model) {
         model.setApplication(application);
         return createModel(model);
     }
 
-    default Model updateModel(Model modelToUpdate,
-                              Model newModel) {
-        modelToUpdate.setData(newModel.getData());
+    default M updateModel(M modelToUpdate,
+                          M newModel) {
+        modelToUpdate.setName(newModel.getName());
+        modelToUpdate.setContentType(newModel.getContentType());
+        modelToUpdate.setContent(newModel.getContent());
         return updateModel(modelToUpdate);
     }
 
-    default Optional<Model> findModelByLink(String link) {
+    default Optional<M> findModelByLink(String link) {
         return findModelById(link.substring(link.lastIndexOf('/') + 1));
     }
 
-    default void createModelsReference(Application application,
+    default void createModelsReference(A application,
                                        List<String> applicationsLinks) {
         applicationsLinks
                 .stream()

@@ -16,15 +16,12 @@
 
 package org.activiti.cloud.organization.core.config;
 
-import org.activiti.cloud.organization.core.audit.AuditorAwareImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.domain.AuditorAware;
 
 /**
  * Organization Test Configuration
@@ -35,11 +32,6 @@ import org.springframework.data.domain.AuditorAware;
 @EntityScan("org.activiti.cloud.organization.core.model")
 @SpringBootApplication
 public class OrganizationCoreApplication {
-
-    @Bean
-    public AuditorAware<String> auditorAware() {
-        return new AuditorAwareImpl();
-    }
 
     public static void main(String[] args) {
         SpringApplication.run(OrganizationCoreApplication.class,

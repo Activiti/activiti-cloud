@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.audit;
+package org.activiti.cloud.services.organization.jpa.audit;
 
-import org.activiti.cloud.organization.core.config.OrganizationCoreApplication;
+import org.activiti.cloud.services.organization.jpa.config.OrganizationJpaApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = OrganizationCoreApplication.class)
+@SpringBootTest(classes = OrganizationJpaApplication.class)
 public class AuditorAwareIT {
 
     @Autowired

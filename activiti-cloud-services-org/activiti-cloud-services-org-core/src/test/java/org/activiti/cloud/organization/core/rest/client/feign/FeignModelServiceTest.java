@@ -19,15 +19,15 @@ package org.activiti.cloud.organization.core.rest.client.feign;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.organization.core.model.Model.ModelType;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import static org.activiti.cloud.organization.core.model.Model.ModelType.FORM;
-import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
+import static org.activiti.cloud.organization.api.ModelType.FORM;
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -50,7 +50,7 @@ public class FeignModelServiceTest {
         initMocks(this);
 
         Map<ModelType, BaseModelService<ModelReference>> modelServices = new HashMap<>();
-        modelServices.put(PROCESS_MODEL,
+        modelServices.put(PROCESS,
                           processModelService);
         modelServices.put(FORM,
                           formModelService);
@@ -64,28 +64,28 @@ public class FeignModelServiceTest {
     @Test
     public void testGetResource() {
         // WHEN
-        feignModelService.getResource(PROCESS_MODEL,
-                                      "process_model_refId");
+        feignModelService.getResource(PROCESS,
+                                      "process_model_id");
 
         // THEN
         verify(processModelService,
                times(1))
-                .getResource("process_model_refId");
+                .getResource("process_model_id");
 
         // WHEN
         feignModelService.getResource(FORM,
-                                      "form_model_refId");
+                                      "form_model_id");
 
         // THEN
         verify(formModelService,
                times(1))
-                .getResource("form_model_refId");
+                .getResource("form_model_id");
     }
 
     @Test
     public void testCreateResource() {
         // WHEN
-        feignModelService.createResource(PROCESS_MODEL,
+        feignModelService.createResource(PROCESS,
                                          mock(ModelReference.class));
 
         // THEN
@@ -106,54 +106,54 @@ public class FeignModelServiceTest {
     @Test
     public void testUpdateResource() {
         // WHEN
-        feignModelService.updateResource(PROCESS_MODEL,
-                                         "process_model_refId",
+        feignModelService.updateResource(PROCESS,
+                                         "process_model_id",
                                          mock(ModelReference.class));
 
         // THEN
         verify(processModelService,
                times(1))
-                .updateResource(eq("process_model_refId"),
+                .updateResource(eq("process_model_id"),
                                 any(ModelReference.class));
 
         // WHEN
         feignModelService.updateResource(FORM,
-                                         "form_model_refId",
+                                         "form_model_id",
                                          mock(ModelReference.class));
 
         // THEN
         verify(formModelService,
                times(1))
-                .updateResource(eq("form_model_refId"),
+                .updateResource(eq("form_model_id"),
                                 any(ModelReference.class));
     }
 
     @Test
     public void testDeleteResource() {
         // WHEN
-        feignModelService.deleteResource(PROCESS_MODEL,
-                                         "process_model_refId");
+        feignModelService.deleteResource(PROCESS,
+                                         "process_model_id");
 
         // THEN
         verify(processModelService,
                times(1))
-                .deleteResource(eq("process_model_refId"));
+                .deleteResource(eq("process_model_id"));
 
         // WHEN
         feignModelService.deleteResource(FORM,
-                                         "form_model_refId");
+                                         "form_model_id");
 
         // THEN
         verify(formModelService,
                times(1))
-                .deleteResource(eq("form_model_refId"));
+                .deleteResource(eq("form_model_id"));
     }
 
     @Test
     public void testvalidateResourceContent() {
         // WHEN
-        feignModelService.validateResourceContent(PROCESS_MODEL,
-                                         "processModelConent".getBytes());
+        feignModelService.validateResourceContent(PROCESS,
+                                                  "processModelConent".getBytes());
 
         // THEN
         verify(processModelService,
@@ -162,7 +162,7 @@ public class FeignModelServiceTest {
 
         // WHEN
         feignModelService.validateResourceContent(FORM,
-                                         "formModelConent".getBytes());
+                                                  "formModelConent".getBytes());
 
         // THEN
         verify(formModelService,

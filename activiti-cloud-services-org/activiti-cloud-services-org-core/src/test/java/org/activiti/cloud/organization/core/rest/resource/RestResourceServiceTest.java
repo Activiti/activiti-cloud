@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.organization.core.rest.resource;
 
-import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.model.Model.ModelType;
+import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.core.mock.ModelMock;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.junit.Rule;
@@ -30,7 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -59,24 +59,24 @@ public class RestResourceServiceTest {
     public void testLoadRestResourceIntoEntityField() {
 
         // GIVEN
-        Model processModel = new Model();
-        processModel.setType(PROCESS_MODEL);
-        processModel.setRefId("process_model_refId");
+        ModelMock processModel = new ModelMock();
+        processModel.setType(PROCESS);
+        processModel.setId("process_model_id");
 
-        ModelReference processModelReference = new ModelReference("process_model_refId",
+        ModelReference processModelReference = new ModelReference("process_model_id",
                                                                   "Process Model");
-        doReturn(processModelReference).when(modelService).getResource(eq(PROCESS_MODEL),
-                                                                       eq("process_model_refId"));
+        doReturn(processModelReference).when(modelService).getResource(eq(PROCESS),
+                                                                       eq("process_model_id"));
 
         // WHEN
         restResourceService.loadRestResourceIntoEntityField(processModel,
                                                             "data",
                                                             "type",
-                                                            "refId");
+                                                            "id");
 
         // THEN
         assertThat(processModel.getData()).isNotNull();
-        assertThat(processModel.getData().getModelId()).isEqualTo("process_model_refId");
+        assertThat(processModel.getData().getModelId()).isEqualTo("process_model_id");
         assertThat(processModel.getData().getName()).isEqualTo("Process Model");
     }
 
@@ -84,24 +84,25 @@ public class RestResourceServiceTest {
     public void testLoadRestResourceWhenNoResourceProvided() {
 
         // GIVEN
-        Model processModel = new Model();
-        processModel.setType(PROCESS_MODEL);
-        processModel.setRefId("process_model_refId");
+        ModelMock processModel = new ModelMock();
+        processModel.setType(PROCESS);
+        processModel.setId("process_model_id");
+        processModel.setData(null);
 
-        doThrow(RuntimeException.class).when(modelService).getResource(eq(PROCESS_MODEL),
-                                                                       eq("process_model_refId"));
+        doThrow(RuntimeException.class).when(modelService).getResource(eq(PROCESS),
+                                                                       eq("process_model_id"));
 
         // WHEN
         restResourceService.loadRestResourceIntoEntityField(processModel,
                                                             "data",
                                                             "type",
-                                                            "refId");
+                                                            "id");
 
         // THEN
         verify(modelService,
                times(1))
-                .getResource(PROCESS_MODEL,
-                             "process_model_refId");
+                .getResource(PROCESS,
+                             "process_model_id");
 
         assertThat(processModel.getData()).isNull();
     }
@@ -112,13 +113,13 @@ public class RestResourceServiceTest {
         // THEN
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage(
-                "Cannot access field 'invalid_field_name' of entity type 'class org.activiti.cloud.organization.core.model.Model'");
+                "Cannot access field 'invalid_field_name' of entity type 'class org.activiti.cloud.organization.core.mock.ModelMock'");
 
         // WHEN
-        restResourceService.loadRestResourceIntoEntityField(new Model(),
+        restResourceService.loadRestResourceIntoEntityField(new ModelMock(),
                                                             "data",
                                                             "invalid_field_name",
-                                                            "refId");
+                                                            "id");
     }
 
     @Test
@@ -127,10 +128,10 @@ public class RestResourceServiceTest {
         // THEN
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage(
-                "Cannot access field 'invalid_field_name' of entity type 'class org.activiti.cloud.organization.core.model.Model'");
+                "Cannot access field 'invalid_field_name' of entity type 'class org.activiti.cloud.organization.core.mock.ModelMock'");
 
         // WHEN
-        restResourceService.loadRestResourceIntoEntityField(new Model(),
+        restResourceService.loadRestResourceIntoEntityField(new ModelMock(),
                                                             "data",
                                                             "type",
                                                             "invalid_field_name");
@@ -142,61 +143,60 @@ public class RestResourceServiceTest {
         // THEN
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage(
-                "Cannot set value to the target field 'invalid_field_name' of entity type 'class org.activiti.cloud.organization.core.model.Model'");
+                "Cannot set value to the target field 'invalid_field_name' of entity type 'class org.activiti.cloud.organization.core.mock.ModelMock'");
 
         // WHEN
-        restResourceService.loadRestResourceIntoEntityField(new Model(),
+        restResourceService.loadRestResourceIntoEntityField(new ModelMock(),
                                                             "invalid_field_name",
                                                             "type",
-                                                            "refId");
+                                                            "id");
     }
 
     @Test
     public void testLoadRestResourceWrongTargetFieldName() {
 
         // GIVEN
-        Model processModel = new Model();
-        processModel.setType(PROCESS_MODEL);
-        processModel.setRefId("process_model_refId");
+        ModelMock processModel = new ModelMock();
+        processModel.setType(PROCESS);
+        processModel.setId("process_model_id");
 
-        ModelReference processModelReference = new ModelReference("process_model_refId",
+        ModelReference processModelReference = new ModelReference("process_model_id",
                                                                   "Process Model");
-        doReturn(processModelReference).when(modelService).getResource(eq(PROCESS_MODEL),
-                                                                       eq("process_model_refId"));
+        doReturn(processModelReference).when(modelService).getResource(eq(PROCESS),
+                                                                       eq("process_model_id"));
 
         // THEN
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage(//"argument type mismatch"
-                                        "Cannot set value to the target field 'id' of entity type 'class org.activiti.cloud.organization.core.model.Model'");
+                                        "Cannot set value to the target field 'id' of entity type 'class org.activiti.cloud.organization.core.mock.ModelMock'");
 
         // WHEN
         restResourceService.loadRestResourceIntoEntityField(processModel,
                                                             "id",
                                                             "type",
-                                                            "refId");
+                                                            "id");
     }
 
     @Test
     public void testCreateRestResourceFromEntityField() {
 
         // GIVEN
-        Model processModel = new Model("process_model_id",
-                                       "Process Model",
-                                       PROCESS_MODEL,
-                                       "process_model_refId");
+        ModelMock processModel = new ModelMock("process_model_id",
+                                               "Process Model",
+                                               PROCESS);
 
         // WHEN
         restResourceService.saveRestResourceFromEntityField(processModel,
                                                             "data",
                                                             "type",
-                                                            "refId",
+                                                            "id",
                                                             false);
 
         // THEN
         verify(modelService,
                never())
-                .updateResource(eq(PROCESS_MODEL),
-                                eq("process_model_refId"),
+                .updateResource(eq(PROCESS),
+                                eq("process_model_id"),
                                 any(ModelReference.class));
 
         verify(modelService,
@@ -206,7 +206,7 @@ public class RestResourceServiceTest {
 
         ModelReference createdModelReference = modelReferenceCaptor.getValue();
         assertThat(createdModelReference).isNotNull();
-        assertThat(createdModelReference.getModelId()).isEqualTo("process_model_refId");
+        assertThat(createdModelReference.getModelId()).isEqualTo("process_model_id");
         assertThat(createdModelReference.getName()).isEqualTo("Process Model");
     }
 
@@ -214,16 +214,15 @@ public class RestResourceServiceTest {
     public void testUpdateRestResourceFromEntityField() {
 
         // GIVEN
-        Model processModel = new Model("process_model_id",
-                                       "Process Model",
-                                       PROCESS_MODEL,
-                                       "process_model_refId");
+        ModelMock processModel = new ModelMock("process_model_id",
+                                               "Process Model",
+                                               PROCESS);
 
         // WHEN
         restResourceService.saveRestResourceFromEntityField(processModel,
                                                             "data",
                                                             "type",
-                                                            "refId",
+                                                            "id",
                                                             true);
 
         // THEN
@@ -234,13 +233,13 @@ public class RestResourceServiceTest {
 
         verify(modelService,
                times(1))
-                .updateResource(eq(PROCESS_MODEL),
-                                eq("process_model_refId"),
+                .updateResource(eq(PROCESS),
+                                eq("process_model_id"),
                                 modelReferenceCaptor.capture());
 
         ModelReference updatedModelReference = modelReferenceCaptor.getValue();
         assertThat(updatedModelReference).isNotNull();
-        assertThat(updatedModelReference.getModelId()).isEqualTo("process_model_refId");
+        assertThat(updatedModelReference.getModelId()).isEqualTo("process_model_id");
         assertThat(updatedModelReference.getName()).isEqualTo("Process Model");
     }
 
@@ -248,13 +247,13 @@ public class RestResourceServiceTest {
     public void testSaveRestResourceFromEntityFieldWithNoDataToSave() {
 
         // GIVEN
-        Model processModel = new Model();
+        ModelMock processModel = new ModelMock();
 
         // WHEN
         restResourceService.saveRestResourceFromEntityField(processModel,
                                                             "data",
                                                             "type",
-                                                            "refId",
+                                                            "id",
                                                             false);
 
         // THEN

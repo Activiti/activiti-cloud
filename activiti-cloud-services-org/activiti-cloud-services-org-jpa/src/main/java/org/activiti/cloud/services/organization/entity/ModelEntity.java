@@ -14,84 +14,91 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.model;
+package org.activiti.cloud.services.organization.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import org.activiti.cloud.organization.core.audit.AuditableEntity;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.resource.EntityWithRestResource;
 import org.activiti.cloud.organization.core.rest.resource.RestResource;
+import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Model model entity
  */
-@Entity
+@Entity(name = "Model")
 @EntityWithRestResource
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class Model extends AuditableEntity<String> {
+public class ModelEntity extends AuditableEntity<String> implements Model<ApplicationEntity, String> {
 
     @Id
     private String id;
 
     @ManyToOne
-    private Application application;
+    private ApplicationEntity application;
 
     private ModelType type;
 
-    private String refId;
-
     @Transient
-    @JsonUnwrapped
+    @JsonIgnore
     @RestResource(
-            resourceIdField = "refId",
+            resourceIdField = "id",
             resourceKeyField = "type")
     private ModelReference data;
 
-    public Model() { // for JPA
+    public ModelEntity() { // for JPA
+        this.data = new ModelReference();
     }
 
-    public Model(String id,
-                 String name,
-                 ModelType type,
-                 String refId) {
+    public ModelEntity(String id,
+                       String name,
+                       ModelType type) {
         this.id = id;
         this.type = type;
-        this.refId = refId;
-        this.data = new ModelReference(refId,
+        this.data = new ModelReference(id,
                                        name);
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public void setId(String id) {
         this.id = id;
+        data.setModelId(id);
     }
 
+    @Override
+    public String getName() {
+        return data.getName();
+    }
+
+    @Override
+    public void setName(String name) {
+        data.setName(name);
+    }
+
+    @Override
     public ModelType getType() {
         return type;
     }
 
+    @Override
     public void setType(ModelType type) {
         this.type = type;
-    }
-
-    public String getRefId() {
-        return refId;
-    }
-
-    public void setRefId(String refId) {
-        this.refId = refId;
     }
 
     public ModelReference getData() {
@@ -102,16 +109,43 @@ public class Model extends AuditableEntity<String> {
         this.data = data;
     }
 
-    public Application getApplication() {
+    @Override
+    public ApplicationEntity getApplication() {
         return application;
     }
 
-    public void setApplication(Application application) {
+    @Override
+    public void setApplication(ApplicationEntity application) {
         this.application = application;
     }
 
-    public enum ModelType {
-        FORM,
-        PROCESS_MODEL
+    @Override
+    public String getVersion() {
+        return data.getVersion();
+    }
+
+    @Override
+    public void setVersion(String version) {
+        data.setVersion(version);
+    }
+
+    @Override
+    public String getContentType() {
+        return data.getContentType();
+    }
+
+    @Override
+    public void setContentType(String contentType) {
+        data.setContentType(contentType);
+    }
+
+    @Override
+    public String getContent() {
+        return data.getContent();
+    }
+
+    @Override
+    public void setContent(String content) {
+        data.setContent(content);
     }
 }

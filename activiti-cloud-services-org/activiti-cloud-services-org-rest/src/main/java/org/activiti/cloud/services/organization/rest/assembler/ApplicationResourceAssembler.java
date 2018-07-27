@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.services.organization.rest.assembler;
 
-import org.activiti.cloud.organization.core.model.Application;
-import org.activiti.cloud.services.organization.rest.controller.ModelController;
+import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.services.organization.rest.controller.ApplicationController;
+import org.activiti.cloud.services.organization.rest.controller.ModelController;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;

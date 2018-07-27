@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.audit;
+package org.activiti.cloud.services.organization.jpa.audit;
 
 import java.util.Date;
 import javax.persistence.EntityListeners;
@@ -80,19 +80,4 @@ public abstract class AuditableEntity<U> {
     public void setLastModifiedDate(Date lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
-
-    public void copyAuditInfo(AuditableEntity<U> source) {
-        if (source.getCreatedBy() != null) {
-            setCreatedBy(source.getCreatedBy());
-        }
-        if (source.getCreationDate() != null) {
-            setCreationDate(source.getCreationDate());
-        }
-        if (source.getLastModifiedBy() != null) {
-            setLastModifiedBy(source.getLastModifiedBy());
-        }
-        if (source.getLastModifiedDate() != null) {
-            setLastModifiedDate(source.getLastModifiedDate());
-        }
     }
-}

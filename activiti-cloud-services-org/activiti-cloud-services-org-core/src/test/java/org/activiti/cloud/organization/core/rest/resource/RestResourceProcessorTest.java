@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.organization.core.rest.resource;
 
-import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.model.Application;
+import org.activiti.cloud.organization.core.mock.ApplicationMock;
+import org.activiti.cloud.organization.core.mock.ModelMock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -48,8 +48,8 @@ public class RestResourceProcessorTest {
     public void testProcessWithRestResource() {
 
         // GIVEN
-        Resource<Object> modelResource = new Resource<Object>(new Model());
-        doReturn(true).when(restResourceProcessor).isEntityWithRestResource(eq(Model.class));
+        Resource<Object> modelResource = new Resource<Object>(new ModelMock());
+        doReturn(true).when(restResourceProcessor).isEntityWithRestResource(eq(ModelMock.class));
 
         // WHEN
         restResourceProcessor.resourceProcessor().process(modelResource);
@@ -57,20 +57,20 @@ public class RestResourceProcessorTest {
         // THEN
         verify(restResourceService,
                times(1))
-                .loadRestResourceIntoEntityField(any(Model.class),
+                .loadRestResourceIntoEntityField(any(ModelMock.class),
                                                  eq("data"),
                                                  eq("type"),
-                                                 eq("refId"));
+                                                 eq("id"));
     }
 
     @Test
     public void testProcessWithoutRestResource() {
 
         // GIVEN
-        Resource<Object> modelResource = new Resource<Object>(new Application());
+        Resource<Object> modelResource = new Resource<Object>(new ApplicationMock());
         doReturn(false)
                 .when(restResourceProcessor)
-                .isEntityWithRestResource(eq(Application.class));
+                .isEntityWithRestResource(eq(ApplicationMock.class));
 
         // WHEN
         restResourceProcessor.resourceProcessor().process(modelResource);

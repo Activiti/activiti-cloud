@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.organization.rest.assembler;
 
-import org.activiti.cloud.organization.core.model.Model;
+import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.services.organization.rest.controller.ModelController;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;

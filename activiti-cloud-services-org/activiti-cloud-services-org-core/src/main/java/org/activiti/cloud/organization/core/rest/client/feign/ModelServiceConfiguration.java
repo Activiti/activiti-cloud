@@ -19,14 +19,14 @@ package org.activiti.cloud.organization.core.rest.client.feign;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.organization.core.model.Model.ModelType;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.activiti.cloud.organization.core.model.Model.ModelType.FORM;
-import static org.activiti.cloud.organization.core.model.Model.ModelType.PROCESS_MODEL;
+import static org.activiti.cloud.organization.api.ModelType.FORM;
+import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 
 /**
  * Model service configuration
@@ -48,11 +48,10 @@ public class ModelServiceConfiguration {
     @Bean
     public Map<ModelType, BaseModelService<ModelReference>> modelServices() {
         Map<ModelType, BaseModelService<ModelReference>> modelServices = new HashMap<>();
-        modelServices.put(PROCESS_MODEL,
+        modelServices.put(PROCESS,
                           processModelService);
         modelServices.put(FORM,
                           formModelService);
         return modelServices;
     }
-
 }

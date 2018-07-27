@@ -18,57 +18,58 @@ package org.activiti.cloud.services.organization.jpa;
 
 import java.util.Optional;
 
-import org.activiti.cloud.organization.core.model.Model;
-import org.activiti.cloud.organization.core.model.Application;
-import org.activiti.cloud.organization.core.repository.ModelRepository;
+import org.activiti.cloud.services.organization.entity.ModelEntity;
+import org.activiti.cloud.services.organization.entity.ApplicationEntity;
+import org.activiti.cloud.organization.repository.ModelRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
- * JPA Repository for {@link Model} entity
+ * JPA Repository for {@link ModelEntity} entity
  */
 @RepositoryRestResource(path = "models",
         collectionResourceRel = "models",
-        itemResourceRel = "models")
-public interface ModelJpaRepository extends JpaRepository<Model, String>,
-                                            ModelRepository {
+        itemResourceRel = "models",
+        exported = false)
+public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
+                                            ModelRepository<ApplicationEntity, ModelEntity> {
 
-    Page<Model> findAllByApplicationIdIsNull(Pageable pageable);
+    Page<ModelEntity> findAllByApplicationIdIsNull(Pageable pageable);
 
-    Page<Model> findAllByApplicationId(String applicationId,
-                                       Pageable pageable);
+    Page<ModelEntity> findAllByApplicationId(String applicationId,
+                                             Pageable pageable);
 
     @Override
-    default Page<Model> getTopLevelModels(Pageable pageable) {
+    default Page<ModelEntity> getTopLevelModels(Pageable pageable) {
         return findAllByApplicationIdIsNull(pageable);
     }
 
     @Override
-    default Page<Model> getModels(Application application,
-                                  Pageable pageable) {
+    default Page<ModelEntity> getModels(ApplicationEntity application,
+                                        Pageable pageable) {
         return findAllByApplicationId(application.getId(),
                                       pageable);
     }
 
     @Override
-    default Optional<Model> findModelById(String id) {
+    default Optional<ModelEntity> findModelById(String id) {
         return findById(id);
     }
 
     @Override
-    default Model createModel(Model model) {
+    default ModelEntity createModel(ModelEntity model) {
         return save(model);
     }
 
     @Override
-    default Model updateModel(Model model) {
+    default ModelEntity updateModel(ModelEntity model) {
         return save(model);
     }
 
     @Override
-    default void deleteModel(Model model) {
+    default void deleteModel(ModelEntity model) {
         delete(model);
     }
 }

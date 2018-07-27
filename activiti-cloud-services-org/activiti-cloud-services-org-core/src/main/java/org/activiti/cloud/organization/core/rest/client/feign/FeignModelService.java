@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
 
-import org.activiti.cloud.organization.core.model.Model.ModelType;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
+import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;

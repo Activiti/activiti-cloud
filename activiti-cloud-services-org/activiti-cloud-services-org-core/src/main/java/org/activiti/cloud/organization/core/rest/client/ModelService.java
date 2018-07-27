@@ -18,7 +18,7 @@ package org.activiti.cloud.organization.core.rest.client;
 
 import java.util.List;
 
-import org.activiti.cloud.organization.core.model.Model.ModelType;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
 
