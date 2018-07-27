@@ -34,6 +34,16 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-org-repository</artifactId>
+        <version>${activiti-cloud-org.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-org-api</artifactId>
+        <version>${activiti-cloud-org.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-org</artifactId>
         <version>${activiti-cloud-org.version}</version>
       </dependency>
