@@ -24,14 +24,15 @@ import java.util.Map;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
-import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
-import org.activiti.runtime.api.cmd.impl.CreateTaskImpl;
-import org.activiti.runtime.api.cmd.impl.UpdateTaskImpl;
 import org.activiti.runtime.api.model.CloudProcessDefinition;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
+import org.activiti.runtime.api.model.payloads.CompleteTaskPayload;
+import org.activiti.runtime.api.model.payloads.CreateTaskPayload;
+import org.activiti.runtime.api.model.payloads.UpdateTaskPayload;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,22 +49,22 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class TasksIT  {
+public class TasksIT {
 
     private static final String TASKS_URL = "/v1/tasks/";
     private static final String ADMIN_TASKS_URL = "/admin/v1/tasks/";
     private static final String SIMPLE_PROCESS = "SimpleProcess";
-    private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudTask>() {};
+    private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudTask>() {
+    };
     private static final ParameterizedTypeReference<PagedResources<CloudTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<CloudTask>>() {
     };
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
-
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -79,18 +80,17 @@ public class TasksIT  {
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
-
     @Before
-    public void setUp(){
+    public void setUp() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
-
 
         ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
-        for(ProcessDefinition pd : processDefinitions.getBody().getContent()){
-            processDefinitionIds.put(pd.getName(), pd.getId());
+        for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
+            processDefinitionIds.put(pd.getName(),
+                                     pd.getId());
         }
     }
 
@@ -121,17 +121,15 @@ public class TasksIT  {
         Collection<CloudTask> tasks = responseEntity.getBody().getContent();
         CloudTask task = tasks.iterator().next();
 
-        UpdateTaskImpl updateTask = new UpdateTaskImpl();
-        updateTask.setDescription("Updated description");
+        UpdateTaskPayload updateTask = TaskPayloadBuilder.update().withTaskId(task.getId()).withDescription("Updated description").build();
 
         //when
-        taskRestTemplate.updateTask(task, updateTask);
+        taskRestTemplate.updateTask(updateTask);
 
         //then
         ResponseEntity<CloudTask> taskResponseEntity = taskRestTemplate.getTask(task.getId());
 
         assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("Updated description");
-
     }
 
     @Test
@@ -151,7 +149,6 @@ public class TasksIT  {
         assertThat(responseEntity).isNotNull();
         Collection<CloudTask> tasks = responseEntity.getBody().getContent();
         assertThat(tasks.size()).isEqualTo(0);
-
     }
 
     @Test
@@ -189,18 +186,17 @@ public class TasksIT  {
 
     private ResponseEntity<PagedResources<CloudTask>> executeRequestGetTasks() {
         return testRestTemplate.exchange(TASKS_URL,
-                HttpMethod.GET,
-                null,
-                PAGED_TASKS_RESPONSE_TYPE);
+                                         HttpMethod.GET,
+                                         null,
+                                         PAGED_TASKS_RESPONSE_TYPE);
     }
 
     private ResponseEntity<PagedResources<CloudTask>> executeRequestGetAdminTasks() {
         return testRestTemplate.exchange(ADMIN_TASKS_URL,
-                HttpMethod.GET,
-                null,
-                PAGED_TASKS_RESPONSE_TYPE);
+                                         HttpMethod.GET,
+                                         null,
+                                         PAGED_TASKS_RESPONSE_TYPE);
     }
-
 
     @Test
     public void shouldGetTasksRelatedToTheGivenProcessInstance() {
@@ -209,9 +205,9 @@ public class TasksIT  {
 
         //when
         ResponseEntity<PagedResources<CloudTask>> tasksEntity = testRestTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + startProcessResponse.getBody().getId() + "/tasks",
-                HttpMethod.GET,
-                null,
-                PAGED_TASKS_RESPONSE_TYPE);
+                                                                                          HttpMethod.GET,
+                                                                                          null,
+                                                                                          PAGED_TASKS_RESPONSE_TYPE);
 
         //then
         assertThat(tasksEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -221,12 +217,10 @@ public class TasksIT  {
     @Test
     public void shouldGetSubTasks() {
         //given
-        CloudTask parentTask = taskRestTemplate.createTask(new CreateTaskImpl("parent task",
-                                                                                    "This is my parent task"));
+        CloudTask parentTask = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("parent task").withDescription("This is my parent task").build());
 
-        CreateTaskImpl createSubTask = new CreateTaskImpl("sub task",
-                                                     "This is my sub-task");
-        createSubTask.setParentTaskId(parentTask.getId());
+        CreateTaskPayload createSubTask = TaskPayloadBuilder.create().withName("sub task").withDescription("This is my sub-task").withParentTaskId(parentTask.getId()).build();
+
         CloudTask subTask = taskRestTemplate.createSubTask(createSubTask);
 
         //when
@@ -239,10 +233,9 @@ public class TasksIT  {
     @Test
     public void shouldBeAbleToDeleteTask() {
         //given
-        CloudTask standaloneTask = taskRestTemplate.createTask(new CreateTaskImpl("parent task",
-                                                                              "This is my parent task"));
+        CloudTask standaloneTask = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("parent task").withDescription("This is my parent task").build());
         //when
-        ResponseEntity<Void> delete = taskRestTemplate.delete(standaloneTask);
+        ResponseEntity<CloudTask> delete = taskRestTemplate.delete(standaloneTask);
 
         //then
         assertThat(delete.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
@@ -262,7 +255,6 @@ public class TasksIT  {
         assertThat(responseEntity.getBody()).isEqualToComparingFieldByField(task);
     }
 
-
     @Test
     public void claimTaskShouldSetAssignee() {
         //given
@@ -271,7 +263,6 @@ public class TasksIT  {
 
         //when
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.claim(task);
-
 
         //then
         assertThat(responseEntity).isNotNull();
@@ -289,16 +280,15 @@ public class TasksIT  {
 
         //when
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId() + "/release",
-                HttpMethod.POST,
-                null,
-                TASK_RESPONSE_TYPE);
+                                                                             HttpMethod.POST,
+                                                                             null,
+                                                                             TASK_RESPONSE_TYPE);
 
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody().getAssignee()).isNull();
     }
-
 
     @Test
     public void shouldCompleteATask() {
@@ -307,12 +297,11 @@ public class TasksIT  {
         Task task = executeRequestGetTasks().getBody().iterator().next();
 
         //when
-        ResponseEntity<Void> responseEntity = taskRestTemplate.complete(task);
+        ResponseEntity<Task> responseEntity = taskRestTemplate.complete(task);
 
         //then
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
     }
-
 
     @Test
     public void shouldCompleteATaskPassingInputVariables() {
@@ -320,15 +309,15 @@ public class TasksIT  {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = executeRequestGetTasks().getBody().iterator().next();
 
-        CompleteTaskImpl completeTaskCmd = new CompleteTaskImpl(task.getId(), Collections.singletonMap("myVar",
-                                                                                                      "any"));
+        CompleteTaskPayload completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(task.getId()).withVariables(Collections.singletonMap("myVar",
+                                                                                                                                                "any")).build();
 
         //when
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId() + "/complete",
-                HttpMethod.POST,
-                new HttpEntity<>(completeTaskCmd),
-                new ParameterizedTypeReference<Void>() {
-                });
+        ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASKS_URL + task.getId() + "/complete",
+                                                                        HttpMethod.POST,
+                                                                        new HttpEntity<>(completeTaskPayload),
+                                                                        new ParameterizedTypeReference<Task>() {
+                                                                        });
 
         //then
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
@@ -339,8 +328,8 @@ public class TasksIT  {
         };
 
         return testRestTemplate.exchange(PROCESS_DEFINITIONS_URL,
-                HttpMethod.GET,
-                null,
-                responseType);
+                                         HttpMethod.GET,
+                                         null,
+                                         responseType);
     }
 }

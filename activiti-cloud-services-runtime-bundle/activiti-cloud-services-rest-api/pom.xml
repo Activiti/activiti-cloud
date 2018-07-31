@@ -16,6 +16,18 @@
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
+      <artifactId>activiti-cloud-common-model-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-task-model-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-process-model-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-process-runtime-api</artifactId>
     </dependency>
     <dependency>

@@ -1,17 +1,18 @@
 package org.activiti.cloud.services.rest.api;
 
 import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
-import org.activiti.runtime.api.cmd.RemoveProcessVariables;
-import org.activiti.runtime.api.cmd.SetProcessVariables;
+import org.activiti.runtime.api.model.payloads.RemoveProcessVariablesPayload;
+import org.activiti.runtime.api.model.payloads.SetProcessVariablesPayload;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resources;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@RequestMapping(value = "/v1/process-instances/{processInstanceId}/variables", produces = MediaTypes.HAL_JSON_VALUE)
+@RequestMapping(value = "/v1/process-instances/{processInstanceId}/variables", produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public interface ProcessInstanceVariableController {
 
     @RequestMapping(method = RequestMethod.GET)
@@ -23,9 +24,9 @@ public interface ProcessInstanceVariableController {
 
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
-                                      @RequestBody SetProcessVariables setTaskVariablesCmd);
+                                      @RequestBody SetProcessVariablesPayload setProcessVariablesPayload);
 
     @RequestMapping(method = RequestMethod.DELETE)
     ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
-                                         @RequestBody RemoveProcessVariables removeProcessVariablesCmd);
+                                         @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload);
 }

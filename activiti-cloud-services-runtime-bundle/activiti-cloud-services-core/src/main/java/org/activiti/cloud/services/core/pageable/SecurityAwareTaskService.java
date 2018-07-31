@@ -20,18 +20,20 @@ import java.util.List;
 
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.runtime.api.TaskRuntime;
-import org.activiti.runtime.api.cmd.ClaimTask;
-import org.activiti.runtime.api.cmd.CompleteTask;
-import org.activiti.runtime.api.cmd.CreateTask;
-import org.activiti.runtime.api.cmd.ReleaseTask;
-import org.activiti.runtime.api.cmd.SetTaskVariables;
-import org.activiti.runtime.api.cmd.UpdateTask;
 import org.activiti.runtime.api.identity.IdentityLookup;
-import org.activiti.runtime.api.model.FluentTask;
+import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.VariableInstance;
+import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
+import org.activiti.runtime.api.model.payloads.ClaimTaskPayload;
+import org.activiti.runtime.api.model.payloads.CompleteTaskPayload;
+import org.activiti.runtime.api.model.payloads.CreateTaskPayload;
+import org.activiti.runtime.api.model.payloads.DeleteTaskPayload;
+import org.activiti.runtime.api.model.payloads.GetTasksPayload;
+import org.activiti.runtime.api.model.payloads.ReleaseTaskPayload;
+import org.activiti.runtime.api.model.payloads.SetTaskVariablesPayload;
+import org.activiti.runtime.api.model.payloads.UpdateTaskPayload;
 import org.activiti.runtime.api.query.Page;
 import org.activiti.runtime.api.query.Pageable;
-import org.activiti.runtime.api.query.TaskFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,131 +54,93 @@ public class SecurityAwareTaskService {
         this.taskRuntime = taskRuntime;
     }
 
-    public Page<FluentTask> getAuthorizedTasks(Pageable pageable) {
+    public Page<Task> getAuthorizedTasks(Pageable pageable) {
 
         String userId = authenticationWrapper.getAuthenticatedUserId();
-        TaskFilter taskFilter;
+        GetTasksPayload getTasksPayload;
         if (userId != null) {
             List<String> groups = null;
             if (identityLookup != null) {
                 groups = identityLookup.getGroupsForCandidateUser(userId);
             }
-            taskFilter = TaskFilter.filteredOnAssigneeOrCandiate(userId,
-                                                                 groups);
+            getTasksPayload = TaskPayloadBuilder.tasks().withAssignee(userId).withGroups(groups).build();
         } else {
-            taskFilter = TaskFilter.unfiltered();
+            getTasksPayload = TaskPayloadBuilder.tasks().build();
         }
         return taskRuntime.tasks(pageable,
-                                 taskFilter);
+                                 getTasksPayload);
     }
 
-    public Page<FluentTask> getAllTasks(Pageable pageable) {
+    public Page<Task> getAllTasks(Pageable pageable) {
         return taskRuntime.tasks(pageable);
     }
 
-    public Page<FluentTask> getTasks(String processInstanceId,
-                                     Pageable pageable) {
+    public Page<Task> getTasks(String processInstanceId,
+                               Pageable pageable) {
         return taskRuntime.tasks(pageable,
-                                 TaskFilter.filteredOnProcessInstanceId(processInstanceId));
+                                 TaskPayloadBuilder.tasks().withProcessInstanceId(processInstanceId).build());
     }
 
-    public FluentTask getTaskById(String taskId) {
+    public Task getTaskById(String taskId) {
         return taskRuntime.task(taskId);
     }
 
-    public FluentTask claimTask(ClaimTask claimTaskCmd) {
-        taskRuntime.task(claimTaskCmd.getTaskId())
-                .claim(claimTaskCmd.getAssignee());
-        return taskRuntime.task(claimTaskCmd.getTaskId());
+    public Task claimTask(ClaimTaskPayload claimTaskPayload) {
+        return taskRuntime.claim(claimTaskPayload);
     }
 
-    public FluentTask releaseTask(ReleaseTask releaseTaskCmd) {
-        taskRuntime.task(releaseTaskCmd.getTaskId())
-                .release();
-        return taskRuntime.task(releaseTaskCmd.getTaskId());
-    }
-
-    public void completeTask(CompleteTask completeTaskCmd) {
-        if (completeTaskCmd != null) {
-            taskRuntime.task(completeTaskCmd.getTaskId())
-                    .completeWith()
-                    .variables(completeTaskCmd.getOutputVariables())
-                    .doIt();
-        }
-    }
-
-    public FluentTask createNewTask(CreateTask createTaskCmd) {
+    public Task releaseTask(ReleaseTaskPayload releaseTaskPayload) {
         return taskRuntime
-                .createTaskWith()
-                .name(createTaskCmd.getName())
-                .description(createTaskCmd.getDescription())
-                .dueDate(createTaskCmd.getDueDate())
-                .priority(createTaskCmd.getPriority())
-                .assignee(createTaskCmd.getAssignee() == null ? authenticationWrapper.getAuthenticatedUserId() : createTaskCmd.getAssignee())
-                .create();
+                .release(releaseTaskPayload);
     }
 
-    public FluentTask createNewSubtask(String parentTaskId,
-                                       CreateTask createSubtaskCmd) {
-        return taskRuntime.task(parentTaskId)
-                .createSubTaskWith()
-                .name(createSubtaskCmd.getName())
-                .description(createSubtaskCmd.getDescription())
-                .dueDate(createSubtaskCmd.getDueDate())
-                .priority(createSubtaskCmd.getPriority())
-                .assignee(createSubtaskCmd.getAssignee() == null ? authenticationWrapper.getAuthenticatedUserId() : createSubtaskCmd.getAssignee())
-                .create();
+    public Task completeTask(CompleteTaskPayload completeTaskPayload) {
+        return taskRuntime.complete(completeTaskPayload);
     }
 
-    public List<FluentTask> getSubtasks(String parentTaskId) {
-        return taskRuntime.task(parentTaskId).subTasks();
-    }
-
-    public void deleteTask(String taskId) {
-        FluentTask task = getTaskById(taskId);
-        task.delete("Cancelled by " + authenticationWrapper.getAuthenticatedUserId());
-    }
-
-    public void updateTask(String taskId,
-                           UpdateTask updateTaskCmd) {
-        FluentTask task = taskRuntime.task(taskId);
-        if (updateTaskCmd.getAssignee() != null) {
-            task.claim(updateTaskCmd.getAssignee());
+    public Task createNewTask(CreateTaskPayload createTaskPayload) {
+        if (createTaskPayload.getAssignee() == null) {
+            createTaskPayload.setAssignee(authenticationWrapper.getAuthenticatedUserId());
         }
-        if (updateTaskCmd.getName() != null) {
-            task.updateName(updateTaskCmd.getName());
-        }
-        if (updateTaskCmd.getDescription() != null) {
-            task.updateDescription(updateTaskCmd.getDescription());
-        }
-        if (updateTaskCmd.getDueDate() != null) {
-            task.updateDueDate(updateTaskCmd.getDueDate());
-        }
-        if (updateTaskCmd.getPriority() != null) {
-            task.updatePriority(updateTaskCmd.getPriority());
-        }
-        if (updateTaskCmd.getParentTaskId() != null) {
-            task.updateParentTaskId(updateTaskCmd.getParentTaskId());
-        }
+        return taskRuntime.create(createTaskPayload);
     }
 
-    public void setTaskVariables(SetTaskVariables setTaskVariablesCmd) {
-        taskRuntime.task(setTaskVariablesCmd.getTaskId())
-                .variables(setTaskVariablesCmd.getVariables());
+    public Task createNewSubtask(String parentTaskId,
+                                 CreateTaskPayload createTaskPayload) {
+        if (createTaskPayload.getAssignee() == null) {
+            createTaskPayload.setAssignee(authenticationWrapper.getAuthenticatedUserId());
+        }
+        if (createTaskPayload.getParentTaskId() == null || createTaskPayload.getParentTaskId().isEmpty()) {
+            createTaskPayload.setParentTaskId(parentTaskId);
+        }
+        return taskRuntime.create(createTaskPayload);
     }
 
-    public void setTaskVariablesLocal(SetTaskVariables setTaskVariablesCmd) {
-        taskRuntime.task(setTaskVariablesCmd.getTaskId())
-                .localVariables(setTaskVariablesCmd.getVariables());
+    public Task deleteTask(DeleteTaskPayload deleteTaskPayload) {
+        String reason = "Cancelled by " + authenticationWrapper.getAuthenticatedUserId();
+        deleteTaskPayload.setReason(reason);
+        return taskRuntime.delete(deleteTaskPayload);
     }
 
+    public Task updateTask(UpdateTaskPayload updateTaskPayload) {
+        return taskRuntime.update(updateTaskPayload);
+    }
+
+    public void setTaskVariables(SetTaskVariablesPayload setTaskVariablesPayload) {
+        taskRuntime.setVariables(setTaskVariablesPayload);
+    }
 
     public List<VariableInstance> getVariableInstances(String taskId) {
-        return taskRuntime.task(taskId).variables();
+        return taskRuntime.variables(TaskPayloadBuilder.variables().withTaskId(taskId).build());
     }
 
-    public List<VariableInstance> getLocalVariableInstances(String taskId) {
-        return taskRuntime.task(taskId).localVariables();
+    public List<VariableInstance> getVariableInstancesLocal(String taskId) {
+        return taskRuntime.variables(TaskPayloadBuilder.variables().withTaskId(taskId).withLocalOnly(true).build());
     }
 
+    public Page<Task> tasks(Pageable pageable,
+                            GetTasksPayload getTasksPayload) {
+        return taskRuntime.tasks(pageable,
+                                 getTasksPayload);
+    }
 }

@@ -8,8 +8,8 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.security.BaseSecurityPoliciesApplicationService;
 import org.activiti.cloud.services.security.SecurityPoliciesService;
 import org.activiti.cloud.services.security.SecurityPolicy;
-import org.activiti.runtime.api.query.ProcessDefinitionFilter;
-import org.activiti.runtime.api.query.ProcessInstanceFilter;
+import org.activiti.runtime.api.model.payloads.GetProcessDefinitionsPayload;
+import org.activiti.runtime.api.model.payloads.GetProcessInstancesPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +29,7 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
     @Autowired(required = false)
     private RuntimeBundleProperties runtimeBundleProperties;
 
-    public ProcessDefinitionFilter restrictProcessDefQuery(SecurityPolicy securityPolicy){
+    public GetProcessDefinitionsPayload restrictProcessDefQuery(SecurityPolicy securityPolicy){
         return restrictQuery(processDefinitionRestrictionApplier, securityPolicy);
     }
 
@@ -51,7 +51,7 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
     }
 
 
-    public ProcessInstanceFilter restrictProcessInstQuery(SecurityPolicy securityPolicy){
+    public GetProcessInstancesPayload restrictProcessInstQuery(SecurityPolicy securityPolicy){
         return restrictQuery(processInstanceRestrictionApplier, securityPolicy);
     }
 

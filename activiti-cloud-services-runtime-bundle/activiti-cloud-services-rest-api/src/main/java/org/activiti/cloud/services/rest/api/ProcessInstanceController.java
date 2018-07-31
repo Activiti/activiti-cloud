@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.rest.api;
 
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
-import org.activiti.runtime.api.cmd.SendSignal;
-import org.activiti.runtime.api.cmd.StartProcess;
+import org.activiti.runtime.api.model.payloads.SignalPayload;
+import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
@@ -21,7 +21,7 @@ public interface ProcessInstanceController {
     PagedResources<ProcessInstanceResource> getProcessInstances(Pageable pageable);
 
     @RequestMapping(method = RequestMethod.POST)
-    ProcessInstanceResource startProcess(@RequestBody StartProcess cmd);
+    ProcessInstanceResource startProcess(@RequestBody StartProcessPayload cmd);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     ProcessInstanceResource getProcessInstanceById(@PathVariable String processInstanceId);
@@ -29,20 +29,19 @@ public interface ProcessInstanceController {
     @RequestMapping(value = "/{processInstanceId}/model",
             method = RequestMethod.GET,
             produces = "image/svg+xml",
-            consumes="image/svg+xml")
+            consumes = "image/svg+xml")//TODO: remove consumes as it's not consuming anything
     @ResponseBody
     String getProcessDiagram(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "/signal")
-    ResponseEntity<Void> sendSignal(@RequestBody SendSignal cmd);
+    ResponseEntity<Void> sendSignal(@RequestBody SignalPayload signalPayload);
 
     @RequestMapping(value = "{processInstanceId}/suspend")
-    ResponseEntity<Void> suspend(@PathVariable String processInstanceId);
+    ProcessInstanceResource suspend(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "{processInstanceId}/activate")
-    ResponseEntity<Void> activate(@PathVariable String processInstanceId);
+    ProcessInstanceResource activate(@RequestBody String processInstanceId);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.DELETE)
-    void deleteProcessInstance(@PathVariable String processInstanceId);
-
+    ProcessInstanceResource deleteProcessInstance(@PathVariable String processInstanceId);
 }

@@ -22,8 +22,12 @@
       <artifactId>activiti-cloud-services-events</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-starter-configure</artifactId>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-process-model-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>

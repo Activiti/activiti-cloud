@@ -15,8 +15,6 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.Map;
-
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
@@ -26,27 +24,20 @@ import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.runtime.api.NotFoundException;
-import org.activiti.runtime.api.cmd.CompleteTask;
-import org.activiti.runtime.api.cmd.CreateTask;
-import org.activiti.runtime.api.cmd.UpdateTask;
-import org.activiti.runtime.api.cmd.impl.ClaimTaskImpl;
-import org.activiti.runtime.api.cmd.impl.CompleteTaskImpl;
-import org.activiti.runtime.api.cmd.impl.ReleaseTaskImpl;
-import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
+import org.activiti.runtime.api.model.payloads.CompleteTaskPayload;
+import org.activiti.runtime.api.model.payloads.CreateTaskPayload;
+import org.activiti.runtime.api.model.payloads.UpdateTaskPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 @RestController
 public class TaskControllerImpl implements TaskController {
@@ -82,7 +73,7 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public PagedResources<TaskResource> getTasks(Pageable pageable) {
-        org.activiti.runtime.api.query.Page<FluentTask> taskPage = securityAwareTaskService.getAuthorizedTasks(pageConverter.toAPIPageable(pageable));
+        org.activiti.runtime.api.query.Page<Task> taskPage = securityAwareTaskService.getAuthorizedTasks(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
                                                   pageConverter.toSpringPage(pageable,
                                                                              taskPage),
@@ -102,58 +93,77 @@ public class TaskControllerImpl implements TaskController {
             throw new IllegalStateException("Assignee must be resolved from the Identity/Security Layer");
         }
 
-        return taskResourceAssembler.toResource(securityAwareTaskService.claimTask(new ClaimTaskImpl(taskId,
-                                                                                                     assignee)));
+        return taskResourceAssembler.toResource(
+                securityAwareTaskService.claimTask(
+                        TaskPayloadBuilder.claim()
+                                .withTaskId(taskId)
+                                .withAssignee(assignee)
+                                .build()));
     }
 
     @Override
     public TaskResource releaseTask(@PathVariable String taskId) {
 
-        return taskResourceAssembler.toResource(securityAwareTaskService.releaseTask(new ReleaseTaskImpl(taskId)));
+        return taskResourceAssembler.toResource(securityAwareTaskService.releaseTask(TaskPayloadBuilder
+                                                                                             .release()
+                                                                                             .withTaskId(taskId)
+                                                                                             .build()));
     }
 
     @Override
-    public ResponseEntity<Void> completeTask(@PathVariable String taskId,
-                                             @RequestBody(required = false) CompleteTask completeTaskCmd) {
-        Map<String, Object> outputVariables = null;
-        if (completeTaskCmd != null) {
-            outputVariables = completeTaskCmd.getOutputVariables();
+    public TaskResource completeTask(@PathVariable String taskId,
+                                     @RequestBody(required = false) CompleteTaskPayload completeTaskPayload) {
+        if (completeTaskPayload != null) {
+            completeTaskPayload.setTaskId(taskId);
         }
-        securityAwareTaskService.completeTask(new CompleteTaskImpl(taskId,
-                                                                   outputVariables));
-        return new ResponseEntity<>(HttpStatus.OK);
+        Task task = securityAwareTaskService.completeTask(completeTaskPayload);
+        return taskResourceAssembler.toResource(task);
     }
 
     @Override
-    public void deleteTask(@PathVariable String taskId) {
-        securityAwareTaskService.deleteTask(taskId);
+    public TaskResource deleteTask(@PathVariable String taskId) {
+        Task task = securityAwareTaskService.deleteTask(TaskPayloadBuilder
+                                                                .delete()
+                                                                .withTaskId(taskId)
+                                                                .build());
+        return taskResourceAssembler.toResource(task);
     }
 
     @Override
-    public TaskResource createNewTask(@RequestBody CreateTask createTaskCmd) {
-        return taskResourceAssembler.toResource(securityAwareTaskService.createNewTask(createTaskCmd));
+    public TaskResource createNewTask(@RequestBody CreateTaskPayload createTaskPayload) {
+        return taskResourceAssembler.toResource(securityAwareTaskService.createNewTask(createTaskPayload));
     }
 
     @Override
-    public ResponseEntity<Void> updateTask(@PathVariable String taskId,
-                                           @RequestBody UpdateTask updateTaskCmd) {
-        securityAwareTaskService.updateTask(taskId,
-                                            updateTaskCmd);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public TaskResource updateTask(@PathVariable String taskId,
+                                   @RequestBody UpdateTaskPayload updateTaskPayload) {
+        if (updateTaskPayload != null) {
+            updateTaskPayload.setTaskId(taskId);
+        }
+        return taskResourceAssembler.toResource(securityAwareTaskService.updateTask(updateTaskPayload));
     }
 
     @Override
     public TaskResource createSubtask(@PathVariable String taskId,
-                                        @RequestBody CreateTask createSubtaskCmd) {
+                                      @RequestBody CreateTaskPayload createTaskPayload) {
 
         return taskResourceAssembler.toResource(securityAwareTaskService.createNewSubtask(taskId,
-                                                                                          createSubtaskCmd));
+                                                                                          createTaskPayload));
     }
 
     @Override
-    public Resources<TaskResource> getSubtasks(@PathVariable String taskId) {
+    public PagedResources<TaskResource> getSubtasks(Pageable pageable,
+                                                    @PathVariable String taskId) {
+        org.activiti.runtime.api.query.Page<Task> taskPage = securityAwareTaskService
+                .tasks(pageConverter.toAPIPageable(pageable),
+                       TaskPayloadBuilder
+                               .tasks()
+                               .withParentTaskId(taskId)
+                               .build());
 
-        return new Resources<>(taskResourceAssembler.toResources(securityAwareTaskService.getSubtasks(taskId)),
-                               linkTo(TaskControllerImpl.class).withSelfRel());
+        return pagedResourcesAssembler.toResource(pageable,
+                                                  pageConverter.toSpringPage(pageable,
+                                                                             taskPage),
+                                                  taskResourceAssembler);
     }
 }

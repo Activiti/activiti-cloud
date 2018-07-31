@@ -27,7 +27,7 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
-import org.activiti.runtime.api.cmd.impl.SetTaskVariablesImpl;
+import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
 import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.activiti.runtime.conf.CommonModelAutoConfiguration;
 import org.activiti.runtime.conf.TaskModelAutoConfiguration;
@@ -46,10 +46,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -152,8 +152,9 @@ public class TaskVariableControllerImplIT {
     @Test
     public void setVariables() throws Exception {
         this.mockMvc.perform(post("/v1/tasks/{taskId}/variables/",
-                                  TASK_ID).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new SetTaskVariablesImpl(TASK_ID,
-                                                                                                                                              Collections.emptyMap()))))
+                                  TASK_ID).contentType(MediaType.APPLICATION_JSON).content(
+                mapper.writeValueAsString(TaskPayloadBuilder.setVariables().withTaskId(TASK_ID)
+                                                  .withVariables(Collections.emptyMap()).build())))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/set",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
@@ -164,11 +165,14 @@ public class TaskVariableControllerImplIT {
     @Test
     public void setVariablesLocalVariables() throws Exception {
         this.mockMvc.perform(post("/v1/tasks/{taskId}/variables/local",
-                                  TASK_ID).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new SetTaskVariablesImpl(TASK_ID,
-                                                                                                                                             Collections.emptyMap()))))
+                                  TASK_ID).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(
+                TaskPayloadBuilder.setVariables()
+                        .withTaskId(TASK_ID)
+                        .withLocalOnly(true)
+                        .withVariables(Collections.emptyMap()).build())))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/set/local",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
-        verify(securityAwareTaskService).setTaskVariablesLocal(any());
+        verify(securityAwareTaskService).setTaskVariables(any());
     }
 }

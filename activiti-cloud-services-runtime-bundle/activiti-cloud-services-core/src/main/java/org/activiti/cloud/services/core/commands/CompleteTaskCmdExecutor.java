@@ -1,16 +1,17 @@
 package org.activiti.cloud.services.core.commands;
 
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
-import org.activiti.runtime.api.cmd.CompleteTask;
-import org.activiti.runtime.api.cmd.TaskCommands;
-import org.activiti.runtime.api.cmd.result.impl.CompleteTaskResultImpl;
+import org.activiti.runtime.api.Result;
+import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.payloads.CompleteTaskPayload;
+import org.activiti.runtime.api.model.results.TaskResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CompleteTaskCmdExecutor implements CommandExecutor<CompleteTask> {
+public class CompleteTaskCmdExecutor implements CommandExecutor<CompleteTaskPayload> {
 
     private SecurityAwareTaskService securityAwareTaskService;
     private MessageChannel commandResults;
@@ -24,13 +25,14 @@ public class CompleteTaskCmdExecutor implements CommandExecutor<CompleteTask> {
 
     @Override
     public String getHandledType() {
-        return TaskCommands.COMPLETE_TASK.name();
+        return CompleteTaskPayload.class.getName();
     }
 
     @Override
-    public void execute(CompleteTask cmd) {
-        securityAwareTaskService.completeTask(cmd);
-        CompleteTaskResultImpl cmdResult = new CompleteTaskResultImpl(cmd);
-        commandResults.send(MessageBuilder.withPayload(cmdResult).build());
+    public void execute(CompleteTaskPayload completeTaskPayload) {
+        Task task = securityAwareTaskService.completeTask(completeTaskPayload);
+        TaskResult result = new TaskResult(completeTaskPayload,
+                                         task);
+        commandResults.send(MessageBuilder.withPayload(result).build());
     }
 }

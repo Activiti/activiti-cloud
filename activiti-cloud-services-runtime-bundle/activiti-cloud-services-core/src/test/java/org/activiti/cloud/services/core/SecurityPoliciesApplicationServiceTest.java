@@ -14,7 +14,7 @@ import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.runtime.api.auth.AuthorizationLookup;
 import org.activiti.runtime.api.identity.IdentityLookup;
-import org.activiti.runtime.api.query.ProcessDefinitionFilter;
+import org.activiti.runtime.api.model.payloads.GetProcessDefinitionsPayload;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -62,11 +62,11 @@ public class SecurityPoliciesApplicationServiceTest {
 
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
 
-        ProcessDefinitionFilter allowAllFilter = mock(ProcessDefinitionFilter.class);
+        GetProcessDefinitionsPayload allowAllFilter = mock(GetProcessDefinitionsPayload.class);
         when(processDefinitionRestrictionApplier.allowAll()).thenReturn(allowAllFilter);
 
         //when
-        ProcessDefinitionFilter actualFilter = securityPoliciesApplicationService.restrictProcessDefQuery(SecurityPolicy.READ);
+        GetProcessDefinitionsPayload actualFilter = securityPoliciesApplicationService.restrictProcessDefQuery(SecurityPolicy.READ);
 
         //then
         assertThat(actualFilter).isEqualTo(allowAllFilter);
@@ -78,11 +78,11 @@ public class SecurityPoliciesApplicationServiceTest {
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn(null);
 
-        ProcessDefinitionFilter allowAllFilter = mock(ProcessDefinitionFilter.class);
+        GetProcessDefinitionsPayload allowAllFilter = mock(GetProcessDefinitionsPayload.class);
         when(processDefinitionRestrictionApplier.allowAll()).thenReturn(allowAllFilter);
 
         //when
-        ProcessDefinitionFilter actualFilter = securityPoliciesApplicationService.restrictProcessDefQuery(SecurityPolicy.READ);
+        GetProcessDefinitionsPayload actualFilter = securityPoliciesApplicationService.restrictProcessDefQuery(SecurityPolicy.READ);
 
         //then
         assertThat(actualFilter).isEqualTo(allowAllFilter);
@@ -94,7 +94,7 @@ public class SecurityPoliciesApplicationServiceTest {
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
 
         Set<String> keys = Collections.singleton("key");
-        ProcessDefinitionFilter filter = mock(ProcessDefinitionFilter.class);
+        GetProcessDefinitionsPayload filter = mock(GetProcessDefinitionsPayload.class);
         when(processDefinitionRestrictionApplier.restrictToKeys(keys)).thenReturn(filter);
 
         when(identityLookup.getGroupsForCandidateUser("bob")).thenReturn(Collections.singletonList("hr"));
@@ -106,7 +106,7 @@ public class SecurityPoliciesApplicationServiceTest {
         when(runtimeBundleProperties.getServiceName()).thenReturn("rb1");
 
         //when
-        ProcessDefinitionFilter actualFilter = securityPoliciesApplicationService.restrictProcessDefQuery(SecurityPolicy.READ);
+        GetProcessDefinitionsPayload actualFilter = securityPoliciesApplicationService.restrictProcessDefQuery(SecurityPolicy.READ);
 
         //then
         assertThat(actualFilter).isEqualTo(filter);
@@ -179,7 +179,7 @@ public class SecurityPoliciesApplicationServiceTest {
     @Test
     public void shouldNotRestrictQueryWhenPolicyIsWildcard() {
         //given
-        ProcessDefinitionFilter filter = mock(ProcessDefinitionFilter.class);
+        GetProcessDefinitionsPayload filter = mock(GetProcessDefinitionsPayload.class);
 
         when(securityPoliciesService.policiesDefined()).thenReturn(true);
         when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bob");
@@ -196,7 +196,7 @@ public class SecurityPoliciesApplicationServiceTest {
         when(processDefinitionRestrictionApplier.allowAll()).thenReturn(filter);
 
         //when
-        ProcessDefinitionFilter actualFilter = securityPoliciesApplicationService.restrictProcessDefQuery(SecurityPolicy.READ);
+        GetProcessDefinitionsPayload actualFilter = securityPoliciesApplicationService.restrictProcessDefQuery(SecurityPolicy.READ);
 
         //then
         assertThat(actualFilter).isEqualTo(filter);

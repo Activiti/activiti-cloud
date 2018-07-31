@@ -2,24 +2,24 @@ package org.activiti.cloud.starter.tests.cmdendpoint;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.activiti.runtime.api.cmd.Command;
-import org.activiti.runtime.api.cmd.SetProcessVariablesResult;
-import org.activiti.runtime.api.cmd.result.ClaimTaskResult;
-import org.activiti.runtime.api.cmd.result.CommandResult;
-import org.activiti.runtime.api.cmd.result.CompleteTaskResult;
-import org.activiti.runtime.api.cmd.result.ReleaseTaskResult;
-import org.activiti.runtime.api.cmd.result.RemoveProcessVariablesResult;
-import org.activiti.runtime.api.cmd.result.ResumeProcessResult;
-import org.activiti.runtime.api.cmd.result.SendSignalResult;
-import org.activiti.runtime.api.cmd.result.SetTaskVariablesResult;
-import org.activiti.runtime.api.cmd.result.StartProcessResult;
-import org.activiti.runtime.api.cmd.result.SuspendProcessResult;
+import org.activiti.runtime.api.Result;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.payloads.ClaimTaskPayload;
+import org.activiti.runtime.api.model.payloads.CompleteTaskPayload;
+import org.activiti.runtime.api.model.payloads.ReleaseTaskPayload;
+import org.activiti.runtime.api.model.payloads.RemoveProcessVariablesPayload;
+import org.activiti.runtime.api.model.payloads.ResumeProcessPayload;
+import org.activiti.runtime.api.model.payloads.SetProcessVariablesPayload;
+import org.activiti.runtime.api.model.payloads.SetTaskVariablesPayload;
+import org.activiti.runtime.api.model.payloads.SignalPayload;
+import org.activiti.runtime.api.model.payloads.StartProcessPayload;
+import org.activiti.runtime.api.model.payloads.SuspendProcessPayload;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 @Profile(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
 @Component
@@ -41,35 +41,34 @@ public class CommandEndPointITStreamHandler {
     private AtomicBoolean setProcessVariablesAck = new AtomicBoolean(false);
     private AtomicBoolean removeProcessVariablesAck = new AtomicBoolean(false);
 
-
     @StreamListener(MessageClientStream.MY_CMD_RESULTS)
-    public <T extends Command<?>>void consumeStartProcessInstanceResults(CommandResult<T> results) {
-        if(results instanceof StartProcessResult){
-            assertThat(((StartProcessResult)results).getProcessInstance()).isNotNull();
-            assertThat(((StartProcessResult)results).getProcessInstance().getId()).isNotEmpty();
-            processInstanceId = ((StartProcessResult)results).getProcessInstance().getId();
+    public <T extends Result> void consumeStartProcessInstanceResults(Result result) {
+        if (result.getPayload() instanceof StartProcessPayload) {
+            assertThat(result.getEntity()).isNotNull();
+            assertThat(result.getEntity()).isInstanceOf(ProcessInstance.class);
+            assertThat(((ProcessInstance) result.getEntity()).getId()).isNotEmpty();
+            processInstanceId = ((ProcessInstance) result.getEntity()).getId();
             startedProcessInstanceAck.set(true);
-        }else if( results instanceof SuspendProcessResult){
+        } else if (result.getPayload() instanceof SuspendProcessPayload) {
             suspendedProcessInstanceAck.set(true);
-        }else if(results instanceof ResumeProcessResult){
+        } else if (result.getPayload() instanceof ResumeProcessPayload) {
             activatedProcessInstanceAck.set(true);
-        }else if(results instanceof ClaimTaskResult){
+        } else if (result.getPayload() instanceof ClaimTaskPayload) {
             claimedTaskAck.set(true);
-        }else if(results instanceof ReleaseTaskResult){
+        } else if (result.getPayload() instanceof ReleaseTaskPayload) {
             releasedTaskAck.set(true);
-        }else if(results instanceof CompleteTaskResult){
+        } else if (result.getPayload() instanceof CompleteTaskPayload) {
             completedTaskAck.set(true);
-        } else if (results instanceof SendSignalResult) {
+        } else if (result.getPayload() instanceof SignalPayload) {
             sendSignalAck.set(true);
-        } else if (results instanceof SetTaskVariablesResult) {
+        } else if (result.getPayload() instanceof SetTaskVariablesPayload) {
             setTaskVariablesAck.set(true);
-        } else if (results instanceof SetProcessVariablesResult) {
+        } else if (result.getPayload() instanceof SetProcessVariablesPayload) {
             setProcessVariablesAck.set(true);
-        } else if (results instanceof RemoveProcessVariablesResult) {
+        } else if (result.getPayload() instanceof RemoveProcessVariablesPayload) {
             removeProcessVariablesAck.set(true);
         }
     }
-
 
     public String getProcessInstanceId() {
         return processInstanceId;

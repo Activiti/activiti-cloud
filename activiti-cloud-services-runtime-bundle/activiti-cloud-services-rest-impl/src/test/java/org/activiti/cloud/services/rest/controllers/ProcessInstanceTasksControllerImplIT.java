@@ -25,12 +25,13 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
-import org.activiti.runtime.api.model.FluentTask;
+import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.query.Page;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -49,10 +50,8 @@ import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestP
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -88,6 +87,11 @@ public class ProcessInstanceTasksControllerImplIT {
     @MockBean
     private ProcessEngineChannels processEngineChannels;
 
+    @Mock
+    private org.activiti.runtime.api.query.Page<Task> apiPage;
+
+    @Mock
+    private org.springframework.data.domain.Page<Task> springPage;
 
     @Before
     public void setUp() {
@@ -97,11 +101,12 @@ public class ProcessInstanceTasksControllerImplIT {
 
     @Test
     public void getTasks() throws Exception {
-        List<FluentTask> taskList = Collections.singletonList(buildDefaultAssignedTask());
-        Page<FluentTask> tasks = new PageImpl<>(taskList,
-                                                taskList.size());
-        when(securityAwareTaskService.getTasks(eq("1"),
-                                               any())).thenReturn(tasks);
+        List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
+        Page<Task> tasks = new PageImpl<>(taskList,
+                                          taskList.size());
+
+        when(securityAwareTaskService.tasks(any(),
+                                            any())).thenReturn(tasks);
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks",
                                  1,
@@ -116,12 +121,13 @@ public class ProcessInstanceTasksControllerImplIT {
 
     @Test
     public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
-        FluentTask task = buildDefaultAssignedTask();
-        List<FluentTask> taskList = Collections.singletonList(task);
-        Page<FluentTask> taskPage = new PageImpl<>(taskList,
-                                          taskList.size());
-        when(securityAwareTaskService.getTasks(eq(task.getProcessInstanceId()),
-                                               any())).thenReturn(taskPage);
+        Task task = buildDefaultAssignedTask();
+        List<Task> taskList = Collections.singletonList(task);
+        Page<Task> taskPage = new PageImpl<>(taskList,
+                                             taskList.size());
+
+        when(securityAwareTaskService.tasks(any(),
+                                            any())).thenReturn(taskPage);
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks?skipCount=10&maxItems=10",
                                  task.getProcessInstanceId(),

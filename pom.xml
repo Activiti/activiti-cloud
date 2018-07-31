@@ -14,7 +14,6 @@
   <url>http://activiti.org</url>
   <modules>
     <module>activiti-cloud-services-runtime-bundle</module>
-    <module>activiti-cloud-starter-configure</module>
     <module>activiti-cloud-starter-runtime-bundle</module>
   </modules>
   <scm>

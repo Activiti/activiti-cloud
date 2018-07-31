@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
-import org.activiti.runtime.api.cmd.impl.CreateTaskImpl;
 import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.model.CloudProcessDefinition;
@@ -15,6 +14,7 @@ import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -207,11 +207,12 @@ public class AuditProducerIT {
     @Test
     public void shouldEmitEventsForTaskDelete() {
         //given
-        CloudTask task = taskRestTemplate.createTask(new CreateTaskImpl("my task name",
-                                                                        "long description here"));
+        CloudTask task = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("my task name").withDescription(
+                "long description here").build());
 
         //when
-        taskRestTemplate.delete(task);
+        ResponseEntity<CloudTask> deleteTask = taskRestTemplate.delete(task);
+
 
         //then
         await().untilAsserted(() -> {

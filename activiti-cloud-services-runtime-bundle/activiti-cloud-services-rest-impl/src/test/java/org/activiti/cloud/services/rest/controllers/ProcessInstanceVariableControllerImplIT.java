@@ -28,8 +28,7 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
-import org.activiti.runtime.api.cmd.impl.RemoveProcessVariablesImpl;
-import org.activiti.runtime.api.cmd.impl.SetProcessVariablesImpl;
+import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
 import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.activiti.runtime.conf.CommonModelAutoConfiguration;
 import org.conf.activiti.runtime.ProcessModelAutoConfiguration;
@@ -50,10 +49,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -77,7 +75,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ProcessInstanceVariableControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "process-instance-variables";
-    private static final String PROCESS_INSTANCE_ID =UUID.randomUUID().toString();
+    private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
 
     @Autowired
     private MockMvc mockMvc;
@@ -93,7 +91,6 @@ public class ProcessInstanceVariableControllerImplIT {
 
     @MockBean
     private ProcessEngineChannels processEngineChannels;
-
 
     @Before
     public void setUp() {
@@ -115,8 +112,10 @@ public class ProcessInstanceVariableControllerImplIT {
                                                                        Integer.class.getName(),
                                                                        12,
                                                                        PROCESS_INSTANCE_ID);
-        given(securityAwareProcessInstanceService.getVariableInstances(PROCESS_INSTANCE_ID)).willReturn(Arrays.asList(name,
-                                                                                               age));
+        given(securityAwareProcessInstanceService.getVariableInstances(ProcessPayloadBuilder.variables()
+                                                                               .withProcessInstanceId(PROCESS_INSTANCE_ID).build()))
+                .willReturn(Arrays.asList(name,
+                                          age));
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables/",
                                  1,
@@ -129,32 +128,39 @@ public class ProcessInstanceVariableControllerImplIT {
     @Test
     public void getVariablesLocal() throws Exception {
         VariableInstanceImpl<Integer> count = new VariableInstanceImpl<>("count",
-                                                                       Integer.class.getName(),
-                                                                       100,
-                                                                       PROCESS_INSTANCE_ID);
-        given(securityAwareProcessInstanceService.getLocalVariableInstances(PROCESS_INSTANCE_ID)).willReturn(Collections.singletonList(count));
+                                                                         Integer.class.getName(),
+                                                                         100,
+                                                                         PROCESS_INSTANCE_ID);
+
+        given(securityAwareProcessInstanceService.getVariableInstances(ProcessPayloadBuilder
+                                                                               .variables()
+                                                                               .withProcessInstanceId(PROCESS_INSTANCE_ID)
+                                                                               .localOnly()
+                                                                               .build()))
+                .willReturn(Collections.singletonList(count));
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables/local",
-                1,
-                1).accept(MediaTypes.HAL_JSON_VALUE))
+                                 1,
+                                 1).accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list/local",
-                        pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
+
     @Test
     public void setVariables() throws Exception {
         Map<String, Object> variables = new HashMap<>();
         variables.put("var1",
-                "varObj1");
+                      "varObj1");
         variables.put("var2",
-                "varObj2");
+                      "varObj2");
 
         this.mockMvc.perform(post("/v1/process-instances/{processInstanceId}/variables",
-                1).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new SetProcessVariablesImpl("1",
-                                                                                                                         variables))))
+                                  1).contentType(MediaType.APPLICATION_JSON).content(
+                mapper.writeValueAsString(ProcessPayloadBuilder.setVariables().withProcessInstanceId("1").withVariables(variables).build())))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/upsert",
-                        pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
 
         verify(securityAwareProcessInstanceService).setProcessVariables(any());
     }
@@ -163,15 +169,14 @@ public class ProcessInstanceVariableControllerImplIT {
     public void deleteVariables() throws Exception {
         this.mockMvc.perform(delete("/v1/process-instances/{processInstanceId}/variables",
                                     PROCESS_INSTANCE_ID)
-                .accept(MediaTypes.HAL_JSON_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(new RemoveProcessVariablesImpl(PROCESS_INSTANCE_ID, Arrays.asList("varName1",
-                                                                                                                     "varName2")))))
+                                     .accept(MediaTypes.HAL_JSON_VALUE)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(mapper.writeValueAsString(ProcessPayloadBuilder.removeVariables().withProcessInstanceId(PROCESS_INSTANCE_ID).withVariableNames(Arrays.asList("varName1",
+                                                                                                                                                                                           "varName2")).build())))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
-                        pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
         verify(securityAwareProcessInstanceService).removeProcessVariables(any());
     }
-
 }

@@ -7,8 +7,7 @@ import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.impl.bpmn.behavior.IntermediateThrowSignalEventActivityBehavior;
 import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.interceptor.CommandContext;
-import org.activiti.runtime.api.cmd.SendSignal;
-import org.activiti.runtime.api.cmd.impl.SendSignalImpl;
+import org.activiti.runtime.api.model.payloads.SignalPayload;
 import org.activiti.spring.bpmn.parser.CloudActivityBehaviorFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
@@ -40,7 +39,7 @@ public class BroadcastSignalEventActivityBehavior extends IntermediateThrowSigna
             eventSubscriptionName = expressionObject.getValue(execution).toString();
         }
 
-        SendSignal sendSignal = new SendSignalImpl(eventSubscriptionName);
-        eventPublisher.publishEvent(sendSignal);
+        SignalPayload signalPayload = new SignalPayload(eventSubscriptionName, null);
+        eventPublisher.publishEvent(signalPayload);
     }
 }

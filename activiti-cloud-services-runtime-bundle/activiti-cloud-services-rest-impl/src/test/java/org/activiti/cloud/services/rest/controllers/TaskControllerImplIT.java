@@ -30,10 +30,11 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
 import org.activiti.runtime.api.NotFoundException;
-import org.activiti.runtime.api.cmd.impl.CreateTaskImpl;
-import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.impl.FluentTaskImpl;
+import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
+import org.activiti.runtime.api.model.impl.TaskImpl;
+import org.activiti.runtime.api.model.payloads.CreateTaskPayload;
+import org.activiti.runtime.api.query.Page;
 import org.activiti.runtime.conf.CommonModelAutoConfiguration;
 import org.activiti.runtime.conf.TaskModelAutoConfiguration;
 import org.junit.Before;
@@ -59,10 +60,9 @@ import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildStan
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildSubTask;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildTask;
 import static org.activiti.runtime.api.model.Task.TaskStatus.CREATED;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.halLinks;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
@@ -120,9 +120,9 @@ public class TaskControllerImplIT {
     @Test
     public void getTasks() throws Exception {
 
-        List<FluentTask> taskList = Collections.singletonList(buildDefaultAssignedTask());
-        org.activiti.runtime.api.query.Page<FluentTask> tasks = new org.activiti.runtime.api.query.impl.PageImpl<>(taskList,
-                                                                                                                   taskList.size());
+        List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
+        org.activiti.runtime.api.query.Page<Task> tasks = new org.activiti.runtime.api.query.impl.PageImpl<>(taskList,
+                                                                                                             taskList.size());
         when(securityAwareTaskService.getAuthorizedTasks(any())).thenReturn(tasks);
 
         this.mockMvc.perform(get("/v1/tasks"))
@@ -135,9 +135,9 @@ public class TaskControllerImplIT {
 
     @Test
     public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
-        List<FluentTask> taskList = Collections.singletonList(buildDefaultAssignedTask());
-        org.activiti.runtime.api.query.Page<FluentTask> taskPage = new org.activiti.runtime.api.query.impl.PageImpl<>(taskList,
-                                                                                                                      taskList.size());
+        List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
+        org.activiti.runtime.api.query.Page<Task> taskPage = new org.activiti.runtime.api.query.impl.PageImpl<>(taskList,
+                                                                                                                taskList.size());
         when(securityAwareTaskService.getAuthorizedTasks(any())).thenReturn(taskPage);
 
         this.mockMvc.perform(get("/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
@@ -186,20 +186,22 @@ public class TaskControllerImplIT {
 
     @Test
     public void completeTask() throws Exception {
-
+        given(securityAwareTaskService.completeTask(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(post("/v1/tasks/{taskId}/complete",
                                   1))
                 .andExpect(status().isOk())
+                .andDo(print())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/complete",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
 
     @Test
     public void deleteTask() throws Exception {
-
+        given(securityAwareTaskService.deleteTask(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(delete("/v1/tasks/{taskId}",
                                     1))
                 .andExpect(status().isOk())
+                .andDo(print())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
@@ -217,12 +219,11 @@ public class TaskControllerImplIT {
 
     @Test
     public void createNewStandaloneTask() throws Exception {
-        FluentTaskImpl task = buildStandAloneTask("new-task",
-                                                  "New task to be performed");
+        TaskImpl task = buildStandAloneTask("new-task",
+                                            "New task to be performed");
         given(securityAwareTaskService.createNewTask(any())).willReturn(task);
 
-        CreateTaskImpl createTask = new CreateTaskImpl("new-task",
-                                                        "description");
+        CreateTaskPayload createTask = TaskPayloadBuilder.create().withName("new-task").withDescription("description").build();
         createTask.setPriority(50);
         this.mockMvc.perform(post("/v1/tasks/",
                                   1).contentType(MediaType.APPLICATION_JSON)
@@ -256,14 +257,14 @@ public class TaskControllerImplIT {
     @Test
     public void createNewSubtask() throws Exception {
         String parentTaskId = UUID.randomUUID().toString();
-        FluentTask subTask = buildSubTask("new-subtask",
-                                          "subtask description",
-                                          parentTaskId);
+        Task subTask = buildSubTask("new-subtask",
+                                    "subtask description",
+                                    parentTaskId);
         given(securityAwareTaskService.createNewSubtask(any(),
                                                         any())).willReturn(subTask);
 
-        CreateTaskImpl createTaskCmd = new CreateTaskImpl("new-task",
-                                                          "description");
+        CreateTaskPayload createTaskCmd = TaskPayloadBuilder.create().withName("new-task").withDescription(
+                "description").build();
         createTaskCmd.setPriority(50);
         this.mockMvc.perform(post("/v1/tasks/{taskId}/subtask",
                                   parentTaskId).contentType(MediaType.APPLICATION_JSON)
@@ -298,15 +299,16 @@ public class TaskControllerImplIT {
 
     @Test
     public void getSubtasks() throws Exception {
-        final FluentTaskImpl subtask1 = buildTask("subtask-1",
-                                                  "subtask-1 description");
-
-        final FluentTaskImpl subtask2 = buildTask("subtask-2",
-                                                  "subtask-2 description");
+        final TaskImpl subtask1 = buildTask("subtask-1",
+                                            "subtask-1 description");
         subtask1.setPriority(85);
 
-        when(securityAwareTaskService.getSubtasks(any())).thenReturn(Arrays.asList(subtask1,
-                                                                                   subtask2));
+        final TaskImpl subtask2 = buildTask("subtask-2",
+                                            "subtask-2 description");
+        Page page = mock(Page.class);
+        when(page.getContent()).thenReturn(Arrays.asList(subtask1,
+                                                         subtask2));
+        when(securityAwareTaskService.tasks(any(), any())).thenReturn(page);
 
         this.mockMvc.perform(get("/v1/tasks/{taskId}/subtasks",
                                  "parentTaskId").contentType(MediaType.APPLICATION_JSON))

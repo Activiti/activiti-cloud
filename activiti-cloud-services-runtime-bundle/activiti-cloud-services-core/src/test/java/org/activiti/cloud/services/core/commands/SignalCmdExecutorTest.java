@@ -1,9 +1,8 @@
 package org.activiti.cloud.services.core.commands;
 
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
-import org.activiti.runtime.api.cmd.RuntimeCommands;
-import org.activiti.runtime.api.cmd.impl.SendSignalImpl;
-import org.activiti.runtime.api.cmd.result.SendSignalResult;
+import org.activiti.runtime.api.Result;
+import org.activiti.runtime.api.model.payloads.SignalPayload;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -12,8 +11,8 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class SignalCmdExecutorTest {
@@ -34,14 +33,15 @@ public class SignalCmdExecutorTest {
 
     @Test
     public void signalProcessInstancesCmdExecutorTest() {
-        SendSignalImpl signalProcessInstancesCmd = new SendSignalImpl("x");
+        SignalPayload signalPayload = new SignalPayload("x",
+                                                        null);
 
-        assertThat(signalCmdExecutor.getHandledType()).isEqualTo(RuntimeCommands.SEND_SIGNAL.name());
+        assertThat(signalCmdExecutor.getHandledType()).isEqualTo(SignalPayload.class.getName());
 
-        signalCmdExecutor.execute(signalProcessInstancesCmd);
+        signalCmdExecutor.execute(signalPayload);
 
-        verify(processInstanceService).signal(signalProcessInstancesCmd);
+        verify(processInstanceService).signal(signalPayload);
 
-        verify(commandResults).send(ArgumentMatchers.<Message<SendSignalResult>>any());
+        verify(commandResults).send(ArgumentMatchers.<Message<Result<Void>>>any());
     }
 }

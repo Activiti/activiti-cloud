@@ -25,7 +25,7 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
-import org.activiti.runtime.api.model.FluentTask;
+import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.query.Page;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.junit.Before;
@@ -47,9 +47,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -81,7 +80,6 @@ public class TaskAdminControllerImplIT {
     @MockBean
     private ProcessEngineChannels processEngineChannels;
 
-
     @Before
     public void setUp() {
         assertThat(pageConverter).isNotNull();
@@ -91,8 +89,8 @@ public class TaskAdminControllerImplIT {
     @Test
     public void getTasks() throws Exception {
 
-        List<FluentTask> taskList = Collections.singletonList(buildDefaultAssignedTask());
-        Page<FluentTask> tasks = new PageImpl<>(taskList,
+        List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
+        Page<Task> tasks = new PageImpl<>(taskList,
                                           taskList.size());
         when(securityAwareTaskService.getAllTasks(any())).thenReturn(tasks);
 
@@ -106,9 +104,9 @@ public class TaskAdminControllerImplIT {
 
     @Test
     public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
-        List<FluentTask> taskList = Collections.singletonList(buildDefaultAssignedTask());
-        Page<FluentTask> taskPage = new PageImpl<>(taskList,
-                                                   taskList.size());
+        List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
+        Page<Task> taskPage = new PageImpl<>(taskList,
+                                             taskList.size());
         when(securityAwareTaskService.getAllTasks(any())).thenReturn(taskPage);
 
         this.mockMvc.perform(get("/admin/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
@@ -117,6 +115,4 @@ public class TaskAdminControllerImplIT {
                                 pageRequestParameters(),
                                 pagedResourcesResponseFields()));
     }
-
-
 }

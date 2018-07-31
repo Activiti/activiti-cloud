@@ -19,9 +19,8 @@ import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.runtime.api.ProcessRuntime;
-import org.activiti.runtime.api.model.FluentProcessDefinition;
 import org.activiti.runtime.api.model.ProcessDefinition;
-import org.activiti.runtime.api.query.ProcessDefinitionFilter;
+import org.activiti.runtime.api.model.payloads.GetProcessDefinitionsPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,11 +45,11 @@ public class SecurityAwareRepositoryService {
     }
 
     public Page<ProcessDefinition> getAuthorizedProcessDefinitions(Pageable pageable) {
-        ProcessDefinitionFilter filter = securityService.restrictProcessDefQuery(SecurityPolicy.READ);
+        GetProcessDefinitionsPayload getProcessDefinitionsPayload = securityService.restrictProcessDefQuery(SecurityPolicy.READ);
 
         return pageConverter.toSpringPage(pageable,
                                           processRuntime.processDefinitions(pageConverter.toAPIPageable(pageable),
-                                                                            filter));
+                                                                            getProcessDefinitionsPayload));
     }
 
     public Page<ProcessDefinition> getAllProcessDefinitions(Pageable pageable) {
@@ -59,7 +58,7 @@ public class SecurityAwareRepositoryService {
     }
 
     public ProcessDefinition getAuthorizedProcessDefinition(String processDefinitionId) {
-        FluentProcessDefinition processDefinition = processRuntime.processDefinitionById(processDefinitionId);
+        ProcessDefinition processDefinition = processRuntime.processDefinition(processDefinitionId);
         if (!securityService.canRead(processDefinition.getKey())) {
             throw new ActivitiObjectNotFoundException("Unable to find process definition for the given id:'" + processDefinitionId + "'");
         }

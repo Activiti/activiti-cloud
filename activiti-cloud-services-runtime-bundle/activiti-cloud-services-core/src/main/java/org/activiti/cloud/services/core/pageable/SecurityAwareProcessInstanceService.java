@@ -15,7 +15,6 @@
 
 package org.activiti.cloud.services.core.pageable;
 
-import java.util.HashMap;
 import java.util.List;
 
 import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
@@ -24,17 +23,19 @@ import org.activiti.cloud.services.core.SecurityPoliciesApplicationService;
 import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.runtime.api.ProcessRuntime;
-import org.activiti.runtime.api.cmd.RemoveProcessVariables;
-import org.activiti.runtime.api.cmd.ResumeProcess;
-import org.activiti.runtime.api.cmd.SendSignal;
-import org.activiti.runtime.api.cmd.SetProcessVariables;
-import org.activiti.runtime.api.cmd.StartProcess;
-import org.activiti.runtime.api.cmd.SuspendProcess;
-import org.activiti.runtime.api.model.FluentProcessDefinition;
-import org.activiti.runtime.api.model.FluentProcessInstance;
+import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.ProcessInstanceMeta;
 import org.activiti.runtime.api.model.VariableInstance;
-import org.activiti.runtime.api.query.ProcessInstanceFilter;
+import org.activiti.runtime.api.model.payloads.DeleteProcessPayload;
+import org.activiti.runtime.api.model.payloads.GetProcessInstancesPayload;
+import org.activiti.runtime.api.model.payloads.GetVariablesPayload;
+import org.activiti.runtime.api.model.payloads.RemoveProcessVariablesPayload;
+import org.activiti.runtime.api.model.payloads.ResumeProcessPayload;
+import org.activiti.runtime.api.model.payloads.SetProcessVariablesPayload;
+import org.activiti.runtime.api.model.payloads.SignalPayload;
+import org.activiti.runtime.api.model.payloads.StartProcessPayload;
+import org.activiti.runtime.api.model.payloads.SuspendProcessPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -54,8 +55,6 @@ public class SecurityAwareProcessInstanceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAwareProcessInstanceService.class);
 
-
-
     public SecurityAwareProcessInstanceService(ProcessRuntime processRuntime,
                                                SecurityPoliciesApplicationService securityPolicyApplicationService,
                                                SpringPageConverter springPageConverter,
@@ -68,11 +67,11 @@ public class SecurityAwareProcessInstanceService {
 
     public Page<ProcessInstance> getAuthorizedProcessInstances(Pageable pageable) {
 
-        ProcessInstanceFilter filter = securityService.restrictProcessInstQuery(SecurityPolicy.READ);
+        GetProcessInstancesPayload getProcessInstancesPayload = securityService.restrictProcessInstQuery(SecurityPolicy.READ);
 
         return springPageConverter.toSpringPage(pageable,
                                                 processRuntime.processInstances(springPageConverter.toAPIPageable(pageable),
-                                                                                filter));
+                                                                                getProcessInstancesPayload));
     }
 
     public Page<ProcessInstance> getAllProcessInstances(Pageable pageable) {
@@ -81,46 +80,46 @@ public class SecurityAwareProcessInstanceService {
                                                 processRuntime.processInstances(springPageConverter.toAPIPageable(pageable)));
     }
 
-    public ProcessInstance startProcess(StartProcess cmd) {
+    public ProcessInstanceMeta processInstanceMeta(String processInstanceId) {
+        return processRuntime.processInstanceMeta(processInstanceId);
+    }
 
-        FluentProcessDefinition processDefinition;
-        if (cmd.getProcessDefinitionKey() != null) {
-            processDefinition = processRuntime.processDefinitionByKey(cmd.getProcessDefinitionKey());
-        } else {
-            processDefinition = processRuntime.processDefinitionById(cmd.getProcessDefinitionId());
+    public ProcessInstance startProcess(StartProcessPayload startProcessPayload) {
+
+        ProcessDefinition processDefinition = null;
+        if (startProcessPayload.getProcessDefinitionId() != null) {
+            processDefinition = processRuntime.processDefinition(startProcessPayload.getProcessDefinitionId());
         }
-
+        if (processDefinition == null && startProcessPayload.getProcessDefinitionKey() != null) {
+            processDefinition = processRuntime.processDefinition(startProcessPayload.getProcessDefinitionKey());
+        }
+        if (processDefinition == null) {
+            throw new IllegalStateException("At least Process Definition Id or Key needs to be provided to start a process");
+        }
         if (!securityService.canWrite(processDefinition.getKey())) {
             LOGGER.debug("User " + authenticationWrapper.getAuthenticatedUserId() + " not permitted to access definition " + processDefinition.getKey());
             throw new ActivitiForbiddenException("Operation not permitted for " + processDefinition.getKey());
         }
-
-        return processDefinition.startProcessWith()
-                .variables(cmd.getVariables())
-                .businessKey(cmd.getBusinessKey())
-                .doIt();
+        return processRuntime.start(startProcessPayload);
     }
 
-    public FluentProcessInstance getAuthorizedProcessInstanceById(String processInstanceId) {
-        FluentProcessInstance processInstance = processRuntime.processInstance(processInstanceId);
+    public ProcessInstance getAuthorizedProcessInstanceById(String processInstanceId) {
+        ProcessInstance processInstance = processRuntime.processInstance(processInstanceId);
         if (processInstance == null || !securityService.canRead(processInstance.getProcessDefinitionKey())) {
             throw new ActivitiObjectNotFoundException("Unable to find process definition for the given id:'" + processInstanceId + "'");
         }
         return processInstance;
     }
 
-    public void signal(SendSignal signaCmd) {
+    public void signal(SignalPayload signalPayload) {
         //TODO: plan is to restrict access to events using a new security policy on events
         // - that's another piece of work though so for now no security here
 
-        processRuntime.sendSignalWith()
-                .name(signaCmd.getName())
-                .variables(signaCmd.getInputVariables())
-                .doIt();
+        processRuntime.signal(signalPayload);
     }
 
-    private FluentProcessInstance verifyCanWriteToProcessInstance(String processInstanceId) {
-        FluentProcessInstance processInstance = getAuthorizedProcessInstanceById(processInstanceId);
+    private ProcessInstance verifyCanWriteToProcessInstance(String processInstanceId) {
+        ProcessInstance processInstance = getAuthorizedProcessInstanceById(processInstanceId);
 
         String processDefinitionKey = processInstance.getProcessDefinitionKey();
         if (!securityService.canWrite(processDefinitionKey)) {
@@ -131,40 +130,34 @@ public class SecurityAwareProcessInstanceService {
         return processInstance;
     }
 
-    public void suspend(SuspendProcess suspendProcessInstanceCmd) {
-        FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(suspendProcessInstanceCmd.getProcessInstanceId());
-        processInstance.suspend();
+    public ProcessInstance suspend(SuspendProcessPayload suspendProcessPayload) {
+        ProcessInstance processInstance = verifyCanWriteToProcessInstance(suspendProcessPayload.getProcessInstanceId());
+        return processRuntime.suspend(suspendProcessPayload);
     }
 
-    public void activate(ResumeProcess resumeProcess) {
-        FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(resumeProcess.getProcessInstanceId());
-        processInstance.resume();
+    public ProcessInstance activate(ResumeProcessPayload resumeProcessPayload) {
+        ProcessInstance processInstance = verifyCanWriteToProcessInstance(resumeProcessPayload.getProcessInstanceId());
+        return processRuntime.resume(resumeProcessPayload);
     }
 
-    public void setProcessVariables(SetProcessVariables setProcessVariablesCmd) {
-        FluentProcessInstance processInstance = getAuthorizedProcessInstanceById(setProcessVariablesCmd.getProcessInstanceId());
+    public void setProcessVariables(SetProcessVariablesPayload setVariablesPayload) {
+        ProcessInstance processInstance = getAuthorizedProcessInstanceById(setVariablesPayload.getProcessInstanceId());
         verifyCanWriteToProcessInstance(processInstance.getId());
-        processInstance.variables(new HashMap<>(setProcessVariablesCmd.getVariables()));
+        processRuntime.setVariables(setVariablesPayload);
     }
 
-    public void deleteProcessInstance(String processInstanceId) {
-        FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(processInstanceId);
-        processInstance.delete("Cancelled by " + authenticationWrapper.getAuthenticatedUserId());
+    public ProcessInstance deleteProcessInstance(DeleteProcessPayload deleteProcessPayload) {
+        ProcessInstance processInstance = verifyCanWriteToProcessInstance(deleteProcessPayload.getProcessInstanceId());
+        return processRuntime.delete(deleteProcessPayload);
     }
 
-    public void removeProcessVariables(RemoveProcessVariables removeProcessVariablesCmd) {
-        FluentProcessInstance processInstance = verifyCanWriteToProcessInstance(removeProcessVariablesCmd.getProcessInstanceId());
-        processInstance.removeVariables(removeProcessVariablesCmd.getVariableNames());
+    public void removeProcessVariables(RemoveProcessVariablesPayload removeVariablesPayload) {
+        ProcessInstance processInstance = verifyCanWriteToProcessInstance(removeVariablesPayload.getProcessInstanceId());
+        processRuntime.removeVariables(removeVariablesPayload);
     }
 
-    public List<VariableInstance> getVariableInstances(String processInstanceId) {
-        FluentProcessInstance processInstance = getAuthorizedProcessInstanceById(processInstanceId);
-        return processRuntime.processInstance(processInstance.getId()).variables();
+    public List<VariableInstance> getVariableInstances(GetVariablesPayload getVariablesPayload) {
+        ProcessInstance processInstance = getAuthorizedProcessInstanceById(getVariablesPayload.getProcessInstanceId());
+        return processRuntime.variables(getVariablesPayload);
     }
-
-    public List<VariableInstance> getLocalVariableInstances(String processInstanceId) {
-        FluentProcessInstance processInstance = getAuthorizedProcessInstanceById(processInstanceId);
-        return processRuntime.processInstance(processInstance.getId()).localVariables();
-    }
-
 }

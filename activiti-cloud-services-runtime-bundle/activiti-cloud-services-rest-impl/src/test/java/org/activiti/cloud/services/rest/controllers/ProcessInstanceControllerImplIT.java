@@ -32,10 +32,11 @@ import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.NotFoundException;
-import org.activiti.runtime.api.cmd.impl.SendSignalImpl;
-import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
-import org.activiti.runtime.api.model.FluentProcessInstance;
 import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.ProcessInstanceMeta;
+import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
+import org.activiti.runtime.api.model.payloads.SignalPayload;
+import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.activiti.runtime.conf.CommonModelAutoConfiguration;
 import org.conf.activiti.runtime.ProcessModelAutoConfiguration;
 import org.junit.Before;
@@ -60,12 +61,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -86,7 +85,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ServicesRestAutoConfiguration.class
-        })
+})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 public class ProcessInstanceControllerImplIT {
 
@@ -154,7 +153,7 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void startProcess() throws Exception {
-        StartProcessImpl cmd = new StartProcessImpl("1");
+        StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
         when(securityAwareProcessInstanceService.startProcess(any())).thenReturn(defaultProcessInstance());
 
@@ -167,7 +166,7 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void startProcessForbidden() throws Exception {
-        StartProcessImpl cmd = new StartProcessImpl("1");
+        StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
         when(securityAwareProcessInstanceService.startProcess(any())).thenThrow(new ActivitiForbiddenException("Not permitted"));
 
@@ -202,10 +201,12 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void getProcessDiagram() throws Exception {
-        FluentProcessInstance processInstance = mock(FluentProcessInstance.class);
+        ProcessInstance processInstance = mock(ProcessInstance.class);
         when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(anyString())).thenReturn(processInstance);
         when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId())).thenReturn(mock(BpmnModel.class));
-        when(processInstance.activeActivityIds()).thenReturn(Collections.emptyList());
+        ProcessInstanceMeta processInstanceMeta = mock(ProcessInstanceMeta.class);
+        when(securityAwareProcessInstanceService.processInstanceMeta(any())).thenReturn(processInstanceMeta);
+        when(processInstanceMeta.getActiveActivitiesIds()).thenReturn(Collections.emptyList());
 
         when(processDiagramGenerator.generateDiagram(any(BpmnModel.class),
                                                      anyList(),
@@ -231,10 +232,12 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void getProcessDiagramWithoutInterchangeInfo() throws Exception {
-        FluentProcessInstance processInstance = mock(FluentProcessInstance.class);
+        ProcessInstance processInstance = mock(ProcessInstance.class);
         when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(anyString())).thenReturn(processInstance);
         when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId())).thenReturn(mock(BpmnModel.class));
-        when(processInstance.activeActivityIds()).thenReturn(Collections.emptyList());
+        ProcessInstanceMeta processInstanceMeta = mock(ProcessInstanceMeta.class);
+        when(securityAwareProcessInstanceService.processInstanceMeta(any())).thenReturn(processInstanceMeta);
+        when(processInstanceMeta.getActiveActivitiesIds()).thenReturn(Collections.emptyList());
 
         when(processDiagramGenerator.generateDiagram(any(BpmnModel.class),
                                                      anyList(),
@@ -248,7 +251,7 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void sendSignal() throws Exception {
-        SendSignalImpl cmd = new SendSignalImpl("signalInstance");
+        SignalPayload cmd = ProcessPayloadBuilder.signal().withName("signalInstance").build();
 
         this.mockMvc.perform(get("/v1/process-instances/signal").contentType(MediaType.APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(cmd)))
@@ -258,9 +261,9 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void suspend() throws Exception {
-        FluentProcessInstance processInstance = mock(FluentProcessInstance.class);
+        ProcessInstance processInstance = mock(ProcessInstance.class);
         when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById("1")).thenReturn(processInstance);
-
+        when(securityAwareProcessInstanceService.suspend(any())).thenReturn(defaultProcessInstance());
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/suspend",
                                  1))
                 .andExpect(status().isOk())
@@ -270,9 +273,9 @@ public class ProcessInstanceControllerImplIT {
 
     @Test
     public void activate() throws Exception {
-        FluentProcessInstance processInstance = mock(FluentProcessInstance.class);
+        ProcessInstance processInstance = mock(ProcessInstance.class);
         when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById("1")).thenReturn(processInstance);
-
+        when(securityAwareProcessInstanceService.activate(any())).thenReturn(defaultProcessInstance());
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/activate",
                                  1))
                 .andExpect(status().isOk())
@@ -280,13 +283,13 @@ public class ProcessInstanceControllerImplIT {
                                 pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
 
-
     @Test
     public void deleteProcessInstance() throws Exception {
-        FluentProcessInstance processInstance = mock(FluentProcessInstance.class);
+        ProcessInstance processInstance = mock(ProcessInstance.class);
         when(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById("1")).thenReturn(processInstance);
-
-        this.mockMvc.perform(delete("/v1/process-instances/{processInstanceId}", 1))
+        when(securityAwareProcessInstanceService.deleteProcessInstance(any())).thenReturn(defaultProcessInstance());
+        this.mockMvc.perform(delete("/v1/process-instances/{processInstanceId}",
+                                    1))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
                                 pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));

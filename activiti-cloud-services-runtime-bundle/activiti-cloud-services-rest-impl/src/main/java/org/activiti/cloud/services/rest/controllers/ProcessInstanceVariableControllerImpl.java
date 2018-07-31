@@ -21,8 +21,9 @@ import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
 import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
-import org.activiti.runtime.api.cmd.RemoveProcessVariables;
-import org.activiti.runtime.api.cmd.SetProcessVariables;
+import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
+import org.activiti.runtime.api.model.payloads.RemoveProcessVariablesPayload;
+import org.activiti.runtime.api.model.payloads.SetProcessVariablesPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
@@ -66,28 +67,32 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
 
     @Override
     public Resources<VariableInstanceResource> getVariables(@PathVariable String processInstanceId) {
-        return resourcesAssembler.toResources(securityAwareProcessInstanceService.getVariableInstances(processInstanceId),
+        return resourcesAssembler.toResources(securityAwareProcessInstanceService.getVariableInstances(ProcessPayloadBuilder.variables()
+                                                                                                               .withProcessInstanceId(processInstanceId)
+                                                                                                               .build()),
                                               variableResourceAssembler);
     }
 
     @Override
     public Resources<VariableInstanceResource> getVariablesLocal(@PathVariable String processInstanceId) {
-        return resourcesAssembler.toResources(
-                securityAwareProcessInstanceService.getLocalVariableInstances(processInstanceId),
-                variableResourceAssembler);
+        return resourcesAssembler.toResources(securityAwareProcessInstanceService.getVariableInstances(ProcessPayloadBuilder.variables()
+                                                                                                               .withProcessInstanceId(processInstanceId)
+                                                                                                               .localOnly()
+                                                                                                               .build()),
+                                              variableResourceAssembler);
     }
 
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
-                                             @RequestBody SetProcessVariables setProcessVariablesCmd) {
-        securityAwareProcessInstanceService.setProcessVariables(setProcessVariablesCmd);
+                                             @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
+        securityAwareProcessInstanceService.setProcessVariables(setProcessVariablesPayload);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
-                                                @RequestBody RemoveProcessVariables removeProcessVariablesCmd) {
-        securityAwareProcessInstanceService.removeProcessVariables(removeProcessVariablesCmd);
+                                                @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload) {
+        securityAwareProcessInstanceService.removeProcessVariables(removeProcessVariablesPayload);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.runtime.api.cmd.Command;
+import org.activiti.runtime.api.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CommandEndpoint<T extends Command<?>> {
+public class CommandEndpoint<T extends Payload> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandEndpoint.class);
     private Map<String, CommandExecutor<T>> commandExecutors;
@@ -26,17 +26,17 @@ public class CommandEndpoint<T extends Command<?>> {
     }
 
     @StreamListener(ProcessEngineChannels.COMMAND_CONSUMER)
-    public void consumeActivateProcessInstanceCmd(T cmd) {
-        processCommand(cmd);
+    public void consumeActivateProcessInstanceCmd(T payload) {
+        processCommand(payload);
     }
 
-    private void processCommand(T cmd) {
-        CommandExecutor<T> cmdExecutor = commandExecutors.get(cmd.getCommandType().name());
-        if (cmdExecutor != null) {
-            cmdExecutor.execute(cmd);
-            return;
-        }
+    private void processCommand(T payload) {
 
-        LOGGER.warn(">>> No Command Found for type: " + cmd.getClass());
+        CommandExecutor<T> cmdExecutor = commandExecutors.get(payload.getClass().getName());
+        if (cmdExecutor != null) {
+            cmdExecutor.execute(payload);
+        } else {
+            LOGGER.warn(">>> No Command Found for type: " + payload.getClass());
+        }
     }
 }

@@ -22,8 +22,8 @@ import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceTasksController;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
-import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
@@ -55,9 +55,13 @@ public class ProcessInstanceTasksControllerImpl implements ProcessInstanceTasksC
     @Override
     public PagedResources<TaskResource> getTasks(@PathVariable String processInstanceId,
                                                  Pageable pageable) {
-        org.activiti.runtime.api.query.Page<FluentTask> page = securityAwareTaskService.getTasks(processInstanceId,
-                                                                                                 pageConverter.toAPIPageable(pageable));
-        return pagedResourcesAssembler.toResource(pageable, pageConverter.toSpringPage(pageable, page),
+        org.activiti.runtime.api.query.Page<Task> page = securityAwareTaskService.tasks(pageConverter.toAPIPageable(pageable),
+                                                                                        TaskPayloadBuilder.tasks()
+                                                                                                .withProcessInstanceId(processInstanceId)
+                                                                                                .build());
+        return pagedResourcesAssembler.toResource(pageable,
+                                                  pageConverter.toSpringPage(pageable,
+                                                                             page),
                                                   taskResourceAssembler);
     }
 }

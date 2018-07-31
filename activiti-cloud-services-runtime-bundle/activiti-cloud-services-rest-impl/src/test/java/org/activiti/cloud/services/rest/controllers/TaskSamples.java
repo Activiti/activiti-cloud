@@ -19,65 +19,61 @@ package org.activiti.cloud.services.rest.controllers;
 import java.util.Date;
 import java.util.UUID;
 
-import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.impl.FluentTaskImpl;
+import org.activiti.runtime.api.model.impl.TaskImpl;
 
 import static org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED;
 
 public class TaskSamples {
 
-    public static FluentTask buildDefaultAssignedTask() {
+    public static Task buildDefaultAssignedTask() {
         return buildTask("user",
                          ASSIGNED);
     }
 
-    public static FluentTask buildTask(Task.TaskStatus status,
-                                       String name,
-                                       String assignee) {
-        FluentTaskImpl task = buildTask(name,
-                                        status);
+    public static Task buildTask(Task.TaskStatus status,
+                                 String name,
+                                 String assignee) {
+        TaskImpl task = buildTask(name,
+                                  status);
         task.setAssignee(assignee);
         return task;
     }
 
-    public static FluentTaskImpl buildTask(String name,
-                                           Task.TaskStatus status) {
+    public static TaskImpl buildTask(String name,
+                                     Task.TaskStatus status) {
         return buildTask(name,
                          status,
                          UUID.randomUUID().toString(),
                          UUID.randomUUID().toString());
     }
 
-    public static FluentTaskImpl buildStandAloneTask(String name,
-                                                     String description) {
-        FluentTaskImpl task = buildTask(name,
-                                        Task.TaskStatus.CREATED,
-                                        null,
-                                        null);
+    public static TaskImpl buildStandAloneTask(String name,
+                                               String description) {
+        TaskImpl task = buildTask(name,
+                                  Task.TaskStatus.CREATED,
+                                  null,
+                                  null);
         task.setDescription(description);
         return task;
     }
 
-    public static FluentTask buildSubTask(String name,
-                                          String description,
-                                          String parentTaskId) {
-        FluentTaskImpl fluentTask = buildStandAloneTask(name, description);
+    public static Task buildSubTask(String name,
+                                    String description,
+                                    String parentTaskId) {
+        TaskImpl fluentTask = buildStandAloneTask(name,
+                                                  description);
         fluentTask.setParentTaskId(parentTaskId);
         return fluentTask;
     }
 
-    private static FluentTaskImpl buildTask(String name,
-                                            Task.TaskStatus status,
-                                            String processInstanceId,
-                                            String processDefinitionId) {
-        FluentTaskImpl task = new FluentTaskImpl(null,
-                                                 null,
-                                                 null,
-                                                 UUID.randomUUID().toString(),
-                                                 name,
-                                                 status
-        );
+    private static TaskImpl buildTask(String name,
+                                      Task.TaskStatus status,
+                                      String processInstanceId,
+                                      String processDefinitionId) {
+        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
+                                     name,
+                                     status);
         task.setOwner("user");
         task.setDescription("ValidateRequest");
         task.setCreatedDate(new Date());
@@ -89,10 +85,10 @@ public class TaskSamples {
         return task;
     }
 
-    public static FluentTaskImpl buildTask(String name,
-                                           String description) {
-        FluentTaskImpl task = buildTask(name,
-                                        Task.TaskStatus.CREATED);
+    public static TaskImpl buildTask(String name,
+                                     String description) {
+        TaskImpl task = buildTask(name,
+                                  Task.TaskStatus.CREATED);
         task.setDescription(description);
         return task;
     }

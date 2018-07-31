@@ -1,16 +1,15 @@
 package org.activiti.cloud.services.core.commands;
 
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
-import org.activiti.runtime.api.cmd.RuntimeCommands;
-import org.activiti.runtime.api.cmd.SendSignal;
-import org.activiti.runtime.api.cmd.result.impl.SendSignalResultImpl;
+import org.activiti.runtime.api.EmptyResult;
+import org.activiti.runtime.api.model.payloads.SignalPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SignalCmdExecutor implements CommandExecutor<SendSignal> {
+public class SignalCmdExecutor implements CommandExecutor<SignalPayload> {
 
     private SecurityAwareProcessInstanceService processInstanceService;
     private MessageChannel commandResults;
@@ -24,13 +23,12 @@ public class SignalCmdExecutor implements CommandExecutor<SendSignal> {
 
     @Override
     public String getHandledType() {
-        return RuntimeCommands.SEND_SIGNAL.name();
+        return SignalPayload.class.getName();
     }
 
     @Override
-    public void execute(SendSignal cmd) {
-        processInstanceService.signal(cmd);
-        SendSignalResultImpl cmdResult = new SendSignalResultImpl(cmd);
-        commandResults.send(MessageBuilder.withPayload(cmdResult).build());
+    public void execute(SignalPayload signalPayload) {
+        processInstanceService.signal(signalPayload);
+        commandResults.send(MessageBuilder.withPayload(new EmptyResult(signalPayload)).build());
     }
 }

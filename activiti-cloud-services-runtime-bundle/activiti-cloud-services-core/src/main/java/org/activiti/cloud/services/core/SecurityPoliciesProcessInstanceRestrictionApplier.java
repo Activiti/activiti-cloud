@@ -19,25 +19,26 @@ package org.activiti.cloud.services.core;
 import java.util.Set;
 import java.util.UUID;
 
-import org.activiti.runtime.api.query.ProcessInstanceFilter;
+import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
+import org.activiti.runtime.api.model.payloads.GetProcessInstancesPayload;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SecurityPoliciesProcessInstanceRestrictionApplier implements SecurityPoliciesRestrictionApplier<ProcessInstanceFilter> {
+public class SecurityPoliciesProcessInstanceRestrictionApplier implements SecurityPoliciesRestrictionApplier<GetProcessInstancesPayload> {
 
     @Override
-    public ProcessInstanceFilter restrictToKeys(Set<String> keys) {
-        return ProcessInstanceFilter.filteredOnKeys(keys);
+    public GetProcessInstancesPayload restrictToKeys(Set<String> keys) {
+        return ProcessPayloadBuilder.processInstances().withProcessDefinitionKeys(keys).build();
     }
 
     @Override
-    public ProcessInstanceFilter denyAll() {
+    public GetProcessInstancesPayload denyAll() {
         //user should not see anything so give unsatisfiable condition
-        return ProcessInstanceFilter.filteredOnKey("missing-" + UUID.randomUUID().toString());
+        return ProcessPayloadBuilder.processInstances().withProcessDefinitionKey("missing-" + UUID.randomUUID().toString()).build();
     }
 
     @Override
-    public ProcessInstanceFilter allowAll() {
-        return ProcessInstanceFilter.unfiltered();
+    public GetProcessInstancesPayload allowAll() {
+        return ProcessPayloadBuilder.processInstances().build();
     }
 }

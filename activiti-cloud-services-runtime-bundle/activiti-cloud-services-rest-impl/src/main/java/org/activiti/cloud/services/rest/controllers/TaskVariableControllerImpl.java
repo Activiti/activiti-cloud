@@ -19,7 +19,7 @@ import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
 import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
-import org.activiti.runtime.api.cmd.SetTaskVariables;
+import org.activiti.runtime.api.model.payloads.SetTaskVariablesPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
@@ -48,25 +48,28 @@ public class TaskVariableControllerImpl implements TaskVariableController {
 
     @Override
     public Resources<VariableInstanceResource> getVariables(@PathVariable String taskId) {
-        return resourcesAssembler.toResources(securityAwareTaskService.getVariableInstances(taskId), variableResourceAssembler);
+        return resourcesAssembler.toResources(securityAwareTaskService.getVariableInstances(taskId),
+                                              variableResourceAssembler);
     }
 
     @Override
     public Resources<VariableInstanceResource> getVariablesLocal(@PathVariable String taskId) {
-       return resourcesAssembler.toResources(securityAwareTaskService.getLocalVariableInstances(taskId), variableResourceAssembler);
+        return resourcesAssembler.toResources(securityAwareTaskService.getVariableInstancesLocal(taskId),
+                                              variableResourceAssembler);
     }
 
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String taskId,
-                                             @RequestBody SetTaskVariables setTaskVariablesCmd) {
+                                             @RequestBody SetTaskVariablesPayload setTaskVariablesCmd) {
         securityAwareTaskService.setTaskVariables(setTaskVariablesCmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> setVariablesLocal(@PathVariable String taskId,
-                                                  @RequestBody SetTaskVariables setTaskVariablesCmd) {
-        securityAwareTaskService.setTaskVariablesLocal(setTaskVariablesCmd);
+                                                  @RequestBody SetTaskVariablesPayload setTaskVariablesCmd) {
+        setTaskVariablesCmd.setLocalOnly(true);
+        securityAwareTaskService.setTaskVariables(setTaskVariablesCmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -1,16 +1,15 @@
 package org.activiti.cloud.services.core.commands;
 
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
-import org.activiti.runtime.api.cmd.SetTaskVariables;
-import org.activiti.runtime.api.cmd.TaskCommands;
-import org.activiti.runtime.api.cmd.result.impl.SetTaskVariablesResultImpl;
+import org.activiti.runtime.api.EmptyResult;
+import org.activiti.runtime.api.model.payloads.SetTaskVariablesPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SetTaskVariablesCmdExecutor implements CommandExecutor<SetTaskVariables> {
+public class SetTaskVariablesCmdExecutor implements CommandExecutor<SetTaskVariablesPayload> {
 
     private SecurityAwareTaskService securityAwareTaskService;
     private MessageChannel commandResults;
@@ -24,13 +23,12 @@ public class SetTaskVariablesCmdExecutor implements CommandExecutor<SetTaskVaria
 
     @Override
     public String getHandledType() {
-        return TaskCommands.SET_TASK_VARIABLES.name();
+        return SetTaskVariablesPayload.class.getName();
     }
 
     @Override
-    public void execute(SetTaskVariables cmd) {
-        securityAwareTaskService.setTaskVariables(cmd);
-        SetTaskVariablesResultImpl cmdResult = new SetTaskVariablesResultImpl(cmd);
-        commandResults.send(MessageBuilder.withPayload(cmdResult).build());
+    public void execute(SetTaskVariablesPayload setTaskVariablesPayload) {
+        securityAwareTaskService.setTaskVariables(setTaskVariablesPayload);
+        commandResults.send(MessageBuilder.withPayload(new EmptyResult(setTaskVariablesPayload)).build());
     }
 }

@@ -19,10 +19,10 @@ package org.activiti.cloud.services.core;
 import java.util.Collections;
 import java.util.Set;
 
-import org.activiti.runtime.api.query.ProcessDefinitionFilter;
+import org.activiti.runtime.api.model.payloads.GetProcessDefinitionsPayload;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 public class SecurityPoliciesProcessDefinitionRestrictionApplierTest {
 
@@ -34,7 +34,7 @@ public class SecurityPoliciesProcessDefinitionRestrictionApplierTest {
         Set<String> keys = Collections.singleton("procDef");
 
         //when
-        ProcessDefinitionFilter filter = restrictionApplier.restrictToKeys(keys);
+        GetProcessDefinitionsPayload filter = restrictionApplier.restrictToKeys(keys);
 
         //then
         assertThat(filter.getProcessDefinitionKeys()).isEqualTo(keys);
@@ -43,7 +43,7 @@ public class SecurityPoliciesProcessDefinitionRestrictionApplierTest {
     @Test
     public void denyAllShouldAddUnmatchableFilter() {
         //when
-        ProcessDefinitionFilter filter = restrictionApplier.denyAll();
+        GetProcessDefinitionsPayload filter = restrictionApplier.denyAll();
 
         //then
         assertThat(filter.getProcessDefinitionKeys()).hasSize(1);

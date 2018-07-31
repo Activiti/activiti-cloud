@@ -21,7 +21,6 @@ import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskAdminController;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
-import org.activiti.runtime.api.model.FluentTask;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +52,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
 
     @Override
     public PagedResources<TaskResource> getAllTasks(Pageable pageable) {
-        Page<FluentTask> tasksPage = taskService.getAllTasks(pageConverter.toAPIPageable(pageable));
+        Page<Task> tasksPage = taskService.getAllTasks(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
                                                   pageConverter.toSpringPage(pageable,
                                                                              tasksPage),

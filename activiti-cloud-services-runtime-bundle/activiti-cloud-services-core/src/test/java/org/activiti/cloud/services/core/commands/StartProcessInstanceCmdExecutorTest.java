@@ -1,10 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
 import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
-import org.activiti.runtime.api.cmd.ProcessCommands;
-import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
-import org.activiti.runtime.api.cmd.result.StartProcessResult;
-import org.activiti.runtime.api.model.FluentProcessInstance;
+import org.activiti.runtime.api.Result;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -13,11 +12,9 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class StartProcessInstanceCmdExecutorTest {
@@ -38,18 +35,21 @@ public class StartProcessInstanceCmdExecutorTest {
 
     @Test
     public void startProcessInstanceCmdExecutorTest() {
-        StartProcessImpl startProcessInstanceCmd = new StartProcessImpl("x");
+        StartProcessPayload startProcessInstanceCmd = new StartProcessPayload("x",
+                                                                              "x",
+                                                                              "key",
+                                                                              null);
 
-        FluentProcessInstance fakeProcessInstance = mock(FluentProcessInstance.class);
+        ProcessInstance fakeProcessInstance = mock(ProcessInstance.class);
 
         given(securityAwareProcessInstanceService.startProcess(any())).willReturn(fakeProcessInstance);
 
-        assertThat(startProcessInstanceCmdExecutor.getHandledType()).isEqualTo(ProcessCommands.START_PROCESS.name());
+        assertThat(startProcessInstanceCmdExecutor.getHandledType()).isEqualTo(StartProcessPayload.class.getName());
 
         startProcessInstanceCmdExecutor.execute(startProcessInstanceCmd);
 
         verify(securityAwareProcessInstanceService).startProcess(startProcessInstanceCmd);
 
-        verify(commandResults).send(ArgumentMatchers.<Message<StartProcessResult>>any());
+        verify(commandResults).send(ArgumentMatchers.<Message<Result<ProcessInstance>>>any());
     }
 }

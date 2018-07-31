@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
 import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
-import org.activiti.runtime.api.cmd.TaskCommands;
-import org.activiti.runtime.api.cmd.impl.ClaimTaskImpl;
-import org.activiti.runtime.api.cmd.result.ClaimTaskResult;
+import org.activiti.runtime.api.Result;
+import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.payloads.ClaimTaskPayload;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -12,8 +12,8 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ClaimTaskCmdExecutorTest {
@@ -35,16 +35,16 @@ public class ClaimTaskCmdExecutorTest {
     @Test
     public void claimTaskCmdExecutorTest() {
         //given
-        ClaimTaskImpl claimTaskCmd = new ClaimTaskImpl("taskId",
-                                                       "assignee");
+        ClaimTaskPayload claimTaskPayload = new ClaimTaskPayload("taskId",
+                                                                 "assignee");
 
-        assertThat(claimTaskCmdExecutor.getHandledType()).isEqualTo(TaskCommands.CLAIM_TASK.name());
+        assertThat(claimTaskCmdExecutor.getHandledType()).isEqualTo(ClaimTaskPayload.class.getName());
 
         //when
-        claimTaskCmdExecutor.execute(claimTaskCmd);
+        claimTaskCmdExecutor.execute(claimTaskPayload);
 
         //then
-        verify(securityAwareTaskService).claimTask(claimTaskCmd);
-        verify(commandResults).send(ArgumentMatchers.<Message<ClaimTaskResult>>any());
+        verify(securityAwareTaskService).claimTask(claimTaskPayload);
+        verify(commandResults).send(ArgumentMatchers.<Message<Result<Task>>>any());
     }
 }

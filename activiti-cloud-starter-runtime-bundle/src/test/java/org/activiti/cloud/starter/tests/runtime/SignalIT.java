@@ -30,7 +30,6 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
-import org.activiti.runtime.api.cmd.impl.SendSignalImpl;
 import org.activiti.runtime.api.model.CloudProcessDefinition;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
@@ -38,6 +37,8 @@ import org.activiti.runtime.api.model.CloudVariableInstance;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.VariableInstance;
+import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
+import org.activiti.runtime.api.model.payloads.SignalPayload;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +57,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
@@ -89,7 +90,8 @@ public class SignalIT {
         ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
-            processDefinitionIds.put(pd.getName(), pd.getId());
+            processDefinitionIds.put(pd.getName(),
+                                     pd.getId());
         }
     }
 
@@ -97,7 +99,7 @@ public class SignalIT {
     public void shouldBroadcastSignals() {
         //when
         org.activiti.engine.runtime.ProcessInstance procInst1 = runtimeService.startProcessInstanceByKey("broadcastSignalCatchEventProcess");
-        org.activiti.engine.runtime.ProcessInstance procInst2 = ((ProcessEngineConfigurationImpl)processEngineConfiguration).getCommandExecutor().execute(new Command<org.activiti.engine.runtime.ProcessInstance>() {
+        org.activiti.engine.runtime.ProcessInstance procInst2 = ((ProcessEngineConfigurationImpl) processEngineConfiguration).getCommandExecutor().execute(new Command<org.activiti.engine.runtime.ProcessInstance>() {
             public org.activiti.engine.runtime.ProcessInstance execute(CommandContext commandContext) {
                 runtimeService.startProcessInstanceByKey("broadcastSignalEventProcess");
                 return runtimeService.startProcessInstanceByKey("broadcastSignalCatchEventProcess");
@@ -152,14 +154,14 @@ public class SignalIT {
     public void processShouldTakeExceptionPathWhenSignalIsSent() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIGNAL_PROCESS));
-        SendSignalImpl signalProcessInstancesCmd = new SendSignalImpl("go");
+        SignalPayload signalProcessInstancesCmd = ProcessPayloadBuilder.signal().withName("go").build();
 
         //when
         ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/signal",
-                HttpMethod.POST,
-                new HttpEntity<>(signalProcessInstancesCmd),
-                new ParameterizedTypeReference<Void>() {
-                });
+                                                                    HttpMethod.POST,
+                                                                    new HttpEntity<>(signalProcessInstancesCmd),
+                                                                    new ParameterizedTypeReference<Void>() {
+                                                                    });
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -171,16 +173,16 @@ public class SignalIT {
     public void processShouldHaveVariablesSetWhenSignalCarriesVariables() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIGNAL_PROCESS));
-        SendSignalImpl signalProcessInstancesCmd = new SendSignalImpl("go",
+        SignalPayload signalProcessInstancesCmd = ProcessPayloadBuilder.signal().withName("go").withVariables(
                 Collections.singletonMap("myVar",
-                        "myContent"));
+                                         "myContent")).build();
 
         //when
         ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "/signal",
-                HttpMethod.POST,
-                new HttpEntity<>(signalProcessInstancesCmd),
-                new ParameterizedTypeReference<Void>() {
-                });
+                                                                    HttpMethod.POST,
+                                                                    new HttpEntity<>(signalProcessInstancesCmd),
+                                                                    new ParameterizedTypeReference<Void>() {
+                                                                    });
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -195,15 +197,14 @@ public class SignalIT {
             assertThat(variable.getName()).isEqualToIgnoringCase("myVar");
             assertThat(variable.<Object>getValue()).isEqualTo("myContent");
         });
-
     }
 
     private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
         ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
         return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL,
-                HttpMethod.GET,
-                null,
-                responseType);
+                                     HttpMethod.GET,
+                                     null,
+                                     responseType);
     }
 }

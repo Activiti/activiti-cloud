@@ -29,11 +29,10 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.NotFoundException;
-import org.activiti.runtime.api.cmd.SendSignal;
-import org.activiti.runtime.api.cmd.StartProcess;
-import org.activiti.runtime.api.cmd.impl.ResumeProcessImpl;
-import org.activiti.runtime.api.cmd.impl.SuspendProcessImpl;
-import org.activiti.runtime.api.model.FluentProcessInstance;
+import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
+import org.activiti.runtime.api.model.payloads.SignalPayload;
+import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
@@ -100,9 +99,8 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-    public ProcessInstanceResource startProcess(@RequestBody StartProcess cmd) {
-
-        return resourceAssembler.toResource(securityAwareProcessInstanceService.startProcess(cmd));
+    public ProcessInstanceResource startProcess(@RequestBody StartProcessPayload startProcessPayload) {
+        return resourceAssembler.toResource(securityAwareProcessInstanceService.startProcess(startProcessPayload));
     }
 
     @Override
@@ -112,37 +110,38 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public String getProcessDiagram(@PathVariable String processInstanceId) {
-        FluentProcessInstance processInstance = securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(processInstanceId);
+        ProcessInstance processInstance = securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(processInstanceId);
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
         return new String(processDiagramGenerator.generateDiagram(bpmnModel,
-                                                                  processInstance.activeActivityIds(),
+                                                                  securityAwareProcessInstanceService
+                                                                          .processInstanceMeta(processInstance.getId())
+                                                                          .getActiveActivitiesIds(),
                                                                   emptyList()),
                           StandardCharsets.UTF_8);
     }
 
     @Override
     @Transactional
-    public ResponseEntity<Void> sendSignal(@RequestBody SendSignal cmd) {
+    public ResponseEntity<Void> sendSignal(@RequestBody SignalPayload cmd) {
         securityAwareProcessInstanceService.signal(cmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> suspend(@PathVariable String processInstanceId) {
-        securityAwareProcessInstanceService.suspend(new SuspendProcessImpl(processInstanceId));
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ProcessInstanceResource suspend(@PathVariable String processInstanceId) {
+        return resourceAssembler.toResource(securityAwareProcessInstanceService.suspend(ProcessPayloadBuilder.suspend(processInstanceId)));
+
     }
 
     @Override
-    public ResponseEntity<Void> activate(@PathVariable String processInstanceId) {
-        securityAwareProcessInstanceService.activate(new ResumeProcessImpl(processInstanceId));
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ProcessInstanceResource activate(@PathVariable String processInstanceId) {
+        return resourceAssembler.toResource(securityAwareProcessInstanceService.activate(ProcessPayloadBuilder.resume(processInstanceId)));
     }
 
     @Override
-    public void deleteProcessInstance(@PathVariable String processInstanceId) {
-        securityAwareProcessInstanceService.deleteProcessInstance(processInstanceId);
+    public ProcessInstanceResource deleteProcessInstance(@PathVariable String processInstanceId) {
+        return resourceAssembler.toResource(securityAwareProcessInstanceService.deleteProcessInstance(ProcessPayloadBuilder.delete(processInstanceId)));
     }
 
 }
