@@ -19,10 +19,10 @@ package org.activiti.cloud.qa.service;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import org.activiti.runtime.api.cmd.CreateTask;
-import org.activiti.runtime.api.cmd.StartProcess;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.payloads.CreateTaskPayload;
+import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
 
@@ -37,7 +37,7 @@ public interface RuntimeBundleService extends BaseService {
 
     @RequestLine("POST /v1/process-instances")
     @Headers("Content-Type: application/json")
-    CloudProcessInstance startProcess(StartProcess startProcess);
+    CloudProcessInstance startProcess(StartProcessPayload startProcess);
 
     @RequestLine("POST /v1/process-instances/{id}/suspend")
     @Headers("Content-Type: application/json")
@@ -73,7 +73,7 @@ public interface RuntimeBundleService extends BaseService {
 
     @RequestLine("POST /v1/tasks/")
     @Headers("Content-Type: application/json")
-    CloudTask createNewTask(CreateTask task);
+    CloudTask createNewTask(CreateTaskPayload task);
 
     @RequestLine("GET /v1/tasks/{id}")
     CloudTask getTaskById(@Param("id") String id);
@@ -87,7 +87,7 @@ public interface RuntimeBundleService extends BaseService {
             "Accept: application/hal+json;charset=UTF-8"
     })
     CloudTask createSubtask(@Param("parentTaskId") String parentTaskId,
-                            CreateTask createTaskCmd);
+                            CreateTaskPayload createTaskCmd);
 
     @RequestLine("GET /v1/tasks/{parentTaskId}/subtasks")
     Resources<CloudTask> getSubtasks(@Param("parentTaskId") String parentTaskId);

@@ -22,12 +22,12 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
-import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
 import org.activiti.runtime.api.model.CloudProcessInstance;
-import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
+import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Runtime bundle steps
@@ -61,7 +61,10 @@ public class MultipleRuntimeBundleSteps {
     @Step
     public CloudProcessInstance startProcess(String process, boolean isPrimaryService) {
 
-        StartProcessImpl startProcessCmd = new StartProcessImpl(process);
+        StartProcessPayload startProcessCmd = ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(process)
+                .build();
 
         if (isPrimaryService) {
             return dirtyContextHandler.dirty(runtimeBundleService.startProcess(startProcessCmd));
