@@ -27,20 +27,20 @@ import org.activiti.cloud.qa.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.RuntimeBundleDiagramService;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
-import org.activiti.runtime.api.cmd.impl.CreateTaskImpl;
-import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
+import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
+import org.activiti.runtime.api.model.payloads.CreateTaskPayload;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Runtime bundle steps
@@ -81,21 +81,21 @@ public class RuntimeBundleSteps {
     @Step
     public CloudProcessInstance startProcess(String process) {
 
-        StartProcessImpl startProcessCmd = new StartProcessImpl();
-        startProcessCmd.setProcessDefinitionKey(process);
-
-        return dirtyContextHandler.dirty(runtimeBundleService.startProcess(startProcessCmd));
+        return dirtyContextHandler.dirty(runtimeBundleService.startProcess(ProcessPayloadBuilder
+                                                                                   .start()
+                                                                                   .withProcessDefinitionKey(process)
+                                                                                   .build()));
     }
 
     @Step
-    public Collection<CloudTask> getTaskByProcessInstanceId(String processInstanceId) throws Exception {
+    public Collection<CloudTask> getTaskByProcessInstanceId(String processInstanceId) {
         return runtimeBundleService
                 .getProcessInstanceTasks(processInstanceId).getContent();
     }
 
     @Step
     public void assignTaskToUser(String id,
-                                 String user) throws IOException {
+                                 String user) {
 
         runtimeBundleService
                 .assignTaskToUser(id,
@@ -103,14 +103,14 @@ public class RuntimeBundleSteps {
     }
 
     @Step
-    public void completeTask(String id) throws IOException {
+    public void completeTask(String id) {
 
         runtimeBundleService
                 .completeTask(id);
     }
 
     @Step
-    public void deleteProcessInstance(String id) throws IOException {
+    public void deleteProcessInstance(String id) {
         runtimeBundleService.deleteProcess(id);
     }
 
@@ -124,17 +124,23 @@ public class RuntimeBundleSteps {
     @Step
     public CloudTask createNewTask() {
 
-        CreateTaskImpl createTask = new CreateTaskImpl("new-task",
-                                                       "task-description");
+        CreateTaskPayload createTask = TaskPayloadBuilder
+                .create()
+                .withName("new-task")
+                .withDescription("task-description")
+                .build();
         return dirtyContextHandler.dirty(
                 runtimeBundleService.createNewTask(createTask));
     }
 
     public CloudTask createSubtask(String parentTaskId) {
-        CreateTaskImpl subtask = new CreateTaskImpl("subtask",
-                                                    "subtask-description");
+        CreateTaskPayload subTask = TaskPayloadBuilder
+                .create()
+                .withName("subtask")
+                .withDescription("subtask-description")
+                .build();
         return runtimeBundleService.createSubtask(parentTaskId,
-                                                  subtask);
+                                                  subTask);
     }
 
     public Resources<CloudTask> getSubtasks(String parentTaskId) {
@@ -193,15 +199,5 @@ public class RuntimeBundleSteps {
         assertThatExceptionOfType(Exception.class).isThrownBy(
                 () -> runtimeBundleService.getTaskById(taskId)
         ).withMessageContaining("Unable to find task");
-    }
-
-    @Step
-    public PagedResources<CloudTask> getAllTasks(){
-        return runtimeBundleService.getAllTasks();
-    }
-
-    @Step
-    public PagedResources<CloudProcessInstance> getAllProcessInstances(){
-        return runtimeBundleService.getAllProcessInstances();
     }
 }

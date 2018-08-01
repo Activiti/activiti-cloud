@@ -115,7 +115,7 @@ public class HrUserTasks {
         }
         return filteredCollection;
     }
-    
+
     @Given("the number is $argument")
     public void printing(String argument){
         System.out.println(argument);
