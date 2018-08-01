@@ -67,6 +67,10 @@ public interface RuntimeBundleService extends BaseService {
     @Headers("Content-Type: application/json")
     void deleteProcess(@Param("id") String id);
 
+    @RequestLine("GET /v1/process-instances")
+    @Headers("Content-Type: application/json")
+    PagedResources<CloudProcessInstance> getAllProcessInstances();
+
     @RequestLine("GET /v1/process-instances/{id}")
     @Headers("Content-Type: application/json")
     CloudProcessInstance getProcessInstance(@Param("id") String id);
@@ -91,4 +95,11 @@ public interface RuntimeBundleService extends BaseService {
 
     @RequestLine("GET /v1/tasks/{parentTaskId}/subtasks")
     Resources<CloudTask> getSubtasks(@Param("parentTaskId") String parentTaskId);
+
+    @RequestLine("GET /v1/tasks")
+    @Headers({
+            "Content-Type: application/json",
+            "Accept: application/hal+json;charset=UTF-8"
+    })
+    PagedResources<CloudTask> getAllTasks();
 }

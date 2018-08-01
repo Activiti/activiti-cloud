@@ -31,11 +31,13 @@ import org.activiti.runtime.api.cmd.impl.CreateTaskImpl;
 import org.activiti.runtime.api.cmd.impl.StartProcessImpl;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.ProcessInstance;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
 
 import static org.assertj.core.api.Assertions.*;
@@ -191,5 +193,15 @@ public class RuntimeBundleSteps {
         assertThatExceptionOfType(Exception.class).isThrownBy(
                 () -> runtimeBundleService.getTaskById(taskId)
         ).withMessageContaining("Unable to find task");
+    }
+
+    @Step
+    public PagedResources<CloudTask> getAllTasks(){
+        return runtimeBundleService.getAllTasks();
+    }
+
+    @Step
+    public PagedResources<CloudProcessInstance> getAllProcessInstances(){
+        return runtimeBundleService.getAllProcessInstances();
     }
 }

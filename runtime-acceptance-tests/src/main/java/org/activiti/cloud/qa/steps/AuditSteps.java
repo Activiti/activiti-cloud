@@ -33,6 +33,7 @@ import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.activiti.runtime.api.model.Task;
 import org.assertj.core.api.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.PagedResources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -203,4 +204,12 @@ public class AuditSteps {
                                                     subtaskId,
                                                     parentTaskId)));
     }
+
+    @Step
+    public PagedResources<CloudRuntimeEvent> getAllEvents(){
+        return auditService.getEvents();
+    }
+
+
+
 }
