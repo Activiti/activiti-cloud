@@ -11,8 +11,10 @@
   <name>Activiti Cloud Services :: Common Keycloak Security</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-common-security</artifactId>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-spring-security</artifactId>
+      <!-- @TODO: do dep mgmt -->
+      <version>7-201803-EA-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
