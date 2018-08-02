@@ -66,7 +66,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED;
 import static org.activiti.runtime.api.model.Task.TaskStatus.CREATED;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
@@ -290,15 +291,19 @@ public class CommandEndpointIT {
                                                                                               resumeProcess.getId()).build());
 
         await("process to be activated").untilTrue(streamHandler.getActivatedProcessInstanceAck());
-        //when
-        ProcessInstance processInstance = executeGetProcessInstanceRequest(processInstanceId);
 
-        //then
+        await().untilAsserted(() -> {
 
-        assertThat(processInstance.getProcessDefinitionId()).isEqualTo(processDefinitionId);
-        assertThat(processInstance.getId()).isNotNull();
-        assertThat(processInstance.getStartDate()).isNotNull();
-        assertThat(processInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
+            //when
+            ProcessInstance processInstance = executeGetProcessInstanceRequest(processInstanceId);
+
+            //then
+
+            assertThat(processInstance.getProcessDefinitionId()).isEqualTo(processDefinitionId);
+            assertThat(processInstance.getId()).isNotNull();
+            assertThat(processInstance.getStartDate()).isNotNull();
+            assertThat(processInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        });
     }
 
     private void suspendProcessInstance(SuspendProcessPayload suspendProcessInstanceCmd) {

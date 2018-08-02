@@ -22,7 +22,6 @@ import org.activiti.runtime.api.model.CloudTask;
 import org.activiti.runtime.api.model.CloudVariableInstance;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
-import org.activiti.runtime.api.model.payloads.CompleteTaskPayload;
 import org.activiti.runtime.api.model.payloads.CreateTaskPayload;
 import org.activiti.runtime.api.model.payloads.SetTaskVariablesPayload;
 import org.activiti.runtime.api.model.payloads.UpdateTaskPayload;
@@ -37,7 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Component
 public class TaskRestTemplate {
@@ -51,10 +50,9 @@ public class TaskRestTemplate {
     private TestRestTemplate testRestTemplate;
 
     public ResponseEntity<Task> complete(Task task) {
-        CompleteTaskPayload completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(task.getId()).build();
         ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId() + "/complete",
                                                                         HttpMethod.POST,
-                                                                        new HttpEntity<>(completeTaskPayload),
+                                                                        null,
                                                                         new ParameterizedTypeReference<Task>() {
                                                                         });
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());

@@ -113,7 +113,12 @@ public class TaskControllerImpl implements TaskController {
     @Override
     public TaskResource completeTask(@PathVariable String taskId,
                                      @RequestBody(required = false) CompleteTaskPayload completeTaskPayload) {
-        if (completeTaskPayload != null) {
+        if (completeTaskPayload == null) {
+            completeTaskPayload = TaskPayloadBuilder
+                    .complete()
+                    .withTaskId(taskId)
+                    .build();
+        } else {
             completeTaskPayload.setTaskId(taskId);
         }
         Task task = securityAwareTaskService.completeTask(completeTaskPayload);
