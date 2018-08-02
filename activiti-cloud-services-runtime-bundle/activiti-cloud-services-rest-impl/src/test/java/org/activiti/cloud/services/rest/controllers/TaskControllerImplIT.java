@@ -35,11 +35,13 @@ import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
 import org.activiti.runtime.api.model.impl.TaskImpl;
 import org.activiti.runtime.api.model.payloads.CreateTaskPayload;
 import org.activiti.runtime.api.query.Page;
+import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.runtime.conf.CommonModelAutoConfiguration;
 import org.activiti.runtime.conf.TaskModelAutoConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -96,7 +98,7 @@ public class TaskControllerImplIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @SpyBean
+    @Autowired
     private ObjectMapper mapper;
 
     @MockBean
@@ -111,6 +113,9 @@ public class TaskControllerImplIT {
     @MockBean
     private ProcessEngineChannels processEngineChannels;
 
+    @Mock
+    private Page<Task> taskPage;
+
     @Before
     public void setUp() {
         assertThat(springPageConverter).isNotNull();
@@ -121,7 +126,7 @@ public class TaskControllerImplIT {
     public void getTasks() throws Exception {
 
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
-        org.activiti.runtime.api.query.Page<Task> tasks = new org.activiti.runtime.api.query.impl.PageImpl<>(taskList,
+        Page<Task> tasks = new PageImpl<>(taskList,
                                                                                                              taskList.size());
         when(securityAwareTaskService.getAuthorizedTasks(any())).thenReturn(tasks);
 
@@ -136,7 +141,7 @@ public class TaskControllerImplIT {
     @Test
     public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
-        org.activiti.runtime.api.query.Page<Task> taskPage = new org.activiti.runtime.api.query.impl.PageImpl<>(taskList,
+        Page<Task> taskPage = new PageImpl<>(taskList,
                                                                                                                 taskList.size());
         when(securityAwareTaskService.getAuthorizedTasks(any())).thenReturn(taskPage);
 
@@ -305,10 +310,9 @@ public class TaskControllerImplIT {
 
         final TaskImpl subtask2 = buildTask("subtask-2",
                                             "subtask-2 description");
-        Page page = mock(Page.class);
-        when(page.getContent()).thenReturn(Arrays.asList(subtask1,
+        when(taskPage.getContent()).thenReturn(Arrays.asList(subtask1,
                                                          subtask2));
-        when(securityAwareTaskService.tasks(any(), any())).thenReturn(page);
+        when(securityAwareTaskService.tasks(any(), any())).thenReturn(taskPage);
 
         this.mockMvc.perform(get("/v1/tasks/{taskId}/subtasks",
                                  "parentTaskId").contentType(MediaType.APPLICATION_JSON))

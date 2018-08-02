@@ -83,7 +83,7 @@ public class ProcessInstanceVariableControllerImplIT {
     @MockBean
     private SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
 
-    @SpyBean
+    @Autowired
     private ObjectMapper mapper;
 
     @SpyBean

@@ -74,7 +74,7 @@ public class TaskVariableControllerImplIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @SpyBean
+    @Autowired
     private ObjectMapper mapper;
 
     @MockBean
