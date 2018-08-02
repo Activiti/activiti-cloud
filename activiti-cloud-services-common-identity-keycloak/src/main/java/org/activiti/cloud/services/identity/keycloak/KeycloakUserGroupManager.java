@@ -16,29 +16,29 @@
 
 package org.activiti.cloud.services.identity.keycloak;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.activiti.runtime.api.identity.IdentityLookup;
+import org.activiti.runtime.api.identity.UserGroupManager;
 import org.keycloak.representations.idm.GroupRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("identitylookup")
-public class KeycloakIdentityLookup implements IdentityLookup {
+import java.util.ArrayList;
+import java.util.List;
+
+@Component("userGroupManager")
+public class KeycloakUserGroupManager implements UserGroupManager {
 
     private KeycloakLookupService keycloakLookupService;
 
     @Autowired
-    public KeycloakIdentityLookup(KeycloakLookupService keycloakLookupService) {
+    public KeycloakUserGroupManager(KeycloakLookupService keycloakLookupService) {
         this.keycloakLookupService = keycloakLookupService;
     }
 
-    public List<String> getGroupsForCandidateUser(String candidateUser) {
-        //candidateUser here will use identifier chosen in KeycloakActivitiAuthenticationProvider
-
-        UserRepresentation user = keycloakLookupService.getUser(candidateUser);
+    @Override
+    public List<String> getUserGroups(String username) {
+        UserRepresentation user = keycloakLookupService.getUser(username);
 
         List<GroupRepresentation> groupRepresentations = keycloakLookupService.getGroupsForUser(user.getId());
 
@@ -52,4 +52,22 @@ public class KeycloakIdentityLookup implements IdentityLookup {
 
         return groups;
     }
+
+    @Override
+    public List<String> getUserRoles(String username) {
+        UserRepresentation user = keycloakLookupService.getUser(username);
+
+        List<RoleRepresentation> rolesRepresentations = keycloakLookupService.getRolesForUser(user.getId());
+
+        List<String> roles = null;
+        if (rolesRepresentations != null && rolesRepresentations.size() > 0) {
+            roles = new ArrayList<String>();
+            for (RoleRepresentation roleRepresentation : rolesRepresentations) {
+                roles.add(roleRepresentation.getName());
+            }
+        }
+
+        return roles;
+    }
+
 }

@@ -20,7 +20,6 @@
     <module>activiti-cloud-services-metadata</module>
     <module>activiti-cloud-services-dbp-rest</module>
     <module>activiti-cloud-services-rest-docs</module>
-    <module>activiti-cloud-services-common-security</module>
     <module>activiti-cloud-services-common-security-keycloak</module>
     <module>activiti-cloud-services-common-identity-keycloak</module>
   </modules>

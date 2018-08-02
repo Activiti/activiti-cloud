@@ -1,9 +1,6 @@
 package org.activiti.cloud.services.identity.keycloak;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.activiti.runtime.api.identity.IdentityLookup;
+import org.activiti.runtime.api.identity.UserGroupManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -11,12 +8,16 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class KeycloakIdentityLookupTest {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
 
-    private IdentityLookup identityLookup;
+public class KeycloakUserGroupManagerTest {
+
+    private UserGroupManager userGroupManager;
 
     @Mock
     private KeycloakLookupService keycloakLookupService;
@@ -24,7 +25,7 @@ public class KeycloakIdentityLookupTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        identityLookup = new KeycloakIdentityLookup(keycloakLookupService);
+        userGroupManager = new KeycloakUserGroupManager(keycloakLookupService);
         UserRepresentation userRepresentation = new UserRepresentation();
         userRepresentation.setId("id");
         List<GroupRepresentation> groupRepresentations = new ArrayList<>();
@@ -38,6 +39,6 @@ public class KeycloakIdentityLookupTest {
 
     @Test
     public void testGetGroups() {
-        assertThat(identityLookup.getGroupsForCandidateUser("bob")).contains("testgroup");
+        assertThat(userGroupManager.getUserGroups("bob")).contains("testgroup");
     }
 }

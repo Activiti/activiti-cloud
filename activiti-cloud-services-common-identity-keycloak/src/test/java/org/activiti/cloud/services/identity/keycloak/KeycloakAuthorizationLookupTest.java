@@ -3,7 +3,7 @@ package org.activiti.cloud.services.identity.keycloak;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.activiti.runtime.api.auth.AuthorizationLookup;
+import org.activiti.runtime.api.identity.UserGroupManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -11,12 +11,12 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public class KeycloakAuthorizationLookupTest {
 
-    private AuthorizationLookup authorizationLookup;
+    private UserGroupManager userGroupManager;
 
     @Mock
     private KeycloakLookupService keycloakLookupService;
@@ -24,8 +24,8 @@ public class KeycloakAuthorizationLookupTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        authorizationLookup = new KeycloakAuthorizationLookup(keycloakLookupService);
-        ((KeycloakAuthorizationLookup) authorizationLookup).setAdminRoleName("admin");
+        userGroupManager = new KeycloakUserGroupManager(keycloakLookupService);
+
 
         UserRepresentation userRepresentation = new UserRepresentation();
         userRepresentation.setId("id");
@@ -42,8 +42,9 @@ public class KeycloakAuthorizationLookupTest {
         roleRepresentations.add(roleRepresentation);
         when(keycloakLookupService.getRolesForUser(anyString())).thenReturn(roleRepresentations);
 
-        assertThat(authorizationLookup.getRolesForUser("bob")).contains("testrole");
-        assertThat(authorizationLookup.isAdmin("bob")).isFalse();
+        assertThat(userGroupManager.getUserRoles("bob")).contains("testrole");
+        assertThat(userGroupManager.getUserRoles("bob")).doesNotContain("admin");
+
     }
 
     @Test
@@ -55,6 +56,6 @@ public class KeycloakAuthorizationLookupTest {
         roleRepresentations.add(roleRepresentation);
         when(keycloakLookupService.getRolesForUser(anyString())).thenReturn(roleRepresentations);
 
-        assertThat(authorizationLookup.isAdmin("bob")).isTrue();
+        assertThat(userGroupManager.getUserRoles("bob")).contains("admin");
     }
 }
