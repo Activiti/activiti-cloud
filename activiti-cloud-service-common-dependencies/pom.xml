@@ -65,11 +65,6 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-security-policies</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-dbp-rest</artifactId>
         <version>${activiti-cloud-service-common.version}</version>
       </dependency>
