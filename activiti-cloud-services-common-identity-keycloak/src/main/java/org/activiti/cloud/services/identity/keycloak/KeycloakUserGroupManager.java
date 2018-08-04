@@ -29,18 +29,20 @@ import java.util.List;
 @Component("userGroupManager")
 public class KeycloakUserGroupManager implements UserGroupManager {
 
-    private KeycloakLookupService keycloakLookupService;
+
+    private KeycloakInstanceWrapper keycloakInstanceWrapper;
 
     @Autowired
-    public KeycloakUserGroupManager(KeycloakLookupService keycloakLookupService) {
-        this.keycloakLookupService = keycloakLookupService;
+    public KeycloakUserGroupManager(KeycloakInstanceWrapper keycloakInstanceWrapper) {
+        this.keycloakInstanceWrapper = keycloakInstanceWrapper;
     }
 
     @Override
     public List<String> getUserGroups(String username) {
-        UserRepresentation user = keycloakLookupService.getUser(username);
+        // Verify that the user exist
+        UserRepresentation user = getUser(username);
 
-        List<GroupRepresentation> groupRepresentations = keycloakLookupService.getGroupsForUser(user.getId());
+        List<GroupRepresentation> groupRepresentations = keycloakInstanceWrapper.getRealm().users().get(user.getId()).groups();
 
         List<String> groups = null;
         if (groupRepresentations != null && groupRepresentations.size() > 0) {
@@ -55,9 +57,10 @@ public class KeycloakUserGroupManager implements UserGroupManager {
 
     @Override
     public List<String> getUserRoles(String username) {
-        UserRepresentation user = keycloakLookupService.getUser(username);
+        // Verify that the user exist
+        UserRepresentation user = getUser(username);
 
-        List<RoleRepresentation> rolesRepresentations = keycloakLookupService.getRolesForUser(user.getId());
+        List<RoleRepresentation> rolesRepresentations = keycloakInstanceWrapper.getRealm().users().get(user.getId()).roles().realmLevel().listEffective();
 
         List<String> roles = null;
         if (rolesRepresentations != null && rolesRepresentations.size() > 0) {
@@ -68,6 +71,20 @@ public class KeycloakUserGroupManager implements UserGroupManager {
         }
 
         return roles;
+    }
+
+    private UserRepresentation getUser(String username) {
+        List<UserRepresentation> users = keycloakInstanceWrapper.getRealm().users().search(username,
+                0,
+                2);
+
+        if (users.size() > 1) {
+            throw new UnsupportedOperationException("User id " + username + " is not unique");
+        }
+        if (users.size() == 0) {
+            throw new UnsupportedOperationException("User id " + username + " not found");
+        }
+        return users.get(0);
     }
 
 }

@@ -18,16 +18,12 @@ public class ActivitiKeycloakAutoConfiguration {
         return new KeycloakInstanceWrapper();
     }
 
-    @Bean
-    @ConditionalOnMissingBean(KeycloakLookupService.class)
-    public KeycloakLookupService keycloakLookupService() {
-        return new KeycloakLookupService();
-    }
+
 
     @Bean
     @ConditionalOnMissingBean(KeycloakUserGroupManager.class)
-    public KeycloakUserGroupManager keycloakUserGroupManager(KeycloakLookupService keycloakLookupService) {
-        return new KeycloakUserGroupManager(keycloakLookupService);
+    public KeycloakUserGroupManager keycloakUserGroupManager(KeycloakInstanceWrapper keycloakInstanceWrapper) {
+        return new KeycloakUserGroupManager(keycloakInstanceWrapper);
     }
 
 }
