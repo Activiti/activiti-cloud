@@ -31,12 +31,8 @@
       <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-common-security</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-security-policies</artifactId>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-spring-security-policies</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.hateoas</groupId>
