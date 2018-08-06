@@ -37,12 +37,8 @@
     <graphql-jpa-query.version>0.3.4</graphql-jpa-query.version>
     <graphql-java.version>6.0</graphql-java.version>
     <java-semver.version>0.9.0</java-semver.version>
-    <keycloak.version>3.4.0.Final</keycloak.version>
-    <!-- keycloak snapshot that was used to build boot2 adapter
-     the original snapshot doesn't contain the boot2 adapter, just this particular build
-     see https://github.com/keycloak/keycloak/pull/4976
-     -->
-    <keycloak-spring-boot.version>3.4.0.CR1-SNAPSHOT</keycloak-spring-boot.version>
+    <keycloak.version>4.2.1.Final</keycloak.version>
+    <keycloak-spring-boot.version>4.2.1.Final</keycloak-spring-boot.version>
     <logstash.version>4.11</logstash.version>
     <querydsl.version>4.1.4</querydsl.version>
     <resteasy.version>3.0.21.Final</resteasy.version>
