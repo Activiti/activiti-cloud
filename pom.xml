@@ -42,16 +42,8 @@
       <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
       <version>${activiti.cloud.version}</version>
     </dependency>
-    <!--<dependency>-->
-      <!--<groupId>org.springframework.cloud</groupId>-->
-      <!--<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>org.springframework.cloud</groupId>-->
-      <!--<artifactId>spring-cloud-starter-config</artifactId>-->
-    <!--</dependency>-->
     <dependency>
-      <groupId>org.postgresql</groupId>
+    <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
