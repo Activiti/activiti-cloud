@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.runtime.api.event.BPMNActivityEvent;
 import org.activiti.runtime.api.event.CloudBPMNActivityEvent;
 import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
@@ -56,6 +57,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,6 +67,7 @@ import static org.awaitility.Awaitility.await;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
+@TestPropertySource("classpath:application.properties")
 public class AuditServiceIT {
 
     @Autowired
@@ -74,7 +77,9 @@ public class AuditServiceIT {
     private EventsRepository repository;
 
     @Autowired
-    private MyProducer2 producer;
+    private MyProducer producer;
+
+
 
     @Before
     public void setUp() throws Exception {
@@ -515,32 +520,6 @@ public class AuditServiceIT {
                                                                                             taskCancelled);
         testEvents.add(cloudTaskCancelledEvent);
 
-
-
-//        VariableInstanceImpl variableCreated = new VariableInstanceImpl("name", "string", "value of string", "49" );
-//        CloudVariableCreatedEventImpl cloudVariableCreatedEvent = new CloudVariableCreatedEventImpl("VariableCreatedEventId",
-//                                                                                                    System.currentTimeMillis(),
-//                                                                                                    variableCreated);
-//        testEvents.add(cloudVariableCreatedEvent);
-//
-//        VariableInstanceImpl variableDeleted = new VariableInstanceImpl("name", "string", "value of string", "50" );
-//        CloudVariableDeletedEventImpl cloudVariableDeletedEvent = new CloudVariableDeletedEventImpl("VariableDeletedEventId",
-//                                                                                                    System.currentTimeMillis(),
-//                                                                                                    variableDeleted);
-//        testEvents.add(cloudVariableDeletedEvent);
-//
-//        VariableInstanceImpl variableUpdated = new VariableInstanceImpl("name", "string", "value of string", "51" );
-//        CloudVariableUpdatedEventImpl cloudVariableUpdatedEvent = new CloudVariableUpdatedEventImpl("VariableUpdatedEventId",
-//                                                                                                    System.currentTimeMillis(),
-//                                                                                                    variableUpdated);
-//        testEvents.add(cloudVariableUpdatedEvent);
-
-//  String processDefinitionId, String processInstanceId
-
-//        coveredEvents.add(new MockProcessEngineEvent(System.currentTimeMillis(), "SequenceFlowTakenEvent", "14", "26", "45"));
-
-//        coveredEvents.add(((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)MockIntegrationEventBuilder.anIntegrationRequestSentEvent().withExecutionId("21")).withProcessDefinitionId("33")).withProcessInstanceId("52")).withFlowNodeId("serviceTask").build());
-//        coveredEvents.add(((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)((MockIntegrationEventBuilder)MockIntegrationEventBuilder.anIntegrationResultRecievedEvent().withExecutionId("22")).withProcessDefinitionId("33")).withProcessInstanceId("52")).withFlowNodeId("serviceTask").build());
 
         return testEvents;
     }
