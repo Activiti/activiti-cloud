@@ -127,6 +127,7 @@ public class RuntimeBundleSteps {
                 .create()
                 .withName("new-task")
                 .withDescription("task-description")
+                .withAssignee("testuser")
                 .build();
         return dirtyContextHandler.dirty(
                 runtimeBundleService.createNewTask(createTask));
@@ -137,6 +138,7 @@ public class RuntimeBundleSteps {
                 .create()
                 .withName("subtask")
                 .withDescription("subtask-description")
+                .withAssignee("testuser")
                 .build();
         return runtimeBundleService.createSubtask(parentTaskId,
                                                   subTask);

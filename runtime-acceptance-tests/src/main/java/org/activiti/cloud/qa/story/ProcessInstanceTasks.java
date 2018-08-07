@@ -89,7 +89,7 @@ public class ProcessInstanceTasks {
     }
 
     @When("the user starts a process without graphic info")
-    public void startProcessWithoutFGraphicInfo() throws Exception {
+    public void startProcessWithoutGraphicInfo() throws Exception {
         this.startProcess("fixSystemFailure");
     }
 
