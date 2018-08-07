@@ -1,18 +1,20 @@
 package org.activiti.cloud.services.security;
 
+import java.util.Map;
+import java.util.Set;
+
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QVariableEntity;
+import org.activiti.runtime.api.identity.UserGroupManager;
+import org.activiti.runtime.api.security.SecurityManager;
 import org.activiti.spring.security.policies.BaseSecurityPoliciesManagerImpl;
 import org.activiti.spring.security.policies.SecurityPolicyAccess;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.activiti.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Applies permissions/restrictions to ProcessInstanceEntity data (and Proc Inst Variables) based upon property file
@@ -22,6 +24,14 @@ public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPolicies
 
     @Value("${spring.application.name}")
     private String appName;
+
+    public SecurityPoliciesApplicationServiceImpl(UserGroupManager userGroupManager,
+                                                  SecurityManager securityManager,
+                                                  SecurityPoliciesProperties securityPoliciesProperties) {
+        super(userGroupManager,
+              securityManager,
+              securityPoliciesProperties);
+    }
 
     @Override
     public boolean canRead(String s) {
@@ -108,7 +118,7 @@ public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPolicies
 
         BooleanExpression nextExpression = appNamePredicate;
         //will filter by app name and will also filter by definition keys if no wildcard
-        if (!defKeys.contains(securityPoliciesProperties.getWildcard())) {
+        if (!defKeys.contains(getSecurityPoliciesProperties().getWildcard())) {
             nextExpression = restrictByAppNameAndProcDefKeys(processInstance,
                     defKeys,
                     appNamePredicate);
