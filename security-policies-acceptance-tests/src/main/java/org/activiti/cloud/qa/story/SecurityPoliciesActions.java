@@ -46,22 +46,6 @@ public class SecurityPoliciesActions {
     @Steps
     private RuntimeBundleSteps runtimeBundleSteps;
 
-//    private ProcessInstanceTasks processInstanceTasks;
-
-//    @Steps
-//    private AuthenticationActions authenticationActions;
-//
-//    @Given("the user is authenticated as an hruser")
-//    public void authenticateHrUser() throws Exception{
-//        authenticationActions.authenticateHrUser();
-//    }
-//
-//    @Given("the user is authenticated as an hradmin")
-//    public void authenticateHrAdmin() throws Exception{
-//        authenticationActions.authenticateHrAdmin();
-//    }
-
-
     @Then("the user cannot start the process with variables")
     public void startProcess() throws Exception {
         try {

@@ -47,13 +47,4 @@ public interface AuditService extends BaseService {
     @Headers("Content-Type: application/json")
     PagedResources<CloudRuntimeEvent> getEventsAdmin(@Param("search") String search);
 
-
-
-//    @RequestLine("GET /v1/events?processInstanceId={processInstanceId}")
-//    @Headers("Content-Type: application/json")
-//    PagedResources<CloudRuntimeEvent> getEventByProcessInstanceId(@Param("processInstanceId") String processInstanceId);
-//
-//    @RequestLine("GET /admin/v1/events?processInstanceId={processInstanceId}")
-//    @Headers("Content-Type: application/json")
-//    PagedResources<CloudRuntimeEvent> getEventByProcessInstanceIdAdmin(@Param("processInstanceId") String processInstanceId);
 }

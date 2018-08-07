@@ -216,19 +216,4 @@ public class AuditSteps {
         String filter = "entityId:";
         return auditService.getEventsAdmin(filter + entityId).getContent();
     }
-
-
-//    @Step
-//    public PagedResources<CloudRuntimeEvent> getEventByProcessInstanceId(String id){
-//        return auditService.getEventByProcessInstanceId(id);
-//    }
-//
-//    @Step
-//    public PagedResources<CloudRuntimeEvent> getEventByProcessInstanceIdAdmin(String id){
-//        return auditService.getEventByProcessInstanceIdAdmin(id);
-//    }
-
-
-
-
 }
