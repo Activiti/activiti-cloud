@@ -1,40 +1,53 @@
 package org.activiti.cloud.services.security;
 
-import java.util.Map;
-import java.util.Set;
-
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QVariableEntity;
+import org.activiti.spring.security.policies.BaseSecurityPoliciesManagerImpl;
+import org.activiti.spring.security.policies.SecurityPolicyAccess;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Applies permissions/restrictions to ProcessInstanceEntity data (and Proc Inst Variables) based upon property file
  */
 @Component
-public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPoliciesApplicationService {
+public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPoliciesManagerImpl {
 
-    @Autowired
-    private SecurityPoliciesService securityPoliciesService;
+    @Value("${spring.application.name}")
+    private String appName;
+
+    @Override
+    public boolean canRead(String s) {
+        return canRead(s, appName);
+    }
+
+    @Override
+    public boolean canWrite(String s) {
+        return canWrite(s, appName);
+    }
 
     public Predicate restrictProcessInstanceQuery(Predicate predicate,
-                                                  SecurityPolicy securityPolicy) {
-        if (noSecurityPoliciesOrNoUser()) {
+                                                  SecurityPolicyAccess securityPolicyAccess) {
+        if (!arePoliciesDefined()) {
             return predicate;
         }
 
         QProcessInstanceEntity processInstance = QProcessInstanceEntity.processInstanceEntity;
         return buildPredicateForQProcessInstance(predicate,
-                                                 securityPolicy,
-                                                 processInstance);
+                securityPolicyAccess,
+                processInstance);
     }
 
     public Predicate restrictProcessInstanceVariableQuery(Predicate predicate,
-                                                          SecurityPolicy securityPolicy) {
-        if (noSecurityPoliciesOrNoUser()) {
+                                                          SecurityPolicyAccess securityPolicyAccess) {
+        if (!arePoliciesDefined()) {
             return predicate;
         }
 
@@ -48,27 +61,27 @@ public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPolicies
         }
 
         return buildPredicateForQProcessInstance(extendedPredicate,
-                                                 securityPolicy,
-                                                 processInstance);
+                securityPolicyAccess,
+                processInstance);
     }
 
     public Predicate buildPredicateForQProcessInstance(Predicate predicate,
-                                                       SecurityPolicy securityPolicy,
+                                                       SecurityPolicyAccess securityPolicyAccess,
                                                        QProcessInstanceEntity processInstance) {
         BooleanExpression securityExpression = null;
 
-        Map<String, Set<String>> restrictions = definitionKeysAllowedForPolicy(securityPolicy);
+        Map<String, Set<String>> restrictions = getAllowedKeys(securityPolicyAccess);
 
         for (String appName : restrictions.keySet()) {
             Set<String> defKeys = restrictions.get(appName);
             securityExpression = addProcessDefRestrictionToExpression(processInstance,
-                                                                      securityExpression,
-                                                                      appName,
-                                                                      defKeys);
+                    securityExpression,
+                    appName,
+                    defKeys);
         }
 
         //policies are defined but none are applicable
-        if (securityExpression == null && securityPoliciesService.policiesDefined()) {
+        if (securityExpression == null && arePoliciesDefined()) {
             //user should not see anything so give unsatisfiable condition
             return getImpossiblePredicate(processInstance);
         }
@@ -87,18 +100,18 @@ public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPolicies
 
         //expect to remove hyphens when passing in environment variables
         BooleanExpression appNamePredicate = Expressions.stringTemplate("replace({0},'-','')",
-                                                                        processInstance.serviceName).equalsIgnoreCase(appName.replace("-",
-                                                                                                                                      ""));
+                processInstance.serviceName).equalsIgnoreCase(appName.replace("-",
+                ""));
         appNamePredicate = appNamePredicate.or(Expressions.stringTemplate("replace({0},'-','')",
-                                                                          processInstance.serviceFullName).equalsIgnoreCase(appName.replace("-",
-                                                                                                                                            "")));
+                processInstance.serviceFullName).equalsIgnoreCase(appName.replace("-",
+                "")));
 
         BooleanExpression nextExpression = appNamePredicate;
         //will filter by app name and will also filter by definition keys if no wildcard
-        if (!defKeys.contains(securityPoliciesService.getWildcard())) {
+        if (!defKeys.contains(securityPoliciesProperties.getWildcard())) {
             nextExpression = restrictByAppNameAndProcDefKeys(processInstance,
-                                                             defKeys,
-                                                             appNamePredicate);
+                    defKeys,
+                    appNamePredicate);
         }
 
         if (securityExpression == null) {

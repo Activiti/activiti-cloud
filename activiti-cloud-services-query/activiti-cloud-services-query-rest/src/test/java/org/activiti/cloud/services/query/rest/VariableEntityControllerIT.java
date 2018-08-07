@@ -16,16 +16,13 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import java.util.Date;
-import java.util.UUID;
-
-import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
+import org.activiti.runtime.api.security.SecurityManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +35,9 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Date;
+import java.util.UUID;
 
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.variableFields;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.variableIdParameter;
@@ -71,7 +71,7 @@ public class VariableEntityControllerIT {
     private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     @MockBean
-    private SpringSecurityAuthenticationWrapper authenticationWrapper;
+    private SecurityManager securityManager;
 
     @MockBean
     private TaskRepository taskRepository;
@@ -83,32 +83,32 @@ public class VariableEntityControllerIT {
     public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         VariableEntity variableEntity = new VariableEntity(String.class.getName(),
-                                                           "firstName",
-                                                           UUID.randomUUID().toString(),
-                                                           "My app",
-                                                           "My app",
-                                                           "1",
-                                                           null,
-                                                           null,
-                                                           UUID.randomUUID().toString(),
-                                                           new Date(),
-                                                           new Date(),
-                                                           UUID.randomUUID().toString());
+                "firstName",
+                UUID.randomUUID().toString(),
+                "My app",
+                "My app",
+                "1",
+                null,
+                null,
+                UUID.randomUUID().toString(),
+                new Date(),
+                new Date(),
+                UUID.randomUUID().toString());
         variableEntity.setValue("John");
         given(entityFinder.findById(eq(variableRepository),
-                                    eq(variableEntity.getId()),
-                                    anyString()))
+                eq(variableEntity.getId()),
+                anyString()))
                 .willReturn(variableEntity);
 
         //when
         this.mockMvc.perform(get("/v1/variables/{variableId}",
-                                 variableEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
+                variableEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
                 //then
                 .andExpect(status().isOk())
                 .andDo(document(VARIABLE_ALFRESCO_IDENTIFIER + "/get",
-                                variableIdParameter(),
-                                variableFields()
-                       )
+                        variableIdParameter(),
+                        variableFields()
+                        )
                 );
 
     }

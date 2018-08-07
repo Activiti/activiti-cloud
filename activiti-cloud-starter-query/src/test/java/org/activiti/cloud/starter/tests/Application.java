@@ -30,12 +30,11 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
         "org.activiti.cloud.services.query.events",
         "org.activiti.cloud.services.query.rest",
         "org.activiti.cloud.services.security",
-        "org.activiti.cloud.services.common.security",
+        "org.activiti.spring.identity",
+        "org.activiti.spring.security",
         "org.activiti.cloud.starters",
         "org.activiti.cloud.starter",
-        "org.activiti.cloud.services.identity",
         "org.activiti.cloud.alfresco"})
-@EnableAutoConfiguration
 public class Application {
 
     public static void main(String[] args) {

@@ -1,17 +1,16 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-
 import org.activiti.cloud.services.query.model.QTaskEntity;
-import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
-import org.activiti.runtime.api.identity.IdentityLookup;
+import org.activiti.runtime.api.identity.UserGroupManager;
+import org.activiti.runtime.api.security.SecurityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +30,9 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = { TaskRepository.class, TaskEntity.class, TaskCandidateUserRepository.class, TaskCandidateUser.class, TaskCandidateGroupRepository.class, TaskCandidateGroup.class, TaskLookupRestrictionService.class})
+@SpringBootTest(classes = {TaskRepository.class, TaskEntity.class,
+        TaskCandidateUserRepository.class, TaskCandidateUser.class,
+        TaskCandidateGroupRepository.class, TaskCandidateGroup.class, TaskLookupRestrictionService.class})
 @EnableConfigurationProperties
 @EnableJpaRepositories(basePackages = "org.activiti")
 @EntityScan("org.activiti")
@@ -51,10 +52,10 @@ public class RestrictTaskEntityQueryIT {
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
     @MockBean
-    private SpringSecurityAuthenticationWrapper authenticationWrapper;
+    private SecurityManager securityManager;
 
     @MockBean
-    private IdentityLookup identityLookup;
+    private UserGroupManager userGroupManager;
 
     @Before
     public void setUp() throws Exception {
@@ -68,11 +69,11 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setId("1");
         taskRepository.save(taskEntity);
 
-        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("1","testuser");
+        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("1", "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
-        when(identityLookup.getGroupsForCandidateUser("testuser")).thenReturn(Arrays.asList("testgroup"));
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+        when(userGroupManager.getUserGroups("testuser")).thenReturn(Arrays.asList("testgroup"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -87,10 +88,10 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setId("2");
         taskRepository.save(taskEntity);
 
-        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("2","testuser");
+        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("2", "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("fred");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("fred");
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -106,10 +107,10 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setAssignee("fred");
         taskRepository.save(taskEntity);
 
-        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("2","testuser");
+        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("2", "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("fred");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("fred");
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -124,11 +125,11 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setId("3");
         taskRepository.save(taskEntity);
 
-        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup("3","hr");
+        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup("3", "hr");
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
-        when(identityLookup.getGroupsForCandidateUser("hruser")).thenReturn(Arrays.asList("hr"));
+        when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
+        when(userGroupManager.getUserGroups("hruser")).thenReturn(Arrays.asList("hr"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -143,11 +144,11 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setId("4");
         taskRepository.save(taskEntity);
 
-        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup("4","finance");
+        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup("4", "finance");
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
-        when(identityLookup.getGroupsForCandidateUser("hruser")).thenReturn(Arrays.asList("hr"));
+        when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
+        when(userGroupManager.getUserGroups("hruser")).thenReturn(Arrays.asList("hr"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -164,7 +165,7 @@ public class RestrictTaskEntityQueryIT {
 
         // no candidates or groups - just a taskEntity without any permissions so anyone can see
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -182,7 +183,7 @@ public class RestrictTaskEntityQueryIT {
 
         // no candidates or groups - just a taskEntity without any permissions so anyone can see
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq("5").and(QTaskEntity.taskEntity.owner.eq("bob")));
 
@@ -200,7 +201,7 @@ public class RestrictTaskEntityQueryIT {
 
         // no candidates or groups - just a taskEntity without any permissions so anyone can see
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq("7").and(QTaskEntity.taskEntity.owner.eq("fred")));
 
@@ -215,11 +216,11 @@ public class RestrictTaskEntityQueryIT {
         taskEntity.setId("3");
         taskRepository.save(taskEntity);
 
-        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup("3","hr");
+        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup("3", "hr");
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
-        when(identityLookup.getGroupsForCandidateUser("hruser")).thenReturn(Arrays.asList("hr"));
+        when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
+        when(userGroupManager.getUserGroups("hruser")).thenReturn(Arrays.asList("hr"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq("7"));
 
