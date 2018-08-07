@@ -23,11 +23,12 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableActivitiQuery
-@ComponentScan("org.activiti.cloud.services.common.security")
+@ComponentScan(basePackages = {"org.activiti.cloud.services.common.security",
+        "org.activiti.spring.security.policies"})
 public class QueryApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(QueryApplication.class,
-                              args);
+                args);
     }
 }
