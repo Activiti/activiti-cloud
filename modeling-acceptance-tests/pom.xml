@@ -7,9 +7,7 @@
     <artifactId>acceptance-tests-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-
   <artifactId>modeling-acceptance-tests</artifactId>
-
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
