@@ -6,7 +6,6 @@ import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 
 import org.activiti.runtime.api.identity.UserGroupManager;
 import org.activiti.runtime.api.security.SecurityManager;
-import org.activiti.spring.identity.ActivitiUserGroupManagerImpl;
 import org.activiti.spring.security.policies.SecurityPolicyAccess;
 import org.junit.Test;
 import org.junit.runner.RunWith;
