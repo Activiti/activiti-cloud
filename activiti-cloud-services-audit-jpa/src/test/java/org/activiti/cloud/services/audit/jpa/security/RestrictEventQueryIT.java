@@ -6,6 +6,7 @@ import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 
 import org.activiti.runtime.api.identity.UserGroupManager;
 import org.activiti.runtime.api.security.SecurityManager;
+import org.activiti.spring.identity.ActivitiUserGroupManagerImpl;
 import org.activiti.spring.security.policies.SecurityPolicyAccess;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +26,6 @@ import java.util.Iterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestPropertySource("classpath:test-application.properties")
@@ -46,7 +46,7 @@ public class RestrictEventQueryIT {
     private SecurityManager securityManager;
 
     @MockBean
-    private UserGroupManager identityLookup;
+    private UserGroupManager userGroupManager;
 
 
     @Test
@@ -101,7 +101,7 @@ public class RestrictEventQueryIT {
         eventsRepository.save(eventEntity);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("bobinhr");
-        when(identityLookup.getUserGroups("bobinhr")).thenReturn(Collections.singletonList("hRgRoUp"));
+        when(userGroupManager.getUserGroups("bobinhr")).thenReturn(Collections.singletonList("hRgRoUp"));
 
         Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
                 SecurityPolicyAccess.READ);

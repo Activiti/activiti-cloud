@@ -25,6 +25,8 @@ import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEnti
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
+import org.activiti.runtime.api.security.SecurityManager;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,7 @@ import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestP
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -67,6 +70,14 @@ public class EventsEngineEventsAdminControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private SecurityManager securityManager;
+
+    @Before
+    public void setUp() throws Exception {
+        when(securityManager.getAuthenticatedUserId()).thenReturn("user");
+    }
 
     @Test
     public void getEvents() throws Exception {
