@@ -113,11 +113,6 @@ public class AuditSteps {
         return auditService.getEvents().getContent();
     }
 
-    @Step
-    public Collection<CloudRuntimeEvent> getEventsByEntityId(String entityId) {
-        return auditService.getEventsByEntityId("entityId:" + entityId).getContent();
-    }
-
     /**
      * Check if a standalone task was created
      * and assigned to it's creator
@@ -206,9 +201,33 @@ public class AuditSteps {
     }
 
     @Step
-    public PagedResources<CloudRuntimeEvent> getAllEvents(){
-        return auditService.getEvents();
+    public Collection<CloudRuntimeEvent> getAllEvents(){
+        return auditService.getEvents().getContent();
     }
+
+    @Step
+    public Collection<CloudRuntimeEvent> getEventsByEntityId(String entityId){
+        String filter = "entityId:";
+        return auditService.getEvents(filter + entityId).getContent();
+    }
+
+    @Step
+    public Collection<CloudRuntimeEvent> getEventsByEntityIdAdmin(String entityId){
+        String filter = "entityId:";
+        return auditService.getEventsAdmin(filter + entityId).getContent();
+    }
+
+
+//    @Step
+//    public PagedResources<CloudRuntimeEvent> getEventByProcessInstanceId(String id){
+//        return auditService.getEventByProcessInstanceId(id);
+//    }
+//
+//    @Step
+//    public PagedResources<CloudRuntimeEvent> getEventByProcessInstanceIdAdmin(String id){
+//        return auditService.getEventByProcessInstanceIdAdmin(id);
+//    }
+
 
 
 

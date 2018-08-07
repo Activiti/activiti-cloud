@@ -71,6 +71,10 @@ public interface RuntimeBundleService extends BaseService {
     @Headers("Content-Type: application/json")
     PagedResources<CloudProcessInstance> getAllProcessInstances();
 
+    @RequestLine("GET /admin/v1/process-instances")
+    @Headers("Content-Type: application/json")
+    PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin();
+
     @RequestLine("GET /v1/process-instances/{id}")
     @Headers("Content-Type: application/json")
     CloudProcessInstance getProcessInstance(@Param("id") String id);

@@ -17,17 +17,22 @@
 package org.activiti.cloud.qa.story;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import net.serenitybdd.core.Serenity;
+import net.thucydides.core.Thucydides;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
+import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
@@ -75,6 +80,20 @@ public class ProcessInstanceTasks {
         assertThat(tasks).isNotEmpty();
         currentTask = tasks.get(0);
         assertThat(currentTask).isNotNull();
+
+        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
+
+    }
+
+    @When("the user starts A SPECIAL PROCESS")
+    public void startProcessSPECIAL1(){
+
+        processInstance = runtimeBundleSteps.startProcess(SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY);
+
+        System.out.println("wololo "+processInstance.getId());
+
+        System.out.println("walala "+Serenity.sessionVariableCalled("processInstanceId"));
+
     }
 
     @When("the user starts a simple process")

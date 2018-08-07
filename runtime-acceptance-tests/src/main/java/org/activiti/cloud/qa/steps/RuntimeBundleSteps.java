@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
-
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.qa.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
@@ -37,8 +36,8 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -199,5 +198,20 @@ public class RuntimeBundleSteps {
         assertThatExceptionOfType(Exception.class).isThrownBy(
                 () -> runtimeBundleService.getTaskById(taskId)
         ).withMessageContaining("Unable to find task");
+    }
+
+    @Step
+    public PagedResources<CloudTask> getAllTasks(){
+        return runtimeBundleService.getAllTasks();
+    }
+
+    @Step
+    public PagedResources<CloudProcessInstance> getAllProcessInstances(){
+        return runtimeBundleService.getAllProcessInstances();
+    }
+
+    @Step
+    public PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin(){
+        return runtimeBundleService.getAllProcessInstancesAdmin();
     }
 }

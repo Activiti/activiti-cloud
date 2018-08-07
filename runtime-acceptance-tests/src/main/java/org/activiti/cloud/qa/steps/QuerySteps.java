@@ -64,6 +64,11 @@ public class QuerySteps {
     }
 
     @Step
+    public PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin(){
+        return queryService.getAllProcessInstancesAdmin();
+    }
+
+    @Step
     public void checkProcessInstanceStatus(String processInstanceId,
                                            ProcessInstanceStatus expectedStatus) throws Exception {
 

@@ -7,16 +7,22 @@ So that I can check the enforcement of security policies
 
 Scenario: getting process instances
 Given the user is authenticated as an hradmin
-Then the user cannot see process with variables instances in the runtime bundle
+When the user starts a process with variables
+Then the user can get process with variables instances in admin endpoint
 
 Scenario: querying process instances
 Given the user is authenticated as an hradmin
-Then
+When the user starts a process with variables
+Then the user can query process with variables instances in admin endpoints
 
-Scenario: querying process instances
+Scenario: getting events
 Given the user is authenticated as an hradmin
-Then
+When the user starts a process with variables
+Then the user can get events for process with variables instances in admin endpoint
 
-Scenario: querying process instances
+Scenario:
 Given the user is authenticated as an hradmin
-Then the user cannot see process with variables instances in the runtime bundle
+When the user starts a process with variables
+Then the user cannot get process with variables instances
+And the user cannot query process with variables instances
+And the user cannot get events for process with variables instances

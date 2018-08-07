@@ -38,6 +38,10 @@ public interface QueryService extends BaseService {
     @Headers("Content-Type: application/json")
     PagedResources<CloudProcessInstance> getAllProcessInstances();
 
+    @RequestLine("GET /admin/v1/process-instances")
+    @Headers("Content-Type: application/json")
+    PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin();
+
     @RequestLine("GET /v1/tasks?status={status}&id={taskId}")
     PagedResources<CloudTask> queryTasksByIdAnsStatus(@Param("taskId") String taskId,
                                                       @Param("status") Task.TaskStatus taskStatus);
