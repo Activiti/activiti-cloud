@@ -34,7 +34,7 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventSpecificationsBuilder;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.repository.SearchOperation;
-import org.activiti.cloud.services.audit.jpa.security.SecurityPoliciesApplicationService;
+import org.activiti.cloud.services.audit.jpa.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.spring.security.policies.SecurityPolicyAccess;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
 
     private final AlfrescoPagedResourcesAssembler<CloudRuntimeEvent> pagedResourcesAssembler;
 
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     private final APIEventToEntityConverters eventConverters;
 
@@ -73,7 +73,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     public AuditEventsControllerImpl(EventsRepository eventsRepository,
                                      EventResourceAssembler eventResourceAssembler,
                                      APIEventToEntityConverters eventConverters,
-                                     SecurityPoliciesApplicationService securityPoliciesApplicationService,
+                                     SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService,
                                      AlfrescoPagedResourcesAssembler<CloudRuntimeEvent> pagedResourcesAssembler) {
         this.eventsRepository = eventsRepository;
         this.eventResourceAssembler = eventResourceAssembler;

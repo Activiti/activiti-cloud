@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * Applies security policies (defined into the application.properties file) to event data
  */
 @Component
-public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesManagerImpl implements SecurityPoliciesManager {
+public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPoliciesManagerImpl implements SecurityPoliciesManager {
 
 
     /*
@@ -45,10 +45,10 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesMana
 
             Set<String> defKeys = restrictions.get(serviceName);
             //will filter by app name and will also filter by definition keys if no wildcard,
-            if (defKeys != null && !defKeys.contains(securityPoliciesProperties.getWildcard())) {
+            if (defKeys != null && defKeys.size()>0 && !defKeys.contains(securityPoliciesProperties.getWildcard())) {
                 return spec.and(new ApplicationProcessDefSecuritySpecification(serviceName,
                                                                                defKeys));
-            } else {  //will filter by app name if wildcard is set
+            } else if (defKeys != null && defKeys.contains(securityPoliciesProperties.getWildcard())) {  //will filter by app name if wildcard is set
                 return spec.and(new ApplicationSecuritySpecification(serviceName));
             }
         }

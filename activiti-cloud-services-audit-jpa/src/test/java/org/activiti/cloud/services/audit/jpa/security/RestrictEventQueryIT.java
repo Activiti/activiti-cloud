@@ -39,7 +39,7 @@ public class RestrictEventQueryIT {
     private EventsRepository eventsRepository;
 
     @Autowired
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     @MockBean
     private SecurityManager securityManager;
@@ -100,7 +100,7 @@ public class RestrictEventQueryIT {
         eventsRepository.save(eventEntity);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("bobinhr");
-        when(userGroupManager.getUserGroups("bobinhr")).thenReturn(Collections.singletonList("hRgRoUp"));
+        when(userGroupManager.getUserGroups("bobinhr")).thenReturn(Collections.singletonList("hrgroup"));
 
         Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
                 SecurityPolicyAccess.READ);
