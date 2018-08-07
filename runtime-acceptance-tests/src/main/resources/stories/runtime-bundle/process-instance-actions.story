@@ -23,7 +23,7 @@ And open the process diagram
 Then the diagram is shown
 
 Scenario: show diagram for a process instance without graphic info
-Given any authenticated user
+Given the user is authenticated as an hruser
 When the user starts a process without graphic info
 And open the process diagram
 Then no diagram is shown
