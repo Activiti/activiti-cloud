@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,5 +52,17 @@ public class Jackson2EntityConfiguration {
     public Jackson2ObjectMapperBuilderCustomizer addModelDeserializer() {
         return builder -> builder.deserializerByType(Model.class,
                                                      modelDeserializer);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JsonDeserializer<Application> applicationDeserializer() {
+        return new ApplicationDeserializer();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JsonDeserializer<Model> modelDeserializer() {
+        return new ModelDeserializer();
     }
 }

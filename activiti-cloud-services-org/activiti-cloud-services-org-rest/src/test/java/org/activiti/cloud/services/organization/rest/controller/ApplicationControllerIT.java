@@ -25,6 +25,7 @@ import org.activiti.cloud.organization.core.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.ModelService;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
+import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
 import org.activiti.cloud.services.organization.entity.ApplicationEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.jpa.ApplicationJpaRepository;
@@ -60,9 +61,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = org.activiti.cloud.services.organization.config.OrganizationRestApplication.class)
+@SpringBootTest(classes = OrganizationRestApplication.class)
 @WebAppConfiguration
-public class ApplicationRestIT {
+public class ApplicationControllerIT {
 
     private MockMvc mockMvc;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.rest.api;
+package org.activiti.cloud.services.organization.rest.controller;
 
 import java.util.Arrays;
 import java.util.List;

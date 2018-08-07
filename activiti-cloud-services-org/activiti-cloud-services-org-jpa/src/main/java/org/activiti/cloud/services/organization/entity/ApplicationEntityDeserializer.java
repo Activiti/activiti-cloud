@@ -23,29 +23,21 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.util.NameTransformer;
-import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.Application;
 import org.springframework.stereotype.Component;
 
 /**
- * Deserializer for {@link Model} resources
+ * Deserializer for {@link ApplicationEntity} resources
  */
 @Component
-public class ModelDeserializer extends JsonDeserializer<Model> {
+public class ApplicationEntityDeserializer extends JsonDeserializer<Application> {
 
     @Override
-    public Model deserialize(JsonParser parser,
-                             DeserializationContext context) throws IOException {
+    public Application deserialize(JsonParser parser,
+                                   DeserializationContext context) throws IOException {
         ObjectMapper mapper = (ObjectMapper) parser.getCodec();
         ObjectNode root = mapper.readTree(parser);
         return mapper.readValue(root.toString(),
-                                ModelEntity.class);
-    }
-
-    @Override
-    public JsonDeserializer<Model> unwrappingDeserializer(NameTransformer unwrapper) {
-        // We need to create a unwrappingDeserializer for supporting
-        // HAL Resource deserialization which unwrap the content.
-        return new ModelDeserializer();
+                                ApplicationEntity.class);
     }
 }
