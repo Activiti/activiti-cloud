@@ -202,26 +202,26 @@ public class QueryAdminVariablesIT {
 
         eventsAggregator.sendAll();
 
-        //awaitility doesn't seem to like this test (just fails with a timeout but doesn't actually wait), not sure why - having to use sleep
-        Thread.sleep(300);
+        await().untilAsserted(() -> {
 
-        //when
-        ResponseEntity<PagedResources<VariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "&name={name}",
-                                                                                                  HttpMethod.GET,
-                                                                                                  keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                  PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                                  runningProcessInstance.getId(),
-                                                                                                  "var2");
+            //when
+            ResponseEntity<PagedResources<VariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "&name={name}",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_VARIABLE_RESPONSE_TYPE,
+                    runningProcessInstance.getId(),
+                    "var2");
 
-        //then
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody().getContent())
-                .extracting(
-                        VariableEntity::getName,
-                        VariableEntity::getValue)
-                .containsExactly(
-                        tuple("var2",
-                              "v2")
-                );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(
+                            VariableEntity::getName,
+                            VariableEntity::getValue)
+                    .containsExactly(
+                            tuple("var2",
+                                    "v2")
+                    );
+        });
     }
 }

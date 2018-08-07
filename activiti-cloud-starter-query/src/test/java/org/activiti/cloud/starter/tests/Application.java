@@ -25,15 +25,13 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 @SpringBootApplication
 @EnableActivitiQuery
-@EnableSpringDataWebSupport
 @ComponentScan({"org.activiti.cloud.services.query.app",
         "org.activiti.cloud.services.query.events",
         "org.activiti.cloud.services.query.rest",
-        "org.activiti.cloud.services.security",
-        "org.activiti.spring.identity",
-        "org.activiti.spring.security",
         "org.activiti.cloud.starters",
         "org.activiti.cloud.starter",
+        "org.activiti.cloud.services.common.security.keycloak",
+        "org.activiti.spring.security.policies",
         "org.activiti.cloud.alfresco"})
 public class Application {
 
