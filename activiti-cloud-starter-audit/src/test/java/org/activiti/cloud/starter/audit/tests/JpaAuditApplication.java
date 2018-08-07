@@ -26,11 +26,10 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan({
         "org.activiti.cloud.services.audit.api",
         "org.activiti.cloud.services.audit.jpa",
-        "org.activiti.cloud.services.security",
-        "org.activiti.cloud.services.common.security",
+        "org.activiti.cloud.services.common.security.keycloak",
+        "org.activiti.spring.security.policies",
         "org.activiti.cloud.starters",
         "org.activiti.cloud.starter",
-        "org.activiti.cloud.services.identity",
         "org.activiti.cloud.alfresco"})
 public class JpaAuditApplication {
 
