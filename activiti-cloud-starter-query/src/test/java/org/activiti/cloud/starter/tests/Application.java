@@ -18,10 +18,8 @@ package org.activiti.cloud.starter.tests;
 
 import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 @SpringBootApplication
 @EnableActivitiQuery
@@ -32,7 +30,8 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
         "org.activiti.cloud.starter",
         "org.activiti.cloud.services.common.security.keycloak",
         "org.activiti.spring.security.policies",
-        "org.activiti.cloud.alfresco"})
+        "org.activiti.cloud.alfresco",
+        "org.activiti.cloud.services.test.identity.keycloak.interceptor"})
 public class Application {
 
     public static void main(String[] args) {
