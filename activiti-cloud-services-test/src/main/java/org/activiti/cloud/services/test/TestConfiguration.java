@@ -23,7 +23,7 @@ import java.util.List;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -37,11 +37,11 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 @ComponentScan({"org.activiti.cloud.services.test"})
 public class TestConfiguration {
 
-    private final KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
+    private final KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
     private final List<Module> modules;
 
-    public TestConfiguration(KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor,
+    public TestConfiguration(KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor,
                              List<Module> modules) {
         this.keycloakSecurityContextClientRequestInterceptor = keycloakSecurityContextClientRequestInterceptor;
         this.modules = modules;
