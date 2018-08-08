@@ -21,6 +21,7 @@ import feign.Param;
 import feign.RequestLine;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.CloudVariableInstance;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.Task;
 import org.springframework.hateoas.PagedResources;
@@ -52,4 +53,9 @@ public interface QueryService extends BaseService {
     @RequestLine("GET /v1/tasks")
     @Headers("Content-Type: application/json")
     PagedResources<CloudTask> queryAllTasks();
+
+    @RequestLine("GET /v1/process-instances/{processInstanceId}/variables")
+    @Headers("Content-Type: application/json")
+    PagedResources<CloudVariableInstance> getProcessInstanceVariables(@Param("processInstanceId") String processInstanceId);
+
 }

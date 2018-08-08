@@ -51,6 +51,8 @@ public class RuntimeBundleSteps {
 
     public static final String SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY = "SimpleProcess";
 
+    public static final String CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY = "ConnectorProcess";
+
     public static final String PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY = "ProcessWithVariables";
 
     @Autowired

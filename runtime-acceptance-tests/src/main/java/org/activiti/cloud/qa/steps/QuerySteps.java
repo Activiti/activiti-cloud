@@ -24,10 +24,12 @@ import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.QueryService;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.CloudTask;
+import org.activiti.runtime.api.model.CloudVariableInstance;
 import org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus;
 
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.Task.TaskStatus;
+import org.activiti.runtime.api.model.VariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 
@@ -80,6 +82,24 @@ public class QuerySteps {
             assertThat(processInstance.getStatus()).isEqualTo(expectedStatus);
             assertThat(processInstance.getServiceName()).isNotEmpty();
             assertThat(processInstance.getServiceFullName()).isNotEmpty();
+
+        });
+    }
+
+    @Step
+    public void checkProcessInstanceHasVariable(String processInstanceId, String variableName) throws Exception {
+
+        await().untilAsserted(() -> {
+
+            assertThat(variableName).isNotNull();
+
+            final Collection<CloudVariableInstance> variableInstances = queryService.getProcessInstanceVariables(processInstanceId).getContent();
+
+            assertThat(variableInstances).isNotNull();
+            assertThat(variableInstances).isNotEmpty();
+
+            //one of the variables should have name matching variableName
+            assertThat(variableInstances).extracting(VariableInstance::getName).contains(variableName);
 
         });
     }

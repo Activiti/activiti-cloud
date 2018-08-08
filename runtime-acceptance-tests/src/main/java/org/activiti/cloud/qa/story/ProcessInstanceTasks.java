@@ -26,6 +26,7 @@ import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.activiti.runtime.api.event.TaskRuntimeEvent;
+import org.activiti.runtime.api.event.VariableEvent;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.Task;
 import org.jbehave.core.annotations.Alias;
@@ -88,6 +89,11 @@ public class ProcessInstanceTasks {
         this.startProcess(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
     }
 
+    @When("the user starts a connector process")
+    public void startConnectorProcess() throws Exception {
+        this.startProcess(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
+    }
+
     @When("the user starts a process without graphic info")
     public void startProcessWithoutGraphicInfo() throws Exception {
         this.startProcess("fixSystemFailure");
@@ -112,6 +118,15 @@ public class ProcessInstanceTasks {
         auditSteps.checkProcessInstanceTaskEvent(processInstance.getId(),
                                                  currentTask.getId(),
                                                  TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
+    }
+
+    @Then("a variable was created with name '$variableName'")
+    public void verifyVariableCreated(String variableName) throws Exception {
+
+        querySteps.checkProcessInstanceHasVariable(processInstance.getId(),variableName);
+
+        auditSteps.checkProcessInstanceVariableEvent(processInstance.getId(),variableName, VariableEvent.VariableEvents.VARIABLE_CREATED);
+
     }
 
     @When("the user cancel the process")
