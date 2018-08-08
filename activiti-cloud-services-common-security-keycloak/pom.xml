@@ -13,8 +13,6 @@
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-spring-security</artifactId>
-      <!-- @TODO: do dep mgmt -->
-      <version>7-201803-EA-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
