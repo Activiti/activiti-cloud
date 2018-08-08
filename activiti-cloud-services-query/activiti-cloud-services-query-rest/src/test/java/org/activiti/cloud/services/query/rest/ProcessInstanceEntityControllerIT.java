@@ -21,13 +21,14 @@ import java.util.Date;
 import java.util.UUID;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
+
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
-import org.activiti.cloud.services.security.SecurityPolicy;
 import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.security.SecurityManager;
+import org.activiti.spring.security.policies.SecurityPolicyAccess;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,14 +80,14 @@ public class ProcessInstanceEntityControllerIT {
     private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     @MockBean
-    private SpringSecurityAuthenticationWrapper authenticationWrapper;
+    private SecurityManager securityManager;
 
     @MockBean
     private EntityFinder entityFinder;
 
     @Before
     public void setUp() throws Exception {
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("user");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("user");
     }
 
     @Test
@@ -94,7 +95,7 @@ public class ProcessInstanceEntityControllerIT {
         //given
         Predicate restrictedPredicate = mock(Predicate.class);
         given(securityPoliciesApplicationService.restrictProcessInstanceQuery(any(),
-                                                                              eq(SecurityPolicy.READ))).willReturn(restrictedPredicate);
+                                                                              eq(SecurityPolicyAccess.READ))).willReturn(restrictedPredicate);
         given(processInstanceRepository.findAll(eq(restrictedPredicate),
                                                 ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
                                                                                                              PageRequest.of(1,

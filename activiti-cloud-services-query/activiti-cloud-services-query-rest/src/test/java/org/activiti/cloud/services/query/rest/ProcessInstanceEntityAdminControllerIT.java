@@ -16,13 +16,10 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
-import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.security.SecurityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +37,11 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
+
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,31 +68,31 @@ public class ProcessInstanceEntityAdminControllerIT {
     private ProcessInstanceRepository processInstanceRepository;
 
     @MockBean
-    private SpringSecurityAuthenticationWrapper authenticationWrapper;
+    private SecurityManager securityManager;
 
     @Before
     public void setUp() throws Exception {
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("user");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("user");
     }
 
     @Test
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         given(processInstanceRepository.findAll(any(),
-                                                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-                                                                                                             PageRequest.of(1,
-                                                                                                                            10),
-                                                                                                             11));
+                ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
+                PageRequest.of(1,
+                        10),
+                11));
 
 
         //when
         mockMvc.perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10")
-                                .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON))
                 //then
                 .andExpect(status().isOk())
                 .andDo(document(PROCESS_INSTANCE_ALFRESCO_IDENTIFIER + "/list",
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()
+                        pageRequestParameters(),
+                        pagedResourcesResponseFields()
 
                 ));
     }
@@ -98,10 +100,10 @@ public class ProcessInstanceEntityAdminControllerIT {
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {
         return new ProcessInstanceEntity("My-app", "My-app", "1", null, null,
-                                         UUID.randomUUID().toString(),
-                                         UUID.randomUUID().toString(),
-                                         ProcessInstance.ProcessInstanceStatus.RUNNING,
-                                         new Date());
+                UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),
+                ProcessInstance.ProcessInstanceStatus.RUNNING,
+                new Date());
     }
 
 }
