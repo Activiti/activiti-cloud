@@ -37,13 +37,13 @@ public class AuthenticationActions {
         authenticationSteps.ensureUserIsAuthenticated();
     }
 
-    @Given("the user is authenticated as a hruser")
+    @Given("the user is authenticated as an hruser")
     public void authenticateHrUser() throws Exception {
         authenticationSteps.authenticateHrUser();
         authenticationSteps.ensureUserIsAuthenticated();
     }
 
-    @Given("the user is authenticated as a hradmin")
+    @Given("the user is authenticated as an hradmin")
     public void authenticateHrAdmin() throws Exception {
         authenticationSteps.authenticateHrAdmin();
         authenticationSteps.ensureUserIsAuthenticated();

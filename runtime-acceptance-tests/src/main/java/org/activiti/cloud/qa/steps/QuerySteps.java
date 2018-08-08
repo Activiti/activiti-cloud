@@ -29,6 +29,7 @@ import org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.Task.TaskStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.PagedResources;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
@@ -55,6 +56,16 @@ public class QuerySteps {
     @Step
     public CloudProcessInstance getProcessInstance(String processInstanceId) throws Exception {
         return queryService.getProcessInstance(processInstanceId);
+    }
+
+    @Step
+    public PagedResources<CloudProcessInstance> getAllProcessInstances(){
+        return queryService.getAllProcessInstances();
+    }
+
+    @Step
+    public PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin(){
+        return queryService.getAllProcessInstancesAdmin();
     }
 
     @Step
@@ -100,4 +111,11 @@ public class QuerySteps {
 
 
     }
+
+    @Step
+    public PagedResources<CloudTask> getAllTasks(){
+        return queryService.queryAllTasks();
+    }
+
+
 }

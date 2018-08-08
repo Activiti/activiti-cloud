@@ -33,6 +33,7 @@ import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.activiti.runtime.api.model.Task;
 import org.assertj.core.api.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.PagedResources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -110,11 +111,6 @@ public class AuditSteps {
     @Step
     public Collection<CloudRuntimeEvent> getEvents() {
         return auditService.getEvents().getContent();
-    }
-
-    @Step
-    public Collection<CloudRuntimeEvent> getEventsByEntityId(String entityId) {
-        return auditService.getEventsByEntityId("entityId:" + entityId).getContent();
     }
 
     /**
@@ -202,5 +198,22 @@ public class AuditSteps {
                                               tuple(subtaskId,
                                                     subtaskId,
                                                     parentTaskId)));
+    }
+
+    @Step
+    public Collection<CloudRuntimeEvent> getAllEvents(){
+        return auditService.getEvents().getContent();
+    }
+
+    @Step
+    public Collection<CloudRuntimeEvent> getEventsByEntityId(String entityId){
+        String filter = "entityId:";
+        return auditService.getEvents(filter + entityId).getContent();
+    }
+
+    @Step
+    public Collection<CloudRuntimeEvent> getEventsByEntityIdAdmin(String entityId){
+        String filter = "entityId:";
+        return auditService.getEventsAdmin(filter + entityId).getContent();
     }
 }

@@ -18,7 +18,7 @@ package org.activiti.cloud.qa.story;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.qa.steps.AuditSteps;
@@ -32,8 +32,6 @@ import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
-
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
 import static org.assertj.core.api.Assertions.*;
@@ -75,6 +73,9 @@ public class ProcessInstanceTasks {
         assertThat(tasks).isNotEmpty();
         currentTask = tasks.get(0);
         assertThat(currentTask).isNotNull();
+
+        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
+
     }
 
     @When("the user starts a simple process")
@@ -88,7 +89,7 @@ public class ProcessInstanceTasks {
     }
 
     @When("the user starts a process without graphic info")
-    public void startProcessWithoutFGraphicInfo() throws Exception {
+    public void startProcessWithoutGraphicInfo() throws Exception {
         this.startProcess("fixSystemFailure");
     }
 
