@@ -30,7 +30,8 @@ import org.springframework.context.annotation.ComponentScan;
         "org.activiti.spring.security.policies",
         "org.activiti.cloud.starters",
         "org.activiti.cloud.starter",
-        "org.activiti.cloud.alfresco"})
+        "org.activiti.cloud.alfresco",
+        "org.activiti.cloud.services.test.identity.keycloak.interceptor"})
 public class JpaAuditApplication {
 
     public static void main(String[] args) {

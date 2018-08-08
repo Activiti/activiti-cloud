@@ -10,7 +10,6 @@ import org.activiti.spring.security.policies.BaseSecurityPoliciesManagerImpl;
 import org.activiti.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.spring.security.policies.conf.SecurityPoliciesProperties;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +19,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPoliciesManagerImpl implements SecurityPoliciesManager {
 
-
-    public SecurityPoliciesApplicationServiceImpl(UserGroupManager userGroupManager, SecurityManager securityManager, SecurityPoliciesProperties securityPoliciesProperties) {
-        super(userGroupManager, securityManager, securityPoliciesProperties);
+    public SecurityPoliciesApplicationServiceImpl(UserGroupManager userGroupManager,
+                                                  SecurityManager securityManager,
+                                                  SecurityPoliciesProperties securityPoliciesProperties) {
+        super(userGroupManager,
+              securityManager,
+              securityPoliciesProperties);
     }
 
     /*
@@ -40,7 +42,7 @@ public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPolicies
      */
     public Specification<AuditEventEntity> createSpecWithSecurity(Specification<AuditEventEntity> spec,
                                                                   SecurityPolicyAccess securityPolicy) {
-        if(spec == null){
+        if (spec == null) {
             spec = new AlwaysTrueSpecification();
         }
         if (!arePoliciesDefined()) {
@@ -52,7 +54,7 @@ public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPolicies
 
             Set<String> defKeys = restrictions.get(serviceName);
             //will filter by app name and will also filter by definition keys if no wildcard,
-            if (defKeys != null && defKeys.size()>0 && !defKeys.contains(securityPoliciesProperties.getWildcard())) {
+            if (defKeys != null && defKeys.size() > 0 && !defKeys.contains(securityPoliciesProperties.getWildcard())) {
                 return spec.and(new ApplicationProcessDefSecuritySpecification(serviceName,
                                                                                defKeys));
             } else if (defKeys != null && defKeys.contains(securityPoliciesProperties.getWildcard())) {  //will filter by app name if wildcard is set
@@ -69,14 +71,12 @@ public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPolicies
     }
 
     public boolean canWrite(String processDefinitionKey) {
-        //TODO: change interface?
-        System.err.println("Unusused method - does it have to be in interface?");
+        //should always use canWrite(processDefinitionKey, appName)
         return false;
     }
 
     public boolean canRead(String processDefinitionKey) {
-        //TODO: change interface?
-        System.err.println("Unusused method - does it have to be in interface?");
+        //should always use canRead(processDefinitionKey, appName)
         return false;
     }
 }
