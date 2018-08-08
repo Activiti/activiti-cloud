@@ -45,30 +45,22 @@ public abstract class ModelingContextSteps<M> {
     private DirtyContextHandler dirtyContextHandler;
 
     @Autowired
-    private ModelingContextHandler modelingContextHandler;
+    protected ModelingContextHandler modelingContextHandler;
 
     protected Resource<M> create(String id,
                                  M m) {
-        service().create(m);
-        return dirty(service().findById(id));
-    }
-
-    protected void addToCurrentContext(Resource<?> objectToAdd,
-                                       Optional<String> objectToAddRel) {
-        modelingContextHandler
+        Optional<String> uri = modelingContextHandler
                 .getCurrentModelingContext()
-                .ifPresent(resource -> {
-                    objectToAddRel
-                            .map(resource::getLink)
-                            .map(Link::getHref)
-                            .ifPresent(parentUri -> {
-                                String childUri = objectToAdd.getLink(REL_SELF).getHref();
-                                service().addRelationByUri(parentUri,
-                                                           childUri);
-                                dirtyRelation(parentUri,
-                                              childUri);
-                            });
-                });
+                .map(this::getRelUri)
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+        if (uri.isPresent()) {
+            service().createByUri(uri.get(),
+                                  m);
+        } else {
+            service().create(m);
+        }
+        return dirty(service().findById(id));
     }
 
     @Step
@@ -99,26 +91,20 @@ public abstract class ModelingContextSteps<M> {
                                   service().findAll().getContent());
     }
 
-    protected M findInCurrentContext(ModelingIdentifier<M> identifier) {
-        return modelingContextHandler
-                .getCurrentModelingContext()
-                .map(this::getRelUri)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(this::findAllByUri)
-                .map(PagedResources::getContent)
-                .flatMap(resources -> resources
-                        .stream()
-                        .map(Resource::getContent)
-                        .filter(identifier)
-                        .findFirst())
-                .orElse(null);
-    }
-
     protected Optional<String> getRelUri(Resource<?> resource) {
         return getRel()
                 .map(resource::getLink)
-                .map(Link::getHref);
+                .map(Link::getHref)
+                .map(this::cutQueryParams);
+    }
+
+    protected String cutQueryParams(String uri) {
+        int index = uri.indexOf('{');
+        if (index <= 0) {
+            return uri;
+        }
+        return uri.substring(0,
+                             index);
     }
 
     protected void updateCurrentModelingObject() {
@@ -185,16 +171,6 @@ public abstract class ModelingContextSteps<M> {
 
     protected Resource<M> dirty(Resource<M> resource) {
         return dirtyContextHandler.dirty(resource);
-    }
-
-    protected String dirtyRelation(String dirtyRelation,
-                                   String childUri) {
-        return dirtyContextHandler.dirtyRelation(dirtyRelation,
-                                                 childUri);
-    }
-
-    protected String dirty(String uri) {
-        return dirtyContextHandler.dirty(uri);
     }
 
     protected Resource<M> findByUri(String uri) {

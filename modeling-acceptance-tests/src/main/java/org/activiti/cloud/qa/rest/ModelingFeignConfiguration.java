@@ -22,9 +22,7 @@ import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
-import org.activiti.cloud.organization.config.ApplicationDeserializer;
-import org.activiti.cloud.organization.config.Jackson2EntityConfiguration;
-import org.activiti.cloud.organization.config.ModelDeserializer;
+import org.activiti.cloud.organization.config.ObjectMapperConfiguration;
 import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.rest.feign.FeignConfiguration;
 import org.activiti.cloud.qa.service.ModelingApplicationsService;
@@ -42,10 +40,8 @@ import org.springframework.hateoas.hal.Jackson2HalModule;
 @Configuration
 @Import({
         JacksonAutoConfiguration.class,
-        Jackson2EntityConfiguration.class,
         FeignConfiguration.class,
-        ApplicationDeserializer.class,
-        ModelDeserializer.class
+        ObjectMapperConfiguration.class
 })
 public class ModelingFeignConfiguration {
 

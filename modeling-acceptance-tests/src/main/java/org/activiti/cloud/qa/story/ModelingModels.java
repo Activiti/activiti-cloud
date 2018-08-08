@@ -19,14 +19,12 @@ package org.activiti.cloud.qa.story;
 import java.util.Arrays;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.qa.steps.ModelingApplicationsSteps;
 import org.activiti.cloud.qa.steps.ModelingModelsSteps;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.springframework.hateoas.Resource;
 
 import static org.activiti.cloud.qa.model.modeling.ModelIdentifier.identified;
 import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.modelNamed;
@@ -45,9 +43,8 @@ public class ModelingModels {
     @When("creates the $modelType model '$modelName'")
     public void createModel(String modelType,
                             String modelName) {
-        Resource<Model> createdModel = modelingModelsSteps.create(modelName,
-                                                                  toModelType(modelType));
-        modelingApplicationsSteps.addModelToCurrentContext(createdModel);
+        modelingModelsSteps.create(modelName,
+                                   toModelType(modelType));
     }
 
     @Then("the $modelType model '$modelName' is created")

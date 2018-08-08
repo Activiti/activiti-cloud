@@ -84,14 +84,9 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
         return buildByUri(uri).get();
     }
 
-    default void addRelationByUri(String uri,
-                                  String relationUri) {
-        buildByUri(uri).addRelation(relationUri);
-    }
-
-    default void addRelationByUri(String uri,
-                                  List<String> relationUriList) {
-        buildByUri(uri).addRelation(relationUriList);
+    default void createByUri(String uri,
+                             R resource) {
+        buildByUri(uri).create(resource);
     }
 
     default void updateByUri(String uri,
