@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.starter.tests;
 
-import java.util.Collection;
-
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -42,6 +40,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -177,8 +177,62 @@ public class QueryTasksIT {
                                 Task::getStatus,
                                 Task::getParentTaskId)
                     .contains(tuple(createdTask.getId(),
-                                    Task.TaskStatus.CREATED,
-                                    createdTask.getParentTaskId()));
+                            Task.TaskStatus.CREATED,
+                            createdTask.getParentTaskId()));
+        });
+
+
+    }
+
+
+    @Test
+    public void shouldGetStandaloneAssignedTasksAndFilterParentId() {
+        //given
+        Task createdTask = taskEventContainedBuilder.aCreatedStandaloneAssignedTaskWithParent("Created task with parent",
+                "testuser");
+
+
+        eventsAggregator.sendAll();
+
+        checkExistingTask(createdTask);
+
+
+    }
+
+
+    @Test
+    public void shouldGetAssignedTasksAndFilterParentId() {
+        //given
+        Task createdTask = taskEventContainedBuilder.anAssignedTaskWithParent("Created task with parent",
+                "testuser",
+                runningProcessInstance);
+
+
+        eventsAggregator.sendAll();
+
+        checkExistingTask(createdTask);
+
+
+    }
+
+    private void checkExistingTask(Task createdTask) {
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<Task> task = responseEntity.getBody().getContent();
+            assertThat(task)
+                    .extracting(Task::getId,
+                            Task::getStatus,
+                            Task::getParentTaskId)
+                    .contains(tuple(createdTask.getId(),
+                            Task.TaskStatus.ASSIGNED,
+                            createdTask.getParentTaskId()));
         });
 
 
@@ -220,20 +274,21 @@ public class QueryTasksIT {
 
         eventsAggregator.sendAll();
 
-        Thread.sleep(300);
+        await().untilAsserted(() -> {
 
-        //when
-        ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
 
-        //then
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        Collection<Task> tasks = responseEntity.getBody().getContent();
-        //don't see the task as not for me
-        assertThat(tasks)
-                .extracting(Task::getId)
-                .doesNotContain(taskWithCandidate.getId());
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            //don't see the task as not for me
+            assertThat(tasks)
+                    .extracting(Task::getId)
+                    .doesNotContain(taskWithCandidate.getId());
+        });
     }
 
     private ResponseEntity<PagedResources<Task>> executeRequestGetTasks() {
