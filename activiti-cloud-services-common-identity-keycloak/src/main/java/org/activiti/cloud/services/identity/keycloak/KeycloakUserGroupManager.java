@@ -16,15 +16,15 @@
 
 package org.activiti.cloud.services.identity.keycloak;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.activiti.runtime.api.identity.UserGroupManager;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component("userGroupManager")
 public class KeycloakUserGroupManager implements UserGroupManager {
@@ -32,21 +32,19 @@ public class KeycloakUserGroupManager implements UserGroupManager {
 
     private KeycloakInstanceWrapper keycloakInstanceWrapper;
 
-    @Autowired
     public KeycloakUserGroupManager(KeycloakInstanceWrapper keycloakInstanceWrapper) {
         this.keycloakInstanceWrapper = keycloakInstanceWrapper;
     }
 
     @Override
     public List<String> getUserGroups(String username) {
-        // Verify that the user exist
-        UserRepresentation user = getUser(username);
+        UserRepresentation user = loadRepresentation(username);
 
-        List<GroupRepresentation> groupRepresentations = keycloakInstanceWrapper.getRealm().users().get(user.getId()).groups();
+        List<GroupRepresentation> groupRepresentations = loadUser(user).groups();
 
         List<String> groups = null;
         if (groupRepresentations != null && groupRepresentations.size() > 0) {
-            groups = new ArrayList<String>();
+            groups = new ArrayList<>();
             for (GroupRepresentation groupRepresentation : groupRepresentations) {
                 groups.add(groupRepresentation.getName());
             }
@@ -57,14 +55,13 @@ public class KeycloakUserGroupManager implements UserGroupManager {
 
     @Override
     public List<String> getUserRoles(String username) {
-        // Verify that the user exist
-        UserRepresentation user = getUser(username);
+        UserRepresentation user = loadRepresentation(username);
 
-        List<RoleRepresentation> rolesRepresentations = keycloakInstanceWrapper.getRealm().users().get(user.getId()).roles().realmLevel().listEffective();
+        List<RoleRepresentation> rolesRepresentations = loadUser(user).roles().realmLevel().listEffective();
 
         List<String> roles = null;
         if (rolesRepresentations != null && rolesRepresentations.size() > 0) {
-            roles = new ArrayList<String>();
+            roles = new ArrayList<>();
             for (RoleRepresentation roleRepresentation : rolesRepresentations) {
                 roles.add(roleRepresentation.getName());
             }
@@ -73,7 +70,11 @@ public class KeycloakUserGroupManager implements UserGroupManager {
         return roles;
     }
 
-    private UserRepresentation getUser(String username) {
+    private UserResource loadUser(UserRepresentation user) {
+        return keycloakInstanceWrapper.getRealm().users().get(user.getId());
+    }
+
+    private UserRepresentation loadRepresentation(String username) {
         List<UserRepresentation> users = keycloakInstanceWrapper.getRealm().users().search(username,
                 0,
                 2);
