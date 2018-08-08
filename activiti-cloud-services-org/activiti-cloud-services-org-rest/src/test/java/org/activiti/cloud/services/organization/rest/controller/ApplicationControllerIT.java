@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.rest.api;
+package org.activiti.cloud.services.organization.rest.controller;
 
 import java.util.Optional;
 
@@ -144,7 +144,6 @@ public class ApplicationControllerIT {
         Application application = new ApplicationEntity(applicationWithModelsId,
                                                         applicationWithModelsName);
 
-        // create an application
         mockMvc.perform(post("{version}/applications",
                              RepositoryRestConfig.API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -152,13 +151,14 @@ public class ApplicationControllerIT {
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        // create a form model
         Model modelForm = new ModelEntity(formModelId,
                                           formModelName,
                                           FORM);
 
-        mockMvc.perform(post("{version}/models",
-                             RepositoryRestConfig.API_VERSION)
+        //when
+        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+                             RepositoryRestConfig.API_VERSION,
+                             applicationWithModelsId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(modelForm)))
                 .andDo(print())
@@ -170,24 +170,13 @@ public class ApplicationControllerIT {
                                              PROCESS
         );
 
-        mockMvc.perform(post("{version}/models",
-                             RepositoryRestConfig.API_VERSION)
+        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+                             RepositoryRestConfig.API_VERSION,
+                             applicationWithModelsId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())
                 .andExpect(status().isCreated());
-
-        //when
-        String uriList = "http://localhost" + RepositoryRestConfig.API_VERSION + "/models/" + formModelId + "\n"
-                + "http://localhost" + RepositoryRestConfig.API_VERSION + "/models/" + processModelId;
-
-        mockMvc.perform(put("{version}/applications/{applicationId}/models",
-                            RepositoryRestConfig.API_VERSION,
-                            applicationWithModelsId)
-                                .contentType("text/uri-list")
-                                .content(uriList))
-                .andDo(print())
-                .andExpect(status().isNoContent());
 
         //then
         mockMvc.perform(get("{version}/applications/{applicationId}/models",

@@ -18,8 +18,9 @@ package org.activiti.cloud.services.organization.rest.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
+import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.core.rest.client.ModelReferenceService;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
@@ -27,6 +28,8 @@ import org.activiti.cloud.services.organization.entity.ApplicationEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.jpa.ApplicationJpaRepository;
 import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
+import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
+import org.hamcrest.collection.IsCollectionWithSize;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -53,6 +57,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -285,5 +290,56 @@ public class ModelControllerIT {
 
         //then
         assertThat(modelRepository.findModelById(processModelId)).isEmpty();
+    }
+
+    @Test
+    public void validateModel() throws Exception {
+
+        // given
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "diagram.bpm",
+                                                       "text/plain",
+                                                       "BPMN diagram".getBytes());
+        Model processModel = new ModelEntity("model_id",
+                                             "Process-Model",
+                                             PROCESS);
+        assertThat(modelRepository.createModel(processModel)).isNotNull();
+
+        List<ModelValidationError> expectedValidationErrors =
+                Arrays.asList(new ModelValidationError(),
+                              new ModelValidationError());
+
+        doReturn(expectedValidationErrors).when(modelService).validateResourceContent(PROCESS,
+                                                                                      file.getBytes());
+
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   "model_id").file(file))
+                .andDo(print());
+
+        // then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.modelValidationErrors",
+                                    IsCollectionWithSize.hasSize(2)));
+    }
+
+    @Test
+    public void validateModelThatNotExistsShouldThrowException() throws Exception {
+        // given
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "diagram.bpm",
+                                                       "text/plain",
+                                                       "BPMN diagram".getBytes());
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   "model_id").file(file))
+                .andDo(print());
+
+        // then
+        resultActions.andExpect(status().isNotFound());
     }
 }

@@ -40,7 +40,7 @@ public class ApplicationResourceAssembler implements ResourceAssembler<Applicati
                 application,
                 linkTo(methodOn(ApplicationController.class).getApplication(application.getId())).withSelfRel(),
                 linkTo(methodOn(ModelController.class).getModels(application.getId(),
-                                                                 ModelType.PROCESS,
+                                                                 null,
                                                                  Pageable.unpaged())).withRel("models")
         );
     }

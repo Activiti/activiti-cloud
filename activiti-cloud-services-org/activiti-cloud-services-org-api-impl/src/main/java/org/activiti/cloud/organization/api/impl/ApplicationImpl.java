@@ -19,6 +19,7 @@ package org.activiti.cloud.organization.api.impl;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.services.auditable.AuditableEntity;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
@@ -27,7 +28,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ApplicationImpl extends AuditableImpl implements Application<String> {
+public class ApplicationImpl extends AuditableEntity<String> implements Application<String> {
 
     private String id;
 

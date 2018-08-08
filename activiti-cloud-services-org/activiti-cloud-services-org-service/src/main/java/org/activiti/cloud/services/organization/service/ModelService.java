@@ -87,24 +87,6 @@ public class ModelService {
         return modelRepository.findModelById(modelId);
     }
 
-    public void createModelsReference(Application application,
-                                      List<String> applicationsLinks) {
-        applicationsLinks
-                .stream()
-                .distinct()
-                .map(this::findModelByLink)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .forEach(model -> {
-                    model.setApplication(application);
-                    modelRepository.updateModel(model);
-                });
-    }
-
-    public Optional<Model> findModelByLink(String link) {
-        return findModelById(link.substring(link.lastIndexOf('/') + 1));
-    }
-
     public Model newModelInstance(ModelType type,
                                   String name) {
         try {

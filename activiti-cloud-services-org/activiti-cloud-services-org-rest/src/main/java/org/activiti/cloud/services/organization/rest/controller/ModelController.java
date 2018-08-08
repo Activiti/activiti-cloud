@@ -161,18 +161,6 @@ public class ModelController implements ModelRestApi {
     }
 
     @Override
-    public void createModelsReference(@PathVariable String applicationId,
-                                      @RequestBody Resources<Object> modelsLinks) {
-        modelService.createModelsReference(
-                applicationController.findApplicationById(applicationId),
-                modelsLinks
-                        .getLinks()
-                        .stream()
-                        .map(Link::getHref)
-                        .collect(Collectors.toList()));
-    }
-
-    @Override
     public void deleteModel(
             @ApiParam("The id of the model to delete")
             @PathVariable String modelId) {

@@ -154,18 +154,6 @@ public interface ModelRestApi {
 
     @ApiOperation(
             tags = MODELS,
-            value = "Add models to an application",
-            notes = "Attach a list of models to an application.")
-    @RequestMapping(method = {PUT, PATCH},
-            path = "/applications/{applicationId}/models",
-            produces = HAL_JSON_VALUE,
-            consumes = TEXT_URI_LIST_VALUE)
-    @ResponseStatus(NO_CONTENT)
-    void createModelsReference(@PathVariable String applicationId,
-                               @RequestBody Resources<Object> modelsLinks);
-
-    @ApiOperation(
-            tags = MODELS,
             value = "Delete model")
     @DeleteMapping(path = "/models/{modelId}")
     @ResponseStatus(NO_CONTENT)
