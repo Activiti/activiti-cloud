@@ -11,12 +11,16 @@
   <name>Activiti Cloud Services :: Core</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-common-security</artifactId>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-spring-identity</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-security-policies</artifactId>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-spring-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-spring-security-policies</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -107,11 +111,6 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-identity-basic</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -151,5 +150,6 @@
       <artifactId>activiti-task-runtime-api-impl</artifactId>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 </project>

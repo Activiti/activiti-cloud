@@ -1,8 +1,10 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.runtime.api.ProcessAdminRuntime;
+import org.activiti.runtime.api.ProcessRuntime;
 import org.activiti.runtime.api.Result;
 import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
 import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,9 +14,11 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class StartProcessInstanceCmdExecutorTest {
@@ -23,7 +27,7 @@ public class StartProcessInstanceCmdExecutorTest {
     private StartProcessInstanceCmdExecutor startProcessInstanceCmdExecutor;
 
     @Mock
-    private SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
+    private ProcessAdminRuntime processAdminRuntime;
 
     @Mock
     private MessageChannel commandResults;
@@ -35,20 +39,21 @@ public class StartProcessInstanceCmdExecutorTest {
 
     @Test
     public void startProcessInstanceCmdExecutorTest() {
-        StartProcessPayload startProcessInstanceCmd = new StartProcessPayload("x",
-                                                                              "x",
-                                                                              "key",
-                                                                              null);
+        StartProcessPayload startProcessInstanceCmd = ProcessPayloadBuilder.start()
+                .withProcessDefinitionKey("def key")
+                .withProcessInstanceName("name")
+                .withBusinessKey("business key")
+        .build();
 
         ProcessInstance fakeProcessInstance = mock(ProcessInstance.class);
 
-        given(securityAwareProcessInstanceService.startProcess(any())).willReturn(fakeProcessInstance);
+        given(processAdminRuntime.start(any())).willReturn(fakeProcessInstance);
 
         assertThat(startProcessInstanceCmdExecutor.getHandledType()).isEqualTo(StartProcessPayload.class.getName());
 
         startProcessInstanceCmdExecutor.execute(startProcessInstanceCmd);
 
-        verify(securityAwareProcessInstanceService).startProcess(startProcessInstanceCmd);
+        verify(processAdminRuntime).start(startProcessInstanceCmd);
 
         verify(commandResults).send(ArgumentMatchers.<Message<Result<ProcessInstance>>>any());
     }

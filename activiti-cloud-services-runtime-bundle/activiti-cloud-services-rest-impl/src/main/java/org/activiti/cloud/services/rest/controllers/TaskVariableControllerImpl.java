@@ -15,10 +15,11 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
 import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
+import org.activiti.runtime.api.TaskRuntime;
+import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
 import org.activiti.runtime.api.model.payloads.SetTaskVariablesPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
@@ -35,33 +36,41 @@ public class TaskVariableControllerImpl implements TaskVariableController {
 
     private ResourcesAssembler resourcesAssembler;
 
-    private SecurityAwareTaskService securityAwareTaskService;
+    private TaskRuntime taskRuntime;
 
     @Autowired
     public TaskVariableControllerImpl(TaskVariableInstanceResourceAssembler variableResourceAssembler,
                                       ResourcesAssembler resourcesAssembler,
-                                      SecurityAwareTaskService securityAwareTaskService) {
+                                      TaskRuntime taskRuntime) {
         this.variableResourceAssembler = variableResourceAssembler;
         this.resourcesAssembler = resourcesAssembler;
-        this.securityAwareTaskService = securityAwareTaskService;
+        this.taskRuntime = taskRuntime;
     }
 
     @Override
     public Resources<VariableInstanceResource> getVariables(@PathVariable String taskId) {
-        return resourcesAssembler.toResources(securityAwareTaskService.getVariableInstances(taskId),
+        return resourcesAssembler.toResources(taskRuntime.variables(TaskPayloadBuilder.
+                                                      variables()
+                                                                            .withTaskId(taskId)
+                                                                            .build()),
                                               variableResourceAssembler);
     }
 
     @Override
     public Resources<VariableInstanceResource> getVariablesLocal(@PathVariable String taskId) {
-        return resourcesAssembler.toResources(securityAwareTaskService.getVariableInstancesLocal(taskId),
+        return resourcesAssembler.toResources(taskRuntime.variables(
+                TaskPayloadBuilder
+                        .variables()
+                        .withTaskId(taskId)
+                        .localOnly()
+                        .build()),
                                               variableResourceAssembler);
     }
 
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String taskId,
                                              @RequestBody SetTaskVariablesPayload setTaskVariablesCmd) {
-        securityAwareTaskService.setTaskVariables(setTaskVariablesCmd);
+        taskRuntime.setVariables(setTaskVariablesCmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -69,7 +78,7 @@ public class TaskVariableControllerImpl implements TaskVariableController {
     public ResponseEntity<Void> setVariablesLocal(@PathVariable String taskId,
                                                   @RequestBody SetTaskVariablesPayload setTaskVariablesCmd) {
         setTaskVariablesCmd.setLocalOnly(true);
-        securityAwareTaskService.setTaskVariables(setTaskVariablesCmd);
+        taskRuntime.setVariables(setTaskVariablesCmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.runtime.api.Result;
+import org.activiti.runtime.api.TaskAdminRuntime;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.payloads.ClaimTaskPayload;
 import org.junit.Before;
@@ -12,8 +12,8 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ClaimTaskCmdExecutorTest {
@@ -22,7 +22,7 @@ public class ClaimTaskCmdExecutorTest {
     private ClaimTaskCmdExecutor claimTaskCmdExecutor;
 
     @Mock
-    private SecurityAwareTaskService securityAwareTaskService;
+    private TaskAdminRuntime taskAdminRuntime;
 
     @Mock
     private MessageChannel commandResults;
@@ -44,7 +44,7 @@ public class ClaimTaskCmdExecutorTest {
         claimTaskCmdExecutor.execute(claimTaskPayload);
 
         //then
-        verify(securityAwareTaskService).claimTask(claimTaskPayload);
+        verify(taskAdminRuntime).claim(claimTaskPayload);
         verify(commandResults).send(ArgumentMatchers.<Message<Result<Task>>>any());
     }
 }

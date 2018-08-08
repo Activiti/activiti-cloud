@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
-import org.activiti.cloud.services.core.pageable.SecurityAwareRepositoryService;
+import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionController;
 import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
@@ -33,9 +33,10 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
+import org.activiti.runtime.api.ProcessRuntime;
 import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
@@ -53,9 +54,11 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
 
     private final ProcessDefinitionResourceAssembler resourceAssembler;
 
-    private final SecurityAwareRepositoryService securityAwareRepositoryService;
+    private final ProcessRuntime processRuntime;
 
     private final AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler;
+
+    private final SpringPageConverter pageConverter;
 
     @ExceptionHandler(ActivitiObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -73,31 +76,33 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     public ProcessDefinitionControllerImpl(RepositoryService repositoryService,
                                            ProcessDiagramGeneratorWrapper processDiagramGenerator,
                                            ProcessDefinitionResourceAssembler resourceAssembler,
-                                           SecurityAwareRepositoryService securityAwareRepositoryService,
-                                           AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler) {
+                                           ProcessRuntime processRuntime,
+                                           AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler,
+                                           SpringPageConverter pageConverter) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.resourceAssembler = resourceAssembler;
-        this.securityAwareRepositoryService = securityAwareRepositoryService;
+        this.processRuntime = processRuntime;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.pageConverter = pageConverter;
     }
 
     @Override
     public PagedResources<ProcessDefinitionResource> getProcessDefinitions(Pageable pageable) {
-        Page<ProcessDefinition> page = securityAwareRepositoryService.getAuthorizedProcessDefinitions(pageable);
+        Page<ProcessDefinition> page = processRuntime.processDefinitions(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
-                                                  page,
+                                                  pageConverter.toSpringPage(pageable, page),
                                                   resourceAssembler);
     }
 
     @Override
     public ProcessDefinitionResource getProcessDefinition(@PathVariable String id) {
-        return resourceAssembler.toResource(securityAwareRepositoryService.getAuthorizedProcessDefinition(id));
+        return resourceAssembler.toResource(processRuntime.processDefinition(id));
     }
 
     @Override
     public String getProcessModel(@PathVariable String id) {
-        checkUserCanProcessDefinition(id);
+        checkUserCanReadProcessDefinition(id);
 
         try (final InputStream resourceStream = repositoryService.getProcessModel(id)) {
             return new String(IoUtil.readInputStream(resourceStream,
@@ -109,15 +114,15 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         }
     }
 
-    private void checkUserCanProcessDefinition(@PathVariable String id) {
+    private void checkUserCanReadProcessDefinition(@PathVariable String id) {
         // check the user can see the process definition (which has same ID as BPMN model in engine)
         //will thrown an exception with the user is not authorized
-        securityAwareRepositoryService.getAuthorizedProcessDefinition(id);
+        processRuntime.processDefinition(id);
     }
 
     @Override
     public String getBpmnModel(@PathVariable String id) {
-        checkUserCanProcessDefinition(id);
+        checkUserCanReadProcessDefinition(id);
         BpmnModel bpmnModel = repositoryService.getBpmnModel(id);
         ObjectNode json = new BpmnJsonConverter().convertToJson(bpmnModel);
         return json.toString();
@@ -125,7 +130,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
 
     @Override
     public String getProcessDiagram(@PathVariable String id) {
-        checkUserCanProcessDefinition(id);
+        checkUserCanReadProcessDefinition(id);
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(id);
         return new String(processDiagramGenerator.generateDiagram(bpmnModel),

@@ -4,13 +4,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.runtime.api.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,6 +28,10 @@ public class CommandEndpoint<T extends Payload> {
 
     @StreamListener(ProcessEngineChannels.COMMAND_CONSUMER)
     public void consumeActivateProcessInstanceCmd(T payload) {
+        // Security set to THREADLOCAL and Admin user set for Command Executors
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_THREADLOCAL);
+        SecurityContextHolder.setContext(new SecurityContextImpl(new CommandEndpointAdminAuthentication()));
+
         processCommand(payload);
     }
 

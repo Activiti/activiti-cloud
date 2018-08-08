@@ -16,11 +16,7 @@
 
 package org.activiti.cloud.services.core.utils;
 
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngineConfiguration;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
+import org.activiti.engine.*;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
@@ -33,6 +29,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 /**
  * Test context configuration for integration tests over Activiti process engine
@@ -41,16 +39,14 @@ import org.springframework.messaging.MessageChannel;
 @ComponentScan({
         "org.activiti.engine",
         "org.activiti.image",
-        "org.activiti.cloud.services.api.model.converter",
-        "org.activiti.cloud.services.security",
-        "org.activiti.cloud.services.common.security",
+        "org.activiti.spring.security",
+        "org.activiti.spring.identity",
         "org.activiti.cloud.services.events.listeners",
         "org.activiti.cloud.services.events.converter",
         "org.activiti.cloud.services.events.configuration",
         "org.activiti.cloud.services.core",
         "org.activiti.cloud.services.core.pageable",
-        "org.activiti.cloud.services.core.utils",
-        "org.activiti.cloud.services.identity",
+        "org.activiti.cloud.services.core.utils"
 
 
 })
@@ -98,5 +94,10 @@ public class TestProcessEngineConfiguration {
     @Bean
     public MessageChannel commandResults() {
         return new MockMessageChannel();
+    }
+
+    @Bean
+    public UserDetailsService myUserDetailsService() {
+        return new InMemoryUserDetailsManager();
     }
 }

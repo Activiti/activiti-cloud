@@ -19,12 +19,12 @@ package org.activiti.cloud.services.rest.controllers;
 import java.util.Collections;
 import java.util.List;
 
-import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.runtime.api.TaskAdminRuntime;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.query.Page;
 import org.activiti.runtime.api.query.impl.PageImpl;
@@ -47,8 +47,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -72,7 +73,7 @@ public class TaskAdminControllerImplIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private SecurityAwareTaskService securityAwareTaskService;
+    private TaskAdminRuntime taskAdminRuntime;
 
     @SpyBean
     private SpringPageConverter pageConverter;
@@ -92,7 +93,7 @@ public class TaskAdminControllerImplIT {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> tasks = new PageImpl<>(taskList,
                                           taskList.size());
-        when(securityAwareTaskService.getAllTasks(any())).thenReturn(tasks);
+        when(taskAdminRuntime.tasks(any())).thenReturn(tasks);
 
         this.mockMvc.perform(get("/admin/v1/tasks"))
                 .andExpect(status().isOk())
@@ -107,7 +108,7 @@ public class TaskAdminControllerImplIT {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> taskPage = new PageImpl<>(taskList,
                                              taskList.size());
-        when(securityAwareTaskService.getAllTasks(any())).thenReturn(taskPage);
+        when(taskAdminRuntime.tasks(any())).thenReturn(taskPage);
 
         this.mockMvc.perform(get("/admin/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

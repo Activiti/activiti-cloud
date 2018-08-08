@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.runtime.api.model.CloudProcessDefinition;
@@ -64,7 +64,7 @@ public class TasksIT {
     };
     private static final ParameterizedTypeReference<PagedResources<CloudTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<CloudTask>>() {
     };
-    public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
+    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -76,7 +76,7 @@ public class TasksIT {
     private TaskRestTemplate taskRestTemplate;
 
     @Autowired
-    private KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
+    private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
@@ -115,11 +115,12 @@ public class TasksIT {
     @Test
     public void shouldUpdateDescription() {
         //given
-        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = executeRequestGetTasks();
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = processInstanceRestTemplate.getTasks(processInstanceEntity);
         assertThat(responseEntity).isNotNull();
         Collection<CloudTask> tasks = responseEntity.getBody().getContent();
         CloudTask task = tasks.iterator().next();
+        taskRestTemplate.claim(task);
 
         UpdateTaskPayload updateTask = TaskPayloadBuilder.update().withTaskId(task.getId()).withDescription("Updated description").build();
 
@@ -244,8 +245,8 @@ public class TasksIT {
     @Test
     public void shouldGetTaskById() {
         //given
-        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
-        Task task = executeRequestGetTasks().getBody().iterator().next();
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
 
         //when
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.getTask(task.getId());
@@ -258,8 +259,8 @@ public class TasksIT {
     @Test
     public void claimTaskShouldSetAssignee() {
         //given
-        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
-        Task task = executeRequestGetTasks().getBody().iterator().next();
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
 
         //when
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.claim(task);
@@ -273,8 +274,8 @@ public class TasksIT {
     @Test
     public void releaseTaskShouldSetAssigneeBackToNull() {
         //given
-        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
-        Task task = executeRequestGetTasks().getBody().iterator().next();
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
 
         taskRestTemplate.claim(task);
 
@@ -293,8 +294,9 @@ public class TasksIT {
     @Test
     public void shouldCompleteATask() {
         //given
-        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
-        Task task = executeRequestGetTasks().getBody().iterator().next();
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
+        taskRestTemplate.claim(task);
 
         //when
         ResponseEntity<Task> responseEntity = taskRestTemplate.complete(task);
@@ -306,8 +308,9 @@ public class TasksIT {
     @Test
     public void shouldCompleteATaskPassingInputVariables() {
         //given
-        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
-        Task task = executeRequestGetTasks().getBody().iterator().next();
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
+        taskRestTemplate.claim(task);
 
         CompleteTaskPayload completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(task.getId()).withVariables(Collections.singletonMap("myVar",
                                                                                                                                                 "any")).build();

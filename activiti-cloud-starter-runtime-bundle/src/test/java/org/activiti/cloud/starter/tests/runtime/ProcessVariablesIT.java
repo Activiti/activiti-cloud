@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.runtime.api.model.CloudProcessDefinition;
@@ -63,7 +63,7 @@ public class ProcessVariablesIT {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    private KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
+    private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;

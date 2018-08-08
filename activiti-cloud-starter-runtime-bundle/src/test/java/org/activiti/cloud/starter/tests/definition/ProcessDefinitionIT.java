@@ -25,7 +25,7 @@ import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.impl.util.IoUtil;
@@ -61,7 +61,7 @@ public class ProcessDefinitionIT {
     private ProcessDiagramGenerator processDiagramGenerator;
 
     @Autowired
-    private KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
+    private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
 
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";

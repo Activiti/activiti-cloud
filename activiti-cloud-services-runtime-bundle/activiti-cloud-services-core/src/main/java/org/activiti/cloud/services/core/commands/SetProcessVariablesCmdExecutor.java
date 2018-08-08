@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.runtime.api.EmptyResult;
+import org.activiti.runtime.api.ProcessAdminRuntime;
 import org.activiti.runtime.api.model.payloads.SetProcessVariablesPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class SetProcessVariablesCmdExecutor implements CommandExecutor<SetProcessVariablesPayload> {
 
-    private SecurityAwareProcessInstanceService processInstanceService;
+    private ProcessAdminRuntime processAdminRuntime;
     private MessageChannel commandResults;
 
     @Autowired
-    public SetProcessVariablesCmdExecutor(SecurityAwareProcessInstanceService processInstanceService,
+    public SetProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime,
                                           MessageChannel commandResults) {
-        this.processInstanceService = processInstanceService;
+        this.processAdminRuntime = processAdminRuntime;
         this.commandResults = commandResults;
     }
 
@@ -28,7 +28,7 @@ public class SetProcessVariablesCmdExecutor implements CommandExecutor<SetProces
 
     @Override
     public void execute(SetProcessVariablesPayload setProcessVariablesPayload) {
-        processInstanceService.setProcessVariables(setProcessVariablesPayload);
+        processAdminRuntime.setVariables(setProcessVariablesPayload);
         commandResults.send(MessageBuilder.withPayload(new EmptyResult(setProcessVariablesPayload)).build());
     }
 }

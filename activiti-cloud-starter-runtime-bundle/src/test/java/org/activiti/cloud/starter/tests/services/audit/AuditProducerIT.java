@@ -1,19 +1,11 @@
 package org.activiti.cloud.starter.tests.services.audit;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.model.CloudProcessDefinition;
-import org.activiti.runtime.api.model.CloudProcessInstance;
-import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.ProcessDefinition;
-import org.activiti.runtime.api.model.Task;
+import org.activiti.runtime.api.event.TaskCandidateUserEvent;
+import org.activiti.runtime.api.model.*;
 import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,30 +24,22 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.activiti.runtime.api.event.BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED;
-import static org.activiti.runtime.api.event.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
-import static org.activiti.runtime.api.event.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
-import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED;
-import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
-import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
-import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED;
-import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
-import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.activiti.runtime.api.event.BPMNActivityEvent.ActivityEvents.*;
+import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.*;
 import static org.activiti.runtime.api.event.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
 import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
 import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED;
 import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
 import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED;
-import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_ACTIVATED;
-import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
-import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CANCELLED;
-import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
-import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
-import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED;
-import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_CREATED;
-import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_DELETED;
-import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.VARIABLE_UPDATED;
-import static org.assertj.core.api.Assertions.*;
+import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.*;
+import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
@@ -65,25 +49,19 @@ import static org.awaitility.Awaitility.await;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class AuditProducerIT {
 
+    public static final String AUDIT_PRODUCER_IT = "AuditProducerIT";
     private static final String SIMPLE_PROCESS = "SimpleProcess";
     private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
-    public static final String AUDIT_PRODUCER_IT = "AuditProducerIT";
-
-    @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
-    private ProcessInstanceRestTemplate processInstanceRestTemplate;
-
-    @Autowired
-    private TaskRestTemplate taskRestTemplate;
-
-    @Autowired
-    private AuditConsumerStreamHandler streamHandler;
-
     @Value("${activiti.keycloak.test-user}")
     protected String keycloakTestUser;
-
+    @Autowired
+    private TestRestTemplate restTemplate;
+    @Autowired
+    private ProcessInstanceRestTemplate processInstanceRestTemplate;
+    @Autowired
+    private TaskRestTemplate taskRestTemplate;
+    @Autowired
+    private AuditConsumerStreamHandler streamHandler;
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
     @Before
@@ -94,7 +72,7 @@ public class AuditProducerIT {
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(),
-                                     pd.getId());
+                    pd.getId());
         }
     }
 
@@ -102,8 +80,8 @@ public class AuditProducerIT {
     public void shouldProduceEventsDuringSimpleProcessExecution() {
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                           Collections.singletonMap("name",
-                                                                                                                                    "peter"));
+                Collections.singletonMap("name",
+                        "peter"));
 
         //then
         await().untilAsserted(() -> {
@@ -112,20 +90,20 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(PROCESS_CREATED.name(),
-                                     VARIABLE_CREATED.name(),
-                                     PROCESS_STARTED.name(),
-                                     ACTIVITY_STARTED.name()/*start event*/,
-                                     ACTIVITY_COMPLETED.name()/*start event*/,
-                                     SEQUENCE_FLOW_TAKEN.name(),
-                                     ACTIVITY_STARTED.name()/*user task*/,
-                                     TASK_CANDIDATE_GROUP_ADDED.name(),
-                                     TASK_CANDIDATE_USER_ADDED.name(),
-                                     TASK_CREATED.name());
+                            VARIABLE_CREATED.name(),
+                            PROCESS_STARTED.name(),
+                            ACTIVITY_STARTED.name()/*start event*/,
+                            ACTIVITY_COMPLETED.name()/*start event*/,
+                            SEQUENCE_FLOW_TAKEN.name(),
+                            ACTIVITY_STARTED.name()/*user task*/,
+                            TASK_CANDIDATE_GROUP_ADDED.name(),
+                            TASK_CANDIDATE_USER_ADDED.name(),
+                            TASK_CREATED.name());
             assertThat(receivedEvents)
                     .filteredOn(event -> ACTIVITY_STARTED.equals(event.getEventType()))
                     .extracting(event -> ((CloudBPMNActivityStarted) event).getEntity().getActivityType())
                     .containsExactly("startEvent",
-                                     "userTask");
+                            "userTask");
         });
 
         //when
@@ -135,7 +113,7 @@ public class AuditProducerIT {
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(PROCESS_SUSPENDED.name(),
-                                 TASK_SUSPENDED.name()));
+                        TASK_SUSPENDED.name()));
 
         //when
         processInstanceRestTemplate.resume(startProcessEntity);
@@ -144,12 +122,12 @@ public class AuditProducerIT {
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(PROCESS_RESUMED.name(),
-                                 TASK_ACTIVATED.name()));
+                        TASK_ACTIVATED.name()));
 
         //when
         processInstanceRestTemplate.setVariables(startProcessEntity.getBody().getId(),
-                                                 Collections.singletonMap("name",
-                                                                          "paul"));
+                Collections.singletonMap("name",
+                        "paul"));
 
         //then
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
@@ -173,14 +151,14 @@ public class AuditProducerIT {
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(TASK_COMPLETED.name(),
-                                 TASK_CANDIDATE_GROUP_REMOVED.name(),
-                                 TASK_CANDIDATE_USER_REMOVED.name(),
-                                 ACTIVITY_COMPLETED.name()/*user task*/,
-                                 SEQUENCE_FLOW_TAKEN.name(),
-                                 ACTIVITY_STARTED.name()/*end event*/,
-                                 ACTIVITY_COMPLETED.name()/*end event*/,
-                                 VARIABLE_DELETED.name(),
-                                 PROCESS_COMPLETED.name()));
+                        TASK_CANDIDATE_GROUP_REMOVED.name(),
+                        TASK_CANDIDATE_USER_REMOVED.name(),
+                        ACTIVITY_COMPLETED.name()/*user task*/,
+                        SEQUENCE_FLOW_TAKEN.name(),
+                        ACTIVITY_STARTED.name()/*end event*/,
+                        ACTIVITY_COMPLETED.name()/*end event*/,
+                        VARIABLE_DELETED.name(),
+                        PROCESS_COMPLETED.name()));
     }
 
     @Test
@@ -197,10 +175,10 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(TASK_CANCELLED.name(),
-                                     ACTIVITY_CANCELLED.name(),
-                                     TASK_CANDIDATE_GROUP_REMOVED.name(),
-                                     TASK_CANDIDATE_USER_REMOVED.name(),
-                                     PROCESS_CANCELLED.name());
+                            ACTIVITY_CANCELLED.name(),
+                            TASK_CANDIDATE_GROUP_REMOVED.name(),
+                            TASK_CANDIDATE_USER_REMOVED.name(),
+                            PROCESS_CANCELLED.name());
         });
     }
 
@@ -218,16 +196,24 @@ public class AuditProducerIT {
         await().untilAsserted(() -> {
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getReceivedEvents();
             assertThat(receivedEvents)
-                    .hasSize(1)
+                    .hasSize(2)
                     .extracting(CloudRuntimeEvent::getEventType,
-                                CloudRuntimeEvent::getEntityId)
-                    .contains(tuple(TASK_CANCELLED,
-                                    task.getId()));
-            assertThat(receivedEvents.get(0).getEntity()).isNotNull();
-            assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(Task.class);
-            assertThat(((Task) receivedEvents.get(0).getEntity()).getStatus()).isEqualTo(Task.TaskStatus.CANCELLED);
-            assertThat(((Task) receivedEvents.get(0).getEntity()).getId()).isEqualTo(task.getId());
-            assertThat(receivedEvents.get(0).getEntityId()).isEqualTo(task.getId());
+                            CloudRuntimeEvent::getEntityId)
+                    .containsExactly(tuple(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED,
+                            "hruser"),
+                            tuple(TASK_CANCELLED,
+                                    task.getId())
+                    );
+
+            assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(TaskCandidateUser.class);
+            assertThat(((TaskCandidateUser) receivedEvents.get(0).getEntity()).getUserId()).isEqualTo("hruser");
+            assertThat(((TaskCandidateUser) receivedEvents.get(0).getEntity()).getTaskId()).isEqualTo(task.getId());
+            assertThat(receivedEvents.get(0).getEntityId()).isEqualTo("hruser");
+            assertThat(receivedEvents.get(1).getEntity()).isNotNull();
+            assertThat(receivedEvents.get(1).getEntity()).isInstanceOf(Task.class);
+            assertThat(((Task) receivedEvents.get(1).getEntity()).getStatus()).isEqualTo(Task.TaskStatus.CANCELLED);
+            assertThat(((Task) receivedEvents.get(1).getEntity()).getId()).isEqualTo(task.getId());
+            assertThat(receivedEvents.get(1).getEntityId()).isEqualTo(task.getId());
         });
     }
 
@@ -236,8 +222,8 @@ public class AuditProducerIT {
         };
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,
-                                     HttpMethod.GET,
-                                     null,
-                                     responseType);
+                HttpMethod.GET,
+                null,
+                responseType);
     }
 }

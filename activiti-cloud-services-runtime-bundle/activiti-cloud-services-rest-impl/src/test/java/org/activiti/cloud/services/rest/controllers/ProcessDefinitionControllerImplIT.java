@@ -25,7 +25,7 @@ import java.util.UUID;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
-import org.activiti.cloud.services.core.pageable.SecurityAwareRepositoryService;
+import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -33,8 +33,11 @@ import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
+import org.activiti.runtime.api.ProcessRuntime;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.impl.ProcessDefinitionImpl;
+import org.activiti.runtime.api.query.Page;
+import org.activiti.runtime.api.query.impl.PageImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,9 +51,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -85,7 +85,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
-        ServicesRestAutoConfiguration.class})
+        ServicesRestAutoConfiguration.class,
+        ServicesCoreAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
 public class ProcessDefinitionControllerImplIT {
@@ -104,10 +105,10 @@ public class ProcessDefinitionControllerImplIT {
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
     @MockBean
-    private SecurityAwareRepositoryService securityAwareRepositoryService;
+    private ProcessEngineChannels processEngineChannels;
 
     @MockBean
-    private ProcessEngineChannels processEngineChannels;
+    private ProcessRuntime processRuntime;
 
     @Before
     public void setUp() {
@@ -126,10 +127,8 @@ public class ProcessDefinitionControllerImplIT {
                                                                                                          this_is_my_process,
                                                                                                          version));
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-                                                                       PageRequest.of(0,
-                                                                                      10),
                                                                        processDefinitionList.size());
-        when(securityAwareRepositoryService.getAuthorizedProcessDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         this.mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(print())
@@ -164,12 +163,9 @@ public class ProcessDefinitionControllerImplIT {
                                                                      "This is my process",
                                                                      1);
         List<ProcessDefinition> processDefinitionList = Collections.singletonList(processDefinition);
-        PageRequest pageable = PageRequest.of(1,
-                                              10);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-                                                                       pageable,
                                                                        11);
-        given(securityAwareRepositoryService.getAuthorizedProcessDefinitions(any())).willReturn(processDefinitionPage);
+        given(processRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
 
         //when
         MvcResult result = this.mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
@@ -198,7 +194,7 @@ public class ProcessDefinitionControllerImplIT {
     public void shouldGetProcessDefinitionById() throws Exception {
         //given
         String processId = UUID.randomUUID().toString();
-        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processId))
+        given(processRuntime.processDefinition(processId))
                 .willReturn(buildProcessDefinition(processId,
                                                    "my process",
                                                    "this is my process",
@@ -214,7 +210,7 @@ public class ProcessDefinitionControllerImplIT {
     @Test
     public void getProcessDefinitionShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         String procDefId = UUID.randomUUID().toString();
-        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(procDefId))
+        given(processRuntime.processDefinition(procDefId))
                 .willReturn(buildProcessDefinition(procDefId,
                                                    "my process",
                                                    "This is my process",
@@ -240,7 +236,7 @@ public class ProcessDefinitionControllerImplIT {
     @Test
     public void shouldGetXMLProcessModel() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
-        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processDefinitionId))
+        given(processRuntime.processDefinition(processDefinitionId))
                 .willReturn(mock(ProcessDefinition.class));
 
         InputStream xml = new ByteArrayInputStream("activiti".getBytes());
@@ -257,7 +253,7 @@ public class ProcessDefinitionControllerImplIT {
     @Test
     public void shouldGetBpmnJsonModel() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
-        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processDefinitionId))
+        given(processRuntime.processDefinition(processDefinitionId))
                 .willReturn(mock(ProcessDefinition.class));
 
         BpmnModel bpmnModel = new BpmnModel();
@@ -278,7 +274,7 @@ public class ProcessDefinitionControllerImplIT {
     @Test
     public void shouldGetSVGProcessDiagram() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
-        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processDefinitionId))
+        given(processRuntime.processDefinition(processDefinitionId))
                 .willReturn(mock(ProcessDefinition.class));
 
         BpmnModel bpmnModel = new BpmnModel();
@@ -297,7 +293,7 @@ public class ProcessDefinitionControllerImplIT {
     @Test
     public void getProcessDiagramShouldReturnNotFoundWhenRelatedProcessDefinitionIsNotFound() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
-        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processDefinitionId))
+        given(processRuntime.processDefinition(processDefinitionId))
                 .willThrow(new ActivitiObjectNotFoundException("missing"));
 
         this.mockMvc.perform(
@@ -311,7 +307,7 @@ public class ProcessDefinitionControllerImplIT {
     @Test
     public void getProcessDiagramShouldReturnNoContentStatusWhenNoInterchangeInfo() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
-        given(securityAwareRepositoryService.getAuthorizedProcessDefinition(processDefinitionId))
+        given(processRuntime.processDefinition(processDefinitionId))
                 .willReturn(mock(ProcessDefinition.class));
 
         BpmnModel bpmnModel = new BpmnModel();

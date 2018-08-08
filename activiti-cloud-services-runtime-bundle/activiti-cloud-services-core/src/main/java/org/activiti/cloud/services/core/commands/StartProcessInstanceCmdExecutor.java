@@ -1,7 +1,6 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
-import org.activiti.runtime.api.Result;
+import org.activiti.runtime.api.ProcessAdminRuntime;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.activiti.runtime.api.model.results.ProcessInstanceResult;
@@ -12,12 +11,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class StartProcessInstanceCmdExecutor implements CommandExecutor<StartProcessPayload> {
 
-    private SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
+    private ProcessAdminRuntime processAdminRuntime;
     private MessageChannel commandResults;
 
-    public StartProcessInstanceCmdExecutor(SecurityAwareProcessInstanceService securityAwareProcessInstanceService,
+    public StartProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime,
                                            MessageChannel commandResults) {
-        this.securityAwareProcessInstanceService = securityAwareProcessInstanceService;
+        this.processAdminRuntime = processAdminRuntime;
         this.commandResults = commandResults;
     }
 
@@ -28,10 +27,10 @@ public class StartProcessInstanceCmdExecutor implements CommandExecutor<StartPro
 
     @Override
     public void execute(StartProcessPayload startProcessPayload) {
-        ProcessInstance processInstance = securityAwareProcessInstanceService.startProcess(startProcessPayload);
+        ProcessInstance processInstance = processAdminRuntime.start(startProcessPayload);
         if (processInstance != null) {
             ProcessInstanceResult result = new ProcessInstanceResult(startProcessPayload,
-                                                        processInstance);
+                                                                     processInstance);
             commandResults.send(MessageBuilder.withPayload(result).build());
         } else {
             throw new IllegalStateException("Failed to start processInstance");

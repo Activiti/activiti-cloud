@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.runtime.api.EmptyResult;
+import org.activiti.runtime.api.TaskAdminRuntime;
 import org.activiti.runtime.api.model.payloads.SetTaskVariablesPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class SetTaskVariablesCmdExecutor implements CommandExecutor<SetTaskVariablesPayload> {
 
-    private SecurityAwareTaskService securityAwareTaskService;
+    private TaskAdminRuntime taskAdminRuntime;
     private MessageChannel commandResults;
 
     @Autowired
-    public SetTaskVariablesCmdExecutor(SecurityAwareTaskService securityAwareTaskService,
+    public SetTaskVariablesCmdExecutor(TaskAdminRuntime taskAdminRuntime,
                                        MessageChannel commandResults) {
-        this.securityAwareTaskService = securityAwareTaskService;
+        this.taskAdminRuntime = taskAdminRuntime;
         this.commandResults = commandResults;
     }
 
@@ -28,7 +28,7 @@ public class SetTaskVariablesCmdExecutor implements CommandExecutor<SetTaskVaria
 
     @Override
     public void execute(SetTaskVariablesPayload setTaskVariablesPayload) {
-        securityAwareTaskService.setTaskVariables(setTaskVariablesPayload);
+        taskAdminRuntime.setVariables(setTaskVariablesPayload);
         commandResults.send(MessageBuilder.withPayload(new EmptyResult(setTaskVariablesPayload)).build());
     }
 }

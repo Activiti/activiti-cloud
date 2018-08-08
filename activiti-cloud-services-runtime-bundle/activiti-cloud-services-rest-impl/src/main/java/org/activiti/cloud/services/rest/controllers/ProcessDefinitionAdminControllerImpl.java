@@ -16,14 +16,16 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.services.core.pageable.SecurityAwareRepositoryService;
+import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionAdminController;
 import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
+import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
+import org.activiti.runtime.api.ProcessAdminRuntime;
 import org.activiti.runtime.api.model.ProcessDefinition;
+import org.activiti.runtime.api.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
@@ -37,9 +39,28 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
 
     private final ProcessDefinitionResourceAssembler resourceAssembler;
 
-    private final SecurityAwareRepositoryService securityAwareRepositoryService;
+    private final ProcessAdminRuntime processAdminRuntime;
 
     private final AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler;
+
+    private final SpringPageConverter pageConverter;
+
+    @Autowired
+    public ProcessDefinitionAdminControllerImpl(ProcessAdminRuntime processAdminRuntime,
+                                                ProcessDefinitionResourceAssembler resourceAssembler,
+                                                AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler,
+                                                SpringPageConverter pageConverter) {
+        this.processAdminRuntime = processAdminRuntime;
+        this.resourceAssembler = resourceAssembler;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.pageConverter = pageConverter;
+    }
+
+    @ExceptionHandler(ActivitiInterchangeInfoNotFoundException.class)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public String handleDiagramInterchangeInfoNotFoundException(ActivitiInterchangeInfoNotFoundException ex) {
+        return ex.getMessage();
+    }
 
     @ExceptionHandler(ActivitiObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -47,20 +68,12 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
         return ex.getMessage();
     }
 
-    @Autowired
-    public ProcessDefinitionAdminControllerImpl(ProcessDefinitionResourceAssembler resourceAssembler,
-                                                SecurityAwareRepositoryService securityAwareRepositoryService,
-                                                AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler) {
-        this.resourceAssembler = resourceAssembler;
-        this.securityAwareRepositoryService = securityAwareRepositoryService;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
-    }
-
     @Override
     public PagedResources<ProcessDefinitionResource> getAllProcessDefinitions(Pageable pageable) {
-        Page<ProcessDefinition> page = securityAwareRepositoryService.getAllProcessDefinitions(pageable);
-        return pagedResourcesAssembler.toResource(pageable, page,
-                                                  resourceAssembler);
+        Page<ProcessDefinition> page = processAdminRuntime.processDefinitions(pageConverter.toAPIPageable(pageable));
+        return pagedResourcesAssembler.toResource(pageable,
+                pageConverter.toSpringPage(pageable, page),
+                resourceAssembler);
     }
 
 }

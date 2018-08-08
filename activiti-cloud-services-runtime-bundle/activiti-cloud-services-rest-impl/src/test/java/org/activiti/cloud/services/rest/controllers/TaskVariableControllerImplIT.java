@@ -21,12 +21,12 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.runtime.api.TaskRuntime;
 import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
 import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.activiti.runtime.conf.CommonModelAutoConfiguration;
@@ -46,10 +46,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -78,7 +78,7 @@ public class TaskVariableControllerImplIT {
     private ObjectMapper mapper;
 
     @MockBean
-    private SecurityAwareTaskService securityAwareTaskService;
+    private TaskRuntime taskRuntime;
 
     @SpyBean
     private TaskVariableInstanceResourceAssembler variableInstanceResourceAssembler;
@@ -113,8 +113,8 @@ public class TaskVariableControllerImplIT {
                                                                        Integer.class.getName(),
                                                                        12,
                                                                        PROCESS_INSTANCE_ID);
-        given(securityAwareTaskService.getVariableInstances(TASK_ID)).willReturn(Arrays.asList(name,
-                                                                                               age));
+        given(taskRuntime.variables(TaskPayloadBuilder.variables().withTaskId(TASK_ID).build())).willReturn(Arrays.asList(name,
+                                                                                                                          age));
         this.mockMvc.perform(get("/v1/tasks/{taskId}/variables/",
                                  TASK_ID))
                 .andExpect(status().isOk())
@@ -137,8 +137,13 @@ public class TaskVariableControllerImplIT {
                                                                        PROCESS_INSTANCE_ID);
         age.setTaskId(TASK_ID);
 
-        given(securityAwareTaskService.getVariableInstances(TASK_ID)).willReturn(Arrays.asList(name,
-                                                                                               age));
+        given(taskRuntime.variables(
+                TaskPayloadBuilder
+                        .variables()
+                        .withTaskId(TASK_ID)
+                        .build()))
+                .willReturn(Arrays.asList(name,
+                                          age));
         this.mockMvc
                 //when
                 .perform(get("/v1/tasks/{taskId}/variables/local",
@@ -159,20 +164,22 @@ public class TaskVariableControllerImplIT {
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/set",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
 
-        verify(securityAwareTaskService).setTaskVariables(any());
+        verify(taskRuntime).setVariables(any());
     }
 
     @Test
     public void setVariablesLocalVariables() throws Exception {
         this.mockMvc.perform(post("/v1/tasks/{taskId}/variables/local",
-                                  TASK_ID).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(
-                TaskPayloadBuilder.setVariables()
-                        .withTaskId(TASK_ID)
-                        .withLocalOnly(true)
-                        .withVariables(Collections.emptyMap()).build())))
+                                  TASK_ID)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(mapper.writeValueAsString(
+                                             TaskPayloadBuilder.setVariables()
+                                                     .withTaskId(TASK_ID)
+                                                     .localOnly()
+                                                     .withVariables(Collections.emptyMap()).build())))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/set/local",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
-        verify(securityAwareTaskService).setTaskVariables(any());
+        verify(taskRuntime).setVariables(any());
     }
 }

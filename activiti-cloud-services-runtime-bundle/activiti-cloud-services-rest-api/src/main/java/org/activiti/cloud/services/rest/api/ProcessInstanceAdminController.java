@@ -1,10 +1,12 @@
 package org.activiti.cloud.services.rest.api;
 
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
+import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -13,5 +15,8 @@ public interface ProcessInstanceAdminController {
 
     @RequestMapping(method = RequestMethod.GET)
     PagedResources<ProcessInstanceResource> getAllProcessInstances(Pageable pageable);
+
+    @RequestMapping(method = RequestMethod.POST)
+    ProcessInstanceResource startProcess(@RequestBody StartProcessPayload cmd);
 
 }

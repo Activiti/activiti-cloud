@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.runtime.api.EmptyResult;
+import org.activiti.runtime.api.ProcessAdminRuntime;
 import org.activiti.runtime.api.model.payloads.SignalPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class SignalCmdExecutor implements CommandExecutor<SignalPayload> {
 
-    private SecurityAwareProcessInstanceService processInstanceService;
+    private ProcessAdminRuntime processAdminRuntime;
     private MessageChannel commandResults;
 
     @Autowired
-    public SignalCmdExecutor(SecurityAwareProcessInstanceService processInstanceService,
+    public SignalCmdExecutor(ProcessAdminRuntime processAdminRuntime,
                              MessageChannel commandResults) {
-        this.processInstanceService = processInstanceService;
+        this.processAdminRuntime = processAdminRuntime;
         this.commandResults = commandResults;
     }
 
@@ -28,7 +28,7 @@ public class SignalCmdExecutor implements CommandExecutor<SignalPayload> {
 
     @Override
     public void execute(SignalPayload signalPayload) {
-        processInstanceService.signal(signalPayload);
+        processAdminRuntime.signal(signalPayload);
         commandResults.send(MessageBuilder.withPayload(new EmptyResult(signalPayload)).build());
     }
 }

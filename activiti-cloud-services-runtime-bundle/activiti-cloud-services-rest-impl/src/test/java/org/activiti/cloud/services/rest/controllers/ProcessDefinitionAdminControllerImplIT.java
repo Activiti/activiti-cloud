@@ -16,17 +16,16 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import org.activiti.cloud.services.core.pageable.SecurityAwareRepositoryService;
+import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.runtime.api.ProcessAdminRuntime;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.impl.ProcessDefinitionImpl;
+import org.activiti.runtime.api.query.Page;
+import org.activiti.runtime.api.query.impl.PageImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,15 +36,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
@@ -54,9 +54,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.halLinks;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -71,7 +69,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
-        ServicesRestAutoConfiguration.class})
+        ServicesRestAutoConfiguration.class,
+        ServicesCoreAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 public class ProcessDefinitionAdminControllerImplIT {
 
@@ -83,7 +82,7 @@ public class ProcessDefinitionAdminControllerImplIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private SecurityAwareRepositoryService securityAwareRepositoryService;
+    private ProcessAdminRuntime processAdminRuntime;
 
     @MockBean
     private ProcessEngineChannels processEngineChannels;
@@ -101,24 +100,42 @@ public class ProcessDefinitionAdminControllerImplIT {
         processDefinition.setName("my process");
         processDefinition.setDescription("this is my process");
         processDefinition.setVersion(1);
-        List<org.activiti.runtime.api.model.ProcessDefinition> processDefinitionList = Collections.singletonList(processDefinition);
-        Page<org.activiti.runtime.api.model.ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-                                                                                                      PageRequest.of(0,
-                                                                                                                     10),
-                                                                                                      processDefinitionList.size());
-        when(securityAwareRepositoryService.getAllProcessDefinitions(any())).thenReturn(processDefinitionPage);
+        String procId = "procId";
+        String my_process = "my process";
+        String this_is_my_process = "this is my process";
+        int version = 1;
+        List<ProcessDefinition> processDefinitionList = Collections.singletonList(buildProcessDefinition(procId,
+                my_process,
+                this_is_my_process,
+                version));
+        org.activiti.runtime.api.query.Page<ProcessDefinition> processDefinitionPage = new org.activiti.runtime.api.query.impl.PageImpl<>(processDefinitionList,
+                processDefinitionList.size());
+        when(processAdminRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         this.mockMvc.perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                responseFields(subsectionWithPath("page").description("Pagination details."),
-                                               subsectionWithPath("_links").description("The hypermedia links."),
-                                               subsectionWithPath("_embedded").description("The process definitions.")),
-                                links(halLinks(),
-                                      linkWithRel("self").description("The current page."))
+                        responseFields(subsectionWithPath("page").description("Pagination details."),
+                                subsectionWithPath("_links").description("The hypermedia links."),
+                                subsectionWithPath("_embedded").description("The process definitions.")),
+                        links(halLinks(),
+                                linkWithRel("self").description("The current page."))
                 ));
     }
+
+    private ProcessDefinition buildProcessDefinition(String processDefinitionId,
+                                                     String name,
+                                                     String description,
+                                                     int version) {
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId(processDefinitionId);
+        processDefinition.setName(name);
+        processDefinition.setDescription(description);
+        processDefinition.setVersion(version);
+        return processDefinition;
+    }
+
 
     @Test
     public void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
@@ -131,19 +148,16 @@ public class ProcessDefinitionAdminControllerImplIT {
         processDefinition.setVersion(1);
 
         List<ProcessDefinition> processDefinitionList = Collections.singletonList(processDefinition);
-        PageRequest pageable = PageRequest.of(1,
-                                              10);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-                                                                       pageable,
-                                                                       11);
-        given(securityAwareRepositoryService.getAllProcessDefinitions(any())).willReturn(processDefinitionPage);
+                11);
+        given(processAdminRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
 
         //when
         MvcResult result = this.mockMvc.perform(get("/admin/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()))
+                        pageRequestParameters(),
+                        pagedResourcesResponseFields()))
                 .andReturn();
 
         //then

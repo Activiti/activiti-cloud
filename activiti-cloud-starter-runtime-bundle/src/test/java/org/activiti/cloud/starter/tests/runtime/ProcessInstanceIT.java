@@ -29,7 +29,7 @@ import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.converter.util.InputStreamProvider;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakSecurityContextClientRequestInterceptor;
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.engine.impl.util.IoUtil;
@@ -38,6 +38,8 @@ import org.activiti.runtime.api.model.CloudProcessDefinition;
 import org.activiti.runtime.api.model.CloudProcessInstance;
 import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
+import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +49,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,7 +77,7 @@ public class ProcessInstanceIT {
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
 
     @Autowired
-    private KeycloakSecurityContextClientRequestInterceptor keycloakSecurityContextClientRequestInterceptor;
+    private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -160,12 +163,22 @@ public class ProcessInstanceIT {
 
     @Test
     public void shouldStartProcessIfAdmin() {
-        //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties but admin role trumps this
+        //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
 
-        ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.startProcessByKey(SIMPLE_PROCESS,
-                null,
-                "business_key");
+        StartProcessPayload startProcess = ProcessPayloadBuilder.start()
+
+                .withProcessDefinitionKey(SIMPLE_PROCESS)
+                .withBusinessKey("business_key")
+                .build();
+
+        HttpEntity<StartProcessPayload> requestEntity = new HttpEntity<>(startProcess);
+
+        ResponseEntity<CloudProcessInstance> entity = restTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL,
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<CloudProcessInstance>() {
+                });
 
         //then
         assertThat(entity).isNotNull();
@@ -274,7 +287,7 @@ public class ProcessInstanceIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
-        //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties but admin role trumps this
+        //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
 
         //when
@@ -289,9 +302,10 @@ public class ProcessInstanceIT {
         assertThat(processInstancesPage.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(processInstancesPage.getBody().getContent()).hasSize(0);
 
-        //but testadmin should see process instances at admin endpoitn
+        //but testadmin should see process instances at admin endpoint
         //when
-        processInstancesPage = restTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + "?page=0&size=2",
+        processInstancesPage = restTemplate
+                .exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + "?page=0&size=2",
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {

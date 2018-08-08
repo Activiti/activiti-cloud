@@ -22,8 +22,10 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
+import org.activiti.runtime.api.identity.UserGroupManager;
+import org.activiti.runtime.api.security.SecurityManager;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
-import org.junit.Ignore;
+import org.activiti.spring.security.policies.ProcessSecurityPoliciesManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +43,7 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CloudConnectorsAutoConfigurationIT {
-    
+
     @Autowired
     private MQServiceTaskBehavior behavior;
 
@@ -60,6 +62,10 @@ public class CloudConnectorsAutoConfigurationIT {
     @MockBean
     private TaskService taskService;
 
+    @Test
+    public void shouldProvideMQServiceTaskBehaviorBean() {
+        assertThat(behavior).isNotNull();
+    }
 
     @EnableAutoConfiguration
     @SpringBootConfiguration
@@ -75,10 +81,20 @@ public class CloudConnectorsAutoConfigurationIT {
             return mock(RuntimeService.class);
         }
 
-    }
+        @Bean
+        public UserGroupManager userGroupManager() {
+            return mock(UserGroupManager.class);
+        }
 
-    @Test
-    public void shouldProvideMQServiceTaskBehaviorBean() {
-        assertThat(behavior).isNotNull();
+        @Bean
+        public SecurityManager securityManager() {
+            return mock(SecurityManager.class);
+        }
+
+        @Bean
+        public ProcessSecurityPoliciesManager processSecurityPoliciesManager() {
+            return mock(ProcessSecurityPoliciesManager.class);
+        }
+
     }
 }

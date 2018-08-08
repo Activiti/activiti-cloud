@@ -16,11 +16,11 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
-import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
 import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
+import org.activiti.runtime.api.ProcessRuntime;
 import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
 import org.activiti.runtime.api.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.runtime.api.model.payloads.SetProcessVariablesPayload;
@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVariableController {
 
     private final ProcessInstanceVariableResourceAssembler variableResourceAssembler;
-    private final SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
+    private final ProcessRuntime processRuntime;
     private final ResourcesAssembler resourcesAssembler;
 
     @ExceptionHandler(ActivitiForbiddenException.class)
@@ -58,41 +58,41 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
 
     @Autowired
     public ProcessInstanceVariableControllerImpl(ProcessInstanceVariableResourceAssembler variableResourceAssembler,
-                                                 SecurityAwareProcessInstanceService securityAwareProcessInstanceService,
+                                                 ProcessRuntime processRuntime,
                                                  ResourcesAssembler resourcesAssembler) {
         this.variableResourceAssembler = variableResourceAssembler;
-        this.securityAwareProcessInstanceService = securityAwareProcessInstanceService;
+        this.processRuntime = processRuntime;
         this.resourcesAssembler = resourcesAssembler;
     }
 
     @Override
     public Resources<VariableInstanceResource> getVariables(@PathVariable String processInstanceId) {
-        return resourcesAssembler.toResources(securityAwareProcessInstanceService.getVariableInstances(ProcessPayloadBuilder.variables()
-                                                                                                               .withProcessInstanceId(processInstanceId)
-                                                                                                               .build()),
+        return resourcesAssembler.toResources(processRuntime.variables(ProcessPayloadBuilder.variables()
+                                                                               .withProcessInstanceId(processInstanceId)
+                                                                               .build()),
                                               variableResourceAssembler);
     }
 
     @Override
     public Resources<VariableInstanceResource> getVariablesLocal(@PathVariable String processInstanceId) {
-        return resourcesAssembler.toResources(securityAwareProcessInstanceService.getVariableInstances(ProcessPayloadBuilder.variables()
-                                                                                                               .withProcessInstanceId(processInstanceId)
-                                                                                                               .localOnly()
-                                                                                                               .build()),
+        return resourcesAssembler.toResources(processRuntime.variables(ProcessPayloadBuilder.variables()
+                                                                               .withProcessInstanceId(processInstanceId)
+                                                                               .localOnly()
+                                                                               .build()),
                                               variableResourceAssembler);
     }
 
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
                                              @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
-        securityAwareProcessInstanceService.setProcessVariables(setProcessVariablesPayload);
+        processRuntime.setVariables(setProcessVariablesPayload);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
                                                 @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload) {
-        securityAwareProcessInstanceService.removeProcessVariables(removeProcessVariablesPayload);
+        processRuntime.removeVariables(removeProcessVariablesPayload);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

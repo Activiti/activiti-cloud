@@ -142,7 +142,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<Void> setVariablesLocal(String taskId,
                                                   Map<String, Object> variables) {
-        SetTaskVariablesPayload setTaskVariablesPayload = TaskPayloadBuilder.setVariables().withTaskId(taskId).withVariables(variables).withLocalOnly(true).build();
+        SetTaskVariablesPayload setTaskVariablesPayload = TaskPayloadBuilder.setVariables().withTaskId(taskId).withVariables(variables).localOnly().build();
 
         HttpEntity<SetTaskVariablesPayload> requestEntity = new HttpEntity<>(
                 setTaskVariablesPayload,

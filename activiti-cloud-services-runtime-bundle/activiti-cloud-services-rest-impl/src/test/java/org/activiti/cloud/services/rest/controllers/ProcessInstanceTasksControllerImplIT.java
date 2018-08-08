@@ -19,19 +19,18 @@ package org.activiti.cloud.services.rest.controllers;
 import java.util.Collections;
 import java.util.List;
 
-import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.runtime.api.TaskRuntime;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.query.Page;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -50,8 +49,9 @@ import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestP
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -79,19 +79,13 @@ public class ProcessInstanceTasksControllerImplIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private SecurityAwareTaskService securityAwareTaskService;
+    private TaskRuntime taskRuntime;
 
     @SpyBean
     private SpringPageConverter pageConverter;
 
     @MockBean
     private ProcessEngineChannels processEngineChannels;
-
-    @Mock
-    private org.activiti.runtime.api.query.Page<Task> apiPage;
-
-    @Mock
-    private org.springframework.data.domain.Page<Task> springPage;
 
     @Before
     public void setUp() {
@@ -105,7 +99,7 @@ public class ProcessInstanceTasksControllerImplIT {
         Page<Task> tasks = new PageImpl<>(taskList,
                                           taskList.size());
 
-        when(securityAwareTaskService.tasks(any(),
+        when(taskRuntime.tasks(any(),
                                             any())).thenReturn(tasks);
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks",
@@ -126,7 +120,7 @@ public class ProcessInstanceTasksControllerImplIT {
         Page<Task> taskPage = new PageImpl<>(taskList,
                                              taskList.size());
 
-        when(securityAwareTaskService.tasks(any(),
+        when(taskRuntime.tasks(any(),
                                             any())).thenReturn(taskPage);
 
         this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks?skipCount=10&maxItems=10",

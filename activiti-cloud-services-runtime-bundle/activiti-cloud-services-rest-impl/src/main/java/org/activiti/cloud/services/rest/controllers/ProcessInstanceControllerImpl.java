@@ -21,7 +21,7 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
-import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
@@ -29,10 +29,12 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.NotFoundException;
+import org.activiti.runtime.api.ProcessRuntime;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
 import org.activiti.runtime.api.model.payloads.SignalPayload;
 import org.activiti.runtime.api.model.payloads.StartProcessPayload;
+import org.activiti.runtime.api.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
@@ -58,7 +60,9 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     private final AlfrescoPagedResourcesAssembler<org.activiti.runtime.api.model.ProcessInstance> pagedResourcesAssembler;
 
-    private final SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
+    private final ProcessRuntime processRuntime;
+
+    private final SpringPageConverter pageConverter;
 
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -82,39 +86,42 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     public ProcessInstanceControllerImpl(RepositoryService repositoryService,
                                          ProcessDiagramGeneratorWrapper processDiagramGenerator,
                                          ProcessInstanceResourceAssembler resourceAssembler,
-                                         AlfrescoPagedResourcesAssembler<org.activiti.runtime.api.model.ProcessInstance> pagedResourcesAssembler,
-                                         SecurityAwareProcessInstanceService securityAwareProcessInstanceService) {
+                                         AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler,
+                                         ProcessRuntime processRuntime,
+                                         SpringPageConverter pageConverter) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
-        this.securityAwareProcessInstanceService = securityAwareProcessInstanceService;
+        this.processRuntime = processRuntime;
+        this.pageConverter = pageConverter;
     }
 
     @Override
     public PagedResources<ProcessInstanceResource> getProcessInstances(Pageable pageable) {
+        Page<ProcessInstance> processInstancePage = processRuntime.processInstances(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
-                                                  securityAwareProcessInstanceService.getAuthorizedProcessInstances(pageable),
+                                                  pageConverter.toSpringPage(pageable, processInstancePage),
                                                   resourceAssembler);
     }
 
     @Override
     public ProcessInstanceResource startProcess(@RequestBody StartProcessPayload startProcessPayload) {
-        return resourceAssembler.toResource(securityAwareProcessInstanceService.startProcess(startProcessPayload));
+        return resourceAssembler.toResource(processRuntime.start(startProcessPayload));
     }
 
     @Override
     public ProcessInstanceResource getProcessInstanceById(@PathVariable String processInstanceId) {
-        return resourceAssembler.toResource(securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(processInstanceId));
+        return resourceAssembler.toResource(processRuntime.processInstance(processInstanceId));
     }
 
     @Override
     public String getProcessDiagram(@PathVariable String processInstanceId) {
-        ProcessInstance processInstance = securityAwareProcessInstanceService.getAuthorizedProcessInstanceById(processInstanceId);
+        ProcessInstance processInstance = processRuntime.processInstance(processInstanceId);
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
         return new String(processDiagramGenerator.generateDiagram(bpmnModel,
-                                                                  securityAwareProcessInstanceService
+                                                                  processRuntime
                                                                           .processInstanceMeta(processInstance.getId())
                                                                           .getActiveActivitiesIds(),
                                                                   emptyList()),
@@ -124,24 +131,24 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     @Override
     @Transactional
     public ResponseEntity<Void> sendSignal(@RequestBody SignalPayload cmd) {
-        securityAwareProcessInstanceService.signal(cmd);
+        processRuntime.signal(cmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ProcessInstanceResource suspend(@PathVariable String processInstanceId) {
-        return resourceAssembler.toResource(securityAwareProcessInstanceService.suspend(ProcessPayloadBuilder.suspend(processInstanceId)));
+        return resourceAssembler.toResource(processRuntime.suspend(ProcessPayloadBuilder.suspend(processInstanceId)));
 
     }
 
     @Override
     public ProcessInstanceResource activate(@PathVariable String processInstanceId) {
-        return resourceAssembler.toResource(securityAwareProcessInstanceService.activate(ProcessPayloadBuilder.resume(processInstanceId)));
+        return resourceAssembler.toResource(processRuntime.resume(ProcessPayloadBuilder.resume(processInstanceId)));
     }
 
     @Override
     public ProcessInstanceResource deleteProcessInstance(@PathVariable String processInstanceId) {
-        return resourceAssembler.toResource(securityAwareProcessInstanceService.deleteProcessInstance(ProcessPayloadBuilder.delete(processInstanceId)));
+        return resourceAssembler.toResource(processRuntime.delete(ProcessPayloadBuilder.delete(processInstanceId)));
     }
 
 }

@@ -23,11 +23,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.runtime.api.ProcessRuntime;
 import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
 import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.activiti.runtime.conf.CommonModelAutoConfiguration;
@@ -49,9 +49,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -81,7 +82,7 @@ public class ProcessInstanceVariableControllerImplIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
+    private ProcessRuntime processRuntime;
 
     @Autowired
     private ObjectMapper mapper;
@@ -112,7 +113,7 @@ public class ProcessInstanceVariableControllerImplIT {
                                                                        Integer.class.getName(),
                                                                        12,
                                                                        PROCESS_INSTANCE_ID);
-        given(securityAwareProcessInstanceService.getVariableInstances(ProcessPayloadBuilder.variables()
+        given(processRuntime.variables(ProcessPayloadBuilder.variables()
                                                                                .withProcessInstanceId(PROCESS_INSTANCE_ID).build()))
                 .willReturn(Arrays.asList(name,
                                           age));
@@ -132,7 +133,7 @@ public class ProcessInstanceVariableControllerImplIT {
                                                                          100,
                                                                          PROCESS_INSTANCE_ID);
 
-        given(securityAwareProcessInstanceService.getVariableInstances(ProcessPayloadBuilder
+        given(processRuntime.variables(ProcessPayloadBuilder
                                                                                .variables()
                                                                                .withProcessInstanceId(PROCESS_INSTANCE_ID)
                                                                                .localOnly()
@@ -162,7 +163,7 @@ public class ProcessInstanceVariableControllerImplIT {
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/upsert",
                                 pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
 
-        verify(securityAwareProcessInstanceService).setProcessVariables(any());
+        verify(processRuntime).setVariables(any());
     }
 
     @Test
@@ -177,6 +178,6 @@ public class ProcessInstanceVariableControllerImplIT {
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
                                 pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
-        verify(securityAwareProcessInstanceService).removeProcessVariables(any());
+        verify(processRuntime).removeVariables(any());
     }
 }

@@ -16,11 +16,11 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskAdminController;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
+import org.activiti.runtime.api.TaskAdminRuntime;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TaskAdminControllerImpl implements TaskAdminController {
 
-    private final SecurityAwareTaskService taskService;
+    private final TaskAdminRuntime taskAdminRuntime;
 
     private final TaskResourceAssembler taskResourceAssembler;
 
@@ -40,11 +40,11 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     private final SpringPageConverter pageConverter;
 
     @Autowired
-    public TaskAdminControllerImpl(SecurityAwareTaskService taskService,
+    public TaskAdminControllerImpl(TaskAdminRuntime taskAdminRuntime,
                                    TaskResourceAssembler taskResourceAssembler,
                                    AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler,
                                    SpringPageConverter pageConverter) {
-        this.taskService = taskService;
+        this.taskAdminRuntime = taskAdminRuntime;
         this.taskResourceAssembler = taskResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.pageConverter = pageConverter;
@@ -52,7 +52,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
 
     @Override
     public PagedResources<TaskResource> getAllTasks(Pageable pageable) {
-        Page<Task> tasksPage = taskService.getAllTasks(pageConverter.toAPIPageable(pageable));
+        Page<Task> tasksPage = taskAdminRuntime.tasks(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
                                                   pageConverter.toSpringPage(pageable,
                                                                              tasksPage),

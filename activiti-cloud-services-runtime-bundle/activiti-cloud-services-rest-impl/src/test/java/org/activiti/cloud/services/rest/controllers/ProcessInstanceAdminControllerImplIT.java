@@ -19,12 +19,16 @@ package org.activiti.cloud.services.rest.controllers;
 import java.util.Collections;
 import java.util.List;
 
-import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.runtime.api.ProcessAdminRuntime;
+import org.activiti.runtime.api.ProcessRuntime;
 import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.runtime.api.query.Page;
+import org.activiti.runtime.api.query.impl.PageImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,9 +42,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -65,7 +66,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
-        ServicesRestAutoConfiguration.class})
+        ServicesRestAutoConfiguration.class,
+        ServicesCoreAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
 public class ProcessInstanceAdminControllerImplIT {
@@ -78,10 +80,10 @@ public class ProcessInstanceAdminControllerImplIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private SecurityAwareProcessInstanceService securityAwareProcessInstanceService;
+    private ProcessEngineChannels processEngineChannels;
 
     @MockBean
-    private ProcessEngineChannels processEngineChannels;
+    private ProcessAdminRuntime processAdminRuntime;
 
     @Before
     public void setUp() {
@@ -93,10 +95,8 @@ public class ProcessInstanceAdminControllerImplIT {
 
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstances = new PageImpl<>(processInstanceList,
-                                                                PageRequest.of(0,
-                                                                               10),
                                                                 processInstanceList.size());
-        when(securityAwareProcessInstanceService.getAllProcessInstances(any())).thenReturn(processInstances);
+        when(processAdminRuntime.processInstances(any())).thenReturn(processInstances);
 
         this.mockMvc.perform(get("/admin/v1/process-instances"))
                 .andExpect(status().isOk())
@@ -111,10 +111,8 @@ public class ProcessInstanceAdminControllerImplIT {
 
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList,
-                                                                   PageRequest.of(1,
-                                                                                  10),
                                                                    processInstanceList.size());
-        when(securityAwareProcessInstanceService.getAllProcessInstances(any())).thenReturn(processInstancePage);
+        when(processAdminRuntime.processInstances(any())).thenReturn(processInstancePage);
 
         this.mockMvc.perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

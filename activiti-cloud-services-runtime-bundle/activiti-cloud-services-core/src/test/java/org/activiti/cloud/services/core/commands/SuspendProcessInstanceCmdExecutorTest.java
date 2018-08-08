@@ -1,6 +1,6 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.cloud.services.core.pageable.SecurityAwareProcessInstanceService;
+import org.activiti.runtime.api.ProcessAdminRuntime;
 import org.activiti.runtime.api.Result;
 import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.payloads.SuspendProcessPayload;
@@ -12,8 +12,8 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class SuspendProcessInstanceCmdExecutorTest {
@@ -22,7 +22,7 @@ public class SuspendProcessInstanceCmdExecutorTest {
     private SuspendProcessInstanceCmdExecutor suspendProcessInstanceCmdExecutor;
 
     @Mock
-    private SecurityAwareProcessInstanceService processInstanceService;
+    private ProcessAdminRuntime processAdminRuntime;
 
     @Mock
     private MessageChannel commandResults;
@@ -42,7 +42,7 @@ public class SuspendProcessInstanceCmdExecutorTest {
         suspendProcessInstanceCmdExecutor.execute(suspendProcessInstanceCmd);
 
         //then
-        verify(processInstanceService).suspend(suspendProcessInstanceCmd);
+        verify(processAdminRuntime).suspend(suspendProcessInstanceCmd);
         verify(commandResults).send(ArgumentMatchers.<Message<Result<ProcessInstance>>>any());
     }
 }

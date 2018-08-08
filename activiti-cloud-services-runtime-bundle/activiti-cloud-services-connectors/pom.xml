@@ -109,6 +109,11 @@
       <artifactId>spring-boot-test</artifactId>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>org.activiti</groupId>
+          <artifactId>activiti-spring-security-policies</artifactId>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
   <build>
     <plugins>

@@ -17,11 +17,11 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.services.core.pageable.SecurityAwareTaskService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceTasksController;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
+import org.activiti.runtime.api.TaskRuntime;
 import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ProcessInstanceTasksControllerImpl implements ProcessInstanceTasksController {
 
-    private final SecurityAwareTaskService securityAwareTaskService;
+    private final TaskRuntime taskRuntime;
 
     private final TaskResourceAssembler taskResourceAssembler;
 
@@ -42,11 +42,11 @@ public class ProcessInstanceTasksControllerImpl implements ProcessInstanceTasksC
     private final SpringPageConverter pageConverter;
 
     @Autowired
-    public ProcessInstanceTasksControllerImpl(SecurityAwareTaskService securityAwareTaskService,
+    public ProcessInstanceTasksControllerImpl(TaskRuntime taskRuntime,
                                               TaskResourceAssembler taskResourceAssembler,
                                               AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler,
                                               SpringPageConverter pageConverter) {
-        this.securityAwareTaskService = securityAwareTaskService;
+        this.taskRuntime = taskRuntime;
         this.taskResourceAssembler = taskResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.pageConverter = pageConverter;
@@ -55,7 +55,7 @@ public class ProcessInstanceTasksControllerImpl implements ProcessInstanceTasksC
     @Override
     public PagedResources<TaskResource> getTasks(@PathVariable String processInstanceId,
                                                  Pageable pageable) {
-        org.activiti.runtime.api.query.Page<Task> page = securityAwareTaskService.tasks(pageConverter.toAPIPageable(pageable),
+        org.activiti.runtime.api.query.Page<Task> page = taskRuntime.tasks(pageConverter.toAPIPageable(pageable),
                                                                                         TaskPayloadBuilder.tasks()
                                                                                                 .withProcessInstanceId(processInstanceId)
                                                                                                 .build());
