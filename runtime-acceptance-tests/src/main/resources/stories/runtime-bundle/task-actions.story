@@ -10,7 +10,7 @@ Given the user is authenticated as an hruser
 When the user starts a process with variables
 And the user claims a task
 And the user completes the task
-Then the status of the process is changed to completed
+Then the status of the process and tasks is changed to completed
 
 Scenario: create a standalone task
 Given the user is authenticated as a testuser

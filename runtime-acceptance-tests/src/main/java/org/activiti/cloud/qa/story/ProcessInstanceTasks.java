@@ -33,6 +33,8 @@ import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+
+import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
 import static org.assertj.core.api.Assertions.*;
@@ -61,8 +63,8 @@ public class ProcessInstanceTasks {
         querySteps.checkServicesHealth();
     }
 
-    @When("the user starts process '$process'")
-    public void startProcess(String process) throws Exception {
+    @When("the user starts process '$process' with tasks")
+    public void startProcessWithTasks(String process) throws Exception {
 
         processInstance = runtimeBundleSteps.startProcess(process);
 
@@ -79,24 +81,34 @@ public class ProcessInstanceTasks {
 
     }
 
+    @When("the user starts process '$process'")
+    public void startProcess(String process) throws Exception {
+
+        processInstance = runtimeBundleSteps.startProcess(process);
+
+        assertThat(processInstance).isNotNull();
+        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
+
+    }
+
     @When("the user starts a simple process")
     public void startSimpleProcess() throws Exception {
-        this.startProcess(SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY);
+        this.startProcessWithTasks(SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY);
     }
 
     @When("the user starts a process with variables")
     public void startProcessWithVariables() throws Exception {
-        this.startProcess(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
+        this.startProcessWithTasks(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
     }
 
     @When("the user starts a connector process")
     public void startConnectorProcess() throws Exception {
-        this.startProcess(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
+        this.startProcess(CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY);
     }
 
     @When("the user starts a process without graphic info")
     public void startProcessWithoutGraphicInfo() throws Exception {
-        this.startProcess("fixSystemFailure");
+        this.startProcessWithTasks("fixSystemFailure");
     }
 
     @When("the user claims a task")
@@ -110,8 +122,8 @@ public class ProcessInstanceTasks {
         runtimeBundleSteps.completeTask(currentTask.getId());
     }
 
-    @Then("the status of the process is changed to completed")
-    public void verifyProcessStatus() throws Exception {
+    @Then("the status of the process and tasks is changed to completed")
+    public void verifyProcessAndTasksStatus() throws Exception {
 
         querySteps.checkProcessInstanceStatus(processInstance.getId(),
                                               ProcessInstance.ProcessInstanceStatus.COMPLETED);
@@ -120,7 +132,15 @@ public class ProcessInstanceTasks {
                                                  TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
     }
 
-    @Then("a variable was created with name '$variableName'")
+    @Then("the status of the process is changed to completed")
+    public void verifyProcessStatus() throws Exception {
+
+        querySteps.checkProcessInstanceStatus(processInstance.getId(),
+                ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        auditSteps.checkProcessInstanceEvent(processInstance.getId(), ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED);
+    }
+
+    @Then("a variable was created with name $variableName")
     public void verifyVariableCreated(String variableName) throws Exception {
 
         querySteps.checkProcessInstanceHasVariable(processInstance.getId(),variableName);
