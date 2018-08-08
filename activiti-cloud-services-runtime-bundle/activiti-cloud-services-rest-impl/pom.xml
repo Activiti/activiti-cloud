@@ -24,6 +24,14 @@
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
+      <artifactId>activiti-process-runtime-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-task-runtime-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-common-runtime-api</artifactId>
     </dependency>
     <dependency>
