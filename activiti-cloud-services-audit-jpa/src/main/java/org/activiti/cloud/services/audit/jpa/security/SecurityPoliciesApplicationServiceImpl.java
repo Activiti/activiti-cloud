@@ -4,9 +4,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
+import org.activiti.runtime.api.identity.UserGroupManager;
+import org.activiti.runtime.api.security.SecurityManager;
 import org.activiti.spring.security.policies.BaseSecurityPoliciesManagerImpl;
 import org.activiti.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.spring.security.policies.SecurityPolicyAccess;
+import org.activiti.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -17,6 +20,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPoliciesManagerImpl implements SecurityPoliciesManager {
 
+
+    public SecurityPoliciesApplicationServiceImpl(UserGroupManager userGroupManager, SecurityManager securityManager, SecurityPoliciesProperties securityPoliciesProperties) {
+        super(userGroupManager, securityManager, securityPoliciesProperties);
+    }
 
     /*
      * Apply Filters for Security Policies (configured in application.properties
