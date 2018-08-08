@@ -16,6 +16,10 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-audit-jpa</artifactId>
     </dependency>
     <dependency>
@@ -173,8 +177,8 @@
         <configuration>
           <images>
             <image>
-              <name>activiti/activiti-cloud-sso-idm</name>
-              <alias>activiti-cloud-sso-idm</alias>
+              <name>activiti/activiti-keycloak</name>
+              <alias>activiti-keycloak</alias>
               <run>
                 <ports>
                   <port>8180:8180</port>

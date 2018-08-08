@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.starter.audit.tests.it;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +23,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -36,7 +36,6 @@ import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 
@@ -47,8 +46,14 @@ public class EventsRestTemplate {
 
     private static final String RELATIVE_EVENTS_ENDPOINT = "/v1/events";
 
-    @Autowired
     private ObjectMapper mapper;
+
+    private KeycloakTokenProducer keycloakTokenProducer;
+
+    public EventsRestTemplate(ObjectMapper mapper, KeycloakTokenProducer keycloakTokenProducer) {
+        this.mapper = mapper;
+        this.keycloakTokenProducer = keycloakTokenProducer;
+    }
 
     @Bean
     public RestTemplateBuilder restTemplateBuilder(List<Module> modules) {
@@ -74,7 +79,7 @@ public class EventsRestTemplate {
     public ResponseEntity<PagedResources<CloudRuntimeEvent>> executeFindAll() {
         ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(RELATIVE_EVENTS_ENDPOINT,
                                                                                                  HttpMethod.GET,
-                                                                                                 null,
+                                                                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                  new ParameterizedTypeReference<PagedResources<CloudRuntimeEvent>>() {
                                                                                                  });
         assertThat(eventsResponse).hasStatusCode(HttpStatus.OK);
@@ -94,7 +99,7 @@ public class EventsRestTemplate {
 
         ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(endPointBuilder.toString(),
                                                                                                  HttpMethod.GET,
-                                                                                                 null,
+                                                                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                  new ParameterizedTypeReference<PagedResources<CloudRuntimeEvent>>() {
                                                                                                  },
                                                                                                  filters);
@@ -105,7 +110,7 @@ public class EventsRestTemplate {
     public ResponseEntity<CloudRuntimeEvent> executeFindById(String id) {
         ResponseEntity<CloudRuntimeEvent> responseEntity = restTemplate.exchange(RELATIVE_EVENTS_ENDPOINT + "/" + id,
                                                                                  HttpMethod.GET,
-                                                                                 null,
+                                                                                keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                  new ParameterizedTypeReference<CloudRuntimeEvent>() {
                                                                                  });
         assertThat(responseEntity).hasStatusCode(HttpStatus.OK);

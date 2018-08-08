@@ -21,33 +21,40 @@ import java.util.List;
 import java.util.Optional;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.events.ActivityStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.runtime.api.event.ProcessRuntimeEvent;
+import org.activiti.runtime.api.identity.UserGroupManager;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
+import org.activiti.runtime.api.security.SecurityManager;
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -59,7 +66,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@WebMvcTest(AuditEventsControllerImpl.class)
+@EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 public class AuditEventsControllerImplIT {
@@ -72,6 +80,17 @@ public class AuditEventsControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private SecurityManager securityManager;
+
+    @MockBean
+    private UserGroupManager userGroupManager;
+
+    @Before
+    public void setUp() throws Exception {
+        when(securityManager.getAuthenticatedUserId()).thenReturn("user");
+    }
 
     @Test
     public void getEvents() throws Exception {
@@ -228,6 +247,13 @@ public class AuditEventsControllerImplIT {
                                         subsectionWithPath("_links").description("<<resources-index-links,Links>> to other resources"),
                                         subsectionWithPath("timestamp").description("The event timestamp"),
                                         subsectionWithPath("eventType").description("The event type"),
+                                        subsectionWithPath("appName").description("The application name"),
+                                        subsectionWithPath("serviceFullName").description("The full service name"),
+                                        subsectionWithPath("appVersion").description("The application version"),
+                                        subsectionWithPath("serviceVersion").description("The version of the service"),
+                                        subsectionWithPath("serviceType").description("The type of the service"),
+                                        subsectionWithPath("nestedProcessDefinitionId").description("Nested process definition id"),
+                                        subsectionWithPath("nestedProcessInstanceId").description("Nested process instance id"),
                                         subsectionWithPath("serviceName").description("The service name"),
                                         subsectionWithPath("entityId").description("the entity idCloudProcessSuspendedEventImpl"),
                                         subsectionWithPath("entity").description("the process instance entity"),

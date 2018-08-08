@@ -4,10 +4,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.security.BaseSecurityPoliciesApplicationService;
-import org.activiti.cloud.services.security.SecurityPoliciesService;
-import org.activiti.cloud.services.security.SecurityPolicy;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.activiti.runtime.api.identity.UserGroupManager;
+import org.activiti.runtime.api.security.SecurityManager;
+import org.activiti.spring.security.policies.BaseSecurityPoliciesManagerImpl;
+import org.activiti.spring.security.policies.SecurityPoliciesManager;
+import org.activiti.spring.security.policies.SecurityPolicyAccess;
+import org.activiti.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +17,15 @@ import org.springframework.stereotype.Component;
  * Applies security policies (defined into the application.properties file) to event data
  */
 @Component
-public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesApplicationService {
+public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPoliciesManagerImpl implements SecurityPoliciesManager {
 
-    @Autowired
-    private SecurityPoliciesService securityPoliciesService;
+    public SecurityPoliciesApplicationServiceImpl(UserGroupManager userGroupManager,
+                                                  SecurityManager securityManager,
+                                                  SecurityPoliciesProperties securityPoliciesProperties) {
+        super(userGroupManager,
+              securityManager,
+              securityPoliciesProperties);
+    }
 
     /*
      * Apply Filters for Security Policies (configured in application.properties
@@ -34,32 +41,42 @@ public class SecurityPoliciesApplicationService extends BaseSecurityPoliciesAppl
      *    - Add Impossible filter so the user doesn't get any data
      */
     public Specification<AuditEventEntity> createSpecWithSecurity(Specification<AuditEventEntity> spec,
-                                                                  SecurityPolicy securityPolicy) {
-        if(spec == null){
+                                                                  SecurityPolicyAccess securityPolicy) {
+        if (spec == null) {
             spec = new AlwaysTrueSpecification();
         }
-        if (noSecurityPoliciesOrNoUser()) {
+        if (!arePoliciesDefined()) {
             return spec;
         }
-        Map<String, Set<String>> restrictions = definitionKeysAllowedForPolicy(securityPolicy);
+        Map<String, Set<String>> restrictions = getAllowedKeys(securityPolicy);
 
         for (String serviceName : restrictions.keySet()) {
 
             Set<String> defKeys = restrictions.get(serviceName);
             //will filter by app name and will also filter by definition keys if no wildcard,
-            if (defKeys != null && !defKeys.contains(securityPoliciesService.getWildcard())) {
+            if (defKeys != null && defKeys.size() > 0 && !defKeys.contains(securityPoliciesProperties.getWildcard())) {
                 return spec.and(new ApplicationProcessDefSecuritySpecification(serviceName,
                                                                                defKeys));
-            } else {  //will filter by app name if wildcard is set
+            } else if (defKeys != null && defKeys.contains(securityPoliciesProperties.getWildcard())) {  //will filter by app name if wildcard is set
                 return spec.and(new ApplicationSecuritySpecification(serviceName));
             }
         }
         //policies are defined but none are applicable
-        if (securityPoliciesService.policiesDefined()) {
+        if (arePoliciesDefined()) {
             //user should not see anything so give unsatisfiable condition
             return spec.and(new ImpossibleSpecification());
         }
 
         return spec;
+    }
+
+    public boolean canWrite(String processDefinitionKey) {
+        //should always use canWrite(processDefinitionKey, appName)
+        return false;
+    }
+
+    public boolean canRead(String processDefinitionKey) {
+        //should always use canRead(processDefinitionKey, appName)
+        return false;
     }
 }

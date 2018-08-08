@@ -3,10 +3,10 @@ package org.activiti.cloud.services.audit.jpa.security;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.activiti.cloud.services.common.security.SpringSecurityAuthenticationWrapper;
 
-import org.activiti.cloud.services.security.*;
-import org.activiti.runtime.api.identity.IdentityLookup;
+import org.activiti.runtime.api.identity.UserGroupManager;
+import org.activiti.runtime.api.security.SecurityManager;
+import org.activiti.spring.security.policies.SecurityPolicyAccess;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,6 @@ import java.util.Iterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestPropertySource("classpath:test-application.properties")
@@ -40,13 +39,13 @@ public class RestrictEventQueryIT {
     private EventsRepository eventsRepository;
 
     @Autowired
-    private SecurityPoliciesApplicationService securityPoliciesApplicationService;
+    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     @MockBean
-    private SpringSecurityAuthenticationWrapper authenticationWrapper;
+    private SecurityManager securityManager;
 
     @MockBean
-    private IdentityLookup identityLookup;
+    private UserGroupManager userGroupManager;
 
 
     @Test
@@ -59,10 +58,10 @@ public class RestrictEventQueryIT {
 
         eventsRepository.save(eventEntity);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
         Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicy.READ);
+                SecurityPolicyAccess.READ);
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
         assertThat(iterable.iterator().hasNext()).isTrue();
@@ -79,10 +78,10 @@ public class RestrictEventQueryIT {
 
         eventsRepository.save(eventEntity);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
 
         Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicy.READ);
+                SecurityPolicyAccess.READ);
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
 
@@ -100,11 +99,11 @@ public class RestrictEventQueryIT {
 
         eventsRepository.save(eventEntity);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("bobinhr");
-        when(identityLookup.getGroupsForCandidateUser("bobinhr")).thenReturn(Collections.singletonList("hRgRoUp"));
+        when(securityManager.getAuthenticatedUserId()).thenReturn("bobinhr");
+        when(userGroupManager.getUserGroups("bobinhr")).thenReturn(Collections.singletonList("hrgroup"));
 
         Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicy.READ);
+                SecurityPolicyAccess.READ);
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
         assertThat(iterable.iterator().hasNext()).isTrue();
@@ -120,10 +119,10 @@ public class RestrictEventQueryIT {
 
         eventsRepository.save(eventEntity);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
         Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicy.READ);
+                SecurityPolicyAccess.READ);
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
 
@@ -156,10 +155,10 @@ public class RestrictEventQueryIT {
 
         assertThat(eventsRepository.count()).isGreaterThanOrEqualTo(2);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("testuser");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
         Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicy.READ);
+                SecurityPolicyAccess.READ);
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
 
@@ -176,10 +175,10 @@ public class RestrictEventQueryIT {
     @Test
     public void shouldNotGetProcessInstancesWhenNotPermitted() throws Exception {
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("intruder");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("intruder");
 
         Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicy.READ);
+                SecurityPolicyAccess.READ);
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
         assertThat(iterable.iterator().hasNext()).isFalse();
@@ -196,9 +195,9 @@ public class RestrictEventQueryIT {
 
         eventsRepository.save(eventEntity);
 
-        when(authenticationWrapper.getAuthenticatedUserId()).thenReturn("hruser");
+        when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
         Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicy.READ);
+                SecurityPolicyAccess.READ);
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
 
