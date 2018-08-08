@@ -1,11 +1,6 @@
 package org.activiti.cloud.services.identity.keycloak.config;
 
-import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
-import org.activiti.cloud.services.identity.keycloak.KeycloakAuthorizationLookup;
-import org.activiti.cloud.services.identity.keycloak.KeycloakIdentityLookup;
-import org.activiti.cloud.services.identity.keycloak.KeycloakInstanceWrapper;
-import org.activiti.cloud.services.identity.keycloak.KeycloakLookupService;
-import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
+import org.activiti.cloud.services.identity.keycloak.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,21 +18,12 @@ public class ActivitiKeycloakAutoConfiguration {
         return new KeycloakInstanceWrapper();
     }
 
-    @Bean
-    @ConditionalOnMissingBean(KeycloakLookupService.class)
-    public KeycloakLookupService keycloakLookupService() {
-        return new KeycloakLookupService();
-    }
+
 
     @Bean
-    @ConditionalOnMissingBean(KeycloakIdentityLookup.class)
-    public KeycloakIdentityLookup keycloakIdentityLookup(KeycloakLookupService keycloakLookupService) {
-        return new KeycloakIdentityLookup(keycloakLookupService);
+    @ConditionalOnMissingBean(KeycloakUserGroupManager.class)
+    public KeycloakUserGroupManager keycloakUserGroupManager(KeycloakInstanceWrapper keycloakInstanceWrapper) {
+        return new KeycloakUserGroupManager(keycloakInstanceWrapper);
     }
 
-    @Bean
-    @ConditionalOnMissingBean(KeycloakAuthorizationLookup.class)
-    public KeycloakAuthorizationLookup keycloakAuthorizationLookup(KeycloakLookupService keycloakLookupService) {
-        return new KeycloakAuthorizationLookup(keycloakLookupService);
-    }
 }

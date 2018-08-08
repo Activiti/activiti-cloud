@@ -54,6 +54,17 @@ public class TaskEventContainedBuilder {
         return task;
     }
 
+    public Task aCreatedStandaloneAssignedTaskWithParent(String taskName, String username) {
+        Task task = buildTask(taskName,
+                Task.TaskStatus.CREATED,
+                null);
+        ((TaskImpl) task).setParentTaskId(UUID.randomUUID().toString());
+        ((TaskImpl) task).setAssignee(username);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+                new CloudTaskAssignedEventImpl(task));
+        return task;
+    }
+
     public Task anAssignedTask(String taskName,
                                String username,
                                ProcessInstance processInstance) {
@@ -64,6 +75,20 @@ public class TaskEventContainedBuilder {
 
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
                                    new CloudTaskAssignedEventImpl(task));
+        return task;
+    }
+
+    public Task anAssignedTaskWithParent(String taskName,
+                               String username,
+                               ProcessInstance processInstance) {
+        TaskImpl task = buildTask(taskName,
+                Task.TaskStatus.ASSIGNED,
+                processInstance);
+        task.setAssignee(username);
+        ((TaskImpl) task).setParentTaskId(UUID.randomUUID().toString());
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+                new CloudTaskAssignedEventImpl(task));
         return task;
     }
 

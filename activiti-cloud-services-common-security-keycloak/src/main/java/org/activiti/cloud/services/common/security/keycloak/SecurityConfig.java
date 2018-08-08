@@ -1,4 +1,4 @@
-/*
+package org.activiti.cloud.services.common.security.keycloak;/*
  * Copyright 2017 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.activiti.cloud.services.identity.keycloak.config;
 
 
 import org.keycloak.adapters.KeycloakConfigResolver;
