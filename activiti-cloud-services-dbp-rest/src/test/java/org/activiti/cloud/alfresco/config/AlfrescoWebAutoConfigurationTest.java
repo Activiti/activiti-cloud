@@ -36,10 +36,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class AlfrescoWebConfigurerTest {
+public class AlfrescoWebAutoConfigurationTest {
 
     @InjectMocks
-    private AlfrescoWebConfigurer configurer;
+    private AlfrescoWebAutoConfiguration configurer;
 
     @Mock
     private AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver;

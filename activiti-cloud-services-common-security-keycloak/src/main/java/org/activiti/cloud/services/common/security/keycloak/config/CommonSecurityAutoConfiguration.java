@@ -1,4 +1,4 @@
-package org.activiti.cloud.services.common.security.keycloak;/*
+package org.activiti.cloud.services.common.security.keycloak.config;/*
  * Copyright 2017 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +38,7 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 @EnableWebSecurity
 @ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
 @ConditionalOnMissingBean(value = {KeycloakConfigResolver.class, SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
-public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
+public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigurerAdapter {
 
     /**
      * Registers the KeycloakAuthenticationProvider with the authentication manager.

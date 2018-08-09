@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
@@ -29,12 +30,13 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@ComponentScan(basePackages = "org.activiti.cloud.alfresco")
 @PropertySource("classpath:config/alfresco-rest-config.properties")
-public class AlfrescoWebConfigurer implements WebMvcConfigurer {
+public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
 
     private final AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver;
 
-    public AlfrescoWebConfigurer(AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver) {
+    public AlfrescoWebAutoConfiguration(AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver) {
         this.alfrescoPageArgumentMethodResolver = alfrescoPageArgumentMethodResolver;
     }
 
