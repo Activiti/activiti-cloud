@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-query-service-parent</artifactId>
-    <version>7-201803-EA-SNAPSHOT</version>
+    <version>7.0.0.Beta1</version>
   </parent>
   <artifactId>activiti-cloud-services-query</artifactId>
   <name>Activiti Cloud Query :: Services :: Parent</name>
