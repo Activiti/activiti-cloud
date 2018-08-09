@@ -22,7 +22,7 @@
   <parent>
     <artifactId>activiti-cloud-services-org</artifactId>
     <groupId>org.activiti.cloud</groupId>
-    <version>7-201803-EA-SNAPSHOT</version>
+    <version>7.0.0.Beta1</version>
   </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-services-org-api</artifactId>
