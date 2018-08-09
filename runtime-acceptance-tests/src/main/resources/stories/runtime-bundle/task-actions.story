@@ -6,7 +6,7 @@ I want to perform an operation on tasks
 So that I can get results on a running process
 
 Scenario: claim and complete tasks in a running process
-Given the user is authenticated as an hruser
+Given the user is authenticated as a testuser
 When the user starts a process with variables
 And the user claims a task
 And the user completes the task
