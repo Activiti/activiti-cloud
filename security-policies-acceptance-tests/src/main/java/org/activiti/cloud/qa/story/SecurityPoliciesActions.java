@@ -51,7 +51,7 @@ public class SecurityPoliciesActions {
         try {
             runtimeBundleSteps.startProcess(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
         }catch (FeignException exception){
-            assertThat(exception.getMessage()).contains("Operation not permitted for ProcessWithVariables");
+            assertThat(exception.getMessage()).contains("Unable to find process definition for the given");
         }
     }
 
