@@ -16,15 +16,16 @@
 
 package org.activiti.cloud.services.organization.mock;
 
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.core.model.ModelReference;
+import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
-import static org.activiti.cloud.organization.core.rest.context.RestContextProvider.FORM_MODEL_URL;
-import static org.activiti.cloud.organization.core.rest.context.RestContextProvider.PROCESS_MODEL_URL;
-import static org.activiti.cloud.services.organization.config.RepositoryRestConfig.API_VERSION;
+import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -38,6 +39,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * Mock rest server for Model resources
  */
 public class MockModelRestServiceServer {
+
+    private static final String LOCALHOST = "http://localhost:8088";
 
     private final MockRestServiceServer mockRestServer;
 
@@ -61,7 +64,7 @@ public class MockModelRestServiceServer {
     public MockModelRestServiceServer expectFormModelCreation() {
         mockRestServer
                 .expect(requestToUriTemplate("{url}{version}/forms",
-                                             FORM_MODEL_URL,
+                                             LOCALHOST,
                                              API_VERSION))
                 .andExpect(method(POST))
                 .andRespond(withStatus(CREATED));
@@ -75,7 +78,7 @@ public class MockModelRestServiceServer {
     public MockModelRestServiceServer expectProcessModelCreation() {
         mockRestServer
                 .expect(requestToUriTemplate("{url}{version}/process-models",
-                                             PROCESS_MODEL_URL,
+                                             LOCALHOST,
                                              API_VERSION))
                 .andExpect(method(POST))
                 .andRespond(withStatus(CREATED));
@@ -89,7 +92,7 @@ public class MockModelRestServiceServer {
     public MockModelRestServiceServer expectFormModelRequest(ModelReference expectedFormModel) throws JsonProcessingException {
         mockRestServer
                 .expect(requestToUriTemplate("{url}{version}/forms/{formId}",
-                                             FORM_MODEL_URL,
+                                             LOCALHOST,
                                              API_VERSION,
                                              expectedFormModel.getModelId()))
                 .andExpect(method(GET))
@@ -105,12 +108,27 @@ public class MockModelRestServiceServer {
     public MockModelRestServiceServer expectProcessModelRequest(ModelReference expectedProcessModel) throws JsonProcessingException {
         mockRestServer
                 .expect(requestToUriTemplate("{url}{version}/process-models/{formId}",
-                                             PROCESS_MODEL_URL,
+                                             LOCALHOST,
                                              API_VERSION,
                                              expectedProcessModel.getModelId()))
                 .andExpect(method(GET))
                 .andRespond(withSuccess(new ObjectMapper().writeValueAsString(expectedProcessModel),
                                         APPLICATION_JSON));
         return this;
+    }
+
+    /**
+     * Expect a certain process-model to be validated
+     * @param validationErrorRepresentations
+     * @throws JsonProcessingException
+     */
+    public void expectProcessModelValidation(List<ValidationErrorRepresentation> validationErrorRepresentations) throws JsonProcessingException {
+        mockRestServer
+                .expect(requestToUriTemplate("{url}{version}/process-models/validate",
+                                             LOCALHOST,
+                                             API_VERSION))
+                .andExpect(method(POST))
+                .andRespond(withSuccess(new ObjectMapper().writeValueAsString(validationErrorRepresentations),
+                                        APPLICATION_JSON));
     }
 }

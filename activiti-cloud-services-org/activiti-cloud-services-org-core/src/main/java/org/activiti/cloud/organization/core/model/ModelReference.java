@@ -16,14 +16,23 @@
 
 package org.activiti.cloud.organization.core.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 /**
  * Common model data.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(NON_NULL)
 public class ModelReference {
 
     private String modelId;
 
     private String name;
+
+    private String contentType;
 
     private String content;
 
@@ -61,6 +70,14 @@ public class ModelReference {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public String getVersion() {

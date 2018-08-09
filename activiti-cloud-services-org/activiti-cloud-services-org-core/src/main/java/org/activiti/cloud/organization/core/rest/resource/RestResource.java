@@ -21,8 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.activiti.cloud.organization.core.rest.context.RestContext;
-
 /**
  * Rest resource annotation.
  */
@@ -30,16 +28,10 @@ import org.activiti.cloud.organization.core.rest.context.RestContext;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RestResource {
 
-    RestContext context() default RestContext.ACTIVITI;
-
-    String path() default "";
-
     String resourceIdField() default "";
 
     String resourceKeyField() default "";
 
     String targetField() default "";
-
-    String resourceRel() default "";
 
 }
