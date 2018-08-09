@@ -19,12 +19,9 @@ package org.activiti.cloud.query;
 import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableActivitiQuery
-@ComponentScan(basePackages = {"org.activiti.cloud.services.common.security",
-        "org.activiti.spring.security.policies"})
 public class QueryApplication {
 
     public static void main(String[] args) {
