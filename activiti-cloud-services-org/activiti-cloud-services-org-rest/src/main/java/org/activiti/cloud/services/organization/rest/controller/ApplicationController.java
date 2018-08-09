@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
-import static org.activiti.cloud.services.organization.swagger.SwaggerConfiguration.ATTACHEMNT_API_PARAM_DESCRIPTION;
 
 /**
  * Controller for {@link Application} resources
@@ -72,23 +71,23 @@ public class ApplicationController implements ApplicationRestApi {
 
     @Override
     public Resource<Application> getApplication(
-            @ApiParam("The id of the application to retrieve")
+            @ApiParam(GET_APPLICATIN_ID_PARAM_DESCR)
             @PathVariable String applicationId) {
         return resourceAssembler.toResource(findApplicationById(applicationId));
     }
 
     @Override
     public Resource<Application> createApplication(
-            @ApiParam("The details of the application to create")
+            @ApiParam(CREATE_APPLICATION_PARAM_DESCR)
             @RequestBody Application application) {
         return resourceAssembler.toResource(applicationService.createApplication(application));
     }
 
     @Override
     public Resource<Application> updateApplication(
-            @ApiParam("The id of the application to update")
+            @ApiParam(UPDATE_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam("The new values to update")
+            @ApiParam(UPDATE_APPLICATION_PARAM_DESCR)
             @RequestBody Application application) {
         Application applicationToUpdate = findApplicationById(applicationId);
         return resourceAssembler.toResource(applicationService.updateApplication(applicationToUpdate,
@@ -97,25 +96,25 @@ public class ApplicationController implements ApplicationRestApi {
 
     @Override
     public void deleteApplication(
-            @ApiParam("The id of the application to delete")
+            @ApiParam(DELETE_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId) {
         applicationService.deleteApplication(findApplicationById(applicationId));
     }
 
     @Override
     public Resource<Application> importApplication(
-            @ApiParam("The file containing the zipped application")
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @ApiParam(IMPORT_APPLICATION_FILE_PARAM_DESCR)
+            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
         return resourceAssembler.toResource(applicationService.importApplication(file));
     }
 
     @Override
     public void exportApplication(
             HttpServletResponse response,
-            @ApiParam("The id of the application to export")
+            @ApiParam(EXPORT_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam(ATTACHEMNT_API_PARAM_DESCRIPTION)
-            @RequestParam(name = "attachment",
+            @ApiParam(ATTACHEMNT_API_PARAM_DESCR)
+            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException {
         Application application = findApplicationById(applicationId);

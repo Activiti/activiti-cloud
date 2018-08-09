@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -31,37 +32,28 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class Jackson2EntityConfiguration {
 
-    private final JsonDeserializer<Application> applicationDeserializer;
-
-    private final JsonDeserializer<Model> modelDeserializer;
-
-    @Autowired
-    public Jackson2EntityConfiguration(JsonDeserializer<Application> applicationDeserializer,
-                                       JsonDeserializer<Model> modelDeserializer) {
-        this.applicationDeserializer = applicationDeserializer;
-        this.modelDeserializer = modelDeserializer;
-    }
-
     @Bean
-    public Jackson2ObjectMapperBuilderCustomizer addApplicationDeserializer() {
+    public Jackson2ObjectMapperBuilderCustomizer addApplicationDeserializer(
+            @Qualifier("applicationDeserializer") JsonDeserializer<Application> applicationDeserializer) {
         return builder -> builder.deserializerByType(Application.class,
                                                      applicationDeserializer);
     }
 
     @Bean
-    public Jackson2ObjectMapperBuilderCustomizer addModelDeserializer() {
+    public Jackson2ObjectMapperBuilderCustomizer addModelDeserializer(
+            @Qualifier("modelDeserializer") JsonDeserializer<Model> modelDeserializer) {
         return builder -> builder.deserializerByType(Model.class,
                                                      modelDeserializer);
     }
 
-    @Bean
-    @ConditionalOnMissingBean
+    @Bean("applicationDeserializer")
+    @ConditionalOnMissingBean(name = "applicationDeserializer")
     public JsonDeserializer<Application> applicationDeserializer() {
         return new ApplicationDeserializer();
     }
 
-    @Bean
-    @ConditionalOnMissingBean
+    @Bean("modelDeserializer")
+    @ConditionalOnMissingBean(name = "modelDeserializer")
     public JsonDeserializer<Model> modelDeserializer() {
         return new ModelDeserializer();
     }

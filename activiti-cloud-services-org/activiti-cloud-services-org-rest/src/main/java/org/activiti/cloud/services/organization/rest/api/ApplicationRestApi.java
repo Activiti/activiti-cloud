@@ -23,6 +23,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.impl.ApplicationImpl;
 import org.activiti.cloud.services.organization.rest.config.ApiAlfrescoPageableApi;
 import org.activiti.cloud.services.organization.swagger.SwaggerConfiguration.AlfrescoApplicationPage;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +43,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import static org.activiti.cloud.services.organization.rest.api.ApplicationRestApi.APPLICATIONS;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
-import static org.activiti.cloud.services.organization.swagger.SwaggerConfiguration.ATTACHEMNT_API_PARAM_DESCRIPTION;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -58,6 +58,29 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 public interface ApplicationRestApi {
 
     String APPLICATIONS = "applications";
+
+    String GET_APPLICATIN_ID_PARAM_DESCR = "The id of the application to retrieve";
+
+    String CREATE_APPLICATION_PARAM_DESCR = "The details of the application to create";
+
+    String UPDATE_APPLICATION_ID_PARAM_DESCR = "The id of the application to update";
+
+    String UPDATE_APPLICATION_PARAM_DESCR = "The new values to update";
+
+    String DELETE_APPLICATION_ID_PARAM_DESCR = "The id of the application to delete";
+
+    String IMPORT_APPLICATION_FILE_PARAM_DESCR = "The file containing the zipped application";
+
+    String EXPORT_APPLICATION_ID_PARAM_DESCR = "The id of the application to export";
+
+    String ATTACHEMNT_API_PARAM_DESCR =
+            "<b>true</b> value enables a web browser to download the file as an attachment.<br> " +
+                    "<b>false</b> means that a web browser may preview the file in a new tab or window, " +
+                    "but not download the file.";
+
+    String UPLOAD_FILE_PARAM_NAME = "file";
+
+    String EXPORT_AS_ATTACHMENT_PARAM_NAME = "attachment";
 
     @ApiOperation(
             tags = APPLICATIONS,
@@ -84,30 +107,32 @@ public interface ApplicationRestApi {
 
     @ApiOperation(
             tags = APPLICATIONS,
-            value = "Create new application")
+            value = "Create new application",
+            response = ApplicationImpl.class)
     @PostMapping(path = "/applications")
     @ResponseStatus(CREATED)
     Resource<Application> createApplication(
-            @ApiParam("The details of the application to create")
+            @ApiParam(CREATE_APPLICATION_PARAM_DESCR)
             @RequestBody Application application);
 
     @ApiOperation(
             tags = APPLICATIONS,
             value = "Get application",
-            response = Application.class)
+            response = ApplicationImpl.class)
     @GetMapping(path = "/applications/{applicationId}")
     Resource<Application> getApplication(
-            @ApiParam("The id of the application to retrieve")
+            @ApiParam(GET_APPLICATIN_ID_PARAM_DESCR)
             @PathVariable String applicationId);
 
     @ApiOperation(
             tags = APPLICATIONS,
-            value = "Update application details")
+            value = "Update application details",
+            response = ApplicationImpl.class)
     @PutMapping(path = "/applications/{applicationId}")
     Resource<Application> updateApplication(
-            @ApiParam("The id of the application to update")
+            @ApiParam(UPDATE_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam("The new values to update")
+            @ApiParam(UPDATE_APPLICATION_PARAM_DESCR)
             @RequestBody Application application);
 
     @ApiOperation(
@@ -116,18 +141,19 @@ public interface ApplicationRestApi {
     @DeleteMapping(path = "/applications/{applicationId}")
     @ResponseStatus(NO_CONTENT)
     void deleteApplication(
-            @ApiParam("The id of the application to delete")
+            @ApiParam(DELETE_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId);
 
     @ApiOperation(
             tags = APPLICATIONS,
             value = "Import an application as zip file",
-            notes = "Allows a zip file to be uploaded containing an app definition and any number of included models.")
+            notes = "Allows a zip file to be uploaded containing an app definition and any number of included models.",
+            response = ApplicationImpl.class)
     @PostMapping(path = "/applications/import", consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(CREATED)
     Resource<Application> importApplication(
-            @ApiParam("The file containing the zipped application")
-            @RequestParam("file") MultipartFile file) throws IOException;
+            @ApiParam(IMPORT_APPLICATION_FILE_PARAM_DESCR)
+            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
 
     @ApiOperation(
             tags = APPLICATIONS,
@@ -139,10 +165,10 @@ public interface ApplicationRestApi {
     @GetMapping(path = "/applications/{applicationId}/export")
     void exportApplication(
             HttpServletResponse response,
-            @ApiParam("The id of the application to export")
+            @ApiParam(EXPORT_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam(ATTACHEMNT_API_PARAM_DESCRIPTION)
-            @RequestParam(name = "attachment",
+            @ApiParam(ATTACHEMNT_API_PARAM_DESCR)
+            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException;
 }

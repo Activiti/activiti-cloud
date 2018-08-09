@@ -24,6 +24,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.api.impl.ModelImpl;
 import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
@@ -45,16 +46,15 @@ import org.springframework.web.multipart.MultipartFile;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_SVG;
 import static org.activiti.cloud.services.organization.rest.api.ModelRestApi.MODELS;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
-import static org.activiti.cloud.services.organization.swagger.SwaggerConfiguration.ATTACHEMNT_API_PARAM_DESCRIPTION;
-import static org.springframework.data.rest.webmvc.RestMediaTypes.TEXT_URI_LIST_VALUE;
+import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.ATTACHEMNT_API_PARAM_DESCR;
+import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.UPLOAD_FILE_PARAM_NAME;
+import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.EXPORT_AS_ATTACHMENT_PARAM_NAME;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 /**
  * Controller for process resources.
@@ -66,6 +66,38 @@ public interface ModelRestApi {
 
     String MODELS = "models";
 
+    String GET_MODELS_TYPE_PARAM_DESCR = "The type of the model to filter";
+
+    String GET_MODELS_APPLICATION_ID_PARAM_DESCR = "The id of the application to get the models for";
+
+    String GET_MODEL_ID_PARAM_DESCR = "The id of the model to retrieve";
+
+    String CREATE_MODEL_PARAM_DESCR = "The details of the model to create";
+
+    String CREATE_MODEL_APPLICATION_ID_PARAM_DESCR = "The id of the application to associate the new model with";
+
+    String UPDATE_MODEL_ID_PARAM_DESCR = "The id of the model to update";
+
+    String UPDATE_MODEL_PARAM_DESCR = "The new values to update";
+
+    String UPDATE_MODEL_FILE_PARAM_DESCR = "The file containing the model content";
+
+    String DELETE_MODEL_ID_PARAM_DESCR = "The id of the model to delete";
+
+    String GET_MODEL_CONTENT_ID_PARAM_DESCR = "The id of the model to get the content";
+
+    String IMPORT_MODEL_TYPE_PARAM_DESCR = "The type of the model to be imported";
+
+    String IMPORT_MODEL_FILE_PARAM_DESCR = "The file containing the model definition";
+
+    String EXPORT_MODEL_ID_PARAM_DESCR = "The id of the model to export";
+
+    String VALIDATE_MODEL_ID_PARAM_DESCR = "The id of the model to validate the content for";
+
+    String VALIDATE_MODEL_FILE_PARAM_DESCR = "The file containing the model definition to validate";
+
+    String MODEL_TYPE_PARAM_NAME = "type";
+
     @ApiOperation(
             tags = MODELS,
             value = "List standalone models",
@@ -75,8 +107,8 @@ public interface ModelRestApi {
     )
     @RequestMapping(method = GET, path = "/models")
     PagedResources<Resource<Model>> getModels(
-            @ApiParam("The type of the model to filter")
-            @RequestParam(value = "type", required = false) ModelType type,
+            @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
+            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
             Pageable pageable);
 
     @ApiOperation(
@@ -88,45 +120,43 @@ public interface ModelRestApi {
     )
     @GetMapping(path = "/applications/{applicationId}/models")
     PagedResources<Resource<Model>> getModels(
-            @ApiParam("The id of the application to get the models for")
+            @ApiParam(GET_MODELS_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam("The type of the model to filter")
-            @RequestParam(value = "type", required = false) ModelType type,
+            @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
+            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
             Pageable pageable);
 
     @ApiOperation(
             tags = MODELS,
             value = "Get metadata information for a model",
-            response = Model.class)
+            response = ModelImpl.class)
     @GetMapping(path = "/models/{modelId}")
     Resource<Model> getModel(
-            @ApiParam("The id of the model to retrieve")
+            @ApiParam(GET_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId);
 
     @ApiOperation(
             tags = MODELS,
             value = "Create new standalone model",
-            notes = "Create a new standalone model"
-            //response = ModelEntity.class
-    )
+            notes = "Create a new standalone model",
+            response = ModelImpl.class)
     @PostMapping(path = "/models")
     @ResponseStatus(CREATED)
     Resource<Model> createModel(
-            @ApiParam("The details of the model to create")
+            @ApiParam(CREATE_MODEL_PARAM_DESCR)
             @RequestBody Model model);
 
     @ApiOperation(
             tags = MODELS,
             value = "Create new model belonging to an application",
-            notes = "Create a new model related to an existing application"
-            //response = ModelEntity.class
-    )
+            notes = "Create a new model related to an existing application",
+            response = ModelImpl.class)
     @PostMapping(path = "/applications/{applicationId}/models")
     @ResponseStatus(CREATED)
     Resource<Model> createModel(
-            @ApiParam("The id of the application to associate the new model with")
+            @ApiParam(CREATE_MODEL_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam("The details of the model to create")
+            @ApiParam(CREATE_MODEL_PARAM_DESCR)
             @RequestBody Model model);
 
     @ApiOperation(
@@ -135,9 +165,9 @@ public interface ModelRestApi {
             notes = "Update the details of a model.")
     @PutMapping(path = "/models/{modelId}")
     Resource<Model> updateModel(
-            @ApiParam("The id of the model to update")
+            @ApiParam(UPDATE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
-            @ApiParam("The new values to update")
+            @ApiParam(UPDATE_MODEL_PARAM_DESCR)
             @RequestBody Model model);
 
     @ApiOperation(
@@ -147,10 +177,10 @@ public interface ModelRestApi {
     @PutMapping(path = "/models/{modelId}/content")
     @ResponseStatus(NO_CONTENT)
     void updateModelContent(
-            @ApiParam("The id of the model to update")
+            @ApiParam(UPDATE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
-            @ApiParam("The file containing the model content")
-            @RequestPart("file") MultipartFile file) throws IOException;
+            @ApiParam(UPDATE_MODEL_FILE_PARAM_DESCR)
+            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
 
     @ApiOperation(
             tags = MODELS,
@@ -158,7 +188,7 @@ public interface ModelRestApi {
     @DeleteMapping(path = "/models/{modelId}")
     @ResponseStatus(NO_CONTENT)
     void deleteModel(
-            @ApiParam("The id of the model to delete")
+            @ApiParam(DELETE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId);
 
     @ApiOperation(
@@ -172,30 +202,29 @@ public interface ModelRestApi {
     @GetMapping(path = "/models/{modelId}/content")
     void getModelContent(
             HttpServletResponse response,
-            @ApiParam("The id of the model to get the content")
+            @ApiParam(GET_MODEL_CONTENT_ID_PARAM_DESCR)
             @PathVariable String modelId) throws IOException;
 
     @GetMapping(path = "/models/{modelId}/content", produces = CONTENT_TYPE_SVG)
     void getModelDiagram(
             HttpServletResponse response,
-            @ApiParam("The id of the model to get the content")
+            @ApiParam(GET_MODEL_CONTENT_ID_PARAM_DESCR)
             @PathVariable String modelId) throws IOException;
 
     @ApiOperation(
             tags = MODELS,
             value = "Import a model from file",
-            notes = "Allows a file to be uploaded containing a model definition."
-            //response = ModelEntity.class
-    )
+            notes = "Allows a file to be uploaded containing a model definition.",
+            response = ModelImpl.class)
     @PostMapping(path = "/applications/{applicationId}/models/import", consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(CREATED)
     Resource<Model> importModel(
-            @ApiParam("The id of the application to associate the new model with")
+            @ApiParam(CREATE_MODEL_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam("The type of the model to be imported")
-            @RequestParam(value = "type", required = false) ModelType type,
-            @ApiParam("The file containing the model definition")
-            @RequestPart("file") MultipartFile file) throws IOException;
+            @ApiParam(IMPORT_MODEL_TYPE_PARAM_DESCR)
+            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
+            @ApiParam(IMPORT_MODEL_FILE_PARAM_DESCR)
+            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
 
     @ApiOperation(
             tags = MODELS,
@@ -204,10 +233,10 @@ public interface ModelRestApi {
     @GetMapping(path = "/models/{modelId}/export")
     void exportModel(
             HttpServletResponse response,
-            @ApiParam("The id of the model to export")
+            @ApiParam(EXPORT_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
-            @ApiParam(ATTACHEMNT_API_PARAM_DESCRIPTION)
-            @RequestParam(name = "attachment",
+            @ApiParam(ATTACHEMNT_API_PARAM_DESCR)
+            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException;
 
@@ -217,8 +246,8 @@ public interface ModelRestApi {
             notes = "Allows to the model content without save it.")
     @PostMapping(value = "/models/{modelId}/validate")
     Resources<ValidationErrorResource> validateModel(
-            @ApiParam("The id of the model to validate the content for")
-            @PathVariable(value = "modelId") String modelId,
-            @ApiParam("The file containing the model definition to validate")
-            @RequestParam("file") MultipartFile file) throws IOException;
+            @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
+            @PathVariable String modelId,
+            @ApiParam(VALIDATE_MODEL_FILE_PARAM_DESCR)
+            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
 }

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 /**
  * Deserializer for {@link ApplicationEntity} resources
  */
-@Component
+@Component("applicationDeserializer")
 public class ApplicationEntityDeserializer extends JsonDeserializer<Application> {
 
     @Override

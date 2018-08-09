@@ -19,7 +19,6 @@ package org.activiti.cloud.services.organization.rest.controller;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import io.swagger.annotations.ApiParam;
@@ -36,7 +35,6 @@ import org.activiti.cloud.services.organization.rest.resource.ValidationErrorRes
 import org.activiti.cloud.services.organization.service.ModelService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
@@ -50,7 +48,9 @@ import org.springframework.web.server.NotAcceptableStatusException;
 
 import static org.activiti.cloud.services.common.util.HttpUtils.multipartToFileContent;
 import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
-import static org.activiti.cloud.services.organization.swagger.SwaggerConfiguration.ATTACHEMNT_API_PARAM_DESCRIPTION;
+import static org.activiti.cloud.services.organization.rest.api.ApplicationRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
+import static org.activiti.cloud.services.organization.rest.api.ApplicationRestApi.UPLOAD_FILE_PARAM_NAME;
+import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.ATTACHEMNT_API_PARAM_DESCR;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 /**
@@ -83,8 +83,8 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public PagedResources<Resource<Model>> getModels(
-            @ApiParam("The type of the model to filter")
-            @RequestParam(value = "type", required = false) ModelType type,
+            @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
+            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
             Pageable pageable) {
         return pagedResourcesAssembler.toResource(
                 pageable,
@@ -95,10 +95,10 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public PagedResources<Resource<Model>> getModels(
-            @ApiParam("The id of the application to get the models for")
+            @ApiParam(GET_MODELS_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam("The type of the model to filter")
-            @RequestParam(value = "type", required = false) ModelType type,
+            @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
+            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
             Pageable pageable) {
         Application application = applicationController.findApplicationById(applicationId);
         return pagedResourcesAssembler.toResource(
@@ -111,14 +111,14 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public Resource<Model> getModel(
-            @ApiParam("The id of the model to retrieve")
+            @ApiParam(GET_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId) {
         return resourceAssembler.toResource(findModelById(modelId));
     }
 
     @Override
     public Resource<Model> createModel(
-            @ApiParam("The details of the model to create")
+            @ApiParam(CREATE_MODEL_PARAM_DESCR)
             @RequestBody Model model) {
         return resourceAssembler.toResource(
                 modelService.createModel(null,
@@ -127,9 +127,9 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public Resource<Model> createModel(
-            @ApiParam("The id of the application to associate the new model with")
+            @ApiParam(CREATE_MODEL_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam("The details of the model to create")
+            @ApiParam(CREATE_MODEL_PARAM_DESCR)
             @RequestBody Model model) {
         Application application = applicationController.findApplicationById(applicationId);
         return resourceAssembler.toResource(
@@ -139,9 +139,9 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public Resource<Model> updateModel(
-            @ApiParam("The id of the model to update")
+            @ApiParam(UPDATE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
-            @ApiParam("The new values to update")
+            @ApiParam(UPDATE_MODEL_PARAM_DESCR)
             @RequestBody Model model) {
         Model modelToUpdate = findModelById(modelId);
         model.setId(modelId);
@@ -152,17 +152,17 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public void updateModelContent(
-            @ApiParam("The id of the model to update")
+            @ApiParam(UPDATE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
-            @ApiParam("The file containing the model content")
-            @RequestPart("file") MultipartFile file) throws IOException {
+            @ApiParam(UPDATE_MODEL_FILE_PARAM_DESCR)
+            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
         modelService.updateModelContent(findModelById(modelId),
                                         multipartToFileContent(file));
     }
 
     @Override
     public void deleteModel(
-            @ApiParam("The id of the model to delete")
+            @ApiParam(DELETE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId) {
         modelService.deleteModel(findModelById(modelId));
     }
@@ -170,7 +170,7 @@ public class ModelController implements ModelRestApi {
     @Override
     public void getModelContent(
             HttpServletResponse response,
-            @ApiParam("The id of the model to get the content")
+            @ApiParam(GET_MODEL_CONTENT_ID_PARAM_DESCR)
             @PathVariable String modelId) throws IOException {
         Model model = findModelById(modelId);
         FileContent fileContent = modelService.getModelContent(model.getId())
@@ -183,7 +183,7 @@ public class ModelController implements ModelRestApi {
     @Override
     public void getModelDiagram(
             HttpServletResponse response,
-            @ApiParam("The id of the model to get the content")
+            @ApiParam(GET_MODEL_CONTENT_ID_PARAM_DESCR)
             @PathVariable String modelId) throws IOException {
         Model model = findModelById(modelId);
         FileContent fileContent = modelService.getModelDiagram(model.getId())
@@ -195,12 +195,12 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public Resource<Model> importModel(
-            @ApiParam("The id of the application to associate the new model with")
+            @ApiParam(CREATE_MODEL_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam("The type of the model to be imported")
-            @RequestParam(value = "type", required = false) ModelType type,
-            @ApiParam("The file containing the model definition")
-            @RequestPart("file") MultipartFile file) throws IOException {
+            @ApiParam(IMPORT_MODEL_TYPE_PARAM_DESCR)
+            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
+            @ApiParam(IMPORT_MODEL_FILE_PARAM_DESCR)
+            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
         Application application = applicationController.findApplicationById(applicationId);
         return resourceAssembler.toResource(
                 modelService.importModel(application,
@@ -211,10 +211,10 @@ public class ModelController implements ModelRestApi {
     @Override
     public void exportModel(
             HttpServletResponse response,
-            @ApiParam("The id of the model to export")
+            @ApiParam(EXPORT_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
-            @ApiParam(ATTACHEMNT_API_PARAM_DESCRIPTION)
-            @RequestParam(name = "attachment",
+            @ApiParam(ATTACHEMNT_API_PARAM_DESCR)
+            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException {
         Model model = findModelById(modelId);
@@ -228,10 +228,10 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public Resources<ValidationErrorResource> validateModel(
-            @ApiParam("The id of the model to validate the content for")
-            @PathVariable(value = "modelId") String modelId,
-            @ApiParam("The file containing the model definition to validate")
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
+            @PathVariable String modelId,
+            @ApiParam(VALIDATE_MODEL_FILE_PARAM_DESCR)
+            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
 
         FileContent fileContent = multipartToFileContent(file);
         Optional<Model> optionalModel = modelService.findModelById(modelId);

@@ -24,12 +24,16 @@
     <groupId>org.activiti.cloud</groupId>
     <version>7.0.0-SNAPSHOT</version>
   </parent>
-  <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-services-org-api-impl</artifactId>
+  <name>Activiti Cloud Services :: Organization API Impl</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-org-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-auditable</artifactId>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -43,6 +47,13 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+    </dependency>
   </dependencies>
 </project>

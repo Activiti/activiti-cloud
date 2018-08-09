@@ -37,11 +37,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfiguration {
 
-    public static final String ATTACHEMNT_API_PARAM_DESCRIPTION =
-            "<b>true</b> value enables a web browser to download the file as an attachment.<br> " +
-            "<b>false</b> means that a web browser may preview the file in a new tab or window, " +
-            "but not download the file.";
-
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
