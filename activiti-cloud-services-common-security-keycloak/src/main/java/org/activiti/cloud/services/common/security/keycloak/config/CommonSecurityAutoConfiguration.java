@@ -35,7 +35,6 @@ import org.springframework.security.web.authentication.session.RegisterSessionAu
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
 @Configuration
-@EnableWebSecurity
 @ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
 @ConditionalOnMissingBean(value = {KeycloakConfigResolver.class, SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
 public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigurerAdapter {
