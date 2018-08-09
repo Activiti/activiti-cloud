@@ -1,4 +1,4 @@
-package org.activiti.cloud.connectors.starter.test;
+package org.activiti.cloud.connectors.starter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +15,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -26,7 +25,6 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootApplication
 @EnableActivitiCloudConnector
 @EnableBinding(CloudConnectorConsumerChannels.class)
-@ComponentScan("org.activiti.cloud.connectors.starter")
 public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
     private static final String CHANNEL_NAME = "notifications";

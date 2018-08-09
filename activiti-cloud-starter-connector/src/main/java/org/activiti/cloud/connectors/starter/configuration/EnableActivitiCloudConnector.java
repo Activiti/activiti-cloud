@@ -1,20 +1,18 @@
 package org.activiti.cloud.connectors.starter.configuration;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.conf.activiti.runtime.CloudProcessModelAutoConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.PropertySources;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Import;
+
+import java.lang.annotation.*;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @EnableDiscoveryClient
-@ComponentScan("org.activiti.cloud.connectors.starter")
+@EnableAutoConfiguration
 public @interface EnableActivitiCloudConnector {
 
 }
