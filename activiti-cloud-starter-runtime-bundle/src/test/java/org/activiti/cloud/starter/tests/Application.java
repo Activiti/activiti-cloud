@@ -19,9 +19,12 @@ package org.activiti.cloud.starter.tests;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ActivitiRuntimeBundle
+@ComponentScan({"org.activiti.cloud.starters.test",
+        "org.activiti.cloud.services.test.identity.keycloak.interceptor"})
 public class Application {
 
     public static void main(String[] args) {
