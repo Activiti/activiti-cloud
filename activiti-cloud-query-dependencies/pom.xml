@@ -5,10 +5,10 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build</artifactId>
-    <version>7-201803-EA-SNAPSHOT</version>
+    <version>7.0.0.Beta1</version>
   </parent>
   <artifactId>activiti-cloud-query-dependencies</artifactId>
-  <version>7-201803-EA-SNAPSHOT</version>
+  <version>7.0.0.Beta1</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Query Dependencies BOM (Bill Of Materials)</name>
   <dependencyManagement>
