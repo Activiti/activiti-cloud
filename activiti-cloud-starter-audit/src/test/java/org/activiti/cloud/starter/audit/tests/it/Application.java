@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.starter.audit.tests;
+package org.activiti.cloud.starter.audit.tests.it;
 
 import org.activiti.cloud.starter.audit.configuration.EnableActivitiAudit;
 import org.springframework.boot.SpringApplication;
@@ -23,19 +23,13 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableActivitiAudit
-@ComponentScan({
-        "org.activiti.cloud.services.audit.api",
-        "org.activiti.cloud.services.audit.jpa",
-        "org.activiti.cloud.services.common.security.keycloak",
-        "org.activiti.spring.security.policies",
-        "org.activiti.cloud.starters",
-        "org.activiti.cloud.starter",
-        "org.activiti.cloud.alfresco",
+@ComponentScan({"org.activiti.cloud.starters.test",
+        "org.activiti.cloud.starter.audit.tests.it",
         "org.activiti.cloud.services.test.identity.keycloak.interceptor"})
-public class JpaAuditApplication {
+public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(JpaAuditApplication.class,
+        SpringApplication.run(Application.class,
                               args);
     }
 }

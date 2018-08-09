@@ -4,7 +4,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan({"org.activiti.cloud.services.audit", "org.activiti.cloud.services.security", "org.activiti.cloud.services.identity", "org.activiti.cloud.alfresco"})
+@ComponentScan({"org.activiti.cloud.services.audit",
+        "org.activiti.cloud.alfresco",
+        "org.activiti.spring.security.policies",
+        "org.activiti.cloud.services.common.security",
+        "org.activiti.cloud.services.identity"})
 public class ActivitiAuditAutoConfiguration {
 
 }
