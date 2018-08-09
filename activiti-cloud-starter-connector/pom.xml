@@ -9,21 +9,21 @@
   </parent>
   <artifactId>activiti-cloud-starter-connector</artifactId>
   <dependencies>
-
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-process-model-api</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-cloud-process-model-api</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-cloud-process-model-api-impl</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-process-model-api-impl</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
