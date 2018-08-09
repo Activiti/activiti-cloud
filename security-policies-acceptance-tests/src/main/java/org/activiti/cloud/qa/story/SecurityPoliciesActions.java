@@ -51,7 +51,7 @@ public class SecurityPoliciesActions {
         try {
             runtimeBundleSteps.startProcess(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
         }catch (FeignException exception){
-            assertThat(exception.getMessage()).contains("Unable to find process definition for the given");
+            assertThat(exception.getMessage()).contains("Unable to find process definition for the given id:'ProcessWithVariables'");
         }
     }
 
@@ -144,10 +144,11 @@ public class SecurityPoliciesActions {
         Collection<CloudRuntimeEvent> filteredCollection = new ArrayList<>();
         for(CloudRuntimeEvent e : rawCollection){
             Object element = e.getEntity();
-            if( element instanceof ProcessInstanceImpl){
+
+
+            if( element instanceof ProcessInstanceImpl && ((((ProcessInstanceImpl) element).getProcessDefinitionKey() != null))){
                 if((((ProcessInstanceImpl) element).getProcessDefinitionKey().equals(processKey))) {
                     filteredCollection.add(e);
-                    break;
                 }
             }
         }
