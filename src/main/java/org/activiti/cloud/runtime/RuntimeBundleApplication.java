@@ -7,7 +7,6 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ActivitiRuntimeBundle
-@ComponentScan("org.activiti.cloud.services.common.security")
 public class RuntimeBundleApplication {
 
     public static void main(String[] args) {
