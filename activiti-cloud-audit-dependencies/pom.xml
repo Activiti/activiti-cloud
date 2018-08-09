@@ -5,10 +5,10 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build</artifactId>
-    <version>7.0.0.Beta1</version>
+    <version>7.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-audit-dependencies</artifactId>
-  <version>7.0.0.Beta1</version>
+  <version>7.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Audit Dependencies BOM (Bill Of Materials)</name>
   <dependencyManagement>
