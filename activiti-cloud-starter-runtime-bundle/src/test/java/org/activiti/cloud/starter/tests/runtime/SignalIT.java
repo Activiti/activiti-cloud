@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.engine.ProcessEngineConfiguration;
@@ -116,6 +115,31 @@ public class SignalIT {
         //then
         List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery().processDefinitionKey("broadcastSignalCatchEventProcess").list();
         assertThat(processInstances).isEmpty();
+    }
+
+    @Test
+    public void shouldBroadcastSignalsWithVariables() {
+        //when
+        org.activiti.engine.runtime.ProcessInstance procInst1 = runtimeService.startProcessInstanceByKey("broadcastSignalCatchEventProcess2");
+        org.activiti.engine.runtime.ProcessInstance procInst2 = ((ProcessEngineConfigurationImpl)processEngineConfiguration).getCommandExecutor().execute(new Command<org.activiti.engine.runtime.ProcessInstance>() {
+            public org.activiti.engine.runtime.ProcessInstance execute(CommandContext commandContext) {
+                runtimeService.startProcessInstanceByKey("broadcastSignalEventProcess", Collections.singletonMap("myVar", "myContent"));
+                return runtimeService.startProcessInstanceByKey("broadcastSignalCatchEventProcess2");
+            }
+        });
+        assertThat(procInst1).isNotNull();
+        assertThat(procInst2).isNotNull();
+
+        await("Broadcast Signals").untilAsserted(() -> {
+            org.activiti.engine.task.Task task = taskService.createTaskQuery().processInstanceId(procInst1.getId()).singleResult();
+            assertThat(task.getTaskDefinitionKey()).isEqualTo("usertask1");
+            task = taskService.createTaskQuery().processInstanceId(procInst2.getId()).singleResult();
+            assertThat(task.getTaskDefinitionKey()).isEqualTo("usertask1");
+        });
+
+        //then
+        assertThat(runtimeService.getVariables(procInst1.getId()).get("myVar")).isEqualTo("myContent");
+        assertThat(runtimeService.getVariables(procInst2.getId()).get("myVar")).isEqualTo("myContent");
     }
 
     @Test
