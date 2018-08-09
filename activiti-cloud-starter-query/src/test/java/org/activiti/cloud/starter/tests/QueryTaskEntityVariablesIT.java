@@ -201,10 +201,10 @@ public class QueryTaskEntityVariablesIT {
     public void shouldNotSeeAdminVariables() {
 
         //when
-        ResponseEntity<String> responseEntity = testRestTemplate.exchange(ADMIN_VARIABLES_URL,
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(ADMIN_VARIABLES_URL,
                                                                           HttpMethod.GET,
                                                                           keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                          String.class);
+                                                                          Void.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);

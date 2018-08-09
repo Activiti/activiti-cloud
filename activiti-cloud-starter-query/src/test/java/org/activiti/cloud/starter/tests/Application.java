@@ -23,14 +23,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableActivitiQuery
-@ComponentScan({"org.activiti.cloud.services.query.app",
-        "org.activiti.cloud.services.query.events",
-        "org.activiti.cloud.services.query.rest",
-        "org.activiti.cloud.starters",
-        "org.activiti.cloud.starter",
-        "org.activiti.cloud.services.common.security.keycloak",
-        "org.activiti.spring.security.policies",
-        "org.activiti.cloud.alfresco",
+@ComponentScan({"org.activiti.cloud.starters.test",
         "org.activiti.cloud.services.test.identity.keycloak.interceptor"})
 public class Application {
 
