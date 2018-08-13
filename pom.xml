@@ -15,7 +15,7 @@
   </scm>
   <properties>
     <java.version>1.8</java.version>
-    <activiti.cloud.version>7-201803-EA-SNAPSHOT</activiti.cloud.version>
+    <activiti.cloud.version>7.0.0.Beta1</activiti.cloud.version>
     <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
     <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version> <!-- required for jx -->
