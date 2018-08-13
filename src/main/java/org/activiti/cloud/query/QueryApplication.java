@@ -17,14 +17,11 @@
 package org.activiti.cloud.query;
 
 import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
-import org.activiti.cloud.starter.query.configuration.QuerySwaggerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
 @EnableActivitiQuery
-@Import(QuerySwaggerConfig.class) //TODO: this is temporary, will apply this in service layer
 public class QueryApplication {
 
     public static void main(String[] args) {
