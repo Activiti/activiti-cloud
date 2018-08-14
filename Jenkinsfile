@@ -21,65 +21,29 @@ pipeline {
           container('maven') {
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
-            sh 'export VERSION=$PREVIEW_VERSION && skaffold build -f skaffold.yaml'
-
-
-            sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:$PREVIEW_VERSION"
           }
 
-          dir ('./charts/preview') {
-           container('maven') {
-             sh "make preview"
-             sh "jx preview --app $APP_NAME --dir ../.."
-           }
-          }
         }
       }
       stage('Build Release') {
         when {
-          branch 'master'
+          branch 'develop'
         }
         steps {
           container('maven') {
             // ensure we're not on a detached head
-            sh "git checkout master"
+            sh "git checkout develop"
             sh "git config --global credential.helper store"
 
             sh "jx step git credentials"
-            // so we can retrieve the version in later steps
-            sh "echo \$(jx-release-version) > VERSION"
-            sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
-          }
-          dir ('./charts/activiti-cloud-acceptance-tests') {
-            container('maven') {
-              sh "make tag"
-            }
           }
           container('maven') {
-            sh 'mvn clean deploy'
+            sh 'export GATEWAY_HOST=activiti-cloud-gateway:8080'
+            sh 'export SSO_HOST=activiti-cloud-gateway:8080'
+            sh 'export SSO_HOST=youngling-boxer-keyc-http'
+            sh 'export REALM=activiti'
+            sh 'mvn clean install -DskipTests && mvn -pl '!modeling-acceptance-tests,!apps-acceptance-tests,!multiple-runtime-acceptance-tests,!security-policies-acceptance-tests,!shared-acceptance-tests' clean verify'
 
-            sh 'export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml'
-
-
-            sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
-          }
-        }
-      }
-      stage('Promote to Environments') {
-        when {
-          branch 'master'
-        }
-        steps {
-          dir ('./charts/activiti-cloud-acceptance-tests') {
-            container('maven') {
-              sh 'jx step changelog --version v\$(cat ../../VERSION)'
-
-              // release the helm chart
-              sh 'jx step helm release'
-
-              // promote through all 'Auto' promotion Environments
-              sh 'jx promote -b --all-auto --timeout 1h --version \$(cat ../../VERSION)'
-            }
           }
         }
       }
