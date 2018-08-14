@@ -38,7 +38,7 @@ pipeline {
             sh "jx step git credentials"
           }
           container('maven') {
-            sh "export GATEWAY_HOST=activiti-cloud-gateway:8080 && export SSO_HOST=youngling-boxer-keyc-http && export REALM=activiti && mvn clean install -DskipTests && mvn -pl '!modeling-acceptance-tests,!apps-acceptance-tests,!multiple-runtime-acceptance-tests,!security-policies-acceptance-tests,!shared-acceptance-tests' clean verify"
+            sh "export GATEWAY_HOST=activiti-cloud-gateway:80 && export SSO_HOST=youngling-boxer-keyc-http && export REALM=activiti && mvn clean install -DskipTests && mvn -pl '!modeling-acceptance-tests,!apps-acceptance-tests,!multiple-runtime-acceptance-tests,!security-policies-acceptance-tests,!shared-acceptance-tests' clean verify"
 
           }
         }
