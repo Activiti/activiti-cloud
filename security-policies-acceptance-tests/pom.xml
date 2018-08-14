@@ -5,7 +5,7 @@
     <parent>
         <artifactId>acceptance-tests-parent</artifactId>
         <groupId>org.activiti.cloud</groupId>
-        <version>7-201803-EA-SNAPSHOT</version>
+        <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

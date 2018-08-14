@@ -39,7 +39,6 @@ pipeline {
           }
           container('maven') {
             sh 'export GATEWAY_HOST=activiti-cloud-gateway:8080'
-            sh 'export SSO_HOST=activiti-cloud-gateway:8080'
             sh 'export SSO_HOST=youngling-boxer-keyc-http'
             sh 'export REALM=activiti'
             sh "mvn clean install -DskipTests && mvn -pl '!modeling-acceptance-tests,!apps-acceptance-tests,!multiple-runtime-acceptance-tests,!security-policies-acceptance-tests,!shared-acceptance-tests' clean verify"
