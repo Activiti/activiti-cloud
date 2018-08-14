@@ -2,14 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.activiti.cloud</groupId>
-    <artifactId>activiti-cloud-parent</artifactId>
-    <version>7-201803-EA-SNAPSHOT</version>
-    <relativePath/>
-  </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>acceptance-tests-parent</artifactId>
+  <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
     <module>shared-acceptance-tests</module>
@@ -31,8 +26,20 @@
     <serenity.version>1.9.6</serenity.version>
     <serenity-jbehave.version>1.38.0</serenity-jbehave.version>
     <awaitility.version>3.1.1</awaitility.version>
+    <batik.version>1.10</batik.version>
+    <activiti.cloud.version>7.0.0.Beta1</activiti.cloud.version>
   </properties>
   <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-dependencies</artifactId>
+        <version>${activiti.cloud.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>com.google.guava</groupId>
@@ -75,7 +82,6 @@
         <version>${batik.version}</version>
       </dependency>
     </dependencies>
-  </dependencyManagement>
   <repositories>
     <repository>
       <id>activiti-snapshots</id>
