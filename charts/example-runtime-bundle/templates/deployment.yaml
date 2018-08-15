@@ -52,6 +52,7 @@ spec:
         - name: ACT_KEYCLOAK_URL
           value: "{{ .Values.global.keycloak.url }}"
 {{- end }}
+{{- if .Values.db.deployPostgres }}
         - name: SPRING_DATASOURCE_URL
   {{- if .Values.db.uri }}
           value: "{{ .Values.db.uri }}"
