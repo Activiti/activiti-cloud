@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.api.model.shared.impl;
 
+import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
 public class CloudRuntimeEntityImpl implements CloudRuntimeEntity {
 

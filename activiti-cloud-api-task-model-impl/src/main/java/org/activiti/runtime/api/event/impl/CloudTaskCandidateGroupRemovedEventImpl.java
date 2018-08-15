@@ -16,9 +16,10 @@
 
 package org.activiti.runtime.api.event.impl;
 
-import org.activiti.runtime.api.event.CloudTaskCandidateGroupRemovedEvent;
-import org.activiti.runtime.api.event.TaskCandidateGroupEvent;
-import org.activiti.runtime.api.model.TaskCandidateGroup;
+import org.activiti.api.task.model.TaskCandidateGroup;
+import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupRemovedEvent;
 
 public class CloudTaskCandidateGroupRemovedEventImpl extends CloudRuntimeEventImpl<TaskCandidateGroup, TaskCandidateGroupEvent.TaskCandidateGroupEvents>
         implements CloudTaskCandidateGroupRemovedEvent {

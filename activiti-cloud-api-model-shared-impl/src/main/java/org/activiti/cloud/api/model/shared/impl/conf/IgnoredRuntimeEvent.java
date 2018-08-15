@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.api.model.shared.impl.conf;
 
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
 

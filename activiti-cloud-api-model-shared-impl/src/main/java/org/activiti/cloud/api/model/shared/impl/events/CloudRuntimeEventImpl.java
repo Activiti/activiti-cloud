@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.api.model.shared.impl.events;
 
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.runtime.api.event.impl.RuntimeEventImpl;
 
 public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum<?>> extends RuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE>
         implements CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {

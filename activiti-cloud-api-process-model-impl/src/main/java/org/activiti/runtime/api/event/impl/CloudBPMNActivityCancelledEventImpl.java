@@ -16,11 +16,11 @@
 
 package org.activiti.runtime.api.event.impl;
 
-import org.activiti.runtime.api.event.BPMNActivityEvent;
-import org.activiti.runtime.api.event.CloudBPMNActivityCancelled;
-import org.activiti.runtime.api.model.BPMNActivity;
+import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
 
-public class CloudBPMNActivityCancelledEventImpl extends CloudBPMNActivityEventImpl implements CloudBPMNActivityCancelled {
+public class CloudBPMNActivityCancelledEventImpl extends CloudBPMNActivityEventImpl implements CloudBPMNActivityCancelledEvent {
 
     private String cause;
 

@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.api.model.shared.impl.events;
 
-import org.activiti.runtime.api.event.CloudVariableDeleted;
-import org.activiti.runtime.api.event.VariableEvent;
-import org.activiti.runtime.api.model.VariableInstance;
+import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 
 public class CloudVariableDeletedEventImpl extends CloudVariableEventImpl implements CloudVariableDeletedEvent {
 

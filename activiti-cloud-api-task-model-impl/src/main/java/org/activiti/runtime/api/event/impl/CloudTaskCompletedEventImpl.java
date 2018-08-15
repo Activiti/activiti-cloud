@@ -16,9 +16,10 @@
 
 package org.activiti.runtime.api.event.impl;
 
-import org.activiti.runtime.api.event.CloudTaskCompletedEvent;
-import org.activiti.runtime.api.event.TaskRuntimeEvent;
-import org.activiti.runtime.api.model.Task;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
 
 public class CloudTaskCompletedEventImpl extends CloudRuntimeEventImpl<Task, TaskRuntimeEvent.TaskEvents>
         implements CloudTaskCompletedEvent {

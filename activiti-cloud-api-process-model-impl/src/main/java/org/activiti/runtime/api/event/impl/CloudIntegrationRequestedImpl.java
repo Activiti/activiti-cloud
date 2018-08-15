@@ -16,12 +16,13 @@
 
 package org.activiti.runtime.api.event.impl;
 
-import org.activiti.runtime.api.event.CloudIntegrationRequested;
-import org.activiti.runtime.api.event.IntegrationEvent;
-import org.activiti.runtime.api.model.IntegrationContext;
+import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.process.model.events.IntegrationEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 
 public class CloudIntegrationRequestedImpl extends CloudRuntimeEventImpl<IntegrationContext, IntegrationEvent.IntegrationEvents>
-        implements CloudIntegrationRequested {
+        implements CloudIntegrationRequestedEvent {
 
     public CloudIntegrationRequestedImpl() {
     }

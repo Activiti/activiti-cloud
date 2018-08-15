@@ -16,11 +16,12 @@
 
 package org.activiti.runtime.api.event.impl;
 
-import org.activiti.runtime.api.event.CloudSequenceFlowTaken;
-import org.activiti.runtime.api.event.SequenceFlowEvent;
-import org.activiti.runtime.api.model.SequenceFlow;
+import org.activiti.api.process.model.SequenceFlow;
+import org.activiti.api.process.model.events.SequenceFlowEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 
-public class CloudSequenceFlowTakenImpl extends CloudRuntimeEventImpl<SequenceFlow, SequenceFlowEvent.SequenceFlowEvents> implements CloudSequenceFlowTaken {
+public class CloudSequenceFlowTakenImpl extends CloudRuntimeEventImpl<SequenceFlow, SequenceFlowEvent.SequenceFlowEvents> implements CloudSequenceFlowTakenEvent {
 
     public CloudSequenceFlowTakenImpl() {
     }

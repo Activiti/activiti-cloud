@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.api.model.shared.impl;
 
-
 import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 
 public class CloudVariableInstanceImpl<T> extends CloudRuntimeEntityImpl implements CloudVariableInstance {
 
