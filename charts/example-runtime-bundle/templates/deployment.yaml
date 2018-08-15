@@ -38,14 +38,6 @@ spec:
         {{ end }}
         - name: SPRING_RABBITMQ_USERNAME
           value: {{ .Values.global.rabbitmq.username.value }}
-        - name: SPRING_RABBITMQ_HOST
-{{- if .Values.global.rabbitmq.host.value }}
-          value: "{{ .Values.global.rabbitmq.host.value }}"
-{{- else }}
-          value: "{{ .Release.Name }}-rabbitmq"
-{{- end }}
-        - name: SPRING_RABBITMQ_USERNAME
-          value: {{ .Values.global.rabbitmq.username.value }}
         - name: SPRING_RABBITMQ_PASSWORD
           value: {{ .Values.global.rabbitmq.password.value }}
 {{- if .Values.global.keycloak.url }}
