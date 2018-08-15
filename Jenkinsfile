@@ -32,7 +32,7 @@ pipeline {
           //   sh "make preview"
           //   sh "jx preview --app $APP_NAME --dir ../.."
           // }
-          }
+          //}
         }
       }
       stage('Build Release') {
