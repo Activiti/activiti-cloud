@@ -27,47 +27,6 @@
     <!--<activiti.version>7.0.6</activiti.version> &lt;!&ndash; fixed version to use CI/CD &ndash;&gt;-->
     <activiti.version>7.0.0-SNAPSHOT</activiti.version>
   </properties>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.activiti</groupId>
-        <artifactId>activiti-dependencies</artifactId>
-        <version>${activiti.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-model-shared</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-model-shared-impl</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-process-model</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-task-model</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-process-model-impl</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-task-model-impl</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <build>
     <plugins>
