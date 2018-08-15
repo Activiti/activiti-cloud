@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.activiti.cloud.api</groupId>
+  <artifactId>activiti-cloud-api</artifactId>
+  <version>7.0.0-SNAPSHOT</version>
+  <name>Activiti Cloud :: Runtime API Parent</name>
+  <packaging>pom</packaging>
+  <modules>
+    <module>activiti-cloud-api-model-shared</module>
+    <module>activiti-cloud-api-process-model</module>
+    <module>activiti-cloud-api-task-model</module>
+  </modules>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti</groupId>
+        <artifactId>activiti-dependencies</artifactId>
+        <version>7.0.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.api</groupId>
+        <artifactId>activiti-cloud-api-model-shared</artifactId>
+        <version>7.0.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.api</groupId>
+        <artifactId>activiti-cloud-api-process-model</artifactId>
+        <version>7.0.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.api</groupId>
+        <artifactId>activiti-cloud-api-task-model</artifactId>
+        <version>7.0.0-SNAPSHOT</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>
