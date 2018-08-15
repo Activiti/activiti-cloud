@@ -23,7 +23,66 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: JAVA_OPTS
-          value: -Xmx{{ .Values.javaOpts.xmx }} -Xms{{ .Values.javaOpts.xms }} {{ .Values.javaOpts.other}}
+          value: "-Xmx{{ .Values.javaOpts.xmx }} -Xms{{ .Values.javaOpts.xms }} {{ .Values.javaOpts.other}}"
+        - name: SPRING_APPLICATION_NAME
+{{- if .Values.service.name }}
+          value: "{{ .Values.service.name }}"
+{{- else }}
+          value: {{ template "fullname" . }}
+{{- end }}
+        - name: SPRING_RABBITMQ_HOST
+        {{- if .Values.global.rabbitmq.host.value }}
+          value: "{{ .Values.global.rabbitmq.host.value }}"
+        {{ else }}
+          value: "{{ .Release.Name }}-rabbitmq"
+        {{ end }}
+        - name: SPRING_RABBITMQ_USERNAME
+          value: {{ .Values.global.rabbitmq.username.value }}
+        - name: SPRING_RABBITMQ_HOST
+{{- if .Values.global.rabbitmq.host.value }}
+          value: "{{ .Values.global.rabbitmq.host.value }}"
+{{- else }}
+          value: "{{ .Release.Name }}-rabbitmq"
+{{- end }}
+        - name: SPRING_RABBITMQ_USERNAME
+          value: {{ .Values.global.rabbitmq.username.value }}
+        - name: SPRING_RABBITMQ_PASSWORD
+          value: {{ .Values.global.rabbitmq.password.value }}
+{{- if .Values.global.keycloak.url }}
+        - name: ACT_KEYCLOAK_URL
+          value: "{{ .Values.global.keycloak.url }}"
+{{- end }}
+{{- if .Values.db.deployPostgres }}
+        - name: SPRING_DATASOURCE_URL
+  {{- if .Values.db.uri }}
+          value: "{{ .Values.db.uri }}"
+  {{- else }}
+          value: "jdbc:postgresql://{{ .Release.Name }}-{{ .Values.db.name }}:{{ .Values.db.port }}/postgres"
+  {{- end }}
+        - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+          value: {{ default "org.postgresql.Driver" .Values.db.driver }}
+        - name: SPRING_DATASOURCE_USERNAME
+          value: {{ default "postgres" .Values.db.user }}
+        - name: SPRING_DATASOURCE_PASSWORD
+  {{- if .Values.db.pass }}
+          value: "{{ .Values.db.pass }}"
+  {{ else }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-{{ .Values.db.name }}
+              key: postgres-password
+  {{- end }}
+        - name: SPRING_JPA_DATABASE_PLATFORM
+          value: {{ default "org.hibernate.dialect.PostgreSQLDialect" .Values.db.platform }}
+{{- end }}
+        - name: EUREKA_CLIENT_ENABLED
+          value: "false"
+        - name: ACTIVITI_CLOUD_SERVICES_METADATA_EUREKA_STATIC_ENABLED
+          value: "false"
+        - name: ACTIVITI_CLOUD_SERVICES_METADATA_EUREKA_DYNAMIC_ENABLED
+          value: "false"
+        - name: ACT_CLOUD_CONFIG_SERVER_ENABLED
+          value: "false"
 {{- with .Values.extraEnv }}
 {{ tpl . $ | indent 8 }}
 {{- end }}

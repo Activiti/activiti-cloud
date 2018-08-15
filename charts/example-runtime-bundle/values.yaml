@@ -2,6 +2,33 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
+global:
+  rabbitmq:
+    host:
+      value: ""
+    username:
+      value: guest
+    password:
+      value: guest
+  keycloak:
+    url: ""
+    name: keycloak
+    service:
+      type: http
+      port: 80
+db:
+  uri: ""
+  name: activitipostgresql
+  deployPostgres: false
+  port: 5432
+
+activitipostgresql:
+   postgresPassword: activiti
+
+javaOpts:
+  xmx: 768m
+  xms: 512m
+  other: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
 image:
   repository: draft
   tag: dev
@@ -32,3 +59,7 @@ readinessProbe:
   successThreshold: 1
   timeoutSeconds: 1
 terminationGracePeriodSeconds: 10
+
+ingress:
+  ## Set to true to enable ingress record generation
+  enabled: false
