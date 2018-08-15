@@ -33,9 +33,17 @@ spec:
         - name: SPRING_RABBITMQ_HOST
         {{- if .Values.global.rabbitmq.host.value }}
           value: "{{ .Values.global.rabbitmq.host.value }}"
-        {{- else }}
+        {{ else }}
           value: "{{ .Release.Name }}-rabbitmq"
-        {{- end }}
+        {{ end }}
+        - name: SPRING_RABBITMQ_USERNAME
+          value: {{ .Values.global.rabbitmq.username.value }}
+        - name: SPRING_RABBITMQ_HOST
+{{- if .Values.global.rabbitmq.host.value }}
+          value: "{{ .Values.global.rabbitmq.host.value }}"
+{{- else }}
+          value: "{{ .Release.Name }}-rabbitmq"
+{{- end }}
         - name: SPRING_RABBITMQ_USERNAME
           value: {{ .Values.global.rabbitmq.username.value }}
         - name: SPRING_RABBITMQ_PASSWORD
@@ -44,7 +52,6 @@ spec:
         - name: ACT_KEYCLOAK_URL
           value: "{{ .Values.global.keycloak.url }}"
 {{- end }}
-{{- if .Values.db.deployPostgres }}
         - name: SPRING_DATASOURCE_URL
   {{- if .Values.db.uri }}
           value: "{{ .Values.db.uri }}"
