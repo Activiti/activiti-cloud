@@ -34,7 +34,7 @@ image:
   tag: dev
   pullPolicy: IfNotPresent
 service:
-  name: example-runtime-bundle
+  name: rb-my-app
   type: ClusterIP
   externalPort: 80
   internalPort: 8080
