@@ -10,20 +10,20 @@
   <artifactId>activiti-cloud-starter-connector</artifactId>
   <dependencies>
     <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-process-model-api</artifactId>
+      <groupId>org.activiti.api</groupId>
+      <artifactId>activiti-api-process-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-cloud-process-model-api</artifactId>
+      <groupId>org.activiti.cloud.api</groupId>
+      <artifactId>activiti-cloud-api-process-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-cloud-process-model-api-impl</artifactId>
+      <groupId>org.activiti.cloud.api</groupId>
+      <artifactId>activiti-cloud-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-process-model-api-impl</artifactId>
+      <groupId>org.activiti.api</groupId>
+      <artifactId>activiti-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -130,7 +130,8 @@
         </executions>
         <configuration>
           <packages>
-            <package>org.activiti.runtime.api.model</package>
+            <package>org.activiti.api.process.model</package>
+            <package>org.activiti.cloud.api.process.model</package>
           </packages>
 
           <!-- whether generated assertions classes can be inherited with consistent assertion chaining -->

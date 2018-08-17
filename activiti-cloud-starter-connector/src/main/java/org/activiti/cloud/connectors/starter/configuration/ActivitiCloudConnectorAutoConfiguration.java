@@ -1,6 +1,6 @@
 package org.activiti.cloud.connectors.starter.configuration;
 
-import org.conf.activiti.runtime.CloudProcessModelAutoConfiguration;
+import org.activiti.cloud.api.process.model.impl.conf.CloudProcessModelAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 

@@ -2,7 +2,7 @@ package org.activiti.cloud.connectors.starter.test.it;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.activiti.runtime.api.model.IntegrationResult;
+import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Profile;

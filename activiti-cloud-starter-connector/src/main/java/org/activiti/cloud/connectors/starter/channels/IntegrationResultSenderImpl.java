@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.connectors.starter.channels;
 
-import org.activiti.runtime.api.model.IntegrationResult;
+import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;

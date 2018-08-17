@@ -16,8 +16,7 @@
 
 package org.activiti.cloud.connectors.starter.channels;
 
-import org.activiti.runtime.api.model.IntegrationRequest;
-import org.activiti.runtime.api.model.IntegrationResult;
+import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.springframework.messaging.Message;
 
 public interface IntegrationResultSender {

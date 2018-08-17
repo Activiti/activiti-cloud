@@ -21,9 +21,9 @@ import java.util.Map;
 import java.util.UUID;
 
 
-import org.activiti.runtime.api.model.IntegrationRequest;
+import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.runtime.api.model.impl.IntegrationContextImpl;
-import org.activiti.runtime.api.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
