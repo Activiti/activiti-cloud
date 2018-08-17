@@ -16,17 +16,16 @@
 
 package org.activiti.cloud.qa.story;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import net.thucydides.core.annotations.Steps;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.qa.steps.AuditSteps;
-import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.MultipleRuntimeBundleSteps;
-import org.activiti.runtime.api.model.CloudProcessInstance;
-import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.cloud.qa.steps.QuerySteps;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
-import net.thucydides.core.annotations.Steps;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProcessInstanceTasks {
 

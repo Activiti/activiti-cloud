@@ -19,16 +19,16 @@ package org.activiti.cloud.qa.story;
 import java.util.Collection;
 
 import net.thucydides.core.annotations.Steps;
+import org.activiti.api.task.model.Task;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
-import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.Task;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Tasks {
 

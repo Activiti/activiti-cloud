@@ -18,17 +18,18 @@ package org.activiti.cloud.qa.story;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
+import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.event.TaskRuntimeEvent;
-import org.activiti.runtime.api.event.VariableEvent;
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.Task;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
@@ -37,7 +38,7 @@ import org.jbehave.core.annotations.When;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProcessInstanceTasks {
 
@@ -145,7 +146,7 @@ public class ProcessInstanceTasks {
 
         querySteps.checkProcessInstanceHasVariable(processInstance.getId(),variableName);
 
-        auditSteps.checkProcessInstanceVariableEvent(processInstance.getId(),variableName, VariableEvent.VariableEvents.VARIABLE_CREATED);
+        auditSteps.checkProcessInstanceVariableEvent(processInstance.getId(), variableName, VariableEvent.VariableEvents.VARIABLE_CREATED);
 
     }
 

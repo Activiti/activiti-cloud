@@ -20,20 +20,19 @@ import java.util.Collection;
 import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
+import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.task.model.Task;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.QueryService;
-import org.activiti.runtime.api.model.CloudProcessInstance;
-import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.CloudVariableInstance;
-import org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus;
-
-import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.Task.TaskStatus;
-import org.activiti.runtime.api.model.VariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 /**
@@ -72,7 +71,7 @@ public class QuerySteps {
 
     @Step
     public void checkProcessInstanceStatus(String processInstanceId,
-                                           ProcessInstanceStatus expectedStatus) throws Exception {
+                                           ProcessInstance.ProcessInstanceStatus expectedStatus) throws Exception {
 
         await().untilAsserted(() -> {
 
@@ -106,7 +105,7 @@ public class QuerySteps {
 
     @Step
     public void checkTaskStatus(String taskId,
-                                TaskStatus expectedStatus) {
+                                Task.TaskStatus expectedStatus) {
 
         await().untilAsserted(() -> assertThat(queryService.queryTasksByIdAnsStatus(taskId,
                 expectedStatus).getContent())

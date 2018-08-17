@@ -19,23 +19,21 @@ package org.activiti.cloud.qa.steps;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import net.thucydides.core.annotations.Step;
+import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.AuditService;
-import org.activiti.runtime.api.event.CloudProcessRuntimeEvent;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudTaskRuntimeEvent;
-import org.activiti.runtime.api.event.CloudVariableEvent;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.event.TaskRuntimeEvent;
-import org.activiti.runtime.api.event.VariableEvent;
-import org.activiti.runtime.api.model.Task;
 import org.assertj.core.api.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.PagedResources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -166,8 +164,8 @@ public class AuditSteps {
                                             "eventType")
                                     .containsExactly(
                                             tuple(taskId,
-                                                    Task.TaskStatus.ASSIGNED,
-                                                    TaskRuntimeEvent.TaskEvents.TASK_CREATED),
+                                                  Task.TaskStatus.ASSIGNED,
+                                                  TaskRuntimeEvent.TaskEvents.TASK_CREATED),
                                             tuple(taskId,
                                                   Task.TaskStatus.ASSIGNED,
                                                   TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED)));

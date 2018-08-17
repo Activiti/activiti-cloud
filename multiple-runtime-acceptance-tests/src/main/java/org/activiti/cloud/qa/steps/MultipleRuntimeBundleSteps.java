@@ -19,12 +19,12 @@ package org.activiti.cloud.qa.steps;
 import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.qa.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.RuntimeBundleService;
-import org.activiti.runtime.api.model.CloudProcessInstance;
-import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
-import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;

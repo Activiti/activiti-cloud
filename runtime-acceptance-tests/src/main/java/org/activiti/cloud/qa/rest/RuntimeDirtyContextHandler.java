@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.qa.rest;
 
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.qa.config.RuntimeTestsConfigurationProperties;
-import org.activiti.runtime.api.model.CloudProcessInstance;
-import org.activiti.runtime.api.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.activiti.cloud.qa.service.RuntimeBundleService.PROCESS_INSTANCES_PATH;

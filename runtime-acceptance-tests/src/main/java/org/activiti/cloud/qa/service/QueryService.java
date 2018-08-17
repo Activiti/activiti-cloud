@@ -19,11 +19,10 @@ package org.activiti.cloud.qa.service;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import org.activiti.runtime.api.model.CloudProcessInstance;
-import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.CloudVariableInstance;
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.Task;
+import org.activiti.api.task.model.Task;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.hateoas.PagedResources;
 
 /**

@@ -19,7 +19,7 @@ package org.activiti.cloud.qa.service;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.springframework.hateoas.PagedResources;
 
 /**
