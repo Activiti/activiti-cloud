@@ -1,6 +1,6 @@
 package org.activiti.cloud.services.common.security.keycloak;
 
-import org.activiti.runtime.api.security.SecurityManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.keycloak.KeycloakPrincipal;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.context.SecurityContextHolder;

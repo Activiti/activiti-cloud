@@ -19,7 +19,7 @@ package org.activiti.cloud.services.identity.keycloak;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.activiti.runtime.api.identity.UserGroupManager;
+import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;

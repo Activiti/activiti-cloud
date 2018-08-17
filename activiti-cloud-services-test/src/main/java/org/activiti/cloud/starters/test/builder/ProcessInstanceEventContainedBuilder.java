@@ -18,11 +18,11 @@ package org.activiti.cloud.starters.test.builder;
 
 import java.util.UUID;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
-import org.activiti.runtime.api.event.impl.CloudProcessCompletedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
-import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 
 public class ProcessInstanceEventContainedBuilder {
@@ -37,8 +37,8 @@ public class ProcessInstanceEventContainedBuilder {
         ProcessInstance processInstance = buildProcessInstance(name);
         eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
                                    new CloudProcessStartedEventImpl(processInstance,
-                                                       null,
-                                                       null),
+                                                                    null,
+                                                                    null),
                                    new CloudProcessCompletedEventImpl(processInstance));
         return processInstance;
     }

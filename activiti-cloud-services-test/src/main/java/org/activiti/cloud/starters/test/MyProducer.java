@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.starters.test;
 
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.messaging.MessageChannel;

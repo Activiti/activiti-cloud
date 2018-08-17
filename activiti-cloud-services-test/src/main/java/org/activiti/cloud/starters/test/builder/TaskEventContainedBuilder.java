@@ -18,13 +18,13 @@ package org.activiti.cloud.starters.test.builder;
 
 import java.util.UUID;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.task.model.Task;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
-import org.activiti.runtime.api.event.impl.CloudTaskAssignedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCandidateUserAddedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCompletedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCreatedEventImpl;
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.impl.TaskCandidateUserImpl;
 import org.activiti.runtime.api.model.impl.TaskImpl;
 
@@ -85,7 +85,7 @@ public class TaskEventContainedBuilder {
                 Task.TaskStatus.ASSIGNED,
                 processInstance);
         task.setAssignee(username);
-        ((TaskImpl) task).setParentTaskId(UUID.randomUUID().toString());
+        task.setParentTaskId(UUID.randomUUID().toString());
 
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
                 new CloudTaskAssignedEventImpl(task));
