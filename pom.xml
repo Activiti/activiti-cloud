@@ -22,6 +22,7 @@
     <docker.rabbitmq.cli.port>15672</docker.rabbitmq.cli.port>
     <docker.rabbitmq.start.timeout>15000</docker.rabbitmq.start.timeout>
     <!-- dependencies -->
+    <activiti-cloud-api.version>7.0.0-SNAPSHOT</activiti-cloud-api.version>
     <activiti-cloud-service-common.version>7.0.0-SNAPSHOT</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle.version>7.0.0-SNAPSHOT</activiti-cloud-runtime-bundle.version>
     <activiti-cloud-app.version>7.0.0-SNAPSHOT</activiti-cloud-app.version>
@@ -49,6 +50,7 @@
     <spring.cloud.k8s.version>0.3.0.RELEASE</spring.cloud.k8s.version>
   </properties>
   <modules>
+    <module>activiti-cloud-api-dependencies</module>
     <module>activiti-cloud-service-common-dependencies</module>
     <module>activiti-cloud-runtime-bundle-dependencies</module>
     <module>activiti-cloud-app-dependencies</module>

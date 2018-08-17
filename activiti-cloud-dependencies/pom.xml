@@ -15,6 +15,13 @@
     <dependencies>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-api-dependencies</artifactId>
+        <version>${activiti-cloud-api.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
         <version>${activiti-cloud-runtime-bundle.version}</version>
         <type>pom</type>
