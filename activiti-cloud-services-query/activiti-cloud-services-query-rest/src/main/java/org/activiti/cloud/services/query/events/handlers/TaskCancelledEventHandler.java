@@ -18,12 +18,13 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudTaskCancelledEvent;
-import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +41,7 @@ public class TaskCancelledEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskCancelledEvent taskCancelledEvent = (CloudTaskCancelledEvent) event;
-        org.activiti.runtime.api.model.Task eventTask = taskCancelledEvent.getEntity();
+        Task eventTask = taskCancelledEvent.getEntity();
 
         updateTaskStatus(taskRepository
                                  .findById(eventTask.getId())
@@ -50,7 +51,7 @@ public class TaskCancelledEventHandler implements QueryEventHandler {
 
     private void updateTaskStatus(TaskEntity taskEntity,
                                   Long eventTimestamp) {
-        taskEntity.setStatus(org.activiti.runtime.api.model.Task.TaskStatus.CANCELLED);
+        taskEntity.setStatus(Task.TaskStatus.CANCELLED);
         taskEntity.setLastModified(new Date(eventTimestamp));
         taskRepository.save(taskEntity);
     }

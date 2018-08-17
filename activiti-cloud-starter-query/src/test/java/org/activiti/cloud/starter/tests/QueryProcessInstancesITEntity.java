@@ -24,7 +24,7 @@ import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTo
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
-import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.api.process.model.ProcessInstance;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,8 +83,8 @@ public class QueryProcessInstancesITEntity {
     @Test
     public void shouldGetAvailableProcInstancesAndFilteredProcessInstances() {
         //given
-        org.activiti.runtime.api.model.ProcessInstance completedProcess = processInstanceBuilder.aCompletedProcessInstance("first");
-        org.activiti.runtime.api.model.ProcessInstance runningProcess = processInstanceBuilder.aRunningProcessInstance("second");
+        ProcessInstance completedProcess = processInstanceBuilder.aCompletedProcessInstance("first");
+        ProcessInstance runningProcess = processInstanceBuilder.aRunningProcessInstance("second");
 
         eventsAggregator.sendAll();
 

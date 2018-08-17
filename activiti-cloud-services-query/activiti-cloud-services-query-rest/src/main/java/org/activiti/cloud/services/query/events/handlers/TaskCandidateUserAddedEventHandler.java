@@ -16,12 +16,12 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import org.activiti.api.task.model.events.TaskCandidateUserEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudTaskCandidateUserAddedEvent;
-import org.activiti.runtime.api.event.TaskCandidateUserEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +38,7 @@ public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskCandidateUserAddedEvent taskCandidateUserAddedEvent = (CloudTaskCandidateUserAddedEvent) event;
-        org.activiti.runtime.api.model.TaskCandidateUser taskCandidateUser = taskCandidateUserAddedEvent.getEntity();
+        org.activiti.api.task.model.TaskCandidateUser taskCandidateUser = taskCandidateUserAddedEvent.getEntity();
 
         try {
             taskCandidateUserRepository.save(new TaskCandidateUser(taskCandidateUser.getTaskId(),

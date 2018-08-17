@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class QueryEventHandlerContext {
                                                                    Function.identity()));
     }
 
-    public void handle(CloudRuntimeEvent<?, ?> ... events) {
+    public void handle(CloudRuntimeEvent<?, ?>... events) {
         if (events != null) {
             for (CloudRuntimeEvent<?, ?> event : events) {
                 QueryEventHandler handler = handlers.get(event.getEventType().name());

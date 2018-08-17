@@ -19,13 +19,13 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 import java.util.Optional;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessStarted;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.model.ProcessInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessStarted startedEvent = (CloudProcessStarted) event;
+        CloudProcessStartedEvent startedEvent = (CloudProcessStartedEvent) event;
         String processInstanceId = startedEvent.getEntity().getId();
         LOGGER.debug("Handling start of process Instance " + processInstanceId);
 
@@ -53,7 +53,7 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
         ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(
                 () -> new QueryException("Unable to find process instance with the given id: " + processInstanceId));
         if (ProcessInstance.ProcessInstanceStatus.CREATED.equals(processInstanceEntity.getStatus())) {
-            processInstanceEntity.setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.RUNNING);
+            processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
             processInstanceEntity.setLastModified(new Date(startedEvent.getTimestamp()));
             processInstanceRepository.save(processInstanceEntity);
         }

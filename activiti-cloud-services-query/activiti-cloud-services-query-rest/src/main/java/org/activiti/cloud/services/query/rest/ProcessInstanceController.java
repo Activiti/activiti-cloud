@@ -25,7 +25,7 @@ import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
-import org.activiti.runtime.api.security.SecurityManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.spring.security.policies.SecurityPolicyAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

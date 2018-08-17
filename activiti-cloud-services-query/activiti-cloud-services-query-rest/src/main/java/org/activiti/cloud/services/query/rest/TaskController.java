@@ -26,7 +26,7 @@ import org.activiti.cloud.services.query.resources.TaskResource;
 import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
-import org.activiti.runtime.api.security.SecurityManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

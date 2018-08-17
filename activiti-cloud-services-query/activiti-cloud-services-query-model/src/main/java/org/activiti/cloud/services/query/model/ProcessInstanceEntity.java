@@ -27,7 +27,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.activiti.runtime.api.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name="ProcessInstance")

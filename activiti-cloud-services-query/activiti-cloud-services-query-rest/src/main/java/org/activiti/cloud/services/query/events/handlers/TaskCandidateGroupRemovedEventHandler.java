@@ -16,12 +16,12 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupRemovedEvent;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudTaskCandidateGroupRemovedEvent;
-import org.activiti.runtime.api.event.TaskCandidateGroupEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

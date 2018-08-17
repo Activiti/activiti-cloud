@@ -7,8 +7,8 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QVariableEntity;
-import org.activiti.runtime.api.security.SecurityManager;
-import org.activiti.runtime.api.identity.UserGroupManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

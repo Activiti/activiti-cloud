@@ -22,7 +22,7 @@ import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
-import org.activiti.runtime.api.security.SecurityManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

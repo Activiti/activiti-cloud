@@ -19,10 +19,10 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.UUID;
 
 import com.querydsl.core.types.Predicate;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.VariableEntity;
-import org.activiti.runtime.api.event.impl.CloudVariableDeletedEventImpl;
 import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.junit.Before;
 import org.junit.Test;

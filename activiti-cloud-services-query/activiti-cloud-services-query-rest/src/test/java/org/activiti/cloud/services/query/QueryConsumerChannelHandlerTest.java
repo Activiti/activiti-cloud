@@ -16,10 +16,10 @@
 
 package org.activiti.cloud.services.query;
 
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
-import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

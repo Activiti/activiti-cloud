@@ -20,13 +20,13 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessResumed;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.event.impl.CloudProcessResumedEventImpl;
-import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -35,10 +35,11 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProcessResumedEventHandlerTest {
@@ -62,7 +63,7 @@ public class ProcessResumedEventHandlerTest {
         //given
         ProcessInstanceImpl eventProcessInstance = new ProcessInstanceImpl();
         eventProcessInstance.setId(UUID.randomUUID().toString());
-        CloudProcessResumed event = new CloudProcessResumedEventImpl(eventProcessInstance);
+        CloudProcessResumedEvent event = new CloudProcessResumedEventImpl(eventProcessInstance);
 
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
         given(processInstanceRepository.findById(eventProcessInstance.getId())).willReturn(Optional.of(currentProcessInstanceEntity));
@@ -81,7 +82,7 @@ public class ProcessResumedEventHandlerTest {
         //given
         ProcessInstanceImpl eventProcessInstance = new ProcessInstanceImpl();
         eventProcessInstance.setId(UUID.randomUUID().toString());
-        CloudProcessResumed event = new CloudProcessResumedEventImpl(eventProcessInstance);
+        CloudProcessResumedEvent event = new CloudProcessResumedEventImpl(eventProcessInstance);
 
         given(processInstanceRepository.findById(eventProcessInstance.getId())).willReturn(Optional.empty());
 

@@ -18,10 +18,10 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 
+import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 import org.activiti.cloud.services.query.model.VariableEntity;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudVariableUpdated;
-import org.activiti.runtime.api.event.VariableEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +41,7 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudVariableUpdated variableUpdatedEvent = (CloudVariableUpdated) event;
+        CloudVariableUpdatedEvent variableUpdatedEvent = (CloudVariableUpdatedEvent) event;
         VariableEntity variableEntity = new VariableEntity(variableUpdatedEvent.getEntity().getType(),
                                                            variableUpdatedEvent.getEntity().getName(),
                                                            variableUpdatedEvent.getEntity().getProcessInstanceId(),

@@ -24,8 +24,8 @@ import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.Task;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.task.model.Task;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -149,7 +149,7 @@ public class QueryTasksIT {
                     .extracting(Task::getId,
                                 Task::getStatus)
                     .containsExactly(tuple(assignedTask.getId(),
-                                           org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED));
+                                           Task.TaskStatus.ASSIGNED));
         });
     }
 
@@ -261,7 +261,7 @@ public class QueryTasksIT {
                     .extracting(Task::getId,
                                 Task::getStatus)
                     .contains(tuple(taskWithCandidate.getId(),
-                                    org.activiti.runtime.api.model.Task.TaskStatus.CREATED));
+                                    Task.TaskStatus.CREATED));
         });
     }
 

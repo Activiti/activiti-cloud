@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudVariableDeleted;
-import org.activiti.runtime.api.event.VariableEvent;
+import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +38,7 @@ public class VariableDeletedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudVariableDeleted variableDeletedEvent = (CloudVariableDeleted) event;
+        CloudVariableDeletedEvent variableDeletedEvent = (CloudVariableDeletedEvent) event;
         if (variableDeletedEvent.getEntity().isTaskVariable()) {
             taskVariableDeletedEventHandler.handle(variableDeletedEvent);
         } else {

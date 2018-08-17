@@ -18,11 +18,11 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.UUID;
 
+import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudTaskCandidateGroupAddedEvent;
-import org.activiti.runtime.api.event.TaskCandidateGroupEvent;
-import org.activiti.runtime.api.event.impl.CloudTaskCandidateGroupAddedEventImpl;
 import org.activiti.runtime.api.model.impl.TaskCandidateGroupImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -32,10 +32,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TaskEntityCandidateGroupAddedEventHandlerTest {

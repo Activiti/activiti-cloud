@@ -18,13 +18,13 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessSuspended;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.model.ProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +40,7 @@ public class ProcessSuspendedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessSuspended suspendedEvent = (CloudProcessSuspended) event;
+        CloudProcessSuspendedEvent suspendedEvent = (CloudProcessSuspendedEvent) event;
         String processInstanceId = suspendedEvent.getEntity().getId();
 
         ProcessInstanceEntity processInstanceEntity = processInstanceRepository.findById(processInstanceId)

@@ -2,7 +2,7 @@ package org.activiti.cloud.services.query.model;
 
 import javax.persistence.MappedSuperclass;
 
-import org.activiti.runtime.api.model.CloudRuntimeEntity;
+import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
 @MappedSuperclass
 public abstract class ActivitiEntityMetadata implements CloudRuntimeEntity {

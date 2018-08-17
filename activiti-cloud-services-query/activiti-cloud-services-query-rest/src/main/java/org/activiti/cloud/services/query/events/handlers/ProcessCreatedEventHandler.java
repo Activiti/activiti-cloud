@@ -18,12 +18,12 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.runtime.api.event.CloudProcessCreated;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.model.ProcessInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessCreated createdEvent = (CloudProcessCreated) event;
+        CloudProcessCreatedEvent createdEvent = (CloudProcessCreatedEvent) event;
         LOGGER.debug("Handling created process Instance " + createdEvent.getEntity().getId());
 
         ProcessInstanceEntity createdProcessInstanceEntity = new ProcessInstanceEntity();

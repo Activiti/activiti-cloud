@@ -30,7 +30,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.activiti.runtime.api.model.CloudVariableInstance;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name="Variable")

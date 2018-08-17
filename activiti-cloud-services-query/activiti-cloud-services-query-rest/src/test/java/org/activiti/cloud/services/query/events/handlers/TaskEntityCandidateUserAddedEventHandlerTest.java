@@ -18,10 +18,10 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.UUID;
 
+import org.activiti.api.task.model.events.TaskCandidateUserEvent;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
-import org.activiti.runtime.api.event.TaskCandidateUserEvent;
-import org.activiti.runtime.api.event.impl.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.runtime.api.model.impl.TaskCandidateUserImpl;
 import org.junit.Before;
 import org.junit.Test;

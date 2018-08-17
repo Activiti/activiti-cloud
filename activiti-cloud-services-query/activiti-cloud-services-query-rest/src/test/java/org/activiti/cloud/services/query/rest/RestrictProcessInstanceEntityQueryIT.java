@@ -5,8 +5,8 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
-import org.activiti.runtime.api.identity.UserGroupManager;
-import org.activiti.runtime.api.security.SecurityManager;
+import org.activiti.api.runtime.shared.identity.UserGroupManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.Before;

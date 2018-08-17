@@ -24,7 +24,7 @@ import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
-import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.api.process.model.ProcessInstance;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

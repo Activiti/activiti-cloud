@@ -17,19 +17,18 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 
+import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
+import org.activiti.api.task.model.events.TaskCandidateUserEvent;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.event.TaskCandidateGroupEvent;
-import org.activiti.runtime.api.event.TaskCandidateUserEvent;
-import org.activiti.runtime.api.event.TaskRuntimeEvent;
-import org.activiti.runtime.api.event.VariableEvent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

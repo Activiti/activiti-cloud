@@ -18,12 +18,13 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.event.CloudProcessCancelled;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class ProcessCancelledEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessCancelled cancelledEvent = (CloudProcessCancelled) event;
+        CloudProcessCancelledEvent cancelledEvent = (CloudProcessCancelledEvent) event;
         LOGGER.debug("Handling cancel of process Instance " + cancelledEvent.getEntity().getId());
         updateProcessInstanceStatus(
                 processInstanceRepository
@@ -55,7 +56,7 @@ public class ProcessCancelledEventHandler implements QueryEventHandler {
 
     private void updateProcessInstanceStatus(ProcessInstanceEntity processInstanceEntity,
                                              Long eventTimestamp) {
-        processInstanceEntity.setStatus(org.activiti.runtime.api.model.ProcessInstance.ProcessInstanceStatus.CANCELLED);
+        processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.CANCELLED);
         processInstanceEntity.setLastModified(new Date(eventTimestamp));
         processInstanceRepository.save(processInstanceEntity);
     }

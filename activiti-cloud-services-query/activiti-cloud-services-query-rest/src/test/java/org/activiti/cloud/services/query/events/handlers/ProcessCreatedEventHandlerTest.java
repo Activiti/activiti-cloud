@@ -18,12 +18,12 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.UUID;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.runtime.api.event.CloudProcessCreated;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
-import org.activiti.runtime.api.model.ProcessInstance;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.activiti.test.Assertions;
 import org.junit.Before;
@@ -57,7 +57,7 @@ public class ProcessCreatedEventHandlerTest {
     @Test
     public void handleShouldUpdateCurrentProcessInstanceStateToCreated() {
         //given
-        CloudProcessCreated event = buildProcessCreatedEvent();
+        CloudProcessCreatedEvent event = buildProcessCreatedEvent();
 
         //when
         handler.handle(event);
@@ -74,7 +74,7 @@ public class ProcessCreatedEventHandlerTest {
                 .hasStatus(ProcessInstance.ProcessInstanceStatus.CREATED);
     }
 
-    private CloudProcessCreated buildProcessCreatedEvent() {
+    private CloudProcessCreatedEvent buildProcessCreatedEvent() {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId(UUID.randomUUID().toString());
         processInstance.setProcessDefinitionId(UUID.randomUUID().toString());

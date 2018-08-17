@@ -18,8 +18,8 @@ package org.activiti.cloud.services.query.rest;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.security.SecurityManager;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

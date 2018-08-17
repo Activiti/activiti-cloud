@@ -19,12 +19,13 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 import java.util.Optional;
 
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
-import org.activiti.runtime.api.event.TaskRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,13 +42,13 @@ public class TaskAssignedEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskAssignedEvent taskAssignedEvent = (CloudTaskAssignedEvent) event;
-        org.activiti.runtime.api.model.Task eventTask = taskAssignedEvent.getEntity();
+        Task eventTask = taskAssignedEvent.getEntity();
         Optional<TaskEntity> findResult = taskRepository.findById(eventTask.getId());
         TaskEntity queryTaskEntity = findResult.orElseThrow(
                 () -> new QueryException("Unable to find task with id: " + eventTask.getId())
         );
         queryTaskEntity.setAssignee(eventTask.getAssignee());
-        queryTaskEntity.setStatus(org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED);
+        queryTaskEntity.setStatus(Task.TaskStatus.ASSIGNED);
         queryTaskEntity.setLastModified(new Date(taskAssignedEvent.getTimestamp()));
         queryTaskEntity.setServiceName(taskAssignedEvent.getServiceName());
         queryTaskEntity.setServiceFullName(taskAssignedEvent.getServiceFullName());

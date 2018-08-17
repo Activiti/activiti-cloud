@@ -19,11 +19,11 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.UUID;
 
 import com.querydsl.core.types.Predicate;
+import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.VariableEntity;
-import org.activiti.runtime.api.event.CloudVariableDeleted;
-import org.activiti.runtime.api.event.impl.CloudVariableDeletedEventImpl;
 import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +57,7 @@ public class ProcessVariableEntityDeletedHandlerTest {
     @Test
     public void handleRemoveVariableFromProcessAndSoftDeleteIt() {
         //given
-        CloudVariableDeleted event = buildVariableDeletedEvent();
+        CloudVariableDeletedEvent event = buildVariableDeletedEvent();
 
         VariableEntity variableEntity = new VariableEntity();
         given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variableEntity);
@@ -70,7 +70,7 @@ public class ProcessVariableEntityDeletedHandlerTest {
         assertThat(variableEntity.getMarkedAsDeleted()).isTrue();
     }
 
-    private CloudVariableDeleted buildVariableDeletedEvent() {
+    private CloudVariableDeletedEvent buildVariableDeletedEvent() {
         return new CloudVariableDeletedEventImpl(new VariableInstanceImpl<>("var", "string", "test",
                                                                             UUID.randomUUID().toString()));
     }

@@ -20,13 +20,13 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
-import org.activiti.runtime.api.event.TaskRuntimeEvent;
-import org.activiti.runtime.api.event.impl.CloudTaskAssignedEventImpl;
-import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.impl.TaskImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,10 +36,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TaskEntityAssignedEventHandlerTest {

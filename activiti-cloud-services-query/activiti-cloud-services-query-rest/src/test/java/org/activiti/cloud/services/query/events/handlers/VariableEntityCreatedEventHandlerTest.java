@@ -19,12 +19,12 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 
+import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.VariableEntity;
-import org.activiti.runtime.api.event.VariableEvent;
-import org.activiti.runtime.api.event.impl.CloudVariableCreatedEventImpl;
 import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.activiti.test.Assertions;
 import org.junit.Before;

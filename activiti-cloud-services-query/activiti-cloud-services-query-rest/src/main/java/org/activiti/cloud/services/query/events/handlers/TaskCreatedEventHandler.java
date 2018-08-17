@@ -18,14 +18,14 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import javax.persistence.EntityManager;
 
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudTaskCreatedEvent;
-import org.activiti.runtime.api.event.TaskRuntimeEvent;
-import org.activiti.runtime.api.model.Task;
 import org.springframework.stereotype.Component;
 
 @Component

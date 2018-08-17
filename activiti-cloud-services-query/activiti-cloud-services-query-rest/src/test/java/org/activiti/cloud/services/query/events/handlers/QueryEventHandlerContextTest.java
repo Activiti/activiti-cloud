@@ -18,11 +18,11 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Collections;
 
-import org.activiti.runtime.api.event.CloudTaskCompletedEvent;
-import org.activiti.runtime.api.event.CloudTaskCreatedEvent;
-import org.activiti.runtime.api.event.TaskRuntimeEvent;
-import org.activiti.runtime.api.event.impl.CloudTaskCompletedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCreatedEventImpl;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
