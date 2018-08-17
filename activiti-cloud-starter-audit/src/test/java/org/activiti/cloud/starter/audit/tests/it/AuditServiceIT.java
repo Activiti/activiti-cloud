@@ -24,31 +24,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.impl.conf.IgnoredRuntimeEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
+import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.activiti.runtime.api.event.BPMNActivityEvent;
-import org.activiti.runtime.api.event.CloudBPMNActivityEvent;
-import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
-import org.activiti.runtime.api.event.CloudTaskCancelledEvent;
-import org.activiti.runtime.api.event.TaskRuntimeEvent;
-import org.activiti.runtime.api.event.impl.CloudBPMNActivityCancelledEventImpl;
-import org.activiti.runtime.api.event.impl.CloudBPMNActivityCompletedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudBPMNActivityStartedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessCancelledEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessCompletedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudRuntimeEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskAssignedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCancelledEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCompletedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCreatedEventImpl;
-import org.activiti.runtime.api.model.Task;
 import org.activiti.runtime.api.model.impl.BPMNActivityImpl;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.activiti.runtime.api.model.impl.TaskImpl;
-import org.conf.activiti.runtime.IgnoredRuntimeEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,12 +82,12 @@ public class AuditServiceIT {
 
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         repository.deleteAll();
     }
 
     @Test
-    public void findAllShouldReturnAllAvailableEvents() throws Exception {
+    public void findAllShouldReturnAllAvailableEvents() {
         //given
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
@@ -115,7 +115,7 @@ public class AuditServiceIT {
     }
 
     @Test
-    public void shouldBeAbleToFilterOnProcessInstanceId() throws Exception {
+    public void shouldBeAbleToFilterOnProcessInstanceId() {
         //given
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
@@ -138,7 +138,7 @@ public class AuditServiceIT {
 
 
     @Test
-    public void shouldBeAbleToFilterOnProcessInstanceIdAndEventType() throws Exception {
+    public void shouldBeAbleToFilterOnProcessInstanceIdAndEventType() {
         //given
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
@@ -156,14 +156,14 @@ public class AuditServiceIT {
             Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
             assertThat(retrievedEvents).hasSize(2);
             for(CloudRuntimeEvent event : retrievedEvents) {
-                CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStarted) event;
+                CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStartedEvent) event;
                 assertThat(cloudBPMNActivityEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
             }
         });
     }
 
     @Test
-    public void shouldGetEventsForACancelledTask() throws Exception {
+    public void shouldGetEventsForACancelledTask() {
         //given
         List<CloudRuntimeEvent> coveredEvents = getTaskCancelledEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
@@ -188,7 +188,7 @@ public class AuditServiceIT {
 
 
     @Test
-    public void shouldBeAbleToFilterOnEventType() throws Exception {
+    public void shouldBeAbleToFilterOnEventType() {
         //given
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
@@ -210,7 +210,7 @@ public class AuditServiceIT {
     }
 
     @Test
-    public void shouldBeAbleToFilterOnEventTypeActivitiStarted() throws Exception {
+    public void shouldBeAbleToFilterOnEventTypeActivitiStarted() {
         //given
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
@@ -225,14 +225,14 @@ public class AuditServiceIT {
             Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
             assertThat(retrievedEvents).hasSize(3);
             for(CloudRuntimeEvent event : retrievedEvents) {
-                CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStarted) event;
+                CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStartedEvent) event;
                 assertThat(cloudBPMNActivityEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
             }
         });
     }
 
     @Test
-    public void shouldBeAbleToFilterOnEventEntityId() throws Exception {
+    public void shouldBeAbleToFilterOnEventEntityId() {
         //given
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
@@ -255,7 +255,7 @@ public class AuditServiceIT {
     }
 
     @Test
-    public void shouldBeAbleToFilterOnEventTypeTaskCancelled() throws Exception {
+    public void shouldBeAbleToFilterOnEventTypeTaskCancelled() {
         //given
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
@@ -279,7 +279,7 @@ public class AuditServiceIT {
     }
 
     @Test
-    public void findByIdShouldReturnTheEventIdentifiedByTheGivenId() throws Exception {
+    public void findByIdShouldReturnTheEventIdentifiedByTheGivenId() {
         //given
         CloudRuntimeEvent[] events = new CloudRuntimeEvent[1];
 
@@ -305,9 +305,9 @@ public class AuditServiceIT {
             //then
             CloudRuntimeEvent event = responseEntity.getBody();
 
-            assertThat(event).isInstanceOf(CloudBPMNActivityStarted.class);
+            assertThat(event).isInstanceOf(CloudBPMNActivityStartedEvent.class);
 
-            CloudBPMNActivityStarted cloudProcessStartedEvent = (CloudBPMNActivityStarted) event;
+            CloudBPMNActivityStartedEvent cloudProcessStartedEvent = (CloudBPMNActivityStartedEvent) event;
             assertThat(cloudProcessStartedEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
             assertThat(cloudProcessStartedEvent.getProcessDefinitionId()).isEqualTo("3");
             assertThat(cloudProcessStartedEvent.getProcessInstanceId()).isEqualTo("4");
@@ -316,7 +316,7 @@ public class AuditServiceIT {
     }
 
     @Test
-    public void unknownEventShouldNotPreventHandlingOfKnownEvents() throws Exception {
+    public void unknownEventShouldNotPreventHandlingOfKnownEvents() {
         //given
         CloudRuntimeEvent[] events = new CloudRuntimeEvent[2];
 
@@ -349,9 +349,9 @@ public class AuditServiceIT {
             assertThat(retrievedEvents).hasSize(1);
             CloudRuntimeEvent event = retrievedEvents.iterator().next();
             //when
-            assertThat(event).isInstanceOf(CloudBPMNActivityStarted.class);
+            assertThat(event).isInstanceOf(CloudBPMNActivityStartedEvent.class);
 
-            CloudBPMNActivityStarted cloudProcessStartedEvent = (CloudBPMNActivityStarted) event;
+            CloudBPMNActivityStartedEvent cloudProcessStartedEvent = (CloudBPMNActivityStartedEvent) event;
             assertThat(cloudProcessStartedEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
             assertThat(cloudProcessStartedEvent.getProcessDefinitionId()).isEqualTo("3");
             assertThat(cloudProcessStartedEvent.getProcessInstanceId()).isEqualTo("4");

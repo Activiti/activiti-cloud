@@ -1,15 +1,12 @@
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCreatedAuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
-import org.activiti.runtime.api.event.CloudProcessCreated;
-import org.activiti.runtime.api.event.CloudProcessStarted;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,7 +19,7 @@ public class ProcessCreatedEventConverter implements EventToEntityConverter<Audi
 
     @Override
     public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudProcessCreated cloudProcessCreated = (CloudProcessCreated) cloudRuntimeEvent;
+        CloudProcessCreatedEvent cloudProcessCreated = (CloudProcessCreatedEvent) cloudRuntimeEvent;
         ProcessCreatedAuditEventEntity processCreatedAuditEventEntity = new ProcessCreatedAuditEventEntity(cloudProcessCreated.getId(),
                                                                                                            cloudProcessCreated.getTimestamp(),
                                                                                                            cloudProcessCreated.getAppName(),
@@ -40,8 +37,8 @@ public class ProcessCreatedEventConverter implements EventToEntityConverter<Audi
     public CloudRuntimeEvent convertToAPI(AuditEventEntity auditEventEntity) {
         ProcessCreatedAuditEventEntity processCreatedAuditEventEntity = (ProcessCreatedAuditEventEntity) auditEventEntity;
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl(processCreatedAuditEventEntity.getEventId(),
-                                                                                                 processCreatedAuditEventEntity.getTimestamp(),
-                                                                                                 processCreatedAuditEventEntity.getProcessInstance());
+                                                                                            processCreatedAuditEventEntity.getTimestamp(),
+                                                                                            processCreatedAuditEventEntity.getProcessInstance());
         processCreatedEvent.setAppName(processCreatedAuditEventEntity.getAppName());
         processCreatedEvent.setAppVersion(processCreatedAuditEventEntity.getAppVersion());
         processCreatedEvent.setServiceFullName(processCreatedAuditEventEntity.getServiceFullName());

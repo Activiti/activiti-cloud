@@ -16,12 +16,12 @@
 
 package org.activiti.cloud.services.audit.api.tests;
 
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
-import org.activiti.runtime.api.event.CloudProcessStarted;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class EventsRelProviderTest {
 
@@ -42,7 +42,7 @@ public class EventsRelProviderTest {
     @Test
     public void shouldSupportCloudRuntimeEventSubClasses() throws Exception {
         //given
-        Class<CloudProcessStarted> aClass = CloudProcessStarted.class;
+        Class<CloudProcessStartedEvent> aClass = CloudProcessStartedEvent.class;
 
         //when
         boolean supports = relProvider.supports(aClass);

@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.runtime.api.identity.UserGroupManager;
-import org.activiti.runtime.api.security.SecurityManager;
+import org.activiti.api.runtime.shared.identity.UserGroupManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.spring.security.policies.BaseSecurityPoliciesManagerImpl;
 import org.activiti.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.spring.security.policies.SecurityPolicyAccess;

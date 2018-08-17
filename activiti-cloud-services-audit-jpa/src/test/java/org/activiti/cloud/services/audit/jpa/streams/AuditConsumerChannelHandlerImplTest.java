@@ -16,18 +16,20 @@
 
 package org.activiti.cloud.services.audit.jpa.streams;
 
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class AuditConsumerChannelHandlerImplTest {
@@ -42,12 +44,12 @@ public class AuditConsumerChannelHandlerImplTest {
     private APIEventToEntityConverters converters;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
     @Test
-    public void receiveEventShouldStoreEntity() throws Exception {
+    public void receiveEventShouldStoreEntity() {
         //given
         CloudRuntimeEvent cloudRuntimeEvent = mock(CloudRuntimeEvent.class);
         when(cloudRuntimeEvent.getEventType()).thenReturn(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED);
@@ -64,24 +66,5 @@ public class AuditConsumerChannelHandlerImplTest {
         //then
         verify(eventsRepository).save(entity);
     }
-//
-//    @Test
-//    public void testReceiveTaskCancelledEvent() throws Exception {
-//        //GIVEN
-//
-//        TaskCancelledEventEntity taskCancelledEventEntity = new TaskCancelledEventEntity();
-//        Task task = new TaskJpaJsonConverter().convertToEntityAttribute(
-//                "{\"id\":\"1\",\"createdDate\":1523945813114,\"priority\":50,\"status\":\"CANCELLED\"}");
-//        FieldUtils.writeField(taskCancelledEventEntity, "task", task, true);
-//        AuditEventEntity[] events = new AuditEventEntity[] {taskCancelledEventEntity};
-//
-//        //WHEN
-//        handler.receiveCloudRuntimeEvent(events);
-//
-//        //THEN
-//        assertThat(taskCancelledEventEntity.isIgnored()).isFalse();
-//        assertThat(taskCancelledEventEntity.getTask()).isNotNull();
-//        assertThat(taskCancelledEventEntity.getTask().getStatus()).isEqualTo("CANCELLED");
-//        verify(eventsRepository).save(taskCancelledEventEntity);
-//    }
+
 }

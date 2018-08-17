@@ -23,7 +23,7 @@ import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.ActivityJpaJsonConverter;
-import org.activiti.runtime.api.model.BPMNActivity;
+import org.activiti.api.process.model.BPMNActivity;
 
 @Entity
 public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {

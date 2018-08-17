@@ -1,12 +1,12 @@
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableCreatedEventEntity;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.CloudVariableCreated;
-import org.activiti.runtime.api.event.VariableEvent;
-import org.activiti.runtime.api.event.impl.CloudVariableCreatedEventImpl;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,17 +19,16 @@ public class VariableCreatedEventConverter implements EventToEntityConverter<Aud
 
     @Override
     public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudVariableCreated cloudVariableCreatedEvent = (CloudVariableCreated) cloudRuntimeEvent;
-        VariableCreatedEventEntity variableCreatedEventEntity = new VariableCreatedEventEntity(cloudVariableCreatedEvent.getId(),
-                                                                                               cloudVariableCreatedEvent.getTimestamp(),
-                                                                                               cloudVariableCreatedEvent.getAppName(),
-                                                                                               cloudVariableCreatedEvent.getAppVersion(),
-                                                                                               cloudVariableCreatedEvent.getServiceFullName(),
-                                                                                               cloudVariableCreatedEvent.getServiceName(),
-                                                                                               cloudVariableCreatedEvent.getServiceType(),
-                                                                                               cloudVariableCreatedEvent.getServiceVersion(),
-                                                                                               cloudVariableCreatedEvent.getEntity());
-        return variableCreatedEventEntity;
+        CloudVariableCreatedEvent cloudVariableCreatedEvent = (CloudVariableCreatedEvent) cloudRuntimeEvent;
+        return new VariableCreatedEventEntity(cloudVariableCreatedEvent.getId(),
+                                              cloudVariableCreatedEvent.getTimestamp(),
+                                              cloudVariableCreatedEvent.getAppName(),
+                                              cloudVariableCreatedEvent.getAppVersion(),
+                                              cloudVariableCreatedEvent.getServiceFullName(),
+                                              cloudVariableCreatedEvent.getServiceName(),
+                                              cloudVariableCreatedEvent.getServiceType(),
+                                              cloudVariableCreatedEvent.getServiceVersion(),
+                                              cloudVariableCreatedEvent.getEntity());
     }
 
     @Override

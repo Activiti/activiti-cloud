@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.audit.api.resources;
 
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 

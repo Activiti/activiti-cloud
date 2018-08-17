@@ -20,8 +20,8 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 
-import org.activiti.runtime.api.event.BPMNActivityEvent;
-import org.activiti.runtime.api.model.BPMNActivity;
+import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.process.model.BPMNActivity;
 
 @Entity
 @DiscriminatorValue(value = ActivityCancelledAuditEventEntity.ACTIVITY_CANCELLED_EVENT)

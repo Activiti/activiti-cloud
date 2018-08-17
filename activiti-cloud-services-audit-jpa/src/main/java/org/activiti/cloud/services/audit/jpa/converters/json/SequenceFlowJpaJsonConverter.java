@@ -16,8 +16,7 @@
 
 package org.activiti.cloud.services.audit.jpa.converters.json;
 
-import org.activiti.runtime.api.model.BPMNActivity;
-import org.activiti.runtime.api.model.SequenceFlow;
+import org.activiti.api.process.model.SequenceFlow;
 
 public class SequenceFlowJpaJsonConverter extends JpaJsonConverter<SequenceFlow> {
 

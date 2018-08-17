@@ -1,12 +1,12 @@
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCancelledAuditEventEntity;
-import org.activiti.runtime.api.event.CloudProcessCancelled;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.event.impl.CloudProcessCancelledEventImpl;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,7 +19,7 @@ public class ProcessCancelledEventConverter implements EventToEntityConverter<Au
 
     @Override
     public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudProcessCancelled cloudProcessCancelledEvent = (CloudProcessCancelled) cloudRuntimeEvent;
+        CloudProcessCancelledEvent cloudProcessCancelledEvent = (CloudProcessCancelledEvent) cloudRuntimeEvent;
         ProcessCancelledAuditEventEntity processCancelledEventEntity = new ProcessCancelledAuditEventEntity(cloudProcessCancelledEvent.getId(),
                                                                                                             cloudProcessCancelledEvent.getTimestamp(),
                                                                                                             cloudProcessCancelledEvent.getCause());

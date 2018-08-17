@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.assembler.EventResourceAssembler;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsAdminController;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
@@ -27,7 +28,6 @@ import org.activiti.cloud.services.audit.api.resources.EventResource;
 import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

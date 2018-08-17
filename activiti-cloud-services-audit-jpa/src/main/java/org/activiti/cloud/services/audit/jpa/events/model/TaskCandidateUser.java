@@ -18,7 +18,7 @@ package org.activiti.cloud.services.audit.jpa.events.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.activiti.runtime.api.model.Task;
+import org.activiti.api.task.model.Task;
 
 /**
  * TaskCandidateUser

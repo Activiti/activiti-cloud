@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.audit.jpa.converters.json;
 
-import org.activiti.runtime.api.model.VariableInstance;
+import org.activiti.api.model.shared.model.VariableInstance;
 
 public class VariableJpaJsonConverter extends JpaJsonConverter<VariableInstance> {
 

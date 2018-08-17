@@ -1,12 +1,12 @@
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.ActivityCancelledAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.runtime.api.event.BPMNActivityEvent;
-import org.activiti.runtime.api.event.CloudBPMNActivityCancelled;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.impl.CloudBPMNActivityCancelledEventImpl;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,7 +19,7 @@ public class   ActivityCancelledEventConverter implements EventToEntityConverter
 
     @Override
     public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudBPMNActivityCancelled cloudBPMNActivityCancelledEvent = (CloudBPMNActivityCancelled) cloudRuntimeEvent;
+        CloudBPMNActivityCancelledEvent cloudBPMNActivityCancelledEvent = (CloudBPMNActivityCancelledEvent) cloudRuntimeEvent;
         ActivityCancelledAuditEventEntity activityCancelledAuditEventEntity = new ActivityCancelledAuditEventEntity(cloudBPMNActivityCancelledEvent.getId(),
                                                                                                                     cloudBPMNActivityCancelledEvent.getTimestamp(),
                                                                                                                     cloudBPMNActivityCancelledEvent.getAppName(),

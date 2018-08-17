@@ -6,7 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
-import org.activiti.runtime.api.model.Task;
+import org.activiti.api.task.model.Task;
 
 @Entity
 public abstract class TaskAuditEventEntity extends AuditEventEntity {

@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.audit.jpa.converters.json;
 
-import org.activiti.runtime.api.model.BPMNActivity;
+import org.activiti.api.process.model.BPMNActivity;
 
 public class ActivityJpaJsonConverter extends JpaJsonConverter<BPMNActivity> {
 

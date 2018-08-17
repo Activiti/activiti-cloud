@@ -1,12 +1,12 @@
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessSuspendedAuditEventEntity;
-import org.activiti.runtime.api.event.CloudProcessSuspended;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.ProcessRuntimeEvent;
-import org.activiti.runtime.api.event.impl.CloudProcessSuspendedEventImpl;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,7 +19,7 @@ public class ProcessSuspendedEventConverter implements EventToEntityConverter<Au
 
     @Override
     public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudProcessSuspended cloudProcessSuspended = (CloudProcessSuspended) cloudRuntimeEvent;
+        CloudProcessSuspendedEvent cloudProcessSuspended = (CloudProcessSuspendedEvent) cloudRuntimeEvent;
         ProcessSuspendedAuditEventEntity processSuspendedAuditEventEntity = new ProcessSuspendedAuditEventEntity(cloudProcessSuspended.getId(),
                                                                                                                  cloudProcessSuspended.getTimestamp());
         processSuspendedAuditEventEntity.setAppName(cloudProcessSuspended.getAppName());

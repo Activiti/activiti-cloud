@@ -7,7 +7,7 @@ import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
-import org.activiti.runtime.api.model.VariableInstance;
+import org.activiti.api.model.shared.model.VariableInstance;
 
 @MappedSuperclass
 public abstract class VariableAuditEventEntity extends AuditEventEntity {

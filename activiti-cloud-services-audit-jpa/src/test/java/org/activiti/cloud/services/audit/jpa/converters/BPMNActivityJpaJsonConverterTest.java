@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.api.process.model.BPMNElement;
 import org.activiti.cloud.services.audit.jpa.converters.json.ActivityJpaJsonConverter;
-import org.activiti.runtime.api.model.BPMNActivity;
-import org.activiti.runtime.api.model.BPMNElement;
 import org.activiti.runtime.api.model.impl.BPMNActivityImpl;
 import org.junit.Test;
 

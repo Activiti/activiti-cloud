@@ -23,7 +23,7 @@ import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
-import org.activiti.runtime.api.model.ProcessInstance;
+import org.activiti.api.process.model.ProcessInstance;
 
 @Entity
 public abstract class ProcessAuditEventEntity extends AuditEventEntity {

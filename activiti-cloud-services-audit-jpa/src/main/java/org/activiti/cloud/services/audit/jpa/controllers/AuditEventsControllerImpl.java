@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 import com.google.common.base.Joiner;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.assembler.EventResourceAssembler;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
@@ -35,7 +36,6 @@ import org.activiti.cloud.services.audit.jpa.repository.EventSpecificationsBuild
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.repository.SearchOperation;
 import org.activiti.cloud.services.audit.jpa.security.SecurityPoliciesApplicationServiceImpl;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.activiti.spring.security.policies.SecurityPolicyAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,9 +121,9 @@ public class AuditEventsControllerImpl implements AuditEventsController {
         }
 
         return pagedResourcesAssembler.toResource(pageable,
-                                                  new PageImpl<CloudRuntimeEvent>(events,
-                                                                                  pageable,
-                                                                                  allAuditInPage.getTotalElements()),
+                                                  new PageImpl<>(events,
+                                                                 pageable,
+                                                                 allAuditInPage.getTotalElements()),
                                                   eventResourceAssembler);
     }
 
