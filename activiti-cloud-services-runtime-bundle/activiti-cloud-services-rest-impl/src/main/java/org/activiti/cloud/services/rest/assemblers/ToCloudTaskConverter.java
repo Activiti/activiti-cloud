@@ -16,10 +16,10 @@
 
 package org.activiti.cloud.services.rest.assemblers;
 
+import org.activiti.api.task.model.Task;
+import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.impl.CloudTaskImpl;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
-import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.impl.CloudTaskImpl;
 
 public class ToCloudTaskConverter {
 

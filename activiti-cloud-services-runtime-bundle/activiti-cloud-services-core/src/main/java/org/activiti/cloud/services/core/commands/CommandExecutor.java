@@ -1,6 +1,6 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.runtime.api.Payload;
+import org.activiti.api.model.shared.Payload;
 
 public interface CommandExecutor<T extends Payload> {
 

@@ -16,11 +16,11 @@
 
 package org.activiti.cloud.services.events.listeners;
 
+import org.activiti.api.process.model.events.BPMNActivityCancelledEvent;
+import org.activiti.api.process.runtime.events.listener.BPMNElementEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.activiti.runtime.api.event.BPMNActivityCancelled;
-import org.activiti.runtime.api.event.listener.BPMNElementEventListener;
 
-public class CloudActivityCancelledProducer implements BPMNElementEventListener<BPMNActivityCancelled> {
+public class CloudActivityCancelledProducer implements BPMNElementEventListener<BPMNActivityCancelledEvent> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
@@ -32,7 +32,7 @@ public class CloudActivityCancelledProducer implements BPMNElementEventListener<
     }
 
     @Override
-    public void onEvent(BPMNActivityCancelled event) {
+    public void onEvent(BPMNActivityCancelledEvent event) {
         eventsAggregator.add(eventConverter.from(event));
     }
 }

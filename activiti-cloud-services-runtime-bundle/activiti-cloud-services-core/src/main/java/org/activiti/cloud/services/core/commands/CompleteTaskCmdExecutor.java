@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.runtime.api.TaskAdminRuntime;
-import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.payloads.CompleteTaskPayload;
-import org.activiti.runtime.api.model.results.TaskResult;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.results.TaskResult;
+import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;

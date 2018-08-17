@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.runtime.api.ProcessAdminRuntime;
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.payloads.SuspendProcessPayload;
-import org.activiti.runtime.api.model.results.ProcessInstanceResult;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.payloads.SuspendProcessPayload;
+import org.activiti.api.process.model.results.ProcessInstanceResult;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;

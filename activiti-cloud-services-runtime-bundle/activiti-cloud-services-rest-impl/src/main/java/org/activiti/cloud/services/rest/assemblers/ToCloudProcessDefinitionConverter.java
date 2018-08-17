@@ -16,10 +16,10 @@
 
 package org.activiti.cloud.services.rest.assemblers;
 
+import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
-import org.activiti.runtime.api.model.CloudProcessDefinition;
-import org.activiti.runtime.api.model.ProcessDefinition;
-import org.activiti.runtime.api.model.impl.CloudProcessDefinitionImpl;
 
 public class ToCloudProcessDefinitionConverter {
 

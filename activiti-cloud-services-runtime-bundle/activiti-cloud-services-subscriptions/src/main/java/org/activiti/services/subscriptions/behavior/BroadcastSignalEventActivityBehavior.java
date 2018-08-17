@@ -1,5 +1,6 @@
 package org.activiti.services.subscriptions.behavior;
 
+import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.bpmn.model.Signal;
 import org.activiti.bpmn.model.SignalEventDefinition;
 import org.activiti.engine.delegate.DelegateExecution;
@@ -7,7 +8,6 @@ import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.impl.bpmn.behavior.IntermediateThrowSignalEventActivityBehavior;
 import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.interceptor.CommandContext;
-import org.activiti.runtime.api.model.payloads.SignalPayload;
 import org.activiti.spring.bpmn.parser.CloudActivityBehaviorFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
@@ -31,7 +31,7 @@ public class BroadcastSignalEventActivityBehavior extends IntermediateThrowSigna
         super.execute(execution);
 
         CommandContext commandContext = Context.getCommandContext();
-        String eventSubscriptionName = null;
+        String eventSubscriptionName;
         if (signalEventName != null) {
             eventSubscriptionName = signalEventName;
         } else {

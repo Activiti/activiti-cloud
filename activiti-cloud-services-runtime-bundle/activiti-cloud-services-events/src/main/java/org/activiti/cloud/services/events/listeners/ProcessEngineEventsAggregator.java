@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.events.listeners;
 
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
 public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggregator<CloudRuntimeEvent<?,?>, MessageProducerCommandContextCloseListener>{
 

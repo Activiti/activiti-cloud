@@ -16,11 +16,11 @@
 
 package org.activiti.cloud.services.events.listeners;
 
+import org.activiti.api.model.shared.event.VariableDeletedEvent;
+import org.activiti.api.runtime.shared.events.VariableEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudVariableEventConverter;
-import org.activiti.runtime.api.event.VariableEventListener;
-import org.activiti.runtime.api.event.VariableDeleted;
 
-public class CloudVariableDeletedProducer implements VariableEventListener<VariableDeleted> {
+public class CloudVariableDeletedProducer implements VariableEventListener<VariableDeletedEvent> {
 
     private ToCloudVariableEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
@@ -32,7 +32,7 @@ public class CloudVariableDeletedProducer implements VariableEventListener<Varia
     }
 
     @Override
-    public void onEvent(VariableDeleted event) {
+    public void onEvent(VariableDeletedEvent event) {
         eventsAggregator.add(converter.from(event));
     }
 }

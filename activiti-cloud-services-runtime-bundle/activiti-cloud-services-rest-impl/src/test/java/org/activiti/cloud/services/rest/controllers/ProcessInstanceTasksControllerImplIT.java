@@ -19,14 +19,14 @@ package org.activiti.cloud.services.rest.controllers;
 import java.util.Collections;
 import java.util.List;
 
+import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
-import org.activiti.runtime.api.TaskRuntime;
-import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.query.Page;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.junit.Before;
 import org.junit.Test;

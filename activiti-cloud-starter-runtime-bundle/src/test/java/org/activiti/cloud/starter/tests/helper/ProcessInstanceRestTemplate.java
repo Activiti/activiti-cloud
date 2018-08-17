@@ -19,13 +19,13 @@ package org.activiti.cloud.starter.tests.helper;
 import java.util.List;
 import java.util.Map;
 
-import org.activiti.runtime.api.model.CloudProcessInstance;
-import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.CloudVariableInstance;
-import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
-import org.activiti.runtime.api.model.payloads.RemoveProcessVariablesPayload;
-import org.activiti.runtime.api.model.payloads.SetProcessVariablesPayload;
-import org.activiti.runtime.api.model.payloads.StartProcessPayload;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
+import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
@@ -37,7 +37,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Component
 public class ProcessInstanceRestTemplate {

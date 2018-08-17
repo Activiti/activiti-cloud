@@ -16,15 +16,19 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
+import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
-import org.activiti.runtime.api.ProcessAdminRuntime;
-import org.activiti.runtime.api.model.ProcessDefinition;
 import org.activiti.runtime.api.model.impl.ProcessDefinitionImpl;
-import org.activiti.runtime.api.query.Page;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,10 +47,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
@@ -54,7 +54,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.*;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.halLinks;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -108,7 +110,7 @@ public class ProcessDefinitionAdminControllerImplIT {
                 my_process,
                 this_is_my_process,
                 version));
-        org.activiti.runtime.api.query.Page<ProcessDefinition> processDefinitionPage = new org.activiti.runtime.api.query.impl.PageImpl<>(processDefinitionList,
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
                 processDefinitionList.size());
         when(processAdminRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 

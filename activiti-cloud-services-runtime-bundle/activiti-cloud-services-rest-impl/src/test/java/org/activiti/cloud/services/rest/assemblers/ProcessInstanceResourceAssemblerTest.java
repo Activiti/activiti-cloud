@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.rest.assemblers;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
-import org.activiti.runtime.api.model.CloudProcessInstance;
-import org.activiti.runtime.api.model.ProcessInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

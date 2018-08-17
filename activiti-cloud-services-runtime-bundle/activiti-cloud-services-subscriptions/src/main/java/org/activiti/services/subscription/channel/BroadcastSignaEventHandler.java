@@ -1,7 +1,7 @@
 package org.activiti.services.subscription.channel;
 
+import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.engine.RuntimeService;
-import org.activiti.runtime.api.model.payloads.SignalPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -14,11 +14,16 @@ import org.springframework.stereotype.Component;
 @EnableBinding(ProcessEngineSignalChannels.class)
 public class BroadcastSignaEventHandler {
 
-    @Autowired
-    private BinderAwareChannelResolver resolver;
+    private final BinderAwareChannelResolver resolver;
+
+    private final RuntimeService runtimeService;
 
     @Autowired
-    private RuntimeService runtimeService;
+    public BroadcastSignaEventHandler(BinderAwareChannelResolver resolver,
+                                      RuntimeService runtimeService) {
+        this.resolver = resolver;
+        this.runtimeService = runtimeService;
+    }
 
     @StreamListener(ProcessEngineSignalChannels.SIGNAL_CONSUMER)
     public void receive(SignalPayload signalPayload) {

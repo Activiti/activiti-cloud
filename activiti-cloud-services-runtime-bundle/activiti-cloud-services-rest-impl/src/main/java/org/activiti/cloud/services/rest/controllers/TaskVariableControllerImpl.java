@@ -15,12 +15,12 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.payloads.SetTaskVariablesPayload;
+import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
 import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
-import org.activiti.runtime.api.TaskRuntime;
-import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
-import org.activiti.runtime.api.model.payloads.SetTaskVariablesPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;

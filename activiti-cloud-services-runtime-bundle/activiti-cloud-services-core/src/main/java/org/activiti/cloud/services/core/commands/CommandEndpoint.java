@@ -4,8 +4,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.activiti.api.model.shared.Payload;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.runtime.api.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

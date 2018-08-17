@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.rest.assemblers;
 
+import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
-import org.activiti.runtime.api.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.runtime.api.model.impl.ProcessDefinitionImpl;
 import org.junit.Before;
 import org.junit.Test;

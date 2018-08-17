@@ -15,16 +15,16 @@
       <artifactId>activiti-cloud-services-events</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-cloud-common-model-api-impl</artifactId>
+      <groupId>org.activiti.cloud.api</groupId>
+      <artifactId>activiti-cloud-api-model-shared-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-process-model-api</artifactId>
+      <groupId>org.activiti.api</groupId>
+      <artifactId>activiti-api-process-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-cloud-process-model-api</artifactId>
+      <groupId>org.activiti.cloud.api</groupId>
+      <artifactId>activiti-cloud-api-process-model</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
@@ -77,12 +77,12 @@
     <dependency>
       <!-- FIXME: temporary dependency, in the next iteration DefaultServiceTaskBehavior
       shoud be moved inside Activiti/Activiti so that we no longer need this dependency-->
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-process-runtime-api-impl</artifactId>
+      <groupId>org.activiti.api</groupId>
+      <artifactId>activiti-api-process-runtime-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-cloud-process-model-api-impl</artifactId>
+      <groupId>org.activiti.cloud.api</groupId>
+      <artifactId>activiti-cloud-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -134,7 +134,7 @@
         <configuration>
           <packages>
             <package>org.activiti.engine.impl.persistence.entity.integration</package>
-            <package>org.activiti.runtime.api.model</package>
+            <package>org.activiti.api.process.model</package>
           </packages>
 
           <!-- whether generated assertions classes can be inherited with consistent assertion chaining -->

@@ -15,14 +15,14 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskAdminController;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
-import org.activiti.runtime.api.TaskAdminRuntime;
-import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;

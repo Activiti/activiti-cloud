@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.runtime.api.EmptyResult;
-import org.activiti.runtime.api.ProcessAdminRuntime;
-import org.activiti.runtime.api.model.payloads.SignalPayload;
+import org.activiti.api.model.shared.EmptyResult;
+import org.activiti.api.process.model.payloads.SignalPayload;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;

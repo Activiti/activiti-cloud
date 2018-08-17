@@ -19,10 +19,10 @@ package org.activiti.cloud.starter.tests.runtime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.runtime.api.model.IntegrationContext;
-import org.activiti.runtime.api.model.IntegrationRequest;
-import org.activiti.runtime.api.model.impl.IntegrationResultImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;

@@ -1,15 +1,13 @@
 package org.activiti.cloud.services.rest.api;
 
+import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
-import org.activiti.runtime.api.model.payloads.CompleteTaskPayload;
-import org.activiti.runtime.api.model.payloads.CreateTaskPayload;
-import org.activiti.runtime.api.model.payloads.UpdateTaskPayload;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

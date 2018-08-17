@@ -18,16 +18,16 @@ package org.activiti.cloud.services.rest.assemblers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.activiti.api.task.model.Task;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskControllerImpl;
-import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.Task;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 
-import static org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED;
+import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 

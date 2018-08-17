@@ -16,15 +16,15 @@
 
 package org.activiti.cloud.services.events.converter;
 
-import org.activiti.runtime.api.event.CloudVariableCreated;
-import org.activiti.runtime.api.event.CloudVariableDeleted;
-import org.activiti.runtime.api.event.CloudVariableUpdated;
-import org.activiti.runtime.api.event.VariableCreated;
-import org.activiti.runtime.api.event.VariableDeleted;
-import org.activiti.runtime.api.event.VariableUpdated;
-import org.activiti.runtime.api.event.impl.CloudVariableCreatedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudVariableDeletedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudVariableUpdatedEventImpl;
+import org.activiti.api.model.shared.event.VariableCreatedEvent;
+import org.activiti.api.model.shared.event.VariableDeletedEvent;
+import org.activiti.api.model.shared.event.VariableUpdatedEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 
 public class ToCloudVariableEventConverter {
 
@@ -34,19 +34,19 @@ public class ToCloudVariableEventConverter {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
-    public CloudVariableCreated from(VariableCreated event) {
+    public CloudVariableCreatedEvent from(VariableCreatedEvent event) {
         CloudVariableCreatedEventImpl cloudEvent = new CloudVariableCreatedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudVariableUpdated from(VariableUpdated event) {
+    public CloudVariableUpdatedEvent from(VariableUpdatedEvent event) {
         CloudVariableUpdatedEventImpl cloudEvent = new CloudVariableUpdatedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudVariableDeleted from(VariableDeleted event) {
+    public CloudVariableDeletedEvent from(VariableDeletedEvent event) {
         CloudVariableDeletedEventImpl cloudEvent = new CloudVariableDeletedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;

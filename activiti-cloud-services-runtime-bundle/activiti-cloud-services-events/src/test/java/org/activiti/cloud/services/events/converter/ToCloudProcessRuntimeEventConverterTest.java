@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.services.events.converter;
 
-import org.activiti.runtime.api.event.CloudProcessStarted;
-import org.activiti.runtime.api.event.impl.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
 import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.junit.Before;
@@ -26,8 +26,8 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ToCloudProcessRuntimeEventConverterTest {
@@ -55,10 +55,10 @@ public class ToCloudProcessRuntimeEventConverterTest {
         event.setNestedProcessInstanceId("2");
 
         //when
-        CloudProcessStarted processStarted = converter.from(event);
+        CloudProcessStartedEvent processStarted = converter.from(event);
 
         //then
-        assertThat(processStarted).isInstanceOf(CloudProcessStarted.class);
+        assertThat(processStarted).isInstanceOf(CloudProcessStartedEvent.class);
 
         assertThat(processStarted.getEntity().getId()).isEqualTo("10");
         assertThat(processStarted.getEntity().getProcessDefinitionId()).isEqualTo("myProcessDef");

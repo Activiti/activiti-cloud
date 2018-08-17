@@ -18,13 +18,13 @@ package org.activiti.cloud.starter.tests.helper;
 
 import java.util.Map;
 
-import org.activiti.runtime.api.model.CloudTask;
-import org.activiti.runtime.api.model.CloudVariableInstance;
-import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
-import org.activiti.runtime.api.model.payloads.CreateTaskPayload;
-import org.activiti.runtime.api.model.payloads.SetTaskVariablesPayload;
-import org.activiti.runtime.api.model.payloads.UpdateTaskPayload;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.api.task.model.payloads.SetTaskVariablesPayload;
+import org.activiti.api.task.model.payloads.UpdateTaskPayload;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;

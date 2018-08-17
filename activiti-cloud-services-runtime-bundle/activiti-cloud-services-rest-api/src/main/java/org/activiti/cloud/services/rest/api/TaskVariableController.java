@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.rest.api;
 
+import org.activiti.api.task.model.payloads.SetTaskVariablesPayload;
 import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
-import org.activiti.runtime.api.model.payloads.SetTaskVariablesPayload;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;

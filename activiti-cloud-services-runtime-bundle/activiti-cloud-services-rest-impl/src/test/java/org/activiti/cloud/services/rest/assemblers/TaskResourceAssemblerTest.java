@@ -1,8 +1,8 @@
 package org.activiti.cloud.services.rest.assemblers;
 
+import org.activiti.api.task.model.Task;
+import org.activiti.cloud.api.task.model.impl.CloudTaskImpl;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
-import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.impl.CloudTaskImpl;
 import org.activiti.runtime.api.model.impl.TaskImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,8 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.hateoas.Link;
 
-import static org.activiti.runtime.api.model.Task.TaskStatus.ASSIGNED;
-import static org.activiti.runtime.api.model.Task.TaskStatus.CREATED;
+import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
+import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.MockitoAnnotations.initMocks;

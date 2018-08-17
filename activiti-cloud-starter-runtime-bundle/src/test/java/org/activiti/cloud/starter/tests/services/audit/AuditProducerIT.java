@@ -1,12 +1,21 @@
 package org.activiti.cloud.starter.tests.services.audit;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.TaskCandidateUser;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
-import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.activiti.runtime.api.event.TaskCandidateUserEvent;
-import org.activiti.runtime.api.model.*;
-import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,20 +33,28 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.activiti.runtime.api.event.BPMNActivityEvent.ActivityEvents.*;
-import static org.activiti.runtime.api.event.ProcessRuntimeEvent.ProcessEvents.*;
-import static org.activiti.runtime.api.event.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
-import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
-import static org.activiti.runtime.api.event.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED;
-import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
-import static org.activiti.runtime.api.event.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED;
-import static org.activiti.runtime.api.event.TaskRuntimeEvent.TaskEvents.*;
-import static org.activiti.runtime.api.event.VariableEvent.VariableEvents.*;
+import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_CREATED;
+import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_DELETED;
+import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_UPDATED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED;
+import static org.activiti.api.process.model.events.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
+import static org.activiti.api.task.model.events.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
+import static org.activiti.api.task.model.events.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED;
+import static org.activiti.api.task.model.events.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
+import static org.activiti.api.task.model.events.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_ACTIVATED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CANCELLED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -70,7 +87,7 @@ public class AuditProducerIT {
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
-        for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
+        for (CloudProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(),
                     pd.getId());
         }
@@ -80,7 +97,7 @@ public class AuditProducerIT {
     public void shouldProduceEventsDuringSimpleProcessExecution() {
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                Collections.singletonMap("name",
+                                                                                                           Collections.singletonMap("name",
                         "peter"));
 
         //then
@@ -90,18 +107,18 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(PROCESS_CREATED.name(),
-                            VARIABLE_CREATED.name(),
-                            PROCESS_STARTED.name(),
-                            ACTIVITY_STARTED.name()/*start event*/,
-                            ACTIVITY_COMPLETED.name()/*start event*/,
-                            SEQUENCE_FLOW_TAKEN.name(),
-                            ACTIVITY_STARTED.name()/*user task*/,
-                            TASK_CANDIDATE_GROUP_ADDED.name(),
-                            TASK_CANDIDATE_USER_ADDED.name(),
-                            TASK_CREATED.name());
+                                     VARIABLE_CREATED.name(),
+                                     PROCESS_STARTED.name(),
+                                     ACTIVITY_STARTED.name()/*start event*/,
+                                     BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*start event*/,
+                                     SEQUENCE_FLOW_TAKEN.name(),
+                                     ACTIVITY_STARTED.name()/*user task*/,
+                                     TASK_CANDIDATE_GROUP_ADDED.name(),
+                                     TASK_CANDIDATE_USER_ADDED.name(),
+                                     TASK_CREATED.name());
             assertThat(receivedEvents)
                     .filteredOn(event -> ACTIVITY_STARTED.equals(event.getEventType()))
-                    .extracting(event -> ((CloudBPMNActivityStarted) event).getEntity().getActivityType())
+                    .extracting(event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType())
                     .containsExactly("startEvent",
                             "userTask");
         });
@@ -151,14 +168,14 @@ public class AuditProducerIT {
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(TASK_COMPLETED.name(),
-                        TASK_CANDIDATE_GROUP_REMOVED.name(),
-                        TASK_CANDIDATE_USER_REMOVED.name(),
-                        ACTIVITY_COMPLETED.name()/*user task*/,
-                        SEQUENCE_FLOW_TAKEN.name(),
-                        ACTIVITY_STARTED.name()/*end event*/,
-                        ACTIVITY_COMPLETED.name()/*end event*/,
-                        VARIABLE_DELETED.name(),
-                        PROCESS_COMPLETED.name()));
+                                 TASK_CANDIDATE_GROUP_REMOVED.name(),
+                                 TASK_CANDIDATE_USER_REMOVED.name(),
+                                 BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*user task*/,
+                                 SEQUENCE_FLOW_TAKEN.name(),
+                                 ACTIVITY_STARTED.name()/*end event*/,
+                                 BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*end event*/,
+                                 VARIABLE_DELETED.name(),
+                                 PROCESS_COMPLETED.name()));
     }
 
     @Test
@@ -199,8 +216,8 @@ public class AuditProducerIT {
                     .hasSize(2)
                     .extracting(CloudRuntimeEvent::getEventType,
                             CloudRuntimeEvent::getEntityId)
-                    .containsExactly(tuple(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED,
-                            "hruser"),
+                    .containsExactly(tuple(TASK_CANDIDATE_USER_REMOVED,
+                                           "hruser"),
                             tuple(TASK_CANCELLED,
                                     task.getId())
                     );

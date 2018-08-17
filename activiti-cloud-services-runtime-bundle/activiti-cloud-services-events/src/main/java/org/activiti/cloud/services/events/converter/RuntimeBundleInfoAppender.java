@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.runtime.api.event.impl.CloudRuntimeEventImpl;
-import org.activiti.runtime.api.model.impl.CloudRuntimeEntityImpl;
 
 public class RuntimeBundleInfoAppender {
 

@@ -2,24 +2,24 @@ package org.activiti.cloud.starter.tests.cmdendpoint;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.activiti.runtime.api.Result;
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.payloads.ClaimTaskPayload;
-import org.activiti.runtime.api.model.payloads.CompleteTaskPayload;
-import org.activiti.runtime.api.model.payloads.ReleaseTaskPayload;
-import org.activiti.runtime.api.model.payloads.RemoveProcessVariablesPayload;
-import org.activiti.runtime.api.model.payloads.ResumeProcessPayload;
-import org.activiti.runtime.api.model.payloads.SetProcessVariablesPayload;
-import org.activiti.runtime.api.model.payloads.SetTaskVariablesPayload;
-import org.activiti.runtime.api.model.payloads.SignalPayload;
-import org.activiti.runtime.api.model.payloads.StartProcessPayload;
-import org.activiti.runtime.api.model.payloads.SuspendProcessPayload;
+import org.activiti.api.model.shared.Result;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
+import org.activiti.api.process.model.payloads.ResumeProcessPayload;
+import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
+import org.activiti.api.process.model.payloads.SignalPayload;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.process.model.payloads.SuspendProcessPayload;
+import org.activiti.api.task.model.payloads.ClaimTaskPayload;
+import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.payloads.ReleaseTaskPayload;
+import org.activiti.api.task.model.payloads.SetTaskVariablesPayload;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Profile(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
 @Component

@@ -17,6 +17,13 @@ package org.activiti.cloud.services.rest.controllers;
 
 import java.nio.charset.StandardCharsets;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.SignalPayload;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.process.runtime.ProcessRuntime;
+import org.activiti.api.runtime.shared.NotFoundException;
+import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
@@ -28,13 +35,6 @@ import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssemb
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
-import org.activiti.runtime.api.NotFoundException;
-import org.activiti.runtime.api.ProcessRuntime;
-import org.activiti.runtime.api.model.ProcessInstance;
-import org.activiti.runtime.api.model.builders.ProcessPayloadBuilder;
-import org.activiti.runtime.api.model.payloads.SignalPayload;
-import org.activiti.runtime.api.model.payloads.StartProcessPayload;
-import org.activiti.runtime.api.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
@@ -58,7 +58,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     private final ProcessInstanceResourceAssembler resourceAssembler;
 
-    private final AlfrescoPagedResourcesAssembler<org.activiti.runtime.api.model.ProcessInstance> pagedResourcesAssembler;
+    private final AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler;
 
     private final ProcessRuntime processRuntime;
 

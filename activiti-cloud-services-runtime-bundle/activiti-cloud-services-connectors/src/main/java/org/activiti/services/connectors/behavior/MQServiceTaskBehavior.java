@@ -18,6 +18,8 @@ package org.activiti.services.connectors.behavior;
 
 import java.util.Date;
 
+import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.delegate.TriggerableActivityBehavior;
@@ -25,8 +27,6 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
-import org.activiti.runtime.api.model.IntegrationRequest;
-import org.activiti.runtime.api.model.impl.IntegrationRequestImpl;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;

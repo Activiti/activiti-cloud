@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.runtime.api.Result;
-import org.activiti.runtime.api.TaskAdminRuntime;
-import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.payloads.ReleaseTaskPayload;
+import org.activiti.api.model.shared.Result;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.payloads.ReleaseTaskPayload;
+import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;

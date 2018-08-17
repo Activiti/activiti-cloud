@@ -15,19 +15,20 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import org.activiti.api.runtime.shared.NotFoundException;
+import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.api.task.model.payloads.UpdateTaskPayload;
+import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskController;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
-import org.activiti.runtime.api.NotFoundException;
-import org.activiti.runtime.api.TaskRuntime;
-import org.activiti.runtime.api.model.Task;
-import org.activiti.runtime.api.model.builders.TaskPayloadBuilder;
-import org.activiti.runtime.api.model.payloads.CompleteTaskPayload;
-import org.activiti.runtime.api.model.payloads.CreateTaskPayload;
-import org.activiti.runtime.api.model.payloads.UpdateTaskPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
@@ -68,7 +69,7 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public PagedResources<TaskResource> getTasks(Pageable pageable) {
-        org.activiti.runtime.api.query.Page<Task> taskPage = taskRuntime.tasks(pageConverter.toAPIPageable(pageable));
+        Page<Task> taskPage = taskRuntime.tasks(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
                                                   pageConverter.toSpringPage(pageable,
                                                                              taskPage),
@@ -147,7 +148,7 @@ public class TaskControllerImpl implements TaskController {
     @Override
     public PagedResources<TaskResource> getSubtasks(Pageable pageable,
                                                     @PathVariable String taskId) {
-        org.activiti.runtime.api.query.Page<Task> taskPage = taskRuntime
+        Page<Task> taskPage = taskRuntime
                 .tasks(pageConverter.toAPIPageable(pageable),
                        TaskPayloadBuilder
                                .tasks()

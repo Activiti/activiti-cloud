@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.rest.api;
 
+import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
-import org.activiti.runtime.api.model.payloads.StartProcessPayload;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;

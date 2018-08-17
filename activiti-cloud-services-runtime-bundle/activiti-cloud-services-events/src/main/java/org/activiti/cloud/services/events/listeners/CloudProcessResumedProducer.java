@@ -16,11 +16,11 @@
 
 package org.activiti.cloud.services.events.listeners;
 
+import org.activiti.api.process.runtime.events.ProcessResumedEvent;
+import org.activiti.api.process.runtime.events.listener.ProcessEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.activiti.runtime.api.event.ProcessResumed;
-import org.activiti.runtime.api.event.listener.ProcessEventListener;
 
-public class CloudProcessResumedProducer implements ProcessEventListener<ProcessResumed> {
+public class CloudProcessResumedProducer implements ProcessEventListener<ProcessResumedEvent> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
@@ -32,7 +32,7 @@ public class CloudProcessResumedProducer implements ProcessEventListener<Process
     }
 
     @Override
-    public void onEvent(ProcessResumed event) {
+    public void onEvent(ProcessResumedEvent event) {
         eventsAggregator.add(eventConverter.from(event));
     }
 }

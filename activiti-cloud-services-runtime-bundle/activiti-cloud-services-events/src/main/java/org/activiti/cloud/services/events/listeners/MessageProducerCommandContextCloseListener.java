@@ -18,11 +18,10 @@ package org.activiti.cloud.services.events.listeners;
 
 import java.util.List;
 
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.MessageBuilder;
 
 public class MessageProducerCommandContextCloseListener implements CommandContextCloseListener {
@@ -31,7 +30,6 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
     private final ProcessEngineChannels producer;
 
-    @Autowired
     public MessageProducerCommandContextCloseListener(ProcessEngineChannels producer) {
         this.producer = producer;
     }

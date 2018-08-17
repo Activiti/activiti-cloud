@@ -16,11 +16,11 @@
 
 package org.activiti.cloud.services.events.listeners;
 
+import org.activiti.api.task.runtime.events.TaskCandidateUserRemovedEvent;
+import org.activiti.api.task.runtime.events.listener.TaskCandidateEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
-import org.activiti.runtime.api.event.TaskCandidateUserRemoved;
-import org.activiti.runtime.api.event.listener.TaskCandidateEventListener;
 
-public class CloudTaskCandidateUserRemovedProducer implements TaskCandidateEventListener<TaskCandidateUserRemoved> {
+public class CloudTaskCandidateUserRemovedProducer implements TaskCandidateEventListener<TaskCandidateUserRemovedEvent> {
 
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
@@ -32,7 +32,7 @@ public class CloudTaskCandidateUserRemovedProducer implements TaskCandidateEvent
     }
 
     @Override
-    public void onEvent(TaskCandidateUserRemoved event) {
+    public void onEvent(TaskCandidateUserRemovedEvent event) {
         eventsAggregator.add(converter.from(event));
     }
 }

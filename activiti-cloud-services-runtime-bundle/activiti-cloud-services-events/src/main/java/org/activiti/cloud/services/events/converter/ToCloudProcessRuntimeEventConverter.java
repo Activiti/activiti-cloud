@@ -16,36 +16,36 @@
 
 package org.activiti.cloud.services.events.converter;
 
-import org.activiti.runtime.api.event.BPMNActivityCancelled;
-import org.activiti.runtime.api.event.BPMNActivityCompleted;
-import org.activiti.runtime.api.event.BPMNActivityStarted;
-import org.activiti.runtime.api.event.CloudBPMNActivityCancelled;
-import org.activiti.runtime.api.event.CloudBPMNActivityCompleted;
-import org.activiti.runtime.api.event.CloudBPMNActivityStarted;
-import org.activiti.runtime.api.event.CloudProcessCancelled;
-import org.activiti.runtime.api.event.CloudProcessCompleted;
-import org.activiti.runtime.api.event.CloudProcessCreated;
-import org.activiti.runtime.api.event.CloudProcessResumed;
-import org.activiti.runtime.api.event.CloudProcessStarted;
-import org.activiti.runtime.api.event.CloudProcessSuspended;
-import org.activiti.runtime.api.event.CloudSequenceFlowTaken;
-import org.activiti.runtime.api.event.ProcessCancelled;
-import org.activiti.runtime.api.event.ProcessCompleted;
-import org.activiti.runtime.api.event.ProcessCreated;
-import org.activiti.runtime.api.event.ProcessResumed;
-import org.activiti.runtime.api.event.ProcessStarted;
-import org.activiti.runtime.api.event.ProcessSuspended;
-import org.activiti.runtime.api.event.SequenceFlowTaken;
-import org.activiti.runtime.api.event.impl.CloudBPMNActivityCancelledEventImpl;
-import org.activiti.runtime.api.event.impl.CloudBPMNActivityCompletedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudBPMNActivityStartedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessCancelledEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessCompletedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessCreatedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessResumedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessStartedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudProcessSuspendedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudSequenceFlowTakenImpl;
+import org.activiti.api.process.model.events.BPMNActivityCancelledEvent;
+import org.activiti.api.process.model.events.BPMNActivityCompletedEvent;
+import org.activiti.api.process.model.events.BPMNActivityStartedEvent;
+import org.activiti.api.process.model.events.SequenceFlowTakenEvent;
+import org.activiti.api.process.runtime.events.ProcessCancelledEvent;
+import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
+import org.activiti.api.process.runtime.events.ProcessCreatedEvent;
+import org.activiti.api.process.runtime.events.ProcessResumedEvent;
+import org.activiti.api.process.runtime.events.ProcessStartedEvent;
+import org.activiti.api.process.runtime.events.ProcessSuspendedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
+import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenImpl;
 
 public class ToCloudProcessRuntimeEventConverter {
 
@@ -55,7 +55,7 @@ public class ToCloudProcessRuntimeEventConverter {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
-    public CloudProcessStarted from(ProcessStarted event) {
+    public CloudProcessStartedEvent from(ProcessStartedEvent event) {
         CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl(event.getEntity(),
                                                                                                  event.getNestedProcessDefinitionId(),
                                                                                                  event.getNestedProcessInstanceId());
@@ -63,37 +63,37 @@ public class ToCloudProcessRuntimeEventConverter {
         return cloudProcessStartedEvent;
     }
 
-    public CloudProcessCreated from(ProcessCreated event) {
+    public CloudProcessCreatedEvent from(ProcessCreatedEvent event) {
         CloudProcessCreatedEventImpl cloudEvent = new CloudProcessCreatedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudProcessResumed from(ProcessResumed event) {
+    public CloudProcessResumedEvent from(ProcessResumedEvent event) {
         CloudProcessResumedEventImpl cloudEvent = new CloudProcessResumedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudProcessSuspended from(ProcessSuspended event) {
+    public CloudProcessSuspendedEvent from(ProcessSuspendedEvent event) {
         CloudProcessSuspendedEventImpl cloudEvent = new CloudProcessSuspendedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudProcessCompleted from(ProcessCompleted event) {
+    public CloudProcessCompletedEvent from(ProcessCompletedEvent event) {
         CloudProcessCompletedEventImpl cloudEvent = new CloudProcessCompletedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudProcessCancelled from(ProcessCancelled event) {
+    public CloudProcessCancelledEvent from(ProcessCancelledEvent event) {
         CloudProcessCancelledEventImpl cloudEvent = new CloudProcessCancelledEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudBPMNActivityStarted from(BPMNActivityStarted event) {
+    public CloudBPMNActivityStartedEvent from(BPMNActivityStartedEvent event) {
         CloudBPMNActivityStartedEventImpl cloudEvent = new CloudBPMNActivityStartedEventImpl(event.getEntity(),
                                                                                              event.getEntity().getProcessDefinitionId(),
                                                                                              event.getEntity().getProcessInstanceId());
@@ -101,7 +101,7 @@ public class ToCloudProcessRuntimeEventConverter {
         return cloudEvent;
     }
 
-    public CloudBPMNActivityCompleted from(BPMNActivityCompleted event) {
+    public CloudBPMNActivityCompletedEvent from(BPMNActivityCompletedEvent event) {
         CloudBPMNActivityCompletedEventImpl cloudEvent = new CloudBPMNActivityCompletedEventImpl(event.getEntity(),
                                                                                                  event.getEntity().getProcessDefinitionId(),
                                                                                                  event.getEntity().getProcessInstanceId());
@@ -109,7 +109,7 @@ public class ToCloudProcessRuntimeEventConverter {
         return cloudEvent;
     }
 
-    public CloudBPMNActivityCancelled from(BPMNActivityCancelled event) {
+    public CloudBPMNActivityCancelledEvent from(BPMNActivityCancelledEvent event) {
         CloudBPMNActivityCancelledEventImpl cloudEvent = new CloudBPMNActivityCancelledEventImpl(event.getEntity(),
                                                                                                  event.getEntity().getProcessDefinitionId(),
                                                                                                  event.getEntity().getProcessInstanceId(),
@@ -118,7 +118,7 @@ public class ToCloudProcessRuntimeEventConverter {
         return cloudEvent;
     }
 
-    public CloudSequenceFlowTaken from(SequenceFlowTaken event) {
+    public CloudSequenceFlowTakenEvent from(SequenceFlowTakenEvent event) {
         CloudSequenceFlowTakenImpl cloudEvent = new CloudSequenceFlowTakenImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;

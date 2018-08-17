@@ -16,11 +16,11 @@
 
 package org.activiti.cloud.services.events.listeners;
 
+import org.activiti.api.task.runtime.events.TaskSuspendedEvent;
+import org.activiti.api.task.runtime.events.listener.TaskEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
-import org.activiti.runtime.api.event.TaskSuspended;
-import org.activiti.runtime.api.event.listener.TaskEventListener;
 
-public class CloudTaskSuspendedProducer implements TaskEventListener<TaskSuspended> {
+public class CloudTaskSuspendedProducer implements TaskEventListener<TaskSuspendedEvent> {
 
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
@@ -32,7 +32,7 @@ public class CloudTaskSuspendedProducer implements TaskEventListener<TaskSuspend
     }
 
     @Override
-    public void onEvent(TaskSuspended event) {
+    public void onEvent(TaskSuspendedEvent event) {
         eventsAggregator.add(converter.from(event));
     }
 }

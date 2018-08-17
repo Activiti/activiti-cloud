@@ -16,36 +16,36 @@
 
 package org.activiti.cloud.services.events.converter;
 
-import org.activiti.runtime.api.event.CloudTaskActivatedEvent;
-import org.activiti.runtime.api.event.CloudTaskAssignedEvent;
-import org.activiti.runtime.api.event.CloudTaskCancelledEvent;
-import org.activiti.runtime.api.event.CloudTaskCandidateGroupAddedEvent;
-import org.activiti.runtime.api.event.CloudTaskCandidateGroupRemovedEvent;
-import org.activiti.runtime.api.event.CloudTaskCandidateUserAddedEvent;
-import org.activiti.runtime.api.event.CloudTaskCandidateUserRemovedEvent;
-import org.activiti.runtime.api.event.CloudTaskCompletedEvent;
-import org.activiti.runtime.api.event.CloudTaskCreatedEvent;
-import org.activiti.runtime.api.event.CloudTaskSuspendedEvent;
-import org.activiti.runtime.api.event.TaskActivated;
-import org.activiti.runtime.api.event.TaskAssigned;
-import org.activiti.runtime.api.event.TaskCancelled;
-import org.activiti.runtime.api.event.TaskCandidateGroupAdded;
-import org.activiti.runtime.api.event.TaskCandidateGroupRemoved;
-import org.activiti.runtime.api.event.TaskCandidateUserAdded;
-import org.activiti.runtime.api.event.TaskCandidateUserRemoved;
-import org.activiti.runtime.api.event.TaskCompleted;
-import org.activiti.runtime.api.event.TaskCreated;
-import org.activiti.runtime.api.event.TaskSuspended;
-import org.activiti.runtime.api.event.impl.CloudTaskActivatedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskAssignedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCancelledEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCandidateGroupAddedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCandidateGroupRemovedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCandidateUserAddedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCandidateUserRemovedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCompletedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskCreatedEventImpl;
-import org.activiti.runtime.api.event.impl.CloudTaskSuspendedEventImpl;
+import org.activiti.api.task.runtime.events.TaskActivatedEvent;
+import org.activiti.api.task.runtime.events.TaskAssignedEvent;
+import org.activiti.api.task.runtime.events.TaskCancelledEvent;
+import org.activiti.api.task.runtime.events.TaskCandidateGroupAddedEvent;
+import org.activiti.api.task.runtime.events.TaskCandidateGroupRemovedEvent;
+import org.activiti.api.task.runtime.events.TaskCandidateUserAddedEvent;
+import org.activiti.api.task.runtime.events.TaskCandidateUserRemovedEvent;
+import org.activiti.api.task.runtime.events.TaskCompletedEvent;
+import org.activiti.api.task.runtime.events.TaskCreatedEvent;
+import org.activiti.api.task.runtime.events.TaskSuspendedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskActivatedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupRemovedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskSuspendedEvent;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskActivatedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserRemovedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
 
 public class ToCloudTaskRuntimeEventConverter {
 
@@ -55,61 +55,61 @@ public class ToCloudTaskRuntimeEventConverter {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
-    public CloudTaskCreatedEvent from(TaskCreated event) {
+    public CloudTaskCreatedEvent from(TaskCreatedEvent event) {
         CloudTaskCreatedEventImpl cloudEvent = new CloudTaskCreatedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskAssignedEvent from(TaskAssigned event) {
+    public CloudTaskAssignedEvent from(TaskAssignedEvent event) {
         CloudTaskAssignedEventImpl cloudEvent = new CloudTaskAssignedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskCompletedEvent from(TaskCompleted event) {
+    public CloudTaskCompletedEvent from(TaskCompletedEvent event) {
         CloudTaskCompletedEventImpl cloudEvent = new CloudTaskCompletedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskCancelledEvent from(TaskCancelled event) {
+    public CloudTaskCancelledEvent from(TaskCancelledEvent event) {
         CloudTaskCancelledEventImpl cloudEvent = new CloudTaskCancelledEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskSuspendedEvent from(TaskSuspended event) {
+    public CloudTaskSuspendedEvent from(TaskSuspendedEvent event) {
         CloudTaskSuspendedEventImpl cloudEvent = new CloudTaskSuspendedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskActivatedEvent from(TaskActivated event) {
+    public CloudTaskActivatedEvent from(TaskActivatedEvent event) {
         CloudTaskActivatedEventImpl cloudEvent = new CloudTaskActivatedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskCandidateUserAddedEvent from(TaskCandidateUserAdded event){
+    public CloudTaskCandidateUserAddedEvent from(TaskCandidateUserAddedEvent event){
         CloudTaskCandidateUserAddedEventImpl cloudEvent = new CloudTaskCandidateUserAddedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskCandidateUserRemovedEvent from(TaskCandidateUserRemoved event){
+    public CloudTaskCandidateUserRemovedEvent from(TaskCandidateUserRemovedEvent event){
         CloudTaskCandidateUserRemovedEventImpl cloudEvent = new CloudTaskCandidateUserRemovedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskCandidateGroupAddedEvent from(TaskCandidateGroupAdded event){
+    public CloudTaskCandidateGroupAddedEvent from(TaskCandidateGroupAddedEvent event){
         CloudTaskCandidateGroupAddedEventImpl cloudEvent = new CloudTaskCandidateGroupAddedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
-    public CloudTaskCandidateGroupRemovedEvent from(TaskCandidateGroupRemoved event){
+    public CloudTaskCandidateGroupRemovedEvent from(TaskCandidateGroupRemovedEvent event){
         CloudTaskCandidateGroupRemovedEventImpl cloudEvent = new CloudTaskCandidateGroupRemovedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;

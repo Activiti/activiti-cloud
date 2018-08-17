@@ -1,6 +1,6 @@
 package org.activiti.services.subscription;
 
-import org.activiti.runtime.api.model.payloads.SignalPayload;
+import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.services.subscription.channel.BroadcastSignaEventHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;

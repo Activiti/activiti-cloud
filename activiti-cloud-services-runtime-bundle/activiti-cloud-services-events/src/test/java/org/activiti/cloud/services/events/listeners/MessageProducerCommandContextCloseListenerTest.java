@@ -18,9 +18,9 @@ package org.activiti.cloud.services.events.listeners;
 
 import java.util.Collections;
 
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.engine.impl.interceptor.CommandContext;
-import org.activiti.runtime.api.event.CloudRuntimeEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

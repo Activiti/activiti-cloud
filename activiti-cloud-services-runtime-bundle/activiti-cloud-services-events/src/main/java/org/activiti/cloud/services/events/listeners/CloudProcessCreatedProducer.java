@@ -16,11 +16,11 @@
 
 package org.activiti.cloud.services.events.listeners;
 
+import org.activiti.api.process.runtime.events.ProcessCreatedEvent;
+import org.activiti.api.process.runtime.events.listener.ProcessEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.activiti.runtime.api.event.ProcessCreated;
-import org.activiti.runtime.api.event.listener.ProcessEventListener;
 
-public class CloudProcessCreatedProducer implements ProcessEventListener<ProcessCreated> {
+public class CloudProcessCreatedProducer implements ProcessEventListener<ProcessCreatedEvent> {
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
@@ -32,7 +32,7 @@ public class CloudProcessCreatedProducer implements ProcessEventListener<Process
     }
 
     @Override
-    public void onEvent(ProcessCreated event) {
+    public void onEvent(ProcessCreatedEvent event) {
         eventsAggregator.add(eventConverter.from(event));
     }
 }
