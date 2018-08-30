@@ -40,6 +40,7 @@ public class ApplicationEntity extends AuditableEntity<String> implements Applic
     private List<ModelEntity> models;
 
     @Id
+    //TODO: to auto-generate the uuid
     private String id;
 
     private String name;

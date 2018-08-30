@@ -23,7 +23,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.organization.api.Application;
-import org.activiti.cloud.organization.api.impl.ApplicationImpl;
 import org.activiti.cloud.services.organization.rest.config.ApiAlfrescoPageableApi;
 import org.activiti.cloud.services.organization.swagger.SwaggerConfiguration.AlfrescoApplicationPage;
 import org.springframework.data.domain.Pageable;
@@ -107,8 +106,7 @@ public interface ApplicationRestApi {
 
     @ApiOperation(
             tags = APPLICATIONS,
-            value = "Create new application",
-            response = ApplicationImpl.class)
+            value = "Create new application")
     @PostMapping(path = "/applications")
     @ResponseStatus(CREATED)
     Resource<Application> createApplication(
@@ -117,8 +115,7 @@ public interface ApplicationRestApi {
 
     @ApiOperation(
             tags = APPLICATIONS,
-            value = "Get application",
-            response = ApplicationImpl.class)
+            value = "Get application")
     @GetMapping(path = "/applications/{applicationId}")
     Resource<Application> getApplication(
             @ApiParam(GET_APPLICATIN_ID_PARAM_DESCR)
@@ -126,8 +123,7 @@ public interface ApplicationRestApi {
 
     @ApiOperation(
             tags = APPLICATIONS,
-            value = "Update application details",
-            response = ApplicationImpl.class)
+            value = "Update application details")
     @PutMapping(path = "/applications/{applicationId}")
     Resource<Application> updateApplication(
             @ApiParam(UPDATE_APPLICATION_ID_PARAM_DESCR)
@@ -147,8 +143,7 @@ public interface ApplicationRestApi {
     @ApiOperation(
             tags = APPLICATIONS,
             value = "Import an application as zip file",
-            notes = "Allows a zip file to be uploaded containing an app definition and any number of included models.",
-            response = ApplicationImpl.class)
+            notes = "Allows a zip file to be uploaded containing an app definition and any number of included models.")
     @PostMapping(path = "/applications/import", consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(CREATED)
     Resource<Application> importApplication(

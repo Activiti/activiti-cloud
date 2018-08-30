@@ -24,7 +24,6 @@ import org.springframework.cloud.openfeign.FeignClient;
  */
 @FeignClient(
         value = "modeling-app",
-        url = "http://localhost:8088",
         path = "/v1/forms")
 public interface FormModelReferenceService extends BaseModelService<ModelReference> {
 

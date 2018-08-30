@@ -24,7 +24,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.api.impl.ModelImpl;
 import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
@@ -47,8 +46,8 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_T
 import static org.activiti.cloud.services.organization.rest.api.ModelRestApi.MODELS;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.ATTACHEMNT_API_PARAM_DESCR;
-import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.UPLOAD_FILE_PARAM_NAME;
 import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.EXPORT_AS_ATTACHMENT_PARAM_NAME;
+import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.UPLOAD_FILE_PARAM_NAME;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -128,8 +127,7 @@ public interface ModelRestApi {
 
     @ApiOperation(
             tags = MODELS,
-            value = "Get metadata information for a model",
-            response = ModelImpl.class)
+            value = "Get metadata information for a model")
     @GetMapping(path = "/models/{modelId}")
     Resource<Model> getModel(
             @ApiParam(GET_MODEL_ID_PARAM_DESCR)
@@ -138,8 +136,7 @@ public interface ModelRestApi {
     @ApiOperation(
             tags = MODELS,
             value = "Create new standalone model",
-            notes = "Create a new standalone model",
-            response = ModelImpl.class)
+            notes = "Create a new standalone model")
     @PostMapping(path = "/models")
     @ResponseStatus(CREATED)
     Resource<Model> createModel(
@@ -149,8 +146,7 @@ public interface ModelRestApi {
     @ApiOperation(
             tags = MODELS,
             value = "Create new model belonging to an application",
-            notes = "Create a new model related to an existing application",
-            response = ModelImpl.class)
+            notes = "Create a new model related to an existing application")
     @PostMapping(path = "/applications/{applicationId}/models")
     @ResponseStatus(CREATED)
     Resource<Model> createModel(
@@ -214,8 +210,7 @@ public interface ModelRestApi {
     @ApiOperation(
             tags = MODELS,
             value = "Import a model from file",
-            notes = "Allows a file to be uploaded containing a model definition.",
-            response = ModelImpl.class)
+            notes = "Allows a file to be uploaded containing a model definition.")
     @PostMapping(path = "/applications/{applicationId}/models/import", consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(CREATED)
     Resource<Model> importModel(
