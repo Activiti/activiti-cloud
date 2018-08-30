@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.qa.story;
 
+import org.activiti.cloud.qa.model.modeling.ModelingContextHandler;
 import org.activiti.cloud.qa.rest.DirtyContextHandler;
 import org.activiti.cloud.qa.rest.EnableDirtyContext;
-import org.activiti.cloud.qa.steps.ModelingContextSteps;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeScenario;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class LifecycleActions {
 
     @BeforeScenario
     public void resetCurrentModelingObject() {
-        ModelingContextSteps.resetCurrentModelingObject();
+        ModelingContextHandler.resetCurrentModelingObject();
     }
 
     @AfterScenario

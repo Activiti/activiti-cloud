@@ -20,22 +20,23 @@ import java.util.Optional;
 import java.util.UUID;
 
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.qa.model.modeling.Application;
-import org.activiti.cloud.qa.model.modeling.Model;
+import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
-import org.activiti.cloud.qa.rest.feign.EnableModelingFeignContext;
 import org.activiti.cloud.qa.service.ModelingApplicationsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.activiti.cloud.qa.steps.ModelingModelsSteps.APPLICATION_MODELS_REL;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
 /**
  * Modeling applications steps
  */
-@EnableModelingFeignContext
+@EnableModelingContext
 public class ModelingApplicationsSteps extends ModelingContextSteps<Application> {
 
     @Autowired
@@ -43,8 +44,12 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
 
     @Step
     public Resource<Application> create(String applicationName) {
-        return create(new Application(UUID.randomUUID().toString(),
-                                      applicationName));
+        String id = UUID.randomUUID().toString();
+        Application application = mock(Application.class);
+        doReturn(id).when(application).getId();
+        doReturn(applicationName).when(application).getName();
+        return create(id,
+                      application);
     }
 
     @Step
@@ -61,8 +66,7 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
     public void checkCurrentApplicationName(String applicationName) {
         updateCurrentModelingObject();
         Resource<Application> currentContext = checkAndGetCurrentContext(Application.class);
-        Application application = currentContext.getContent();
-        assertThat(application.getName()).isEqualTo(applicationName);
+        assertThat(currentContext.getContent().getName()).isEqualTo(applicationName);
     }
 
     @Step
@@ -73,6 +77,18 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
                            .filter(identifier::test)
                            .findAny())
                 .isEmpty();
+    }
+
+    @Step
+    public void addApplicationToCurrentContext(Resource<Application> objectToAdd) {
+        addToCurrentContext(objectToAdd,
+                            Optional.empty());
+    }
+
+    @Step
+    public void addModelToCurrentContext(Resource<Model> objectToAdd) {
+        addToCurrentContext(objectToAdd,
+                            Optional.of(APPLICATION_MODELS_REL));
     }
 
     @Override

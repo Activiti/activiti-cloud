@@ -69,9 +69,8 @@ public class RuntimeFeignConfiguration {
     @Bean
     public RuntimeBundleService runtimeBundleService() {
         return FeignRestDataClient
-                .builder()
-                .encoder(new JacksonEncoder(objectMapper))
-                .decoder(new HalDecoder(objectMapper))
+                .builder(new JacksonEncoder(objectMapper),
+                         new HalDecoder(objectMapper))
                 .target(RuntimeBundleService.class,
                         runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
@@ -91,9 +90,8 @@ public class RuntimeFeignConfiguration {
     @Bean
     public AuditService auditClient() {
         return FeignRestDataClient
-                .builder()
-                .encoder(new JacksonEncoder())
-                .decoder(new HalDecoder(objectMapper))
+                .builder(new JacksonEncoder(),
+                         new HalDecoder(objectMapper))
                 .target(AuditService.class,
                         runtimeTestsConfigurationProperties.getAuditEventUrl());
     }
@@ -101,9 +99,8 @@ public class RuntimeFeignConfiguration {
     @Bean
     public QueryService queryService() {
         return FeignRestDataClient
-                .builder()
-                .encoder(new JacksonEncoder())
-                .decoder(new HalDecoder(objectMapper))
+                .builder(new JacksonEncoder(),
+                         new HalDecoder(objectMapper))
                 .target(QueryService.class,
                         runtimeTestsConfigurationProperties.getQueryUrl());
     }

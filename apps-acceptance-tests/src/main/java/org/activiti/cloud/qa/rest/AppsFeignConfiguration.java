@@ -16,9 +16,11 @@
 
 package org.activiti.cloud.qa.rest;
 
+import feign.gson.GsonEncoder;
 import org.activiti.cloud.qa.config.AppsTestsConfigurationProperties;
 import org.activiti.cloud.qa.rest.feign.FeignConfiguration;
 import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
+import org.activiti.cloud.qa.rest.feign.HalDecoder;
 import org.activiti.cloud.qa.service.AppsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +41,8 @@ public class AppsFeignConfiguration {
     @Bean
     AppsService appsService(){
         return FeignRestDataClient
-                .builder()
+                .builder(new GsonEncoder(),
+                         new HalDecoder())
                 .target(AppsService.class,
                         appsTestsConfigurationProperties.getAppsUrl());
     }

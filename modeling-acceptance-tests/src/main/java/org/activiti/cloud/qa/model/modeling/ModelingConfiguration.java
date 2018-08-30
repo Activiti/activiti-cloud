@@ -16,11 +16,20 @@
 
 package org.activiti.cloud.qa.model.modeling;
 
-import java.util.function.Predicate;
+import org.activiti.cloud.qa.rest.ModelingFeignConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
- * Model identifier
+ * Modeling configuration
  */
-public interface ModelingIdentifier<M> extends Predicate<M> {
+@Import(ModelingFeignConfiguration.class)
+@Configuration
+public class ModelingConfiguration {
 
+    @Bean
+    public ModelingContextHandler modelingContextHandler() {
+        return new ModelingContextHandler();
+    }
 }

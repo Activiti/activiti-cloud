@@ -16,8 +16,13 @@
 
 package org.activiti.cloud.qa.service;
 
-import org.activiti.cloud.qa.model.modeling.Model;
+import feign.codec.Decoder;
+import feign.codec.Encoder;
+import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.qa.rest.feign.FeignRestDataClient;
+
+import static org.activiti.cloud.qa.rest.ModelingFeignConfiguration.modelingDecoder;
+import static org.activiti.cloud.qa.rest.ModelingFeignConfiguration.modelingEncoder;
 
 /**
  * Modeling groups service
@@ -27,13 +32,26 @@ public interface ModelingModelsService extends FeignRestDataClient<ModelingModel
     String PATH = "/v1/models";
 
     @Override
+    default Encoder encoder() {
+        return modelingEncoder;
+    }
+
+    @Override
+    default Decoder decoder() {
+        return modelingDecoder;
+    }
+
+    @Override
     default Class<ModelingModelsService> getType() {
         return ModelingModelsService.class;
     }
 
-    static ModelingModelsService build(String baseUrl) {
+    static ModelingModelsService build(Encoder encoder,
+                                       Decoder decoder,
+                                       String baseUrl) {
         return FeignRestDataClient
-                .builder()
+                .builder(encoder,
+                         decoder)
                 .target(ModelingModelsService.class,
                         baseUrl + PATH);
     }

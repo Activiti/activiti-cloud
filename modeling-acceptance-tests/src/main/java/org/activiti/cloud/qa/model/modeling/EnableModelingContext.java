@@ -16,17 +16,20 @@
 
 package org.activiti.cloud.qa.model.modeling;
 
-import java.util.Optional;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
+import org.springframework.test.context.ContextConfiguration;
 
 /**
- * Modeling context
+ * Allow Feign modeling clients autowiring
  */
-public interface ModelingContext {
-
-    String getId();
-
-    String getName();
-
-    Optional<String> getRel();
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@ContextConfiguration(classes = {ModelingTestsConfigurationProperties.class, ModelingConfiguration.class})
+public @interface EnableModelingContext {
 
 }

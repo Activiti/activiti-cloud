@@ -16,34 +16,76 @@
 
 package org.activiti.cloud.qa.rest;
 
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.codec.Decoder;
+import feign.codec.Encoder;
+import feign.jackson.JacksonDecoder;
+import feign.jackson.JacksonEncoder;
+import org.activiti.cloud.organization.config.ApplicationDeserializer;
+import org.activiti.cloud.organization.config.Jackson2EntityConfiguration;
+import org.activiti.cloud.organization.config.ModelDeserializer;
 import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.rest.feign.FeignConfiguration;
 import org.activiti.cloud.qa.service.ModelingApplicationsService;
 import org.activiti.cloud.qa.service.ModelingModelsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.hateoas.hal.Jackson2HalModule;
 
 /**
  * Feign Configuration
  */
 @Configuration
-@Import(FeignConfiguration.class)
+@Import({
+        JacksonAutoConfiguration.class,
+        Jackson2EntityConfiguration.class,
+        FeignConfiguration.class,
+        ApplicationDeserializer.class,
+        ModelDeserializer.class
+})
 public class ModelingFeignConfiguration {
 
     @Autowired
     private ModelingTestsConfigurationProperties modelingTestsConfigurationProperties;
 
+    public static Encoder modelingEncoder;
+
+    public static Decoder modelingDecoder;
+
     @Bean
-    public ModelingApplicationsService modelingApplicationsService() {
-        return ModelingApplicationsService
-                .build(modelingTestsConfigurationProperties.getModelingUrl());
+    public Module jackson2HalModule() {
+        return new Jackson2HalModule();
     }
 
     @Bean
-    public ModelingModelsService modelingModelsService() {
+    public Encoder modelingEncoder(ObjectMapper objectMapper) {
+        return modelingEncoder = new JacksonEncoder(objectMapper);
+    }
+
+    @Bean
+    public Decoder modelingDecoder(ObjectMapper objectMapper) {
+        return modelingDecoder = new JacksonDecoder(objectMapper);
+    }
+
+    @Bean
+    public ModelingApplicationsService modelingApplicationsService(Encoder modelingEncoder,
+                                                                   Decoder modelingDecoder) {
+        return ModelingApplicationsService
+                .build(modelingEncoder,
+                       modelingDecoder,
+                       modelingTestsConfigurationProperties.getModelingUrl());
+    }
+
+    @Bean
+    public ModelingModelsService modelingModelsService(Encoder modelingEncoder,
+                                                       Decoder modelingDecoder) {
         return ModelingModelsService
-                .build(modelingTestsConfigurationProperties.getModelingUrl());
+                .build(modelingEncoder,
+                       modelingDecoder,
+                       modelingTestsConfigurationProperties.getModelingUrl());
     }
 }

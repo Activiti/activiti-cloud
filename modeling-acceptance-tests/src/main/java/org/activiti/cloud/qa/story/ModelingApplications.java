@@ -19,14 +19,15 @@ package org.activiti.cloud.qa.story;
 import java.util.List;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.model.modeling.Application;
+import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.qa.steps.ModelingApplicationsSteps;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.Resource;
 
-import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.named;
+import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.applicationNamed;
+import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.applicationsNamed;
 
 /**
  * Modeling applications scenarios
@@ -39,7 +40,7 @@ public class ModelingApplications {
     @When("the user creates an application '$applicationName'")
     public void createApplication(String applicationName) {
         Resource<Application> createdApplication = modelingApplicationsSteps.create(applicationName);
-        modelingApplicationsSteps.addToCurrentContext(createdApplication);
+        modelingApplicationsSteps.addApplicationToCurrentContext(createdApplication);
     }
 
     @When("update the application name to '$applicationName'")
@@ -54,34 +55,34 @@ public class ModelingApplications {
 
     @Then("the application '$applicationName' is created")
     public void checkApplicationExists(String applicationName) {
-        modelingApplicationsSteps.checkExists(named(applicationName));
+        modelingApplicationsSteps.checkExists(applicationNamed(applicationName));
     }
 
     @Then("delete application '$applicationName'")
     @When("the user delete the application '$applicationName'")
     public void deleteApplication(String applicationName) {
-        modelingApplicationsSteps.deleteAll(named(applicationName));
+        modelingApplicationsSteps.deleteAll(applicationNamed(applicationName));
     }
 
     @Then("delete applications '$applicationNames'")
     public void deleteApplications(List<String> applicationNames) {
-        modelingApplicationsSteps.deleteAll(named(applicationNames));
+        modelingApplicationsSteps.deleteAll(applicationsNamed(applicationNames));
     }
 
     @Given("an existing application '$applicationName'")
     public void ensureApplicationExists(String applicationName) {
-        if (!modelingApplicationsSteps.exists(named(applicationName))) {
+        if (!modelingApplicationsSteps.exists(applicationNamed(applicationName))) {
             modelingApplicationsSteps.create(applicationName);
         }
     }
 
     @When("the user opens the application '$applicationName'")
     public void openApplication(String applicationName) {
-        modelingApplicationsSteps.openModelingObject(named(applicationName));
+        modelingApplicationsSteps.openModelingObject(applicationNamed(applicationName));
     }
 
     @Then("the application '$applicationName' is deleted")
     public void checkApplicationNotFound(String applicationName) {
-        modelingApplicationsSteps.checkApplicationNotFound(named(applicationName));
+        modelingApplicationsSteps.checkApplicationNotFound(applicationNamed(applicationName));
     }
 }

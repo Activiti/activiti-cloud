@@ -17,13 +17,12 @@
 package org.activiti.cloud.qa.steps;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.qa.model.modeling.Model;
-import org.activiti.cloud.qa.model.modeling.ModelingContext;
+import org.activiti.cloud.qa.model.modeling.ModelingContextHandler;
 import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
 import org.activiti.cloud.qa.rest.DirtyContextHandler;
 import org.activiti.cloud.qa.rest.EnableDirtyContext;
@@ -40,23 +39,26 @@ import static org.springframework.hateoas.Link.REL_SELF;
  * Modeling context steps
  */
 @EnableDirtyContext
-public abstract class ModelingContextSteps<M extends ModelingContext> {
-
-    private static final String MODELING_CURRENT_CONTEXT = "modelingCurrentContext";
+public abstract class ModelingContextSteps<M> {
 
     @Autowired
     private DirtyContextHandler dirtyContextHandler;
 
-    protected Resource<M> create(M m) {
+    @Autowired
+    private ModelingContextHandler modelingContextHandler;
+
+    protected Resource<M> create(String id,
+                                 M m) {
         service().create(m);
-        return dirty(service().findById(m.getId()));
+        return dirty(service().findById(id));
     }
 
-    @Step
-    public void addToCurrentContext(Resource<? extends ModelingContext> objectToAdd) {
-        getCurrentModelingContext()
+    protected void addToCurrentContext(Resource<?> objectToAdd,
+                                       Optional<String> objectToAddRel) {
+        modelingContextHandler
+                .getCurrentModelingContext()
                 .ifPresent(resource -> {
-                    objectToAdd.getContent().getRel()
+                    objectToAddRel
                             .map(resource::getLink)
                             .map(Link::getHref)
                             .ifPresent(parentUri -> {
@@ -70,35 +72,36 @@ public abstract class ModelingContextSteps<M extends ModelingContext> {
     }
 
     @Step
-    public void checkExists(ModelingIdentifier identifier) {
+    public void checkExists(ModelingIdentifier<M> identifier) {
         assertThat(exists(identifier)).isTrue();
     }
 
     @Step
-    public void checkExistsInCurrentContext(ModelingIdentifier identifier) {
+    public void checkExistsInCurrentContext(ModelingIdentifier<M> identifier) {
         assertThat(existsInCurrentContext(identifier)).isTrue();
     }
 
     @Step
-    public void deleteAll(ModelingIdentifier identifier) {
+    public void deleteAll(ModelingIdentifier<M> identifier) {
         service().findAll()
                 .getContent()
                 .stream()
-                .filter(resourceGroup -> identifier.test(resourceGroup.getContent()))
-                .map(resourceGroup -> resourceGroup.getLink(REL_SELF))
+                .filter(resource -> identifier.test(resource.getContent()))
+                .map(resource -> resource.getLink(REL_SELF))
                 .map(Link::getHref)
                 .collect(Collectors.toList())
                 .forEach(service()::deleteByUri);
     }
 
     @Step
-    public boolean exists(ModelingIdentifier identifier) {
+    public boolean exists(ModelingIdentifier<M> identifier) {
         return existsInCollection(identifier,
                                   service().findAll().getContent());
     }
 
-    protected M findInCurrentContext(ModelingIdentifier identifier) {
-        return getCurrentModelingContext()
+    protected M findInCurrentContext(ModelingIdentifier<M> identifier) {
+        return modelingContextHandler
+                .getCurrentModelingContext()
                 .map(this::getRelUri)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -112,48 +115,42 @@ public abstract class ModelingContextSteps<M extends ModelingContext> {
                 .orElse(null);
     }
 
-    protected Optional<String> getRelUri(Resource<? extends ModelingContext> resource) {
+    protected Optional<String> getRelUri(Resource<?> resource) {
         return getRel()
                 .map(resource::getLink)
                 .map(Link::getHref);
     }
 
     protected void updateCurrentModelingObject() {
-        getCurrentModelingContext()
+        modelingContextHandler
+                .getCurrentModelingContext()
                 .map(resource -> resource.getLink(REL_SELF))
                 .map(Link::getHref)
                 .map(this::findByUri)
-                .ifPresent(this::setCurrentModelingObject);
-    }
-
-    protected Optional<Resource<? extends ModelingContext>> getCurrentModelingContext() {
-        return Optional.ofNullable(Serenity.sessionVariableCalled(MODELING_CURRENT_CONTEXT));
+                .ifPresent(modelingContextHandler::setCurrentModelingObject);
     }
 
     protected Resource<M> checkAndGetCurrentContext(Class<M> expetedCurrentContextClass) {
-        Optional<Resource<? extends ModelingContext>> currentModel = getCurrentModelingContext();
-        assertThat(currentModel).isNotEmpty();
-        assertThat(currentModel.get().getContent()).isInstanceOf(expetedCurrentContextClass);
-        return (Resource<M>) currentModel.get();
+        Optional<Resource<?>> currentModelingContext =
+                modelingContextHandler.getCurrentModelingContext();
+        assertThat(currentModelingContext).isNotEmpty();
+        assertThat(currentModelingContext.get().getContent()).isInstanceOf(expetedCurrentContextClass);
+        return (Resource<M>) currentModelingContext.get();
     }
 
-    protected void setCurrentModelingObject(Resource<? extends ModelingContext> currentModelingObject) {
-        Serenity.setSessionVariable(MODELING_CURRENT_CONTEXT)
-                .to(currentModelingObject);
-    }
-
-    public void openModelingObject(ModelingIdentifier identifier) {
+    public void openModelingObject(ModelingIdentifier<M> identifier) {
         Optional<Resource<M>> currentModelingObject = getAvailableModelingObjects()
                 .stream()
                 .filter(modelingObject -> identifier.test(modelingObject.getContent()))
                 .findFirst();
         assertThat(currentModelingObject.isPresent()).isTrue();
 
-        setCurrentModelingObject(currentModelingObject.get());
+        modelingContextHandler.setCurrentModelingObject(currentModelingObject.get());
     }
 
     protected Collection<Resource<M>> getAvailableModelingObjects() {
-        return getCurrentModelingContext()
+        return modelingContextHandler
+                .getCurrentModelingContext()
                 .map(this::getRelUri)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -162,8 +159,9 @@ public abstract class ModelingContextSteps<M extends ModelingContext> {
                 .orElseGet(() -> findAll().getContent());
     }
 
-    protected boolean existsInCurrentContext(ModelingIdentifier identifier) {
-        return getCurrentModelingContext()
+    protected boolean existsInCurrentContext(ModelingIdentifier<M> identifier) {
+        return modelingContextHandler
+                .getCurrentModelingContext()
                 .map(this::getRelUri)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -174,11 +172,12 @@ public abstract class ModelingContextSteps<M extends ModelingContext> {
                 .orElse(false);
     }
 
-    protected boolean existsInCollection(ModelingIdentifier identifier,
+    protected boolean existsInCollection(ModelingIdentifier<M> identifier,
                                          Collection<Resource<M>> modelingObjects) {
         return modelingObjects
                 .stream()
                 .map(Resource::getContent)
+                .filter(Objects::nonNull)
                 .filter(identifier)
                 .findFirst()
                 .isPresent();
@@ -196,10 +195,6 @@ public abstract class ModelingContextSteps<M extends ModelingContext> {
 
     protected String dirty(String uri) {
         return dirtyContextHandler.dirty(uri);
-    }
-
-    public static void resetCurrentModelingObject() {
-        Serenity.setSessionVariable(MODELING_CURRENT_CONTEXT).to(null);
     }
 
     protected Resource<M> findByUri(String uri) {

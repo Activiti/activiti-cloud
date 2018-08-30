@@ -20,32 +20,38 @@ import java.util.Optional;
 import java.util.UUID;
 
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.qa.model.modeling.Model;
-import org.activiti.cloud.qa.model.modeling.Model.ModelType;
-import org.activiti.cloud.qa.model.modeling.ModelingContext;
-import org.activiti.cloud.qa.rest.feign.EnableModelingFeignContext;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.service.ModelingModelsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
 /**
  * Modeling steps for process models, from models, ...
  */
-@EnableModelingFeignContext
+@EnableModelingContext
 public class ModelingModelsSteps extends ModelingContextSteps<Model> {
+
+    public static final String APPLICATION_MODELS_REL = "models";
 
     @Autowired
     private ModelingModelsService modelingModelsService;
 
     @Step
     public Resource<Model> create(String modelName,
-                                  String modelType) {
-        return create(new Model(UUID.randomUUID().toString(),
-                                modelName,
-                                ModelType.forText(modelType)));
+                                  ModelType modelType) {
+        String id = UUID.randomUUID().toString();
+        Model model = mock(Model.class);
+        doReturn(id).when(model).getId();
+        doReturn(modelType).when(model).getType();
+        doReturn(modelName).when(model).getName();
+        return create(id,
+                      model);
     }
 
     @Step
@@ -70,7 +76,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     @Override
     protected Optional<String> getRel() {
-        return Optional.of(Model.APPLICATION_MODELS_REL);
+        return Optional.of(APPLICATION_MODELS_REL);
     }
 
     @Override

@@ -19,10 +19,13 @@ package org.activiti.cloud.qa.model.modeling;
 import java.util.Arrays;
 import java.util.List;
 
+import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Model;
+
 /**
  * Identifier by name
  */
-public class ModelingNamingIdentifier implements ModelingIdentifier {
+public abstract class ModelingNamingIdentifier<M> implements ModelingIdentifier<M> {
 
     private List<String> names;
 
@@ -39,15 +42,37 @@ public class ModelingNamingIdentifier implements ModelingIdentifier {
     }
 
     @Override
-    public boolean test(ModelingContext modelingContext) {
-        return names.contains(modelingContext.getName());
+    public boolean test(M modelingContext) {
+        return names.contains(getName(modelingContext));
     }
 
-    public static ModelingNamingIdentifier named(String name) {
-        return new ModelingNamingIdentifier(name);
+    protected abstract String getName(M modelingContext);
+
+    public static ModelingNamingIdentifier<Application> applicationNamed(String name) {
+        return new ModelingNamingIdentifier<Application>(name) {
+            @Override
+            protected String getName(Application application) {
+                return application.getName();
+            }
+        };
     }
 
-    public static ModelingNamingIdentifier named(List<String> name) {
-        return new ModelingNamingIdentifier(name);
+    public static ModelingNamingIdentifier applicationsNamed(List<String> names) {
+        return new ModelingNamingIdentifier<Application>(names) {
+            @Override
+            protected String getName(Application application) {
+                return application.getName();
+            }
+        };
     }
+
+    public static ModelingNamingIdentifier modelNamed(String name) {
+        return new ModelingNamingIdentifier<Model>(name) {
+            @Override
+            protected String getName(Model application) {
+                return application.getName();
+            }
+        };
+    }
+
 }
