@@ -59,11 +59,6 @@
         <version>${activiti-cloud-runtime-bundle.version}</version>
         <scope>test</scope>
       </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-starter-configure</artifactId>
-        <version>${activiti-cloud-runtime-bundle.version}</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
