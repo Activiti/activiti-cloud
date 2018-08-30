@@ -18,23 +18,17 @@ package org.activiti.cloud.services.auditable;
 
 import java.util.Date;
 
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Auditable entity
  */
 public abstract class AbstractAuditable<U> implements Auditable<U> {
 
-    @ApiModelProperty(value = "The user that created this entity", readOnly = true)
     protected U createdBy;
 
-    @ApiModelProperty(value = "The creation date of this entity", readOnly = true)
     protected Date creationDate;
 
-    @ApiModelProperty(value = "The last user that modified this entity", readOnly = true)
     protected U lastModifiedBy;
 
-    @ApiModelProperty(value = "The last modification date of this entity", readOnly = true)
     protected Date lastModifiedDate;
 
     public U getCreatedBy() {

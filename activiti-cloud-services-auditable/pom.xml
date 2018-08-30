@@ -26,10 +26,4 @@
   </parent>
   <artifactId>activiti-cloud-services-auditable</artifactId>
   <name>Activiti Cloud Services :: Auditable</name>
-  <dependencies>
-    <dependency>
-      <groupId>io.swagger</groupId>
-      <artifactId>swagger-annotations</artifactId>
-    </dependency>
-  </dependencies>
 </project>
