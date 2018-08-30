@@ -18,19 +18,25 @@ package org.activiti.cloud.organization.api.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.services.auditable.AbstractAuditable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Implementation for {@link Application}
  */
+@ApiModel("Application")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ApplicationImpl extends AuditableImpl implements Application<String> {
+public class ApplicationImpl extends AbstractAuditable<String> implements Application<String> {
 
+    @ApiModelProperty(value = "The unique identifier of the application", readOnly = true)
     private String id;
 
+    @ApiModelProperty(value = "The name of the application")
     private String name;
 
     public ApplicationImpl() {

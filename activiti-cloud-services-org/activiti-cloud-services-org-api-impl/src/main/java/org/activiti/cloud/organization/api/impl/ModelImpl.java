@@ -16,33 +16,47 @@
 
 package org.activiti.cloud.organization.api.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.services.auditable.AbstractAuditable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Implementation for {@link Model}
  */
+@ApiModel("Model")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ModelImpl extends AuditableImpl implements Model<ApplicationImpl, String> {
+public class ModelImpl extends AbstractAuditable<String> implements Model<ApplicationImpl, String> {
 
+    @ApiModelProperty(readOnly = true)
     private String id;
 
+    @ApiModelProperty("The name of the model")
     private String name;
 
+    @ApiModelProperty(value = "The type of the model", readOnly = true)
     private ModelType type;
 
-    private ApplicationImpl application;
-
+    @ApiModelProperty(value = "The version of the model", readOnly = true)
     private String version;
 
+    @ApiModelProperty(value = "The content type of the model", readOnly = true, hidden = true)
+    @JsonIgnore
     private String contentType;
 
+    @ApiModelProperty(value = "The content of the model", readOnly = true, hidden = true)
+    @JsonIgnore
     private String content;
+
+    @ApiModelProperty(hidden = true)
+    private ApplicationImpl application;
 
     public ModelImpl() {
 

@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.organization.jpa;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.services.organization.entity.ApplicationEntity;
@@ -47,6 +48,9 @@ public interface ApplicationJpaRepository extends JpaRepository<ApplicationEntit
 
     @Override
     default ApplicationEntity createApplication(ApplicationEntity application) {
+        if (application.getId() == null) {
+            application.setId(UUID.randomUUID().toString());
+        }
         return save(application);
     }
 
@@ -58,5 +62,10 @@ public interface ApplicationJpaRepository extends JpaRepository<ApplicationEntit
     @Override
     default void deleteApplication(ApplicationEntity application) {
         delete(application);
+    }
+
+    @Override
+    default Class<ApplicationEntity> getApplicationType() {
+        return ApplicationEntity.class;
     }
 }

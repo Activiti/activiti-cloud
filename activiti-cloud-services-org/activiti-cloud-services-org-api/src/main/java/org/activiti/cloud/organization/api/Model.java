@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.organization.api;
 
+import org.activiti.cloud.services.auditable.Auditable;
+
 /**
  * Interface for models
  */

@@ -16,12 +16,17 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
+import java.io.IOException;
 import java.util.Optional;
+import javax.servlet.http.HttpServletResponse;
 
+import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.organization.api.Application;
-import org.activiti.cloud.organization.repository.ApplicationRepository;
+import org.activiti.cloud.services.common.file.FileContent;
+import org.activiti.cloud.services.organization.rest.api.ApplicationRestApi;
 import org.activiti.cloud.services.organization.rest.assembler.ApplicationResourceAssembler;
+import org.activiti.cloud.services.organization.service.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -29,77 +34,98 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
 
 /**
  * Controller for {@link Application} resources
  */
 @RestController
-@RequestMapping(produces = {HAL_JSON_VALUE, APPLICATION_JSON_VALUE})
-public class ApplicationController {
+public class ApplicationController implements ApplicationRestApi {
 
-    private final ApplicationRepository applicationRepository;
+    private final ApplicationService applicationService;
 
     private final ApplicationResourceAssembler resourceAssembler;
 
     private final AlfrescoPagedResourcesAssembler<Application> pagedResourcesAssembler;
 
     @Autowired
-    public ApplicationController(ApplicationRepository applicationRepository,
+    public ApplicationController(ApplicationService applicationService,
                                  ApplicationResourceAssembler resourceAssembler,
                                  AlfrescoPagedResourcesAssembler<Application> pagedResourcesAssembler) {
-        this.applicationRepository = applicationRepository;
+        this.applicationService = applicationService;
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
-    @RequestMapping(method = GET, path = "/v1/applications")
-    public PagedResources<Resource<Application>> getApplication(Pageable pageable) {
+    @Override
+    public PagedResources<Resource<Application>> getApplications(Pageable pageable) {
         return pagedResourcesAssembler.toResource(
                 pageable,
-                applicationRepository.getApplications(pageable),
+                applicationService.getApplications(pageable),
                 resourceAssembler);
     }
 
-    @RequestMapping(method = GET, path = "/v1/applications/{applicationId}")
-    public Resource<Application> getApplication(@PathVariable String applicationId) {
+    @Override
+    public Resource<Application> getApplication(
+            @ApiParam(GET_APPLICATIN_ID_PARAM_DESCR)
+            @PathVariable String applicationId) {
         return resourceAssembler.toResource(findApplicationById(applicationId));
     }
 
-    @RequestMapping(method = POST, path = "/v1/applications")
-    @ResponseStatus(CREATED)
-    public Resource<Application> createApplication(@RequestBody Application application) {
-        return resourceAssembler.toResource(applicationRepository.createApplication(application));
+    @Override
+    public Resource<Application> createApplication(
+            @ApiParam(CREATE_APPLICATION_PARAM_DESCR)
+            @RequestBody Application application) {
+        return resourceAssembler.toResource(applicationService.createApplication(application));
     }
 
-    @RequestMapping(method = PUT, path = "/v1/applications/{applicationId}")
-    @ResponseStatus(NO_CONTENT)
-    public Resource<Application> updateApplication(@PathVariable String applicationId,
-                                                   @RequestBody Application application) {
+    @Override
+    public Resource<Application> updateApplication(
+            @ApiParam(UPDATE_APPLICATION_ID_PARAM_DESCR)
+            @PathVariable String applicationId,
+            @ApiParam(UPDATE_APPLICATION_PARAM_DESCR)
+            @RequestBody Application application) {
         Application applicationToUpdate = findApplicationById(applicationId);
-        return resourceAssembler.toResource(applicationRepository.updateApplication(applicationToUpdate,
-                                                                                    application));
+        return resourceAssembler.toResource(applicationService.updateApplication(applicationToUpdate,
+                                                                                 application));
     }
 
-    @RequestMapping(method = DELETE, path = "/v1/applications/{applicationId}")
-    @ResponseStatus(NO_CONTENT)
-    public void deleteApplication(@PathVariable String applicationId) {
-        applicationRepository.deleteApplication(findApplicationById(applicationId));
+    @Override
+    public void deleteApplication(
+            @ApiParam(DELETE_APPLICATION_ID_PARAM_DESCR)
+            @PathVariable String applicationId) {
+        applicationService.deleteApplication(findApplicationById(applicationId));
+    }
+
+    @Override
+    public Resource<Application> importApplication(
+            @ApiParam(IMPORT_APPLICATION_FILE_PARAM_DESCR)
+            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
+        return resourceAssembler.toResource(applicationService.importApplication(file));
+    }
+
+    @Override
+    public void exportApplication(
+            HttpServletResponse response,
+            @ApiParam(EXPORT_APPLICATION_ID_PARAM_DESCR)
+            @PathVariable String applicationId,
+            @ApiParam(ATTACHEMNT_API_PARAM_DESCR)
+            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
+                    required = false,
+                    defaultValue = "true") boolean attachment) throws IOException {
+        Application application = findApplicationById(applicationId);
+        FileContent fileContent = applicationService.exportApplication(application);
+        writeFileToResponse(response,
+                            fileContent,
+                            attachment);
     }
 
     public Application findApplicationById(String applicationId) {
-        Optional<Application> optionalApplication = applicationRepository.findApplicationById(applicationId);
+        Optional<Application> optionalApplication = applicationService.findApplicationById(applicationId);
         return optionalApplication
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found: " + applicationId));
     }

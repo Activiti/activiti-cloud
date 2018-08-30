@@ -19,6 +19,7 @@
     <module>activiti-cloud-services-org-rest</module>
     <module>activiti-cloud-services-org-repository</module>
     <module>activiti-cloud-services-org-api</module>
+    <module>activiti-cloud-services-org-service</module>
     <module>activiti-cloud-services-org-api-impl</module>
   </modules>
 

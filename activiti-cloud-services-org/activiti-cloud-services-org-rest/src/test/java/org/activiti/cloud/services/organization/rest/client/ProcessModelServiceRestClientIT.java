@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
+import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
@@ -44,8 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = OrganizationRestApplication.class)
 @WebAppConfiguration
-@AutoConfigureStubRunner(
-        ids = "org.activiti.cloud:activiti-cloud-services-process-model-rest:+:stubs:8088")
+@AutoConfigureStubRunner(ids = "org.activiti.cloud:activiti-cloud-services-process-model-rest:+:stubs:8088")
 public class ProcessModelServiceRestClientIT {
 
     @Autowired
@@ -63,7 +63,7 @@ public class ProcessModelServiceRestClientIT {
 
     @Test
     public void testCreateProcessModel() throws Exception {
-        Model processModel = new ModelEntity("newProcesModelId",
+        Model processModel = new ModelEntity("contractNewProcesModelId",
                                              "newProcesModelName",
                                              PROCESS
         );
@@ -93,7 +93,7 @@ public class ProcessModelServiceRestClientIT {
                 .contentType(APPLICATION_JSON_VALUE)
                 .body(mapper.writeValueAsString(newProcessModel))
                 .put("/v1/models/contractUpdateProcesModelId")
-                .then().expect(status().isNoContent());
+                .then().expect(status().isOk());
     }
 
     @Test
@@ -109,8 +109,6 @@ public class ProcessModelServiceRestClientIT {
                 .then().expect(status().isOk())
                 .and().body("name",
                             equalTo("contractUpdateProcesModelNameUpdated"))
-                .and().body("content",
-                            equalTo("contractContentVersion002"))
                 .and().body("version",
                             equalTo("0.0.2"));
     }

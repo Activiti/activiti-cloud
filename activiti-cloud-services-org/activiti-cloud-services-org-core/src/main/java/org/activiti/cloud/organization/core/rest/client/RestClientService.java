@@ -16,6 +16,10 @@
 
 package org.activiti.cloud.organization.core.rest.client;
 
+import java.util.List;
+
+import org.activiti.cloud.organization.api.ModelValidationError;
+
 /**
  * Rest client interface
  */
@@ -33,4 +37,7 @@ public interface RestClientService<T, R, K> {
 
     void deleteResource(T resourceType,
                         K resourceId);
+
+    List<ModelValidationError> validateResourceContent(T resourceType,
+                                                       byte[] file);
 }

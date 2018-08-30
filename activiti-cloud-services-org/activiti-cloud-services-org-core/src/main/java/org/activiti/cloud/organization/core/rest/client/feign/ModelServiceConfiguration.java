@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.core.model.ModelReference;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,13 +34,13 @@ import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 @Configuration
 public class ModelServiceConfiguration {
 
-    private final ProcessModelService processModelService;
+    private final ProcessModelReferenceService processModelService;
 
-    private final FormModelService formModelService;
+    private final FormModelReferenceService formModelService;
 
     @Autowired
-    public ModelServiceConfiguration(ProcessModelService processModelService,
-                                     FormModelService formModelService) {
+    public ModelServiceConfiguration(ProcessModelReferenceService processModelService,
+                                     FormModelReferenceService formModelService) {
         this.processModelService = processModelService;
         this.formModelService = formModelService;
     }

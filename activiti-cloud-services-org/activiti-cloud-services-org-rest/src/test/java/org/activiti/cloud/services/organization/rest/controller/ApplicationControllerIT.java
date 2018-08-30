@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.rest.api;
+package org.activiti.cloud.services.organization.rest.controller;
 
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.core.model.ModelReference;
-import org.activiti.cloud.organization.core.rest.client.ModelService;
+import org.activiti.cloud.organization.core.rest.client.ModelReferenceService;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
@@ -46,6 +46,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.activiti.cloud.organization.api.ModelType.FORM;
 import static org.activiti.cloud.organization.api.ModelType.PROCESS;
+import static org.activiti.cloud.services.organization.mock.MockFactory.application;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.is;
@@ -68,7 +69,7 @@ public class ApplicationControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private ModelService modelService;
+    private ModelReferenceService modelService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -96,29 +97,98 @@ public class ApplicationControllerIT {
     @Test
     public void testGetApplications() throws Exception {
 
-        //given
-        final String applicationId = "application_id";
-        final String applicationName = "Application";
-        Application application = new ApplicationEntity(applicationId,
-                                                        applicationName);
+        // GIVEN
+        applicationRepository.createApplication(application("Application1"));
+        applicationRepository.createApplication(application("Application2"));
 
-        //when
-        application = applicationRepository.createApplication(application);
-        assertThat(application).isNotNull();
-
-        //then
+        // WHEN
         mockMvc.perform(get("{version}/applications",
                             RepositoryRestConfig.API_VERSION))
+                // THEN
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.applications",
-                                    hasSize(1)))
+                                    hasSize(2)))
                 .andExpect(jsonPath("$._embedded.applications[0].name",
-                                    is(applicationName)));
+                                    is("Application1")))
+                .andExpect(jsonPath("$._embedded.applications[1].name",
+                                    is("Application2")));
+    }
+
+    @Test
+    public void testGetApplication() throws Exception {
+        // GIVEN
+        Application application = application("Existing Application");
+        applicationRepository.createApplication(application);
+
+        // WHEN
+        mockMvc.perform(get("{version}/applications/{applicationId}",
+                            API_VERSION,
+                            application.getId()))
+                // THEN
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name",
+                                    is("Existing Application")));
+    }
+
+    @Test
+    public void testCreateApplication() throws Exception {
+        // GIVEN
+        Application application = application("New application name");
+
+        // WHEN
+        mockMvc.perform(post("{version}/applications",
+                            API_VERSION)
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(application)))
+                // THEN
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name",
+                                    is("New application name")));
+    }
+
+    @Test
+    public void testUpdateApplication() throws Exception {
+        // GIVEN
+        Application application = application("Application to update");
+        applicationRepository.createApplication(application);
+
+        // WHEN
+        mockMvc.perform(put("{version}/applications/{applicationId}",
+                            API_VERSION,
+                            application.getId())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(application("Updated application name"))))
+                // THEN
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name",
+                                    is("Updated application name")));
+
+        assertThat((Optional<Application>) applicationRepository.findApplicationById(application.getId()))
+                .hasValueSatisfying(updatedApplication -> {
+                    assertThat(updatedApplication.getName()).isEqualTo("Updated application name");
+                });
+    }
+
+    @Test
+    public void testDeleteApplication() throws Exception {
+        // GIVEN
+        Application application = application("Application to delete");
+        applicationRepository.createApplication(application);
+
+        // WHEN
+        mockMvc.perform(delete("{version}/applications/{applicationId}",
+                               API_VERSION,
+                               application.getId()))
+                // THEN
+                .andExpect(status().isNoContent());
+
+        assertThat(applicationRepository.findApplicationById(application.getId())).isEmpty();
     }
 
     @Test
     public void testCreateApplicationsWithModels() throws Exception {
+        // GIVEN
         final String formModelId = "form_model_id";
         final String formModelName = "Form Model";
 
@@ -138,13 +208,11 @@ public class ApplicationControllerIT {
                 .getResource(eq(PROCESS),
                              eq(expectedProcessModel.getModelId()));
 
-        //given
         final String applicationWithModelsId = "application_with_models_id";
         final String applicationWithModelsName = "application with models";
         Application application = new ApplicationEntity(applicationWithModelsId,
                                                         applicationWithModelsName);
 
-        // create an application
         mockMvc.perform(post("{version}/applications",
                              RepositoryRestConfig.API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -152,47 +220,35 @@ public class ApplicationControllerIT {
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        // create a form model
         Model modelForm = new ModelEntity(formModelId,
                                           formModelName,
                                           FORM);
 
-        mockMvc.perform(post("{version}/models",
-                             RepositoryRestConfig.API_VERSION)
+        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+                             RepositoryRestConfig.API_VERSION,
+                             applicationWithModelsId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(modelForm)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        // create a process-model
         Model processModel = new ModelEntity(processModelId,
                                              processModelName,
-                                             PROCESS
-        );
+                                             PROCESS);
 
-        mockMvc.perform(post("{version}/models",
-                             RepositoryRestConfig.API_VERSION)
+        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+                             RepositoryRestConfig.API_VERSION,
+                             applicationWithModelsId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        //when
-        String uriList = "http://localhost" + RepositoryRestConfig.API_VERSION + "/models/" + formModelId + "\n"
-                + "http://localhost" + RepositoryRestConfig.API_VERSION + "/models/" + processModelId;
-
-        mockMvc.perform(put("{version}/applications/{applicationId}/models",
-                            RepositoryRestConfig.API_VERSION,
-                            applicationWithModelsId)
-                                .contentType("text/uri-list")
-                                .content(uriList))
-                .andDo(print())
-                .andExpect(status().isNoContent());
-
-        //then
+        // WHEN
         mockMvc.perform(get("{version}/applications/{applicationId}/models",
                             RepositoryRestConfig.API_VERSION,
                             applicationWithModelsId))
+                // THEN
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.models",
@@ -201,73 +257,5 @@ public class ApplicationControllerIT {
                                     is(formModelName)))
                 .andExpect(jsonPath("$._embedded.models[1].name",
                                     is(processModelName)));
-    }
-
-    @Test
-    public void testGetApplication() throws Exception {
-        //given
-        final String applicationId = "application_id";
-        final String applicationName = "Application";
-        Application application = new ApplicationEntity(applicationId,
-                                                        applicationName);
-
-        //when
-        application = applicationRepository.createApplication(application);
-        assertThat(application).isNotNull();
-
-        //then
-        mockMvc.perform(get("{version}/applications/{applicationId}",
-                            API_VERSION,
-                            applicationId))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    public void testUpdateApplication() throws Exception {
-        //given
-        final String applicationId = "application_id";
-        final Application savedApplication = applicationRepository.createApplication(new ApplicationEntity(applicationId,
-                                                                                                           "Application name"));
-        assertThat(savedApplication).isNotNull();
-
-        assertThat((Optional<Application>) applicationRepository.findApplicationById(applicationId))
-                .hasValueSatisfying(application -> {
-                    assertThat(application.getName()).isEqualTo("Application name");
-                });
-
-        Application newApplication = new ApplicationEntity(applicationId,
-                                                           "New application name");
-
-        //when
-        mockMvc.perform(put("{version}/applications/{applicationId}",
-                            API_VERSION,
-                            applicationId)
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(newApplication)))
-                .andExpect(status().isNoContent());
-
-        //then
-        assertThat((Optional<Application>) applicationRepository.findApplicationById(applicationId))
-                .hasValueSatisfying(application -> {
-                    assertThat(application.getName()).isEqualTo("New application name");
-                });
-    }
-
-    @Test
-    public void testDeleteApplication() throws Exception {
-        //given
-        final String applicationId = "application_id";
-        final Application savedApplication = applicationRepository.createApplication(new ApplicationEntity(applicationId,
-                                                                                                           "Application"));
-        assertThat(savedApplication).isNotNull();
-
-        //when
-        mockMvc.perform(delete("{version}/applications/{applicationId}",
-                               API_VERSION,
-                               applicationId))
-                .andExpect(status().isNoContent());
-
-        //then
-        assertThat(applicationRepository.findApplicationById(applicationId)).isEmpty();
     }
 }

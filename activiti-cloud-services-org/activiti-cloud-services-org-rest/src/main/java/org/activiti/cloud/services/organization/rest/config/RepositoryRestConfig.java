@@ -30,17 +30,9 @@ public class RepositoryRestConfig extends RepositoryRestConfigurerAdapter {
 
     public static final String API_VERSION = "/v1";
 
-    @Autowired
-    private UriListHttpMessageConverter uriListHttpMessageConverter;
-
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
 
         config.setBasePath(API_VERSION);
-    }
-
-    @Override
-    public void configureHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-        messageConverters.add(uriListHttpMessageConverter);
     }
 }

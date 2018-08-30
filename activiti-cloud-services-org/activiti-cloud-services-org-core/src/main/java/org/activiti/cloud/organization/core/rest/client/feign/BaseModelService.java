@@ -18,7 +18,7 @@ package org.activiti.cloud.organization.core.rest.client.feign;
 
 import java.util.List;
 
-import org.activiti.cloud.organization.core.model.ValidationErrorRepresentation;
+import org.activiti.cloud.organization.api.ModelValidationError;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,5 +50,5 @@ public interface BaseModelService<T> {
     void deleteResource(@PathVariable("id") String id);
 
     @RequestMapping(method = POST, path = "/validate", consumes = APPLICATION_OCTET_STREAM_VALUE)
-    List<ValidationErrorRepresentation> validateResourceContent(@RequestBody byte[] file);
+    List<ModelValidationError> validateResourceContent(@RequestBody byte[] file);
 }
