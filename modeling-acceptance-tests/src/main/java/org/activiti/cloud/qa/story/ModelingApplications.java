@@ -39,8 +39,7 @@ public class ModelingApplications {
 
     @When("the user creates an application '$applicationName'")
     public void createApplication(String applicationName) {
-        Resource<Application> createdApplication = modelingApplicationsSteps.create(applicationName);
-        modelingApplicationsSteps.addApplicationToCurrentContext(createdApplication);
+        modelingApplicationsSteps.create(applicationName);
     }
 
     @When("update the application name to '$applicationName'")

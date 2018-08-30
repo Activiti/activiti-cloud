@@ -21,14 +21,12 @@ import java.util.UUID;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.organization.api.Application;
-import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
 import org.activiti.cloud.qa.service.ModelingApplicationsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 
-import static org.activiti.cloud.qa.steps.ModelingModelsSteps.APPLICATION_MODELS_REL;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
@@ -77,18 +75,6 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
                            .filter(identifier::test)
                            .findAny())
                 .isEmpty();
-    }
-
-    @Step
-    public void addApplicationToCurrentContext(Resource<Application> objectToAdd) {
-        addToCurrentContext(objectToAdd,
-                            Optional.empty());
-    }
-
-    @Step
-    public void addModelToCurrentContext(Resource<Model> objectToAdd) {
-        addToCurrentContext(objectToAdd,
-                            Optional.of(APPLICATION_MODELS_REL));
     }
 
     @Override
