@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.organization.api;
 
-import java.util.List;
-
 /**
  * Interface for applications
  */
@@ -30,5 +28,4 @@ public interface Application<U> extends Auditable<U> {
     String getName();
 
     void setName(String name);
-
 }
