@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.org.config;
+package org.activiti.cloud.organization;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -32,7 +32,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @EnableAutoConfiguration
-@ComponentScan("org.activiti")
+@ComponentScan({"org.activiti.cloud.organization", "org.activiti.cloud.services.organization" })
 @EnableFeignClients("org.activiti.cloud.organization.core.rest.client.feign")
 @EnableJpaRepositories("org.activiti.cloud.services.organization.jpa")
 @EntityScan("org.activiti.cloud.services.organization.entity")

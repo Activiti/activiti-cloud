@@ -27,7 +27,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
-import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
@@ -64,8 +65,8 @@ public class ProcessModelServiceRestClientIT {
     @Test
     public void testCreateProcessModel() throws Exception {
         Model processModel = new ModelEntity("contractNewProcesModelId",
-                                             "newProcesModelName",
-                                             PROCESS
+                "newProcesModelName",
+                PROCESS
         );
 
         given()
@@ -78,8 +79,8 @@ public class ProcessModelServiceRestClientIT {
     @Test
     public void testUpdateProcessModel() throws Exception {
         Model processModel = new ModelEntity("contractUpdateProcesModelId",
-                                             "newProcesModelNameUpdated",
-                                             PROCESS
+                "newProcesModelNameUpdated",
+                PROCESS
         );
         processModel.setContent("someContent");
         modelRepository.createModel(processModel);
@@ -99,8 +100,8 @@ public class ProcessModelServiceRestClientIT {
     @Test
     public void testGetProcessModel() throws Exception {
         Model processModel = new ModelEntity("contractUpdateProcesModelId",
-                                             "testProcesModelName",
-                                             PROCESS);
+                "testProcesModelName",
+                PROCESS);
         modelRepository.createModel(processModel);
 
         given()
@@ -108,8 +109,17 @@ public class ProcessModelServiceRestClientIT {
                 .get("/v1/models/contractUpdateProcesModelId")
                 .then().expect(status().isOk())
                 .and().body("name",
-                            equalTo("contractUpdateProcesModelNameUpdated"))
+                equalTo("contractUpdateProcesModelNameUpdated"))
                 .and().body("version",
-                            equalTo("0.0.2"));
+                equalTo("0.0.2"));
+    }
+
+    @Configuration
+    static class Config {
+        @Bean
+        public String myUrlBean() {
+            return "localhost:8088";
+
+        }
     }
 }

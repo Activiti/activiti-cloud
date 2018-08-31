@@ -22,9 +22,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 /**
  * Feign client for process model REST service
  */
-@FeignClient(
-        value = "modeling-app",
-        url = "http://localhost:8088",
+@FeignClient(url = "#{'${activiti.cloud.modeling.url:modeling-app}'}",
+        name = "modeling-app",
         path = "/v1/process-models")
 public interface ProcessModelReferenceService extends BaseModelService<ModelReference> {
 

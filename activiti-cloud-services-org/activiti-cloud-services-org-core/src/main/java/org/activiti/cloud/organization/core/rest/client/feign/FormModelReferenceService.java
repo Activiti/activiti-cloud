@@ -22,9 +22,10 @@ import org.springframework.cloud.openfeign.FeignClient;
 /**
  * Feign client for forms REST service
  */
-@FeignClient(
-        value = "modeling-app",
-        path = "/v1/forms")
+@FeignClient(url = "#{'${activiti.cloud.modeling.url:${spring.application.name}}'}",
+        name = "modeling-app",
+        path = "/v1/forms"
+        )
 public interface FormModelReferenceService extends BaseModelService<ModelReference> {
 
 }
