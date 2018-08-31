@@ -113,13 +113,4 @@ public class ProcessModelServiceRestClientIT {
                 .and().body("version",
                 equalTo("0.0.2"));
     }
-
-    @Configuration
-    static class Config {
-        @Bean
-        public String myUrlBean() {
-            return "localhost:8088";
-
-        }
-    }
 }
