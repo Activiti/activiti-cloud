@@ -174,7 +174,9 @@ public class ModelController implements ModelRestApi {
             @PathVariable String modelId) throws IOException {
         Model model = findModelById(modelId);
         FileContent fileContent = modelService.getModelContent(model.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Model content not found: " + modelId));
+                .orElseGet(() -> new FileContent(model.getId(),
+                                                 null,
+                                                 new byte[0]));
         writeFileToResponse(response,
                             fileContent,
                             false);

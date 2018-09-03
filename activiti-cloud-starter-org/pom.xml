@@ -12,6 +12,14 @@
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-org-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-org-api-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-org-jpa</artifactId>
     </dependency>
     <dependency>
@@ -24,11 +32,11 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-monitoring</artifactId>
+      <artifactId>activiti-cloud-services-org-service</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-monitoring</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
