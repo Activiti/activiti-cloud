@@ -89,20 +89,8 @@ public interface ApplicationRestApi {
             produces = APPLICATION_JSON_VALUE,
             response = AlfrescoApplicationPage.class)
     @ApiAlfrescoPageableApi
-    @GetMapping(path = "/applications", produces = APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/applications")
     PagedResources<Resource<Application>> getApplications(Pageable pageable);
-
-    @ApiOperation(
-            tags = APPLICATIONS,
-            value = "List application",
-            notes = "Get the list of available applications. " +
-                    "Minimal information for each application is returned.",
-            produces = HAL_JSON_VALUE,
-            response = PagedResources.class)
-    @GetMapping(path = "/applications", produces = HAL_JSON_VALUE)
-    default PagedResources<Resource<Application>> getHalApplications(Pageable pageable) {
-        return getApplications(pageable);
-    }
 
     @ApiOperation(
             tags = APPLICATIONS,
