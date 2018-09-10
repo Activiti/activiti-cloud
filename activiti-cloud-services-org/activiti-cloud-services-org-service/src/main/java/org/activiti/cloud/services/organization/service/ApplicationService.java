@@ -34,6 +34,7 @@ import org.activiti.cloud.services.common.zip.ZipStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,6 +47,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_T
  * Business logic related to {@link Application} entities
  */
 @Service
+@PreAuthorize("hasRole('ACTIVITI_MODELER')")
 public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;

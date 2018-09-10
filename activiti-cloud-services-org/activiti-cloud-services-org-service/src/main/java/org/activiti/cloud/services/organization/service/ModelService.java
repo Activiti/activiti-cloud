@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Service;
  * including process models, form models, connectors, data models and decision table models.
  */
 @Service
+@PreAuthorize("hasRole('ACTIVITI_MODELER')")
 public class ModelService {
 
     private final ModelRepository modelRepository;

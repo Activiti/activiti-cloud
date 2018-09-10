@@ -200,7 +200,7 @@ public class ModelController implements ModelRestApi {
             @ApiParam(CREATE_MODEL_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
             @ApiParam(IMPORT_MODEL_TYPE_PARAM_DESCR)
-            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) ModelType type,
             @ApiParam(IMPORT_MODEL_FILE_PARAM_DESCR)
             @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
         Application application = applicationController.findApplicationById(applicationId);
