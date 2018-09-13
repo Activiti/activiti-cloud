@@ -18,6 +18,7 @@ package org.activiti.cloud.services.identity.keycloak;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.keycloak.admin.client.resource.UserResource;
@@ -70,6 +71,20 @@ public class KeycloakUserGroupManager implements UserGroupManager {
         return roles;
     }
 
+    @Override
+    public List<String> getGroups() {
+        return keycloakInstanceWrapper
+                .getRealm().groups().groups()
+                .stream().map(GroupRepresentation::getName).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getUsers() {
+        return keycloakInstanceWrapper
+                .getRealm().users().list()
+                .stream().map(UserRepresentation::getUsername).collect(Collectors.toList());
+    }
+
     private UserResource loadUser(UserRepresentation user) {
         return keycloakInstanceWrapper.getRealm().users().get(user.getId());
     }
@@ -87,5 +102,4 @@ public class KeycloakUserGroupManager implements UserGroupManager {
         }
         return users.get(0);
     }
-
 }
