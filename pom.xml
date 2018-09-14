@@ -60,7 +60,6 @@
   </properties>
   <modules>
     <module>activiti-cloud-app-dependencies</module>
-    <module>activiti-cloud-connectors-dependencies</module>
     <module>activiti-cloud-process-model-dependencies</module>
     <module>activiti-cloud-org-dependencies</module>
     <module>activiti-cloud-parent</module>
