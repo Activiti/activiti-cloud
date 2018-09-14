@@ -58,13 +58,6 @@
     <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
     <spring-cloud-contract.version>2.0.0.M8</spring-cloud-contract.version>
   </properties>
-  <modules>
-    <module>activiti-cloud-app-dependencies</module>
-    <module>activiti-cloud-process-model-dependencies</module>
-    <module>activiti-cloud-org-dependencies</module>
-    <module>activiti-cloud-parent</module>
-    <module>activiti-cloud-uservices-parent</module>
-  </modules>
   <dependencyManagement>
     <dependencies>
       <!-- fix for https://github.com/spring-cloud/spring-cloud-netflix/issues/2779 -->
