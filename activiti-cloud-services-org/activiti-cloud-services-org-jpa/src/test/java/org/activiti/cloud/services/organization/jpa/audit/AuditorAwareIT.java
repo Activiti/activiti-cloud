@@ -44,7 +44,7 @@ public class AuditorAwareIT {
         assertThat(auditorAware.getCurrentAuditor()).hasValueSatisfying(
                 currentUser ->
                         // THEN
-                        assertThat(currentUser).isEqualTo("Unknown")
+                        assertThat(currentUser).isEqualTo("")
         );
 
         // GIVEN

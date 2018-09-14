@@ -18,27 +18,26 @@ package org.activiti.cloud.services.organization.jpa.audit;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AuditorAware;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
+import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.springframework.stereotype.Component;
 
 /**
  * Auditor implementation.
  */
+@Component
 public class AuditorAwareImpl implements AuditorAware<String> {
 
-    private static final String UNKNOWN_AUDITOR = "Unknown";
+    private final SecurityManager securityManager;
+
+    @Autowired
+    public AuditorAwareImpl(SecurityManager securityManager) {
+        this.securityManager = securityManager;
+    }
 
     @Override
     public Optional<String> getCurrentAuditor() {
-        return Optional.of(
-                Optional.of(SecurityContextHolder.getContext())
-                .map(SecurityContext::getAuthentication)
-                .map(Authentication::getPrincipal)
-                .map(User.class::cast)
-                .map(User::getUsername)
-                .orElse(UNKNOWN_AUDITOR));
+        return Optional.ofNullable(securityManager.getAuthenticatedUserId());
     }
 }
