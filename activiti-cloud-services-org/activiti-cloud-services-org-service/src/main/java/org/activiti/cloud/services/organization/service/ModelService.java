@@ -19,7 +19,10 @@ package org.activiti.cloud.services.organization.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
@@ -44,28 +47,34 @@ public class ModelService {
 
     private final ModelRepository modelRepository;
 
+    private final ModelTypeService modelTypeService;
+
     @Autowired
-    public ModelService(ModelRepository modelRepository) {
+    public ModelService(ModelRepository modelRepository,
+                        ModelTypeService modelTypeService) {
         this.modelRepository = modelRepository;
+        this.modelTypeService = modelTypeService;
     }
 
-    public Page<Model> getTopLevelModels(ModelType modelType,
+    public Set<String> buildModelTypesFilter(Optional<ModelType> modelType) {
+        return modelType
+                .map(Stream::of)
+                .orElseGet(() -> modelTypeService.getAvailableModelTypes().stream())
+                .map(ModelType::getName)
+                .collect(Collectors.toSet());
+    }
+
+    public Page<Model> getTopLevelModels(Optional<ModelType> modelType,
                                          Pageable pageable) {
-        //TODO: to implement filtering by model type
-        return modelRepository.getTopLevelModels(pageable);
+        return modelRepository.getTopLevelModels(buildModelTypesFilter(modelType),
+                                                 pageable);
     }
 
     public Page<Model> getModels(Application application,
-                                 ModelType modelType,
-                                 Pageable pageable) {
-        //TODO: to implement filtering by model type
-        return getModels(application,
-                         pageable);
-    }
-
-    public Page<Model> getModels(Application application,
+                                 Optional<ModelType> modelType,
                                  Pageable pageable) {
         return modelRepository.getModels(application,
+                                         buildModelTypesFilter(modelType),
                                          pageable);
     }
 
@@ -94,7 +103,7 @@ public class ModelService {
         try {
             Model model = (Model) modelRepository.getModelType().newInstance();
             model.setId(UUID.randomUUID().toString());
-            model.setType(type);
+            model.setType(type.getName());
             model.setName(name);
             return model;
         } catch (InstantiationException | IllegalAccessException e) {

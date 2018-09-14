@@ -18,6 +18,7 @@ package org.activiti.cloud.services.organization.jpa;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.activiti.cloud.organization.api.ModelValidationError;
@@ -46,21 +47,27 @@ import static org.activiti.cloud.services.organization.entity.ModelEntityHandler
 public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
                                             ModelRepository<ApplicationEntity, ModelEntity> {
 
-    Page<ModelEntity> findAllByApplicationIdIsNull(Pageable pageable);
+    Page<ModelEntity> findAllByApplicationIdIsNullAndTypeIn(Set<String> modelTypesFilter,
+                                                            Pageable pageable);
 
-    Page<ModelEntity> findAllByApplicationId(String applicationId,
-                                             Pageable pageable);
+    Page<ModelEntity> findAllByApplicationIdAndTypeIn(String applicationId,
+                                                      Set<String> modelTypesFilter,
+                                                      Pageable pageable);
 
     @Override
-    default Page<ModelEntity> getTopLevelModels(Pageable pageable) {
-        return loadModelReference(findAllByApplicationIdIsNull(pageable));
+    default Page<ModelEntity> getTopLevelModels(Set<String> modelTypesFilter,
+                                                Pageable pageable) {
+        return loadModelReference(findAllByApplicationIdIsNullAndTypeIn(modelTypesFilter,
+                                                                        pageable));
     }
 
     @Override
     default Page<ModelEntity> getModels(ApplicationEntity application,
+                                        Set<String> modelTypesFilter,
                                         Pageable pageable) {
-        return loadModelReference(findAllByApplicationId(application.getId(),
-                                                         pageable));
+        return loadModelReference(findAllByApplicationIdAndTypeIn(application.getId(),
+                                                                  modelTypesFilter,
+                                                                  pageable));
     }
 
     @Override
@@ -93,7 +100,7 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
     default List<ModelValidationError> validateModelContent(ModelEntity model,
                                                             byte[] content) {
         return validateModelReference(model,
-                                    content);
+                                      content);
     }
 
     @Override

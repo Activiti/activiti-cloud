@@ -45,7 +45,7 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
     @ManyToOne
     private ApplicationEntity application;
 
-    private ModelType type;
+    private String type;
 
     @Transient
     @JsonIgnore
@@ -57,7 +57,7 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
 
     public ModelEntity(String id,
                        String name,
-                       ModelType type) {
+                       String type) {
         this.id = id;
         this.type = type;
         this.data = new ModelReference(id,
@@ -86,12 +86,12 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
     }
 
     @Override
-    public ModelType getType() {
+    public String getType() {
         return type;
     }
 
     @Override
-    public void setType(ModelType type) {
+    public void setType(String type) {
         this.type = type;
     }
 

@@ -16,38 +16,18 @@
 
 package org.activiti.cloud.organization.api;
 
-import org.activiti.cloud.services.auditable.Auditable;
+import org.springframework.stereotype.Component;
 
 /**
- * Interface for models
+ * Form model type
  */
-public interface Model<A extends Application, U> extends Auditable<U> {
+@Component
+public class FormModelType implements ModelType {
 
-    String getId();
+    public static final String FORM = "FORM";
 
-    void setId(String id);
-
-    String getName();
-
-    void setName(String name);
-
-    String getType();
-
-    void setType(String type);
-
-    A getApplication();
-
-    void setApplication(A application);
-
-    String getVersion();
-
-    void setVersion(String version);
-
-    String getContentType();
-
-    void setContentType(String contentType);
-
-    String getContent();
-
-    void setContent(String content);
+    @Override
+    public String getName() {
+        return FORM;
+    }
 }

@@ -17,11 +17,8 @@
 package org.activiti.cloud.services.organization.service;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
@@ -38,8 +35,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.activiti.cloud.organization.api.ModelType.FORM;
-import static org.activiti.cloud.organization.api.ModelType.PROCESS;
+import static org.activiti.cloud.organization.api.FormModelType.FORM;
+import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 
@@ -54,11 +51,15 @@ public class ApplicationService {
 
     private final ModelService modelService;
 
+    private final ModelTypeService modelTypeService;
+
     @Autowired
     public ApplicationService(ApplicationRepository applicationRepository,
-                              ModelService modelService) {
+                              ModelService modelService,
+                              ModelTypeService modelTypeService) {
         this.applicationRepository = applicationRepository;
         this.modelService = modelService;
+        this.modelTypeService = modelTypeService;
     }
 
     /**
@@ -119,7 +120,8 @@ public class ApplicationService {
             app.setName(name);
             return app;
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new ModelingException("Cannot create application instance", e);
+            throw new ModelingException("Cannot create application instance",
+                                        e);
         }
     }
 
@@ -134,6 +136,7 @@ public class ApplicationService {
                 .appendFolder(application.getName());
 
         modelService.getModels(application,
+                               Optional.empty(),
                                Pageable.unpaged())
                 .getContent()
                 .stream()
@@ -191,7 +194,7 @@ public class ApplicationService {
                     Model model = modelService.newModelInstance(modelType,
                                                                 modelName);
                     model.setName(modelName);
-                    model.setType(modelType);
+                    model.setType(modelType.getName());
                     model.setContentType(fileContent.getContentType());
                     model.setContent(new String(fileContent.getFileContent()));
                     return model;
@@ -199,8 +202,8 @@ public class ApplicationService {
     }
 
     private Optional<ModelType> getModelType(String contentType) {
-        return CONTENT_TYPE_JSON.equals(contentType) ? Optional.of(FORM) :
-                CONTENT_TYPE_XML.equals(contentType) ? Optional.of(PROCESS) :
+        return CONTENT_TYPE_JSON.equals(contentType) ? modelTypeService.findModelTypeByName(FORM) :
+                CONTENT_TYPE_XML.equals(contentType) ? modelTypeService.findModelTypeByName(PROCESS) :
                         Optional.empty();
     }
 }

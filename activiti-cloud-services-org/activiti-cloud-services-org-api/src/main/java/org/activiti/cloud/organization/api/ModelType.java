@@ -17,9 +17,9 @@
 package org.activiti.cloud.organization.api;
 
 /**
- * Model types enum
+ * Model type interface
  */
-public enum ModelType {
-    FORM,
-    PROCESS
+public interface ModelType {
+
+    String getName();
 }

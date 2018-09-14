@@ -20,10 +20,9 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
 
-import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.core.rest.client.ModelReferenceService;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
@@ -36,22 +35,22 @@ import org.springframework.stereotype.Service;
 public class FeignModelReferenceService implements ModelReferenceService {
 
     @Resource
-    private Map<ModelType, BaseModelService<ModelReference>> modelServices;
+    private Map<String, BaseModelService<ModelReference>> modelServices;
 
     @Override
-    public ModelReference getResource(ModelType modelType,
+    public ModelReference getResource(String modelType,
                                       String modelId) {
         return modelServices.get(modelType).getResource(modelId);
     }
 
     @Override
-    public void createResource(ModelType modelType,
+    public void createResource(String modelType,
                                ModelReference model) {
         modelServices.get(modelType).createResource(model);
     }
 
     @Override
-    public void updateResource(ModelType modelType,
+    public void updateResource(String modelType,
                                String id,
                                ModelReference model) {
         modelServices.get(modelType).updateResource(id,
@@ -59,13 +58,13 @@ public class FeignModelReferenceService implements ModelReferenceService {
     }
 
     @Override
-    public void deleteResource(ModelType modelType,
+    public void deleteResource(String modelType,
                                String id) {
         modelServices.get(modelType).deleteResource(id);
     }
 
     @Override
-    public List<ModelValidationError> validateResourceContent(ModelType modelType,
+    public List<ModelValidationError> validateResourceContent(String modelType,
                                                               byte[] file) {
         return modelServices.get(modelType).validateResourceContent(file);
     }

@@ -30,9 +30,12 @@ import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.organization.rest.api.ModelRestApi;
 import org.activiti.cloud.services.organization.rest.assembler.ModelResourceAssembler;
+import org.activiti.cloud.services.organization.rest.assembler.ModelTypeResourceAssembler;
+import org.activiti.cloud.services.organization.rest.assembler.PagedModelTypeAssembler;
 import org.activiti.cloud.services.organization.rest.assembler.ValidationErrorResourceAssembler;
 import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.activiti.cloud.services.organization.service.ModelService;
+import org.activiti.cloud.services.organization.service.ModelTypeService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.PagedResources;
@@ -45,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.NotAcceptableStatusException;
+import org.springframework.web.server.ServerWebInputException;
 
 import static org.activiti.cloud.services.common.util.HttpUtils.multipartToFileContent;
 import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
@@ -61,22 +65,34 @@ public class ModelController implements ModelRestApi {
 
     private final ModelService modelService;
 
+    private final ModelTypeService modelTypeService;
+
     private final ModelResourceAssembler resourceAssembler;
 
     private final AlfrescoPagedResourcesAssembler<Model> pagedResourcesAssembler;
+
+    private final ModelTypeResourceAssembler modelTypeAssembler;
+
+    private final PagedModelTypeAssembler pagedModelTypeAssembler;
 
     private final ValidationErrorResourceAssembler validationErrorResourceAssembler;
 
     private final ApplicationController applicationController;
 
     public ModelController(ModelService modelService,
+                           ModelTypeService modelTypeService,
                            ModelResourceAssembler resourceAssembler,
                            AlfrescoPagedResourcesAssembler<Model> pagedResourcesAssembler,
+                           ModelTypeResourceAssembler modelTypeAssembler,
+                           PagedModelTypeAssembler pagedModelTypeAssembler,
                            ValidationErrorResourceAssembler validationErrorResourceAssembler,
                            ApplicationController applicationController) {
         this.modelService = modelService;
+        this.modelTypeService = modelTypeService;
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.modelTypeAssembler = modelTypeAssembler;
+        this.pagedModelTypeAssembler = pagedModelTypeAssembler;
         this.validationErrorResourceAssembler = validationErrorResourceAssembler;
         this.applicationController = applicationController;
     }
@@ -84,11 +100,11 @@ public class ModelController implements ModelRestApi {
     @Override
     public PagedResources<Resource<Model>> getModels(
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) Optional<String> type,
             Pageable pageable) {
         return pagedResourcesAssembler.toResource(
                 pageable,
-                modelService.getTopLevelModels(type,
+                modelService.getTopLevelModels(type.map(this::findModelType),
                                                pageable),
                 resourceAssembler);
     }
@@ -98,13 +114,13 @@ public class ModelController implements ModelRestApi {
             @ApiParam(GET_MODELS_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) Optional<String> type,
             Pageable pageable) {
         Application application = applicationController.findApplicationById(applicationId);
         return pagedResourcesAssembler.toResource(
                 pageable,
                 modelService.getModels(application,
-                                       type,
+                                       type.map(this::findModelType),
                                        pageable),
                 resourceAssembler);
     }
@@ -200,13 +216,13 @@ public class ModelController implements ModelRestApi {
             @ApiParam(CREATE_MODEL_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
             @ApiParam(IMPORT_MODEL_TYPE_PARAM_DESCR)
-            @RequestParam(MODEL_TYPE_PARAM_NAME) ModelType type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             @ApiParam(IMPORT_MODEL_FILE_PARAM_DESCR)
             @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
         Application application = applicationController.findApplicationById(applicationId);
         return resourceAssembler.toResource(
                 modelService.importModel(application,
-                                         type,
+                                         findModelType(type),
                                          multipartToFileContent(file)));
     }
 
@@ -226,6 +242,13 @@ public class ModelController implements ModelRestApi {
                                 fileContent.get(),
                                 attachment);
         }
+    }
+
+    @Override
+    public PagedResources<Resource<ModelType>> getModelTypes(Pageable pageable) {
+        return pagedModelTypeAssembler.toResource(pageable,
+                                                  modelTypeService.getModelTypeNames(pageable),
+                                                  modelTypeAssembler);
     }
 
     @Override
@@ -250,5 +273,11 @@ public class ModelController implements ModelRestApi {
         Optional<Model> optionalModel = modelService.findModelById(modelId);
         return optionalModel
                 .orElseThrow(() -> new ResourceNotFoundException("Model not found: " + modelId));
+    }
+
+    public ModelType findModelType(String type) {
+        Optional<ModelType> optionalModelType = modelTypeService.findModelTypeByName(type);
+        return optionalModelType
+                .orElseThrow(() -> new ServerWebInputException("Unknown model type: " + type));
     }
 }

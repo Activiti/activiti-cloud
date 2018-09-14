@@ -18,6 +18,7 @@ package org.activiti.cloud.organization.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
@@ -30,9 +31,11 @@ import org.springframework.data.domain.Pageable;
  */
 public interface ModelRepository<A extends Application, M extends Model<A, ?>> {
 
-    Page<M> getTopLevelModels(Pageable pageable);
+    Page<M> getTopLevelModels(Set<String> modelTypesFilter,
+                              Pageable pageable);
 
     Page<M> getModels(A application,
+                      Set<String> modelTypesFilter,
                       Pageable pageable);
 
     Optional<M> findModelById(String modelId);

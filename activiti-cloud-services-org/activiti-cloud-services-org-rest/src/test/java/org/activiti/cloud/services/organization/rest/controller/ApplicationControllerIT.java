@@ -44,8 +44,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.activiti.cloud.organization.api.ModelType.FORM;
-import static org.activiti.cloud.organization.api.ModelType.PROCESS;
+import static org.activiti.cloud.organization.api.FormModelType.FORM;
+import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.organization.mock.MockFactory.application;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.assertj.core.api.Assertions.*;
@@ -69,7 +69,7 @@ public class ApplicationControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private ModelReferenceService modelService;
+    private ModelReferenceService modelReferenceService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -138,7 +138,7 @@ public class ApplicationControllerIT {
 
         // WHEN
         mockMvc.perform(post("{version}/applications",
-                            API_VERSION)
+                             API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(application)))
                 // THEN
@@ -200,11 +200,11 @@ public class ApplicationControllerIT {
         ModelReference expectedProcessModel = new ModelReference(processModelId,
                                                                  processModelName);
         doReturn(expectedFormModel)
-                .when(modelService)
+                .when(modelReferenceService)
                 .getResource(eq(FORM),
                              eq(expectedFormModel.getModelId()));
         doReturn(expectedProcessModel)
-                .when(modelService)
+                .when(modelReferenceService)
                 .getResource(eq(PROCESS),
                              eq(expectedProcessModel.getModelId()));
 

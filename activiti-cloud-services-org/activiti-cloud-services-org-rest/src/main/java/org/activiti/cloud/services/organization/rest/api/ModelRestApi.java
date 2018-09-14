@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.organization.rest.api;
 
 import java.io.IOException;
+import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
 import io.swagger.annotations.Api;
@@ -107,7 +108,7 @@ public interface ModelRestApi {
     @RequestMapping(method = GET, path = "/models")
     PagedResources<Resource<Model>> getModels(
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) Optional<String> type,
             Pageable pageable);
 
     @ApiOperation(
@@ -122,7 +123,7 @@ public interface ModelRestApi {
             @ApiParam(GET_MODELS_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) Optional<String> type,
             Pageable pageable);
 
     @ApiOperation(
@@ -217,7 +218,7 @@ public interface ModelRestApi {
             @ApiParam(CREATE_MODEL_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
             @ApiParam(IMPORT_MODEL_TYPE_PARAM_DESCR)
-            @RequestParam(value = MODEL_TYPE_PARAM_NAME, required = false) ModelType type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             @ApiParam(IMPORT_MODEL_FILE_PARAM_DESCR)
             @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
 
@@ -237,9 +238,16 @@ public interface ModelRestApi {
 
     @ApiOperation(
             tags = MODELS,
+            value = "List model types",
+            notes = "Get the list of available model types.")
+    @GetMapping(path = "/model-types")
+    PagedResources<Resource<ModelType>> getModelTypes(Pageable pageable);
+
+    @ApiOperation(
+            tags = MODELS,
             value = "Validate a model content",
             notes = "Allows to the model content without save it.")
-    @PostMapping(value = "/models/{modelId}/validate")
+    @PostMapping("/models/{modelId}/validate")
     Resources<ValidationErrorResource> validateModel(
             @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
