@@ -22,13 +22,6 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.build</groupId>
-        <artifactId>activiti-cloud-audit-dependencies</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.build</groupId>
         <artifactId>activiti-cloud-connectors-dependencies</artifactId>
         <version>${activiti-cloud-connectors.version}</version>
         <type>pom</type>
