@@ -96,6 +96,13 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.query</groupId>
+        <artifactId>activiti-cloud-query-dependencies</artifactId>
+        <version>7.0.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
