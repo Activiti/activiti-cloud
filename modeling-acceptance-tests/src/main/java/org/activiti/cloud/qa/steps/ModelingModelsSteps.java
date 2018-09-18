@@ -21,7 +21,6 @@ import java.util.UUID;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.service.ModelingModelsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,11 +43,11 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     @Step
     public Resource<Model> create(String modelName,
-                                  ModelType modelType) {
+                                  String modelType) {
         String id = UUID.randomUUID().toString();
         Model model = mock(Model.class);
         doReturn(id).when(model).getId();
-        doReturn(modelType).when(model).getType();
+        doReturn(modelType.toUpperCase()).when(model).getType();
         doReturn(modelName).when(model).getName();
         return create(id,
                       model);

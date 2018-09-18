@@ -26,19 +26,19 @@ public class ModelIdentifier<M> implements ModelingIdentifier<M> {
 
     private String modelName;
 
-    private ModelType modelType;
+    private String modelType;
 
     private String modelVersion;
 
     public ModelIdentifier(String modelName,
-                           ModelType modelType) {
+                           String modelType) {
         this(modelName,
              modelType,
              null);
     }
 
     public ModelIdentifier(String modelName,
-                           ModelType modelType,
+                           String modelType,
                            String modelVersion) {
         this.modelName = modelName;
         this.modelType = modelType;
@@ -49,18 +49,18 @@ public class ModelIdentifier<M> implements ModelingIdentifier<M> {
     public boolean test(M modelingContext) {
         return modelingContext instanceof Model &&
                 modelName.equals(((Model) modelingContext).getName()) &&
-                modelType == ((Model) modelingContext).getType() &&
+                modelType.equalsIgnoreCase(((Model) modelingContext).getType()) &&
                 (modelVersion == null || modelVersion.equals(((Model) modelingContext).getVersion()));
     }
 
     public static ModelIdentifier identified(String modelName,
-                                             ModelType modelType) {
+                                             String modelType) {
         return new ModelIdentifier(modelName,
                                    modelType);
     }
 
     public static ModelIdentifier identified(String modelName,
-                                             ModelType modelType,
+                                             String modelType,
                                              String modelVersion) {
         return new ModelIdentifier(modelName,
                                    modelType,
