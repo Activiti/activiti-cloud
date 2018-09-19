@@ -51,7 +51,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.NestedServletException;
 
-import static org.activiti.cloud.organization.api.FormModelType.FORM;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.assertj.core.api.Assertions.*;
@@ -107,34 +106,34 @@ public class ModelControllerIT {
 
     @Test
     public void testGetModels() throws Exception {
-        final String formModelId = "form_model_id";
-        final String formModelName = "Form Model";
+        final String processModelId1 = "form_model_id";
+        final String processModelName1 = "Process Model 1";
 
-        final String processModelId = "process_model_id";
-        final String processModelName = "Process Model";
+        final String processModelId2 = "process_model_id";
+        final String processModelName2 = "Process Model 2";
 
-        ModelReference expectedFormModel = new ModelReference(formModelId,
-                                                              "Form Model");
-        ModelReference expectedProcessModel = new ModelReference(processModelId,
-                                                                 "Process Model");
+        ModelReference expectedProcessModel1 = new ModelReference(processModelId1,
+                                                              "Process Model 1");
+        ModelReference expectedProcessModel2 = new ModelReference(processModelId2,
+                                                                 "Process Model 2");
 
-        doReturn(expectedFormModel).when(modelReferenceService).getResource(eq(FORM),
-                                                                            eq(expectedFormModel.getModelId()));
-        doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(PROCESS),
-                                                                               eq(expectedProcessModel.getModelId()));
+        doReturn(expectedProcessModel1).when(modelReferenceService).getResource(eq(PROCESS),
+                                                                            eq(expectedProcessModel1.getModelId()));
+        doReturn(expectedProcessModel2).when(modelReferenceService).getResource(eq(PROCESS),
+                                                                               eq(expectedProcessModel2.getModelId()));
 
         //given
-        Model formModel = new ModelEntity(formModelId,
-                                          formModelName,
-                                          FORM);
-        formModel = modelRepository.createModel(formModel);
-        assertThat(formModel).isNotNull();
+        Model processModel1 = new ModelEntity(processModelId1,
+                                          processModelName1,
+                                          PROCESS);
+        processModel1 = modelRepository.createModel(processModel1);
+        assertThat(processModel1).isNotNull();
 
-        Model processModel = new ModelEntity(processModelId,
-                                             processModelName,
+        Model processModel2 = new ModelEntity(processModelId2,
+                                             processModelName2,
                                              PROCESS);
-        processModel = modelRepository.createModel(processModel);
-        assertThat(processModel).isNotNull();
+        processModel2 = modelRepository.createModel(processModel2);
+        assertThat(processModel2).isNotNull();
 
         //when
         final ResultActions resultActions = mockMvc.perform(get("{version}/models",
@@ -146,25 +145,25 @@ public class ModelControllerIT {
                 .andExpect(jsonPath("$._embedded.models",
                                     hasSize(2)))
                 .andExpect(jsonPath("$._embedded.models[0].name",
-                                    is(formModelName)))
+                                    is(processModelName1)))
                 .andExpect(jsonPath("$._embedded.models[1].name",
-                                    is(processModelName)));
+                                    is(processModelName2)));
     }
 
     @Test
     public void testCreateModel() throws Exception {
 
         //given
-        final String formModelId = "form_model_id";
-        final String formModelName = "Form Model";
-        Model formModel = new ModelEntity(formModelId,
-                                          formModelName,
-                                          FORM);
+        final String processModelId = "process_model_id";
+        final String processModelName = "Process Model";
+        Model formModel = new ModelEntity(processModelId,
+                                          processModelName,
+                                          PROCESS);
 
-        ModelReference expectedProcessModel = new ModelReference(formModelId,
+        ModelReference expectedProcessModel = new ModelReference(processModelId,
                                                                  "Form Model");
-        doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(FORM),
-                                                                               eq(formModelId));
+        doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(PROCESS),
+                                                                               eq(processModelId));
 
         mockMvc.perform(post("{version}/models",
                              API_VERSION)
@@ -175,16 +174,16 @@ public class ModelControllerIT {
     }
 
     @Test
-    public void testCreateModelFeignException() throws Exception {
+    public void testCreateModelProducerException() throws Exception {
 
         //given
-        final String formModelId = "form_model_id";
-        final String formModelName = "Form Model";
-        Model formModel = new ModelEntity(formModelId,
-                                          formModelName,
-                                          FORM);
+        final String processModelId = "process_model_id";
+        final String processModelName = "Process Model";
+        Model formModel = new ModelEntity(processModelId,
+                                          processModelName,
+                                          PROCESS);
 
-        doThrow(new RuntimeException()).when(modelReferenceService).createResource(eq(FORM),
+        doThrow(new RuntimeException()).when(modelReferenceService).createResource(eq(PROCESS),
                                                                                    any(ModelReference.class));
 
         expectedException.expect(NestedServletException.class);
@@ -302,10 +301,8 @@ public class ModelControllerIT {
                             API_VERSION))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.model-types",
-                                    hasSize(2)))
+                                    hasSize(1)))
                 .andExpect(jsonPath("$._embedded.model-types[0].name",
-                                    is(FORM)))
-                .andExpect(jsonPath("$._embedded.model-types[1].name",
                                     is(PROCESS)));
     }
 

@@ -26,7 +26,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @EnableWebMvc
-@EnableAutoConfiguration
 @ComponentScan("org.activiti")
 @EnableFeignClients("org.activiti.cloud.organization.core.rest.client.feign")
 @EnableJpaRepositories("org.activiti.cloud.services.organization.jpa")

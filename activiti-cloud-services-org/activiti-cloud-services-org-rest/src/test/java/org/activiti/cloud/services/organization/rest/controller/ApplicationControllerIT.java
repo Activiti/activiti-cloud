@@ -44,7 +44,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.activiti.cloud.organization.api.FormModelType.FORM;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.organization.mock.MockFactory.application;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
@@ -189,24 +188,24 @@ public class ApplicationControllerIT {
     @Test
     public void testCreateApplicationsWithModels() throws Exception {
         // GIVEN
-        final String formModelId = "form_model_id";
-        final String formModelName = "Form Model";
+        final String processModelId1 = "process_model_id1";
+        final String processModelName1 = "Process Model 1";
 
-        final String processModelId = "process_model_id";
-        final String processModelName = "Process Model";
+        final String processModelId2 = "process_model_id2";
+        final String processModelName2 = "Process Model 2";
 
-        ModelReference expectedFormModel = new ModelReference(formModelId,
-                                                              formModelName);
-        ModelReference expectedProcessModel = new ModelReference(processModelId,
-                                                                 processModelName);
-        doReturn(expectedFormModel)
-                .when(modelReferenceService)
-                .getResource(eq(FORM),
-                             eq(expectedFormModel.getModelId()));
-        doReturn(expectedProcessModel)
+        ModelReference expectedProcessModel1 = new ModelReference(processModelId1,
+                                                                  processModelName1);
+        ModelReference expectedProcessModel2 = new ModelReference(processModelId2,
+                                                                  processModelName2);
+        doReturn(expectedProcessModel1)
                 .when(modelReferenceService)
                 .getResource(eq(PROCESS),
-                             eq(expectedProcessModel.getModelId()));
+                             eq(expectedProcessModel1.getModelId()));
+        doReturn(expectedProcessModel2)
+                .when(modelReferenceService)
+                .getResource(eq(PROCESS),
+                             eq(expectedProcessModel2.getModelId()));
 
         final String applicationWithModelsId = "application_with_models_id";
         final String applicationWithModelsName = "application with models";
@@ -220,27 +219,27 @@ public class ApplicationControllerIT {
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        Model modelForm = new ModelEntity(formModelId,
-                                          formModelName,
-                                          FORM);
+        Model processModel1 = new ModelEntity(processModelId1,
+                                              processModelName1,
+                                              PROCESS);
 
         mockMvc.perform(post("{version}/applications/{applicationId}/models",
                              RepositoryRestConfig.API_VERSION,
                              applicationWithModelsId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(modelForm)))
+                                .content(mapper.writeValueAsString(processModel1)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        Model processModel = new ModelEntity(processModelId,
-                                             processModelName,
-                                             PROCESS);
+        Model processModel2 = new ModelEntity(processModelId2,
+                                              processModelName2,
+                                              PROCESS);
 
         mockMvc.perform(post("{version}/applications/{applicationId}/models",
                              RepositoryRestConfig.API_VERSION,
                              applicationWithModelsId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(processModel)))
+                                .content(mapper.writeValueAsString(processModel2)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
@@ -254,8 +253,8 @@ public class ApplicationControllerIT {
                 .andExpect(jsonPath("$._embedded.models",
                                     hasSize(2)))
                 .andExpect(jsonPath("$._embedded.models[0].name",
-                                    is(formModelName)))
+                                    is(processModelName1)))
                 .andExpect(jsonPath("$._embedded.models[1].name",
-                                    is(processModelName)));
+                                    is(processModelName2)));
     }
 }

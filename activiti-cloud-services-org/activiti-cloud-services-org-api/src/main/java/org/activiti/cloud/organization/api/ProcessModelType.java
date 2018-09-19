@@ -18,6 +18,8 @@ package org.activiti.cloud.organization.api;
 
 import org.springframework.stereotype.Component;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
+
 /**
  * Process model type
  */
@@ -29,5 +31,10 @@ public class ProcessModelType implements ModelType {
     @Override
     public String getName() {
         return PROCESS;
+    }
+
+    @Override
+    public String getContentType() {
+        return CONTENT_TYPE_XML;
     }
 }

@@ -19,7 +19,6 @@ package org.activiti.cloud.organization.core.rest.client.feign;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.organization.api.FormModelType;
 import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,21 +33,13 @@ public class ModelServiceConfiguration {
 
     private final ProcessModelType processModelType;
 
-    private final FormModelType formModelType;
-
     private final ProcessModelReferenceService processModelService;
-
-    private final FormModelReferenceService formModelService;
 
     @Autowired
     public ModelServiceConfiguration(ProcessModelType processModelType,
-                                     FormModelType formModelType,
-                                     ProcessModelReferenceService processModelService,
-                                     FormModelReferenceService formModelService) {
+                                     ProcessModelReferenceService processModelService) {
         this.processModelType = processModelType;
-        this.formModelType = formModelType;
         this.processModelService = processModelService;
-        this.formModelService = formModelService;
     }
 
     @Bean
@@ -56,8 +47,6 @@ public class ModelServiceConfiguration {
         Map<String, BaseModelService<ModelReference>> modelServices = new HashMap<>();
         modelServices.put(processModelType.getName(),
                           processModelService);
-        modelServices.put(formModelType.getName(),
-                          formModelService);
         return modelServices;
     }
 }
