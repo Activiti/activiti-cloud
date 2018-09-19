@@ -35,7 +35,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.activiti.cloud.organization.api.FormModelType.FORM;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
@@ -189,7 +188,7 @@ public class ApplicationService {
         String modelName = modelMapEntry.getKey();
         FileContent fileContent = modelMapEntry.getValue();
         //TODO: to detect the model type from file content. For now, just use the content type.
-        return getModelType(fileContent.getContentType())
+        return modelTypeService.findModelTypeByContentType(fileContent.getContentType())
                 .map(modelType -> {
                     Model model = modelService.newModelInstance(modelType,
                                                                 modelName);
@@ -199,11 +198,5 @@ public class ApplicationService {
                     model.setContent(new String(fileContent.getFileContent()));
                     return model;
                 });
-    }
-
-    private Optional<ModelType> getModelType(String contentType) {
-        return CONTENT_TYPE_JSON.equals(contentType) ? modelTypeService.findModelTypeByName(FORM) :
-                CONTENT_TYPE_XML.equals(contentType) ? modelTypeService.findModelTypeByName(PROCESS) :
-                        Optional.empty();
     }
 }

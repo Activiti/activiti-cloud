@@ -38,22 +38,33 @@ import static org.springframework.data.repository.support.PageableExecutionUtils
 @Service
 public class ModelTypeService {
 
-    private Map<String, ModelType> modelTypesMap;
+    private Map<String, ModelType> modelTypesMapByName;
+
+    private Map<String, ModelType> modelTypesMapByContentType;
 
     @Autowired
     public ModelTypeService(Set<ModelType> availableModelTypes) {
-        this.modelTypesMap = availableModelTypes
+        this.modelTypesMapByName = availableModelTypes
                 .stream()
                 .collect(Collectors.toMap(ModelType::getName,
+                                          Function.identity()));
+
+        this.modelTypesMapByContentType = availableModelTypes
+                .stream()
+                .collect(Collectors.toMap(ModelType::getContentType,
                                           Function.identity()));
     }
 
     public Optional<ModelType> findModelTypeByName(String name) {
-        return Optional.ofNullable(modelTypesMap.get(name));
+        return Optional.ofNullable(modelTypesMapByName.get(name));
+    }
+
+    public Optional<ModelType> findModelTypeByContentType(String name) {
+        return Optional.ofNullable(modelTypesMapByContentType.get(name));
     }
 
     public Collection<ModelType> getAvailableModelTypes() {
-        return modelTypesMap.values();
+        return modelTypesMapByName.values();
     }
 
     public Page<ModelType> getModelTypeNames(Pageable pageable) {

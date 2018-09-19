@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import static org.activiti.cloud.organization.api.FormModelType.FORM;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -39,9 +38,6 @@ public class FeignModelServiceTest {
     @Mock
     private ProcessModelReferenceService processModelService;
 
-    @Mock
-    private FormModelReferenceService formModelService;
-
     private FeignModelReferenceService feignModelService = new FeignModelReferenceService();
 
     @Before
@@ -51,8 +47,6 @@ public class FeignModelServiceTest {
         Map<String, BaseModelService<ModelReference>> modelServices = new HashMap<>();
         modelServices.put(PROCESS,
                           processModelService);
-        modelServices.put(FORM,
-                          formModelService);
 
         FieldUtils.writeField(feignModelService,
                               "modelServices",
@@ -70,15 +64,6 @@ public class FeignModelServiceTest {
         verify(processModelService,
                times(1))
                 .getResource("process_model_id");
-
-        // WHEN
-        feignModelService.getResource(FORM,
-                                      "form_model_id");
-
-        // THEN
-        verify(formModelService,
-               times(1))
-                .getResource("form_model_id");
     }
 
     @Test
@@ -89,15 +74,6 @@ public class FeignModelServiceTest {
 
         // THEN
         verify(processModelService,
-               times(1))
-                .createResource(any(ModelReference.class));
-
-        // WHEN
-        feignModelService.createResource(FORM,
-                                         mock(ModelReference.class));
-
-        // THEN
-        verify(formModelService,
                times(1))
                 .createResource(any(ModelReference.class));
     }
@@ -114,17 +90,6 @@ public class FeignModelServiceTest {
                times(1))
                 .updateResource(eq("process_model_id"),
                                 any(ModelReference.class));
-
-        // WHEN
-        feignModelService.updateResource(FORM,
-                                         "form_model_id",
-                                         mock(ModelReference.class));
-
-        // THEN
-        verify(formModelService,
-               times(1))
-                .updateResource(eq("form_model_id"),
-                                any(ModelReference.class));
     }
 
     @Test
@@ -137,15 +102,6 @@ public class FeignModelServiceTest {
         verify(processModelService,
                times(1))
                 .deleteResource(eq("process_model_id"));
-
-        // WHEN
-        feignModelService.deleteResource(FORM,
-                                         "form_model_id");
-
-        // THEN
-        verify(formModelService,
-               times(1))
-                .deleteResource(eq("form_model_id"));
     }
 
     @Test
@@ -158,14 +114,5 @@ public class FeignModelServiceTest {
         verify(processModelService,
                times(1))
                 .validateResourceContent(eq("processModelConent".getBytes()));
-
-        // WHEN
-        feignModelService.validateResourceContent(FORM,
-                                                  "formModelConent".getBytes());
-
-        // THEN
-        verify(formModelService,
-               times(1))
-                .validateResourceContent(eq("formModelConent".getBytes()));
     }
 }

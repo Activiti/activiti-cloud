@@ -39,5 +39,9 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-commons-io</artifactId>
+    </dependency>
   </dependencies>
 </project>

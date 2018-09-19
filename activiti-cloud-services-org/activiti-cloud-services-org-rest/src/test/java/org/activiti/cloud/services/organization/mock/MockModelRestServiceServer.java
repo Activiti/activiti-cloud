@@ -58,20 +58,6 @@ public class MockModelRestServiceServer {
     }
 
     /**
-     * Expect a form model to be created with success
-     * @return this
-     */
-    public MockModelRestServiceServer expectFormModelCreation() {
-        mockRestServer
-                .expect(requestToUriTemplate("{url}{version}/forms",
-                                             LOCALHOST,
-                                             API_VERSION))
-                .andExpect(method(POST))
-                .andRespond(withStatus(CREATED));
-        return this;
-    }
-
-    /**
      * Expect a process model to be created with success
      * @return this
      */
@@ -86,28 +72,12 @@ public class MockModelRestServiceServer {
     }
 
     /**
-     * Expect a certain form model to be requested
-     * @return this
-     */
-    public MockModelRestServiceServer expectFormModelRequest(ModelReference expectedFormModel) throws JsonProcessingException {
-        mockRestServer
-                .expect(requestToUriTemplate("{url}{version}/forms/{formId}",
-                                             LOCALHOST,
-                                             API_VERSION,
-                                             expectedFormModel.getModelId()))
-                .andExpect(method(GET))
-                .andRespond(withSuccess(new ObjectMapper().writeValueAsString(expectedFormModel),
-                                        APPLICATION_JSON));
-        return this;
-    }
-
-    /**
      * Expect a certain process model to be requested
      * @return this
      */
     public MockModelRestServiceServer expectProcessModelRequest(ModelReference expectedProcessModel) throws JsonProcessingException {
         mockRestServer
-                .expect(requestToUriTemplate("{url}{version}/process-models/{formId}",
+                .expect(requestToUriTemplate("{url}{version}/process-models/{processId}",
                                              LOCALHOST,
                                              API_VERSION,
                                              expectedProcessModel.getModelId()))
