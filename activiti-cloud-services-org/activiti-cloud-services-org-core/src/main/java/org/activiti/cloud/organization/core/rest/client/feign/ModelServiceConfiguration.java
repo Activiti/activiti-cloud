@@ -19,14 +19,12 @@ package org.activiti.cloud.organization.core.rest.client.feign;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.api.FormModelType;
+import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import static org.activiti.cloud.organization.api.ModelType.FORM;
-import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 
 /**
  * Model service configuration
@@ -34,23 +32,31 @@ import static org.activiti.cloud.organization.api.ModelType.PROCESS;
 @Configuration
 public class ModelServiceConfiguration {
 
+    private final ProcessModelType processModelType;
+
+    private final FormModelType formModelType;
+
     private final ProcessModelReferenceService processModelService;
 
     private final FormModelReferenceService formModelService;
 
     @Autowired
-    public ModelServiceConfiguration(ProcessModelReferenceService processModelService,
+    public ModelServiceConfiguration(ProcessModelType processModelType,
+                                     FormModelType formModelType,
+                                     ProcessModelReferenceService processModelService,
                                      FormModelReferenceService formModelService) {
+        this.processModelType = processModelType;
+        this.formModelType = formModelType;
         this.processModelService = processModelService;
         this.formModelService = formModelService;
     }
 
     @Bean
-    public Map<ModelType, BaseModelService<ModelReference>> modelServices() {
-        Map<ModelType, BaseModelService<ModelReference>> modelServices = new HashMap<>();
-        modelServices.put(PROCESS,
+    public Map<String, BaseModelService<ModelReference>> modelServices() {
+        Map<String, BaseModelService<ModelReference>> modelServices = new HashMap<>();
+        modelServices.put(processModelType.getName(),
                           processModelService);
-        modelServices.put(FORM,
+        modelServices.put(formModelType.getName(),
                           formModelService);
         return modelServices;
     }

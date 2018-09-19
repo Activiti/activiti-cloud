@@ -42,7 +42,7 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
     private String name;
 
     @ApiModelProperty(value = "The type of the model", readOnly = true)
-    private ModelType type;
+    private String type;
 
     @ApiModelProperty(value = "The version of the model", readOnly = true)
     private String version;
@@ -64,7 +64,7 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
 
     public ModelImpl(String id,
                      String name,
-                     ModelType type) {
+                     String type) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -91,12 +91,12 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
     }
 
     @Override
-    public ModelType getType() {
+    public String getType() {
         return type;
     }
 
     @Override
-    public void setType(ModelType type) {
+    public void setType(String type) {
         this.type = type;
     }
 

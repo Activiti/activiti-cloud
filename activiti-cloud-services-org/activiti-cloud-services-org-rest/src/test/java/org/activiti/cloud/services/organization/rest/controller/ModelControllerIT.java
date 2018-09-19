@@ -51,8 +51,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.NestedServletException;
 
-import static org.activiti.cloud.organization.api.ModelType.FORM;
-import static org.activiti.cloud.organization.api.ModelType.PROCESS;
+import static org.activiti.cloud.organization.api.FormModelType.FORM;
+import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.hasSize;
@@ -76,7 +76,7 @@ public class ModelControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private ModelReferenceService modelService;
+    private ModelReferenceService modelReferenceService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -118,10 +118,10 @@ public class ModelControllerIT {
         ModelReference expectedProcessModel = new ModelReference(processModelId,
                                                                  "Process Model");
 
-        doReturn(expectedFormModel).when(modelService).getResource(eq(FORM),
-                                                                   eq(expectedFormModel.getModelId()));
-        doReturn(expectedProcessModel).when(modelService).getResource(eq(PROCESS),
-                                                                      eq(expectedProcessModel.getModelId()));
+        doReturn(expectedFormModel).when(modelReferenceService).getResource(eq(FORM),
+                                                                            eq(expectedFormModel.getModelId()));
+        doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(PROCESS),
+                                                                               eq(expectedProcessModel.getModelId()));
 
         //given
         Model formModel = new ModelEntity(formModelId,
@@ -163,8 +163,8 @@ public class ModelControllerIT {
 
         ModelReference expectedProcessModel = new ModelReference(formModelId,
                                                                  "Form Model");
-        doReturn(expectedProcessModel).when(modelService).getResource(eq(FORM),
-                                                                      eq(formModelId));
+        doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(FORM),
+                                                                               eq(formModelId));
 
         mockMvc.perform(post("{version}/models",
                              API_VERSION)
@@ -184,8 +184,8 @@ public class ModelControllerIT {
                                           formModelName,
                                           FORM);
 
-        doThrow(new RuntimeException()).when(modelService).createResource(eq(FORM),
-                                                                          any(ModelReference.class));
+        doThrow(new RuntimeException()).when(modelReferenceService).createResource(eq(FORM),
+                                                                                   any(ModelReference.class));
 
         expectedException.expect(NestedServletException.class);
         mockMvc.perform(post("{version}/models",
@@ -206,8 +206,8 @@ public class ModelControllerIT {
 
         ModelReference expectedProcessModel = new ModelReference(processModelId,
                                                                  "Process Model");
-        doReturn(expectedProcessModel).when(modelService).getResource(eq(PROCESS),
-                                                                      eq(processModelId));
+        doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(PROCESS),
+                                                                               eq(processModelId));
         //when
         assertThat(modelRepository.createModel(processModel)).isNotNull();
 
@@ -229,8 +229,8 @@ public class ModelControllerIT {
 
         ModelReference expectedProcessModel = new ModelReference(processModelId,
                                                                  "Process Model");
-        doReturn(expectedProcessModel).when(modelService).getResource(eq(PROCESS),
-                                                                      eq(processModelId));
+        doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(PROCESS),
+                                                                               eq(processModelId));
 
         String parentApplicationId = "parent_application_id";
         applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
@@ -260,8 +260,8 @@ public class ModelControllerIT {
         ModelReference expectedProcessModel = new ModelReference(processModelId,
                                                                  "Process Model");
 
-        doReturn(expectedProcessModel).when(modelService).getResource(eq(PROCESS),
-                                                                      eq(expectedProcessModel.getModelId()));
+        doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(PROCESS),
+                                                                               eq(expectedProcessModel.getModelId()));
 
         Model newModel = new ModelEntity();
         newModel.setType(PROCESS);
@@ -296,6 +296,20 @@ public class ModelControllerIT {
     }
 
     @Test
+    public void testGetModelTypes() throws Exception {
+
+        mockMvc.perform(get("{version}/model-types",
+                            API_VERSION))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.model-types",
+                                    hasSize(2)))
+                .andExpect(jsonPath("$._embedded.model-types[0].name",
+                                    is(FORM)))
+                .andExpect(jsonPath("$._embedded.model-types[1].name",
+                                    is(PROCESS)));
+    }
+
+    @Test
     public void validateModel() throws Exception {
 
         // given
@@ -312,8 +326,8 @@ public class ModelControllerIT {
                 Arrays.asList(new ModelValidationError(),
                               new ModelValidationError());
 
-        doReturn(expectedValidationErrors).when(modelService).validateResourceContent(PROCESS,
-                                                                                      file.getBytes());
+        doReturn(expectedValidationErrors).when(modelReferenceService).validateResourceContent(PROCESS,
+                                                                                               file.getBytes());
 
         // when
         final ResultActions resultActions = mockMvc

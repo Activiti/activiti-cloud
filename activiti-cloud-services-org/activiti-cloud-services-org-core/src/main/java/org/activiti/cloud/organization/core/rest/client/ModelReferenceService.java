@@ -16,12 +16,11 @@
 
 package org.activiti.cloud.organization.core.rest.client;
 
-import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 
 /**
  * Model rest client service interface
  */
-public interface ModelReferenceService extends RestClientService<ModelType, ModelReference, String> {
+public interface ModelReferenceService extends RestClientService<String, ModelReference, String> {
 
 }
