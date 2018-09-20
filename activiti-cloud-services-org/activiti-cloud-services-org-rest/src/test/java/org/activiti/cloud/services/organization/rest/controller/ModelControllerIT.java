@@ -106,32 +106,32 @@ public class ModelControllerIT {
 
     @Test
     public void testGetModels() throws Exception {
-        final String processModelId1 = "form_model_id";
+        final String processModelId1 = "process_model_id1";
         final String processModelName1 = "Process Model 1";
 
-        final String processModelId2 = "process_model_id";
+        final String processModelId2 = "process_model_id2";
         final String processModelName2 = "Process Model 2";
 
         ModelReference expectedProcessModel1 = new ModelReference(processModelId1,
-                                                              "Process Model 1");
+                                                                  "Process Model 1");
         ModelReference expectedProcessModel2 = new ModelReference(processModelId2,
-                                                                 "Process Model 2");
+                                                                  "Process Model 2");
 
         doReturn(expectedProcessModel1).when(modelReferenceService).getResource(eq(PROCESS),
-                                                                            eq(expectedProcessModel1.getModelId()));
+                                                                                eq(expectedProcessModel1.getModelId()));
         doReturn(expectedProcessModel2).when(modelReferenceService).getResource(eq(PROCESS),
-                                                                               eq(expectedProcessModel2.getModelId()));
+                                                                                eq(expectedProcessModel2.getModelId()));
 
         //given
         Model processModel1 = new ModelEntity(processModelId1,
-                                          processModelName1,
-                                          PROCESS);
+                                              processModelName1,
+                                              PROCESS);
         processModel1 = modelRepository.createModel(processModel1);
         assertThat(processModel1).isNotNull();
 
         Model processModel2 = new ModelEntity(processModelId2,
-                                             processModelName2,
-                                             PROCESS);
+                                              processModelName2,
+                                              PROCESS);
         processModel2 = modelRepository.createModel(processModel2);
         assertThat(processModel2).isNotNull();
 
@@ -156,21 +156,37 @@ public class ModelControllerIT {
         //given
         final String processModelId = "process_model_id";
         final String processModelName = "Process Model";
-        Model formModel = new ModelEntity(processModelId,
-                                          processModelName,
-                                          PROCESS);
+        Model processModel = new ModelEntity(processModelId,
+                                             processModelName,
+                                             PROCESS);
 
         ModelReference expectedProcessModel = new ModelReference(processModelId,
-                                                                 "Form Model");
+                                                                 "Process Model");
         doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(PROCESS),
                                                                                eq(processModelId));
 
         mockMvc.perform(post("{version}/models",
                              API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(formModel)))
+                                .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void testCreateModelOfUnknownType() throws Exception {
+
+        //given
+        Model formModel = new ModelEntity("id",
+                                          "name",
+                                          "FORM");
+
+        mockMvc.perform(post("{version}/models",
+                             API_VERSION)
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(formModel)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -179,7 +195,7 @@ public class ModelControllerIT {
         //given
         final String processModelId = "process_model_id";
         final String processModelName = "Process Model";
-        Model formModel = new ModelEntity(processModelId,
+        Model processModel = new ModelEntity(processModelId,
                                           processModelName,
                                           PROCESS);
 
@@ -190,7 +206,7 @@ public class ModelControllerIT {
         mockMvc.perform(post("{version}/models",
                              API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(formModel)))
+                                .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())
                 .andExpect(status().isInternalServerError());
     }

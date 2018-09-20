@@ -28,6 +28,7 @@ import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidationError;
+import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.apache.commons.lang3.StringUtils;
@@ -81,6 +82,9 @@ public class ModelService {
     public Model createModel(Application application,
                              Model model) {
         model.setApplication(application);
+        Optional.ofNullable(model.getType())
+                .flatMap(modelTypeService::findModelTypeByName)
+                .orElseThrow(() -> new UnknownModelTypeException("Unknown model type: " + model.getType()));
         return modelRepository.createModel(model);
     }
 
@@ -98,12 +102,12 @@ public class ModelService {
         return modelRepository.findModelById(modelId);
     }
 
-    public Model newModelInstance(ModelType type,
+    public Model newModelInstance(String type,
                                   String name) {
         try {
             Model model = (Model) modelRepository.getModelType().newInstance();
             model.setId(UUID.randomUUID().toString());
-            model.setType(type.getName());
+            model.setType(type);
             model.setName(name);
             return model;
         } catch (InstantiationException | IllegalAccessException e) {
@@ -132,7 +136,7 @@ public class ModelService {
                              ModelType modelType,
                              FileContent fileContent) {
 
-        Model model = newModelInstance(modelType,
+        Model model = newModelInstance(modelType.getName(),
                                        fileContent.getFilename());
         model.setContentType(fileContent.getContentType());
         model.setContent(new String(fileContent.getFileContent()));

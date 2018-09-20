@@ -22,7 +22,4 @@ package org.activiti.cloud.organization.api;
 public interface ModelType {
 
     String getName();
-
-    //TODO: this is temporary functionality: the model type should not be tied to the content type
-    String getContentType();
 }

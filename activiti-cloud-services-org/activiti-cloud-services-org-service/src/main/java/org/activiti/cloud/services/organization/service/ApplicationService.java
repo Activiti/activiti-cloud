@@ -22,7 +22,7 @@ import java.util.Optional;
 
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.organization.core.error.ModelingException;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -35,10 +35,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
-
 /**
  * Business logic related to {@link Application} entities
  */
@@ -50,15 +46,11 @@ public class ApplicationService {
 
     private final ModelService modelService;
 
-    private final ModelTypeService modelTypeService;
-
     @Autowired
     public ApplicationService(ApplicationRepository applicationRepository,
-                              ModelService modelService,
-                              ModelTypeService modelTypeService) {
+                              ModelService modelService) {
         this.applicationRepository = applicationRepository;
         this.modelService = modelService;
-        this.modelTypeService = modelTypeService;
     }
 
     /**
@@ -187,16 +179,13 @@ public class ApplicationService {
     private Optional<Model> toModel(Map.Entry<String, FileContent> modelMapEntry) {
         String modelName = modelMapEntry.getKey();
         FileContent fileContent = modelMapEntry.getValue();
-        //TODO: to detect the model type from file content. For now, just use the content type.
-        return modelTypeService.findModelTypeByContentType(fileContent.getContentType())
-                .map(modelType -> {
-                    Model model = modelService.newModelInstance(modelType,
-                                                                modelName);
-                    model.setName(modelName);
-                    model.setType(modelType.getName());
-                    model.setContentType(fileContent.getContentType());
-                    model.setContent(new String(fileContent.getFileContent()));
-                    return model;
-                });
+
+        //TODO: to detect the model type from zip structure (https://github.com/Activiti/Activiti/issues/2001)
+        //For now, just use the default PROCESS
+        Model model = modelService.newModelInstance(ProcessModelType.PROCESS,
+                                                    modelName);
+        model.setContentType(fileContent.getContentType());
+        model.setContent(new String(fileContent.getFileContent()));
+        return Optional.of(model);
     }
 }
