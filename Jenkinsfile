@@ -27,12 +27,6 @@ pipeline {
             sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:$PREVIEW_VERSION"
           }
 
-          dir ('./charts/preview') {
-           container('maven') {
-             sh "make preview"
-             sh "jx preview --app $APP_NAME --dir ../.."
-           }
-          }
         }
       }
       stage('Build Release') {
@@ -50,11 +44,6 @@ pipeline {
             sh "echo \$(jx-release-version) > VERSION"
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
           }
-          dir ('./charts/activiti-cloud-build') {
-            container('maven') {
-              sh "make tag"
-            }
-          }
           container('maven') {
             sh 'mvn clean deploy'
 
@@ -62,24 +51,6 @@ pipeline {
 
 
             sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
-          }
-        }
-      }
-      stage('Promote to Environments') {
-        when {
-          branch 'master'
-        }
-        steps {
-          dir ('./charts/activiti-cloud-build') {
-            container('maven') {
-              sh 'jx step changelog --version v\$(cat ../../VERSION)'
-
-              // release the helm chart
-              sh 'jx step helm release'
-
-              // promote through all 'Auto' promotion Environments
-              sh 'jx promote -b --all-auto --timeout 1h --version \$(cat ../../VERSION)'
-            }
           }
         }
       }
