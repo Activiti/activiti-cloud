@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.organization.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +41,6 @@ public class ModelTypeService {
 
     private Map<String, ModelType> modelTypesMapByName;
 
-    private Map<String, ModelType> modelTypesMapByContentType;
-
     @Autowired
     public ModelTypeService(Set<ModelType> availableModelTypes) {
         this.modelTypesMapByName = availableModelTypes
@@ -49,18 +48,10 @@ public class ModelTypeService {
                 .collect(Collectors.toMap(ModelType::getName,
                                           Function.identity()));
 
-        this.modelTypesMapByContentType = availableModelTypes
-                .stream()
-                .collect(Collectors.toMap(ModelType::getContentType,
-                                          Function.identity()));
     }
 
     public Optional<ModelType> findModelTypeByName(String name) {
         return Optional.ofNullable(modelTypesMapByName.get(name));
-    }
-
-    public Optional<ModelType> findModelTypeByContentType(String name) {
-        return Optional.ofNullable(modelTypesMapByContentType.get(name));
     }
 
     public Collection<ModelType> getAvailableModelTypes() {
@@ -68,11 +59,9 @@ public class ModelTypeService {
     }
 
     public Page<ModelType> getModelTypeNames(Pageable pageable) {
-        List<ModelType> availableModelTypeNames = getAvailableModelTypes()
-                .stream()
-                .collect(Collectors.toList());
+        List<ModelType> availableModelTypeNames = new ArrayList<>(getAvailableModelTypes());
         return getPage(availableModelTypeNames,
                        pageable,
-                       () -> availableModelTypeNames.size());
+                       availableModelTypeNames::size);
     }
 }

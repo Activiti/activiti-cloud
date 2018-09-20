@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.api;
-
-import org.springframework.stereotype.Component;
+package org.activiti.cloud.organization.core.error;
 
 /**
- * Process model type
+ * Exception thrown when an unknown model type is being processed
  */
-@Component
-public class ProcessModelType implements ModelType {
+public class UnknownModelTypeException extends ModelingException {
 
-    public static final String PROCESS = "PROCESS";
-
-    @Override
-    public String getName() {
-        return PROCESS;
+    public UnknownModelTypeException(String message) {
+        super(message);
     }
 }
