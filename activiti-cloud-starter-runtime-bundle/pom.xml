@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud</groupId>
+    <groupId>org.activiti.cloud.rb</groupId>
     <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
     <version>7.0.0-SNAPSHOT</version>
   </parent>
@@ -16,7 +16,7 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.rb</groupId>
       <artifactId>activiti-cloud-services-api</artifactId>
     </dependency>
     <dependency>
@@ -24,44 +24,44 @@
       <artifactId>activiti-spring-boot-starter</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-metadata</artifactId>
     </dependency>
     <!-- keycloak included as default identity provider to be excluded if overridden -->
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.rb</groupId>
       <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-monitoring</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-tracing</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-logging</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.rb</groupId>
       <artifactId>activiti-cloud-services-events</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.rb</groupId>
       <artifactId>activiti-cloud-services-rest-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.rb</groupId>
       <artifactId>activiti-cloud-services-connectors</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.rb</groupId>
       <artifactId>activiti-cloud-services-subscriptions</artifactId>
     </dependency>
     <dependency>
@@ -198,7 +198,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-test</artifactId>
       <scope>test</scope>
     </dependency>
