@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud</groupId>
+    <groupId>org.activiti.cloud.audit</groupId>
     <artifactId>activiti-cloud-audit-service-parent</artifactId>
     <version>7.0.0-SNAPSHOT</version>
   </parent>
@@ -11,19 +11,19 @@
   <name>Activiti Cloud Audit :: Starter :: Audit</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.audit</groupId>
       <artifactId>activiti-cloud-services-audit-jpa</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-metadata</artifactId>
     </dependency>
     <dependency>
@@ -75,15 +75,15 @@
       <artifactId>spring-web</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-monitoring</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-tracing</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-logging</artifactId>
     </dependency>
     <dependency>
@@ -159,7 +159,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-test</artifactId>
       <scope>test</scope>
     </dependency>

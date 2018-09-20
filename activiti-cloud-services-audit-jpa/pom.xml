@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud</groupId>
+    <groupId>org.activiti.cloud.audit</groupId>
     <artifactId>activiti-cloud-audit-service-parent</artifactId>
     <version>7.0.0-SNAPSHOT</version>
   </parent>
@@ -11,7 +11,7 @@
   <name>Activiti Cloud Audit :: Services :: Audit JPA</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.audit</groupId>
       <artifactId>activiti-cloud-services-audit-api</artifactId>
     </dependency>
     <dependency>
@@ -19,7 +19,7 @@
       <artifactId>activiti-api-model-shared</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.api</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-api-model-shared-impl</artifactId>
     </dependency>
     <dependency>
@@ -35,7 +35,7 @@
       <artifactId>activiti-api-process-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.api</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
@@ -47,7 +47,7 @@
       <artifactId>activiti-api-task-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.api</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-api-task-model-impl</artifactId>
     </dependency>
     <dependency>
@@ -63,7 +63,7 @@
       <artifactId>activiti-cloud-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-dbp-rest</artifactId>
     </dependency>
     <dependency>
@@ -212,7 +212,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-rest-docs</artifactId>
       <scope>test</scope>
     </dependency>
