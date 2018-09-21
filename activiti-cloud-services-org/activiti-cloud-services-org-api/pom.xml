@@ -20,15 +20,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
+    <groupId>org.activiti.cloud.modeling</groupId>
     <artifactId>activiti-cloud-services-org</artifactId>
-    <groupId>org.activiti.cloud</groupId>
     <version>7.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-org-api</artifactId>
   <name>Activiti Cloud Services :: Organization API</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-auditable</artifactId>
     </dependency>
     <dependency>

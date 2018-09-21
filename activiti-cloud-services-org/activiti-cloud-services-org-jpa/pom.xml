@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud</groupId>
+    <groupId>org.activiti.cloud.modeling</groupId>
     <artifactId>activiti-cloud-services-org</artifactId>
     <version>7.0.0-SNAPSHOT</version>
   </parent>
@@ -10,19 +10,19 @@
   <name>Activiti Cloud Services :: Organization JPA</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.modeling</groupId>
       <artifactId>activiti-cloud-services-org-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.modeling</groupId>
       <artifactId>activiti-cloud-services-org-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.modeling</groupId>
       <artifactId>activiti-cloud-services-org-repository</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-auditable</artifactId>
     </dependency>
     <dependency>
@@ -30,7 +30,7 @@
       <artifactId>activiti-api-runtime-shared</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
     </dependency>
     <dependency>
