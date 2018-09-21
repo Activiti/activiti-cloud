@@ -10,11 +10,11 @@
   <artifactId>modeling-acceptance-tests</artifactId>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.modeling</groupId>
       <artifactId>activiti-cloud-services-org-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud</groupId>
+      <groupId>org.activiti.cloud.modeling</groupId>
       <artifactId>activiti-cloud-services-org-api-impl</artifactId>
     </dependency>
     <dependency>

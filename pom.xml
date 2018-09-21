@@ -49,7 +49,7 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud</groupId>
+        <groupId>org.activiti.cloud.dependencies</groupId>
         <artifactId>activiti-cloud-dependencies</artifactId>
         <version>${activiti.cloud.version}</version>
         <scope>import</scope>
