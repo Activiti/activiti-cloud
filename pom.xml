@@ -16,7 +16,7 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.activiti.cloud</groupId>
+                <groupId>org.activiti.cloud.dependencies</groupId>
                 <artifactId>activiti-cloud-dependencies</artifactId>
                 <version>${activiti.cloud.version}</version>
                 <scope>import</scope>
@@ -26,20 +26,19 @@
     </dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>org.activiti.cloud</groupId>
+            <groupId>org.activiti.cloud.connector</groupId>
             <artifactId>activiti-cloud-starter-connector</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.activiti.cloud</groupId>
+            <groupId>org.activiti.cloud.common</groupId>
             <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
-            <version>${activiti.cloud.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.activiti.cloud</groupId>
+            <groupId>org.activiti.cloud.common</groupId>
             <artifactId>activiti-cloud-services-tracing</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.activiti.cloud</groupId>
+            <groupId>org.activiti.cloud.common</groupId>
             <artifactId>activiti-cloud-services-logging</artifactId>
         </dependency>
         <dependency>
