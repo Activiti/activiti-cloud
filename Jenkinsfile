@@ -55,8 +55,62 @@ pipeline {
 
             sh "jx step git credentials"
             //need to fill in the versions that we actually want to push
-            //sh "updatebot push-version --kind maven org.activiti.api:activiti-cloud-service-common-dependencies \$(cat VERSION)"
+            sh "updatebot push"
+            sh "updatebot update"
+            sh "updatebot update-loop"
 
+          }
+        }
+      }
+      stage('Build Release from Tag') {
+        when {
+          tag '*RELEASE'
+        }
+        steps {
+          container('maven') {
+            // ensure we're not on a detached head
+            sh "git checkout $TAG_NAME"
+            sh "git config --global credential.helper store"
+
+            sh "jx step git credentials"
+            // so we can retrieve the version in later steps
+            sh "echo \$TAG_NAME > VERSION"
+            sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
+          }
+          container('maven') {
+            sh '''
+              mvn clean deploy -P !alfresco -P central
+              '''
+
+            sh 'export VERSION=`cat VERSION`'// && skaffold build -f skaffold.yaml'
+
+            sh "git config --global credential.helper store"
+
+            sh "jx step git credentials"
+            //sh "updatebot push"
+            //sh "updatebot update"
+
+            sh "echo pushing with update using version \$(cat VERSION)"
+
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-auditable \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-metadata \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-identity-keycloak \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-security \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-security-keycloak \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-commons-io \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-dbp-rest \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-identity-basic \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-identity-keycloak \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-logging \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-monitoring \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-security-policies \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-rest-docs \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-test \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-tracing \$(cat VERSION)"
+            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-service-common-dependencies \$(cat VERSION)"
+            sh "updatebot update-loop"
+
+        //    sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
           }
         }
       }
