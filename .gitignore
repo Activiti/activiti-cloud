@@ -33,3 +33,9 @@ hs_err_pid*
 .classpath
 .settings
 .factorypath
+
+# Updatebot
+.updatebot-repos
+.updatebot-repos/**
+
+*.versionsBackup
