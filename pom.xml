@@ -39,6 +39,9 @@
       </releases>
     </repository>
   </repositories>
+  <properties>
+    <activiti-cloud-service-common.version>7.0.0-SNAPSHOT</activiti-cloud-service-common.version>
+  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
