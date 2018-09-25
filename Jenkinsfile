@@ -48,7 +48,7 @@ pipeline {
             sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
             sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
             sh "git push origin v\$(cat VERSION)"
-            
+
           }
           container('maven') {
             sh 'mvn clean deploy'
@@ -56,9 +56,9 @@ pipeline {
             sh 'export VERSION=`cat VERSION`'
 
 
-            sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
             sh "updatebot push"
             sh "updatebot update"
+            sh "updatebot update-loop"
           }
         }
       }
