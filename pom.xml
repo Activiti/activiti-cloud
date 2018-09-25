@@ -40,7 +40,7 @@
     </repository>
   </repositories>
   <properties>
-    <activiti-cloud-service-common.version>7.0.0-SNAPSHOT</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.0.1</activiti-cloud-service-common.version>
   </properties>
   <dependencyManagement>
     <dependencies>
