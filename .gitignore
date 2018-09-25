@@ -34,3 +34,9 @@ hs_err_pid*
 .project
 .classpath
 .settings
+
+# Updatebot
+.updatebot-repos
+.updatebot-repos/**
+
+*.versionsBackup
