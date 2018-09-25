@@ -54,7 +54,7 @@ pipeline {
             sh 'export VERSION=`cat VERSION`'
             
             sh "jx step git credentials"
-            sh "updatebot push"
+            sh "updatebot push --ref develop"
             sh "updatebot update"
 
           }
