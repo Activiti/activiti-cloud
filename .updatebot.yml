@@ -4,17 +4,5 @@ github:
     repositories:
     - name: activiti-cloud-service-common
       branch: develop
-    - name: activiti-cloud-connectors
-      branch: develop
-    - name: activiti-cloud-query-service
-      branch: develop
-    - name: activiti-cloud-runtime-bundle-service
-      branch: develop
-    - name: activiti-cloud-audit-service
-      branch: develop
-    - name: activiti-cloud-api
-      branch: develop
     - name: activiti-cloud-dependencies
-      branch: develop
-    - name: activiti-cloud-acceptance-tests
       branch: develop

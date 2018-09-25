@@ -49,6 +49,12 @@ pipeline {
             // so we can retrieve the version in later steps
             sh "echo \$(jx-release-version) > VERSION"
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
+
+            sh "git add --all"
+            sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
+            sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
+            sh "git push origin v\$(cat VERSION)"
+
           }
           //dir ('./charts/activiti-cloud-api') {
           //  container('maven') {
@@ -97,13 +103,6 @@ pipeline {
 
             sh "echo pushing with update using version \$(cat VERSION)"
 
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api \$(cat VERSION)"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-model-shared \$(cat VERSION)"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-api-task-model \$(cat VERSION)"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-process-model \$(cat VERSION)"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-model-shared-impl \$(cat VERSION)"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-task-model-impl \$(cat VERSION)"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-model-shared-impl \$(cat VERSION)"
             sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-dependencies \$(cat VERSION)"
             sh "updatebot update-loop"
 
