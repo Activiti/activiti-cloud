@@ -59,7 +59,7 @@ pipeline {
             sh 'mvn clean deploy'
 
             sh 'export VERSION=`cat VERSION`' // && skaffold build -f skaffold.yaml'
-            sh "updatebot push"
+            sh "updatebot push --ref develop"
             sh "updatebot update"
             sh "updatebot update-loop"
 
@@ -97,14 +97,14 @@ pipeline {
 
             sh "echo pushing with update using version \$(cat VERSION)"
 
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api \$(cat VERSION) --ref develop"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-model-shared \$(cat VERSION) --ref develop"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-api-task-model \$(cat VERSION) --ref develop"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-process-model \$(cat VERSION) --ref develop"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-model-shared-impl \$(cat VERSION) --ref develop"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-task-model-impl \$(cat VERSION) --ref develop"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-model-shared-impl \$(cat VERSION) --ref develop"
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-dependencies \$(cat VERSION) --ref develop"
+            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-model-shared \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-api-task-model \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-process-model \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-model-shared-impl \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-task-model-impl \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-model-shared-impl \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-dependencies \$(cat VERSION)"
             sh "updatebot update-loop"
 
         //    sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"

@@ -74,8 +74,6 @@
   </repositories>
 
   <properties>
-    <!--<activiti.version>7.0.6</activiti.version> &lt;!&ndash; fixed version to use CI/CD &ndash;&gt;-->
-    <activiti.version>7.0.0-SNAPSHOT</activiti.version>
     <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
   </properties>
 
