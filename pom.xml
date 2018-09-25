@@ -11,6 +11,7 @@
 
   <groupId>org.activiti.cloud.common</groupId>
   <artifactId>activiti-cloud-service-common-parent</artifactId>
+  <version>7.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Service Common Parent</name>
   <url>http://activiti.org</url>

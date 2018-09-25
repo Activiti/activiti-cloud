@@ -55,7 +55,7 @@ pipeline {
 
             sh "jx step git credentials"
             //need to fill in the versions that we actually want to push
-            sh "updatebot push"
+            sh "updatebot push --ref develop"
             sh "updatebot update"
             sh "updatebot update-loop"
 
@@ -92,22 +92,7 @@ pipeline {
 
             sh "echo pushing with update using version \$(cat VERSION)"
 
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-auditable \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-metadata \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-identity-keycloak \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-security \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-security-keycloak \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-commons-io \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-dbp-rest \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-identity-basic \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-identity-keycloak \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-logging \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-monitoring \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-security-policies \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-rest-docs \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-services-test \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-tracing \$(cat VERSION)"
-            sh "updatebot push-version -r develop --kind maven org.activiti.cloud.common:activiti-cloud-service-common-dependencies \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.common:activiti-cloud-service-common-dependencies \$(cat VERSION)"
             sh "updatebot update-loop"
 
         //    sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
