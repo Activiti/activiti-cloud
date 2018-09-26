@@ -39,6 +39,7 @@ pipeline {
             // so we can retrieve the version in later steps
             sh "echo \$(jx-release-version) > VERSION"
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
+
             sh "git add --all"
             sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
             sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
@@ -49,12 +50,49 @@ pipeline {
 
             sh 'export VERSION=`cat VERSION`'
 
+            sh "jx step git credentials"
+            sh "updatebot push"
+            sh "updatebot update"
+            sh "updatebot update-loop"
+
+          }
+        }
+      }
+      stage('Build Release from Tag') {
+        when {
+          tag '*RELEASE'
+        }
+        steps {
+          container('maven') {
+            // ensure we're not on a detached head
+            sh "git checkout $TAG_NAME"
             sh "git config --global credential.helper store"
 
             sh "jx step git credentials"
-            //replace below with rb starter and add updatebot yaml
-            //sh "updatebot push-version --kind maven org.activiti:activiti-core-dependencies \$(cat VERSION)"
+            // so we can retrieve the version in later steps
+            sh "echo \$TAG_NAME > VERSION"
+            sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
+          }
+          container('maven') {
+            sh '''
+              mvn clean deploy -P !alfresco -P central
+              '''
 
+            sh 'export VERSION=`cat VERSION`'// && skaffold build -f skaffold.yaml'
+
+            sh "git config --global credential.helper store"
+
+            sh "jx step git credentials"
+            //sh "updatebot push"
+            //sh "updatebot update"
+
+            sh "echo pushing with update using version \$(cat VERSION)"
+
+            //will need to add updatebot yaml file and specify downtream repos
+            sh "updatebot push-version --kind maven org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies \$(cat VERSION)"
+            sh "updatebot update-loop"
+
+        //    sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
           }
         }
       }
