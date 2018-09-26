@@ -41,6 +41,7 @@
   </repositories>
   <properties>
     <activiti-cloud-service-common.version>7.0.1</activiti-cloud-service-common.version>
+    <activiti-cloud-query.version>${project.version}</activiti-cloud-query.version>
   </properties>
   <dependencyManagement>
     <dependencies>
