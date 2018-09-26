@@ -183,8 +183,6 @@
     <dependency>
       <groupId>org.activiti.cloud.process.model</groupId>
       <artifactId>activiti-cloud-services-process-model-rest</artifactId>
-      <version>${project.version}</version>
-      <classifier>stubs</classifier>
       <scope>test</scope>
     </dependency>
     <dependency>
