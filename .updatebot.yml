@@ -12,7 +12,7 @@ github:
       branch: develop
     - name: ttc-query-campaign
       branch: develop
-    - name: ttc-connectors-dummy-twitter
+    - name: ttc-connectors-dummytwitter
       branch: develop
     - name: ttc-connectors-ranking
       branch: develop
