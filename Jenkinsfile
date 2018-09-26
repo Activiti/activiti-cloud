@@ -56,6 +56,7 @@ pipeline {
             sh "jx step git credentials"
             sh "updatebot push --ref develop"
             sh "updatebot update"
+            sh "updatebot update-loop"
 
           }
         }
@@ -90,8 +91,8 @@ pipeline {
 
             sh "echo pushing with update using version \$(cat VERSION)"
 
-            //need to switch this to specific artifacts for downstream repos when configuring updatebot
-            //sh "updatebot push-version --kind maven org.activiti.build:activiti-parent \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.connectors:activiti-cloud-connectors-dependencies \$(cat VERSION)"
+            sh "updatebot update-loop"
 
         //    sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
           }
