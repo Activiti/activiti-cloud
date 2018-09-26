@@ -42,6 +42,7 @@
   </repositories>
   <properties>
     <activiti-cloud-service-common.version>7.0.1</activiti-cloud-service-common.version>
+    <activiti-cloud-audit.version>${project.version}</activiti-cloud-audit.version>
   </properties>
   <dependencyManagement>
     <!-- This duplicates activiti-cloud-audit-dependencies module but we can't import that module here as this is its parent
