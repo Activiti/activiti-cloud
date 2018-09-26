@@ -36,6 +36,14 @@ pipeline {
             sh "git config --global credential.helper store"
 
             sh "jx step git credentials"
+            // so we can retrieve the version in later steps
+            sh "echo \$(jx-release-version) > VERSION"
+            sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
+
+            sh "git add --all"
+            sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
+            sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
+            sh "git push origin v\$(cat VERSION)"
           }
           container('maven') {
             sh "export REALM=activiti && mvn clean install -DskipTests && mvn -pl '!modeling-acceptance-tests,!apps-acceptance-tests,!multiple-runtime-acceptance-tests,!security-policies-acceptance-tests,!shared-acceptance-tests' clean verify"
