@@ -35,3 +35,7 @@ hs_err_pid*
 
 #MacOS
 .DS_Store
+
+# Updatebot
+.updatebot-repos
+.updatebot-repos/**
