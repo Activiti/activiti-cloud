@@ -52,6 +52,7 @@ pipeline {
             sh 'mvn clean deploy'
 
             sh 'export VERSION=`cat VERSION`'
+            sh 'export UPDATEBOT_MERGE=false'
 
             sh "jx step git credentials"
             sh "updatebot push --ref develop --merge=false"
