@@ -52,11 +52,12 @@ pipeline {
             sh 'mvn clean deploy'
 
             sh 'export VERSION=`cat VERSION`'
+            sh 'export UPDATEBOT_MERGE=false'
 
             sh "jx step git credentials"
-            sh "updatebot push --ref develop --merge false"
-            sh "updatebot update --ref develop --merge false"
+            sh "updatebot push --ref develop"
             sh "updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies \$(cat VERSION) --merge false"
+            sh "updatebot update --merge false"
           }
         }
       }
