@@ -56,7 +56,7 @@ pipeline {
 
             sh "jx step git credentials"
             sh "updatebot push --ref develop --merge=false"
-            sh "updatebot update"
+            sh "updatebot update --merge=false"
           }
         }
       }
