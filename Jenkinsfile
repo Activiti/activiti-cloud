@@ -55,7 +55,7 @@ pipeline {
 
             sh "jx step git credentials"
             sh "updatebot push --ref develop --merge=false"
-            sh "updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies \$(cat VERSION) --merge=false"
           }
         }
       }
