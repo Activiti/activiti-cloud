@@ -116,7 +116,7 @@
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-audit-dependencies</artifactId>
-        <version>7.0.7</version>
+        <version>7.0.8</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
