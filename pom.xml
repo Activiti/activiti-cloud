@@ -89,7 +89,7 @@
       </dependency>
       <dependency>
         <groupId>org.activiti</groupId>
-        <artifactId>activiti-core-dependencies</artifactId>
+        <artifactId>activiti-dependencies</artifactId>
         <version>${activiti.version}</version>
         <type>pom</type>
         <scope>import</scope>
