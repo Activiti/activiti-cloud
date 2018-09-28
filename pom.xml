@@ -38,7 +38,7 @@
   </repositories>
 
   <properties>
-    <activiti-cloud-runtime-bundle.version>7.0.18</activiti-cloud-runtime-bundle.version>
+    <activiti-cloud-runtime-bundle.version>7.0.19</activiti-cloud-runtime-bundle.version>
   </properties>
 
   <dependencyManagement>
