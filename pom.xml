@@ -41,7 +41,7 @@
     </repository>
   </repositories>
   <properties>
-    <activiti-cloud-service-common.version>7.0.14</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.0.15</activiti-cloud-service-common.version>
     <activiti-cloud-audit.version>${project.version}</activiti-cloud-audit.version>
   </properties>
   <dependencyManagement>
