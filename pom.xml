@@ -88,7 +88,7 @@
         <scope>runtime</scope>
       </dependency>
       <dependency>
-        <groupId>org.activiti</groupId>
+        <groupId>org.activiti.dependencies</groupId>
         <artifactId>activiti-dependencies</artifactId>
         <version>${activiti.version}</version>
         <type>pom</type>
