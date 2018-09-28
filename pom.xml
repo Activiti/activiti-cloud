@@ -16,7 +16,7 @@
 
   <properties>
     <activiti-cloud-runtime-bundle.version>${project.version}</activiti-cloud-runtime-bundle.version>
-    <activiti-cloud-service-common.version>7.0.12</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.0.13</activiti-cloud-service-common.version>
   </properties>
 
   <modules>
