@@ -40,7 +40,7 @@
   </repositories>
   <properties>
     <activiti-cloud-service-common.version>7.0.14</activiti-cloud-service-common.version>
-    <activiti-cloud-process-model.version>7.0.7</activiti-cloud-process-model.version>
+    <activiti-cloud-process-model.version>7.0.8</activiti-cloud-process-model.version>
   </properties>
   <dependencyManagement>
     <!-- This duplicates activiti-cloud-api-dependencies module but we can't import that module here as this is its parent
