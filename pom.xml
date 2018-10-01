@@ -85,7 +85,7 @@
 
   <properties>
     <activiti-cloud-api-dependencies.version>7.0.6</activiti-cloud-api-dependencies.version>
-    <activiti-cloud-service-common-dependencies.version>7.0.17</activiti-cloud-service-common-dependencies.version>
+    <activiti-cloud-service-common-dependencies.version>7.0.19</activiti-cloud-service-common-dependencies.version>
     <activiti-cloud-runtime-bundle-dependencies.version>7.0.22</activiti-cloud-runtime-bundle-dependencies.version>
     <activiti-cloud-query-dependencies.version>7.0.16</activiti-cloud-query-dependencies.version>
     <activiti-cloud-audit-dependencies.version>7.0.12</activiti-cloud-audit-dependencies.version>
