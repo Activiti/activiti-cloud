@@ -39,7 +39,7 @@
     </repository>
   </repositories>
   <properties>
-    <activiti-cloud-service-common.version>7.0.16</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.0.18</activiti-cloud-service-common.version>
     <activiti-cloud-process-model.version>7.0.8</activiti-cloud-process-model.version>
   </properties>
   <dependencyManagement>
