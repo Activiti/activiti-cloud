@@ -91,7 +91,7 @@
     <activiti-cloud-audit-dependencies.version>7.0.12</activiti-cloud-audit-dependencies.version>
     <activiti-cloud-connectors-dependencies.version>7.0.16</activiti-cloud-connectors-dependencies.version>
     <activiti-cloud-org-dependencies.version>7.0.2</activiti-cloud-org-dependencies.version>
-    <activiti-cloud-process-model-dependencies.version>7.0.9</activiti-cloud-process-model-dependencies.version>
+    <activiti-cloud-process-model-dependencies.version>7.0.10</activiti-cloud-process-model-dependencies.version>
     <activiti-cloud-app-dependencies.version>7.0.12</activiti-cloud-app-dependencies.version>
   </properties>
 
