@@ -16,7 +16,7 @@
   </scm>
   <properties>
     <java.version>1.8</java.version>
-    <activiti-cloud.version>7.0.29</activiti-cloud.version>
+    <activiti-cloud-dependencies.version>7.0.29</activiti-cloud-dependencies.version>
     <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
     <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version> <!-- required for jx -->
@@ -27,7 +27,7 @@
       <dependency>
         <groupId>org.activiti.cloud.dependencies</groupId>
         <artifactId>activiti-cloud-dependencies</artifactId>
-        <version>${activiti-cloud.version}</version>
+        <version>${activiti-cloud-dependencies.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -41,7 +41,6 @@
     <dependency>
       <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
-      <version>${activiti-cloud.version}</version>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
