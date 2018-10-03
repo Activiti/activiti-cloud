@@ -265,6 +265,18 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${maven-release-plugin.version}</version>
+          <configuration>
+            <releaseProfiles>sign</releaseProfiles>
+            <autoVersionSubmodules>true</autoVersionSubmodules>
+            <tagNameFormat>activiti-@{project.version}</tagNameFormat>
+            <!-- Necessary until keycloak releases boot2 adaptor -->
+            <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>com.mysema.maven</groupId>
           <artifactId>apt-maven-plugin</artifactId>
           <version>${apt-maven-plugin.version}</version>
@@ -338,6 +350,34 @@
     </plugins>
   </build>
   <profiles>
+    <!-- Profile to sign artifacts, triggered when releasing -->
+    <profile>
+      <id>sign</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>${maven-gpg-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <profile>
       <id>integration-test</id>
       <activation>
