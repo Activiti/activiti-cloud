@@ -2,11 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.activiti.build</groupId>
-    <artifactId>activiti-parent</artifactId>
-    <version>7.0.28</version>
-  </parent>
   <groupId>org.activiti.cloud.build</groupId>
   <artifactId>activiti-cloud-parent</artifactId>
   <version>7.0.0-SNAPSHOT</version>
@@ -14,6 +9,9 @@
   <name>Activiti Cloud :: Build</name>
   <url>http://activiti.org</url>
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>1.8</java.version>
     <!-- Docker props -->
     <docker.keycloak.port>8180</docker.keycloak.port>
     <docker.keycloak.start.timeout>40000</docker.keycloak.start.timeout>
@@ -47,6 +45,9 @@
     <docker-maven-plugin.version>0.21.0</docker-maven-plugin.version>
     <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
     <spring-cloud-contract.version>2.0.0.M8</spring-cloud-contract.version>
+    <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -342,6 +343,18 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <showDeprecation>true</showDeprecation>
+          <showWarnings>true</showWarnings>
+          <optimize>true</optimize>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
