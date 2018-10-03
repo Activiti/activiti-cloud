@@ -65,9 +65,8 @@ pipeline {
             sh 'mvn clean deploy'
 
             sh 'export VERSION=`cat VERSION`' // && skaffold build -f skaffold.yaml'
-            sh "updatebot push --ref develop"
-            sh "updatebot update"
-            sh "updatebot update-loop"
+            sh "updatebot push push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-dependencies \$(cat VERSION)"
+            sh "updatebot update --merge false"
 
             //sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
           }
