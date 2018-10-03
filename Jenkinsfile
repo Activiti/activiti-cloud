@@ -56,9 +56,8 @@ pipeline {
             sh 'export VERSION=`cat VERSION`'
 
 
-            sh "updatebot push --ref develop"
-            sh "updatebot update"
-            sh "updatebot update-loop"
+            sh "updatebot push --ref develop --merge false"
+            sh "updatebot update --merge false"
           }
         }
       }
