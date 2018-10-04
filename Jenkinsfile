@@ -42,6 +42,7 @@ pipeline {
             // so we can retrieve the version in later steps
             sh "echo \$(jx-release-version) > VERSION"
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
+            sh "mvn clean verify"
 
             sh "git add --all"
             sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
@@ -49,14 +50,13 @@ pipeline {
             sh "git push origin v\$(cat VERSION)"
           }
           container('maven') {
-            sh 'mvn clean deploy'
+            sh 'mvn clean deploy -DskipTest'
 
             sh 'export VERSION=`cat VERSION`'
 
             sh "jx step git credentials"
-            sh "updatebot push"
-            sh "updatebot update"
-            sh "updatebot update-loop"
+            sh "updatebot push-version --kind maven org.activiti.cloud.modeling:activiti-cloud-org-dependencies \$(cat VERSION)"
+            sh "updatebot update -—merge false"
           }
         }
       }
@@ -92,7 +92,7 @@ pipeline {
 
             //add updatebot configuration to push to downstream
             sh "updatebot push-version --kind maven org.activiti.cloud.modeling:activiti-cloud-org-dependencies \$(cat VERSION)"
-            sh "updatebot update-loop"
+            //sh "updatebot update-loop"
 
         //    sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
           }
