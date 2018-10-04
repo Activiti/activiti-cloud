@@ -12,6 +12,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
+    <!-- configuration properties for tests-->
+    <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
+    <generated-assertions-package>org.activiti.test</generated-assertions-package>
     <!-- Docker props -->
     <docker.keycloak.port>8180</docker.keycloak.port>
     <docker.keycloak.start.timeout>40000</docker.keycloak.start.timeout>
@@ -40,6 +43,7 @@
     <asciidoctor.version>1.5.6</asciidoctor.version>
     <!-- plugin versions -->
     <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
+    <assertj-assertions-generator-maven-plugin.version>2.0.0</assertj-assertions-generator-maven-plugin.version>
     <docker-maven-plugin.version>0.21.0</docker-maven-plugin.version>
     <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
     <spring-cloud-contract.version>2.0.0.M8</spring-cloud-contract.version>
@@ -328,6 +332,30 @@
           <artifactId>spring-cloud-contract-maven-plugin</artifactId>
           <version>${spring-cloud-contract.version}</version>
           <extensions>true</extensions>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>${build-helper-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>add-generated-assertions-folder</id>
+              <phase>generate-test-sources</phase>
+              <goals>
+                <goal>add-test-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>${generated-assertions-folder}</source>
+                </sources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.assertj</groupId>
+          <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
+          <version>${assertj-assertions-generator-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
