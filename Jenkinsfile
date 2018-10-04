@@ -53,7 +53,7 @@ pipeline {
 
             sh "jx step git credentials"
             sh "updatebot push-version --kind maven org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies \$(cat VERSION)"
-            sh "updatebot update"
+            sh "updatebot update --merge false"
 
 
           }
