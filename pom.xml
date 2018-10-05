@@ -39,11 +39,13 @@
       </releases>
     </repository>
   </repositories>
+
   <properties>
     <activiti-cloud-build.version>7.0.28</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>7.0.22</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.0.23</activiti-cloud-service-common.version>
     <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
   </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
