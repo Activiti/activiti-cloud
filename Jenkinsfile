@@ -58,7 +58,7 @@ pipeline {
             sh 'export VERSION=`cat VERSION`'
 
 
-            sh "updatebot push-version --kind maven org.activiti.cloud.build:activiti-cloud-parent \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.build:activiti-cloud-parent \$(cat VERSION) org.activiti.cloud.build:activiti-cloud-dependencies-parent \$(cat VERSION)"
             sh "updatebot update --merge false"
           }
         }
