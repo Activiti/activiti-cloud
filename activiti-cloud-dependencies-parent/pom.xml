@@ -27,7 +27,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <activiti-dependencies.version>7.0.42</activiti-dependencies.version>
+    <activiti-dependencies.version>7.0.45</activiti-dependencies.version>
     <spring-cloud.version>Finchley.SR1</spring-cloud.version>
     <spring-cloud-k8s.version>0.3.0.RELEASE</spring-cloud-k8s.version>
   </properties>
