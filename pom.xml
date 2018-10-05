@@ -98,13 +98,6 @@
         <version>2.6</version>
         <scope>runtime</scope>
       </dependency>
-      <dependency>
-        <groupId>org.activiti.dependencies</groupId>
-        <artifactId>activiti-dependencies</artifactId>
-        <version>${activiti-dependencies.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
       <!-- SpringFox dependencies -->
       <dependency>
         <groupId>io.springfox</groupId>
