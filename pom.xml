@@ -15,6 +15,11 @@
 
   <packaging>pom</packaging>
 
+  <properties>
+    <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
+    <activiti-cloud-build.version>7.0.28</activiti-cloud-build.version>
+  </properties>
+
   <dependencyManagement>
     <!-- This duplicates activiti-cloud-api-dependencies module but we can't import that module here as this is its parent
          and we want to keep a standard Maven structure -->
@@ -58,7 +63,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
   <modules>
     <module>activiti-cloud-api-dependencies</module>
     <module>activiti-cloud-api-model-shared</module>
@@ -68,7 +72,6 @@
     <module>activiti-cloud-api-task-model</module>
     <module>activiti-cloud-api-task-model-impl</module>
   </modules>
-
   <repositories>
     <repository>
       <id>alfresco</id>
@@ -79,11 +82,6 @@
       </releases>
     </repository>
   </repositories>
-
-  <properties>
-    <activiti-cloud-build.version>7.0.28</activiti-cloud-build.version>       
-    <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>       
-  </properties>
 
   <build>
     <plugins>
