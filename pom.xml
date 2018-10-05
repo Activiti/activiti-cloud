@@ -40,7 +40,7 @@
   </repositories>
   <properties>
     <activiti-cloud-org.version>${project.version}</activiti-cloud-org.version>
-    <activiti-cloud-service-common.version>7.0.19</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.0.23</activiti-cloud-service-common.version>
     <activiti-cloud-process-model.version>7.0.10</activiti-cloud-process-model.version>
   </properties>
   <dependencyManagement>
