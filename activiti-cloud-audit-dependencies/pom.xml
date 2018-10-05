@@ -14,41 +14,34 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.common</groupId>
-        <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-services-audit-parent</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-services-audit-jpa</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-services-audit-mongo</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-starter-audit</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-services-audit-api</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
