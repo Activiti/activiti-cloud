@@ -24,7 +24,7 @@
     <!-- configurations for Spring REST docs -->
     <asciidoc.filename>index.adoc</asciidoc.filename>
     <!-- dependencies -->
-    <activiti-dependencies.version>7.0.38</activiti-dependencies.version>
+    <activiti-dependencies.version>7.0.42</activiti-dependencies.version>
     <awaitility.version>3.0.0</awaitility.version>
     <commons-beanutils.version>1.9.3</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
