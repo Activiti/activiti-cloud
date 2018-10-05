@@ -30,13 +30,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.rb</groupId>
-        <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-        <version>${activiti-cloud-runtime-bundle.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
         <groupId>org.activiti.cloud.connector</groupId>
         <artifactId>activiti-cloud-starter-connector</artifactId>
         <version>${activiti-cloud-connectors.version}</version>
