@@ -42,7 +42,7 @@
   </repositories>
   <properties>
     <activiti-cloud-service-common.version>7.0.22</activiti-cloud-service-common.version>
-    <activiti-cloud-audit.version>${project.version}</activiti-cloud-audit.version>
+    <activiti-cloud-audit-service.version>${project.version}</activiti-cloud-audit-service.version>
   </properties>
   <dependencyManagement>
     <!-- This duplicates activiti-cloud-audit-dependencies module but we can't import that module here as this is its parent
@@ -58,32 +58,32 @@
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-services-audit-parent</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-services-audit-jpa</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-services-audit-mongo</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-starter-audit</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-services-audit-api</artifactId>
-        <version>${activiti-cloud-audit.version}</version>
+        <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
