@@ -49,7 +49,9 @@
     <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
     <spring-cloud-contract.version>2.0.0.M8</spring-cloud-contract.version>
     <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+    <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+    <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
 
   </properties>
 
@@ -405,10 +407,26 @@
               </execution>
             </executions>
           </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${maven-surefire-plugin.version}</version>
+            <configuration>
+              <redirectTestOutputToFile>true</redirectTestOutputToFile>
+              <failIfNoTests>false</failIfNoTests>
+              <trimStackTrace>false</trimStackTrace>
+              <excludes>
+                <exclude>**/*TestCase.java</exclude>
+                <exclude>**/*IT.java</exclude>
+              </excludes>
+              <runOrder>alphabetical</runOrder>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>
 
+    <!-- Activate integration tests -->
     <profile>
       <id>integration-test</id>
       <activation>
@@ -428,6 +446,22 @@
             </plugin>
           </plugins>
         </pluginManagement>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>${maven-failsafe-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>integration-test</id>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
       </build>
     </profile>
   </profiles>
