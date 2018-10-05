@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.0.24</version>
+    <version>7.0.28</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.dependencies</groupId>
@@ -99,7 +99,7 @@
     <activiti-cloud-org-service.version>7.0.7</activiti-cloud-org-service.version>
     <activiti-cloud-process-model-service.version>7.0.12</activiti-cloud-process-model-service.version>
     <activiti-cloud-app-service.version>7.0.16</activiti-cloud-app-service.version>
-    <activiti-cloud-build.version>7.0.24</activiti-cloud-build.version>
+    <activiti-cloud-build.version>7.0.28</activiti-cloud-build.version>
   </properties>
 
   <dependencyManagement>
