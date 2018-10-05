@@ -41,6 +41,7 @@
     </repository>
   </repositories>
   <properties>
+    <activiti-cloud-build.version>7.0.28</activiti-cloud-build.version>       
     <activiti-cloud-service-common.version>7.0.22</activiti-cloud-service-common.version>
     <activiti-cloud-audit-service.version>${project.version}</activiti-cloud-audit-service.version>
   </properties>
@@ -48,6 +49,13 @@
     <!-- This duplicates activiti-cloud-audit-dependencies module but we can't import that module here as this is its parent
          and we want to keep a standard Maven structure -->
     <dependencies>
+      <dependency>
+        <groupId>org.activiti.cloud.build</groupId>
+        <artifactId>activiti-cloud-dependencies-parent</artifactId>
+        <version>${activiti-cloud-build.version}</version>
+        <scope>import</scope>
+        <type>pom</type>       
+      </dependency>                
       <dependency>
         <groupId>org.activiti.cloud.common</groupId>
         <artifactId>activiti-cloud-service-common-dependencies</artifactId>
