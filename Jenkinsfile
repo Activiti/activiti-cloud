@@ -55,7 +55,7 @@ pipeline {
             sh 'export VERSION=`cat VERSION`'
             
             sh "jx step git credentials"
-            sh "updatebot push-version --kind maven org.activiti.cloud.connectors:activiti-cloud-connectors-dependencies \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.connector:activiti-cloud-connectors-dependencies \$(cat VERSION)"
             sh "updatebot update --merge false"
 
           }
