@@ -42,7 +42,7 @@
   </repositories>
   <properties>
     <activiti-cloud-build.version>7.0.29</activiti-cloud-build.version>       
-    <activiti-cloud-service-common.version>7.0.23</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.0.24</activiti-cloud-service-common.version>
     <activiti-cloud-audit-service.version>${project.version}</activiti-cloud-audit-service.version>
   </properties>
   <dependencyManagement>
