@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.0.28</version>
+    <version>7.0.29</version>
   </parent>
   <groupId>org.activiti.cloud.modeling</groupId>
   <artifactId>activiti-cloud-org-service-parent</artifactId>
@@ -39,7 +39,7 @@
     </repository>
   </repositories>
   <properties>
-    <activiti-cloud-build.version>7.0.28</activiti-cloud-build.version>       
+    <activiti-cloud-build.version>7.0.29</activiti-cloud-build.version>       
     <activiti-cloud-org-service.version>${project.version}</activiti-cloud-org-service.version>
     <activiti-cloud-service-common.version>7.0.23</activiti-cloud-service-common.version>
     <activiti-cloud-process-model-service.version>7.0.12</activiti-cloud-process-model-service.version>
