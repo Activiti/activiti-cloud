@@ -19,7 +19,7 @@
   <properties>
     <activiti-cloud-build.version>7.0.29</activiti-cloud-build.version>        
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
-    <activiti-cloud-api.version>7.0.12</activiti-cloud-api.version>
+    <activiti-cloud-api.version>7.0.13</activiti-cloud-api.version>
   </properties>
 
   <modules>
