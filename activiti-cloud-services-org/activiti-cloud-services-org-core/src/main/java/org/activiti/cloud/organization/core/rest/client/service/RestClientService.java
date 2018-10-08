@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.rest.client;
+package org.activiti.cloud.organization.core.rest.client.service;
 
 import java.util.List;
 

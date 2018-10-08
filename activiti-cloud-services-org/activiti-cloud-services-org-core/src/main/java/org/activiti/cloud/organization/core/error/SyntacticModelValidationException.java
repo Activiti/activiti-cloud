@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.rest.client;
-
-import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
+package org.activiti.cloud.organization.core.error;
 
 /**
- * Model rest client service interface
+ * Exception thrown when syntactic errors are found during validating a model content
  */
-public interface ModelReferenceService extends RestClientService<String, ModelReference, String> {
+public class SyntacticModelValidationException extends ModelingException {
 
+    public SyntacticModelValidationException(String message) {
+        super(message);
+    }
+
+    public SyntacticModelValidationException(Throwable cause) {
+        super(cause);
+    }
+
+    public SyntacticModelValidationException(String message,
+                                             Throwable cause) {
+        super(message,
+              cause);
+    }
 }

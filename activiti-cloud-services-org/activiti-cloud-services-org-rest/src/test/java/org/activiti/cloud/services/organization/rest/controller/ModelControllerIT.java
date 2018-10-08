@@ -22,7 +22,7 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelValidationError;
-import org.activiti.cloud.organization.core.rest.client.ModelReferenceService;
+import org.activiti.cloud.organization.core.rest.client.service.ModelReferenceService;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
@@ -323,7 +323,7 @@ public class ModelControllerIT {
     }
 
     @Test
-    public void validateModel() throws Exception {
+    public void validateProcessModel() throws Exception {
 
         // given
         MockMultipartFile file = new MockMultipartFile("file",
@@ -350,9 +350,7 @@ public class ModelControllerIT {
                 .andDo(print());
 
         // then
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.modelValidationErrors",
-                                    IsCollectionWithSize.hasSize(2)));
+        resultActions.andExpect(status().isBadRequest());
     }
 
     @Test

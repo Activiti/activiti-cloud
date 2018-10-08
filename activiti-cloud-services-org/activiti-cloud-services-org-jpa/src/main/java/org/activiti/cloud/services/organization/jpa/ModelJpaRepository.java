@@ -16,12 +16,10 @@
 
 package org.activiti.cloud.services.organization.jpa;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.entity.ApplicationEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
@@ -35,7 +33,6 @@ import static org.activiti.cloud.services.organization.entity.ModelEntityHandler
 import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.deleteModelReference;
 import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.loadModelReference;
 import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.updateModelReference;
-import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.validateModelReference;
 
 /**
  * JPA Repository for {@link ModelEntity} entity
@@ -94,13 +91,6 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
     default void deleteModel(ModelEntity model) {
         deleteModelReference(model);
         delete(model);
-    }
-
-    @Override
-    default List<ModelValidationError> validateModelContent(ModelEntity model,
-                                                            byte[] content) {
-        return validateModelReference(model,
-                                      content);
     }
 
     @Override

@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.organization.api;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-
 /**
  * Model validation error
  */

@@ -19,7 +19,7 @@ package org.activiti.cloud.services.organization.entity;
 import java.util.List;
 
 import org.activiti.cloud.organization.api.ModelValidationError;
-import org.activiti.cloud.organization.core.rest.client.ModelReferenceService;
+import org.activiti.cloud.organization.core.rest.client.service.ModelReferenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;

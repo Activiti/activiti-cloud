@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.error;
+package org.activiti.cloud.organization.core.rest.client.service;
+
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 
 /**
- * Generic modeling exception
+ * Model rest client service interface
  */
-public class ModelingException extends RuntimeException {
+public interface ModelReferenceService extends RestClientService<String, ModelReference, String> {
 
-    public ModelingException() {
-        super();
-    }
-
-    public ModelingException(Throwable cause) {
-        super(cause);
-    }
-
-    public ModelingException(String message) {
-        super(message);
-    }
-
-    public ModelingException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

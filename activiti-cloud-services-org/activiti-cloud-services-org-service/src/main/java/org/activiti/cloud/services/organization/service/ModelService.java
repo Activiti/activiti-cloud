@@ -17,17 +17,18 @@
 package org.activiti.cloud.services.organization.service;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.api.ModelValidationError;
+import org.activiti.cloud.organization.api.ModelValidator;
 import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -50,11 +51,19 @@ public class ModelService {
 
     private final ModelTypeService modelTypeService;
 
+    private Map<String, ModelValidator> modelValidatorsMapByModelType;
+
     @Autowired
     public ModelService(ModelRepository modelRepository,
-                        ModelTypeService modelTypeService) {
+                        ModelTypeService modelTypeService,
+                        Set<ModelValidator> modelValidators) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
+
+        this.modelValidatorsMapByModelType = modelValidators
+                .stream()
+                .collect(Collectors.toMap((modelValidationService) -> modelValidationService.getHandledModelType().getName(),
+                                          Function.identity()));
     }
 
     public Set<String> buildModelTypesFilter(Optional<ModelType> modelType) {
@@ -155,9 +164,10 @@ public class ModelService {
         return Optional.empty();
     }
 
-    public List<ModelValidationError> validateModelContent(Model type,
-                                                           FileContent fileContent) {
-        return modelRepository.validateModelContent(type,
-                                                    fileContent.getFileContent());
+    public void validateModelContent(Model model,
+                                     FileContent fileContent) {
+        Optional.ofNullable(model.getType())
+                .map(modelValidatorsMapByModelType::get)
+                .ifPresent(modelValidator -> modelValidator.validateModelContent(fileContent.getFileContent()));
     }
 }

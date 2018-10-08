@@ -21,7 +21,7 @@ import java.util.Optional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.core.rest.client.ModelReferenceService;
+import org.activiti.cloud.organization.core.rest.client.service.ModelReferenceService;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;

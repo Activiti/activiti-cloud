@@ -16,13 +16,11 @@
 
 package org.activiti.cloud.organization.repository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ModelValidationError;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -45,9 +43,6 @@ public interface ModelRepository<A extends Application, M extends Model<A, ?>> {
     M updateModel(M modelToUpdate);
 
     void deleteModel(M model);
-
-    List<ModelValidationError> validateModelContent(M model,
-                                                    byte[] content);
 
     Class<M> getModelType();
 }

@@ -14,26 +14,14 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.error;
+package org.activiti.cloud.organization.api;
 
 /**
- * Generic modeling exception
+ * Business logic related with validation of a {@link Model} content
  */
-public class ModelingException extends RuntimeException {
+public interface ModelValidator {
 
-    public ModelingException() {
-        super();
-    }
+    void validateModelContent(byte[] modelContent);
 
-    public ModelingException(Throwable cause) {
-        super(cause);
-    }
-
-    public ModelingException(String message) {
-        super(message);
-    }
-
-    public ModelingException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    ModelType getHandledModelType();
 }

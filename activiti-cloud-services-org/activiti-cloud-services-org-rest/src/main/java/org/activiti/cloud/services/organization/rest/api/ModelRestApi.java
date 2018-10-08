@@ -248,7 +248,8 @@ public interface ModelRestApi {
             value = "Validate a model content",
             notes = "Allows to the model content without save it.")
     @PostMapping("/models/{modelId}/validate")
-    Resources<ValidationErrorResource> validateModel(
+    @ResponseStatus(NO_CONTENT)
+    void validateModel(
             @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
             @ApiParam(VALIDATE_MODEL_FILE_PARAM_DESCR)

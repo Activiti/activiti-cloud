@@ -21,7 +21,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.activiti.cloud.organization.api.ModelValidationError;
-import org.activiti.cloud.organization.core.rest.client.ModelReferenceService;
+import org.activiti.cloud.organization.core.rest.client.service.ModelReferenceService;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.openfeign.FeignClient;

@@ -17,7 +17,6 @@
 package org.activiti.cloud.services.organization.rest.controller;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,31 +25,23 @@ import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.api.ModelValidationError;
-import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.organization.rest.api.ModelRestApi;
 import org.activiti.cloud.services.organization.rest.assembler.ModelResourceAssembler;
 import org.activiti.cloud.services.organization.rest.assembler.ModelTypeResourceAssembler;
 import org.activiti.cloud.services.organization.rest.assembler.PagedModelTypeAssembler;
 import org.activiti.cloud.services.organization.rest.assembler.ValidationErrorResourceAssembler;
-import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.activiti.cloud.services.organization.service.ModelService;
 import org.activiti.cloud.services.organization.service.ModelTypeService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.NotAcceptableStatusException;
@@ -61,7 +52,6 @@ import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToRespo
 import static org.activiti.cloud.services.organization.rest.api.ApplicationRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
 import static org.activiti.cloud.services.organization.rest.api.ApplicationRestApi.UPLOAD_FILE_PARAM_NAME;
 import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.ATTACHEMNT_API_PARAM_DESCR;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 /**
  * Controller for {@link Model} resources
@@ -102,13 +92,6 @@ public class ModelController implements ModelRestApi {
         this.pagedModelTypeAssembler = pagedModelTypeAssembler;
         this.validationErrorResourceAssembler = validationErrorResourceAssembler;
         this.applicationController = applicationController;
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(UnknownModelTypeException.class)
-    @ResponseBody
-    public String handleIOException(UnknownModelTypeException e) {
-        return e.toString();
     }
 
     @Override
@@ -266,21 +249,16 @@ public class ModelController implements ModelRestApi {
     }
 
     @Override
-    public Resources<ValidationErrorResource> validateModel(
+    public void validateModel(
             @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
             @ApiParam(VALIDATE_MODEL_FILE_PARAM_DESCR)
             @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
 
-        FileContent fileContent = multipartToFileContent(file);
-        Optional<Model> optionalModel = modelService.findModelById(modelId);
-        List<ModelValidationError> validationResult = optionalModel
-                .map(model -> modelService.validateModelContent(model,
-                                                                fileContent))
+        Model model = modelService.findModelById(modelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Model not found: " + modelId));
-
-        return new Resources<>(validationErrorResourceAssembler.toResources(validationResult),
-                               linkTo(ModelController.class).withSelfRel());
+        modelService.validateModelContent(model,
+                                          multipartToFileContent(file));
     }
 
     public Model findModelById(String modelId) {
