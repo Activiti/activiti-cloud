@@ -7,7 +7,55 @@
   <version>7.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Build</name>
+  <description>${project.name}</description>
   <url>http://activiti.org</url>
+  <inceptionYear>2017</inceptionYear>
+  <organization>
+    <name>Alfresco</name>
+    <url>http://www.alfresco.com</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>Apache v2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>salaboy</id>
+      <name>Mauricio Salatino</name>
+      <email>mauricio.salatino@alfresco.com</email>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>erdemedeiros</id>
+      <name>Elias De Medeiros</name>
+      <email>elias.demedeiros@alfresco.com</email>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>ryandawsonuk</id>
+      <name>Ryan Dawson</name>
+      <email>ryan.dawson@alfresco.com</email>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+  </developers>
+  <scm>
+    <url>http://github.com/Activiti/${project.artifactId}</url>
+    <connection>scm:git:git://github.com/Activiti/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/Activiti/${project.artifactId}.git</developerConnection>
+  </scm>
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/Activiti/Activiti/issues</url>
+  </issueManagement>
+  <ciManagement>
+    <system>Travis</system>
+    <url>https://travis-ci.org/Activiti/${project.artifactId}</url>
+  </ciManagement>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -46,11 +94,13 @@
     <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
     <docker-maven-plugin.version>0.21.0</docker-maven-plugin.version>
     <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
+    <exec-maven-plugin.version>1.5.0</exec-maven-plugin.version>
     <spring-cloud-contract.version>2.0.0.M8</spring-cloud-contract.version>
     <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
+    <maven-site-plugin.version>3.6</maven-site-plugin.version>
 
   </properties>
 
@@ -216,12 +266,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <scm>
-    <url>https://github.com/Activiti/activiti-cloud-build</url>
-    <connection>scm:git:https://github.com/Activiti/activiti-cloud-build.git</connection>
-    <developerConnection>scm:git:https://github.com/Activiti/activiti-cloud-build.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
   <repositories>
     <repository>
       <id>alfresco</id>
@@ -261,8 +305,21 @@
             <releaseProfiles>sign</releaseProfiles>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <tagNameFormat>activiti-@{project.version}</tagNameFormat>
-            <!-- Necessary until keycloak releases boot2 adaptor -->
-            <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+          <configuration>
+            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <failIfNoTests>false</failIfNoTests>
+            <trimStackTrace>false</trimStackTrace>
+            <excludes>
+              <exclude>**/*TestCase.java</exclude>
+              <exclude>**/*IT.java</exclude>
+            </excludes>
+            <runOrder>alphabetical</runOrder>
           </configuration>
         </plugin>
         <plugin>
@@ -305,6 +362,24 @@
           </executions>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>${maven-site-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${maven-source-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
+          <configuration>
+            <doclint>none</doclint>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>pl.project13.maven</groupId>
           <artifactId>git-commit-id-plugin</artifactId>
           <version>${git-commit-id-plugin.version}</version>
@@ -344,6 +419,18 @@
                   <source>${generated-assertions-folder}</source>
                 </sources>
               </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring-boot.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>repackage</goal>
+              </goals>
             </execution>
           </executions>
         </plugin>
@@ -399,23 +486,15 @@
               </execution>
             </executions>
           </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>${maven-surefire-plugin.version}</version>
-            <configuration>
-              <redirectTestOutputToFile>true</redirectTestOutputToFile>
-              <failIfNoTests>false</failIfNoTests>
-              <trimStackTrace>false</trimStackTrace>
-              <excludes>
-                <exclude>**/*TestCase.java</exclude>
-                <exclude>**/*IT.java</exclude>
-              </excludes>
-              <runOrder>alphabetical</runOrder>
-            </configuration>
-          </plugin>
         </plugins>
       </build>
+      <distributionManagement>
+        <repository>
+          <id>central-releases-staging</id>
+          <name>Central Releases - Staging</name>
+          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+      </distributionManagement>
     </profile>
 
     <!-- Activate integration tests -->
@@ -454,6 +533,65 @@
             </executions>
           </plugin>
         </plugins>
+      </build>
+    </profile>
+    <!-- profile to make eclipse happy -->
+    <profile>
+      <id>m2eclipse</id>
+      <activation>
+        <property>
+          <name>m2e.version</name>
+        </property>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.eclipse.m2e</groupId>
+              <artifactId>lifecycle-mapping</artifactId>
+              <version>1.0.0</version>
+              <configuration>
+                <lifecycleMappingMetadata>
+                  <pluginExecutions>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <versionRange>[${exec-maven-plugin.version},)</versionRange>
+                        <goals>
+                          <goal>java</goal>
+                          <goal>exec</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <execute>
+                          <runOnIncremental>true</runOnIncremental>
+                          <runOnConfiguration>true</runOnConfiguration>
+                        </execute>
+                      </action>
+                    </pluginExecution>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>org.assertj</groupId>
+                        <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
+                        <versionRange>[${assertj-assertions-generator-maven-plugin.version},)</versionRange>
+                        <goals>
+                          <goal>generate-assertions</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <execute>
+                          <runOnIncremental>true</runOnIncremental>
+                          <runOnConfiguration>true</runOnConfiguration>
+                        </execute>
+                      </action>
+                    </pluginExecution>
+                  </pluginExecutions>
+                </lifecycleMappingMetadata>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
       </build>
     </profile>
   </profiles>
