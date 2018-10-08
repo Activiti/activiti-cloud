@@ -99,7 +99,7 @@
     <activiti-cloud-org-service.version>7.0.11</activiti-cloud-org-service.version>
     <activiti-cloud-process-model-service.version>7.0.14</activiti-cloud-process-model-service.version>
     <activiti-cloud-app-service.version>7.0.18</activiti-cloud-app-service.version>
-    <activiti-cloud-build.version>7.0.28</activiti-cloud-build.version>
+    <activiti-cloud-build.version>7.0.29</activiti-cloud-build.version>
   </properties>
 
   <dependencyManagement>
