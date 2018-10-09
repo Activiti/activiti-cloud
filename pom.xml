@@ -41,7 +41,7 @@
     <serenity-jbehave.version>1.38.0</serenity-jbehave.version>
     <awaitility.version>3.1.1</awaitility.version>
     <batik.version>1.10</batik.version>
-    <activiti.cloud.version>7.0.19</activiti.cloud.version>
+    <activiti.cloud.version>7.0.60</activiti.cloud.version>
     <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
     <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
@@ -102,17 +102,6 @@
       <id>activiti-releases</id>
       <name>Activiti Releases</name>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>activiti-snapshots</id>
-      <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
     </repository>
   </repositories>
   <build>
