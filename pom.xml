@@ -16,11 +16,10 @@
   </scm>
   <properties>
     <java.version>1.8</java.version>
-    <activiti-cloud-dependencies.version>7.0.29</activiti-cloud-dependencies.version>
+    <activiti-cloud-dependencies.version>7.0.60</activiti-cloud-dependencies.version>
     <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
     <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version> <!-- required for jx -->
-    <spring-boot.version>2.0.4.RELEASE</spring-boot.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -84,7 +83,6 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>${spring-boot.version}</version>
         <executions>
           <execution>
             <goals>
@@ -116,28 +114,9 @@
   </build>
   <repositories>
     <repository>
-      <id>spring-milestones</id>
-      <name>Spring Milestones</name>
-      <url>https://repo.spring.io/milestone/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>spring-snapshots</id>
-      <name>Spring Snapshots</name>
-      <url>https://repo.spring.io/snapshot/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-    <repository>
-      <id>activiti-snapshots</id>
-      <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
+        <id>activiti-releases</id>
+        <name>Activiti Releases</name>
+        <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
     </repository>
   </repositories>
 </project>
