@@ -36,6 +36,7 @@ public class AuthenticationSteps {
     private static final String AUTH_USERNAME_TESTUSER = "testuser";
     private static final String AUTH_USERNAME_HRUSER = "hruser";
     private static final String AUTH_USERNAME_HRADMIN = "hradmin";
+    private static final String AUTH_USERNAME_MODELER = "modeler";
     private static final String AUTH_PASSWORD = "password";
 
     @Autowired
@@ -67,6 +68,16 @@ public class AuthenticationSteps {
                 .authenticate(AUTH_CLIENT_ID,
                         AUTH_GRANT_TYPE,
                         AUTH_USERNAME_HRADMIN,
+                        AUTH_PASSWORD);
+        TokenHolder.setAuthToken(authToken);
+    }
+
+    @Step
+    public void authenticateModeler() {
+        AuthToken authToken = authenticationService
+                .authenticate(AUTH_CLIENT_ID,
+                        AUTH_GRANT_TYPE,
+                        AUTH_USERNAME_MODELER,
                         AUTH_PASSWORD);
         TokenHolder.setAuthToken(authToken);
     }
