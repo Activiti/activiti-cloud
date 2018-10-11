@@ -27,19 +27,11 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <activiti-dependencies.version>7.0.45</activiti-dependencies.version>
     <spring-cloud.version>Finchley.SR1</spring-cloud.version>
     <spring-cloud-k8s.version>0.3.0.RELEASE</spring-cloud-k8s.version>
   </properties>
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.activiti.dependencies</groupId>
-        <artifactId>activiti-dependencies</artifactId>
-        <version>${activiti-dependencies.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
