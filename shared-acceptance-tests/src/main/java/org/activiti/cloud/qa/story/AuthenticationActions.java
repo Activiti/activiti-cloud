@@ -49,5 +49,11 @@ public class AuthenticationActions {
         authenticationSteps.ensureUserIsAuthenticated();
     }
 
+    @Given("the user is authenticated as a modeler")
+    public void authenticateModeler() throws Exception {
+        authenticationSteps.authenticateModeler();
+        authenticationSteps.ensureUserIsAuthenticated();
+    }
+
 
 }
