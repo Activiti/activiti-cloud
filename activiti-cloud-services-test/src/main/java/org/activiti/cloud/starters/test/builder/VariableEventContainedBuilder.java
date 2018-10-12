@@ -23,7 +23,7 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEvent
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
-import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 
 public class VariableEventContainedBuilder {
 

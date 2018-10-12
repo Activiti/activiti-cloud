@@ -23,7 +23,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEve
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 
 public class ProcessInstanceEventContainedBuilder {
 

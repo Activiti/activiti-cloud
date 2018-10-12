@@ -25,8 +25,8 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAdded
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
-import org.activiti.runtime.api.model.impl.TaskCandidateUserImpl;
-import org.activiti.runtime.api.model.impl.TaskImpl;
+import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
+import org.activiti.api.task.model.impl.TaskImpl;
 
 public class TaskEventContainedBuilder {
 
