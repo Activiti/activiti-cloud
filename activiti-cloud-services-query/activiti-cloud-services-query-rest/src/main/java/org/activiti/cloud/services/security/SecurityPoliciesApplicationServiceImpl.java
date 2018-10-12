@@ -6,13 +6,13 @@ import java.util.Set;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.QVariableEntity;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.spring.security.policies.BaseSecurityPoliciesManagerImpl;
-import org.activiti.spring.security.policies.SecurityPolicyAccess;
-import org.activiti.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QVariableEntity;
+import org.activiti.core.common.spring.security.policies.BaseSecurityPoliciesManagerImpl;
+import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
+import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

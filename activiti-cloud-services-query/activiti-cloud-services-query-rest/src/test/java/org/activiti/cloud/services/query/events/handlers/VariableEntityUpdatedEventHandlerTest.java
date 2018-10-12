@@ -17,9 +17,9 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.services.query.model.VariableEntity;
-import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.activiti.test.Assertions;
 import org.junit.Before;
 import org.junit.Test;

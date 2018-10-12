@@ -1,14 +1,17 @@
 package org.activiti.cloud.services.query.rest;
 
+import java.util.Collections;
+import java.util.Iterator;
+
 import com.querydsl.core.types.Predicate;
+import org.activiti.api.runtime.shared.identity.UserGroupManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
-import org.activiti.api.runtime.shared.identity.UserGroupManager;
-import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.spring.security.policies.SecurityPolicyAccess;
-import org.activiti.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
+import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,9 +24,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.Collections;
-import java.util.Iterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;

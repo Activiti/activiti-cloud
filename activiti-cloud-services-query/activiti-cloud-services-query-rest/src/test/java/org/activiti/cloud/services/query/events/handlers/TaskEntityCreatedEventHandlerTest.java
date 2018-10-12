@@ -26,7 +26,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.runtime.api.model.impl.TaskImpl;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

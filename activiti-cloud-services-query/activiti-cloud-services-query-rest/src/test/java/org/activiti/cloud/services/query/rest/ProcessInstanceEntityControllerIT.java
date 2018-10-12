@@ -21,14 +21,13 @@ import java.util.Date;
 import java.util.UUID;
 
 import com.querydsl.core.types.Predicate;
-
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.spring.security.policies.SecurityPolicyAccess;
+import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

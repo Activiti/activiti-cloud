@@ -11,15 +11,11 @@
   <name>Activiti Cloud Query :: Services :: Query REST</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti</groupId>
+      <groupId>org.activiti.core.common</groupId>
       <artifactId>activiti-spring-identity</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-spring-security</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti</groupId>
+      <groupId>org.activiti.core.common</groupId>
       <artifactId>activiti-spring-security-policies</artifactId>
     </dependency>
     <dependency>

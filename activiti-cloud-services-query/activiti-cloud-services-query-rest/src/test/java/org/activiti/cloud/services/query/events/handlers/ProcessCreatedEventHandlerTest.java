@@ -20,11 +20,11 @@ import java.util.UUID;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.activiti.test.Assertions;
 import org.junit.Before;
 import org.junit.Rule;

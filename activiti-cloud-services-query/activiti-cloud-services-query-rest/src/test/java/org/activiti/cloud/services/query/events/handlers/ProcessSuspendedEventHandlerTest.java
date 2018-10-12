@@ -22,12 +22,12 @@ import java.util.UUID;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

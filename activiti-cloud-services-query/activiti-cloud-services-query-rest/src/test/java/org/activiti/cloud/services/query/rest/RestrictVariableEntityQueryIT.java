@@ -1,14 +1,24 @@
 package org.activiti.cloud.services.query.rest;
 
+import java.util.Arrays;
+
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.query.app.repository.*;
-import org.activiti.cloud.services.query.model.*;
+import org.activiti.api.runtime.shared.identity.UserGroupManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroup;
+import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.cloud.services.security.VariableLookupRestrictionService;
-import org.activiti.api.runtime.shared.identity.UserGroupManager;
-import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,8 +32,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;

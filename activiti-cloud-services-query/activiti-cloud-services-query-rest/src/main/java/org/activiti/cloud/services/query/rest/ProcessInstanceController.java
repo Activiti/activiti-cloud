@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -25,8 +26,7 @@ import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
-import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.spring.security.policies.SecurityPolicyAccess;
+import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +98,7 @@ public class ProcessInstanceController {
                                                            Pageable pageable) {
 
         predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(predicate,
-                SecurityPolicyAccess.READ);
+                                                                                    SecurityPolicyAccess.READ);
 
         return pagedResourcesAssembler.toResource(pageable,
                                                   processInstanceRepository.findAll(predicate,

@@ -19,10 +19,10 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.UUID;
 
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
+import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
-import org.activiti.runtime.api.model.impl.TaskCandidateGroupImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

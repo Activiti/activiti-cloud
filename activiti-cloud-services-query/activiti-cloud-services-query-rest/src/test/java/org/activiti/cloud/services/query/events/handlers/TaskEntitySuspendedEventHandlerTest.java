@@ -26,7 +26,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.runtime.api.model.impl.TaskImpl;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

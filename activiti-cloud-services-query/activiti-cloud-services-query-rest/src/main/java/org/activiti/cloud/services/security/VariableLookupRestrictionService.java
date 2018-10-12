@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.security;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.spring.security.policies.SecurityPolicyAccess;
+import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,12 +11,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class VariableLookupRestrictionService {
 
-    @Autowired
-    private TaskLookupRestrictionService taskLookupRestrictionService;
+    private final TaskLookupRestrictionService taskLookupRestrictionService;
+
+    private final SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     @Autowired
-    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
-
+    public VariableLookupRestrictionService(TaskLookupRestrictionService taskLookupRestrictionService,
+                                            SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService) {
+        this.taskLookupRestrictionService = taskLookupRestrictionService;
+        this.securityPoliciesApplicationService = securityPoliciesApplicationService;
+    }
 
     public Predicate restrictTaskVariableQuery(Predicate predicate){
         return taskLookupRestrictionService.restrictTaskVariableQuery(predicate);
