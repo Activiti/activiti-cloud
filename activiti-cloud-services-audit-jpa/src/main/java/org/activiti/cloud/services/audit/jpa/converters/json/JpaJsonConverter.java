@@ -32,13 +32,13 @@ import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.SequenceFlow;
+import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.api.runtime.model.impl.SequenceFlowImpl;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.services.audit.api.AuditException;
-import org.activiti.runtime.api.model.impl.BPMNActivityImpl;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
-import org.activiti.runtime.api.model.impl.SequenceFlowImpl;
-import org.activiti.runtime.api.model.impl.TaskImpl;
-import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 
 public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
 
