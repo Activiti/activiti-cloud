@@ -46,9 +46,9 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.activiti.runtime.api.model.impl.BPMNActivityImpl;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
-import org.activiti.runtime.api.model.impl.TaskImpl;
+import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

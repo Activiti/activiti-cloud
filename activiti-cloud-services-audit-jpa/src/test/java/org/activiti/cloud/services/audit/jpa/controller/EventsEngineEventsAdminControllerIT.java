@@ -16,19 +16,15 @@
 
 package org.activiti.cloud.services.audit.jpa.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.api.runtime.shared.identity.UserGroupManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControllerImpl;
-import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
-import org.activiti.api.runtime.shared.identity.UserGroupManager;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
-import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,9 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -47,6 +41,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
@@ -92,31 +89,31 @@ public class EventsEngineEventsAdminControllerIT {
     @Test
     public void getEvents() throws Exception {
         PageRequest pageable = PageRequest.of(1,
-                                              10);
+                10);
         Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1),
-                                                           pageable,
-                                                           11);
+                pageable,
+                11);
 
         given(eventsRepository.findAll(any(PageRequest.class))).willReturn(eventsPage);
 
         mockMvc.perform(get("/admin/{version}/events",
-                            "v1")
-                                .param("page",
-                                       "1")
-                                .param("size",
-                                       "10")
-                                .param("sort",
-                                       "asc"))
+                "v1")
+                .param("page",
+                        "1")
+                .param("size",
+                        "10")
+                .param("sort",
+                        "asc"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                responseFields(
-                                        subsectionWithPath("_embedded.events").description("A list of events "),
-                                        subsectionWithPath("_links.self").description("Resource Self Link"),
-                                        subsectionWithPath("_links.first").description("Pagination First Link"),
-                                        subsectionWithPath("_links.prev").description("Pagination Prev Link"),
-                                        subsectionWithPath("_links.last").description("Pagination Last Link"),
-                                        subsectionWithPath("page").description("Pagination details."))));
+                        responseFields(
+                                subsectionWithPath("_embedded.events").description("A list of events "),
+                                subsectionWithPath("_links.self").description("Resource Self Link"),
+                                subsectionWithPath("_links.first").description("Pagination First Link"),
+                                subsectionWithPath("_links.prev").description("Pagination Prev Link"),
+                                subsectionWithPath("_links.last").description("Pagination Last Link"),
+                                subsectionWithPath("page").description("Pagination details."))));
     }
 
     private List<AuditEventEntity> buildEventsData(int recordsNumber) {
@@ -134,7 +131,7 @@ public class EventsEngineEventsAdminControllerIT {
 
     private AuditEventEntity buildAuditEventEntity(long id) {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity("id",
-                                                                                        System.currentTimeMillis());
+                System.currentTimeMillis());
         eventEntity.setId(id);
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("10");
@@ -152,24 +149,24 @@ public class EventsEngineEventsAdminControllerIT {
     public void getEventsAlfresco() throws Exception {
 
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                                                                  10,
-                                                                  PageRequest.of(0,
-                                                                                 20));
+                10,
+                PageRequest.of(0,
+                        20));
 
         List<AuditEventEntity> events = buildEventsData(1);
 
         given(eventsRepository.findAll(any(AlfrescoPageRequest.class)))
                 .willReturn(new PageImpl<>(events,
-                                           pageRequest,
-                                           12));
+                        pageRequest,
+                        12));
 
         MvcResult result = mockMvc.perform(get("/admin/{version}/events?skipCount=11&maxItems=10",
-                                               "v1")
-                                                   .accept(MediaType.APPLICATION_JSON))
+                "v1")
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/list",
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()
+                        pageRequestParameters(),
+                        pagedResourcesResponseFields()
                 ))
                 .andReturn();
 
@@ -184,15 +181,15 @@ public class EventsEngineEventsAdminControllerIT {
     @Test
     public void headEvents() throws Exception {
         PageRequest pageable = PageRequest.of(1,
-                                              10);
+                10);
         Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1),
-                                                           pageable,
-                                                           10);
+                pageable,
+                10);
 
         given(eventsRepository.findAll(any(PageRequest.class))).willReturn(eventsPage);
 
         mockMvc.perform(head("/admin/{version}/events",
-                             "v1"))
+                "v1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/head/list"));
@@ -201,21 +198,21 @@ public class EventsEngineEventsAdminControllerIT {
     @Test
     public void headEventsAlfresco() throws Exception {
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                                                                  10,
-                                                                  PageRequest.of(0,
-                                                                                 20));
+                10,
+                PageRequest.of(0,
+                        20));
 
         List<AuditEventEntity> events = buildEventsData(1);
 
         given(eventsRepository.findAll(
                 any(AlfrescoPageRequest.class)))
                 .willReturn(new PageImpl<>(events,
-                                           pageRequest,
-                                           12));
+                        pageRequest,
+                        12));
 
         mockMvc.perform(head("/admin/{version}/events?skipCount=11&maxItems=10",
-                             "v1")
-                                .accept(MediaType.APPLICATION_JSON))
+                "v1")
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andDo(document(DOCUMENTATION_ALFRESCO_IDENTIFIER + "/head/list"));
