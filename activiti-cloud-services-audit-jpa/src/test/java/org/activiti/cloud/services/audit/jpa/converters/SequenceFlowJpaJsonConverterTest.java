@@ -19,7 +19,7 @@ package org.activiti.cloud.services.audit.jpa.converters;
 import org.activiti.api.process.model.BPMNElement;
 import org.activiti.api.process.model.SequenceFlow;
 import org.activiti.cloud.services.audit.jpa.converters.json.SequenceFlowJpaJsonConverter;
-import org.activiti.runtime.api.model.impl.SequenceFlowImpl;
+import org.activiti.api.runtime.model.impl.SequenceFlowImpl;
 import org.junit.Test;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;

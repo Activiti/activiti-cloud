@@ -20,7 +20,7 @@ import java.util.Date;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
 import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.junit.Test;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;

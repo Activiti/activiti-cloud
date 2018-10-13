@@ -28,7 +28,7 @@ import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEnti
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

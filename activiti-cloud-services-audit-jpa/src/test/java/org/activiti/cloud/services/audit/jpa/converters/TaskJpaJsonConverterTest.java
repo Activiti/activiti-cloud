@@ -20,7 +20,7 @@ import java.util.Date;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
 import org.activiti.api.task.model.Task;
-import org.activiti.runtime.api.model.impl.TaskImpl;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.junit.Test;
 import static org.activiti.test.Assertions.assertThat;
 

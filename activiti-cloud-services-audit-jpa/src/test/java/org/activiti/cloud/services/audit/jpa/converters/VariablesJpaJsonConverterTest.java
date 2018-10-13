@@ -20,7 +20,7 @@ import java.io.Serializable;
 
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 import org.activiti.api.model.shared.model.VariableInstance;
-import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.junit.Test;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;

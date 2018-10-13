@@ -3,13 +3,13 @@ package org.activiti.cloud.services.audit.jpa.security;
 import java.util.Map;
 import java.util.Set;
 
-import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.spring.security.policies.BaseSecurityPoliciesManagerImpl;
-import org.activiti.spring.security.policies.SecurityPoliciesManager;
-import org.activiti.spring.security.policies.SecurityPolicyAccess;
-import org.activiti.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
+import org.activiti.core.common.spring.security.policies.BaseSecurityPoliciesManagerImpl;
+import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
+import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
+import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 

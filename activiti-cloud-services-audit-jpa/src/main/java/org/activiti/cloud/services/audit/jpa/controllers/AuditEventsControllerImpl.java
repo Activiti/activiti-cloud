@@ -36,7 +36,7 @@ import org.activiti.cloud.services.audit.jpa.repository.EventSpecificationsBuild
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.repository.SearchOperation;
 import org.activiti.cloud.services.audit.jpa.security.SecurityPoliciesApplicationServiceImpl;
-import org.activiti.spring.security.policies.SecurityPolicyAccess;
+import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,7 +105,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
         Specification<AuditEventEntity> spec = createSearchSpec(search);
 
         spec = securityPoliciesApplicationService.createSpecWithSecurity(spec,
-                SecurityPolicyAccess.READ);
+                                                                         SecurityPolicyAccess.READ);
 
         Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(spec,
                                                                          pageable);
