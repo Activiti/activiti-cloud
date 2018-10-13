@@ -22,7 +22,7 @@ import java.util.UUID;
 
 
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.activiti.runtime.api.model.impl.IntegrationContextImpl;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.junit.Before;
 import org.junit.ClassRule;

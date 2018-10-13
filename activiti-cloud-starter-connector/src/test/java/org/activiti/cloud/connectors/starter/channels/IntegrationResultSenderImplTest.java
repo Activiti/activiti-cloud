@@ -18,7 +18,7 @@ package org.activiti.cloud.connectors.starter.channels;
 
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.runtime.api.model.impl.IntegrationContextImpl;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.junit.Before;
