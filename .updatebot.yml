@@ -2,5 +2,5 @@ github:
   organisations:
   - name: activiti
     repositories:
-    - name: activiti-cloud-dependencies
+    - name: activiti-cloud-modeling-dependencies
       branch: develop

@@ -3,9 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.build</groupId>
-    <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.0.33</version>
+    <groupId>org.activiti.cloud.modeling.build</groupId>
+    <artifactId>activiti-cloud-modeling-parent</artifactId>
+    <version>7.0.0</version>
+    <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.modeling</groupId>
   <artifactId>activiti-cloud-org-service-parent</artifactId>
@@ -39,7 +40,7 @@
     </repository>
   </repositories>
   <properties>
-    <activiti-cloud-build.version>7.0.33</activiti-cloud-build.version>
+    <activiti-cloud-modeling-build.version>7.0.0</activiti-cloud-modeling-build.version>
     <activiti-cloud-service-common.version>7.0.29</activiti-cloud-service-common.version>
     <activiti-cloud-process-model-service.version>7.0.18</activiti-cloud-process-model-service.version>
     <activiti-cloud-org-service.version>${project.version}</activiti-cloud-org-service.version>
@@ -49,9 +50,9 @@
          and we want to keep a standard Maven structure -->
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.build</groupId>
-        <artifactId>activiti-cloud-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
+        <groupId>org.activiti.cloud.modeling.build</groupId>
+        <artifactId>activiti-cloud-modeling-dependencies-parent</artifactId>
+        <version>${activiti-cloud-modeling-build.version}</version>
         <scope>import</scope>
         <type>pom</type>       
       </dependency>               
