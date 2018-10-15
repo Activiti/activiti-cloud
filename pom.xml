@@ -91,7 +91,7 @@
 
   <properties>
     <activiti-cloud-api.version>7.0.14</activiti-cloud-api.version>
-    <activiti-cloud-service-common.version>7.0.28</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.0.29</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>7.0.33</activiti-cloud-runtime-bundle-service.version>
     <activiti-cloud-query-service.version>7.0.29</activiti-cloud-query-service.version>
     <activiti-cloud-audit-service.version>7.0.23</activiti-cloud-audit-service.version>
