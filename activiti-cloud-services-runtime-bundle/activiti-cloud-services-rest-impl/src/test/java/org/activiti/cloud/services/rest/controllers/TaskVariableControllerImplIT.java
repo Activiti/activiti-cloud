@@ -21,6 +21,9 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -28,9 +31,7 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
-import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
-import org.activiti.runtime.conf.CommonModelAutoConfiguration;
-import org.activiti.runtime.conf.TaskModelAutoConfiguration;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

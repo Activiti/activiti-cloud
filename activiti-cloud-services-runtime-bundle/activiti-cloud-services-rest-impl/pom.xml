@@ -59,6 +59,10 @@
       <artifactId>activiti-api-task-model</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.activiti.api</groupId>
+      <artifactId>activiti-api-model-shared-impl</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud.api</groupId>
       <artifactId>activiti-cloud-api-task-model</artifactId>
     </dependency>
@@ -71,7 +75,7 @@
       <artifactId>activiti-cloud-services-dbp-rest</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
+      <groupId>org.activiti.core.common</groupId>
       <artifactId>activiti-spring-security-policies</artifactId>
     </dependency>
     <dependency>

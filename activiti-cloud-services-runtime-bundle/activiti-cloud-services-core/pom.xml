@@ -11,16 +11,20 @@
   <name>Activiti Cloud Services :: Core</name>
   <dependencies>
     <dependency>
-      <groupId>org.activiti</groupId>
+      <groupId>org.activiti.core.common</groupId>
       <artifactId>activiti-spring-identity</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
+      <groupId>org.activiti.core.common</groupId>
       <artifactId>activiti-spring-security</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
+      <groupId>org.activiti.core.common</groupId>
       <artifactId>activiti-spring-security-policies</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.core.common</groupId>
+      <artifactId>activiti-spring-connector</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud.rb</groupId>

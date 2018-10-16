@@ -76,7 +76,7 @@ public class MQServiceTaskBehavior extends DefaultServiceTaskBehavior implements
     private void publishSpringEvent(DelegateExecution execution,
                                       IntegrationContextEntity integrationContext) {
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContextBuilder.from(integrationContext,
-                                                                                                              execution));
+                                                                                                              execution, null));
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequest);
 
         eventPublisher.publishEvent(integrationRequest);

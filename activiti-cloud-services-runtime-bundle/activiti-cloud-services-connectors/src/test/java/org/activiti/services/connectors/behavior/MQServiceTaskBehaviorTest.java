@@ -105,7 +105,7 @@ public class MQServiceTaskBehaviorTest {
         given(applicationContext.containsBean(CONNECTOR_TYPE)).willReturn(false);
 
         IntegrationContext integrationContext = mock(IntegrationContext.class);
-        given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
+        given(integrationContextBuilder.from(entity, execution, null)).willReturn(integrationContext);
 
         //when
         behavior.execute(execution);

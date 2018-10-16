@@ -39,8 +39,9 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 @ComponentScan({
         "org.activiti.engine",
         "org.activiti.image",
-        "org.activiti.spring.security",
-        "org.activiti.spring.identity",
+        "org.activiti.core.common.spring.security",
+        "org.activiti.core.common.spring.identity",
+        "org.activiti.core.common.spring.connector",
         "org.activiti.cloud.services.events.listeners",
         "org.activiti.cloud.services.events.converter",
         "org.activiti.cloud.services.events.configuration",

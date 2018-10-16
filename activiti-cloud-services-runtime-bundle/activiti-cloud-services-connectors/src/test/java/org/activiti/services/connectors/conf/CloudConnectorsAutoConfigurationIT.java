@@ -18,6 +18,7 @@ package org.activiti.services.connectors.conf;
 
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.core.common.spring.security.policies.ProcessSecurityPoliciesManager;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -25,7 +26,6 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
-import org.activiti.spring.security.policies.ProcessSecurityPoliciesManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

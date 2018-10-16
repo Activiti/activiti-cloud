@@ -92,7 +92,7 @@ public class IntegrationRequestSenderTest {
 
         IntegrationContextEntity contextEntity = mock(IntegrationContextEntity.class);
         given(contextEntity.getId()).willReturn(INTEGRATION_CONTEXT_ID);
-        IntegrationContext integrationContext = new IntegrationContextBuilder().from(contextEntity, delegateExecution);
+        IntegrationContext integrationContext = new IntegrationContextBuilder(null).from(contextEntity, delegateExecution, null);
         integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setServiceFullName(APP_NAME);
     }

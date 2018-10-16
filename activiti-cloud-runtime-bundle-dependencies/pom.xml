@@ -50,18 +50,13 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.rb</groupId>
-        <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
-        <version>${activiti-cloud-runtime-bundle-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.rb</groupId>
         <artifactId>activiti-cloud-services-identity-basic</artifactId>
         <version>${activiti-cloud-runtime-bundle-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.rb</groupId>
-        <artifactId>activiti-cloud-services-subscriptions</artifactId>
-        <version>${activiti-cloud-runtime-bundle-service.version}</version>
+        <artifactId>activiti-cloud-services-identity-keycloak</artifactId>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.rb</groupId>
@@ -75,14 +70,13 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.rb</groupId>
-        <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
-        <version>${activiti-cloud-runtime-bundle-service.version}</version>
+        <artifactId>activiti-cloud-services-subscriptions</artifactId>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.rb</groupId>
-        <artifactId>activiti-cloud-services-test</artifactId>
-        <version>${activiti-cloud-runtime-bundle-service.version}</version>
-        <scope>test</scope>
+        <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
+        <version>${activiti-cloud-runtime-bundle.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

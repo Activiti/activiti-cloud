@@ -1,9 +1,9 @@
 package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.CloudVariableInstanceImpl;
 import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
-import org.activiti.runtime.api.model.impl.VariableInstanceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

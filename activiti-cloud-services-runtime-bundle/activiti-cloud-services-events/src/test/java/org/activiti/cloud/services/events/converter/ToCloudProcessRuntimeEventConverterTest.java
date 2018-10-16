@@ -19,7 +19,7 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
