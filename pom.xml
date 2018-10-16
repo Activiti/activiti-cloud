@@ -18,6 +18,7 @@
   <properties>
     <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
     <activiti-cloud-build.version>7.0.33</activiti-cloud-build.version>
+    <activiti-api.version>7.0.33</activiti-api.version>
   </properties>
 
   <dependencyManagement>
@@ -30,7 +31,14 @@
         <version>${activiti-cloud-build.version}</version>
         <scope>import</scope>
         <type>pom</type>       
-      </dependency>       
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.api</groupId>
+        <artifactId>activiti-api-dependencies</artifactId>
+        <version>${activiti-api.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
       <dependency>
         <groupId>org.activiti.cloud.api</groupId>
         <artifactId>activiti-cloud-api-model-shared</artifactId>
