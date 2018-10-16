@@ -35,3 +35,9 @@ When the user creates a standalone task
 And user creates a subtask for the previously created task
 Then a list of one subtask should be available for the task
 
+Scenario: create a process with assigned tasks and complete it
+Given the user is authenticated as a testuser
+When the user starts a single-task process
+And the status of the task is ASSIGNED
+And the user completes the task
+Then the status of the process and tasks is changed to completed

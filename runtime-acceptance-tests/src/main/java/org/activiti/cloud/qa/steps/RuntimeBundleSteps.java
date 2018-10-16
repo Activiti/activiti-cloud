@@ -23,7 +23,9 @@ import java.util.Collection;
 import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -56,6 +58,8 @@ public class RuntimeBundleSteps {
     public static final String CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY = "ConnectorProcess";
 
     public static final String PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY = "ProcessWithVariables";
+
+    public static final String PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY = "SingleTaskProcess";
 
     @Autowired
     private RuntimeDirtyContextHandler dirtyContextHandler;
@@ -219,5 +223,15 @@ public class RuntimeBundleSteps {
     @Step
     public PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin(){
         return runtimeBundleService.getAllProcessInstancesAdmin();
+    }
+
+    @Step
+    public void checkTaskStatus(String id, Task.TaskStatus status){
+         assertThat(runtimeBundleService.getTaskById(id).getStatus()).isEqualTo(status);
+    }
+
+    @Step
+    public void checkProcessInstanceStatus(String id, ProcessInstance.ProcessInstanceStatus status){
+        assertThat(runtimeBundleService.getProcessInstance(id).getStatus()).isEqualTo(status);
     }
 }

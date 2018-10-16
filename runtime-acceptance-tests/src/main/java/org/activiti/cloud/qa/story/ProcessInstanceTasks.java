@@ -19,6 +19,7 @@ package org.activiti.cloud.qa.story;
 import java.util.ArrayList;
 import java.util.List;
 
+import feign.FeignException;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -38,6 +39,7 @@ import org.jbehave.core.annotations.When;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
+import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProcessInstanceTasks {
@@ -102,6 +104,11 @@ public class ProcessInstanceTasks {
         this.startProcessWithTasks(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
     }
 
+    @When("the user starts a single-task process")
+    public void startSingleTaskProcess()throws Exception {
+        this.startProcessWithTasks(PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY);
+    }
+
     @When("the user starts a connector process")
     public void startConnectorProcess() throws Exception {
         this.startProcess(CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY);
@@ -123,6 +130,13 @@ public class ProcessInstanceTasks {
         runtimeBundleSteps.completeTask(currentTask.getId());
     }
 
+    @When("the status of the task is $status")
+    public void checkTaskStatus(Task.TaskStatus status) throws Exception {
+        querySteps.checkTaskStatus(currentTask.getId(), status);
+        auditSteps.checkTaskCreatedAndAssignedEvents(currentTask.getId());
+        runtimeBundleSteps.checkTaskStatus(currentTask.getId(), status);
+    }
+
     @Then("the status of the process and tasks is changed to completed")
     public void verifyProcessAndTasksStatus() throws Exception {
 
@@ -131,6 +145,13 @@ public class ProcessInstanceTasks {
         auditSteps.checkProcessInstanceTaskEvent(processInstance.getId(),
                                                  currentTask.getId(),
                                                  TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
+        //the process instance disappears once it is completed
+        try{
+            runtimeBundleSteps.checkProcessInstanceStatus(processInstance.getId(),
+                                                          ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        }catch (FeignException exception) {
+            assertThat(exception.getMessage()).contains("Unable to find process instance for the given id:'" + processInstance.getId() + "'");
+        }
     }
 
     @Then("the status of the process is changed to completed")
