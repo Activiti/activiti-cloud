@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
+import feign.FeignException;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -44,6 +45,7 @@ import org.springframework.hateoas.Resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Runtime bundle steps
@@ -60,6 +62,9 @@ public class RuntimeBundleSteps {
     public static final String PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY = "ProcessWithVariables";
 
     public static final String PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY = "SingleTaskProcess";
+
+    public static final String PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES_DEFINITION_KEY = "SingleTaskProcessUserCandidate";
+
 
     @Autowired
     private RuntimeDirtyContextHandler dirtyContextHandler;
@@ -231,7 +236,12 @@ public class RuntimeBundleSteps {
     }
 
     @Step
-    public void checkProcessInstanceStatus(String id, ProcessInstance.ProcessInstanceStatus status){
-        assertThat(runtimeBundleService.getProcessInstance(id).getStatus()).isEqualTo(status);
+    public void checkProcessInstanceIsNotPresent(String id){
+        try{
+            runtimeBundleService.getProcessInstance(id);
+
+        }catch (FeignException exception) {
+            assertThat(exception.getMessage()).contains("Unable to find process instance for the given id:'" + id+ "'");
+        }
     }
 }
