@@ -9,7 +9,7 @@
       <bpmn2:incoming>SequenceFlow_0c386rl</bpmn2:incoming>
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_0c386rl" sourceRef="Task_1wwno76" targetRef="EndEvent_0e2e5eu" />
-    <bpmn2:userTask id="Task_1wwno76" name="my-task" activiti:candidateGroups="testgroup">
+    <bpmn2:userTask id="Task_1wwno76" name="my-task" activiti:candidateGroups="testgroup,hr">
       <bpmn2:incoming>SequenceFlow_15va6d2</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_0c386rl</bpmn2:outgoing>
     </bpmn2:userTask>
