@@ -41,3 +41,11 @@ When the user starts a single-task process
 And the status of the task is ASSIGNED
 And the user completes the task
 Then the status of the process and tasks is changed to completed
+
+Scenario: create a process with user candidates, claim a task and complete it
+Given the user is authenticated as a testuser
+When the user starts a single-task process with user candidates
+And the status of the task is CREATED
+And the user claims a task
+And the user completes the task
+Then the status of the process and tasks is changed to completed

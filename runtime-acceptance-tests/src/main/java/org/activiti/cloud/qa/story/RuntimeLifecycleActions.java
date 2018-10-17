@@ -50,7 +50,7 @@ public class RuntimeLifecycleActions {
 
     @BeforeStories
     public void checkServicesHealth() throws Exception {
-        authenticationSteps.authenticateTestUser();
+        authenticationSteps.authenticateUser("testuser");
         runtimeBundleSteps.checkServicesHealth();
         auditSteps.checkServicesHealth();
         querySteps.checkServicesHealth();

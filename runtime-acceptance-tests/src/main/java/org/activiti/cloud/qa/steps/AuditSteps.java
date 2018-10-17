@@ -143,6 +143,36 @@ public class AuditSteps {
      * and assigned to it's creator
      * @param taskId the id of the task (from rb)
      */
+
+    /**
+     * Check if a task was created
+     * @param taskId the id of the task (from rb)
+     */
+    public void checkTaskCreatedEvent(String taskId){
+
+        final Collection<CloudRuntimeEvent> events = getEventsByEntityId(taskId);
+        Condition<CloudRuntimeEvent> taskIsMatched = new Condition<CloudRuntimeEvent>() {
+            @Override
+            public boolean matches(CloudRuntimeEvent event) {
+
+                return event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent) event).getEntity() != null
+                        && taskId.equals(((CloudTaskRuntimeEvent) event).getEntity().getId());
+            }
+        };
+
+        await().untilAsserted(() -> assertThat(events).isNotNull()
+                .isNotEmpty()
+                .filteredOn(taskIsMatched).hasSize(1)
+                .extracting("entity.id",
+                        "entity.status",
+                        "eventType")
+                .containsExactly(
+                        tuple(taskId,
+                                Task.TaskStatus.CREATED,
+                                TaskRuntimeEvent.TaskEvents.TASK_CREATED)));
+
+    }
+
     @Step
     public void checkTaskCreatedAndAssignedEvents(String taskId) {
 
@@ -172,11 +202,49 @@ public class AuditSteps {
     }
 
     /**
+     * Check if a task was created
+     * and assigned
+     * and completed
+     * @param taskId the id of the task (from rb)
+     */
+    @Step
+    public void checkTaskCreatedAndAssignedAndCompletedEvents(String taskId) {
+
+        final Collection<CloudRuntimeEvent> events = getEventsByEntityId(taskId);
+        Condition<CloudRuntimeEvent> taskIsMatched = new Condition<CloudRuntimeEvent>() {
+            @Override
+            public boolean matches(CloudRuntimeEvent event) {
+
+                return event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent) event).getEntity() != null
+                        && taskId.equals(((CloudTaskRuntimeEvent) event).getEntity().getId());
+            }
+        };
+
+        await().untilAsserted(() -> assertThat(events).isNotNull()
+                .isNotEmpty()
+                .filteredOn(taskIsMatched).hasSize(3)
+                .extracting("entity.id",
+                        "entity.status",
+                        "eventType")
+                .containsExactly(
+                        tuple(taskId,
+                                Task.TaskStatus.COMPLETED,
+                                TaskRuntimeEvent.TaskEvents.TASK_CREATED),
+                        tuple(taskId,
+                                Task.TaskStatus.COMPLETED,
+                                TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED),
+                        tuple(taskId,
+                                Task.TaskStatus.COMPLETED,
+                                TaskRuntimeEvent.TaskEvents.TASK_COMPLETED)));
+    }
+
+    /**
      * Check if a standalone task was cancelled.
      * @param taskId the id of the task
      */
     @Step
     public void checkTaskDeletedEvent(String taskId) {
+        
         await().untilAsserted(() -> {
         assertThat(getEventsByEntityId(taskId))
                 .isNotEmpty()
