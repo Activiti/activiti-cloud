@@ -244,8 +244,7 @@ public class AuditSteps {
      */
     @Step
     public void checkTaskDeletedEvent(String taskId) {
-
-        System.out.println("and the taskId is...: "+ taskId);
+        
         await().untilAsserted(() -> {
         assertThat(getEventsByEntityId(taskId))
                 .isNotEmpty()
