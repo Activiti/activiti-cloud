@@ -30,30 +30,12 @@ public class AuthenticationActions {
     @Steps
     private AuthenticationSteps authenticationSteps;
 
-    @Given("any authenticated user")
-    @Alias("the user is authenticated as a testuser")
-    public void authenticateTestUser() throws Exception {
-        authenticationSteps.authenticateTestUser();
+    @Given("the user is authenticated as a $authUsername")
+    public void authenticateUser(String authUsername) throws Exception{
+        authenticationSteps.authenticateUser(authUsername);
         authenticationSteps.ensureUserIsAuthenticated();
     }
 
-    @Given("the user is authenticated as an hruser")
-    public void authenticateHrUser() throws Exception {
-        authenticationSteps.authenticateHrUser();
-        authenticationSteps.ensureUserIsAuthenticated();
-    }
-
-    @Given("the user is authenticated as an hradmin")
-    public void authenticateHrAdmin() throws Exception {
-        authenticationSteps.authenticateHrAdmin();
-        authenticationSteps.ensureUserIsAuthenticated();
-    }
-
-    @Given("the user is authenticated as a modeler")
-    public void authenticateModeler() throws Exception {
-        authenticationSteps.authenticateModeler();
-        authenticationSteps.ensureUserIsAuthenticated();
-    }
 
 
 }
