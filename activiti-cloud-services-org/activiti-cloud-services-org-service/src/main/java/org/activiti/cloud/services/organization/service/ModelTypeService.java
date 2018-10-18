@@ -41,6 +41,8 @@ public class ModelTypeService {
 
     private Map<String, ModelType> modelTypesMapByName;
 
+    private Map<String, ModelType> modelTypesMapByZipFolderName;
+
     @Autowired
     public ModelTypeService(Set<ModelType> availableModelTypes) {
         this.modelTypesMapByName = availableModelTypes
@@ -48,10 +50,19 @@ public class ModelTypeService {
                 .collect(Collectors.toMap(ModelType::getName,
                                           Function.identity()));
 
+        this.modelTypesMapByZipFolderName = availableModelTypes
+                .stream()
+                .collect(Collectors.toMap(ModelType::getFolderName,
+                                          Function.identity()));
+
     }
 
     public Optional<ModelType> findModelTypeByName(String name) {
         return Optional.ofNullable(modelTypesMapByName.get(name));
+    }
+
+    public Optional<ModelType> findModelTypeByZipFolderName(String zipFolderName) {
+        return Optional.ofNullable(modelTypesMapByZipFolderName.get(zipFolderName));
     }
 
     public Collection<ModelType> getAvailableModelTypes() {

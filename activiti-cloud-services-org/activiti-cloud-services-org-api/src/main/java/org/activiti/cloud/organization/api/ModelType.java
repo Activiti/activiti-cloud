@@ -22,4 +22,6 @@ package org.activiti.cloud.organization.api;
 public interface ModelType {
 
     String getName();
+
+    String getFolderName();
 }

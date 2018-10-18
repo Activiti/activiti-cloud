@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.api;
+package org.activiti.cloud.services.organization.mock;
 
-import org.springframework.stereotype.Component;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
+
+import static org.mockito.ArgumentMatchers.argThat;
 
 /**
- * Process model type
+ * Custom modeling related argument matchers
  */
-@Component
-public class ProcessModelType implements ModelType {
+public class ModelingArgumentMatchers {
 
-    public static final String PROCESS = "PROCESS";
-
-    public static final String PROCESSES = "processes";
-
-    @Override
-    public String getName() {
-        return PROCESS;
-    }
-
-    @Override
-    public String getFolderName() {
-        return PROCESSES;
+    public static ModelReference modelReferenceNamed(String name) {
+        return argThat(modelReference -> modelReference.getName().equals(name));
     }
 }

@@ -16,14 +16,11 @@
 
 package org.activiti.cloud.services.organization.service;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.activiti.cloud.services.common.file.FileContent;
-
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByExtension;
-import static org.apache.commons.io.FilenameUtils.getExtension;
 
 /**
  * Builder for applications
@@ -32,7 +29,7 @@ public class ApplicationBuilder {
 
     private String applicationName;
 
-    private Map<String, FileContent> applicationMap = new LinkedHashMap<>();
+    private List<ModelFile> modelFiles = new ArrayList<>();
 
     public ApplicationBuilder withApplicationName(String applicationName) {
         if (this.applicationName == null) {
@@ -41,14 +38,10 @@ public class ApplicationBuilder {
         return this;
     }
 
-    public ApplicationBuilder addContent(String filename,
-                                         byte[] bytes) {
-        getContentTypeByExtension(getExtension(filename))
-                .map(contentType -> new FileContent(filename,
-                                                    contentType,
-                                                    bytes))
-                .ifPresent(fileContent -> applicationMap.put(fileContent.getFilename(),
-                                                             fileContent));
+    public ApplicationBuilder withModelFile(String modelType,
+                                            FileContent fileContent) {
+        modelFiles.add(new ModelFile(modelType,
+                                     fileContent));
         return this;
     }
 
@@ -56,7 +49,28 @@ public class ApplicationBuilder {
         return Optional.ofNullable(applicationName);
     }
 
-    public Map<String, FileContent> getApplicationMap() {
-        return applicationMap;
+    public List<ModelFile> getModelFiles() {
+        return modelFiles;
+    }
+
+    class ModelFile {
+
+        private final String modelType;
+
+        private final FileContent fileContent;
+
+        public ModelFile(String modelType,
+                         FileContent fileContent) {
+            this.modelType = modelType;
+            this.fileContent = fileContent;
+        }
+
+        public String getModelType() {
+            return modelType;
+        }
+
+        public FileContent getFileContent() {
+            return fileContent;
+        }
     }
 }

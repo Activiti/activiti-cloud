@@ -19,6 +19,9 @@ package org.activiti.cloud.services.organization.mock;
 import java.util.UUID;
 
 import org.activiti.cloud.services.organization.entity.ApplicationEntity;
+import org.activiti.cloud.services.organization.entity.ModelEntity;
+
+import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 
 /**
  * Mocks factory
@@ -28,6 +31,21 @@ public class MockFactory {
     public static ApplicationEntity application(String name) {
         return new ApplicationEntity(id(),
                                      name);
+    }
+
+    public static ModelEntity processModel(String name) {
+        return new ModelEntity(id(),
+                               name,
+                               PROCESS);
+    }
+
+    public static ModelEntity processModelWithContent(String name,
+                                                      String content) {
+        ModelEntity processModel = new ModelEntity(id(),
+                                                   name,
+                                                   PROCESS);
+        processModel.setContent(content);
+        return processModel;
     }
 
     public static String id() {

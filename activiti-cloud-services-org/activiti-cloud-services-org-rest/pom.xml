@@ -126,6 +126,11 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.activiti.cloud.common</groupId>
+      <artifactId>activiti-cloud-services-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud.modeling</groupId>
       <artifactId>activiti-cloud-services-org-jpa</artifactId>
       <scope>test</scope>

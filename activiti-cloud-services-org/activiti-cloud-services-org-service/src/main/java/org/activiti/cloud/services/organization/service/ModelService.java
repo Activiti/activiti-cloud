@@ -32,7 +32,6 @@ import org.activiti.cloud.organization.api.ModelValidator;
 import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -127,10 +126,11 @@ public class ModelService {
     public Optional<FileContent> getModelContent(String modelId) {
         Optional<Model> optionalModel = modelRepository.findModelById(modelId);
         return optionalModel
-                .filter(model -> StringUtils.isNotEmpty(model.getContent()))
                 .map(model -> new FileContent(model.getName(),
                                               model.getContentType(),
-                                              model.getContent().getBytes()));
+                                              Optional.ofNullable(model.getContent())
+                                                      .map(String::getBytes)
+                                                      .orElse(new byte[0])));
     }
 
     public void updateModelContent(Model modelToBeUpdate,

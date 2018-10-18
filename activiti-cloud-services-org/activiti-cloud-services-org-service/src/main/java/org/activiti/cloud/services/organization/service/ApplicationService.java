@@ -17,23 +17,27 @@
 package org.activiti.cloud.services.organization.service;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ProcessModelType;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.error.ModelingException;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.zip.ZipBuilder;
 import org.activiti.cloud.services.common.zip.ZipStream;
+import org.activiti.cloud.services.organization.service.ApplicationBuilder.ModelFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByExtension;
+import static org.apache.commons.io.FilenameUtils.getExtension;
+import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 /**
  * Business logic related to {@link Application} entities
@@ -46,11 +50,15 @@ public class ApplicationService {
 
     private final ModelService modelService;
 
+    private final ModelTypeService modelTypeService;
+
     @Autowired
     public ApplicationService(ApplicationRepository applicationRepository,
-                              ModelService modelService) {
+                              ModelService modelService,
+                              ModelTypeService modelTypeService) {
         this.applicationRepository = applicationRepository;
         this.modelService = modelService;
+        this.modelTypeService = modelTypeService;
     }
 
     /**
@@ -123,21 +131,19 @@ public class ApplicationService {
      * @throws IOException in case of I/O error
      */
     public FileContent exportApplication(Application application) throws IOException {
-        ZipBuilder zipBuilder = new ZipBuilder(application.getName())
-                .appendFolder(application.getName());
-
+        ZipBuilder zipBuilder = new ZipBuilder(application.getName());
         modelService.getModels(application,
                                Optional.empty(),
                                Pageable.unpaged())
                 .getContent()
-                .stream()
-                .map(Model::getId)
-                .map(modelService::exportModel)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .forEach(fileContent -> zipBuilder.appendFile(fileContent.getFileContent(),
-                                                              application.getName(),
-                                                              fileContent.getFilename()));
+                .forEach(model -> modelTypeService.findModelTypeByName(model.getType())
+                        .map(ModelType::getFolderName)
+                        .ifPresent(zipFolderName -> modelService.exportModel(model.getId())
+                                .ifPresent(fileContent -> zipBuilder
+                                        .appendFolder(zipFolderName)
+                                        .appendFile(fileContent.getFileContent(),
+                                                    zipFolderName,
+                                                    fileContent.getFilename()))));
         return zipBuilder.toZipFileContent();
     }
 
@@ -148,44 +154,38 @@ public class ApplicationService {
      * @throws IOException in case of multipart file input stream access error
      */
     public Application importApplication(MultipartFile file) throws IOException {
-        ApplicationBuilder applicationBuilder = new ApplicationBuilder();
+        ApplicationBuilder applicationBuilder = new ApplicationBuilder()
+                .withApplicationName(removeExtension(file.getOriginalFilename()));
 
-        ZipStream.of(file).forEach(zipEntry -> {
-            zipEntry.getFolderName(0).ifPresent(applicationName -> {
-                applicationBuilder.withApplicationName(applicationName);
-                zipEntry.getContent()
-                        .ifPresent(bytes -> applicationBuilder.addContent(zipEntry.getFileName(),
-                                                                          bytes));
-            });
-        });
+        ZipStream.of(file).forEach(zipEntry -> zipEntry.getContent()
+                .ifPresent(bytes -> zipEntry.getFolderName(0)
+                        .flatMap(modelTypeService::findModelTypeByZipFolderName)
+                        .map(ModelType::getName)
+                        .ifPresent(modelType -> getContentTypeByExtension(getExtension(zipEntry.getFileName()))
+                                .map(contentType -> new FileContent(zipEntry.getFileName(),
+                                                                    contentType,
+                                                                    bytes))
+                                .ifPresent(contentFile -> applicationBuilder.withModelFile(modelType,
+                                                                                           contentFile)))));
 
-        return applicationBuilder.getApplicationName()
+        Application createdApplication = applicationBuilder.getApplicationName()
                 .map(this::newApplicationInstance)
-                .map(app -> {
-                    Application createdApplication = applicationRepository.createApplication(app);
-                    applicationBuilder.getApplicationMap()
-                            .entrySet()
-                            .stream()
-                            .map(this::toModel)
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .forEach(modelToCreate -> modelService.createModel(createdApplication,
-                                                                               modelToCreate));
-                    return createdApplication;
-                })
+                .map(this::createApplication)
                 .orElseThrow(() -> new ModelingException("No valid application entry found to import: " + file.getOriginalFilename()));
+
+        applicationBuilder.getModelFiles()
+                .stream()
+                .map(this::toModel)
+                .forEach(modelToCreate -> modelService.createModel(createdApplication,
+                                                                   modelToCreate));
+        return createdApplication;
     }
 
-    private Optional<Model> toModel(Map.Entry<String, FileContent> modelMapEntry) {
-        String modelName = modelMapEntry.getKey();
-        FileContent fileContent = modelMapEntry.getValue();
-
-        //TODO: to detect the model type from zip structure (https://github.com/Activiti/Activiti/issues/2001)
-        //For now, just use the default PROCESS
-        Model model = modelService.newModelInstance(ProcessModelType.PROCESS,
-                                                    modelName);
-        model.setContentType(fileContent.getContentType());
-        model.setContent(new String(fileContent.getFileContent()));
-        return Optional.of(model);
+    private Model toModel(ModelFile modelFile) {
+        Model model = modelService.newModelInstance(modelFile.getModelType(),
+                                                    modelFile.getFileContent().getFilename());
+        model.setContentType(modelFile.getFileContent().getContentType());
+        model.setContent(new String(modelFile.getFileContent().getFileContent()));
+        return model;
     }
 }
