@@ -66,7 +66,7 @@ public class ZipBuilder {
 
     /**
      * Append a file to the zip content.
-     * The path of the foile to be appended is given as an array of folder names ended with the file name.
+     * The path of the file to be appended is given as an array of folder names ended with the file name.
      * @param content the file content
      * @param path the path of the file
      * @return this
@@ -79,6 +79,22 @@ public class ZipBuilder {
         contentMap.put(entry,
                        content);
         return this;
+    }
+
+    /**
+     * Append a file to the zip content.
+     * The path of the file to be appended is given as an array of folder names.
+     * The file name will be appended to this path.
+     * @param fileContent the file content
+     * @param path the folders path
+     * @return this
+     */
+    public ZipBuilder appendFile(FileContent fileContent,
+                                 String... path) {
+        String[] newPath = Arrays.copyOf(path, path.length + 1);
+        newPath[path.length] = fileContent.getFilename();
+        return appendFile(fileContent.getFileContent(),
+                          newPath);
     }
 
     /**

@@ -45,6 +45,30 @@ public class AssertFileContent {
         }
     }
 
+    public AssertFileContent hasName(String expectedName) {
+        assertThat(fileContent).isNotNull();
+        assertThat(fileContent.getFilename()).isEqualTo(expectedName);
+        return this;
+    }
+
+    public AssertFileContent hasContentType(String expectedContentType) {
+        assertThat(fileContent).isNotNull();
+        assertThat(fileContent.getContentType()).isEqualTo(expectedContentType);
+        return this;
+    }
+
+    public AssertFileContent hasContent(byte[] expectedContent) {
+        hasContent(new String(expectedContent));
+        return this;
+    }
+
+    public AssertFileContent hasContent(String expectedContent) {
+        assertThat(fileContent).isNotNull();
+        assertThat(fileContent.getFileContent()).isNotNull();
+        assertThat(new String(fileContent.getFileContent())).isEqualTo(expectedContent);
+        return this;
+    }
+
     public static AssertFileContent assertThatFileContent(FileContent fileContent) {
         return new AssertFileContent(fileContent);
     }

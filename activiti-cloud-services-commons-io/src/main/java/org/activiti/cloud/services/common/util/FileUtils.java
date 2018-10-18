@@ -68,6 +68,10 @@ public class FileUtils {
                 .map(classLoader::getResourceAsStream);
     }
 
+    /**
+     * Get current class loader
+     * @return the current class loader
+     */
     public static ClassLoader classLoader() {
         return FileUtils.class.getClassLoader();
     }
