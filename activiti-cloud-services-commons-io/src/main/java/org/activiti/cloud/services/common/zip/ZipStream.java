@@ -130,7 +130,7 @@ public class ZipStream {
 
         /**
          * Get the file name or the folder name corresponding to this zip entry.
-         * @return
+         * @return the file name
          */
         public String getFileName() {
             return path.getFileName().toString();

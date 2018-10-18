@@ -18,11 +18,11 @@ package org.activiti.cloud.services.common.zip;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -41,7 +41,7 @@ public class ZipBuilder {
 
     private String name;
 
-    private List<String> entries = new ArrayList<>();
+    private Set<String> entries = new TreeSet<>();
 
     private Map<String, byte[]> contentMap = new HashMap<>();
 
@@ -56,8 +56,7 @@ public class ZipBuilder {
      * @return this
      */
     public ZipBuilder appendFolder(String... path) {
-        String entry = Arrays.asList(path)
-                .stream()
+        String entry = Arrays.stream(path)
                 .collect(Collectors.joining(ZIP_PATH_DELIMITATOR,
                                             "",
                                             ZIP_PATH_DELIMITATOR));
@@ -74,9 +73,8 @@ public class ZipBuilder {
      */
     public ZipBuilder appendFile(byte[] content,
                                  String... path) {
-        String entry = Arrays.asList(path)
-                .stream()
-                .collect(Collectors.joining(ZIP_PATH_DELIMITATOR));
+        String entry = String.join(ZIP_PATH_DELIMITATOR,
+                                   path);
         entries.add(entry);
         contentMap.put(entry,
                        content);
@@ -95,7 +93,8 @@ public class ZipBuilder {
                 zipOutputStream.putNextEntry(new ZipEntry(entry));
                 byte[] content = contentMap.get(entry);
                 if (content != null) {
-                    writeChunked(content, zipOutputStream);
+                    writeChunked(content,
+                                 zipOutputStream);
                 }
                 zipOutputStream.closeEntry();
             }
