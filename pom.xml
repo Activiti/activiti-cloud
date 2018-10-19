@@ -37,6 +37,7 @@
     <swagger.version>1.5.10</swagger.version>
     <xstream.version>1.4.10</xstream.version>
     <asciidoctor.version>1.5.6</asciidoctor.version>
+    <json-unit.version>1.24.0</json-unit.version>
   </properties>
 
   <modules>
@@ -312,6 +313,11 @@
         <groupId>net.logstash.logback</groupId>
         <artifactId>logstash-logback-encoder</artifactId>
         <version>${logstash.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.javacrumbs.json-unit</groupId>
+        <artifactId>json-unit-fluent</artifactId>
+        <version>${json-unit.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

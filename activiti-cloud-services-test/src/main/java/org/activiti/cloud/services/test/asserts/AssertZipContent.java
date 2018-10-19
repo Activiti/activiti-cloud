@@ -20,18 +20,16 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import net.javacrumbs.jsonunit.fluent.JsonFluentAssert;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.zip.ZipStream;
-import org.hamcrest.Matcher;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -88,15 +86,17 @@ public class AssertZipContent {
 
     public AssertZipContent hasContent(String entry,
                                        byte[] expectedContent) {
-        hasContent(entry, new String(expectedContent));
+        hasContent(entry,
+                   new String(expectedContent));
         return this;
     }
 
     public AssertZipContent hasContent(String entry,
                                        String expectedContent) {
-        hasContentSatisfying(entry, actualContent ->{
-            assertThat(actualContent).isEqualTo(expectedContent);
-        });
+        hasContentSatisfying(entry,
+                             actualContent -> {
+                                 assertThat(actualContent).isEqualTo(expectedContent);
+                             });
         return this;
     }
 
@@ -107,23 +107,15 @@ public class AssertZipContent {
     }
 
     public AssertZipContent hasJsonContent(String entry) {
-        assertThat(zipContent(entry)).hasValueSatisfying(
-                content -> org.junit.Assert.assertThat(content,
-                                                       isJson()));
+        assertThat(zipContent(entry)).hasValueSatisfying(JsonFluentAssert::assertThatJson);
         return this;
     }
 
     public AssertZipContent hasJsonContentSatisfying(String entry,
-                                                     Matcher... matchers) {
-        hasJsonContentSatisfying(entry, content ->
-                Arrays.stream(matchers).forEach(matcher -> org.junit.Assert.assertThat(content, matcher)));
-        return this;
-    }
-
-    public AssertZipContent hasJsonContentSatisfying(String entry,
-                                                     Consumer<String> requirement) {
-        hasJsonContent(entry);
-        assertThat(zipContent(entry)).hasValueSatisfying(requirement);
+                                                     Consumer<JsonFluentAssert> requirement) {
+        assertThat(zipContent(entry))
+                .map(JsonFluentAssert::assertThatJson)
+                .hasValueSatisfying(requirement);
         return this;
     }
 
