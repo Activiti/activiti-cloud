@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:activiti="http://activiti.org/bpmn" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
-  <bpmn2:process id="SingleTaskProcessUserCandidate" name="single-task-process-user-candidates" isExecutable="false">
+  <bpmn2:process id="SingleTaskProcessUserCandidates" name="single-task-process-user-candidates" isExecutable="true">
     <bpmn2:startEvent id="StartEvent_1">
       <bpmn2:outgoing>SequenceFlow_0vfuqzz</bpmn2:outgoing>
     </bpmn2:startEvent>
@@ -9,13 +9,13 @@
       <bpmn2:incoming>SequenceFlow_1tljgh6</bpmn2:incoming>
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="SequenceFlow_1tljgh6" sourceRef="Task_1869ft4" targetRef="EndEvent_1pxgthp" />
-    <bpmn2:userTask id="Task_1869ft4" name="my-task" activiti:candidateUsers="hruser">
+    <bpmn2:userTask id="Task_1869ft4" name="my-task" activiti:candidateUsers="testuser,hruser">
       <bpmn2:incoming>SequenceFlow_0vfuqzz</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_1tljgh6</bpmn2:outgoing>
     </bpmn2:userTask>
   </bpmn2:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="SingleTaskProcessUserCandidate">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="SingleTaskProcessUserCandidates">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="412" y="240" width="36" height="36" />
       </bpmndi:BPMNShape>
