@@ -33,13 +33,16 @@ public class AuthenticationSteps {
 
     private static final String AUTH_CLIENT_ID = "activiti";
     private static final String AUTH_GRANT_TYPE = "password";
-    private static final String AUTH_PASSWORD = "password";
+    private static String AUTH_PASSWORD = "password";
 
     @Autowired
     private AuthenticationService authenticationService;
 
     @Step
     public void authenticateUser(String authUsername){
+        if(authUsername.equals("admin")){
+            AUTH_PASSWORD = "admin";
+        }
         AuthToken authToken = authenticationService
                 .authenticate(AUTH_CLIENT_ID,
                         AUTH_GRANT_TYPE,

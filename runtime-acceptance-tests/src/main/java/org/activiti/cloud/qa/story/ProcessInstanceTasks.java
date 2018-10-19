@@ -19,7 +19,6 @@ package org.activiti.cloud.qa.story;
 import java.util.ArrayList;
 import java.util.List;
 
-import feign.FeignException;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -41,6 +40,8 @@ import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WI
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES_DEFINITION_KEY;
+import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_DEFINITION_KEY;
+import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO_DEFINITION_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProcessInstanceTasks {
@@ -67,71 +68,79 @@ public class ProcessInstanceTasks {
         querySteps.checkServicesHealth();
     }
 
-    @When("the user starts process '$process' with tasks")
-    public void startProcessWithTasks(String process) throws Exception {
+    @When("the user starts a $processName")
+    public void startProcess(String processName) {
 
-        processInstance = runtimeBundleSteps.startProcess(process);
+        String processDefinitionKey;
+        boolean withTasks = false;
+
+        switch(processName){
+            case "process with variables":
+                processDefinitionKey = PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY;
+                withTasks = true;
+                break;
+            case "single-task process":
+                processDefinitionKey = PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY;
+                withTasks = true;
+                break;
+            case "single-task process with user candidates":
+                processDefinitionKey = PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES_DEFINITION_KEY;
+                withTasks = true;
+                break;
+            case "single-task process with group candidates":
+                processDefinitionKey = PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_DEFINITION_KEY;
+                withTasks = true;
+                break;
+            case "process without graphic info":
+                processDefinitionKey = PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO_DEFINITION_KEY;
+                withTasks = true;
+                break;
+            case "connector process":
+                processDefinitionKey = CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY;
+                break;
+            default:
+                processDefinitionKey = SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
+        }
+
+        processInstance = runtimeBundleSteps.startProcess(processDefinitionKey);
         assertThat(processInstance).isNotNull();
 
-        List<Task> tasks = new ArrayList<>(
-                runtimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId()));
-        assertThat(tasks).isNotEmpty();
-        currentTask = tasks.get(0);
-        assertThat(currentTask).isNotNull();
+        if(withTasks){
+            List<Task> tasks = new ArrayList<>(
+                    runtimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId()));
+            assertThat(tasks).isNotEmpty();
+            currentTask = tasks.get(0);
+            assertThat(currentTask).isNotNull();
+        }
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
-
     }
 
-    @When("the user starts process '$process'")
-    public void startProcess(String process) throws Exception {
-
-        processInstance = runtimeBundleSteps.startProcess(process);
-
-        assertThat(processInstance).isNotNull();
-        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
-
+    @Given("any suspended process instance")
+    public void suspendCurrentProcessInstance() {
+        this.startProcess("any");
+        runtimeBundleSteps.suspendProcessInstance(processInstance.getId());
     }
 
-    @When("the user starts a simple process")
-    public void startSimpleProcess() throws Exception {
-        this.startProcessWithTasks(SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY);
+    @When("the assignee is $user")
+    public void checkAssignee(String user)throws Exception {
+        assertThat(runtimeBundleSteps.getTaskById(currentTask.getId()).getAssignee()).isEqualTo(user);
     }
 
-    @When("the user starts a process with variables")
-    public void startProcessWithVariables() throws Exception {
-        this.startProcessWithTasks(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
-    }
-
-    @When("the user starts a single-task process")
-    public void startSingleTaskProcess()throws Exception {
-        this.startProcessWithTasks(PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY);
-    }
-
-    @When("the user starts a single-task process with user candidates")
-    public void startSingleTaskProcessWithUserCandidates()throws Exception {
-        this.startProcessWithTasks(PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES_DEFINITION_KEY);
-    }
-
-    @When("the user starts a connector process")
-    public void startConnectorProcess() throws Exception {
-        this.startProcess(CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY);
-    }
-
-    @When("the user starts a process without graphic info")
-    public void startProcessWithoutGraphicInfo() throws Exception {
-        this.startProcessWithTasks("fixSystemFailure");
-    }
-
-    @When("the user claims a task")
-    public void claimTask() throws Exception {
+    @When("the $user claims the task")
+    public void claimTask(String user) throws Exception {
         runtimeBundleSteps.assignTaskToUser(currentTask.getId(),
-                                            "testuser");
+                                            user);
     }
 
     @When("the user completes the task")
     public void completeTask() throws Exception {
         runtimeBundleSteps.completeTask(currentTask.getId());
+    }
+
+    @Then("the user cannot complete the task")
+    public void cannotCompleteTask() throws Exception{
+        runtimeBundleSteps.cannotCompleteTask(currentTask.getId());
     }
 
     @When("the status of the task is $status")
@@ -153,7 +162,13 @@ public class ProcessInstanceTasks {
 
     }
 
-    @Then("the status of the process and tasks is changed to completed")
+    @Then("the task cannot be claimed by $user")
+    public void cannotClaimTask(String user) throws Exception {
+        runtimeBundleSteps.cannotAssignTaskToUser(currentTask.getId(),
+                                            user);
+    }
+
+    @Then("the status of the process and the task is changed to completed")
     public void verifyProcessAndTasksStatus() throws Exception {
 
         querySteps.checkProcessInstanceStatus(processInstance.getId(),
@@ -211,12 +226,6 @@ public class ProcessInstanceTasks {
     @Then("no diagram is shown")
     public void checkProcessInstanceNoDiagram() throws Exception {
         runtimeBundleSteps.checkProcessInstanceNoDiagram(processInstanceDiagram);
-    }
-
-    @Given("any suspended process instance")
-    public void suspendCurrentProcessInstance() {
-        processInstance = runtimeBundleSteps.startProcess();
-        runtimeBundleSteps.suspendProcessInstance(processInstance.getId());
     }
 
     @When("activate the process")
