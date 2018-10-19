@@ -47,6 +47,8 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
 
     private String type;
 
+    private String extensions;
+
     @Transient
     @JsonIgnore
     private ModelReference data;
@@ -83,6 +85,16 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
     @Override
     public void setName(String name) {
         data.setName(name);
+    }
+
+    @Override
+    public String getExtensions() {
+        return extensions;
+    }
+
+    @Override
+    public void setExtensions(String extensions) {
+        this.extensions = extensions;
     }
 
     @Override

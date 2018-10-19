@@ -113,7 +113,7 @@ public class ApplicationController implements ApplicationRestApi {
             HttpServletResponse response,
             @ApiParam(EXPORT_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam(ATTACHEMNT_API_PARAM_DESCR)
+            @ApiParam(ATTACHMENT_API_PARAM_DESCR)
             @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException {

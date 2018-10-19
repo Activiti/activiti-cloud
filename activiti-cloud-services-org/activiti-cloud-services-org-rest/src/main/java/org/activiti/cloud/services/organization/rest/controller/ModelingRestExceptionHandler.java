@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
+import org.activiti.cloud.organization.core.error.ImportApplicationException;
+import org.activiti.cloud.organization.core.error.ImportModelException;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
@@ -47,7 +49,6 @@ public class ModelingRestExceptionHandler {
     @Bean
     public ErrorAttributes errorAttributes() {
         return new DefaultErrorAttributes() {
-
             @Override
             public Map<String, Object> getErrorAttributes(WebRequest webRequest,
                                                           boolean includeStackTrace) {
@@ -67,7 +68,9 @@ public class ModelingRestExceptionHandler {
     @ExceptionHandler({
             UnknownModelTypeException.class,
             SyntacticModelValidationException.class,
-            SemanticModelValidationException.class
+            SemanticModelValidationException.class,
+            ImportApplicationException.class,
+            ImportModelException.class
     })
     public void handleBadRequestException(Exception ex,
                                           HttpServletResponse response) throws IOException {

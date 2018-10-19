@@ -25,11 +25,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,7 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_SVG;
 import static org.activiti.cloud.services.organization.rest.api.ModelRestApi.MODELS;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
-import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.ATTACHEMNT_API_PARAM_DESCR;
+import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.ATTACHMENT_API_PARAM_DESCR;
 import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.EXPORT_AS_ATTACHMENT_PARAM_NAME;
 import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.UPLOAD_FILE_PARAM_NAME;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
@@ -231,7 +229,7 @@ public interface ModelRestApi {
             HttpServletResponse response,
             @ApiParam(EXPORT_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
-            @ApiParam(ATTACHEMNT_API_PARAM_DESCR)
+            @ApiParam(ATTACHMENT_API_PARAM_DESCR)
             @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException;

@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.api;
+package org.activiti.cloud.organization.core.error;
 
 /**
- * Model type interface
+ * Exception thrown when an application cannot be imported from a given zip file
  */
-public interface ModelType {
+public class ImportApplicationException extends ModelingException {
 
-    String getName();
+    public ImportApplicationException() {
+    }
 
-    String getFolderName();
+    public ImportApplicationException(Throwable cause) {
+        super(cause);
+    }
 
-    String getContentFileExtension();
+    public ImportApplicationException(String message) {
+        super(message);
+    }
 
-    String[] getAllowedContentFileExtension();
+    public ImportApplicationException(String message,
+                                      Throwable cause) {
+        super(message,
+              cause);
+    }
 }

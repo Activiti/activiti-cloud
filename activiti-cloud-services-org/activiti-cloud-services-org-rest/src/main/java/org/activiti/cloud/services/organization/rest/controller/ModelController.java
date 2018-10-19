@@ -51,7 +51,7 @@ import static org.activiti.cloud.services.common.util.HttpUtils.multipartToFileC
 import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
 import static org.activiti.cloud.services.organization.rest.api.ApplicationRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
 import static org.activiti.cloud.services.organization.rest.api.ApplicationRestApi.UPLOAD_FILE_PARAM_NAME;
-import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.ATTACHEMNT_API_PARAM_DESCR;
+import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.ATTACHMENT_API_PARAM_DESCR;
 
 /**
  * Controller for {@link Model} resources
@@ -186,12 +186,8 @@ public class ModelController implements ModelRestApi {
             @ApiParam(GET_MODEL_CONTENT_ID_PARAM_DESCR)
             @PathVariable String modelId) throws IOException {
         Model model = findModelById(modelId);
-        FileContent fileContent = modelService.getModelContent(model.getId())
-                .orElseGet(() -> new FileContent(model.getId(),
-                                                 null,
-                                                 new byte[0]));
         writeFileToResponse(response,
-                            fileContent,
+                            modelService.getModelContent(model),
                             false);
     }
 
@@ -228,17 +224,14 @@ public class ModelController implements ModelRestApi {
             HttpServletResponse response,
             @ApiParam(EXPORT_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
-            @ApiParam(ATTACHEMNT_API_PARAM_DESCR)
+            @ApiParam(ATTACHMENT_API_PARAM_DESCR)
             @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException {
         Model model = findModelById(modelId);
-        Optional<FileContent> fileContent = modelService.exportModel(model.getId());
-        if (fileContent.isPresent()) {
-            writeFileToResponse(response,
-                                fileContent.get(),
-                                attachment);
-        }
+        writeFileToResponse(response,
+                            modelService.exportModel(model),
+                            attachment);
     }
 
     @Override

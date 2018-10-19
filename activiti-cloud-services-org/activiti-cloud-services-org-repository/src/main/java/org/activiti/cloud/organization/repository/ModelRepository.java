@@ -38,6 +38,8 @@ public interface ModelRepository<A extends Application, M extends Model<A, ?>> {
 
     Optional<M> findModelById(String modelId);
 
+    byte[] getModelContent(M model);
+
     M createModel(M model);
 
     M updateModel(M modelToUpdate);

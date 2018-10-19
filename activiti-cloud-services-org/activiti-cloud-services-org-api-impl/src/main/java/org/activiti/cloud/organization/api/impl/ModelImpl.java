@@ -41,6 +41,10 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
     @ApiModelProperty("The name of the model")
     private String name;
 
+    @ApiModelProperty(value = "The extensions of the model")
+    @JsonIgnore
+    private String extensions;
+
     @ApiModelProperty(value = "The type of the model", readOnly = true)
     private String type;
 
@@ -88,6 +92,16 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getExtensions() {
+        return extensions;
+    }
+
+    @Override
+    public void setExtensions(String extensions) {
+        this.extensions = extensions;
     }
 
     @Override

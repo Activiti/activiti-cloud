@@ -73,6 +73,13 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
     }
 
     @Override
+    default byte[] getModelContent(ModelEntity model) {
+        return Optional.ofNullable(model.getContent())
+                .map(String::getBytes)
+                .orElse(new byte[0]);
+    }
+
+    @Override
     default ModelEntity createModel(ModelEntity model) {
         if (model.getId() == null) {
             model.setId(UUID.randomUUID().toString());

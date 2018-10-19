@@ -22,6 +22,7 @@ import org.activiti.cloud.services.organization.entity.ApplicationEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 
 /**
  * Mocks factory
@@ -44,7 +45,9 @@ public class MockFactory {
         ModelEntity processModel = new ModelEntity(id(),
                                                    name,
                                                    PROCESS);
+        processModel.setContentType(CONTENT_TYPE_XML);
         processModel.setContent(content);
+        processModel.setVersion("0.0.1");
         return processModel;
     }
 

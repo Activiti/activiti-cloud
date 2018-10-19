@@ -20,10 +20,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelValidationError;
-import org.activiti.cloud.organization.core.rest.client.service.ModelReferenceService;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
+import org.activiti.cloud.organization.core.rest.client.service.ModelReferenceService;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
@@ -32,7 +33,6 @@ import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.jpa.ApplicationJpaRepository;
 import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
-import org.hamcrest.collection.IsCollectionWithSize;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -47,16 +47,24 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.NestedServletException;
 
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.organization.mock.MockFactory.application;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
+import static org.activiti.cloud.services.organization.mock.ModelingArgumentMatchers.modelReferenceNamed;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
+import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -94,7 +102,6 @@ public class ModelControllerIT {
 
     @Before
     public void setUp() {
-
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
@@ -196,8 +203,8 @@ public class ModelControllerIT {
         final String processModelId = "process_model_id";
         final String processModelName = "Process Model";
         Model processModel = new ModelEntity(processModelId,
-                                          processModelName,
-                                          PROCESS);
+                                             processModelName,
+                                             PROCESS);
 
         doThrow(new RuntimeException()).when(modelReferenceService).createResource(eq(PROCESS),
                                                                                    any(ModelReference.class));
@@ -369,5 +376,146 @@ public class ModelControllerIT {
 
         // then
         resultActions.andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testExportModel() throws Exception {
+        //GIVEN
+        ModelEntity processModel1 = processModelWithContent("process_model_id",
+                                                            "Process Model Content 1");
+        assertThat(modelRepository.createModel(processModel1)).isNotNull();
+
+        doReturn(processModel1.getData())
+                .when(modelReferenceService)
+                .getResource(eq(PROCESS),
+                             eq(processModel1.getId()));
+
+        // WHEN
+        MvcResult response = mockMvc.perform(
+                get("{version}/models/{modelId}/export",
+                    API_VERSION,
+                    processModel1.getId()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // THEN
+        assertThatResponseContent(response)
+                .isFile()
+                .hasName("process_model_id.bpmn20.xml")
+                .hasContentType(CONTENT_TYPE_XML)
+                .hasContent("Process Model Content 1");
+    }
+
+    @Test
+    public void testExportModelNotFound() throws Exception {
+        // WHEN
+        mockMvc.perform(
+                get("{version}/models/not_existing_model/export",
+                    API_VERSION))
+                // THEN
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
+    public void testImportModel() throws Exception {
+        //GIVEN
+        Application parentApplication = application("Parent Application");
+        applicationRepository.createApplication(parentApplication);
+
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+                                                          "x-19022.bpmn20.xml",
+                                                          "application/xml",
+                                                          resourceAsByteArray("process/x-19022.bpmn20.xml"));
+
+        doReturn(mock(ModelReference.class))
+                .when(modelReferenceService)
+                .getResource(eq(PROCESS),
+                             anyString());
+
+        // WHEN
+        mockMvc.perform(multipart("{version}/applications/{applicationId}/models/import",
+                                  API_VERSION,
+                                  parentApplication.getId())
+                                .file(zipFile)
+                                .param("type",
+                                       PROCESS)
+                                .accept(APPLICATION_JSON_VALUE))
+                .andDo(print())
+                .andExpect(status().isCreated());
+
+        // THEN
+        verify(modelReferenceService,
+               times(1))
+                .createResource(eq(PROCESS),
+                                modelReferenceNamed("x-19022"));
+    }
+
+    @Test
+    public void testImportModelWrongFileName() throws Exception {
+        //GIVEN
+        Application parentApplication = application("Parent Application");
+        applicationRepository.createApplication(parentApplication);
+
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+                                                          "x-19022",
+                                                          "application/xml",
+                                                          resourceAsByteArray("process/x-19022.bpmn20.xml"));
+
+        // WHEN
+        mockMvc.perform(multipart("{version}/applications/{applicationId}/models/import",
+                                  API_VERSION,
+                                  parentApplication.getId())
+                                .file(zipFile)
+                                .param("type",
+                                       PROCESS)
+                                .accept(APPLICATION_JSON_VALUE))
+                // THEN
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(is("Unexpected extension was found for file to import model of type PROCESS: x-19022")));
+    }
+
+    @Test
+    public void testImportModelWrongModelType() throws Exception {
+        //GIVEN
+        Application parentApplication = application("Parent Application");
+        applicationRepository.createApplication(parentApplication);
+
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+                                                          "x-19022.xml",
+                                                          "application/xml",
+                                                          resourceAsByteArray("process/x-19022.bpmn20.xml"));
+
+        // WHEN
+        mockMvc.perform(multipart("{version}/applications/{applicationId}/models/import",
+                                  API_VERSION,
+                                  parentApplication.getId())
+                                .file(zipFile)
+                                .param("type",
+                                       "WRONG_TYPE"))
+                // THEN
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(is("Unknown model type: WRONG_TYPE")));
+    }
+
+    @Test
+    public void testImportModelApplicationNotFound() throws Exception {
+        //GIVEN
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+                                                          "x-19022.xml",
+                                                          "application/xml",
+                                                          resourceAsByteArray("process/x-19022.bpmn20.xml"));
+
+        // WHEN
+        mockMvc.perform(multipart("{version}/applications/not_existing_application/models/import",
+                                  API_VERSION)
+                                .file(zipFile)
+                                .param("type",
+                                       PROCESS))
+                // THEN
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 }

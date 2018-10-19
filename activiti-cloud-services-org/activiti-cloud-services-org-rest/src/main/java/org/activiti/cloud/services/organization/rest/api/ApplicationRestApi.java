@@ -72,7 +72,7 @@ public interface ApplicationRestApi {
 
     String EXPORT_APPLICATION_ID_PARAM_DESCR = "The id of the application to export";
 
-    String ATTACHEMNT_API_PARAM_DESCR =
+    String ATTACHMENT_API_PARAM_DESCR =
             "<b>true</b> value enables a web browser to download the file as an attachment.<br> " +
                     "<b>false</b> means that a web browser may preview the file in a new tab or window, " +
                     "but not download the file.";
@@ -150,7 +150,7 @@ public interface ApplicationRestApi {
             HttpServletResponse response,
             @ApiParam(EXPORT_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
-            @ApiParam(ATTACHEMNT_API_PARAM_DESCR)
+            @ApiParam(ATTACHMENT_API_PARAM_DESCR)
             @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException;

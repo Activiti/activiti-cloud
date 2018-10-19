@@ -17,10 +17,8 @@
 package org.activiti.cloud.services.organization.rest.controller;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
@@ -49,13 +47,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
-import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.organization.mock.MockFactory.application;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
 import static org.activiti.cloud.services.organization.mock.ModelingArgumentMatchers.modelReferenceNamed;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
+import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.*;
@@ -266,13 +265,17 @@ public class ApplicationControllerIT {
                                     is(processModelName1)))
                 .andExpect(jsonPath("$._embedded.models[1].name",
                                     is(processModelName2)));
+
+        mockMvc.perform(delete("/v1/applications/{applicationId}",
+                               applicationWithModelsId))
+                .andExpect(status().isNoContent());
     }
 
     @Test
     public void testExportApplication() throws Exception {
         // GIVEN
-        String processName1 = "process-model-1.bpmn20.xml";
-        String processName2 = "process-model-2.bpmn20.xml";
+        String processName1 = "process-model-1";
+        String processName2 = "process-model-2";
 
         Application application = application("application-with-models");
         ModelEntity processModel1 = processModelWithContent(processName1,
@@ -314,7 +317,8 @@ public class ApplicationControllerIT {
 
         // WHEN
         MvcResult response = mockMvc.perform(
-                get("/v1/applications/{applicationId}/export",
+                get("{version}/applications/{applicationId}/export",
+                    API_VERSION,
                     application.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -325,13 +329,29 @@ public class ApplicationControllerIT {
                 .isZip()
                 .hasName("application-with-models.zip")
                 .hasEntries(
+                        "application-with-models.json",
                         "processes/",
                         "processes/process-model-1.bpmn20.xml",
-                        "processes/process-model-2.bpmn20.xml")
+                        "processes/process-model-1.json",
+                        "processes/process-model-2.bpmn20.xml",
+                        "processes/process-model-2.json")
+                .hasJsonContentSatisfying("application-with-models.json",
+                                          jsonContent -> jsonContent
+                                                  .node("name").isEqualTo("application-with-models"))
                 .hasContent("processes/process-model-1.bpmn20.xml",
-                            "Process Model Content 1".getBytes())
+                            "Process Model Content 1")
+                .hasJsonContentSatisfying("processes/process-model-1.json",
+                                          jsonContent -> jsonContent
+                                                  .node("name").isEqualTo("process-model-1")
+                                                  .node("type").isEqualTo("PROCESS")
+                                                  .node("version").isEqualTo("0.0.1"))
                 .hasContent("processes/process-model-2.bpmn20.xml",
-                            "Process Model Content 2".getBytes());
+                            "Process Model Content 2")
+                .hasJsonContentSatisfying("processes/process-model-2.json",
+                                          jsonContent -> jsonContent
+                                                  .node("name").isEqualTo("process-model-2")
+                                                  .node("type").isEqualTo("PROCESS")
+                                                  .node("version").isEqualTo("0.0.1"));
     }
 
     @Test
@@ -341,8 +361,13 @@ public class ApplicationControllerIT {
                                                           "application-xy.zip",
                                                           "application/zip",
                                                           resourceAsByteArray("application/application-xy.zip"));
+
+        doReturn(mock(ModelReference.class))
+                .when(modelReferenceService)
+                .getResource(eq(PROCESS),
+                             anyString());
+
         // WHEN
-        final AtomicReference<String> applicationId = new AtomicReference<>();
         mockMvc.perform(multipart("{version}/applications/import",
                                   API_VERSION)
                                 .file(zipFile)
@@ -351,20 +376,59 @@ public class ApplicationControllerIT {
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name",
-                                    is("application-xy")))
-                .andDo(result -> applicationId.set(
-                        JsonPath.parse(result.getResponse().getContentAsString())
-                                .read("$.id")
-                                .toString()));
+                                    is("application-xy")));
 
         verify(modelReferenceService,
                times(1))
                 .createResource(eq(PROCESS),
-                                modelReferenceNamed("process-x.bpmn20.xml"));
+                                modelReferenceNamed("process-x"));
 
         verify(modelReferenceService,
                times(1))
                 .createResource(eq(PROCESS),
-                                modelReferenceNamed("process-y.bpmn20.xml"));
+                                modelReferenceNamed("process-y"));
+    }
+
+    @Test
+    public void testImportApplicationNoApplicationJsonFile() throws Exception {
+        //GIVEN
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+                                                          "application-xy.zip",
+                                                          "application/zip",
+                                                          resourceAsByteArray("application/application-xy-no-app.zip"));
+
+        // WHEN
+        mockMvc.perform(multipart("{version}/applications/import",
+                                  API_VERSION)
+                                .file(zipFile)
+                                .accept(APPLICATION_JSON_VALUE))
+                // THEN
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(is("No valid application entry found to import: application-xy.zip")));
+    }
+
+    @Test
+    public void testImportApplicationInvalidProcessJsonFile() throws Exception {
+        //GIVEN
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+                                                          "application-xy.zip",
+                                                          "application/zip",
+                                                          resourceAsByteArray("application/application-xy-invalid-process-json.zip"));
+
+        doReturn(mock(ModelReference.class))
+                .when(modelReferenceService)
+                .getResource(eq(PROCESS),
+                             anyString());
+
+        // WHEN
+        mockMvc.perform(multipart("{version}/applications/import",
+                                  API_VERSION)
+                                .file(zipFile)
+                                .accept(APPLICATION_JSON_VALUE))
+                // THEN
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(containsString("Cannot convert json file content to model")));
     }
 }
