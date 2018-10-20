@@ -90,7 +90,7 @@
   </repositories>
 
   <properties>
-    <activiti-cloud-api.version>7.0.16</activiti-cloud-api.version>
+    <activiti-cloud-api.version>7.0.17</activiti-cloud-api.version>
     <activiti-cloud-service-common.version>7.0.30</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>7.0.35</activiti-cloud-runtime-bundle-service.version>
     <activiti-cloud-query-service.version>7.0.31</activiti-cloud-query-service.version>
