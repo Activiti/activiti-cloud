@@ -33,6 +33,8 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
+    <activiti-cloud.version>7.0.71</activiti-cloud.version>
+    <activiti-cloud-modeling.version>7.0.3</activiti-cloud-modeling.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <enforcer.skip>true</enforcer.skip>
     <java.version>1.8</java.version>
@@ -42,7 +44,7 @@
     <serenity-jbehave.version>1.38.0</serenity-jbehave.version>
     <awaitility.version>3.1.1</awaitility.version>
     <batik.version>1.10</batik.version>
-    <activiti.cloud.version>7.0.71</activiti.cloud.version>
+
     <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
     <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
@@ -52,7 +54,14 @@
       <dependency>
         <groupId>org.activiti.cloud.dependencies</groupId>
         <artifactId>activiti-cloud-dependencies</artifactId>
-        <version>${activiti.cloud.version}</version>
+        <version>${activiti-cloud.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.dependencies</groupId>
+        <artifactId>activiti-cloud-modeling-dependencies</artifactId>
+        <version>${activiti-cloud-modeling.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>

@@ -22,12 +22,12 @@ import java.util.Collection;
 import feign.FeignException;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
-import org.activiti.runtime.api.model.impl.ProcessInstanceImpl;
 import org.jbehave.core.annotations.Then;
 import org.springframework.hateoas.PagedResources;
 
