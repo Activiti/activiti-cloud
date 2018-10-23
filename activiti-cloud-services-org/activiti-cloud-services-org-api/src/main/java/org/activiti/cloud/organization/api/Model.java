@@ -50,8 +50,4 @@ public interface Model<A extends Application, U> extends Auditable<U> {
     String getContent();
 
     void setContent(String content);
-
-    String getExtensions();
-
-    void setExtensions(String extensions);
 }

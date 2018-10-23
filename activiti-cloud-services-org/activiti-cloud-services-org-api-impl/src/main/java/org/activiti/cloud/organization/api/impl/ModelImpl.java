@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.services.auditable.AbstractAuditable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -40,10 +39,6 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
 
     @ApiModelProperty("The name of the model")
     private String name;
-
-    @ApiModelProperty(value = "The extensions of the model")
-    @JsonIgnore
-    private String extensions;
 
     @ApiModelProperty(value = "The type of the model", readOnly = true)
     private String type;
@@ -92,16 +87,6 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
     @Override
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public String getExtensions() {
-        return extensions;
-    }
-
-    @Override
-    public void setExtensions(String extensions) {
-        this.extensions = extensions;
     }
 
     @Override
