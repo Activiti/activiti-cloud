@@ -17,13 +17,17 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
+
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -33,8 +37,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity(name="Variable")
-@Table(name = "VARIABLE")
+@Table(	name = "VARIABLE",
+		indexes = { 
+				@Index(name = "variable_processInstanceId_idx", columnList = "processInstanceId", unique = false), 
+				@Index(name = "variable_taskId_idx", columnList = "taskId", unique = false),
+				@Index(name = "variable_name_idx", columnList = "name", unique = false), 
+				@Index(name = "variable_executionId_idx", columnList = "executionId", unique = false) 
+		})
 public class VariableEntity extends ActivitiEntityMetadata implements CloudVariableInstance {
 
     @Id
@@ -58,20 +70,20 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
     private String executionId;
 
     @Convert(converter = VariableValueJsonConverter.class)
-    @Lob
+    @Lob @Basic(fetch=FetchType.LAZY)
     @Column
     private VariableValue<?> value;
 
     private Boolean markedAsDeleted = false;
 
     @JsonIgnore
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private TaskEntity task;
 
     @JsonIgnore
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private ProcessInstanceEntity processInstance;

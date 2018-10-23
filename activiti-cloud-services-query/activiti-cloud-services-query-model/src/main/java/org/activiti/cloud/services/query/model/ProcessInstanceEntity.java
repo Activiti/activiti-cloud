@@ -18,10 +18,15 @@ package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
 import java.util.Set;
+
+import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -30,8 +35,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity(name="ProcessInstance")
-@Table(name = "PROCESS_INSTANCE")
+@Table(name = "PROCESS_INSTANCE",
+		indexes= {
+				@Index(name="pi_status_idx", columnList="status", unique=false),
+				@Index(name="pi_businessKey_idx", columnList="businessKey", unique=false),
+				@Index(name="pi_name_idx", columnList="name", unique=false),
+				@Index(name="pi_processDefinitionId_idx", columnList="processDefinitionId", unique=false),
+				@Index(name="pi_processDefinitionKey_idx", columnList="processDefinitionKey", unique=false)
+		})
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 
     @Id
@@ -56,13 +70,15 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private Date lastModifiedFrom;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "processInstance")
-    @org.hibernate.annotations.ForeignKey(name = "none")
+    @OneToMany(fetch=FetchType.LAZY)
+    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
+    	, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private Set<TaskEntity> tasks;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "processInstance")
-    @org.hibernate.annotations.ForeignKey(name = "none")
+    @OneToMany(fetch=FetchType.LAZY)
+    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
+		, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private Set<VariableEntity> variables;
 
     public ProcessInstanceEntity() {

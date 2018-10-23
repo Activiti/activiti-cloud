@@ -50,4 +50,5 @@ public class VariableValueJsonConverter implements AttributeConverter<VariableVa
             throw new QueryException("Unable to deserialize variable.", e);
         }
     }
+    
 }
