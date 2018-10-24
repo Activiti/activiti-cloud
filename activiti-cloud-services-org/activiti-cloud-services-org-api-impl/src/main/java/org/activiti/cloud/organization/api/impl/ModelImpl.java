@@ -55,6 +55,7 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
     private String content;
 
     @ApiModelProperty(hidden = true)
+    @JsonIgnore
     private ApplicationImpl application;
 
     public ModelImpl() {

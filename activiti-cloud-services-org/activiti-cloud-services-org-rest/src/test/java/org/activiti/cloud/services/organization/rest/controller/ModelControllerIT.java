@@ -143,7 +143,7 @@ public class ModelControllerIT {
         assertThat(processModel2).isNotNull();
 
         //when
-        final ResultActions resultActions = mockMvc.perform(get("{version}/models",
+        final ResultActions resultActions = mockMvc.perform(get("{version}/models?type=PROCESS",
                                                                 API_VERSION))
                 .andDo(print());
 

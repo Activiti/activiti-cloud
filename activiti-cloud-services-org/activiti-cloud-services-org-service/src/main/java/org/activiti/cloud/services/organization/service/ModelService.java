@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.services.organization.service;
 
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -26,16 +25,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidator;
 import org.activiti.cloud.organization.core.error.ImportModelException;
-import org.activiti.cloud.organization.core.error.ModelingException;
 import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -65,18 +60,18 @@ public class ModelService {
 
     private final ModelTypeService modelTypeService;
 
-    private final ObjectMapper jsonMapper;
-
     private final Map<String, ModelValidator> modelValidatorsMapByModelType;
+
+    private final JsonConverter<Model> jsonConverter;
 
     @Autowired
     public ModelService(ModelRepository modelRepository,
                         ModelTypeService modelTypeService,
-                        ObjectMapper jsonMapper,
-                        Set<ModelValidator> modelValidators) {
+                        Set<ModelValidator> modelValidators,
+                        JsonConverter<Model> jsonConverter) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
-        this.jsonMapper = jsonMapper;
+        this.jsonConverter = jsonConverter;
 
         this.modelValidatorsMapByModelType = modelValidators
                 .stream()
@@ -84,32 +79,28 @@ public class ModelService {
                                           Function.identity()));
     }
 
-    public Set<String> buildModelTypesFilter(Optional<ModelType> modelType) {
-        return modelType
-                .map(Stream::of)
-                .orElseGet(() -> modelTypeService.getAvailableModelTypes().stream())
-                .map(ModelType::getName)
-                .collect(Collectors.toSet());
-    }
-
     public List<Model> getAllModels(Application application) {
-        return getModels(application,
-                         Optional.empty(),
-                         Pageable.unpaged())
-                .getContent();
+        return modelTypeService.getAvailableModelTypes()
+                .stream()
+                .map(modelType -> getModels(application,
+                                            modelType,
+                                            Pageable.unpaged()))
+                .map(Page::getContent)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
     }
 
-    public Page<Model> getTopLevelModels(Optional<ModelType> modelType,
+    public Page<Model> getTopLevelModels(ModelType modelType,
                                          Pageable pageable) {
-        return modelRepository.getTopLevelModels(buildModelTypesFilter(modelType),
+        return modelRepository.getTopLevelModels(modelType,
                                                  pageable);
     }
 
     public Page<Model> getModels(Application application,
-                                 Optional<ModelType> modelType,
+                                 ModelType modelType,
                                  Pageable pageable) {
         return modelRepository.getModels(application,
-                                         buildModelTypesFilter(modelType),
+                                         modelType,
                                          pageable);
     }
 
@@ -157,7 +148,7 @@ public class ModelService {
     public FileContent getModelJson(Model model) {
         return new FileContent(toJsonFilename(model.getName()),
                                model.getContentType(),
-                               toJson(model));
+                               jsonConverter.convertToJsonBytes(model));
     }
 
     public Optional<FileContent> getModelDiagram(String modelId) {
@@ -199,22 +190,18 @@ public class ModelService {
     public Model importJsonModel(Application application,
                                  ModelType modelType,
                                  FileContent fileContent) {
-        try {
-            Model model = jsonMapper.readValue(fileContent.getFileContent(),
-                                               Model.class);
-            if (!modelType.getName().equals(model.getType())) {
-                throw new ImportModelException(MessageFormat.format(
-                        "Expected model type {0} was found actually as {1} in the file to import: {2}",
-                        modelType.getName(),
-                        model.getType(),
-                        fileContent.getFilename()));
-            }
-
-            return createModel(application,
-                               model);
-        } catch (IOException e) {
-            throw new ImportModelException("Cannot convert json file content to model: " + fileContent);
+        Model model = jsonConverter.tryConvertToEntity((fileContent.getFileContent()))
+                .orElseThrow(() -> new ImportModelException("Cannot convert json file content to model: " + fileContent));
+        if (!modelType.getName().equals(model.getType())) {
+            throw new ImportModelException(MessageFormat.format(
+                    "Expected model type {0} was found actually as {1} in the file to import: {2}",
+                    modelType.getName(),
+                    model.getType(),
+                    fileContent.getFilename()));
         }
+
+        return createModel(application,
+                           model);
     }
 
     public Model importModelFromContent(Application application,
@@ -256,14 +243,5 @@ public class ModelService {
         return Optional.ofNullable(model.getType())
                 .flatMap(modelTypeService::findModelTypeByName)
                 .orElseThrow(() -> new UnknownModelTypeException("Unknown model type: " + model.getType()));
-    }
-
-    private byte[] toJson(Model model) {
-        try {
-            return jsonMapper.writeValueAsBytes(model);
-        } catch (JsonProcessingException e) {
-            throw new ModelingException("Cannot convert model metadata to json: " + model.getId(),
-                                        e);
-        }
     }
 }

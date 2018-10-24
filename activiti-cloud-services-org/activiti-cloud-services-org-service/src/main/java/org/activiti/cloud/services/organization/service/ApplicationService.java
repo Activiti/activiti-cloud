@@ -19,19 +19,14 @@ package org.activiti.cloud.services.organization.service;
 import java.io.IOException;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.core.error.ImportApplicationException;
-import org.activiti.cloud.organization.core.error.ModelingException;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.zip.ZipBuilder;
 import org.activiti.cloud.services.common.zip.ZipStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,25 +47,24 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFil
 @PreAuthorize("hasRole('ACTIVITI_MODELER')")
 public class ApplicationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ApplicationService.class);
-
     private final ApplicationRepository applicationRepository;
 
     private final ModelService modelService;
 
     private final ModelTypeService modelTypeService;
 
-    private final ObjectMapper jsonMapper;
+
+    private final JsonConverter<Application> jsonConverter;
 
     @Autowired
     public ApplicationService(ApplicationRepository applicationRepository,
                               ModelService modelService,
                               ModelTypeService modelTypeService,
-                              ObjectMapper jsonMapper) {
+                              JsonConverter<Application> jsonConverter) {
         this.applicationRepository = applicationRepository;
         this.modelService = modelService;
         this.modelTypeService = modelTypeService;
-        this.jsonMapper = jsonMapper;
+        this.jsonConverter = jsonConverter;
     }
 
     /**
@@ -130,7 +124,7 @@ public class ApplicationService {
      */
     public FileContent exportApplication(Application application) throws IOException {
         ZipBuilder zipBuilder = new ZipBuilder(application.getName())
-                .appendFile(toJson(application),
+                .appendFile(jsonConverter.convertToJsonBytes(application),
                             toJsonFilename(application.getName()));
         modelService.getAllModels(application)
                 .forEach(model -> modelTypeService.findModelTypeByName(model.getType())
@@ -165,7 +159,7 @@ public class ApplicationService {
                         .ifPresent(fileContent -> {
                             Optional<String> folderName = zipEntry.getFolderName(0);
                             if (folderName.isPresent()) {
-                                folderName.flatMap(modelTypeService::findModelTypeByZipFolderName).ifPresent(modelType -> {
+                                folderName.flatMap(modelTypeService::findModelTypeByFolderName).ifPresent(modelType -> {
                                     if (fileContent.isJson()) {
                                         String modelName = removeExtension(fileContent.getFilename(),
                                                                            JSON);
@@ -180,7 +174,7 @@ public class ApplicationService {
                                     }
                                 });
                             } else if (fileContent.isJson()) {
-                                jsonToApplication(bytes)
+                                jsonConverter.tryConvertToEntity(bytes)
                                         .ifPresent(applicationHolder::setApplication);
                             }
                         })));
@@ -198,25 +192,5 @@ public class ApplicationService {
                                                                               fileContent));
         });
         return createdApplication;
-    }
-
-    private Optional<Application> jsonToApplication(byte[] json) {
-        try {
-            return Optional.of(jsonMapper.readValue(json,
-                                                    Application.class));
-        } catch (IOException e) {
-            logger.error("Cannot convert json to application metadata: " + new String(json),
-                         e);
-        }
-        return Optional.empty();
-    }
-
-    private byte[] toJson(Application application) {
-        try {
-            return jsonMapper.writeValueAsBytes(application);
-        } catch (JsonProcessingException e) {
-            throw new ModelingException("Cannot convert application metadata to json: " + application.getId(),
-                                        e);
-        }
     }
 }

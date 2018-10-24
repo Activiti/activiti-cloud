@@ -17,7 +17,6 @@
 package org.activiti.cloud.services.organization.rest.api;
 
 import java.io.IOException;
-import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
 import io.swagger.annotations.Api;
@@ -106,7 +105,7 @@ public interface ModelRestApi {
     @RequestMapping(method = GET, path = "/models")
     PagedResources<Resource<Model>> getModels(
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(MODEL_TYPE_PARAM_NAME) Optional<String> type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             Pageable pageable);
 
     @ApiOperation(
@@ -121,7 +120,7 @@ public interface ModelRestApi {
             @ApiParam(GET_MODELS_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(MODEL_TYPE_PARAM_NAME) Optional<String> type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             Pageable pageable);
 
     @ApiOperation(

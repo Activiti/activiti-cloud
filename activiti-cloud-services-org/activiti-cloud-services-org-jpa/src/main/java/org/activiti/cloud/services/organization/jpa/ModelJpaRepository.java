@@ -17,9 +17,9 @@
 package org.activiti.cloud.services.organization.jpa;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.entity.ApplicationEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
@@ -44,27 +44,27 @@ import static org.activiti.cloud.services.organization.entity.ModelEntityHandler
 public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
                                             ModelRepository<ApplicationEntity, ModelEntity> {
 
-    Page<ModelEntity> findAllByApplicationIdIsNullAndTypeIn(Set<String> modelTypesFilter,
-                                                            Pageable pageable);
+    Page<ModelEntity> findAllByApplicationIdIsNullAndTypeEquals(String modelTypeFilter,
+                                                                Pageable pageable);
 
-    Page<ModelEntity> findAllByApplicationIdAndTypeIn(String applicationId,
-                                                      Set<String> modelTypesFilter,
-                                                      Pageable pageable);
+    Page<ModelEntity> findAllByApplicationIdAndTypeEquals(String applicationId,
+                                                          String modelTypeFilter,
+                                                          Pageable pageable);
 
     @Override
-    default Page<ModelEntity> getTopLevelModels(Set<String> modelTypesFilter,
+    default Page<ModelEntity> getTopLevelModels(ModelType modelTypeFilter,
                                                 Pageable pageable) {
-        return loadModelReference(findAllByApplicationIdIsNullAndTypeIn(modelTypesFilter,
-                                                                        pageable));
+        return loadModelReference(findAllByApplicationIdIsNullAndTypeEquals(modelTypeFilter.getName(),
+                                                                            pageable));
     }
 
     @Override
     default Page<ModelEntity> getModels(ApplicationEntity application,
-                                        Set<String> modelTypesFilter,
+                                        ModelType modelTypeFilter,
                                         Pageable pageable) {
-        return loadModelReference(findAllByApplicationIdAndTypeIn(application.getId(),
-                                                                  modelTypesFilter,
-                                                                  pageable));
+        return loadModelReference(findAllByApplicationIdAndTypeEquals(application.getId(),
+                                                                      modelTypeFilter.getName(),
+                                                                      pageable));
     }
 
     @Override

@@ -97,11 +97,11 @@ public class ModelController implements ModelRestApi {
     @Override
     public PagedResources<Resource<Model>> getModels(
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(MODEL_TYPE_PARAM_NAME) Optional<String> type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             Pageable pageable) {
         return pagedResourcesAssembler.toResource(
                 pageable,
-                modelService.getTopLevelModels(type.map(this::findModelType),
+                modelService.getTopLevelModels(findModelType(type),
                                                pageable),
                 resourceAssembler);
     }
@@ -111,13 +111,13 @@ public class ModelController implements ModelRestApi {
             @ApiParam(GET_MODELS_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(MODEL_TYPE_PARAM_NAME) Optional<String> type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             Pageable pageable) {
         Application application = applicationController.findApplicationById(applicationId);
         return pagedResourcesAssembler.toResource(
                 pageable,
                 modelService.getModels(application,
-                                       type.map(this::findModelType),
+                                       findModelType(type),
                                        pageable),
                 resourceAssembler);
     }

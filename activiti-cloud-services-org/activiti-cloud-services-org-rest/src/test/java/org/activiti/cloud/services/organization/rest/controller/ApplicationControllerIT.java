@@ -253,7 +253,7 @@ public class ApplicationControllerIT {
                 .andExpect(status().isCreated());
 
         // WHEN
-        mockMvc.perform(get("{version}/applications/{applicationId}/models",
+        mockMvc.perform(get("{version}/applications/{applicationId}/models?type=PROCESS",
                             RepositoryRestConfig.API_VERSION,
                             applicationWithModelsId))
                 // THEN
