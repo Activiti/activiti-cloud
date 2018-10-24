@@ -33,7 +33,6 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -51,7 +50,7 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     private String type;
 
@@ -91,7 +90,8 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
     public VariableEntity() {
     }
 
-    public VariableEntity(String type,
+    public VariableEntity(Long id,
+                          String type,
                           String name,
                           String processInstanceId,
                           String serviceName,
@@ -108,6 +108,7 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
               serviceVersion,
               appName,
               appVersion);
+        this.id = id;
         this.type = type;
         this.name = name;
         this.processInstanceId = processInstanceId;
@@ -117,7 +118,7 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
         this.executionId = executionId;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

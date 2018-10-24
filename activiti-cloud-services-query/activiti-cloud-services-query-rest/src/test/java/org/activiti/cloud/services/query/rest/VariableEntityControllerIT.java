@@ -16,13 +16,25 @@
 
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.variableFields;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.variableIdParameter;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Date;
+import java.util.UUID;
+
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.VariableEntity;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
-import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,18 +47,6 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Date;
-import java.util.UUID;
-
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.variableFields;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.variableIdParameter;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(VariableController.class)
@@ -82,7 +82,8 @@ public class VariableEntityControllerIT {
     @Test
     public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
-        VariableEntity variableEntity = new VariableEntity(String.class.getName(),
+        VariableEntity variableEntity = new VariableEntity(1L,
+                String.class.getName(),
                 "firstName",
                 UUID.randomUUID().toString(),
                 "My app",

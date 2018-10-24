@@ -42,7 +42,8 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudVariableUpdatedEvent variableUpdatedEvent = (CloudVariableUpdatedEvent) event;
-        VariableEntity variableEntity = new VariableEntity(variableUpdatedEvent.getEntity().getType(),
+        VariableEntity variableEntity = new VariableEntity(null,
+        		                                           variableUpdatedEvent.getEntity().getType(),
                                                            variableUpdatedEvent.getEntity().getName(),
                                                            variableUpdatedEvent.getEntity().getProcessInstanceId(),
                                                            variableUpdatedEvent.getServiceName(),

@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
+
 import javax.persistence.EntityManager;
 
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -52,7 +53,8 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudVariableCreatedEvent variableCreatedEvent = (CloudVariableCreatedEvent) event;
         LOGGER.debug("Handling variableEntity created event: " + variableCreatedEvent.getEntity().getName());
-        VariableEntity variableEntity = new VariableEntity(variableCreatedEvent.getEntity().getType(),
+        VariableEntity variableEntity = new VariableEntity(null, 
+                                                           variableCreatedEvent.getEntity().getType(),
                                                            variableCreatedEvent.getEntity().getName(),
                                                            variableCreatedEvent.getEntity().getProcessInstanceId(),
                                                            variableCreatedEvent.getServiceName(),
