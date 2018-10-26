@@ -16,6 +16,8 @@
 
 package org.activiti.alfresco.rest.docs;
 
+import java.util.Date;
+
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 import org.springframework.restdocs.request.PathParametersSnippet;
 import org.springframework.restdocs.request.RequestParametersSnippet;
@@ -110,17 +112,17 @@ public class AlfrescoDocumentation {
                 subsectionWithPath("entry.assignee").description("The use assigned to this task."),
                 subsectionWithPath("entry.name").description("The task name."),
                 subsectionWithPath("entry.description").description("The task description."),
-                subsectionWithPath("entry.createTime").description("Time where this task has been created."),
+                subsectionWithPath("entry.createdDate").description("Time where this task has been created."),
                 subsectionWithPath("entry.dueDate").description("Date this task is due for."),
                 subsectionWithPath("entry.priority").description("The task priority."),
-                subsectionWithPath("entry.category").description("The task category."),
+                subsectionWithPath("entry.category").optional().description("The task category.").type(String.class),
                 subsectionWithPath("entry.processDefinitionId").description("The related process definition id."),
                 subsectionWithPath("entry.processInstanceId").description("The related process instance id."),
                 subsectionWithPath("entry.serviceName")
                         .description("The name of the application which started this process instance."),
                 subsectionWithPath("entry.status").description("The process instance status."),
-                subsectionWithPath("entry.lastModified").description("The process instance last modified date."),
-                subsectionWithPath("entry.claimDate").description("The date where this task was claimed.")
+                subsectionWithPath("entry.lastModified").optional().description("The process instance last modified date.").type(Date.class),
+                subsectionWithPath("entry.claimedDate").description("The date when this task was claimed.")
         );
     }
 
