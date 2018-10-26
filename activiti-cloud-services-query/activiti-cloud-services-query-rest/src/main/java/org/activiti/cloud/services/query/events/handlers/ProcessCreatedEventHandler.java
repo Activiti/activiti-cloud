@@ -56,6 +56,7 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
         createdProcessInstanceEntity.setId(createdEvent.getEntity().getId());
         createdProcessInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.CREATED);
         createdProcessInstanceEntity.setLastModified(new Date(createdEvent.getTimestamp()));
+        createdProcessInstanceEntity.setName(createdEvent.getEntity().getName());
 
         createdProcessInstanceEntity.setProcessDefinitionKey(createdEvent.getEntity().getProcessDefinitionKey());
         createdProcessInstanceEntity.setInitiator(createdEvent.getEntity().getInitiator());

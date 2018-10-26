@@ -71,7 +71,8 @@ public class ProcessCreatedEventHandlerTest {
                 .hasProcessDefinitionId(event.getEntity().getProcessDefinitionId())
                 .hasServiceName(event.getServiceName())
                 .hasProcessDefinitionKey(event.getEntity().getProcessDefinitionKey())
-                .hasStatus(ProcessInstance.ProcessInstanceStatus.CREATED);
+                .hasStatus(ProcessInstance.ProcessInstanceStatus.CREATED)
+                .hasName(event.getEntity().getName());
     }
 
     private CloudProcessCreatedEvent buildProcessCreatedEvent() {
@@ -79,6 +80,7 @@ public class ProcessCreatedEventHandlerTest {
         processInstance.setId(UUID.randomUUID().toString());
         processInstance.setProcessDefinitionId(UUID.randomUUID().toString());
         processInstance.setBusinessKey("myKey");
+        processInstance.setName("myName");
         CloudProcessCreatedEventImpl event = new CloudProcessCreatedEventImpl(processInstance);
         event.setServiceName("runtime-bundle-a");
         return event;
