@@ -39,6 +39,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserRemov
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -53,6 +54,8 @@ public class CloudTaskModelAutoConfiguration {
 
         module.registerSubtypes(new NamedType(CloudTaskCreatedEventImpl.class,
                                               TaskRuntimeEvent.TaskEvents.TASK_CREATED.name()));
+        module.registerSubtypes(new NamedType(CloudTaskUpdatedEventImpl.class,
+                                              TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name()));
         module.registerSubtypes(new NamedType(CloudTaskAssignedEventImpl.class,
                                               TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name()));
         module.registerSubtypes(new NamedType(CloudTaskCompletedEventImpl.class,
