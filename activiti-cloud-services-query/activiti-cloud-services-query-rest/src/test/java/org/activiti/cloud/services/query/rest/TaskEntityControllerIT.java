@@ -143,7 +143,6 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    @Ignore //@TODO: we need to update the docs that are being checked for alfresco types
     public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
