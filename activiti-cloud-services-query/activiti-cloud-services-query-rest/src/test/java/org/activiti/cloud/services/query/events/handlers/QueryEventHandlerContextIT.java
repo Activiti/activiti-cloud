@@ -121,6 +121,7 @@ public class QueryEventHandlerContextIT {
                 TaskRuntimeEvent.TaskEvents.TASK_ACTIVATED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_COMPLETED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name(),
+                TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name(),
                 TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name(),
                 TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name(),
                 TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name(),
@@ -141,6 +142,7 @@ public class QueryEventHandlerContextIT {
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_ACTIVATED.name())).isInstanceOf(TaskActivatedEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED.name())).isInstanceOf(TaskCompletedEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name())).isInstanceOf(TaskCancelledEventHandler.class);
+        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name())).isInstanceOf(TaskUpdatedEventHandler.class);
         assertThat(handlers.get(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name())).isInstanceOf(TaskCandidateUserAddedEventHandler.class);
         assertThat(handlers.get(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name())).isInstanceOf(TaskCandidateUserRemovedEventHandler.class);
         assertThat(handlers.get(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name())).isInstanceOf(TaskCandidateGroupAddedEventHandler.class);
