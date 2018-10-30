@@ -20,13 +20,15 @@ import java.util.UUID;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
+import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
-import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
-import org.activiti.api.task.model.impl.TaskImpl;
 
 public class TaskEventContainedBuilder {
 
@@ -112,6 +114,18 @@ public class TaskEventContainedBuilder {
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
                                    new CloudTaskCandidateUserAddedEventImpl(new TaskCandidateUserImpl(username,
                                                                                                       task.getId())));
+        return task;
+    }
+
+    public Task aTaskWithGroupCandidate(String taskName,
+                                       String groupId,
+                                       ProcessInstance processInstance) {
+        TaskImpl task = buildTask(taskName,
+                                  Task.TaskStatus.CREATED,
+                                  processInstance);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+                                   new CloudTaskCandidateGroupAddedEventImpl(new TaskCandidateGroupImpl(groupId,
+                                                                                                        task.getId())));
         return task;
     }
 
