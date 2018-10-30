@@ -52,7 +52,7 @@ public class Tasks {
     private Task subtask;
 
     @When("the user creates a standalone task")
-    @Given("an existing standalone task")
+    @Given("the user creates a standalone task")
     public void createTask() throws Exception {
         newTask = runtimeBundleSteps.createNewTask();
         assertThat(newTask).isNotNull();
@@ -68,16 +68,17 @@ public class Tasks {
                                    Task.TaskStatus.ASSIGNED);
     }
 
-    @When("the user cancel the task")
-    public void cancelCurrentTask() {
+    @When("the user deletes the standalone task")
+    public void deleteCurrentTask() {
         runtimeBundleSteps.deleteTask(newTask.getId());
     }
 
-    @Then("the task is cancelled")
-    public void checkTaskIsCancelled() throws Exception {
+    @Then("the standalone task is deleted")
+    public void checkTaskIsDeleted() throws Exception {
         runtimeBundleSteps.checkTaskNotFound(newTask.getId());
         auditSteps.checkTaskDeletedEvent(newTask.getId());
         querySteps.checkTaskStatus(newTask.getId(),
+                                   //TODO change to DELETED when RB is ready
                                    Task.TaskStatus.CANCELLED);
     }
 
@@ -100,7 +101,7 @@ public class Tasks {
                                                subtask.getParentTaskId());
     }
 
-    @Then("a list of one subtask should be available for the task")
+    @Then("a list of one subtask is be available for the task")
     public void getSubtasksForTask() {
         final Collection<CloudTask> subtasks = runtimeBundleSteps.getSubtasks(newTask.getId()).getContent();
         assertThat(subtasks).isNotNull().hasSize(1);

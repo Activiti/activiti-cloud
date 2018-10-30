@@ -16,21 +16,15 @@
 
 package org.activiti.cloud.qa.story;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import feign.FeignException;
-import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
-import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
 import org.jbehave.core.annotations.Then;
-import org.springframework.hateoas.PagedResources;
 
+import static org.activiti.cloud.qa.helper.Filters.checkEvents;
+import static org.activiti.cloud.qa.helper.Filters.checkProcessInstances;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY;
 import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,11 +60,6 @@ public class SecurityPoliciesActions {
         assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstances(), PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isNotEmpty();
     }
 
-    @Then("the user can get process with variables instances in admin endpoint")
-    public void checkIfProcessWithVariablesArePresentAdmin(){
-        assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstancesAdmin(), PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isNotEmpty();
-    }
-
     @Then("the user can query simple process instances")
     public void checkIfSimpleProcessInstancesArePresentQuery(){
         assertThat(checkProcessInstances(querySteps.getAllProcessInstances(), SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY)).isNotEmpty();
@@ -84,14 +73,6 @@ public class SecurityPoliciesActions {
     @Then("the user can get events for process with variables instances")
     public void checkIfEventsFromProcessesWithVariablesArePresent(){
         assertThat(checkEvents(auditSteps.getAllEvents(),PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isNotEmpty();
-    }
-
-    @Then("the user can get events for process with variables instances in admin endpoint")
-    public void checkIfEventsFromProcessesWithVariablesArePresentAdmin(){
-        //TODO some refactoring after fixing the behavior of the /admin/v1/events?search=entityId:UUID endpoint
-        Collection<CloudRuntimeEvent> filteredCollection = checkEvents(auditSteps.getEventsByEntityIdAdmin(Serenity.sessionVariableCalled("processInstanceId")), PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
-        assertThat(filteredCollection).isNotEmpty();
-        assertThat(((ProcessInstanceImpl)filteredCollection.iterator().next().getEntity()).getProcessDefinitionKey()).isEqualTo(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
     }
 
     @Then("the user cannot get events for process with variables instances")
@@ -114,11 +95,6 @@ public class SecurityPoliciesActions {
         assertThat(checkProcessInstances(querySteps.getAllProcessInstances(),PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isNotEmpty();
     }
 
-    @Then("the user can query process with variables instances in admin endpoints")
-    public void checkIfProcessWithVariablesArePresentQueryAdmin(){
-        assertThat(checkProcessInstances(querySteps.getAllProcessInstancesAdmin(),PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isNotEmpty();
-    }
-
     @Then("the user can get tasks")
     public void checkIfTaskArePresent(){
         assertThat(runtimeBundleSteps.getAllTasks().getContent()).isNotNull();
@@ -129,30 +105,4 @@ public class SecurityPoliciesActions {
         assertThat(querySteps.getAllTasks().getContent()).isNotNull();
     }
 
-    private Collection<CloudProcessInstance> checkProcessInstances(PagedResources<CloudProcessInstance> resource, String processKey){
-        Collection<CloudProcessInstance> rawCollection = resource.getContent();
-        Collection<CloudProcessInstance> filteredCollection = new ArrayList<>();
-        for(CloudProcessInstance e : rawCollection){
-            if(e.getProcessDefinitionKey().equals(processKey)){
-                filteredCollection.add(e);
-            }
-        }
-        return filteredCollection;
-    }
-
-    private Collection<CloudRuntimeEvent> checkEvents(Collection<CloudRuntimeEvent> rawCollection, String processKey){
-
-        Collection<CloudRuntimeEvent> filteredCollection = new ArrayList<>();
-        for(CloudRuntimeEvent e : rawCollection){
-            Object element = e.getEntity();
-
-
-            if( element instanceof ProcessInstanceImpl && ((((ProcessInstanceImpl) element).getProcessDefinitionKey() != null))){
-                if((((ProcessInstanceImpl) element).getProcessDefinitionKey().equals(processKey))) {
-                    filteredCollection.add(e);
-                }
-            }
-        }
-        return filteredCollection;
-    }
 }

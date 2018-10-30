@@ -34,11 +34,11 @@ public interface QueryService extends BaseService {
     @Headers("Content-Type: application/json")
     CloudProcessInstance getProcessInstance(@Param("processInstanceId") String processInstanceId);
 
-    @RequestLine("GET /v1/process-instances")
+    @RequestLine("GET /v1/process-instances?sort=startDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
     PagedResources<CloudProcessInstance> getAllProcessInstances();
 
-    @RequestLine("GET /admin/v1/process-instances")
+    @RequestLine("GET /admin/v1/process-instances?sort=startDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
     PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin();
 
@@ -49,7 +49,7 @@ public interface QueryService extends BaseService {
     @RequestLine("GET /v1/tasks?id={taskId}")
     PagedResources<CloudTask> queryTasksById(@Param("taskId") String taskId);
 
-    @RequestLine("GET /v1/tasks")
+    @RequestLine("GET /v1/tasks?sort=createdDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
     PagedResources<CloudTask> queryAllTasks();
 

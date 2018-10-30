@@ -19,9 +19,9 @@ Then the task is created and the status is assigned
 
 Scenario: delete a standalone task
 Given the user is authenticated as testuser
-And an existing standalone task
-When the user cancel the task
-Then the task is cancelled
+And the user creates a standalone task
+When the user deletes the standalone task
+Then the standalone task is deleted
 
 Scenario: create a subtask
 Given the user is authenticated as testuser
@@ -33,7 +33,7 @@ Scenario: get a list of subtasks
 Given the user is authenticated as testuser
 When the user creates a standalone task
 And user creates a subtask for the previously created task
-Then a list of one subtask should be available for the task
+Then a list of one subtask is be available for the task
 
 Scenario: create a process with assigned tasks and complete it
 Given the user is authenticated as testuser

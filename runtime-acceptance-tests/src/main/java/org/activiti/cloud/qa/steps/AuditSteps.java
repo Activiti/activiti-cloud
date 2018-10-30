@@ -264,6 +264,7 @@ public class AuditSteps {
                               TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED),
                         tuple(taskId,
                               taskId,
+                              //TODO change to DELETED status and TASK_DELETED event when RB is ready
                               Task.TaskStatus.CANCELLED,
                               TaskRuntimeEvent.TaskEvents.TASK_CANCELLED));
         });
