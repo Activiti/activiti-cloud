@@ -38,7 +38,7 @@ Then a list of one subtask is be available for the task
 Scenario: create a process with assigned tasks and complete it
 Given the user is authenticated as testuser
 When the user starts a single-task process
-And the status of the task is ASSIGNED
+And the status of the task since the beginning is ASSIGNED
 And the user completes the task
 Then the status of the process and the task is changed to completed
 
@@ -64,20 +64,30 @@ When the user starts a single-task process
 And the user completes the task
 Then the user cannot complete the task
 
+Scenario: cannot claim a task that belongs to different candidate group
+Given the user is authenticated as testuser
+When the user starts a single-task process with group candidates for test group
+And another user is authenticated as hruser
+Then the task cannot be claimed by hruser
+
 Scenario: cannot claim a task that has already been claimed
 Given the user is authenticated as testuser
 When the user starts a single-task process with user candidates
 And the status of the task is CREATED
 And the testuser claims the task
+And the status of the task is ASSIGNED
 And another user is authenticated as hruser
 Then the task cannot be claimed by hruser
 
-
-
-
-
-
-
+Scenario: cannot see tasks that belongs to different candidate group
+Given the user is authenticated as testuser
+When the user starts a single-task process with group candidates for test group
+And the testuser claims the task
+And the status of the task is ASSIGNED
+And the user completes the task
+And the status of the task is COMPLETED
+And another user is authenticated as hruser
+Then tasks of SingleTaskProcessGroupCandidatesTestGroup cannot be seen by user
 
 
 

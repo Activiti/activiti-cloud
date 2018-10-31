@@ -77,34 +77,34 @@ public class ProcessInstanceTasks {
     public void startProcess(String processName) {
 
         String processDefinitionKey;
-        boolean withTasks = false;
+        boolean withTasks = true;
 
         switch(processName){
             case "process with variables":
                 processDefinitionKey = PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY;
-                withTasks = true;
                 break;
             case "single-task process":
                 processDefinitionKey = PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY;
-                withTasks = true;
                 break;
             case "single-task process with user candidates":
                 processDefinitionKey = PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES_DEFINITION_KEY;
-                withTasks = true;
                 break;
             case "single-task process with group candidates":
                 processDefinitionKey = PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_DEFINITION_KEY;
-                withTasks = true;
                 break;
             case "process without graphic info":
                 processDefinitionKey = PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO_DEFINITION_KEY;
-                withTasks = true;
                 break;
             case "connector process":
                 processDefinitionKey = CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY;
+                withTasks = false;
+                break;
+            case "single-task process with group candidates for test group":
+                processDefinitionKey = "singletask-b6095889-6177-4b73-b3d9-316e47749a36";
                 break;
             default:
                 processDefinitionKey = SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
+                withTasks = false;
         }
 
         processInstance = runtimeBundleSteps.startProcess(processDefinitionKey);
@@ -148,6 +148,13 @@ public class ProcessInstanceTasks {
         runtimeBundleSteps.cannotCompleteTask(currentTask.getId());
     }
 
+    @When("the status of the task since the beginning is $status")
+    public void checkTaskStatusSinceBeginning(Task.TaskStatus status){
+        querySteps.checkTaskStatus(currentTask.getId(), status);
+        runtimeBundleSteps.checkTaskStatus(currentTask.getId(), status);
+        auditSteps.checkTaskCreatedAndAssignedEventsWhenAlreadyAssinged(currentTask.getId());
+    }
+
     @When("the status of the task is $status")
     public void checkTaskStatus(Task.TaskStatus status) throws Exception {
         querySteps.checkTaskStatus(currentTask.getId(), status);
@@ -171,15 +178,15 @@ public class ProcessInstanceTasks {
     public void cannotClaimTask(String user) throws Exception {
         runtimeBundleSteps.cannotAssignTaskToUser(currentTask.getId(),
                                             user);
-        //the claimed task cannot/shouldn't be found by query
+        //the claimed task shouldn't be found by query
         Collection <? extends Task> tasks = querySteps.getAllTasks().getContent();
-        Task foundTask = null;
-        for(Task t : tasks) {
-            if(t.getId().equals(currentTask.getId())) {
-                foundTask = currentTask;
-            }
-        }
-        assertThat(foundTask).isNull();
+        assertThat(tasks).extracting("id").doesNotContain(currentTask.getId());
+    }
+
+    @Then("tasks of $definitionKey cannot be seen by user")
+    public void cannotSeeTasksOfDefinition(String defintionKey) throws Exception {
+        Collection <? extends Task> tasks = querySteps.getAllTasks().getContent();
+        assertThat(tasks).extracting("processDefinitionId").doesNotContain(defintionKey);
     }
 
     @Then("the status of the process and the task is changed to completed")

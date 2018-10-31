@@ -143,11 +143,40 @@ public class AuditSteps {
      * and assigned to it's creator
      * @param taskId the id of the task (from rb)
      */
+    @Step
+    public void checkTaskCreatedAndAssignedEventsWhenAlreadyAssinged(String taskId){
+
+        final Collection<CloudRuntimeEvent> events = getEventsByEntityId(taskId);
+        Condition<CloudRuntimeEvent> taskIsMatched = new Condition<CloudRuntimeEvent>() {
+            @Override
+            public boolean matches(CloudRuntimeEvent event) {
+
+                return event instanceof CloudTaskRuntimeEvent && ((CloudTaskRuntimeEvent) event).getEntity() != null
+                        && taskId.equals(((CloudTaskRuntimeEvent) event).getEntity().getId());
+            }
+        };
+
+        await().untilAsserted(() -> assertThat(events).isNotNull()
+                .isNotEmpty()
+                .filteredOn(taskIsMatched).hasSize(2)
+                .extracting("entity.id",
+                        "entity.status",
+                        "eventType")
+                .containsExactly(
+                        tuple(taskId,
+                                Task.TaskStatus.ASSIGNED,
+                                TaskRuntimeEvent.TaskEvents.TASK_CREATED),
+                        tuple(taskId,
+                                Task.TaskStatus.ASSIGNED,
+                                TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED)));
+    }
+
 
     /**
      * Check if a task was created
      * @param taskId the id of the task (from rb)
      */
+    @Step
     public void checkTaskCreatedEvent(String taskId){
 
         final Collection<CloudRuntimeEvent> events = getEventsByEntityId(taskId);
@@ -194,7 +223,7 @@ public class AuditSteps {
                                             "eventType")
                                     .containsExactly(
                                             tuple(taskId,
-                                                  Task.TaskStatus.ASSIGNED,
+                                                  Task.TaskStatus.CREATED,
                                                   TaskRuntimeEvent.TaskEvents.TASK_CREATED),
                                             tuple(taskId,
                                                   Task.TaskStatus.ASSIGNED,
@@ -228,10 +257,10 @@ public class AuditSteps {
                         "eventType")
                 .containsExactly(
                         tuple(taskId,
-                                Task.TaskStatus.COMPLETED,
+                                Task.TaskStatus.CREATED,
                                 TaskRuntimeEvent.TaskEvents.TASK_CREATED),
                         tuple(taskId,
-                                Task.TaskStatus.COMPLETED,
+                                Task.TaskStatus.ASSIGNED,
                                 TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED),
                         tuple(taskId,
                                 Task.TaskStatus.COMPLETED,

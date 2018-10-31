@@ -63,7 +63,7 @@ public class Tasks {
         final CloudTask assignedTask = runtimeBundleSteps.getTaskById(newTask.getId());
         assertThat(assignedTask).isNotNull();
         assertThat(assignedTask.getStatus()).isEqualTo(Task.TaskStatus.ASSIGNED);
-        auditSteps.checkTaskCreatedAndAssignedEvents(assignedTask.getId());
+        auditSteps.checkTaskCreatedAndAssignedEventsWhenAlreadyAssinged(assignedTask.getId());
         querySteps.checkTaskStatus(assignedTask.getId(),
                                    Task.TaskStatus.ASSIGNED);
     }

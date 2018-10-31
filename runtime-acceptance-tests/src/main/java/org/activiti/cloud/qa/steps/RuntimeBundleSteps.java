@@ -248,7 +248,10 @@ public class RuntimeBundleSteps {
 
     @Step
     public void checkTaskStatus(String id, Task.TaskStatus status){
-         assertThat(runtimeBundleService.getTaskById(id).getStatus()).isEqualTo(status);
+        //once a task is completed, it disappears from the runtime bundle
+        if(!status.equals(Task.TaskStatus.COMPLETED)){
+            assertThat(runtimeBundleService.getTaskById(id).getStatus()).isEqualTo(status);
+        }
     }
 
     @Step

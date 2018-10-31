@@ -49,3 +49,4 @@ Scenario: get events as an admin
 Given the user is authenticated as hradmin
 When the user starts a process with variables
 Then the user can get events for process with variables instances in admin endpoint
+
