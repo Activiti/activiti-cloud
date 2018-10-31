@@ -17,6 +17,7 @@
 package org.activiti.cloud.starter.tests;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
@@ -69,6 +70,9 @@ public class QueryTasksIT {
     private TaskCandidateUserRepository taskCandidateUserRepository;
 
     @Autowired
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
+
+    @Autowired
     private ProcessInstanceRepository processInstanceRepository;
 
     @Autowired
@@ -93,6 +97,7 @@ public class QueryTasksIT {
     @After
     public void tearDown() {
         taskCandidateUserRepository.deleteAll();
+        taskCandidateGroupRepository.deleteAll();
         taskRepository.deleteAll();
         processInstanceRepository.deleteAll();
     }
@@ -239,20 +244,52 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetRestrictedTasksWithPermission() {
+    public void shouldGetRestrictedTasksWithUserPermission() {
         //given
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate("task with candidate",
                                                                                   "testuser",
                                                                                   runningProcessInstance);
-
+        //when
         eventsAggregator.sendAll();
 
+        //then
+        assertCanRetrieveTask(taskWithCandidate);
+    }
+
+    @Test
+    public void shouldNotGetRestrictedTasksWithoutUserPermission() throws Exception {
+        //given
+        Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate("task with candidate",
+                                                                                  "specialUser",
+                                                                                  runningProcessInstance);
+
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        assertCannotSeeTask(taskWithCandidate);
+    }
+
+    @Test
+    public void shouldGetRestrictedTasksWithGroupPermission() {
+        //given
+        //we are logged in as testuser who belongs to testgroup, so it should be able to see the task
+        Task taskWithCandidate = taskEventContainedBuilder.aTaskWithGroupCandidate("task with candidate",
+                                                                                  "testgroup",
+                                                                                  runningProcessInstance);
+
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        assertCanRetrieveTask(taskWithCandidate);
+    }
+
+    private void assertCanRetrieveTask(Task task) {
         await().untilAsserted(() -> {
 
-            //when
             ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
 
-            //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -260,26 +297,30 @@ public class QueryTasksIT {
             assertThat(tasks)
                     .extracting(Task::getId,
                                 Task::getStatus)
-                    .contains(tuple(taskWithCandidate.getId(),
+                    .contains(tuple(task.getId(),
                                     Task.TaskStatus.CREATED));
         });
     }
 
     @Test
-    public void shouldNotGetRestrictedTasksWithoutPermission() throws Exception {
+    public void shouldNotGetRestrictedTasksWithoutGroupPermission() throws Exception {
         //given
-        Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate("task with candidate",
-                                                                                  "specialUser",
+        //we are logged in as test user who does not belong to hrgroup, so it should not be available
+        Task taskWithCandidate = taskEventContainedBuilder.aTaskWithGroupCandidate("task with candidate",
+                                                                                  "hrgroup",
                                                                                   runningProcessInstance);
-
+        //when
         eventsAggregator.sendAll();
 
+        //then
+        assertCannotSeeTask(taskWithCandidate);
+    }
+
+    private void assertCannotSeeTask(Task task) {
         await().untilAsserted(() -> {
 
-            //when
             ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
 
-            //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -287,7 +328,7 @@ public class QueryTasksIT {
             //don't see the task as not for me
             assertThat(tasks)
                     .extracting(Task::getId)
-                    .doesNotContain(taskWithCandidate.getId());
+                    .doesNotContain(task.getId());
         });
     }
 
