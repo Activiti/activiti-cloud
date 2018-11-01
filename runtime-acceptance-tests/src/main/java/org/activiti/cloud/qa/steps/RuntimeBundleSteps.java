@@ -24,7 +24,6 @@ import java.util.Map;
 
 import feign.FeignException;
 import net.thucydides.core.annotations.Step;
-import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -51,20 +50,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 @EnableRuntimeFeignContext
 public class RuntimeBundleSteps {
-
-    public static final String SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY = "SimpleProcess";
-
-    public static final String CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY = "ConnectorProcess";
-
-    public static final String PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY = "ProcessWithVariables";
-
-    public static final String PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY = "SingleTaskProcess";
-
-    public static final String PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES_DEFINITION_KEY = "SingleTaskProcessUserCandidates";
-
-    public static final String PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_DEFINITION_KEY = "SingleTaskProcessGroupCandidates";
-
-    public static final String PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO_DEFINITION_KEY = "fixSystemFailure";
 
     @Autowired
     private RuntimeDirtyContextHandler dirtyContextHandler;
