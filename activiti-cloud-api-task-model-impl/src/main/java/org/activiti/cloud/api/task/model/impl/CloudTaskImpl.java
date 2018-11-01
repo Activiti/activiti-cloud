@@ -36,6 +36,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private String processDefinitionId;
     private String processInstanceId;
     private String parentTaskId;
+    private String formKey;
     private TaskStatus status;
 
     public CloudTaskImpl() {
@@ -54,6 +55,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         processDefinitionId = task.getProcessDefinitionId();
         processInstanceId = task.getProcessInstanceId();
         parentTaskId = task.getParentTaskId();
+        formKey = task.getFormKey();
         status = task.getStatus();
     }
 
@@ -166,6 +168,15 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     }
 
     @Override
+    public String getFormKey() {
+        return formKey;
+    }
+
+    public void setFormKey(String formKey) {
+        this.formKey = formKey;
+    }
+
+    @Override
     public TaskStatus getStatus() {
         return status;
     }
@@ -189,6 +200,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
                 ", processDefinitionId='" + processDefinitionId + '\'' +
                 ", processInstanceId='" + processInstanceId + '\'' +
                 ", parentTaskId='" + parentTaskId + '\'' +
+                ", formKey='" + formKey + '\'' +
                 ", status=" + status +
                 '}';
     }

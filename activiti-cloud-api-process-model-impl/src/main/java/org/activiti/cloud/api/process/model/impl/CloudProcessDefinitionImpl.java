@@ -27,6 +27,7 @@ public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implement
     private String key;
     private String description;
     private int version;
+    private String formKey;
 
     public CloudProcessDefinitionImpl() {
     }
@@ -37,6 +38,7 @@ public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implement
         key = processDefinition.getKey();
         description = processDefinition.getDescription();
         version = processDefinition.getVersion();
+        formKey = processDefinition.getFormKey();
     }
 
     @Override
@@ -82,5 +84,14 @@ public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implement
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    @Override
+    public String getFormKey() {
+        return formKey;
+    }
+
+    public void setFormKey(String formKey) {
+        this.formKey = formKey;
     }
 }
