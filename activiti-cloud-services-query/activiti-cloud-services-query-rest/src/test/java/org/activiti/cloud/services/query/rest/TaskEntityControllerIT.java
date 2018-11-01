@@ -138,7 +138,8 @@ public class TaskEntityControllerIT {
                               new Date(),
                               new Date(),
                               "peter",
-                              null
+                              null,
+                              "aFormKey"
         );
     }
 

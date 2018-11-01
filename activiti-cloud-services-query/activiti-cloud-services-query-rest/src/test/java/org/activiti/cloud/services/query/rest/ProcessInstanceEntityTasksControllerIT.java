@@ -90,7 +90,8 @@ public class ProcessInstanceEntityTasksControllerIT {
                                                new Date(),
                                                new Date(),
                                                "peter",
-                                               null
+                                               null,
+                                               "aFormKey"
         );
 
         given(taskRepository.findAll(any(),
