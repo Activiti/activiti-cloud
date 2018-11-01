@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Convert;
@@ -29,7 +28,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -69,8 +67,7 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
     private String executionId;
 
     @Convert(converter = VariableValueJsonConverter.class)
-    @Lob @Basic(fetch=FetchType.LAZY)
-    @Column
+    @Column(columnDefinition="text")
     private VariableValue<?> value;
 
     private Boolean markedAsDeleted = false;
