@@ -1,6 +1,11 @@
 package org.activiti.cloud.services.query.rest;
 
+import java.util.Arrays;
+import java.util.UUID;
+
 import com.querydsl.core.types.Predicate;
+import org.activiti.api.runtime.shared.identity.UserGroupManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -9,8 +14,6 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
-import org.activiti.api.runtime.shared.identity.UserGroupManager;
-import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,8 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -58,18 +59,22 @@ public class RestrictTaskEntityQueryIT {
     private UserGroupManager userGroupManager;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
+        taskCandidateUserRepository.deleteAll();
+        taskCandidateGroupRepository.deleteAll();
+        taskRepository.deleteAll();
     }
 
     @Test
-    public void shouldGetTasksWhenCandidate() throws Exception {
+    public void shouldGetTasksWhenCandidate() {
 
         TaskEntity taskEntity = new TaskEntity();
-        taskEntity.setId("1");
+        String taskId = UUID.randomUUID().toString();
+        taskEntity.setId(taskId);
         taskRepository.save(taskEntity);
 
-        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("1", "testuser");
+        TaskCandidateUser taskCandidateUser = new TaskCandidateUser(taskEntity.getId(), "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
@@ -82,7 +87,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetTasksWhenNotCandidate() throws Exception {
+    public void shouldNotGetTasksWhenNotCandidate() {
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("2");
@@ -100,7 +105,52 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldGetTasksWhenAssigneeEvenIfNotCandidate() throws Exception {
+    public void shouldNotGetTasksAssignedToSomeOneElseWhenCandidate() {
+        //given
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("2");
+        taskEntity.setAssignee("someOneElse");
+        taskRepository.save(taskEntity);
+
+        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("2", "testuser");
+        taskCandidateUserRepository.save(taskCandidateUser);
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
+
+        //when
+        Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
+
+        //then
+        assertThat(iterable).isEmpty();
+    }
+
+    @Test
+    public void shouldGetTasksAssignedToSomeOneElseWhenOwner() {
+        //given
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("2");
+        taskEntity.setAssignee("someOneElse");
+        taskEntity.setOwner("testuser");
+        taskRepository.save(taskEntity);
+
+        TaskCandidateUser taskCandidateUser = new TaskCandidateUser("2", "someOneElse");
+        taskCandidateUserRepository.save(taskCandidateUser);
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
+
+        //when
+        Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
+
+        //then
+        assertThat(iterable).extracting(TaskEntity::getId).containsOnly(taskEntity.getId());
+    }
+
+    @Test
+    public void shouldGetTasksWhenAssigneeEvenIfNotCandidate() {
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("2");
@@ -119,7 +169,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldGetTasksWhenInCandidateGroup() throws Exception {
+    public void shouldGetTasksWhenInCandidateGroup() {
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("3");
@@ -138,7 +188,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetTasksWhenNotInCandidateGroup() throws Exception {
+    public void shouldNotGetTasksWhenNotInCandidateGroup() {
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("4");
@@ -157,7 +207,30 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldGetTasksWhenNoCandidatesConfigured() throws Exception {
+    public void shouldNotGetTasksAssignedToSomeOneElseWhenInCandidateGroup() {
+        //given
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("3");
+        taskEntity.setAssignee("someOneElse");
+        taskRepository.save(taskEntity);
+
+        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup("3", "hr");
+        taskCandidateGroupRepository.save(taskCandidateGroup);
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
+        when(userGroupManager.getUserGroups("hruser")).thenReturn(Arrays.asList("hr"));
+
+        Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
+
+        //when
+        Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
+
+        //then
+        assertThat(iterable).isEmpty();
+    }
+
+    @Test
+    public void shouldGetTasksWhenNoCandidatesConfiguredAndNotAssigned() {
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("5");
@@ -174,7 +247,28 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldGetTasksWhenNoCandidatesConfiguredAndExistingQueryMatches() throws Exception {
+    public void shouldNotGetTasksAssignedToSomeOneElseWhenNoCandidatesConfigured() {
+        //given
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("5");
+        taskEntity.setAssignee("someOneElse");
+        taskRepository.save(taskEntity);
+
+        // no candidates or groups - just a taskEntity without any permissions so anyone could see if not assigned
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
+
+        //when
+        Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
+
+        //then
+        assertThat(iterable).isEmpty();
+    }
+
+    @Test
+    public void shouldGetTasksWhenNoCandidatesConfiguredAndExistingQueryMatches() {
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("5");
@@ -192,7 +286,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetTasksWhenNoCandidatesConfiguredAndExistingQueryDoesNotMatch() throws Exception {
+    public void shouldNotGetTasksWhenNoCandidatesConfiguredAndExistingQueryDoesNotMatch() {
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("5");
@@ -210,7 +304,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetTasksWhenInCandidateGroupButExistingQueryDoesNotMatch() throws Exception {
+    public void shouldNotGetTasksWhenInCandidateGroupButExistingQueryDoesNotMatch() {
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("3");
