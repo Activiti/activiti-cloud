@@ -108,7 +108,7 @@ public class QueryTasksIT {
         Task createdTask = taskEventContainedBuilder.aCreatedTask("Created task",
                                                                   runningProcessInstance);
         Task assignedTask = taskEventContainedBuilder.anAssignedTask("Assigned task",
-                                                                     "jack",
+                                                                     "testuser",
                                                                      runningProcessInstance);
         Task completedTask = taskEventContainedBuilder.aCompletedTask("Completed task",
                                                                       runningProcessInstance);
