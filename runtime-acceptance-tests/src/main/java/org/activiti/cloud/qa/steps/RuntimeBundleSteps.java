@@ -24,6 +24,7 @@ import java.util.Map;
 
 import feign.FeignException;
 import net.thucydides.core.annotations.Step;
+import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -252,6 +253,11 @@ public class RuntimeBundleSteps {
     @Step
     public void getProcessInstanceById(String id){
         runtimeBundleService.getProcessInstance(id);
+    }
+
+    @Step
+    public PagedResources<ProcessDefinition> getProcessDefinitions(){
+        return runtimeBundleService.getProcessDefinitions();
     }
 
 }

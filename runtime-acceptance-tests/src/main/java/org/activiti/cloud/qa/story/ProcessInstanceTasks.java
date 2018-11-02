@@ -23,6 +23,7 @@ import java.util.List;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -30,6 +31,7 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.qa.helper.ProcessMatcher;
 import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
@@ -254,5 +256,17 @@ public class ProcessInstanceTasks {
         currentTask = tasksList.get(0);
         assertThat(currentTask.getStatus()).isEqualTo(status);
         assertThat(currentTask.getName()).isEqualTo(taskName);
+    }
+
+    @When("the user gets the process definitions")
+    public void getProcessDefinitions(){
+        Collection<ProcessDefinition> processDefinitions = runtimeBundleSteps.getProcessDefinitions().getContent();
+        Serenity.setSessionVariable("processDefinitions").to(processDefinitions);
+    }
+
+    @Then("all the process definitions are present")
+    public void checkProcessDefinitions(){
+        Collection<ProcessDefinition> processDefinitions = Serenity.sessionVariableCalled("processDefinitions");
+        assertThat(processDefinitions).extracting("key").containsAll(processDefinitionKeys.values());
     }
 }
