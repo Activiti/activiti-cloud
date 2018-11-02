@@ -71,6 +71,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     private TaskStatus status;
     private String owner;
     private String parentTaskId;
+    private String formKey;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModified;
@@ -127,7 +128,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
                       Date lastModified,
                       Date claimedDate,
                       String owner,
-                      String parentTaskId) {
+                      String parentTaskId,
+                      String formKey) {
         super(serviceName,
               serviceFullName,
               serviceVersion,
@@ -148,6 +150,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.claimedDate = claimedDate;
         this.owner = owner;
         this.parentTaskId = parentTaskId;
+        this.formKey = formKey;
     }
 
     @Override
@@ -359,5 +362,14 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
 
     public void setParentTaskId(String parentTaskId) {
         this.parentTaskId = parentTaskId;
+    }
+
+    @Override
+    public String getFormKey() {
+        return formKey;
+    }
+
+    public void setFormKey(String formKey) {
+        this.formKey = formKey;
     }
 }
