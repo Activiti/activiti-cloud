@@ -22,16 +22,18 @@ public class ProcessMatcher {
 
     private static final HashMap <String, String> processWithTasksDefinitionKeys = new HashMap<String, String>(){{
             put("PROCESS_INSTANCE_WITH_VARIABLES","ProcessWithVariables");
-            put("PROCESS_INSTANCE_WITH_SINGLE_TASK","SingleTaskProcess");
+            put("PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED","SingleTaskProcess");
             put("PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES","SingleTaskProcessUserCandidates");
             put("PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES","SingleTaskProcessGroupCandidates");
             put("PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO","fixSystemFailure");
             put("PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_FOR_TESTGROUP","singletask-b6095889-6177-4b73-b3d9-316e47749a36");
+            put("SUB_PROCESS_INSTANCE_WITH_TASK","subprocess-970cb8df-2d4c-482b-a7f8-c19a983c2ef2");
     }};
 
     private static final HashMap <String, String> processWithNoTasksDefinitionKeys = new HashMap<String, String>(){{
             put("SIMPLE_PROCESS_INSTANCE","SimpleProcess");
             put("CONNECTOR_PROCESS_INSTANCE","ConnectorProcess");
+            put("PROCESS_INSTANCE_WITH_CALL_ACTIVITIES","parentproc-8e992556-5785-4ee0-9fe7-354decfea4a8");
     }};
 
     public static final HashMap <String, String> processDefinitionKeys = new HashMap<String, String>(){{
@@ -47,3 +49,8 @@ public class ProcessMatcher {
         return processWithTasksDefinitionKeys.containsKey(processName);
     }
 }
+
+
+
+
+

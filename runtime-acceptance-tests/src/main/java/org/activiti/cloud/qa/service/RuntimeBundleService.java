@@ -67,7 +67,7 @@ public interface RuntimeBundleService extends BaseService {
     @Headers("Content-Type: application/json")
     void deleteProcess(@Param("id") String id);
 
-    @RequestLine("GET /v1/process-instances")
+    @RequestLine("GET /v1/process-instances?sort=startDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
     PagedResources<CloudProcessInstance> getAllProcessInstances();
 

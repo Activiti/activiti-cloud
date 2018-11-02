@@ -37,7 +37,7 @@ Then a list of one subtask is be available for the task
 
 Scenario: create a process with assigned tasks and complete it
 Given the user is authenticated as testuser
-When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK
+When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
 And the status of the task since the beginning is ASSIGNED
 And the user completes the task
 Then the status of the process and the task is changed to completed
@@ -60,7 +60,7 @@ Then the status of the process and the task is changed to completed
 
 Scenario: cannot complete a task that has already been completed
 Given the user is authenticated as testuser
-When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK
+When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
 And the user completes the task
 Then the user cannot complete the task
 
@@ -89,6 +89,10 @@ And the status of the task is COMPLETED
 And another user is authenticated as hruser
 Then tasks of PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_FOR_TESTGROUP cannot be seen by user
 
+Scenario: subprocess task is created when starting a parent process with call activities
+Given the user is authenticated as testuser
+When the user starts a PROCESS_INSTANCE_WITH_CALL_ACTIVITIES
+Then the task from SUB_PROCESS_INSTANCE_WITH_TASK is CREATED and it is called subprocess-task
 
 
 

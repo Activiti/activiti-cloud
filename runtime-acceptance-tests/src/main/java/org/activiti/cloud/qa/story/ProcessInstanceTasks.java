@@ -18,6 +18,7 @@ package org.activiti.cloud.qa.story;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
@@ -28,6 +29,7 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
@@ -237,5 +239,20 @@ public class ProcessInstanceTasks {
     @Then("the user can get process with variables instances in admin endpoint")
     public void checkIfProcessWithVariablesArePresentAdmin(){
         assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstancesAdmin(), processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
+    }
+
+    @Then("the task from $processName is $status and it is called $taskName")
+    public void checkTaskFromProcessInstance(String processName,Task.TaskStatus status, String taskName){
+        List<ProcessInstance> processInstancesList = new ArrayList<>(
+                runtimeBundleSteps.getAllProcessInstances().getContent());
+        assertThat(processInstancesList).hasSize(2);
+        assertThat(processInstancesList).extracting("processDefinitionKey")
+                                        .contains(processDefinitionKeyMatcher(processName));
+
+        List<Task> tasksList = new ArrayList<>(runtimeBundleSteps.getAllTasks().getContent());
+        assertThat(tasksList).isNotEmpty();
+        currentTask = tasksList.get(0);
+        assertThat(currentTask.getStatus()).isEqualTo(status);
+        assertThat(currentTask.getName()).isEqualTo(taskName);
     }
 }

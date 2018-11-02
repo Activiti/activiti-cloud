@@ -249,4 +249,9 @@ public class RuntimeBundleSteps {
         }
     }
 
+    @Step
+    public void getProcessInstanceById(String id){
+        runtimeBundleService.getProcessInstance(id);
+    }
+
 }
