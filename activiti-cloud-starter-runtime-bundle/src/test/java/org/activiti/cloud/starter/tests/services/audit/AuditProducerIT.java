@@ -176,6 +176,11 @@ public class AuditProducerIT {
                                  BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*end event*/,
                                  VARIABLE_DELETED.name(),
                                  PROCESS_COMPLETED.name()));
+
+        assertThat(streamHandler.getReceivedEvents())
+                .filteredOn(event -> event.getEventType().equals(TASK_COMPLETED))
+                .extracting(event -> ((Task) event.getEntity()).getStatus())
+                .containsOnly(Task.TaskStatus.COMPLETED);
     }
 
     @Test
