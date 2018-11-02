@@ -123,9 +123,7 @@ public class QueryEventHandlerContextIT {
                 TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name(),
                 TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name(),
-                TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name(),
                 TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name(),
-                TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name(),
                 VariableEvent.VariableEvents.VARIABLE_CREATED.name(),
                 VariableEvent.VariableEvents.VARIABLE_UPDATED.name(),
                 VariableEvent.VariableEvents.VARIABLE_DELETED.name()
