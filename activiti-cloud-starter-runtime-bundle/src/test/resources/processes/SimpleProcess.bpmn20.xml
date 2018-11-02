@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/processdef" xmlns:modeler="http://activiti.com/modeler" modeler:version="1.0en" modeler:exportDateTime="20170630121556884" modeler:modelId="31032" modeler:modelVersion="1" modeler:modelLastUpdated="1498821282568">
   <process id="SimpleProcess" name="SimpleProcess" isExecutable="true">
-    <startEvent id="startEvent1">
+    <startEvent id="startEvent1" activiti:formKey="startFormKey">
       <extensionElements>
         <modeler:editor-resource-id><![CDATA[startEvent1]]></modeler:editor-resource-id>
       </extensionElements>
     </startEvent>
-    <userTask id="sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94" name="Perform action" activiti:candidateGroups="hr" activiti:candidateUsers="hruser">
+    <userTask id="sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94" name="Perform action" activiti:formKey="taskFormKey" activiti:candidateGroups="hr" activiti:candidateUsers="hruser">
       <extensionElements>
         <modeler:allow-send-email><![CDATA[true]]></modeler:allow-send-email>
         <modeler:initiator-can-complete><![CDATA[false]]></modeler:initiator-can-complete>

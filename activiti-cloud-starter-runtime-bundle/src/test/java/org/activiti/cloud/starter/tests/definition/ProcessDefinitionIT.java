@@ -68,8 +68,11 @@ public class ProcessDefinitionIT {
 
     public static final String ADMIN_PROCESS_DEFINITIONS_URL = "/admin/v1/process-definitions/";
 
+    private static final String PROCESS_WITH_VARIABLES = "ProcessWithVariables";
     private static final String PROCESS_WITH_VARIABLES_2 = "ProcessWithVariables2";
     private static final String PROCESS_POOL_LANE = "process_pool1";
+    private static final String SIMPLE_PROCESS = "SimpleProcess";
+    private static final String PROCESS_WITH_BOUNDARY_SIGNAL = "ProcessWithBoundarySignal";
 
     @Test
     public void shouldRetrieveListOfProcessDefinition() {
@@ -85,11 +88,11 @@ public class ProcessDefinitionIT {
         assertThat(entity).isNotNull();
         assertThat(entity.getBody()).isNotNull();
         assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).contains(
-                "ProcessWithVariables",
-                "ProcessWithVariables2",
-                "process_pool1",
-                "SimpleProcess",
-                "ProcessWithBoundarySignal");
+                PROCESS_WITH_VARIABLES,
+                PROCESS_WITH_VARIABLES_2,
+                PROCESS_POOL_LANE,
+                SIMPLE_PROCESS,
+                PROCESS_WITH_BOUNDARY_SIGNAL);
     }
 
     private ProcessDefinition getProcessDefinition(String name) {
@@ -280,12 +283,12 @@ public class ProcessDefinitionIT {
         assertThat(entity).isNotNull();
         assertThat(entity.getBody()).isNotNull();
         assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).contains(
-                "ProcessWithVariables",
+                PROCESS_WITH_VARIABLES,
                 PROCESS_POOL_LANE);
         assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).doesNotContain(
                 PROCESS_WITH_VARIABLES_2,
-                "SimpleProcess",
-                "ProcessWithBoundarySignal");
+                SIMPLE_PROCESS,
+                PROCESS_WITH_BOUNDARY_SIGNAL);
 
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
@@ -293,8 +296,8 @@ public class ProcessDefinitionIT {
         entity = getProcessDefinitions(PROCESS_DEFINITIONS_URL);
         assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).contains(
                 PROCESS_WITH_VARIABLES_2,
-                "SimpleProcess",
-                "ProcessWithBoundarySignal");
+                SIMPLE_PROCESS,
+                PROCESS_WITH_BOUNDARY_SIGNAL);
     }
 
     @Test
@@ -311,11 +314,11 @@ public class ProcessDefinitionIT {
 
         assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).doesNotContain(
                 PROCESS_WITH_VARIABLES_2,
-                "SimpleProcess",
-                "ProcessWithBoundarySignal");
+                SIMPLE_PROCESS,
+                PROCESS_WITH_BOUNDARY_SIGNAL);
 
         assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).contains(
-                "ProcessWithVariables",
+                PROCESS_WITH_VARIABLES,
                 PROCESS_POOL_LANE);
 
         //and a larger set at admin endpoint
@@ -324,7 +327,13 @@ public class ProcessDefinitionIT {
         assertThat(entity.getBody()).isNotNull();
         assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).contains(
                 PROCESS_WITH_VARIABLES_2,
-                "SimpleProcess",
-                "ProcessWithBoundarySignal");
+                SIMPLE_PROCESS,
+                PROCESS_WITH_BOUNDARY_SIGNAL);
+    }
+
+    @Test
+    public void processDefinitionShouldHaveFormKey() {
+        ProcessDefinition aProcessDefinition = getProcessDefinition(SIMPLE_PROCESS);
+        assertThat(aProcessDefinition.getFormKey()).isEqualTo("startFormKey");
     }
 }

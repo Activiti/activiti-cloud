@@ -113,6 +113,20 @@ public class TasksIT {
     }
 
     @Test
+    public void taskShouldHaveFormKey() {
+        //given
+        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+
+        //when
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = executeRequestGetTasks();
+
+        //then
+        assertThat(responseEntity).isNotNull();
+        Collection<CloudTask> tasks = responseEntity.getBody().getContent();
+        assertThat(tasks).extracting(Task::getFormKey).contains("taskFormKey");
+    }
+
+    @Test
     public void shouldUpdateDescription() {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
