@@ -123,9 +123,7 @@ public class QueryEventHandlerContextIT {
                 TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name(),
                 TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name(),
-                TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name(),
                 TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name(),
-                TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name(),
                 VariableEvent.VariableEvents.VARIABLE_CREATED.name(),
                 VariableEvent.VariableEvents.VARIABLE_UPDATED.name(),
                 VariableEvent.VariableEvents.VARIABLE_DELETED.name()
@@ -144,9 +142,7 @@ public class QueryEventHandlerContextIT {
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name())).isInstanceOf(TaskCancelledEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name())).isInstanceOf(TaskUpdatedEventHandler.class);
         assertThat(handlers.get(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name())).isInstanceOf(TaskCandidateUserAddedEventHandler.class);
-        assertThat(handlers.get(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name())).isInstanceOf(TaskCandidateUserRemovedEventHandler.class);
         assertThat(handlers.get(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name())).isInstanceOf(TaskCandidateGroupAddedEventHandler.class);
-        assertThat(handlers.get(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name())).isInstanceOf(TaskCandidateGroupRemovedEventHandler.class);
         assertThat(handlers.get(VariableEvent.VariableEvents.VARIABLE_CREATED.name())).isInstanceOf(VariableCreatedEventHandler.class);
         assertThat(handlers.get(VariableEvent.VariableEvents.VARIABLE_UPDATED.name())).isInstanceOf(VariableUpdatedEventHandler.class);
         assertThat(handlers.get(VariableEvent.VariableEvents.VARIABLE_DELETED.name())).isInstanceOf(VariableDeletedEventHandler.class);
