@@ -16,8 +16,11 @@
 
 package org.activiti.cloud.qa.story;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.CloudTask;
@@ -107,5 +110,20 @@ public class Tasks {
         assertThat(subtasks).isNotNull().hasSize(1);
         assertThat(subtasks.iterator().hasNext()).isTrue();
         assertThat(subtasks.iterator().next()).extracting("id").containsOnly(subtask.getId());
+    }
+
+    @Then("the tasks has the formKey field")
+    public void checkIfFormKeyIsPresent(){
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId").toString();
+        List<CloudTask> tasksFromRB = new ArrayList<>(
+                runtimeBundleSteps.getTaskByProcessInstanceId(processInstanceId));
+        assertThat(tasksFromRB).isNotEmpty();
+        newTask = tasksFromRB.get(0);
+        assertThat(newTask).isNotNull();
+        assertThat(newTask).extracting("formKey").contains("taskForm");
+
+        CloudTask taskFromQuery = querySteps.getTaskById(newTask.getId());
+        assertThat(taskFromQuery).isNotNull();
+        assertThat(taskFromQuery.getFormKey()).isEqualTo("taskForm");
     }
 }

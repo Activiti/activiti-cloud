@@ -94,7 +94,10 @@ Given the user is authenticated as testuser
 When the user starts a PROCESS_INSTANCE_WITH_CALL_ACTIVITIES
 Then the task from SUB_PROCESS_INSTANCE_WITH_TASK is CREATED and it is called subprocess-task
 
-
+Scenario: check the presence of formKey field in task
+Given the user is authenticated as testuser
+When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
+Then the tasks has the formKey field
 
 
 
