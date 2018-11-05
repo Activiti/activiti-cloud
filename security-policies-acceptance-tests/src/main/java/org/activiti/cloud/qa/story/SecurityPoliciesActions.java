@@ -25,8 +25,7 @@ import org.jbehave.core.annotations.Then;
 
 import static org.activiti.cloud.qa.helper.Filters.checkEvents;
 import static org.activiti.cloud.qa.helper.Filters.checkProcessInstances;
-import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY;
-import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
+import static org.activiti.cloud.qa.helper.ProcessDefinitionRegistry.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -44,7 +43,7 @@ public class SecurityPoliciesActions {
     @Then("the user cannot start the process with variables")
     public void startProcess() throws Exception {
         try {
-            runtimeBundleSteps.startProcess(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
+            runtimeBundleSteps.startProcess(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
         }catch (FeignException exception){
             assertThat(exception.getMessage()).contains("Unable to find process definition for the given id:'ProcessWithVariables'");
         }
@@ -52,47 +51,47 @@ public class SecurityPoliciesActions {
 
     @Then("the user can get simple process instances")
     public void checkIfSimpleProcessInstancesArePresent(){
-        assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstances(), SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY)).isNotEmpty();
+        assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstances(), processDefinitionKeys.get("SIMPLE_PROCESS_INSTANCE"))).isNotEmpty();
     }
 
     @Then("the user can get process with variables instances")
     public void checkIfProcessWithVariablesArePresent(){
-        assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstances(), PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isNotEmpty();
+        assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstances(), processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
     }
 
     @Then("the user can query simple process instances")
     public void checkIfSimpleProcessInstancesArePresentQuery(){
-        assertThat(checkProcessInstances(querySteps.getAllProcessInstances(), SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY)).isNotEmpty();
+        assertThat(checkProcessInstances(querySteps.getAllProcessInstances(), processDefinitionKeys.get("SIMPLE_PROCESS_INSTANCE"))).isNotEmpty();
     }
 
     @Then("the user can get events for simple process instances")
     public void checkIfEventsFromSimpleProcessesArePresent(){
-        assertThat(checkEvents(auditSteps.getAllEvents(),SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY)).isNotEmpty();
+        assertThat(checkEvents(auditSteps.getAllEvents(),processDefinitionKeys.get("SIMPLE_PROCESS_INSTANCE"))).isNotEmpty();
     }
 
     @Then("the user can get events for process with variables instances")
     public void checkIfEventsFromProcessesWithVariablesArePresent(){
-        assertThat(checkEvents(auditSteps.getAllEvents(),PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isNotEmpty();
+        assertThat(checkEvents(auditSteps.getAllEvents(),processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
     }
 
     @Then("the user cannot get events for process with variables instances")
     public void checkIfEventsFromProcessesWithVariablesAreNotPresent(){
-        assertThat(checkEvents(auditSteps.getAllEvents(),PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isEmpty();
+        assertThat(checkEvents(auditSteps.getAllEvents(),processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isEmpty();
     }
 
     @Then("the user cannot get process with variables instances")
     public void checkIfProcessWithVariablesAreNotPresent(){
-        assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstances(), PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isEmpty();
+        assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstances(), processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isEmpty();
     }
 
     @Then("the user cannot query process with variables instances")
     public void checkIfProcessWithVariablesAreNotPresentQuery(){
-        assertThat(checkProcessInstances(querySteps.getAllProcessInstances(),PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isEmpty();
+        assertThat(checkProcessInstances(querySteps.getAllProcessInstances(),processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isEmpty();
     }
 
     @Then("the user can query process with variables instances")
     public void checkIfProcessWithVariablesArePresentQuery(){
-        assertThat(checkProcessInstances(querySteps.getAllProcessInstances(),PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isNotEmpty();
+        assertThat(checkProcessInstances(querySteps.getAllProcessInstances(),processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
     }
 
     @Then("the user can get tasks")

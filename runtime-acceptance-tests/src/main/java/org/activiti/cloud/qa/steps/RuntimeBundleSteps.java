@@ -22,9 +22,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
+import com.sun.org.apache.xalan.internal.xslt.Process;
 import feign.FeignException;
 import net.thucydides.core.annotations.Step;
-import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -51,20 +52,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 @EnableRuntimeFeignContext
 public class RuntimeBundleSteps {
-
-    public static final String SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY = "SimpleProcess";
-
-    public static final String CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY = "ConnectorProcess";
-
-    public static final String PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY = "ProcessWithVariables";
-
-    public static final String PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY = "SingleTaskProcess";
-
-    public static final String PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES_DEFINITION_KEY = "SingleTaskProcessUserCandidates";
-
-    public static final String PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_DEFINITION_KEY = "SingleTaskProcessGroupCandidates";
-
-    public static final String PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO_DEFINITION_KEY = "fixSystemFailure";
 
     @Autowired
     private RuntimeDirtyContextHandler dirtyContextHandler;
@@ -262,6 +249,21 @@ public class RuntimeBundleSteps {
         }catch (FeignException exception) {
             assertThat(exception.getMessage()).contains("Unable to find process instance for the given id:'" + id+ "'");
         }
+    }
+
+    @Step
+    public void getProcessInstanceById(String id){
+        runtimeBundleService.getProcessInstance(id);
+    }
+
+    @Step
+    public PagedResources<ProcessDefinition> getProcessDefinitions(){
+        return runtimeBundleService.getProcessDefinitions();
+    }
+
+    @Step
+    public ProcessDefinition getProcessDefinitionByKey(String key){
+        return runtimeBundleService.getProcessDefinitionByKey(key);
     }
 
 }

@@ -136,5 +136,12 @@ public class QuerySteps {
         return queryService.queryAllTasks();
     }
 
+    @Step
+    public CloudTask getTaskById(String id){
+        return queryService.queryTasksById(id).getContent().iterator().next();
+    }
+
+
+
 
 }

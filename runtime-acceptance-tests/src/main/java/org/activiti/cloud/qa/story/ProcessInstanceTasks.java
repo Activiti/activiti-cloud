@@ -19,10 +19,10 @@ package org.activiti.cloud.qa.story;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -33,20 +33,13 @@ import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
 import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
-import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
+import static org.activiti.cloud.qa.helper.ProcessDefinitionRegistry.*;
 import static org.activiti.cloud.qa.helper.Filters.checkEvents;
 import static org.activiti.cloud.qa.helper.Filters.checkProcessInstances;
-import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY;
-import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY;
-import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
-import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY;
-import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES_DEFINITION_KEY;
-import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_DEFINITION_KEY;
-import static org.activiti.cloud.qa.steps.RuntimeBundleSteps.PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO_DEFINITION_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProcessInstanceTasks {
@@ -76,41 +69,10 @@ public class ProcessInstanceTasks {
     @When("the user starts a $processName")
     public void startProcess(String processName) {
 
-        String processDefinitionKey;
-        boolean withTasks = true;
-
-        switch(processName){
-            case "process with variables":
-                processDefinitionKey = PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY;
-                break;
-            case "single-task process":
-                processDefinitionKey = PROCESS_INSTANCE_WITH_SINGLE_TASK_DEFINITION_KEY;
-                break;
-            case "single-task process with user candidates":
-                processDefinitionKey = PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES_DEFINITION_KEY;
-                break;
-            case "single-task process with group candidates":
-                processDefinitionKey = PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_DEFINITION_KEY;
-                break;
-            case "process without graphic info":
-                processDefinitionKey = PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO_DEFINITION_KEY;
-                break;
-            case "connector process":
-                processDefinitionKey = CONNECTOR_PROCESS_INSTANCE_DEFINITION_KEY;
-                withTasks = false;
-                break;
-            case "single-task process with group candidates for test group":
-                processDefinitionKey = "singletask-b6095889-6177-4b73-b3d9-316e47749a36";
-                break;
-            default:
-                processDefinitionKey = SIMPLE_PROCESS_INSTANCE_DEFINITION_KEY;
-                withTasks = false;
-        }
-
-        processInstance = runtimeBundleSteps.startProcess(processDefinitionKey);
+        processInstance = runtimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName));
         assertThat(processInstance).isNotNull();
 
-        if(withTasks){
+        if(withTasks(processName)){
             List<Task> tasks = new ArrayList<>(
                     runtimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId()));
             assertThat(tasks).isNotEmpty();
@@ -123,7 +85,7 @@ public class ProcessInstanceTasks {
 
     @Given("any suspended process instance")
     public void suspendCurrentProcessInstance() {
-        this.startProcess("any");
+        this.startProcess("SIMPLE_PROCESS_INSTANCE");
         runtimeBundleSteps.suspendProcessInstance(processInstance.getId());
     }
 
@@ -183,10 +145,10 @@ public class ProcessInstanceTasks {
         assertThat(tasks).extracting("id").doesNotContain(currentTask.getId());
     }
 
-    @Then("tasks of $definitionKey cannot be seen by user")
-    public void cannotSeeTasksOfDefinition(String defintionKey) throws Exception {
+    @Then("tasks of $processName cannot be seen by user")
+    public void cannotSeeTasksOfDefinition(String processName) throws Exception {
         Collection <? extends Task> tasks = querySteps.getAllTasks().getContent();
-        assertThat(tasks).extracting("processDefinitionId").doesNotContain(defintionKey);
+        assertThat(tasks).extracting("processDefinitionId").doesNotContain(processDefinitionKeyMatcher(processName));
     }
 
     @Then("the status of the process and the task is changed to completed")
@@ -263,18 +225,56 @@ public class ProcessInstanceTasks {
     @Then("the user can get events for process with variables instances in admin endpoint")
     public void checkIfEventsFromProcessesWithVariablesArePresentAdmin(){
         //TODO some refactoring after fixing the behavior of the /admin/v1/events?search=entityId:UUID endpoint
-        Collection<CloudRuntimeEvent> filteredCollection = checkEvents(auditSteps.getEventsByEntityIdAdmin(Serenity.sessionVariableCalled("processInstanceId")), PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
+        Collection<CloudRuntimeEvent> filteredCollection = checkEvents(auditSteps.getEventsByEntityIdAdmin(Serenity.sessionVariableCalled("processInstanceId")), processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
         assertThat(filteredCollection).isNotEmpty();
-        assertThat(((ProcessInstanceImpl)filteredCollection.iterator().next().getEntity()).getProcessDefinitionKey()).isEqualTo(PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY);
+        assertThat(((ProcessInstanceImpl)filteredCollection.iterator().next().getEntity()).getProcessDefinitionKey()).isEqualTo(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
     }
 
     @Then("the user can query process with variables instances in admin endpoints")
     public void checkIfProcessWithVariablesArePresentQueryAdmin(){
-        assertThat(checkProcessInstances(querySteps.getAllProcessInstancesAdmin(),PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isNotEmpty();
+        assertThat(checkProcessInstances(querySteps.getAllProcessInstancesAdmin(),processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
     }
 
     @Then("the user can get process with variables instances in admin endpoint")
     public void checkIfProcessWithVariablesArePresentAdmin(){
-        assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstancesAdmin(), PROCESS_INSTANCE_WITH_VARIABLES_DEFINITION_KEY)).isNotEmpty();
+        assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstancesAdmin(), processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
+    }
+
+    @Then("the task from $processName is $status and it is called $taskName")
+    public void checkTaskFromProcessInstance(String processName,Task.TaskStatus status, String taskName){
+        List<ProcessInstance> processInstancesList = new ArrayList<>(
+                runtimeBundleSteps.getAllProcessInstances().getContent());
+        assertThat(processInstancesList).hasSize(2);
+        assertThat(processInstancesList).extracting("processDefinitionKey")
+                                        .contains(processDefinitionKeyMatcher(processName));
+
+        List<Task> tasksList = new ArrayList<>(runtimeBundleSteps.getAllTasks().getContent());
+        assertThat(tasksList).isNotEmpty();
+        currentTask = tasksList.get(0);
+        assertThat(currentTask.getStatus()).isEqualTo(status);
+        assertThat(currentTask.getName()).isEqualTo(taskName);
+    }
+
+    @When("the user gets the process definitions")
+    public void getProcessDefinitions(){
+        Collection<ProcessDefinition> processDefinitions = runtimeBundleSteps.getProcessDefinitions().getContent();
+        Serenity.setSessionVariable("processDefinitions").to(processDefinitions);
+    }
+
+    @Then("all the process definitions are present")
+    public void checkProcessDefinitions(){
+        Collection<ProcessDefinition> processDefinitions = Serenity.sessionVariableCalled("processDefinitions");
+        assertThat(processDefinitions)
+                .extracting("key")
+                .containsAll(processDefinitionKeys.values());
+    }
+
+    @Then("the $processName definition has the $field field with value $value")
+    public void checkIfFieldIsPresentAndHasValue(String processName, String field, String value){
+        ProcessDefinition processDefinition =   runtimeBundleSteps
+                                                .getProcessDefinitionByKey(processDefinitionKeyMatcher(processName));
+        assertThat(processDefinition)
+                .extracting(field)
+                .contains(value);
     }
 }

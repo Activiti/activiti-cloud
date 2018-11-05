@@ -19,6 +19,7 @@ package org.activiti.cloud.qa.service;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -67,7 +68,7 @@ public interface RuntimeBundleService extends BaseService {
     @Headers("Content-Type: application/json")
     void deleteProcess(@Param("id") String id);
 
-    @RequestLine("GET /v1/process-instances")
+    @RequestLine("GET /v1/process-instances?sort=startDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
     PagedResources<CloudProcessInstance> getAllProcessInstances();
 
@@ -106,4 +107,12 @@ public interface RuntimeBundleService extends BaseService {
             "Accept: application/hal+json;charset=UTF-8"
     })
     PagedResources<CloudTask> getAllTasks();
+
+    @RequestLine("GET /v1/process-definitions")
+    @Headers("Content-Type: application/json")
+    PagedResources<ProcessDefinition> getProcessDefinitions();
+
+    @RequestLine("GET /v1/process-definitions/{processDefinitionKey}")
+    @Headers("Content-Type: application/json")
+    ProcessDefinition getProcessDefinitionByKey(@Param("processDefinitionKey") String processDefinitionKey);
 }

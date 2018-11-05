@@ -57,7 +57,7 @@ public class RuntimeLifecycleActions {
     }
 
     @AfterScenario
-    public void creanup() {
+    public void cleanup() {
         dirtyContextHandler.cleanup();
     }
 
