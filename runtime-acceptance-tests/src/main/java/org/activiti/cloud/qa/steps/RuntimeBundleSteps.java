@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
+import com.sun.org.apache.xalan.internal.xslt.Process;
 import feign.FeignException;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -258,6 +259,11 @@ public class RuntimeBundleSteps {
     @Step
     public PagedResources<ProcessDefinition> getProcessDefinitions(){
         return runtimeBundleService.getProcessDefinitions();
+    }
+
+    @Step
+    public ProcessDefinition getProcessDefinitionByKey(String key){
+        return runtimeBundleService.getProcessDefinitionByKey(key);
     }
 
 }

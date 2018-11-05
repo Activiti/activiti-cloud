@@ -54,3 +54,7 @@ Given the user is authenticated as hradmin
 When the user starts a PROCESS_INSTANCE_WITH_VARIABLES
 Then the user can get events for process with variables instances in admin endpoint
 
+Scenario: check the presence of formKey field in task
+Given the user is authenticated as testuser
+Then the PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED definition has the formKey field with value startForm
+

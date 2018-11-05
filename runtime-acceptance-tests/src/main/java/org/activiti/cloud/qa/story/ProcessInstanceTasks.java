@@ -267,6 +267,17 @@ public class ProcessInstanceTasks {
     @Then("all the process definitions are present")
     public void checkProcessDefinitions(){
         Collection<ProcessDefinition> processDefinitions = Serenity.sessionVariableCalled("processDefinitions");
-        assertThat(processDefinitions).extracting("key").containsAll(processDefinitionKeys.values());
+        assertThat(processDefinitions)
+                .extracting("key")
+                .containsAll(processDefinitionKeys.values());
+    }
+
+    @Then("the $processName definition has the $field field with value $value")
+    public void checkIfFieldIsPresentAndHasValue(String processName, String field, String value){
+        ProcessDefinition processDefinition =   runtimeBundleSteps
+                                                .getProcessDefinitionByKey(processDefinitionKeyMatcher(processName));
+        assertThat(processDefinition)
+                .extracting(field)
+                .contains(value);
     }
 }

@@ -111,4 +111,8 @@ public interface RuntimeBundleService extends BaseService {
     @RequestLine("GET /v1/process-definitions")
     @Headers("Content-Type: application/json")
     PagedResources<ProcessDefinition> getProcessDefinitions();
+
+    @RequestLine("GET /v1/process-definitions/{processDefinitionKey}")
+    @Headers("Content-Type: application/json")
+    ProcessDefinition getProcessDefinitionByKey(@Param("processDefinitionKey") String processDefinitionKey);
 }
