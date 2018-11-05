@@ -18,7 +18,7 @@ package org.activiti.cloud.qa.helper;
 
 import java.util.HashMap;
 
-public class ProcessMatcher {
+public class ProcessDefinitionRegistry {
 
     private static final HashMap <String, String> processWithTasksDefinitionKeys = new HashMap<String, String>(){{
             put("PROCESS_INSTANCE_WITH_VARIABLES","ProcessWithVariables");

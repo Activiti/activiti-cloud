@@ -18,7 +18,6 @@ package org.activiti.cloud.qa.story;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
@@ -30,8 +29,6 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.task.model.CloudTask;
-import org.activiti.cloud.qa.helper.ProcessMatcher;
 import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
@@ -40,7 +37,7 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
-import static org.activiti.cloud.qa.helper.ProcessMatcher.*;
+import static org.activiti.cloud.qa.helper.ProcessDefinitionRegistry.*;
 import static org.activiti.cloud.qa.helper.Filters.checkEvents;
 import static org.activiti.cloud.qa.helper.Filters.checkProcessInstances;
 import static org.assertj.core.api.Assertions.assertThat;

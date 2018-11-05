@@ -25,7 +25,7 @@ import org.jbehave.core.annotations.Then;
 
 import static org.activiti.cloud.qa.helper.Filters.checkEvents;
 import static org.activiti.cloud.qa.helper.Filters.checkProcessInstances;
-import static org.activiti.cloud.qa.helper.ProcessMatcher.*;
+import static org.activiti.cloud.qa.helper.ProcessDefinitionRegistry.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
