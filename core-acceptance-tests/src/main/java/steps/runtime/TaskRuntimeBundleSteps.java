@@ -28,6 +28,11 @@ public class TaskRuntimeBundleSteps {
     private TaskRuntimeService taskRuntimeService;
 
     @Step
+    public void checkServicesHealth() {
+        assertThat(taskRuntimeService.isServiceUp()).isTrue();
+    }
+
+    @Step
     public Collection<CloudTask> getTaskByProcessInstanceId(String processInstanceId) {
         return taskRuntimeService
                 .getProcessInstanceTasks(processInstanceId).getContent();
