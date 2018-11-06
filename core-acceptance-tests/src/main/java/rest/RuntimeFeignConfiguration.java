@@ -18,9 +18,6 @@ package rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import config.RuntimeTestsConfigurationProperties;
-import feign.Feign;
-import feign.Logger;
-import feign.gson.GsonEncoder;
 import feign.jackson.JacksonEncoder;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.conf.impl.ProcessModelAutoConfiguration;

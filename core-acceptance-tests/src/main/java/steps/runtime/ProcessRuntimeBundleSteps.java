@@ -5,20 +5,13 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.apache.batik.transcoder.TranscoderException;
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 import rest.RuntimeDirtyContextHandler;
 import rest.feign.EnableRuntimeFeignContext;
 import services.runtime.ProcessRuntimeService;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
+import static helper.SvgToPng.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -30,17 +23,6 @@ public class ProcessRuntimeBundleSteps {
 
     @Autowired
     private ProcessRuntimeService processRuntimeService;
-
-    private byte[] svgToPng(byte[] streamBytes)
-            throws TranscoderException, IOException {
-        try (ByteArrayInputStream input = new ByteArrayInputStream(streamBytes);
-             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            new PNGTranscoder().transcode(new TranscoderInput(input),
-                    new TranscoderOutput(output));
-            output.flush();
-            return output.toByteArray();
-        }
-    }
 
     @Step
     public void checkServicesHealth() {
