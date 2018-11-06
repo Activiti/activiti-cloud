@@ -1,4 +1,4 @@
-package services.audit;
+package services.audit.admin;
 
 import feign.Headers;
 import feign.Param;
@@ -7,9 +7,9 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.qa.service.BaseService;
 import org.springframework.hateoas.PagedResources;
 
-public interface ProcessAuditService extends BaseService {
+public interface AuditAdminService extends BaseService {
 
-    @RequestLine("GET /v1/events?search={search},sort=timestamp,desc&sort=id,desc")
+    @RequestLine("GET /admin/v1/events?search={search},sort=timestamp,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
-    PagedResources<CloudRuntimeEvent> getEvents(@Param("search") String search);
+    PagedResources<CloudRuntimeEvent> getEventsAdmin(@Param("search") String search);
 }
