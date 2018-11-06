@@ -11,14 +11,14 @@ import org.springframework.hateoas.PagedResources;
 public interface TaskQueryService extends BaseService {
 
     @RequestLine("GET /v1/tasks?status={status}&id={taskId}")
-    PagedResources<CloudTask> queryTasksByIdAnsStatus(@Param("taskId") String taskId,
-                                                      @Param("status") Task.TaskStatus taskStatus);
+    PagedResources<CloudTask> getTasksByStatus(@Param("taskId") String taskId,
+                                               @Param("status") Task.TaskStatus taskStatus);
 
     @RequestLine("GET /v1/tasks?id={taskId}")
-    PagedResources<CloudTask> queryTasksById(@Param("taskId") String taskId);
+    PagedResources<CloudTask> getTask(@Param("taskId") String taskId);
 
     @RequestLine("GET /v1/tasks?sort=createdDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
-    PagedResources<CloudTask> queryAllTasks();
+    PagedResources<CloudTask> getTasks();
 
 }

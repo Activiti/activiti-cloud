@@ -16,7 +16,7 @@ public interface ProcessQueryService extends BaseService {
 
     @RequestLine("GET /v1/process-instances?sort=startDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
-    PagedResources<CloudProcessInstance> getAllProcessInstances();
+    PagedResources<CloudProcessInstance> getProcessInstances();
 
     @RequestLine("GET /v1/process-instances/{processInstanceId}/variables")
     @Headers("Content-Type: application/json")

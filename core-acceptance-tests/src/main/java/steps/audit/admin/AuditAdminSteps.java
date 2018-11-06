@@ -22,6 +22,6 @@ public class AuditAdminSteps {
     @Step
     public Collection<CloudRuntimeEvent> getEventsByEntityIdAdmin(String entityId){
         String filter = "entityId:";
-        return auditAdminService.getEventsAdmin(filter + entityId).getContent();
+        return auditAdminService.getEvents(filter + entityId).getContent();
     }
 }

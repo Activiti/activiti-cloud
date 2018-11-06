@@ -10,5 +10,5 @@ public interface ProcessQueryAdminService extends BaseService {
 
     @RequestLine("GET /admin/v1/process-instances?sort=startDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
-    PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin();
+    PagedResources<CloudProcessInstance> getProcessInstances();
 }

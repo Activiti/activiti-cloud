@@ -13,6 +13,6 @@ public class ProcessQueryAdminSteps {
 
     @Step
     public PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin(){
-        return processQueryAdminService.getAllProcessInstancesAdmin();
+        return processQueryAdminService.getProcessInstances();
     }
 }

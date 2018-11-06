@@ -22,7 +22,7 @@ public class TaskQuerySteps {
     public void checkTaskStatus(String taskId,
                                 Task.TaskStatus expectedStatus) {
 
-        await().untilAsserted(() -> assertThat(taskQueryService.queryTasksByIdAnsStatus(taskId,
+        await().untilAsserted(() -> assertThat(taskQueryService.getTasksByStatus(taskId,
                 expectedStatus).getContent())
                 .isNotNull()
                 .isNotEmpty()
@@ -35,7 +35,7 @@ public class TaskQuerySteps {
 
         await().untilAsserted(() -> {
 
-            final Collection<CloudTask> tasks = taskQueryService.queryTasksById(subtaskId).getContent();
+            final Collection<CloudTask> tasks = taskQueryService.getTask(subtaskId).getContent();
 
             assertThat(tasks).isNotNull().isNotEmpty().hasSize(1).extracting(Task::getId,
                     Task::getParentTaskId).containsOnly(tuple(subtaskId,
@@ -48,12 +48,12 @@ public class TaskQuerySteps {
 
     @Step
     public PagedResources<CloudTask> getAllTasks(){
-        return taskQueryService.queryAllTasks();
+        return taskQueryService.getTasks();
     }
 
     @Step
     public CloudTask getTaskById(String id){
-        return taskQueryService.queryTasksById(id).getContent().iterator().next();
+        return taskQueryService.getTask(id).getContent().iterator().next();
     }
 
 }

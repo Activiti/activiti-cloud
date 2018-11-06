@@ -10,6 +10,6 @@ public interface ProcessRuntimeAdminService extends BaseService {
 
     @RequestLine("GET /admin/v1/process-instances")
     @Headers("Content-Type: application/json")
-    PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin();
+    PagedResources<CloudProcessInstance> getProcessInstances();
 
 }

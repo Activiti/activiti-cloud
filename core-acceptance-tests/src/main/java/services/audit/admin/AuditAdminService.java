@@ -11,5 +11,5 @@ public interface AuditAdminService extends BaseService {
 
     @RequestLine("GET /admin/v1/events?search={search},sort=timestamp,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
-    PagedResources<CloudRuntimeEvent> getEventsAdmin(@Param("search") String search);
+    PagedResources<CloudRuntimeEvent> getEvents(@Param("search") String search);
 }

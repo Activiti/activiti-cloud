@@ -5,11 +5,14 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 import rest.RuntimeDirtyContextHandler;
 import rest.feign.EnableRuntimeFeignContext;
 import services.runtime.ProcessRuntimeService;
+
+import java.util.Collection;
 
 import static helper.SvgToPng.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,7 +55,7 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public String openProcessInstanceDiagram(String id) {
-        return processRuntimeService.getProcessDiagram(id);
+        return processRuntimeService.getProcessInstanceModel(id);
     }
 
     @Step
@@ -87,7 +90,7 @@ public class ProcessRuntimeBundleSteps {
             processRuntimeService.getProcessInstance(id);
 
         }catch (FeignException exception) {
-            assertThat(exception.getMessage()).contains("Unable to find process instance for the given id:'" + id+ "'");
+            assertThat(exception.getMessage()).contains("Unable to find process instance for the given id:'" + id + "'");
         }
     }
 
@@ -104,5 +107,11 @@ public class ProcessRuntimeBundleSteps {
     @Step
     public ProcessDefinition getProcessDefinitionByKey(String key){
         return processRuntimeService.getProcessDefinitionByKey(key);
+    }
+
+    @Step
+    public Collection<CloudTask> getTaskByProcessInstanceId(String processInstanceId) {
+        return processRuntimeService
+                .getProcessInstanceTasks(processInstanceId).getContent();
     }
 }

@@ -31,7 +31,7 @@ public class ProcessQuerySteps {
 
     @Step
     public PagedResources<CloudProcessInstance> getAllProcessInstances(){
-        return processQueryService.getAllProcessInstances();
+        return processQueryService.getProcessInstances();
     }
 
     @Step

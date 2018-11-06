@@ -6,6 +6,7 @@ import feign.RequestLine;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.hateoas.PagedResources;
 import org.activiti.cloud.qa.service.BaseService;
 
@@ -47,5 +48,12 @@ public interface ProcessRuntimeService extends BaseService {
 
     @RequestLine("GET /v1/process-instances/{id}/model")
     @Headers("Content-Type: image/svg+xml")
-    String getProcessDiagram(@Param("id") String id);
+    String getProcessInstanceModel(@Param("id") String id);
+
+    @RequestLine("GET /v1/process-instances/{id}/tasks")
+    @Headers({
+            "Content-Type: application/json",
+            "Accept: application/hal+json;charset=UTF-8"
+    })
+    PagedResources<CloudTask> getProcessInstanceTasks(@Param("id") String id);
 }

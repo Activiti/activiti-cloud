@@ -12,7 +12,7 @@ public class ProcessRuntimeAdminSteps {
     private ProcessRuntimeAdminService processRuntimeAdminService;
 
     @Step
-    public PagedResources<CloudProcessInstance> getAllProcessInstancesAdmin(){
-        return processRuntimeAdminService.getAllProcessInstancesAdmin();
+    public PagedResources<CloudProcessInstance> getProcessInstances(){
+        return processRuntimeAdminService.getProcessInstances();
     }
 }
