@@ -99,19 +99,17 @@ Given the user is authenticated as testuser
 When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
 Then the tasks has the formKey field
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Scenario: tasks have their own copies of variables
+Given the user is authenticated as testuser
+When the user starts with variables for TWO_TASK_PROCESS with variables start1 and start2
+And a task variable was created with name start1
+And task variable start1 has value start1
+And a task variable was created with name start2
+And we set task variable start1 to start1modified
+And task variable start1 has value start1modified
+And the testuser claims the task
+And the user completes the task
+And another user is authenticated as hruser
+And a task variable was created with name start1
+And a task variable was created with name start2
+Then task variable start1 has value start1

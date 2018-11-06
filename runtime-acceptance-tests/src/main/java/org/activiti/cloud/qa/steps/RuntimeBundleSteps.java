@@ -28,8 +28,10 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.builders.SetTaskVariablesPayloadBuilder;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.qa.rest.RuntimeDirtyContextHandler;
@@ -79,6 +81,16 @@ public class RuntimeBundleSteps {
                                                                                    .start()
                                                                                    .withProcessDefinitionKey(process)
                                                                                    .build()));
+    }
+
+    @Step
+    public CloudProcessInstance startProcessWithVariables(String process, Map<String,Object> variables) {
+
+        return dirtyContextHandler.dirty(runtimeBundleService.startProcess(ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(process)
+                .withVariables(variables)
+                .build()));
     }
 
     @Step
@@ -264,6 +276,13 @@ public class RuntimeBundleSteps {
     @Step
     public ProcessDefinition getProcessDefinitionByKey(String key){
         return runtimeBundleService.getProcessDefinitionByKey(key);
+    }
+
+    @Step
+    public void setVariables(String taskId, Map<String, Object> variables){
+
+        runtimeBundleService.setTaskVariables(taskId,TaskPayloadBuilder.setVariables().withTaskId(taskId)
+                .withVariables(variables).build());
     }
 
 }

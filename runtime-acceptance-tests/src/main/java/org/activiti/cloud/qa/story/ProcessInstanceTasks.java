@@ -18,7 +18,10 @@ package org.activiti.cloud.qa.story;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -66,10 +69,24 @@ public class ProcessInstanceTasks {
         querySteps.checkServicesHealth();
     }
 
+    @When("the user starts with variables for $processName with variables $variableName1 and $variableName2")
+    public void startProcess(String processName, String variableName1, String variableName2) {
+        Map<String,Object> variables = new HashMap<>();
+        variables.put(variableName1,variableName1);  //using var names as values
+        variables.put(variableName2,variableName2);
+
+        processInstance = runtimeBundleSteps.startProcessWithVariables(processDefinitionKeyMatcher(processName),variables);
+        checkProcessWithTaskCreated(processName);
+    }
+
     @When("the user starts a $processName")
     public void startProcess(String processName) {
 
         processInstance = runtimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName));
+        checkProcessWithTaskCreated(processName);
+    }
+
+    private void checkProcessWithTaskCreated(String processName) {
         assertThat(processInstance).isNotNull();
 
         if(withTasks(processName)){
@@ -173,6 +190,7 @@ public class ProcessInstanceTasks {
     }
 
     @Then("a variable was created with name $variableName")
+    @When("a variable was created with name $variableName")
     public void verifyVariableCreated(String variableName) throws Exception {
 
         querySteps.checkProcessInstanceHasVariable(processInstance.getId(),variableName);

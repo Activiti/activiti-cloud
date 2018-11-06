@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
@@ -122,8 +123,8 @@ public class AuditSteps {
 
             assertThat(events).isNotEmpty();
             assertThat(events).extracting(e -> e.getEventType()).containsOnly(eventType);
-            List<CloudRuntimeEvent> processInstanceTasks = events.stream().filter(e -> ((CloudVariableEvent) e).getEntity().getProcessInstanceId().equals(processInstanceId)).collect(Collectors.toList());
-            assertThat(processInstanceTasks).hasSize(1);
+            List<CloudRuntimeEvent> processInstanceTasks = events.stream().filter(e -> variableName.equals(((CloudVariableEvent) e).getEntity().getName()) && processInstanceId.equals(((CloudVariableEvent) e).getEntity().getProcessInstanceId())).collect(Collectors.toList());
+            assertThat(processInstanceTasks).hasSize(1); //could be more than one if there are multiple vars
             CloudRuntimeEvent resultingEvent = processInstanceTasks.get(0);
             assertThat(resultingEvent).isNotNull();
             assertThat(resultingEvent).isInstanceOf(CloudVariableEvent.class);
@@ -133,6 +134,32 @@ public class AuditSteps {
 
         });
     }
+
+    @Step
+    public void checkTaskVariableEvent(String processInstanceId, String taskId,
+                                                  String variableName,
+                                                  VariableEvent.VariableEvents eventType) throws Exception {
+
+        Collection<CloudRuntimeEvent> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
+                eventType.name());
+
+
+        await().untilAsserted(() -> {
+
+            assertThat(events).isNotEmpty();
+            assertThat(events).extracting(e -> e.getEventType()).containsOnly(eventType);
+            List<CloudRuntimeEvent> processInstanceTasks = events.stream().filter(e -> variableName.equals(((CloudVariableEvent) e).getEntity().getName()) && taskId.equals(((CloudVariableEvent) e).getEntity().getTaskId())).collect(Collectors.toList());
+            assertThat(processInstanceTasks).hasSize(1); //could be more than one if there are multiple vars
+            CloudRuntimeEvent resultingEvent = processInstanceTasks.get(0);
+            assertThat(resultingEvent).isNotNull();
+            assertThat(resultingEvent).isInstanceOf(CloudVariableEvent.class);
+            assertThat(((CloudVariableEvent) resultingEvent).getEntity().getName()).isEqualTo(variableName);
+            assertThat(resultingEvent.getServiceName()).isNotEmpty();
+            assertThat(resultingEvent.getServiceFullName()).isNotEmpty();
+
+        });
+    }
+
     @Step
     public Collection<CloudRuntimeEvent> getEvents() {
         return auditService.getEvents().getContent();

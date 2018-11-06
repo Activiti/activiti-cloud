@@ -22,6 +22,8 @@ import feign.RequestLine;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.api.task.model.payloads.SetTaskVariablesPayload;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.hateoas.PagedResources;
@@ -115,4 +117,9 @@ public interface RuntimeBundleService extends BaseService {
     @RequestLine("GET /v1/process-definitions/{processDefinitionKey}")
     @Headers("Content-Type: application/json")
     ProcessDefinition getProcessDefinitionByKey(@Param("processDefinitionKey") String processDefinitionKey);
+
+    @RequestLine("POST /v1/tasks/{taskId}/variables")
+    @Headers("Content-Type: application/json")
+    void setTaskVariables(@Param("taskId") String taskId, SetTaskVariablesPayload variablesPayload);
+
 }
