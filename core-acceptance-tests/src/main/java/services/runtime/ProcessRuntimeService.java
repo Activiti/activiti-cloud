@@ -11,6 +11,8 @@ import org.activiti.cloud.qa.service.BaseService;
 
 public interface ProcessRuntimeService extends BaseService {
 
+    String PROCESS_INSTANCES_PATH = "/v1/process-instances/";
+
     @RequestLine("POST /v1/process-instances")
     @Headers("Content-Type: application/json")
     CloudProcessInstance startProcess(StartProcessPayload startProcess);
@@ -42,4 +44,8 @@ public interface ProcessRuntimeService extends BaseService {
     @RequestLine("GET /v1/process-definitions/{processDefinitionKey}")
     @Headers("Content-Type: application/json")
     ProcessDefinition getProcessDefinitionByKey(@Param("processDefinitionKey") String processDefinitionKey);
+
+    @RequestLine("GET /v1/process-instances/{id}/model")
+    @Headers("Content-Type: image/svg+xml")
+    String getProcessDiagram(@Param("id") String id);
 }

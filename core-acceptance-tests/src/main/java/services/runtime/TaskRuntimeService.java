@@ -11,6 +11,8 @@ import org.springframework.hateoas.Resources;
 
 public interface TaskRuntimeService extends BaseService {
 
+    String TASKS_PATH = "/v1/tasks/";
+
     @RequestLine("GET /v1/process-instances/{id}/tasks")
     @Headers({
             "Content-Type: application/json",
