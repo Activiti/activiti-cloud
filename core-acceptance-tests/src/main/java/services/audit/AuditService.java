@@ -12,4 +12,8 @@ public interface AuditService extends BaseService {
     @RequestLine("GET /v1/events?search={search},sort=timestamp,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
     PagedResources<CloudRuntimeEvent> getEvents(@Param("search") String search);
+
+    @RequestLine("GET /v1/events?sort=timestamp,desc&sort=id,desc")
+    @Headers("Content-Type: application/json")
+    PagedResources<CloudRuntimeEvent> getEvents();
 }
