@@ -8,7 +8,7 @@ So that I can get results on a running process
 Scenario: claim and complete tasks in a running process
 Given the user is authenticated as testuser
 When the user starts a PROCESS_INSTANCE_WITH_VARIABLES
-And the testuser claims the task
+And the user claims the task
 And the user completes the task
 Then the status of the process and the task is changed to completed
 
@@ -46,7 +46,7 @@ Scenario: create a process with user candidates, claim a task and complete it
 Given the user is authenticated as testuser
 When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES
 And the status of the task is CREATED
-And the testuser claims the task
+And the user claims the task
 And the user completes the task
 Then the status of the process and the task is changed to completed
 
@@ -54,7 +54,7 @@ Scenario: create a process with group candidates, claim a task and complete it
 Given the user is authenticated as testuser
 When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES
 And the status of the task is CREATED
-And the testuser claims the task
+And the user claims the task
 And the user completes the task
 Then the status of the process and the task is changed to completed
 
@@ -68,21 +68,21 @@ Scenario: cannot claim a task that belongs to different candidate group
 Given the user is authenticated as testuser
 When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_FOR_TESTGROUP
 And another user is authenticated as hruser
-Then the task cannot be claimed by hruser
+Then the task cannot be claimed by user
 
 Scenario: cannot claim a task that has already been claimed
 Given the user is authenticated as testuser
 When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES
 And the status of the task is CREATED
-And the testuser claims the task
+And the user claims the task
 And the status of the task is ASSIGNED
 And another user is authenticated as hruser
-Then the task cannot be claimed by hruser
+Then the task cannot be claimed by user
 
 Scenario: cannot see tasks that belongs to different candidate group
 Given the user is authenticated as testuser
 When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_FOR_TESTGROUP
-And the testuser claims the task
+And the user claims the task
 And the status of the task is ASSIGNED
 And the user completes the task
 And the status of the task is COMPLETED

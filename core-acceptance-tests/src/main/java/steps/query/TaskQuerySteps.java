@@ -19,6 +19,11 @@ public class TaskQuerySteps {
     private TaskQueryService taskQueryService;
 
     @Step
+    public void checkServicesHealth() {
+        assertThat(taskQueryService.isServiceUp()).isTrue();
+    }
+
+    @Step
     public void checkTaskStatus(String taskId,
                                 Task.TaskStatus expectedStatus) {
 

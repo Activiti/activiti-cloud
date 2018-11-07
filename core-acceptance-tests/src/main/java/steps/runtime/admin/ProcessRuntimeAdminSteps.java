@@ -6,10 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 import services.runtime.admin.ProcessRuntimeAdminService;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class ProcessRuntimeAdminSteps {
 
     @Autowired
     private ProcessRuntimeAdminService processRuntimeAdminService;
+
+    @Step
+    public void checkServicesHealth() {
+        assertThat(processRuntimeAdminService.isServiceUp()).isTrue();
+    }
 
     @Step
     public PagedResources<CloudProcessInstance> getProcessInstances(){
