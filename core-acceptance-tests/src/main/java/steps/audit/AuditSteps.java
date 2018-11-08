@@ -11,6 +11,7 @@ import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.assertj.core.api.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
+import rest.feign.EnableRuntimeFeignContext;
 import services.audit.AuditService;
 
 import java.util.Collection;
@@ -21,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+@EnableRuntimeFeignContext
 public class AuditSteps {
 
     @Autowired

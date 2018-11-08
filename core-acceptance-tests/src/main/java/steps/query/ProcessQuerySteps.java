@@ -7,6 +7,7 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
+import rest.feign.EnableRuntimeFeignContext;
 import services.query.ProcessQueryService;
 
 import java.util.Collection;
@@ -14,6 +15,7 @@ import java.util.Collection;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+@EnableRuntimeFeignContext
 public class ProcessQuerySteps {
 
     @Autowired

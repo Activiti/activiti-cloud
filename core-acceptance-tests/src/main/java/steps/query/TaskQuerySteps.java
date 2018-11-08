@@ -5,6 +5,7 @@ import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
+import rest.feign.EnableRuntimeFeignContext;
 import services.query.TaskQueryService;
 
 import java.util.Collection;
@@ -13,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+@EnableRuntimeFeignContext
 public class TaskQuerySteps {
 
     @Autowired
@@ -27,7 +29,7 @@ public class TaskQuerySteps {
     public void checkTaskStatus(String taskId,
                                 Task.TaskStatus expectedStatus) {
 
-        await().untilAsserted(() -> assertThat(taskQueryService.getTasksByStatus(taskId,
+        await().untilAsserted(() -> assertThat(taskQueryService.queryTasksByIdAnsStatus(taskId,
                 expectedStatus).getContent())
                 .isNotNull()
                 .isNotEmpty()
