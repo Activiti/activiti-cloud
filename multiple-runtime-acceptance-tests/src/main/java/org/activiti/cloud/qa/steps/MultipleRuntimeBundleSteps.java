@@ -22,10 +22,10 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.activiti.cloud.qa.rest.RuntimeDirtyContextHandler;
-import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
-import org.activiti.cloud.qa.service.RuntimeBundleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import rest.RuntimeDirtyContextHandler;
+import rest.feign.EnableRuntimeFeignContext;
+import services.runtime.ProcessRuntimeService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,19 +43,19 @@ public class MultipleRuntimeBundleSteps {
     private RuntimeDirtyContextHandler dirtyContextHandler;
 
     @Autowired
-    private RuntimeBundleService runtimeBundleService;
+    private ProcessRuntimeService processRuntimeService;
 
     @Autowired
-    private RuntimeBundleService runtimeBundleAnotherService;
+    private ProcessRuntimeService anotherProcessRuntimeService;
 
     @Step
     public void checkServicesHealth() {
-        assertThat(runtimeBundleService.isServiceUp()).isTrue();
+        assertThat(processRuntimeService.isServiceUp()).isTrue();
     }
 
     @Step
     public Map<String, Object> health() {
-        return runtimeBundleService.health();
+        return anotherProcessRuntimeService.health();
     }
 
     @Step
@@ -67,9 +67,9 @@ public class MultipleRuntimeBundleSteps {
                 .build();
 
         if (isPrimaryService) {
-            return dirtyContextHandler.dirty(runtimeBundleService.startProcess(startProcessCmd));
+            return dirtyContextHandler.dirty(processRuntimeService.startProcess(startProcessCmd));
         } else {
-        	return dirtyContextHandler.dirty(runtimeBundleAnotherService.startProcess(startProcessCmd));
+        	return dirtyContextHandler.dirty(anotherProcessRuntimeService.startProcess(startProcessCmd));
         }
     }
 
