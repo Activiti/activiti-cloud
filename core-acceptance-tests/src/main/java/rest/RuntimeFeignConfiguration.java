@@ -18,6 +18,9 @@ package rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import config.RuntimeTestsConfigurationProperties;
+import feign.Feign;
+import feign.Logger;
+import feign.gson.GsonEncoder;
 import feign.jackson.JacksonEncoder;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.conf.impl.ProcessModelAutoConfiguration;
@@ -40,6 +43,7 @@ import services.runtime.ProcessRuntimeService;
 import services.runtime.TaskRuntimeService;
 import services.runtime.admin.ProcessRuntimeAdminService;
 import services.runtime.admin.TaskRuntimeAdminService;
+import services.runtime.diagram.ProcessRuntimeDiagramService;
 
 /**
  * Feign Configuration
@@ -71,6 +75,18 @@ public class RuntimeFeignConfiguration {
                 .builder(new JacksonEncoder(objectMapper),
                          new HalDecoder(objectMapper))
                 .target(ProcessRuntimeService.class,
+                        runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public ProcessRuntimeDiagramService runtimeBundleDiagramService() {
+        return Feign.builder()
+                .encoder(new GsonEncoder())
+                .errorDecoder(new FeignErrorDecoder())
+                .logger(new Logger.ErrorLogger())
+                .logLevel(Logger.Level.FULL)
+                .requestInterceptor(new OAuth2FeignRequestInterceptor())
+                .target(ProcessRuntimeDiagramService.class,
                         runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 

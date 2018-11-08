@@ -9,7 +9,11 @@ import org.springframework.hateoas.PagedResources;
 
 public interface AuditAdminService extends BaseService {
 
-    @RequestLine("GET /admin/v1/events?search={search},sort=timestamp,desc&sort=id,desc")
+    @RequestLine("GET /admin/v1/events?search={search}")
     @Headers("Content-Type: application/json")
     PagedResources<CloudRuntimeEvent> getEvents(@Param("search") String search);
+
+    @RequestLine("GET /admin/v1/events?sort=timestamp,desc&sort=id,desc")
+    @Headers("Content-Type: application/json")
+    PagedResources<CloudRuntimeEvent> getEvents();
 }

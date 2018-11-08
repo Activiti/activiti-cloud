@@ -11,6 +11,7 @@ import org.springframework.hateoas.PagedResources;
 import rest.RuntimeDirtyContextHandler;
 import rest.feign.EnableRuntimeFeignContext;
 import services.runtime.ProcessRuntimeService;
+import services.runtime.diagram.ProcessRuntimeDiagramService;
 
 import java.util.Collection;
 
@@ -26,6 +27,9 @@ public class ProcessRuntimeBundleSteps {
 
     @Autowired
     private ProcessRuntimeService processRuntimeService;
+
+    @Autowired
+    private ProcessRuntimeDiagramService processRuntimeDiagramService;
 
     @Step
     public void checkServicesHealth() {
@@ -55,7 +59,7 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public String openProcessInstanceDiagram(String id) {
-        return processRuntimeService.getProcessInstanceModel(id);
+        return processRuntimeDiagramService.getProcessInstanceModel(id);
     }
 
     @Step

@@ -46,10 +46,6 @@ public interface ProcessRuntimeService extends BaseService {
     @Headers("Content-Type: application/json")
     ProcessDefinition getProcessDefinitionByKey(@Param("processDefinitionKey") String processDefinitionKey);
 
-    @RequestLine("GET /v1/process-instances/{id}/model")
-    @Headers("Content-Type: image/svg+xml")
-    String getProcessInstanceModel(@Param("id") String id);
-
     @RequestLine("GET /v1/process-instances/{id}/tasks")
     @Headers({
             "Content-Type: application/json",
