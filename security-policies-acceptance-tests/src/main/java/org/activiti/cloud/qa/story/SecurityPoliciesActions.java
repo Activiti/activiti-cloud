@@ -27,9 +27,9 @@ import steps.query.admin.ProcessQueryAdminSteps;
 import steps.runtime.ProcessRuntimeBundleSteps;
 import steps.runtime.TaskRuntimeBundleSteps;
 import steps.runtime.admin.ProcessRuntimeAdminSteps;
-import static org.activiti.cloud.qa.helper.Filters.checkEvents;
-import static org.activiti.cloud.qa.helper.Filters.checkProcessInstances;
-import static org.activiti.cloud.qa.helper.ProcessDefinitionRegistry.*;
+import static helper.Filters.checkEvents;
+import static helper.Filters.checkProcessInstances;
+import static helper.ProcessDefinitionRegistry.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.helper;
+package helper;
 
 import java.util.HashMap;
 

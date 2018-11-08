@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.qa.helper;
+package helper;
 
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
