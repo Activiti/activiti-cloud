@@ -18,16 +18,8 @@ public interface TaskVariableController {
     @RequestMapping(method = RequestMethod.GET)
     Resources<VariableInstanceResource> getVariables(@PathVariable String taskId);
 
-    @RequestMapping(value = "/local",
-            method = RequestMethod.GET)
-    Resources<VariableInstanceResource> getVariablesLocal(@PathVariable String taskId);
-
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<Void> setVariables(@PathVariable String taskId,
                                       @RequestBody SetTaskVariablesPayload setTaskVariablesPayload);
 
-    @RequestMapping(value = "/local",
-            method = RequestMethod.POST)
-    ResponseEntity<Void> setVariablesLocal(@PathVariable String taskId,
-                                           @RequestBody SetTaskVariablesPayload setTaskVariablesCmd);
 }

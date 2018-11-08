@@ -92,15 +92,16 @@ public class TaskVariablesIT {
         Map<String, Object> taskVariables = new HashMap<>();
         taskVariables.put("var2",
                           "test2");
-        taskRestTemplate.setVariablesLocal(taskId, taskVariables);
+        taskRestTemplate.setVariables(taskId, taskVariables);
 
         //when
-        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariablesLocal(taskId);
+        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(taskId);
 
         //then
         assertThat(variablesResponse).isNotNull();
         assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesDoNotContainKeys(variablesResponse.getBody().getContent(),"var1")).isTrue();
+        //process variables also at task level
+        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
 
         // when
         variablesResponse = taskRestTemplate.getVariables(taskId);
@@ -127,13 +128,6 @@ public class TaskVariablesIT {
         assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var3","test3",variablesResponse.getBody().getContent())).isTrue();
 
-        // when
-        variablesResponse = taskRestTemplate.getVariablesLocal(taskId);
-
-        // then
-        assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesDoNotContainKeys(variablesResponse.getBody().getContent(),"var1","var3")).isTrue();
 
     }
 
@@ -149,18 +143,6 @@ public class TaskVariablesIT {
         return false;
     }
 
-    private boolean variablesDoNotContainKeys(Collection<CloudVariableInstance> variableCollection, String... keys){
-        Iterator<CloudVariableInstance> iterator = variableCollection.iterator();
-        while(iterator.hasNext()){
-            VariableInstance variable = iterator.next();
-            for(String key:keys){
-                if(variable.getName().equalsIgnoreCase(key)){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 
     private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
         ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {

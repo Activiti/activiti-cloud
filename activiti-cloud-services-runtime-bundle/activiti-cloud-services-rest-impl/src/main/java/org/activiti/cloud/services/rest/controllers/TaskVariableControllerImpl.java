@@ -57,28 +57,10 @@ public class TaskVariableControllerImpl implements TaskVariableController {
     }
 
     @Override
-    public Resources<VariableInstanceResource> getVariablesLocal(@PathVariable String taskId) {
-        return resourcesAssembler.toResources(taskRuntime.variables(
-                TaskPayloadBuilder
-                        .variables()
-                        .withTaskId(taskId)
-                        .localOnly()
-                        .build()),
-                                              variableResourceAssembler);
-    }
-
-    @Override
     public ResponseEntity<Void> setVariables(@PathVariable String taskId,
                                              @RequestBody SetTaskVariablesPayload setTaskVariablesCmd) {
         taskRuntime.setVariables(setTaskVariablesCmd);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Override
-    public ResponseEntity<Void> setVariablesLocal(@PathVariable String taskId,
-                                                  @RequestBody SetTaskVariablesPayload setTaskVariablesCmd) {
-        setTaskVariablesCmd.setLocalOnly(true);
-        taskRuntime.setVariables(setTaskVariablesCmd);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 }

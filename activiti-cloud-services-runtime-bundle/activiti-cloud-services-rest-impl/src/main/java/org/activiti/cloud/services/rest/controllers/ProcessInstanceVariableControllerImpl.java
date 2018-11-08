@@ -71,15 +71,6 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
     }
 
     @Override
-    public Resources<VariableInstanceResource> getVariablesLocal(@PathVariable String processInstanceId) {
-        return resourcesAssembler.toResources(processRuntime.variables(ProcessPayloadBuilder.variables()
-                                                                               .withProcessInstanceId(processInstanceId)
-                                                                               .localOnly()
-                                                                               .build()),
-                                              variableResourceAssembler);
-    }
-
-    @Override
     public ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
                                              @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
         processRuntime.setVariables(setProcessVariablesPayload);

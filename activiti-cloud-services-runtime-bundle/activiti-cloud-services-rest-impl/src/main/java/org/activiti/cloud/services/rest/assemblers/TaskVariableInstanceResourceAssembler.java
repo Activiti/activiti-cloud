@@ -25,10 +25,9 @@ public class TaskVariableInstanceResourceAssembler extends ResourceAssemblerSupp
     @Override
     public VariableInstanceResource toResource(VariableInstance taskVariable) {
         CloudVariableInstance cloudVariableInstance = converter.from(taskVariable);
-        Link globalVariables = linkTo(methodOn(TaskVariableControllerImpl.class).getVariables(cloudVariableInstance.getTaskId())).withRel("globalVariables");
-        Link localVariables = linkTo(methodOn(TaskVariableControllerImpl.class).getVariablesLocal(cloudVariableInstance.getTaskId())).withRel("localVariables");
+        Link globalVariables = linkTo(methodOn(TaskVariableControllerImpl.class).getVariables(cloudVariableInstance.getTaskId())).withRel("variables");
         Link taskRel = linkTo(methodOn(TaskControllerImpl.class).getTaskById(cloudVariableInstance.getTaskId())).withRel("task");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
-        return new VariableInstanceResource(cloudVariableInstance, globalVariables, localVariables, taskRel, homeLink);
+        return new VariableInstanceResource(cloudVariableInstance, globalVariables, taskRel, homeLink);
     }
 }

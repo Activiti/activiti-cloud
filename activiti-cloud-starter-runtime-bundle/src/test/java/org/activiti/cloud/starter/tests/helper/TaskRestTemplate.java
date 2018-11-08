@@ -140,21 +140,6 @@ public class TaskRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Void> setVariablesLocal(String taskId,
-                                                  Map<String, Object> variables) {
-        SetTaskVariablesPayload setTaskVariablesPayload = TaskPayloadBuilder.setVariables().withTaskId(taskId).withVariables(variables).localOnly().build();
-
-        HttpEntity<SetTaskVariablesPayload> requestEntity = new HttpEntity<>(
-                setTaskVariablesPayload,
-                null);
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/local",
-                                                                        HttpMethod.POST,
-                                                                        requestEntity,
-                                                                        new ParameterizedTypeReference<Void>() {
-                                                                        });
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        return responseEntity;
-    }
 
     public ResponseEntity<Resources<CloudVariableInstance>> getVariables(String taskId) {
 
@@ -167,14 +152,4 @@ public class TaskRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Resources<CloudVariableInstance>> getVariablesLocal(String taskId) {
-
-        ResponseEntity<Resources<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(TaskRestTemplate.TASK_VAR_RELATIVE_URL + taskId + "/variables/local",
-                                                                                                    HttpMethod.GET,
-                                                                                                    null,
-                                                                                                    new ParameterizedTypeReference<Resources<CloudVariableInstance>>() {
-                                                                                                    });
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        return responseEntity;
-    }
 }

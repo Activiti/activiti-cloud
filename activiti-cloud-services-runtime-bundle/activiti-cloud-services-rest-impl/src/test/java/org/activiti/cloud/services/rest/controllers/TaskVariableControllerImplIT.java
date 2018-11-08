@@ -123,37 +123,6 @@ public class TaskVariableControllerImplIT {
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
 
-    @Test
-    public void getVariablesLocal() throws Exception {
-        //given
-        VariableInstanceImpl<String> name = new VariableInstanceImpl<>("name",
-                                                                       String.class.getName(),
-                                                                       "Paul",
-                                                                       PROCESS_INSTANCE_ID);
-        name.setTaskId(TASK_ID);
-
-        VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>("age",
-                                                                       Integer.class.getName(),
-                                                                       12,
-                                                                       PROCESS_INSTANCE_ID);
-        age.setTaskId(TASK_ID);
-
-        given(taskRuntime.variables(
-                TaskPayloadBuilder
-                        .variables()
-                        .withTaskId(TASK_ID)
-                        .build()))
-                .willReturn(Arrays.asList(name,
-                                          age));
-        this.mockMvc
-                //when
-                .perform(get("/v1/tasks/{taskId}/variables/local",
-                             TASK_ID))
-                //then
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list/local",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
-    }
 
     @Test
     public void setVariables() throws Exception {
@@ -168,19 +137,4 @@ public class TaskVariableControllerImplIT {
         verify(taskRuntime).setVariables(any());
     }
 
-    @Test
-    public void setVariablesLocalVariables() throws Exception {
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/variables/local",
-                                  TASK_ID)
-                                     .contentType(MediaType.APPLICATION_JSON)
-                                     .content(mapper.writeValueAsString(
-                                             TaskPayloadBuilder.setVariables()
-                                                     .withTaskId(TASK_ID)
-                                                     .localOnly()
-                                                     .withVariables(Collections.emptyMap()).build())))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/set/local",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
-        verify(taskRuntime).setVariables(any());
-    }
 }

@@ -128,28 +128,6 @@ public class ProcessInstanceVariableControllerImplIT {
     }
 
     @Test
-    public void getVariablesLocal() throws Exception {
-        VariableInstanceImpl<Integer> count = new VariableInstanceImpl<>("count",
-                                                                         Integer.class.getName(),
-                                                                         100,
-                                                                         PROCESS_INSTANCE_ID);
-
-        given(processRuntime.variables(ProcessPayloadBuilder
-                                                                               .variables()
-                                                                               .withProcessInstanceId(PROCESS_INSTANCE_ID)
-                                                                               .localOnly()
-                                                                               .build()))
-                .willReturn(Collections.singletonList(count));
-
-        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables/local",
-                                 1,
-                                 1).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/list/local",
-                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
-    }
-
-    @Test
     public void setVariables() throws Exception {
         Map<String, Object> variables = new HashMap<>();
         variables.put("var1",

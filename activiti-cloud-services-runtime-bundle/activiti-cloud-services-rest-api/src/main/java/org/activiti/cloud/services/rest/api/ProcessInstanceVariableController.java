@@ -18,10 +18,6 @@ public interface ProcessInstanceVariableController {
     @RequestMapping(method = RequestMethod.GET)
     Resources<VariableInstanceResource> getVariables(@PathVariable String processInstanceId);
 
-    @RequestMapping(value = "/local",
-            method = RequestMethod.GET)
-    Resources<VariableInstanceResource> getVariablesLocal(@PathVariable String processInstanceId);
-
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
                                       @RequestBody SetProcessVariablesPayload setProcessVariablesPayload);

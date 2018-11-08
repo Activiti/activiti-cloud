@@ -39,7 +39,7 @@ public class TaskVariablesResourceAssemblerTest {
         VariableInstanceResource resource = resourceAssembler.toResource(model);
 
         //then
-        Link globalVariablesLink = resource.getLink("globalVariables");
+        Link globalVariablesLink = resource.getLink("variables");
 
         assertThat(globalVariablesLink).isNotNull();
         assertThat(globalVariablesLink.getHref()).contains("my-identifier");

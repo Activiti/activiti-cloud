@@ -114,6 +114,7 @@ public class AuditProducerIT {
                                      BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*start event*/,
                                      SEQUENCE_FLOW_TAKEN.name(),
                                      ACTIVITY_STARTED.name()/*user task*/,
+                                     VARIABLE_CREATED.name(), /*task variable copy of proc var*/
                                      TASK_CANDIDATE_GROUP_ADDED.name(),
                                      TASK_CANDIDATE_USER_ADDED.name(),
                                      TASK_CREATED.name());
@@ -170,14 +171,16 @@ public class AuditProducerIT {
         //then
         await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
                 .extracting(event -> event.getEventType().name())
-                .containsExactly(TASK_COMPLETED.name(),
+                .containsExactly(VARIABLE_UPDATED.name(),/*task local var copied back to proc var*/
+                                 TASK_COMPLETED.name(),
                                  TASK_CANDIDATE_GROUP_REMOVED.name(),
                                  TASK_CANDIDATE_USER_REMOVED.name(),
+                                 VARIABLE_DELETED.name(),/*task local var deleted*/
                                  BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*user task*/,
                                  SEQUENCE_FLOW_TAKEN.name(),
                                  ACTIVITY_STARTED.name()/*end event*/,
                                  BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*end event*/,
-                                 VARIABLE_DELETED.name(),
+                                 VARIABLE_DELETED.name(), /*proc var deleted as proc completes*/
                                  PROCESS_COMPLETED.name()));
 
         assertThat(streamHandler.getReceivedEvents())
