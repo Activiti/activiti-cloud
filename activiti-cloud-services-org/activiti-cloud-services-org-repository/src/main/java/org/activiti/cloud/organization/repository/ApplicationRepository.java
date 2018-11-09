@@ -37,6 +37,4 @@ public interface ApplicationRepository<A extends Application> {
     A updateApplication(A applicationToUpdate);
 
     void deleteApplication(A application);
-
-    Class<A> getApplicationType();
 }

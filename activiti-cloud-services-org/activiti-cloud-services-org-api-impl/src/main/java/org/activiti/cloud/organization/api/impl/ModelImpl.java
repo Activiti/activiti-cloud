@@ -19,9 +19,13 @@ package org.activiti.cloud.organization.api.impl;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.impl.ModelView.ContentView;
+import org.activiti.cloud.organization.api.impl.ModelView.ExportView;
+import org.activiti.cloud.organization.api.impl.ModelView.MetadataView;
 import org.activiti.cloud.services.auditable.AbstractAuditable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -38,25 +42,32 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
     private String id;
 
     @ApiModelProperty("The name of the model")
+    @JsonView({MetadataView.class, ExportView.class})
     private String name;
 
     @ApiModelProperty(value = "The type of the model", readOnly = true)
+    @JsonView({MetadataView.class, ExportView.class})
     private String type;
 
     @ApiModelProperty(value = "The version of the model", readOnly = true)
+    @JsonView({MetadataView.class, ExportView.class})
     private String version;
 
     @ApiModelProperty(value = "The content type of the model", readOnly = true, hidden = true)
-    @JsonIgnore
+    @JsonView({ExportView.class, ContentView.class})
     private String contentType;
 
     @ApiModelProperty(value = "The content of the model", readOnly = true, hidden = true)
-    @JsonIgnore
+    @JsonView({ExportView.class, ContentView.class})
     private String content;
 
     @ApiModelProperty(hidden = true)
     @JsonIgnore
     private ApplicationImpl application;
+
+    @ApiModelProperty("The parent application id")
+    @JsonView(MetadataView.class)
+    private String applicationId;
 
     public ModelImpl() {
 
@@ -105,9 +116,14 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
         return application;
     }
 
+    public String getApplicationId() {
+        return applicationId;
+    }
+
     @Override
     public void setApplication(ApplicationImpl application) {
         this.application = application;
+        this.applicationId = application.getId();
     }
 
     @Override

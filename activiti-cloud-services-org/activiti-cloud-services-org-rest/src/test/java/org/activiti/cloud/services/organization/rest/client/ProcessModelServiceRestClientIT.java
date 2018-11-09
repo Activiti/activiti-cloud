@@ -18,8 +18,10 @@ package org.activiti.cloud.services.organization.rest.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
+import org.activiti.cloud.services.organization.entity.ApplicationEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +53,9 @@ public class ProcessModelServiceRestClientIT {
     private WebApplicationContext context;
 
     @Autowired
+    private ApplicationRepository applicationRepository;
+
+    @Autowired
     private ModelRepository modelRepository;
 
     private ObjectMapper mapper = new ObjectMapper();
@@ -62,6 +67,10 @@ public class ProcessModelServiceRestClientIT {
 
     @Test
     public void testCreateProcessModel() throws Exception {
+        String parentApplicationId = "parent_application_id";
+        applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
+                                                                      "Parent Application"));
+
         Model processModel = new ModelEntity("contractNewProcesModelId",
                                              "newProcesModelName",
                                              PROCESS);
@@ -69,7 +78,8 @@ public class ProcessModelServiceRestClientIT {
         given()
                 .contentType(APPLICATION_JSON_VALUE)
                 .body(mapper.writeValueAsString(processModel))
-                .post("/v1/models")
+                .post("/v1/applications/{applicationId}/models",
+                      parentApplicationId)
                 .then().expect(status().isCreated());
     }
 

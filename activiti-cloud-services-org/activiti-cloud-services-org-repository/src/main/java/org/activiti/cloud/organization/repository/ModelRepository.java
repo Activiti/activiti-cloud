@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,9 +29,6 @@ import org.springframework.data.domain.Pageable;
  * Interface for {@link Model} entities repository
  */
 public interface ModelRepository<A extends Application, M extends Model<A, ?>> {
-
-    Page<M> getTopLevelModels(ModelType modelTypeFilter,
-                              Pageable pageable);
 
     Page<M> getModels(A application,
                       ModelType modelTypeFilter,
@@ -40,11 +38,18 @@ public interface ModelRepository<A extends Application, M extends Model<A, ?>> {
 
     byte[] getModelContent(M model);
 
+    byte[] getModelExport(M model);
+
     M createModel(M model);
 
     M updateModel(M modelToUpdate);
 
+    M updateModelContent(M modelToBeUpdate,
+                         FileContent fileContent);
+
     void deleteModel(M model);
 
     Class<M> getModelType();
+
+    Class<?> getModelMetadataView();
 }

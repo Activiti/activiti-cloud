@@ -97,19 +97,6 @@ public interface ModelRestApi {
 
     @ApiOperation(
             tags = MODELS,
-            value = "List standalone models",
-            notes = "Get the standalone models. " +
-                    "Minimal information for each model is returned."
-            //response = AlfrescoModelPage.class
-    )
-    @RequestMapping(method = GET, path = "/models")
-    PagedResources<Resource<Model>> getModels(
-            @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
-            Pageable pageable);
-
-    @ApiOperation(
-            tags = MODELS,
             value = "List models for an application",
             notes = "Get the models associated with an application. " +
                     "Minimal information for each model is returned."
@@ -130,16 +117,6 @@ public interface ModelRestApi {
     Resource<Model> getModel(
             @ApiParam(GET_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId);
-
-    @ApiOperation(
-            tags = MODELS,
-            value = "Create new standalone model",
-            notes = "Create a new standalone model")
-    @PostMapping(path = "/models")
-    @ResponseStatus(CREATED)
-    Resource<Model> createModel(
-            @ApiParam(CREATE_MODEL_PARAM_DESCR)
-            @RequestBody Model model);
 
     @ApiOperation(
             tags = MODELS,

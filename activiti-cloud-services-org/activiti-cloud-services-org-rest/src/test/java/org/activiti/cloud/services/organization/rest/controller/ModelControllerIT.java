@@ -113,6 +113,11 @@ public class ModelControllerIT {
 
     @Test
     public void testGetModels() throws Exception {
+        String parentApplicationId = "parent_application_id";
+        Application createdApplication =
+                applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
+                                                                      "Parent Application"));
+
         final String processModelId1 = "process_model_id1";
         final String processModelName1 = "Process Model 1";
 
@@ -133,18 +138,22 @@ public class ModelControllerIT {
         Model processModel1 = new ModelEntity(processModelId1,
                                               processModelName1,
                                               PROCESS);
+        processModel1.setApplication(createdApplication);
         processModel1 = modelRepository.createModel(processModel1);
         assertThat(processModel1).isNotNull();
 
         Model processModel2 = new ModelEntity(processModelId2,
                                               processModelName2,
                                               PROCESS);
+        processModel2.setApplication(createdApplication);
         processModel2 = modelRepository.createModel(processModel2);
         assertThat(processModel2).isNotNull();
 
         //when
-        final ResultActions resultActions = mockMvc.perform(get("{version}/models?type=PROCESS",
-                                                                API_VERSION))
+        final ResultActions resultActions = mockMvc
+                .perform(get("{version}/applications/{applicationId}/models?type=PROCESS",
+                             API_VERSION,
+                             parentApplicationId))
                 .andDo(print());
 
         //then
@@ -160,7 +169,10 @@ public class ModelControllerIT {
     @Test
     public void testCreateModel() throws Exception {
 
-        //given
+        String parentApplicationId = "parent_application_id";
+        applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
+                                                                      "Parent Application"));
+
         final String processModelId = "process_model_id";
         final String processModelName = "Process Model";
         Model processModel = new ModelEntity(processModelId,
@@ -172,8 +184,9 @@ public class ModelControllerIT {
         doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(PROCESS),
                                                                                eq(processModelId));
 
-        mockMvc.perform(post("{version}/models",
-                             API_VERSION)
+        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+                             API_VERSION,
+                             parentApplicationId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())
@@ -183,13 +196,17 @@ public class ModelControllerIT {
     @Test
     public void testCreateModelOfUnknownType() throws Exception {
 
-        //given
+        String parentApplicationId = "parent_application_id";
+        applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
+                                                                      "Parent Application"));
+
         Model formModel = new ModelEntity("id",
                                           "name",
                                           "FORM");
 
-        mockMvc.perform(post("{version}/models",
-                             API_VERSION)
+        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+                             API_VERSION,
+                             parentApplicationId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(formModel)))
                 .andDo(print())
@@ -199,7 +216,10 @@ public class ModelControllerIT {
     @Test
     public void testCreateModelProducerException() throws Exception {
 
-        //given
+        String parentApplicationId = "parent_application_id";
+        applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
+                                                                      "Parent Application"));
+
         final String processModelId = "process_model_id";
         final String processModelName = "Process Model";
         Model processModel = new ModelEntity(processModelId,
@@ -210,8 +230,9 @@ public class ModelControllerIT {
                                                                                    any(ModelReference.class));
 
         expectedException.expect(NestedServletException.class);
-        mockMvc.perform(post("{version}/models",
-                             API_VERSION)
+        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+                             API_VERSION,
+                             parentApplicationId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())

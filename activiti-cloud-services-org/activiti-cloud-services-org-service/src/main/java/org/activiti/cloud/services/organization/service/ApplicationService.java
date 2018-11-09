@@ -135,7 +135,7 @@ public class ApplicationService {
                                     .appendFile(modelService.exportModel(model),
                                                 folderName);
                             if (!isJsonContentType(model.getContentType())) {
-                                zipBuilder.appendFile(modelService.getModelJson(model),
+                                zipBuilder.appendFile(modelService.getModelMetadataFile(model),
                                                       folderName);
                             }
                         }));

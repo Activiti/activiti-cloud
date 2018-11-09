@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.repository.ModelRepository;
+import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.organization.entity.ApplicationEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntityHandler;
@@ -52,13 +53,6 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
                                                           Pageable pageable);
 
     @Override
-    default Page<ModelEntity> getTopLevelModels(ModelType modelTypeFilter,
-                                                Pageable pageable) {
-        return loadModelReference(findAllByApplicationIdIsNullAndTypeEquals(modelTypeFilter.getName(),
-                                                                            pageable));
-    }
-
-    @Override
     default Page<ModelEntity> getModels(ApplicationEntity application,
                                         ModelType modelTypeFilter,
                                         Pageable pageable) {
@@ -80,6 +74,16 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
     }
 
     @Override
+    default Class<?> getModelMetadataView() {
+        return null;
+    }
+
+    @Override
+    default byte[] getModelExport(ModelEntity model) {
+        return getModelContent(model);
+    }
+
+    @Override
     default ModelEntity createModel(ModelEntity model) {
         if (model.getId() == null) {
             model.setId(UUID.randomUUID().toString());
@@ -92,6 +96,12 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
     default ModelEntity updateModel(ModelEntity model) {
         updateModelReference(model);
         return loadModelReference(save(model));
+    }
+
+    @Override
+    default ModelEntity updateModelContent(ModelEntity modelToBeUpdate,
+                                           FileContent fileContent) {
+        return updateModel(modelToBeUpdate);
     }
 
     @Override

@@ -34,6 +34,7 @@ import org.activiti.cloud.organization.core.error.ImportModelException;
 import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
+import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,12 +91,6 @@ public class ModelService {
                 .collect(Collectors.toList());
     }
 
-    public Page<Model> getTopLevelModels(ModelType modelType,
-                                         Pageable pageable) {
-        return modelRepository.getTopLevelModels(modelType,
-                                                 pageable);
-    }
-
     public Page<Model> getModels(Application application,
                                  ModelType modelType,
                                  Pageable pageable) {
@@ -138,20 +133,33 @@ public class ModelService {
         }
     }
 
-    public FileContent getModelContent(Model model) {
+    public FileContent getModelMetadataFile(Model model) {
+        Class<?> metadataView = modelRepository.getModelMetadataView();
+        return new FileContent(toJsonFilename(model.getName()),
+                               ContentTypeUtils.CONTENT_TYPE_JSON,
+                               jsonConverter.convertToJsonBytes(model,
+                                                                metadataView));
+    }
+
+    public FileContent getModelContentFile(Model model) {
+        return getModelViewFile(model,
+                                modelRepository.getModelContent(model));
+    }
+
+    public FileContent exportModel(Model model) {
+        return getModelViewFile(model,
+                                modelRepository.getModelExport(model));
+    }
+
+    private FileContent getModelViewFile(Model model,
+                                         byte[] modelBytes) {
         return new FileContent(setExtension(model.getName(),
                                             findModelType(model).getContentFileExtension()),
                                model.getContentType(),
-                               modelRepository.getModelContent(model));
+                               modelBytes);
     }
 
-    public FileContent getModelJson(Model model) {
-        return new FileContent(toJsonFilename(model.getName()),
-                               model.getContentType(),
-                               jsonConverter.convertToJsonBytes(model));
-    }
-
-    public Optional<FileContent> getModelDiagram(String modelId) {
+    public Optional<FileContent> getModelDiagramFile(String modelId) {
         //TODO: to implement
         return Optional.empty();
     }
@@ -160,8 +168,8 @@ public class ModelService {
                                     FileContent fileContent) {
         modelToBeUpdate.setContentType(fileContent.getContentType());
         modelToBeUpdate.setContent(fileContent.toString());
-
-        return modelRepository.updateModel(modelToBeUpdate);
+        return modelRepository.updateModelContent(modelToBeUpdate,
+                                                  fileContent);
     }
 
     public Model importModel(Application application,
@@ -173,7 +181,7 @@ public class ModelService {
                 fileContent.getFilename(),
                 fileContent));
 
-        if (fileContent.isJson()) {
+        if (modelTypeService.isJson(modelType)) {
             return importJsonModel(application,
                                    modelType,
                                    fileContent);
@@ -228,14 +236,13 @@ public class ModelService {
                                                   extension));
     }
 
-    public FileContent exportModel(Model model) {
-        return getModelContent(model);
+    public Optional<ModelValidator> findModelValidatorByModelType(String modelType) {
+        return Optional.ofNullable(modelValidatorsMapByModelType.get(modelType));
     }
 
     public void validateModelContent(Model model,
                                      FileContent fileContent) {
-        Optional.ofNullable(model.getType())
-                .map(modelValidatorsMapByModelType::get)
+        findModelValidatorByModelType(model.getType())
                 .ifPresent(modelValidator -> modelValidator.validateModelContent(fileContent.getFileContent()));
     }
 
