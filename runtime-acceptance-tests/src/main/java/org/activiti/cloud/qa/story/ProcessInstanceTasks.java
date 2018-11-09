@@ -262,7 +262,6 @@ public class ProcessInstanceTasks {
     public void checkTaskFromProcessInstance(String processName,Task.TaskStatus status, String taskName){
         List<ProcessInstance> processInstancesList = new ArrayList<>(
                 runtimeBundleSteps.getAllProcessInstances().getContent());
-        assertThat(processInstancesList).hasSize(2);
         assertThat(processInstancesList).extracting("processDefinitionKey")
                                         .contains(processDefinitionKeyMatcher(processName));
 
