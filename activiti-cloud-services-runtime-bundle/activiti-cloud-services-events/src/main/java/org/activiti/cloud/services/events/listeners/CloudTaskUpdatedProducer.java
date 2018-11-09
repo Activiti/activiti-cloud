@@ -18,21 +18,25 @@ package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.api.task.runtime.events.TaskUpdatedEvent;
 import org.activiti.api.task.runtime.events.listener.TaskEventListener;
+import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
+import org.springframework.messaging.support.MessageBuilder;
 
 public class CloudTaskUpdatedProducer implements TaskEventListener<TaskUpdatedEvent> {
 
     private ToCloudTaskRuntimeEventConverter converter;
-    private ProcessEngineEventsAggregator eventsAggregator;
+    private ProcessEngineChannels producer;
 
     public CloudTaskUpdatedProducer(ToCloudTaskRuntimeEventConverter converter,
-                                    ProcessEngineEventsAggregator eventsAggregator) {
+                                    ProcessEngineChannels producer) {
         this.converter = converter;
-        this.eventsAggregator = eventsAggregator;
+        this.producer = producer;
     }
 
     @Override
     public void onEvent(TaskUpdatedEvent event) {
-        eventsAggregator.add(converter.from(event));
+        producer.auditProducer().send(MessageBuilder.withPayload(
+                converter.from(event)).build());
     }
+
 }

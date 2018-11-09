@@ -87,9 +87,9 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     public CloudTaskUpdatedProducer cloudTaskUpdatedProducer(ToCloudTaskRuntimeEventConverter taskRuntimeEventConverter,
-                                                             ProcessEngineEventsAggregator eventsAggregator) {
+                                                             ProcessEngineChannels processEngineChannels) {
         return new CloudTaskUpdatedProducer(taskRuntimeEventConverter,
-                                            eventsAggregator);
+                                            processEngineChannels);
     }
 
     @Bean
