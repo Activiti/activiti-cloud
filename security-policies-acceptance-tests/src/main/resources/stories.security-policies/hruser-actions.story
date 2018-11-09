@@ -7,7 +7,7 @@ So that I can check the enforcement of security policies
 
 Scenario: starting an instance of a simple process
 Given the user is authenticated as hruser
-When the user starts a simple process
+When the user starts a SIMPLE_PROCESS_INSTANCE
 Then the user can get simple process instances
 And the user can query simple process instances
 And the user can get events for simple process instances
