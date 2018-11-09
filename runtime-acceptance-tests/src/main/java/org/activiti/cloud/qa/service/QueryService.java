@@ -57,4 +57,8 @@ public interface QueryService extends BaseService {
     @Headers("Content-Type: application/json")
     PagedResources<CloudVariableInstance> getProcessInstanceVariables(@Param("processInstanceId") String processInstanceId);
 
+    @RequestLine("GET /v1/tasks/{taskId}/variables")
+    @Headers("Content-Type: application/json")
+    PagedResources<CloudVariableInstance> getTaskVariables(@Param("taskId") String taskId);
+
 }

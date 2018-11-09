@@ -104,6 +104,28 @@ public class QuerySteps {
     }
 
     @Step
+    public void checkTaskHasVariable(String taskId, String variableName, String variableValue) throws Exception {
+
+        await().untilAsserted(() -> {
+
+            assertThat(variableName).isNotNull();
+
+            final Collection<CloudVariableInstance> variableInstances = queryService.getTaskVariables(taskId).getContent();
+
+            assertThat(variableInstances).isNotNull();
+            assertThat(variableInstances).isNotEmpty();
+
+            //one of the variables should have name matching variableName
+            assertThat(variableInstances).extracting(VariableInstance::getName).contains(variableName);
+
+            if(variableValue!=null){
+                assertThat(variableInstances).extracting(VariableInstance::getName,VariableInstance::getValue).contains(tuple(variableName,variableValue));
+            }
+
+        });
+    }
+
+    @Step
     public void checkTaskStatus(String taskId,
                                 Task.TaskStatus expectedStatus) {
 
