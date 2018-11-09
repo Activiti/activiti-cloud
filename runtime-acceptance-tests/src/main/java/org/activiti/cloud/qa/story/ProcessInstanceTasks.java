@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
@@ -32,6 +33,7 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.qa.rest.TokenHolder;
 import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.QuerySteps;
@@ -262,11 +264,16 @@ public class ProcessInstanceTasks {
     public void checkTaskFromProcessInstance(String processName,Task.TaskStatus status, String taskName){
         List<ProcessInstance> processInstancesList = new ArrayList<>(
                 runtimeBundleSteps.getAllProcessInstances().getContent());
-        assertThat(processInstancesList).hasSize(2);
+        assertThat(processInstancesList.size()).isGreaterThanOrEqualTo(2);
         assertThat(processInstancesList).extracting("processDefinitionKey")
                                         .contains(processDefinitionKeyMatcher(processName));
 
-        List<Task> tasksList = new ArrayList<>(runtimeBundleSteps.getAllTasks().getContent());
+        //filter the list
+        processInstancesList = processInstancesList.stream().filter(p -> p.getProcessDefinitionKey().equals(processDefinitionKeyMatcher(processName))).collect(Collectors.toList());
+        assertThat(processInstancesList.size()).isEqualTo(1);
+
+        List<Task> tasksList = new ArrayList<>(runtimeBundleSteps.getTaskByProcessInstanceId(processInstancesList.get(0).getId()));
+
         assertThat(tasksList).isNotEmpty();
         currentTask = tasksList.get(0);
         assertThat(currentTask.getStatus()).isEqualTo(status);

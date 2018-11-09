@@ -49,6 +49,7 @@ public class AuthenticationSteps {
                         authUsername,
                         AUTH_PASSWORD);
         TokenHolder.setAuthToken(authToken);
+        TokenHolder.setUserName(authUsername);
     }
     
     @Step

@@ -31,6 +31,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
+import org.activiti.cloud.qa.rest.TokenHolder;
 import org.activiti.cloud.qa.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.qa.service.AuditService;
 import org.assertj.core.api.Condition;
@@ -143,14 +144,18 @@ public class AuditSteps {
         Collection<CloudRuntimeEvent> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
                 eventType.name());
 
-
         await().untilAsserted(() -> {
 
             assertThat(events).isNotEmpty();
             assertThat(events).extracting(e -> e.getEventType()).containsOnly(eventType);
-            List<CloudRuntimeEvent> processInstanceTasks = events.stream().filter(e -> variableName.equals(((CloudVariableEvent) e).getEntity().getName()) && taskId.equals(((CloudVariableEvent) e).getEntity().getTaskId())).collect(Collectors.toList());
-            assertThat(processInstanceTasks).hasSize(1); //could be more than one if there are multiple vars
-            CloudRuntimeEvent resultingEvent = processInstanceTasks.get(0);
+            List<CloudRuntimeEvent> varEvents = events.stream().filter(e -> variableName.equals(((CloudVariableEvent) e).getEntity().getName()) && taskId.equals(((CloudVariableEvent) e).getEntity().getTaskId())).collect(Collectors.toList());
+
+            if(processInstanceId!=null){
+                varEvents = varEvents.stream().filter(e -> processInstanceId.equals(((CloudVariableEvent) e).getEntity().getProcessInstanceId())).collect(Collectors.toList());
+            }
+
+            assertThat(varEvents.size()).isGreaterThanOrEqualTo(1); //could be more than one if there are multiple vars with same name
+            CloudRuntimeEvent resultingEvent = varEvents.get(0);
             assertThat(resultingEvent).isNotNull();
             assertThat(resultingEvent).isInstanceOf(CloudVariableEvent.class);
             assertThat(((CloudVariableEvent) resultingEvent).getEntity().getName()).isEqualTo(variableName);
