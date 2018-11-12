@@ -34,6 +34,7 @@ public class ProcessDefinitionRegistry {
             put("SIMPLE_PROCESS_INSTANCE","SimpleProcess");
             put("CONNECTOR_PROCESS_INSTANCE","ConnectorProcess");
             put("PROCESS_INSTANCE_WITH_CALL_ACTIVITIES","parentproc-8e992556-5785-4ee0-9fe7-354decfea4a8");
+            put("Process Information","processinf-4e42752c-cc4d-429b-9528-7d3df24a9537");
     }};
 
     public static final HashMap <String, String> processDefinitionKeys = new HashMap<String, String>(){{
