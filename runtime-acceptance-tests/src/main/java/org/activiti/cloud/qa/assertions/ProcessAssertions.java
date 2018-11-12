@@ -41,23 +41,6 @@ public class ProcessAssertions {
                 .hasMessageContaining("Unable to find process instance for the given id");
 
         await().untilAsserted(() -> {
-            //TODO: uncomment the SequenceFlowTakenEvent once the issue is solved
-            Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
-            assertThat(events).isNotEmpty();
-            assertThat(events)
-                    .extracting(CloudRuntimeEvent::getEventType)
-                    .containsExactlyInAnyOrder(
-                            ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED,
-                            ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED,
-                            BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
-                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
-                            //SequenceFlowTakenEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN,
-                            BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
-                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
-                            ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED);
-        });
-
-        await().untilAsserted(() -> {
             ProcessInstance queryProcessInstance = processQuerySteps.getProcessInstance(processInstanceId);
             assertThat(queryProcessInstance).isNotNull();
             assertThat(queryProcessInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.COMPLETED);
@@ -77,11 +60,34 @@ public class ProcessAssertions {
         });
     }
 
-    @Then("the events are as expected")
-    public void assertThatEventsAreAsExpected() throws Exception {
+    @Then("the events are as expected for Process Information")
+    public void assertThatEventsAreAsExpectedForProcessInformation() throws Exception {
 
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
-        
+
+        await().untilAsserted(() -> {
+            //TODO: uncomment the SequenceFlowTakenEvent once the issue is solved
+            Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
+            assertThat(events).isNotEmpty();
+            assertThat(events)
+                    .extracting(CloudRuntimeEvent::getEventType)
+                    .containsExactlyInAnyOrder(
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED,
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
+                            //SequenceFlowTakenEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED);
+        });
+    }
+
+    @Then("the events are as expected for Process Information with variables")
+    public void assertThatEventsAreAsExpectedForProcessInformationWithVariables() throws Exception {
+
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+
         await().untilAsserted(() -> {
             //TODO: uncomment the SequenceFlowTakenEvent and VariableCreated once the issues are solved
             Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
@@ -100,6 +106,34 @@ public class ProcessAssertions {
                             ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED);
         });
     }
+
+    @Then("the events are as expected for Process with Generic BPMN Task")
+    public void assertThatEventsAreAsExpectedForProcessWithGenericBPMNTask() throws Exception {
+
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+
+        await().untilAsserted(() -> {
+            //TODO: uncomment the SequenceFlowTakenEvent and VariableCreated once the issues are solved
+            Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
+            assertThat(events).isNotEmpty();
+            assertThat(events)
+                    .extracting(CloudRuntimeEvent::getEventType)
+                    .containsExactlyInAnyOrder(
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED,
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
+                            //SequenceFlowTakenEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
+                            //SequenceFlowTakenEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED);
+        });
+    }
+
+
 
 
 
