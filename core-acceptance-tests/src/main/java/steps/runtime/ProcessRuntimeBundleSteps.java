@@ -46,6 +46,29 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
+    public CloudProcessInstance startProcessWithNameAndBusinessKey(String processName, String processInstanceName, String businessKey) {
+
+        return dirtyContextHandler.dirty(processRuntimeService.startProcess(ProcessPayloadBuilder
+                                                                            .start()
+                                                                            .withProcessDefinitionKey(processName)
+                                                                            .withProcessInstanceName(processInstanceName)
+                                                                            .withBusinessKey(businessKey)
+                                                                            .build()));
+    }
+
+    @Step
+    public CloudProcessInstance startProcessWithVariables(String processName) {
+
+        return dirtyContextHandler.dirty(processRuntimeService.startProcess(ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(processName)
+                .withVariable("test-variable-name", "test-variable-value")
+                .build()));
+    }
+
+
+
+    @Step
     public void deleteProcessInstance(String id) {
         processRuntimeService.deleteProcess(id);
     }
