@@ -23,14 +23,14 @@ import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import rest.RuntimeDirtyContextHandler;
-import rest.feign.EnableRuntimeFeignContext;
-import services.runtime.ProcessRuntimeService;
+import org.activiti.cloud.acceptance.rest.RuntimeDirtyContextHandler;
+import org.activiti.cloud.acceptance.rest.feign.EnableRuntimeFeignContext;
+import org.activiti.cloud.acceptance.services.runtime.ProcessRuntimeService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Runtime bundle steps
+ * Runtime bundle org.activiti.cloud.acceptance.steps
  */
 @EnableRuntimeFeignContext
 public class MultipleRuntimeBundleSteps {

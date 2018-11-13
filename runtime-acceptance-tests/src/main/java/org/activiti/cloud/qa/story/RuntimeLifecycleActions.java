@@ -23,17 +23,17 @@ import org.activiti.cloud.qa.steps.AuthenticationSteps;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeStories;
 import org.springframework.beans.factory.annotation.Autowired;
-import steps.audit.AuditSteps;
-import steps.audit.admin.AuditAdminSteps;
-import steps.query.ProcessQuerySteps;
-import steps.query.TaskQuerySteps;
-import steps.query.admin.ProcessQueryAdminSteps;
-import steps.runtime.ProcessRuntimeBundleSteps;
-import steps.runtime.TaskRuntimeBundleSteps;
-import steps.runtime.admin.ProcessRuntimeAdminSteps;
+import org.activiti.cloud.acceptance.steps.audit.AuditSteps;
+import org.activiti.cloud.acceptance.steps.audit.admin.AuditAdminSteps;
+import org.activiti.cloud.acceptance.steps.query.ProcessQuerySteps;
+import org.activiti.cloud.acceptance.steps.query.TaskQuerySteps;
+import org.activiti.cloud.acceptance.steps.query.admin.ProcessQueryAdminSteps;
+import org.activiti.cloud.acceptance.steps.runtime.ProcessRuntimeBundleSteps;
+import org.activiti.cloud.acceptance.steps.runtime.TaskRuntimeBundleSteps;
+import org.activiti.cloud.acceptance.steps.runtime.admin.ProcessRuntimeAdminSteps;
 
 /**
- * Lifecycle steps
+ * Lifecycle org.activiti.cloud.acceptance.steps
  */
 @EnableDirtyContext
 public class RuntimeLifecycleActions {

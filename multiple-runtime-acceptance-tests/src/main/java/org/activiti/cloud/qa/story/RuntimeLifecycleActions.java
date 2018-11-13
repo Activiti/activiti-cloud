@@ -24,11 +24,11 @@ import org.activiti.cloud.qa.steps.MultipleRuntimeBundleSteps;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeStories;
 import org.springframework.beans.factory.annotation.Autowired;
-import steps.audit.AuditSteps;
-import steps.query.ProcessQuerySteps;
+import org.activiti.cloud.acceptance.steps.audit.AuditSteps;
+import org.activiti.cloud.acceptance.steps.query.ProcessQuerySteps;
 
 /**
- * Lifecycle steps
+ * Lifecycle org.activiti.cloud.acceptance.steps
  */
 @EnableDirtyContext
 public class RuntimeLifecycleActions {

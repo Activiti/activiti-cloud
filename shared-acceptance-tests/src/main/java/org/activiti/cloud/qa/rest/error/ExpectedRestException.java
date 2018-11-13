@@ -20,7 +20,7 @@ import org.activiti.cloud.qa.serenity.exception.ExpectedException;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Expected rest exception
+ * Expected org.activiti.cloud.acceptance.rest exception
  */
 public class ExpectedRestException extends ExpectedException {
 

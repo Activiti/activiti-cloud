@@ -1,5 +1,5 @@
-'mvn clean verify -Dprofile=docker' will run the test against services started with docker-compose.
-'mvn clean verify -Dprofile=kubernetes' will run the test against services started with kubernetes.
+'mvn clean verify -Dprofile=docker' will run the test against org.activiti.cloud.acceptance.services started with docker-compose.
+'mvn clean verify -Dprofile=kubernetes' will run the test against org.activiti.cloud.acceptance.services started with kubernetes.
 
 For custom values for gateway and sso hosts:
 

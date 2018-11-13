@@ -22,8 +22,7 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.qa.steps.MultipleRuntimeBundleSteps;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import steps.query.ProcessQuerySteps;
-import steps.runtime.ProcessRuntimeBundleSteps;
+import org.activiti.cloud.acceptance.steps.query.ProcessQuerySteps;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

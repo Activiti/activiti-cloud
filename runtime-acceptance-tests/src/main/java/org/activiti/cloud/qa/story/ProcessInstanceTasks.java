@@ -34,18 +34,18 @@ import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import steps.audit.AuditSteps;
-import steps.audit.admin.AuditAdminSteps;
-import steps.query.ProcessQuerySteps;
-import steps.query.TaskQuerySteps;
-import steps.query.admin.ProcessQueryAdminSteps;
-import steps.runtime.ProcessRuntimeBundleSteps;
-import steps.runtime.TaskRuntimeBundleSteps;
-import steps.runtime.admin.ProcessRuntimeAdminSteps;
+import org.activiti.cloud.acceptance.steps.audit.AuditSteps;
+import org.activiti.cloud.acceptance.steps.audit.admin.AuditAdminSteps;
+import org.activiti.cloud.acceptance.steps.query.ProcessQuerySteps;
+import org.activiti.cloud.acceptance.steps.query.TaskQuerySteps;
+import org.activiti.cloud.acceptance.steps.query.admin.ProcessQueryAdminSteps;
+import org.activiti.cloud.acceptance.steps.runtime.ProcessRuntimeBundleSteps;
+import org.activiti.cloud.acceptance.steps.runtime.TaskRuntimeBundleSteps;
+import org.activiti.cloud.acceptance.steps.runtime.admin.ProcessRuntimeAdminSteps;
 
-import static helper.ProcessDefinitionRegistry.*;
-import static helper.Filters.checkEvents;
-import static helper.Filters.checkProcessInstances;
+import static org.activiti.cloud.acceptance.helper.ProcessDefinitionRegistry.*;
+import static org.activiti.cloud.acceptance.helper.Filters.checkEvents;
+import static org.activiti.cloud.acceptance.helper.Filters.checkProcessInstances;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProcessInstanceTasks {
@@ -75,7 +75,7 @@ public class ProcessInstanceTasks {
 
     private Task currentTask;
 
-    @When("services are started")
+    @When("org.activiti.cloud.acceptance.services are started")
     public void checkServicesStatus() {
         processRuntimeBundleSteps.checkServicesHealth();
         taskRuntimeBundleSteps.checkServicesHealth();
