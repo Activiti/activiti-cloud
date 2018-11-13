@@ -15,6 +15,7 @@ import org.activiti.cloud.acceptance.services.runtime.ProcessRuntimeService;
 import org.activiti.cloud.acceptance.services.runtime.diagram.ProcessRuntimeDiagramService;
 
 import java.util.Collection;
+import java.util.Map;
 
 import static org.activiti.cloud.acceptance.helper.SvgToPng.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,10 +42,10 @@ public class ProcessRuntimeBundleSteps {
     public CloudProcessInstance startProcess(String process, boolean variables ) {
 
         StartProcessPayloadBuilder payload = ProcessPayloadBuilder
-                                                .start()
-                                                .withProcessDefinitionKey(process)
-                                                .withProcessInstanceName("processInstanceName")
-                                                .withBusinessKey("businessKey");
+                .start()
+                .withProcessDefinitionKey(process)
+                .withProcessInstanceName("processInstanceName")
+                .withBusinessKey("businessKey");
 
         if(variables){
             payload.withVariable("test-variable-name", "test-variable-value");
@@ -60,6 +61,16 @@ public class ProcessRuntimeBundleSteps {
         return dirtyContextHandler.dirty(processRuntimeService.startProcess(ProcessPayloadBuilder
                 .start()
                 .withProcessDefinitionKey(process)
+                .build()));
+    }
+
+    @Step
+    public CloudProcessInstance startProcessWithVariables(String process, Map<String,Object> variables) {
+
+        return dirtyContextHandler.dirty(processRuntimeService.startProcess(ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(process)
+                .withVariables(variables)
                 .build()));
     }
 

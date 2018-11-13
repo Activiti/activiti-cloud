@@ -5,6 +5,7 @@ import feign.Param;
 import feign.RequestLine;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.api.task.model.payloads.SetTaskVariablesPayload;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.qa.service.BaseService;
 import org.springframework.hateoas.PagedResources;
@@ -50,4 +51,8 @@ public interface TaskRuntimeService extends BaseService {
             "Accept: application/hal+json;charset=UTF-8"
     })
     PagedResources<CloudTask> getTasks();
+
+    @RequestLine("POST /v1/tasks/{taskId}/variables")
+    @Headers("Content-Type: application/json")
+    void setTaskVariables(@Param("taskId") String taskId, SetTaskVariablesPayload variablesPayload);
 }

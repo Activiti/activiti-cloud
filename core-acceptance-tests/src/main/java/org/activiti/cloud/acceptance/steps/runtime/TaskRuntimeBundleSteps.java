@@ -13,6 +13,9 @@ import org.activiti.cloud.acceptance.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acceptance.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acceptance.services.runtime.TaskRuntimeService;
 
+import java.util.Collection;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -119,6 +122,13 @@ public class TaskRuntimeBundleSteps {
         if(!status.equals(Task.TaskStatus.COMPLETED)){
             assertThat(taskRuntimeService.getTask(id).getStatus()).isEqualTo(status);
         }
+    }
+
+    @Step
+    public void setVariables(String taskId, Map<String, Object> variables){
+
+        taskRuntimeService.setTaskVariables(taskId,TaskPayloadBuilder.setVariables().withTaskId(taskId)
+                .withVariables(variables).build());
     }
 
 }

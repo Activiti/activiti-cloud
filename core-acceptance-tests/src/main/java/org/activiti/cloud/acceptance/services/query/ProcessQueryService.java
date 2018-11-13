@@ -21,4 +21,6 @@ public interface ProcessQueryService extends BaseService {
     @RequestLine("GET /v1/process-instances/{processInstanceId}/variables")
     @Headers("Content-Type: application/json")
     PagedResources<CloudVariableInstance> getProcessInstanceVariables(@Param("processInstanceId") String processInstanceId);
+
+
 }

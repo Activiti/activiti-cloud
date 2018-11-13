@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.activiti.cloud.acceptance.steps.audit;
 
 import net.thucydides.core.annotations.Step;
@@ -22,6 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+/**
+ * Audit steps
+ */
 @EnableRuntimeFeignContext
 public class AuditSteps {
 
@@ -44,7 +63,7 @@ public class AuditSteps {
                                           ProcessRuntimeEvent.ProcessEvents eventType) throws Exception {
 
         Collection<CloudRuntimeEvent> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
-                eventType.name());
+                                                                                        eventType.name());
 
         await().untilAsserted(() -> {
 
@@ -64,7 +83,7 @@ public class AuditSteps {
                                               TaskRuntimeEvent.TaskEvents eventType) throws Exception {
 
         Collection<CloudRuntimeEvent> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
-                eventType.name());
+                                                                            eventType.name());
 
 
         await().untilAsserted(() -> {
@@ -97,8 +116,8 @@ public class AuditSteps {
 
             assertThat(events).isNotEmpty();
             assertThat(events).extracting(e -> e.getEventType()).containsOnly(eventType);
-            List<CloudRuntimeEvent> processInstanceTasks = events.stream().filter(e -> ((CloudVariableEvent) e).getEntity().getProcessInstanceId().equals(processInstanceId)).collect(Collectors.toList());
-            assertThat(processInstanceTasks).hasSize(1);
+            List<CloudRuntimeEvent> processInstanceTasks = events.stream().filter(e -> variableName.equals(((CloudVariableEvent) e).getEntity().getName()) && processInstanceId.equals(((CloudVariableEvent) e).getEntity().getProcessInstanceId())).collect(Collectors.toList());
+            assertThat(processInstanceTasks).hasSize(1); //could be more than one if there are multiple vars
             CloudRuntimeEvent resultingEvent = processInstanceTasks.get(0);
             assertThat(resultingEvent).isNotNull();
             assertThat(resultingEvent).isInstanceOf(CloudVariableEvent.class);
@@ -108,6 +127,36 @@ public class AuditSteps {
 
         });
     }
+
+    @Step
+    public void checkTaskVariableEvent(String processInstanceId, String taskId,
+                                                  String variableName,
+                                                  VariableEvent.VariableEvents eventType) throws Exception {
+
+        Collection<CloudRuntimeEvent> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
+                eventType.name());
+
+        await().untilAsserted(() -> {
+
+            assertThat(events).isNotEmpty();
+            assertThat(events).extracting(e -> e.getEventType()).containsOnly(eventType);
+            List<CloudRuntimeEvent> varEvents = events.stream().filter(e -> variableName.equals(((CloudVariableEvent) e).getEntity().getName()) && taskId.equals(((CloudVariableEvent) e).getEntity().getTaskId())).collect(Collectors.toList());
+
+            if(processInstanceId!=null){
+                varEvents = varEvents.stream().filter(e -> processInstanceId.equals(((CloudVariableEvent) e).getEntity().getProcessInstanceId())).collect(Collectors.toList());
+            }
+
+            assertThat(varEvents.size()).isGreaterThanOrEqualTo(1); //could be more than one if there are multiple vars with same name
+            CloudRuntimeEvent resultingEvent = varEvents.get(0);
+            assertThat(resultingEvent).isNotNull();
+            assertThat(resultingEvent).isInstanceOf(CloudVariableEvent.class);
+            assertThat(((CloudVariableEvent) resultingEvent).getEntity().getName()).isEqualTo(variableName);
+            assertThat(resultingEvent.getServiceName()).isNotEmpty();
+            assertThat(resultingEvent.getServiceFullName()).isNotEmpty();
+
+        });
+    }
+
     @Step
     public Collection<CloudRuntimeEvent> getEvents() {
         return auditService.getEvents().getContent();
@@ -191,18 +240,18 @@ public class AuditSteps {
         };
 
         await().untilAsserted(() -> assertThat(events).isNotNull()
-                .isNotEmpty()
-                .filteredOn(taskIsMatched).hasSize(2)
-                .extracting("entity.id",
-                        "entity.status",
-                        "eventType")
-                .containsExactly(
-                        tuple(taskId,
-                                Task.TaskStatus.CREATED,
-                                TaskRuntimeEvent.TaskEvents.TASK_CREATED),
-                        tuple(taskId,
-                                Task.TaskStatus.ASSIGNED,
-                                TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED)));
+                                    .isNotEmpty()
+                                    .filteredOn(taskIsMatched).hasSize(2)
+                                    .extracting("entity.id",
+                                            "entity.status",
+                                            "eventType")
+                                    .containsExactly(
+                                            tuple(taskId,
+                                                  Task.TaskStatus.CREATED,
+                                                  TaskRuntimeEvent.TaskEvents.TASK_CREATED),
+                                            tuple(taskId,
+                                                  Task.TaskStatus.ASSIGNED,
+                                                  TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED)));
     }
 
     /**

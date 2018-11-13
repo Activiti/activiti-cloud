@@ -22,6 +22,7 @@ public class ProcessDefinitionRegistry {
 
     private static final HashMap <String, String> processWithTasksDefinitionKeys = new HashMap<String, String>(){{
             put("PROCESS_INSTANCE_WITH_VARIABLES","ProcessWithVariables");
+            put("TWO_TASK_PROCESS","twoTaskProcess");
             put("PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED","SingleTaskProcess");
             put("PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES","SingleTaskProcessUserCandidates");
             put("PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES","SingleTaskProcessGroupCandidates");

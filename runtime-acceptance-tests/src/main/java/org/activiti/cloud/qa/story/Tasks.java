@@ -18,10 +18,12 @@ package org.activiti.cloud.qa.story;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
+import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.jbehave.core.annotations.Given;
@@ -129,16 +131,50 @@ public class Tasks {
 
     @Then("the tasks has the formKey field")
     public void checkIfFormKeyIsPresent(){
+        newTask = obtainFirstTaskFromProcess();
+        assertThat(newTask).extracting("formKey").contains("taskForm");
+
+        CloudTask taskFromQuery = taskRuntimeBundleSteps.getTaskById(newTask.getId());
+        assertThat(taskFromQuery).isNotNull();
+        assertThat(taskFromQuery.getFormKey()).isEqualTo("taskForm");
+    }
+
+    private CloudTask obtainFirstTaskFromProcess() {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId").toString();
         List<CloudTask> tasksFromRB = new ArrayList<>(
                 processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstanceId));
         assertThat(tasksFromRB).isNotEmpty();
         newTask = tasksFromRB.get(0);
         assertThat(newTask).isNotNull();
-        assertThat(newTask).extracting("formKey").contains("taskForm");
+        return newTask;
+    }
 
-        CloudTask taskFromQuery = taskQuerySteps.getTaskById(newTask.getId());
-        assertThat(taskFromQuery).isNotNull();
-        assertThat(taskFromQuery.getFormKey()).isEqualTo("taskForm");
+    @Then("a task variable was created with name $variableName")
+    @When("a task variable was created with name $variableName")
+    public void verifyVariableCreated(String variableName) throws Exception {
+        newTask = obtainFirstTaskFromProcess();
+
+        taskQuerySteps.checkTaskHasVariable(newTask.getId(),variableName,variableName);
+
+        auditSteps.checkTaskVariableEvent(Serenity.sessionVariableCalled("processInstanceId").toString(),newTask.getId(), variableName, VariableEvent.VariableEvents.VARIABLE_CREATED);
+
+    }
+
+    @Then("task variable $variableName has value $variableValue")
+    @When("task variable $variableName has value $variableValue")
+    public void verifyVariableValue(String variableName, String variableValue) throws Exception {
+        newTask = obtainFirstTaskFromProcess();
+
+        taskQuerySteps.checkTaskHasVariable(newTask.getId(),variableName,variableValue);
+
+    }
+
+    @Then("we set task variable $variableName to $variableValue")
+    @When("we set task variable $variableName to $variableValue")
+    public void setTaskVariableValue(String variableName, String variableValue) throws Exception {
+        newTask = obtainFirstTaskFromProcess();
+
+        taskRuntimeBundleSteps.setVariables(newTask.getId(), Collections.singletonMap(variableName,variableValue));
+
     }
 }
