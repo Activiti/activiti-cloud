@@ -17,7 +17,7 @@ public class ProcessOperations {
     @When("the user starts a process called $processName")
     public void startProcess(String processName) {
 
-        ProcessInstance processInstance = processRuntimeBundleSteps.startProcessNew(
+        ProcessInstance processInstance = processRuntimeBundleSteps.startProcess(
                 processDefinitionKeyMatcher(processName), false);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
@@ -25,7 +25,7 @@ public class ProcessOperations {
 
     @When("the user starts a process with variables called $processName")
     public void startProcessWithVariables(String processName){
-        ProcessInstance processInstance = processRuntimeBundleSteps.startProcessNew(
+        ProcessInstance processInstance = processRuntimeBundleSteps.startProcess(
                 processDefinitionKeyMatcher(processName), true);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());

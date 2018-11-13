@@ -38,7 +38,7 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public CloudProcessInstance startProcessNew(String process, boolean variables ) {
+    public CloudProcessInstance startProcess(String process, boolean variables ) {
 
         StartProcessPayloadBuilder payload = ProcessPayloadBuilder
                                                 .start()
