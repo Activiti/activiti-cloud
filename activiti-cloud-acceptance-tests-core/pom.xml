@@ -9,7 +9,7 @@
         <version>7.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>bpmn-scenarios-set0</artifactId>
+    <artifactId>activiti-cloud-acceptance-tests-core</artifactId>
 
     <dependencies>
         <dependency>
@@ -23,10 +23,6 @@
         <dependency>
             <groupId>org.activiti.cloud.acc</groupId>
             <artifactId>activiti-cloud-acceptance-tests-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.activiti.cloud.acc</groupId>
-            <artifactId>activiti-cloud-acceptance-tests-core</artifactId>
         </dependency>
     </dependencies>
 

@@ -2,18 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.activiti.cloud</groupId>
-  <artifactId>acceptance-tests-parent</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <groupId>org.activiti.cloud.acc</groupId>
+  <artifactId>activiti-cloud-acceptance-tests-parent</artifactId>
+  <version>7.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-    <module>shared-acceptance-tests</module>
-    <module>modeling-acceptance-tests</module>
-    <module>runtime-acceptance-tests</module>
-    <module>multiple-runtime-acceptance-tests</module>
-    <module>apps-acceptance-tests</module>
-    <module>security-policies-acceptance-tests</module>
-    <module>core-acceptance-tests</module>
+    <module>activiti-cloud-acceptance-tests-dependencies</module>
+    <module>activiti-cloud-acceptance-tests-shared</module>
+    <module>activiti-cloud-acceptance-tests-core</module>
     <module>bpmn-scenarios-set0</module>
   </modules>
   <scm>
@@ -36,7 +32,7 @@
   </distributionManagement>
   <properties>
     <activiti-cloud.version>7.0.77</activiti-cloud.version>
-    <activiti-cloud-modeling.version>7.0.3</activiti-cloud-modeling.version>
+    <activiti-cloud-acceptance-tests.version>${project.version}</activiti-cloud-acceptance-tests.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <enforcer.skip>true</enforcer.skip>
     <java.version>1.8</java.version>
@@ -61,11 +57,14 @@
         <type>pom</type>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.dependencies</groupId>
-        <artifactId>activiti-cloud-modeling-dependencies</artifactId>
-        <version>${activiti-cloud-modeling.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
+        <groupId>org.activiti.cloud.acc</groupId>
+        <artifactId>activiti-cloud-acceptance-tests-shared</artifactId>
+        <version>${activiti-cloud-acceptance-tests.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.acc</groupId>
+        <artifactId>activiti-cloud-acceptance-tests-core</artifactId>
+        <version>${activiti-cloud-acceptance-tests.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
