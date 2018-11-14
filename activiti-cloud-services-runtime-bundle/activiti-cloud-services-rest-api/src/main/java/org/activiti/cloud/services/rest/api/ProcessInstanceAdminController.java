@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,5 +19,9 @@ public interface ProcessInstanceAdminController {
 
     @RequestMapping(method = RequestMethod.POST)
     ProcessInstanceResource startProcess(@RequestBody StartProcessPayload cmd);
+    
+    @RequestMapping(method = RequestMethod.POST,value = "{processInstanceId}/suspend")
+    ProcessInstanceResource suspend(@PathVariable String processInstanceId);
+
 
 }
