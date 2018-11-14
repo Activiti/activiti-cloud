@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * User authentication org.activiti.cloud.acceptance.steps
+ * User authentication steps
  */
 @EnableFeignContext
 public class AuthenticationSteps {

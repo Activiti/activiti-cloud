@@ -2,7 +2,7 @@ Meta:
 
 Narrative:
 As a user
-I want to perform org.activiti.cloud.acceptance.operations on process instances
+I want to perform operations on process instances
 
 Scenario: signal between multiple runtime bundle org.activiti.cloud.acceptance.services
 Given the user is authenticated as testuser

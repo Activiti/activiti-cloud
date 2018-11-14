@@ -31,7 +31,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 
 /**
- * Generic REST client org.activiti.cloud.acceptance.operations
+ * Generic REST client operations
  */
 public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
 

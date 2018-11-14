@@ -33,7 +33,7 @@ import org.activiti.cloud.acceptance.steps.runtime.TaskRuntimeBundleSteps;
 import org.activiti.cloud.acceptance.steps.runtime.admin.ProcessRuntimeAdminSteps;
 
 /**
- * Lifecycle org.activiti.cloud.acceptance.steps
+ * Lifecycle steps
  */
 @EnableDirtyContext
 public class RuntimeLifecycleActions {

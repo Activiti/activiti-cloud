@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
 /**
- * Modeling applications org.activiti.cloud.acceptance.steps
+ * Modeling applications steps
  */
 @EnableModelingContext
 public class ModelingApplicationsSteps extends ModelingContextSteps<Application> {

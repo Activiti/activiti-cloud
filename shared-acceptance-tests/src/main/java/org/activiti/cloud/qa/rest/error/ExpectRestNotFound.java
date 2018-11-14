@@ -25,7 +25,7 @@ import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 
 /**
- * Expect org.activiti.cloud.acceptance.rest error annotation
+ * Expect rest error annotation
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

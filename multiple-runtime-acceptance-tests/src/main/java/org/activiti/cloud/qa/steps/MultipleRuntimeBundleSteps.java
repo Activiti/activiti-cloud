@@ -30,7 +30,7 @@ import org.activiti.cloud.acceptance.services.runtime.ProcessRuntimeService;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Runtime bundle org.activiti.cloud.acceptance.steps
+ * Runtime bundle steps
  */
 @EnableRuntimeFeignContext
 public class MultipleRuntimeBundleSteps {

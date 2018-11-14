@@ -17,7 +17,7 @@ pipeline {
           PREVIEW_NAMESPACE = "$APP_NAME-$BRANCH_NAME".toLowerCase()
           HELM_RELEASE = "$PREVIEW_NAMESPACE".toLowerCase()
         }
-        org.activiti.cloud.acceptance.steps {
+        steps {
           container('maven') {
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
@@ -33,10 +33,10 @@ pipeline {
           container('maven') {
             // ensure we're not on a detached head
             sh "git checkout develop"
-            sh "git org.activiti.cloud.acceptance.config --global credential.org.activiti.cloud.acceptance.helper store"
+            sh "git config --global credential.helper store"
 
             sh "jx step git credentials"
-            // so we can retrieve the version in later org.activiti.cloud.acceptance.steps
+            // so we can retrieve the version in later steps
             sh "echo \$(jx-release-version) > VERSION"
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
 

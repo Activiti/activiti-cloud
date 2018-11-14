@@ -28,7 +28,7 @@ import org.activiti.cloud.acceptance.steps.audit.AuditSteps;
 import org.activiti.cloud.acceptance.steps.query.ProcessQuerySteps;
 
 /**
- * Lifecycle org.activiti.cloud.acceptance.steps
+ * Lifecycle steps
  */
 @EnableDirtyContext
 public class RuntimeLifecycleActions {
