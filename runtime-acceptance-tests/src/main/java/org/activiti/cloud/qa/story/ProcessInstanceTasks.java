@@ -31,32 +31,48 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.qa.rest.TokenHolder;
 import org.activiti.cloud.qa.rest.error.ExpectRestNotFound;
-import org.activiti.cloud.qa.steps.AuditSteps;
-import org.activiti.cloud.qa.steps.QuerySteps;
-import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.activiti.cloud.acceptance.steps.audit.AuditSteps;
+import org.activiti.cloud.acceptance.steps.audit.admin.AuditAdminSteps;
+import org.activiti.cloud.acceptance.steps.query.ProcessQuerySteps;
+import org.activiti.cloud.acceptance.steps.query.TaskQuerySteps;
+import org.activiti.cloud.acceptance.steps.query.admin.ProcessQueryAdminSteps;
+import org.activiti.cloud.acceptance.steps.runtime.ProcessRuntimeBundleSteps;
+import org.activiti.cloud.acceptance.steps.runtime.TaskRuntimeBundleSteps;
+import org.activiti.cloud.acceptance.steps.runtime.admin.ProcessRuntimeAdminSteps;
 
-import static org.activiti.cloud.qa.helper.ProcessDefinitionRegistry.*;
-import static org.activiti.cloud.qa.helper.Filters.checkEvents;
-import static org.activiti.cloud.qa.helper.Filters.checkProcessInstances;
+import static org.activiti.cloud.acceptance.helper.ProcessDefinitionRegistry.*;
+import static org.activiti.cloud.acceptance.helper.Filters.checkEvents;
+import static org.activiti.cloud.acceptance.helper.Filters.checkProcessInstances;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProcessInstanceTasks {
 
     @Steps
-    private RuntimeBundleSteps runtimeBundleSteps;
+    private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
+    @Steps
+    private TaskRuntimeBundleSteps taskRuntimeBundleSteps;
+    @Steps
+    private ProcessRuntimeAdminSteps processRuntimeAdminSteps;
+
+    @Steps
+    private ProcessQuerySteps processQuerySteps;
+    @Steps
+    private TaskQuerySteps taskQuerySteps;
+    @Steps
+    private ProcessQueryAdminSteps processQueryAdminSteps;
 
     @Steps
     private AuditSteps auditSteps;
-
     @Steps
-    private QuerySteps querySteps;
+    private AuditAdminSteps auditAdminSteps;
 
     private ProcessInstance processInstance;
 
@@ -66,9 +82,14 @@ public class ProcessInstanceTasks {
 
     @When("services are started")
     public void checkServicesStatus() {
-        runtimeBundleSteps.checkServicesHealth();
+        processRuntimeBundleSteps.checkServicesHealth();
+        taskRuntimeBundleSteps.checkServicesHealth();
+        processRuntimeAdminSteps.checkServicesHealth();
+        processQuerySteps.checkServicesHealth();
+        taskQuerySteps.checkServicesHealth();
+        processQueryAdminSteps.checkServicesHealth();
         auditSteps.checkServicesHealth();
-        querySteps.checkServicesHealth();
+        auditAdminSteps.checkServicesHealth();
     }
 
     @When("the user starts with variables for $processName with variables $variableName1 and $variableName2")
@@ -77,14 +98,14 @@ public class ProcessInstanceTasks {
         variables.put(variableName1,variableName1);  //using var names as values
         variables.put(variableName2,variableName2);
 
-        processInstance = runtimeBundleSteps.startProcessWithVariables(processDefinitionKeyMatcher(processName),variables);
+        processInstance = processRuntimeBundleSteps.startProcessWithVariables(processDefinitionKeyMatcher(processName),variables);
         checkProcessWithTaskCreated(processName);
     }
 
     @When("the user starts a $processName")
     public void startProcess(String processName) {
 
-        processInstance = runtimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName));
+        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName));
         checkProcessWithTaskCreated(processName);
     }
 
@@ -93,7 +114,7 @@ public class ProcessInstanceTasks {
 
         if(withTasks(processName)){
             List<Task> tasks = new ArrayList<>(
-                    runtimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId()));
+                    processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId()));
             assertThat(tasks).isNotEmpty();
             currentTask = tasks.get(0);
             assertThat(currentTask).isNotNull();
@@ -105,41 +126,48 @@ public class ProcessInstanceTasks {
     @Given("any suspended process instance")
     public void suspendCurrentProcessInstance() {
         this.startProcess("SIMPLE_PROCESS_INSTANCE");
-        runtimeBundleSteps.suspendProcessInstance(processInstance.getId());
+        processRuntimeBundleSteps.suspendProcessInstance(processInstance.getId());
     }
 
     @When("the assignee is $user")
     public void checkAssignee(String user)throws Exception {
-        assertThat(runtimeBundleSteps.getTaskById(currentTask.getId()).getAssignee()).isEqualTo(user);
+        assertThat(taskRuntimeBundleSteps.getTaskById(currentTask.getId()).getAssignee()).isEqualTo(user);
     }
 
-    @When("the $user claims the task")
-    public void claimTask(String user) throws Exception {
-        runtimeBundleSteps.assignTaskToUser(currentTask.getId(),
-                                            user);
+    @When("the user claims the task")
+    public void claimTask() throws Exception {
+        taskRuntimeBundleSteps.claimTask(currentTask.getId());
     }
 
     @When("the user completes the task")
     public void completeTask() throws Exception {
-        runtimeBundleSteps.completeTask(currentTask.getId());
+        taskRuntimeBundleSteps.completeTask(currentTask.getId(),
+                TaskPayloadBuilder
+                        .complete()
+                        .withTaskId(currentTask.getId())
+                        .build());
     }
 
     @Then("the user cannot complete the task")
-    public void cannotCompleteTask() throws Exception{
-        runtimeBundleSteps.cannotCompleteTask(currentTask.getId());
+    public void cannotCompleteTask() throws Exception {
+        taskRuntimeBundleSteps.cannotCompleteTask(currentTask.getId(),
+                TaskPayloadBuilder
+                        .complete()
+                        .withTaskId(currentTask.getId())
+                        .build());
     }
 
     @When("the status of the task since the beginning is $status")
     public void checkTaskStatusSinceBeginning(Task.TaskStatus status){
-        querySteps.checkTaskStatus(currentTask.getId(), status);
-        runtimeBundleSteps.checkTaskStatus(currentTask.getId(), status);
+        taskRuntimeBundleSteps.checkTaskStatus(currentTask.getId(), status);
+        taskQuerySteps.checkTaskStatus(currentTask.getId(), status);
         auditSteps.checkTaskCreatedAndAssignedEventsWhenAlreadyAssinged(currentTask.getId());
     }
 
     @When("the status of the task is $status")
     public void checkTaskStatus(Task.TaskStatus status) throws Exception {
-        querySteps.checkTaskStatus(currentTask.getId(), status);
-        runtimeBundleSteps.checkTaskStatus(currentTask.getId(), status);
+        taskRuntimeBundleSteps.checkTaskStatus(currentTask.getId(), status);
+        taskQuerySteps.checkTaskStatus(currentTask.getId(), status);
 
         switch (status){
             case CREATED:
@@ -155,38 +183,37 @@ public class ProcessInstanceTasks {
 
     }
 
-    @Then("the task cannot be claimed by $user")
-    public void cannotClaimTask(String user) throws Exception {
-        runtimeBundleSteps.cannotAssignTaskToUser(currentTask.getId(),
-                                            user);
+    @Then("the task cannot be claimed by user")
+    public void cannotClaimTask() throws Exception {
+        taskRuntimeBundleSteps.cannotClaimTask(currentTask.getId());
         //the claimed task shouldn't be found by query
-        Collection <? extends Task> tasks = querySteps.getAllTasks().getContent();
+        Collection <? extends Task> tasks = taskQuerySteps.getAllTasks().getContent();
         assertThat(tasks).extracting("id").doesNotContain(currentTask.getId());
     }
 
     @Then("tasks of $processName cannot be seen by user")
     public void cannotSeeTasksOfDefinition(String processName) throws Exception {
-        Collection <? extends Task> tasks = querySteps.getAllTasks().getContent();
+        Collection <? extends Task> tasks = taskQuerySteps.getAllTasks().getContent();
         assertThat(tasks).extracting("processDefinitionId").doesNotContain(processDefinitionKeyMatcher(processName));
     }
 
     @Then("the status of the process and the task is changed to completed")
     public void verifyProcessAndTasksStatus() throws Exception {
 
-        querySteps.checkProcessInstanceStatus(processInstance.getId(),
-                                              ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        processQuerySteps.checkProcessInstanceStatus(processInstance.getId(),
+                ProcessInstance.ProcessInstanceStatus.COMPLETED);
         auditSteps.checkProcessInstanceTaskEvent(processInstance.getId(),
                                                  currentTask.getId(),
                                                  TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
         //the process instance disappears once it is completed
-        runtimeBundleSteps.checkProcessInstanceIsNotPresent(processInstance.getId());
+        processRuntimeBundleSteps.checkProcessInstanceIsNotPresent(processInstance.getId());
 
     }
 
     @Then("the status of the process is changed to completed")
     public void verifyProcessStatus() throws Exception {
 
-        querySteps.checkProcessInstanceStatus(processInstance.getId(),
+        processQuerySteps.checkProcessInstanceStatus(processInstance.getId(),
                 ProcessInstance.ProcessInstanceStatus.COMPLETED);
         auditSteps.checkProcessInstanceEvent(processInstance.getId(), ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED);
     }
@@ -195,84 +222,85 @@ public class ProcessInstanceTasks {
     @When("a variable was created with name $variableName")
     public void verifyVariableCreated(String variableName) throws Exception {
 
-        querySteps.checkProcessInstanceHasVariable(processInstance.getId(),variableName);
-
-        auditSteps.checkProcessInstanceVariableEvent(processInstance.getId(), variableName, VariableEvent.VariableEvents.VARIABLE_CREATED);
+        processQuerySteps.checkProcessInstanceHasVariable(processInstance.getId(),
+                variableName);
+        auditSteps.checkProcessInstanceVariableEvent(processInstance.getId(),
+                variableName,
+                VariableEvent.VariableEvents.VARIABLE_CREATED);
 
     }
 
     @When("the user deletes the process")
     public void deleteCurrentProcessInstance() throws Exception {
-        runtimeBundleSteps.deleteProcessInstance(processInstance.getId());
+        processRuntimeBundleSteps.deleteProcessInstance(processInstance.getId());
     }
 
     @Then("the process instance is deleted")
     public void verifyProcessInstanceIsDeleted() throws Exception {
         //TODO change to DELETED status and PROCESS_DELETED event when RB is ready
-        runtimeBundleSteps.checkProcessInstanceNotFound(processInstance.getId());
-        querySteps.checkProcessInstanceStatus(processInstance.getId(),
-                                              ProcessInstance.ProcessInstanceStatus.CANCELLED);
+        processRuntimeBundleSteps.checkProcessInstanceNotFound(processInstance.getId());
+        processQuerySteps.checkProcessInstanceStatus(processInstance.getId(),
+                ProcessInstance.ProcessInstanceStatus.CANCELLED);
         auditSteps.checkProcessInstanceEvent(processInstance.getId(),
                                              ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED);
     }
 
     @When("open the process diagram")
     public void openProcessInstanceDiagram() {
-        processInstanceDiagram = runtimeBundleSteps.openProcessInstanceDiagram(processInstance.getId());
+        processInstanceDiagram = processRuntimeBundleSteps.openProcessInstanceDiagram(processInstance.getId());
     }
 
     @Then("the diagram is shown")
     public void checkProcessInstanceDiagram() throws Exception {
-        runtimeBundleSteps.checkProcessInstanceDiagram(processInstanceDiagram);
+        processRuntimeBundleSteps.checkProcessInstanceDiagram(processInstanceDiagram);
     }
 
     @Then("no diagram is shown")
     public void checkProcessInstanceNoDiagram() throws Exception {
-        runtimeBundleSteps.checkProcessInstanceNoDiagram(processInstanceDiagram);
+        processRuntimeBundleSteps.checkProcessInstanceNoDiagram(processInstanceDiagram);
     }
 
     @When("activate the process")
     public void activateCurrentProcessInstance() {
-        runtimeBundleSteps.activateProcessInstance(processInstance.getId());
+        processRuntimeBundleSteps.activateProcessInstance(processInstance.getId());
     }
 
     @Then("the process cannot be activated anymore")
     @ExpectRestNotFound("Unable to find process instance for the given id")
     public void cannotActivateProcessInstance() {
-        runtimeBundleSteps.activateProcessInstance(processInstance.getId());
+        processRuntimeBundleSteps.activateProcessInstance(processInstance.getId());
     }
 
     @Then("the user can get events for process with variables instances in admin endpoint")
     public void checkIfEventsFromProcessesWithVariablesArePresentAdmin(){
         //TODO some refactoring after fixing the behavior of the /admin/v1/events?search=entityId:UUID endpoint
-        Collection<CloudRuntimeEvent> filteredCollection = checkEvents(auditSteps.getEventsByEntityIdAdmin(Serenity.sessionVariableCalled("processInstanceId")), processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
+        Collection<CloudRuntimeEvent> filteredCollection = checkEvents(auditAdminSteps.getEventsByEntityIdAdmin(Serenity.sessionVariableCalled("processInstanceId")), processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
         assertThat(filteredCollection).isNotEmpty();
         assertThat(((ProcessInstanceImpl)filteredCollection.iterator().next().getEntity()).getProcessDefinitionKey()).isEqualTo(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
     }
 
     @Then("the user can query process with variables instances in admin endpoints")
     public void checkIfProcessWithVariablesArePresentQueryAdmin(){
-        assertThat(checkProcessInstances(querySteps.getAllProcessInstancesAdmin(),processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
+        assertThat(checkProcessInstances(processQueryAdminSteps.getAllProcessInstancesAdmin(),processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
     }
 
     @Then("the user can get process with variables instances in admin endpoint")
     public void checkIfProcessWithVariablesArePresentAdmin(){
-        assertThat(checkProcessInstances(runtimeBundleSteps.getAllProcessInstancesAdmin(), processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
+        assertThat(checkProcessInstances(processRuntimeAdminSteps.getProcessInstances(), processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
     }
 
     @Then("the task from $processName is $status and it is called $taskName")
     public void checkTaskFromProcessInstance(String processName,Task.TaskStatus status, String taskName){
         List<ProcessInstance> processInstancesList = new ArrayList<>(
-                runtimeBundleSteps.getAllProcessInstances().getContent());
-
+                processRuntimeBundleSteps.getAllProcessInstances().getContent());
         assertThat(processInstancesList).extracting("processDefinitionKey")
-                                        .contains(processDefinitionKeyMatcher(processName));
+                .contains(processDefinitionKeyMatcher(processName));
 
         //filter the list
         processInstancesList = processInstancesList.stream().filter(p -> p.getProcessDefinitionKey().equals(processDefinitionKeyMatcher(processName))).collect(Collectors.toList());
         assertThat(processInstancesList.size()).isEqualTo(1);
 
-        List<Task> tasksList = new ArrayList<>(runtimeBundleSteps.getTaskByProcessInstanceId(processInstancesList.get(0).getId()));
+        List<Task> tasksList = new ArrayList<>(processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstancesList.get(0).getId()));
 
         assertThat(tasksList).isNotEmpty();
         currentTask = tasksList.get(0);
@@ -282,7 +310,7 @@ public class ProcessInstanceTasks {
 
     @When("the user gets the process definitions")
     public void getProcessDefinitions(){
-        Collection<ProcessDefinition> processDefinitions = runtimeBundleSteps.getProcessDefinitions().getContent();
+        Collection<ProcessDefinition> processDefinitions = processRuntimeBundleSteps.getProcessDefinitions().getContent();
         Serenity.setSessionVariable("processDefinitions").to(processDefinitions);
     }
 
@@ -296,8 +324,8 @@ public class ProcessInstanceTasks {
 
     @Then("the $processName definition has the $field field with value $value")
     public void checkIfFieldIsPresentAndHasValue(String processName, String field, String value){
-        ProcessDefinition processDefinition =   runtimeBundleSteps
-                                                .getProcessDefinitionByKey(processDefinitionKeyMatcher(processName));
+        ProcessDefinition processDefinition = processRuntimeBundleSteps
+                .getProcessDefinitionByKey(processDefinitionKeyMatcher(processName));
         assertThat(processDefinition)
                 .extracting(field)
                 .contains(value);

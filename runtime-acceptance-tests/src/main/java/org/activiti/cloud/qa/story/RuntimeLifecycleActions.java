@@ -19,16 +19,21 @@ package org.activiti.cloud.qa.story;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.qa.rest.DirtyContextHandler;
 import org.activiti.cloud.qa.rest.EnableDirtyContext;
-import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.AuthenticationSteps;
-import org.activiti.cloud.qa.steps.QuerySteps;
-import org.activiti.cloud.qa.steps.RuntimeBundleSteps;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeStories;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.activiti.cloud.acceptance.steps.audit.AuditSteps;
+import org.activiti.cloud.acceptance.steps.audit.admin.AuditAdminSteps;
+import org.activiti.cloud.acceptance.steps.query.ProcessQuerySteps;
+import org.activiti.cloud.acceptance.steps.query.TaskQuerySteps;
+import org.activiti.cloud.acceptance.steps.query.admin.ProcessQueryAdminSteps;
+import org.activiti.cloud.acceptance.steps.runtime.ProcessRuntimeBundleSteps;
+import org.activiti.cloud.acceptance.steps.runtime.TaskRuntimeBundleSteps;
+import org.activiti.cloud.acceptance.steps.runtime.admin.ProcessRuntimeAdminSteps;
 
 /**
- * Lifecycle steps
+ * Lifecycle org.activiti.cloud.acceptance.steps
  */
 @EnableDirtyContext
 public class RuntimeLifecycleActions {
@@ -40,20 +45,35 @@ public class RuntimeLifecycleActions {
     private AuthenticationSteps authenticationSteps;
 
     @Steps
-    private RuntimeBundleSteps runtimeBundleSteps;
+    private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
+    @Steps
+    private TaskRuntimeBundleSteps taskRuntimeBundleSteps;
+    @Steps
+    private ProcessRuntimeAdminSteps processRuntimeAdminSteps;
+
+    @Steps
+    private ProcessQuerySteps processQuerySteps;
+    @Steps
+    private TaskQuerySteps taskQuerySteps;
+    @Steps
+    private ProcessQueryAdminSteps processQueryAdminSteps;
 
     @Steps
     private AuditSteps auditSteps;
-
     @Steps
-    private QuerySteps querySteps;
+    private AuditAdminSteps auditAdminSteps;
 
     @BeforeStories
     public void checkServicesHealth() throws Exception {
         authenticationSteps.authenticateUser("testuser");
-        runtimeBundleSteps.checkServicesHealth();
+        processRuntimeBundleSteps.checkServicesHealth();
+        taskRuntimeBundleSteps.checkServicesHealth();
+        processRuntimeAdminSteps.checkServicesHealth();
+        processQuerySteps.checkServicesHealth();
+        taskQuerySteps.checkServicesHealth();
+        processQueryAdminSteps.checkServicesHealth();
         auditSteps.checkServicesHealth();
-        querySteps.checkServicesHealth();
+        auditAdminSteps.checkServicesHealth();
     }
 
     @AfterScenario

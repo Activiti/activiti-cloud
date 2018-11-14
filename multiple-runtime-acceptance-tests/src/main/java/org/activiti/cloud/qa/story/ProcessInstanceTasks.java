@@ -19,11 +19,10 @@ package org.activiti.cloud.qa.story;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.activiti.cloud.qa.steps.AuditSteps;
 import org.activiti.cloud.qa.steps.MultipleRuntimeBundleSteps;
-import org.activiti.cloud.qa.steps.QuerySteps;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.activiti.cloud.acceptance.steps.query.ProcessQuerySteps;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,10 +32,7 @@ public class ProcessInstanceTasks {
     private MultipleRuntimeBundleSteps runtimeBundleSteps;
 
     @Steps
-    private AuditSteps auditSteps;
-
-    @Steps
-    private QuerySteps querySteps;
+    private ProcessQuerySteps processQuerySteps;
 
     private CloudProcessInstance processInstance;
 
@@ -49,7 +45,7 @@ public class ProcessInstanceTasks {
 
     @Then("a signal was received and the signal catch process was completed")
     public void startSignalThrowProcessInstance() throws Exception {
-        querySteps.checkProcessInstanceStatus(processInstance.getId(),
+        processQuerySteps.checkProcessInstanceStatus(processInstance.getId(),
                                               ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
 }

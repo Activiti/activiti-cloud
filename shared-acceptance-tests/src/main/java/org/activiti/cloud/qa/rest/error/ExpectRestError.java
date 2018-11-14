@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
 
 /**
- * Expect rest error annotation
+ * Expect org.activiti.cloud.acceptance.rest error annotation
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

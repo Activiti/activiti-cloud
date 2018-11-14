@@ -24,7 +24,7 @@ import org.jbehave.core.annotations.BeforeScenario;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Lifecycle steps
+ * Lifecycle org.activiti.cloud.acceptance.steps
  */
 @EnableDirtyContext
 public class LifecycleActions {

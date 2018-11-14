@@ -2,7 +2,7 @@ Meta:
 
 Narrative:
 As a user
-I want to perform operations on process instances
+I want to perform org.activiti.cloud.acceptance.operations on process instances
 
 Scenario: check all process definitions are present
 Given the user is authenticated as testuser

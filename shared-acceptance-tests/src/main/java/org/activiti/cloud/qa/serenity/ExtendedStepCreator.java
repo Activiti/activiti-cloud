@@ -121,7 +121,7 @@ public class ExtendedStepCreator extends StepCreator {
     }
 
     /**
-     * Extended ParametrisedStep for steps that is expecting to throw an exception
+     * Extended ParametrisedStep for org.activiti.cloud.acceptance.steps that is expecting to throw an exception
      */
     class ExpectingExceptionParametrisedStep extends ParametrisedStep {
 

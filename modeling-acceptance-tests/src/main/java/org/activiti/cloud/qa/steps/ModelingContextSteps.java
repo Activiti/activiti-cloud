@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
 /**
- * Modeling context steps
+ * Modeling context org.activiti.cloud.acceptance.steps
  */
 @EnableDirtyContext
 public abstract class ModelingContextSteps<M> {

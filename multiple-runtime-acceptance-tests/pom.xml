@@ -24,5 +24,10 @@
       <artifactId>runtime-acceptance-tests</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>core-acceptance-tests</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>
