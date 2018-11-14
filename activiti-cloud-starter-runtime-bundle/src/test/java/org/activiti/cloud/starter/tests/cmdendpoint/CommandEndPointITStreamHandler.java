@@ -32,7 +32,7 @@ public class CommandEndPointITStreamHandler {
 
     private AtomicBoolean startedProcessInstanceAck = new AtomicBoolean(false);
     private AtomicBoolean suspendedProcessInstanceAck = new AtomicBoolean(false);
-    private AtomicBoolean activatedProcessInstanceAck = new AtomicBoolean(false);
+    private AtomicBoolean resumedProcessInstanceAck = new AtomicBoolean(false);
     private AtomicBoolean claimedTaskAck = new AtomicBoolean(false);
     private AtomicBoolean releasedTaskAck = new AtomicBoolean(false);
     private AtomicBoolean completedTaskAck = new AtomicBoolean(false);
@@ -52,7 +52,7 @@ public class CommandEndPointITStreamHandler {
         } else if (result.getPayload() instanceof SuspendProcessPayload) {
             suspendedProcessInstanceAck.set(true);
         } else if (result.getPayload() instanceof ResumeProcessPayload) {
-            activatedProcessInstanceAck.set(true);
+            resumedProcessInstanceAck.set(true);
         } else if (result.getPayload() instanceof ClaimTaskPayload) {
             claimedTaskAck.set(true);
         } else if (result.getPayload() instanceof ReleaseTaskPayload) {
@@ -82,8 +82,8 @@ public class CommandEndPointITStreamHandler {
         return suspendedProcessInstanceAck;
     }
 
-    public AtomicBoolean getActivatedProcessInstanceAck() {
-        return activatedProcessInstanceAck;
+    public AtomicBoolean getResumedProcessInstanceAck() {
+        return resumedProcessInstanceAck;
     }
 
     public AtomicBoolean getClaimedTaskAck() {

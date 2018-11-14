@@ -36,11 +36,11 @@ public interface ProcessInstanceController {
     @RequestMapping(value = "/signal")
     ResponseEntity<Void> sendSignal(@RequestBody SignalPayload signalPayload);
 
-    @RequestMapping(value = "{processInstanceId}/suspend")
+    @RequestMapping(value = "{processInstanceId}/suspend", method = RequestMethod.POST)
     ProcessInstanceResource suspend(@PathVariable String processInstanceId);
 
-    @RequestMapping(value = "{processInstanceId}/activate")
-    ProcessInstanceResource activate(@RequestBody String processInstanceId);
+    @RequestMapping(value = "{processInstanceId}/resume", method = RequestMethod.POST)
+    ProcessInstanceResource resume(@RequestBody String processInstanceId);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.DELETE)
     ProcessInstanceResource deleteProcessInstance(@PathVariable String processInstanceId);

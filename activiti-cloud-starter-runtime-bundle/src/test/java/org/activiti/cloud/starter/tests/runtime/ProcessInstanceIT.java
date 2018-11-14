@@ -343,7 +343,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void activateShouldPutASuspendedProcessInstanceBackToActiveState() {
+    public void resumeShouldPutASuspendedProcessInstanceBackToActiveState() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         executeRequestSuspendProcess(startProcessEntity);

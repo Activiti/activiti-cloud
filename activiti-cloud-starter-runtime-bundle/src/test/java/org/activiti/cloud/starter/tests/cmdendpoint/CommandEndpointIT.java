@@ -18,6 +18,12 @@
 
 package org.activiti.cloud.starter.tests.cmdendpoint;
 
+import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
+import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,12 +69,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
-import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
@@ -185,7 +185,7 @@ public class CommandEndpointIT {
 
         assertThat(streamHandler.getStartedProcessInstanceAck()).isTrue();
         assertThat(streamHandler.getSuspendedProcessInstanceAck()).isTrue();
-        assertThat(streamHandler.getActivatedProcessInstanceAck()).isTrue();
+        assertThat(streamHandler.getResumedProcessInstanceAck()).isTrue();
         assertThat(streamHandler.getClaimedTaskAck()).isTrue();
         assertThat(streamHandler.getReleasedTaskAck()).isTrue();
         assertThat(streamHandler.getCompletedTaskAck()).isTrue();
@@ -290,7 +290,7 @@ public class CommandEndpointIT {
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(resumeProcess).setHeader("cmdId",
                                                                                               resumeProcess.getId()).build());
 
-        await("process to be activated").untilTrue(streamHandler.getActivatedProcessInstanceAck());
+        await("process to be resumed").untilTrue(streamHandler.getResumedProcessInstanceAck());
 
         await().untilAsserted(() -> {
 

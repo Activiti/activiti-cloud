@@ -142,7 +142,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-    public ProcessInstanceResource activate(@PathVariable String processInstanceId) {
+    public ProcessInstanceResource resume(@PathVariable String processInstanceId) {
         return resourceAssembler.toResource(processRuntime.resume(ProcessPayloadBuilder.resume(processInstanceId)));
     }
 

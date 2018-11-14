@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +38,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @Component
 public class ProcessInstanceRestTemplate {
@@ -170,7 +170,7 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<Void> resume(ResponseEntity<CloudProcessInstance> startProcessEntity) {
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startProcessEntity.getBody().getId() + "/activate",
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startProcessEntity.getBody().getId() + "/resume",
                                                                         HttpMethod.POST,
                                                                         null,
                                                                         new ParameterizedTypeReference<Void>() {
