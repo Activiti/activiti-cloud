@@ -63,6 +63,21 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
+import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceAdminControllerImpl.class)
 @EnableSpringDataWebSupport
@@ -73,10 +88,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
         ServicesRestAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
-@EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
 public class ProcessInstanceAdminControllerImplIT {
 
-    private static final String DOCUMENTATION_IDENTIFIER = "process-instance";
+    private static final String DOCUMENTATION_IDENTIFIER = "process-instance-admin";
 
     private static final String DOCUMENTATION_IDENTIFIER_ALFRESCO = "process-instance-alfresco";
 
@@ -99,15 +114,15 @@ public class ProcessInstanceAdminControllerImplIT {
 
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstances = new PageImpl<>(processInstanceList,
-                                                                processInstanceList.size());
+                processInstanceList.size());
         when(processAdminRuntime.processInstances(any())).thenReturn(processInstances);
 
         this.mockMvc.perform(get("/admin/v1/process-instances"))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                responseFields(subsectionWithPath("page").description("Pagination details."),
-                                               subsectionWithPath("_links").description("The hypermedia links."),
-                                               subsectionWithPath("_embedded").description("The process definitions."))));
+                        responseFields(subsectionWithPath("page").description("Pagination details."),
+                                subsectionWithPath("_links").description("The hypermedia links."),
+                                subsectionWithPath("_embedded").description("The process definitions."))));
     }
 
     @Test
@@ -115,26 +130,43 @@ public class ProcessInstanceAdminControllerImplIT {
 
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList,
-                                                                   processInstanceList.size());
+                processInstanceList.size());
         when(processAdminRuntime.processInstances(any())).thenReturn(processInstancePage);
 
         this.mockMvc.perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
-                                pageRequestParameters(),
-                                pagedResourcesResponseFields()));
+                        pageRequestParameters(),
+                        pagedResourcesResponseFields()));
+    }
+
+    @Test
+    public void resume() throws Exception {
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+
+        when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
+
+        when(processAdminRuntime.resume(any())).thenReturn(defaultProcessInstance());
+
+        this.mockMvc.perform(RestDocumentationRequestBuilders.post("/admin/v1/process-instances/{processInstanceId}/resume",
+                1))
+                .andExpect(status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/resume",
+                        pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
     
     @Test
     public void suspend() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
-         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
-         when(processAdminRuntime.suspend(any())).thenReturn(defaultProcessInstance());
-         this.mockMvc.perform(RestDocumentationRequestBuilders.post("/admin/v1/process-instances/{processInstanceId}/suspend",
-                1))
-                .andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/suspend",
-                        pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+        when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
+        when(processAdminRuntime.suspend(any())).thenReturn(defaultProcessInstance());
+        this.mockMvc.perform(RestDocumentationRequestBuilders.post("/admin/v1/process-instances/{processInstanceId}/suspend",
+               1))
+               .andExpect(status().isOk())
+               .andDo(MockMvcResultHandlers.print())
+               .andDo(document(DOCUMENTATION_IDENTIFIER + "/suspend",
+                       pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
     }
 }

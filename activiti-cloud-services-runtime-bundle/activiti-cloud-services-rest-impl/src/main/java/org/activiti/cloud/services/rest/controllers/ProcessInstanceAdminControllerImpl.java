@@ -30,6 +30,7 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -81,6 +82,11 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
     @Override
     public ProcessInstanceResource startProcess(@RequestBody StartProcessPayload startProcessPayload) {
         return resourceAssembler.toResource(processAdminRuntime.start(startProcessPayload));
+    }
+
+    @Override
+    public ProcessInstanceResource resume(@PathVariable String processInstanceId) {
+        return resourceAssembler.toResource(processAdminRuntime.resume(ProcessPayloadBuilder.resume(processInstanceId)));
     }
 
 
