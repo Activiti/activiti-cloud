@@ -53,13 +53,5 @@
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-openfeign-core</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.xmlgraphics</groupId>
-      <artifactId>batik-transcoder</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.xmlgraphics</groupId>
-      <artifactId>batik-codec</artifactId>
-    </dependency>
   </dependencies>
 </project>

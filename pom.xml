@@ -10,7 +10,6 @@
     <module>activiti-cloud-acceptance-tests-dependencies</module>
     <module>activiti-cloud-acceptance-tests-shared</module>
     <module>activiti-cloud-acceptance-tests-core</module>
-    <module>bpmn-scenarios-set0</module>
   </modules>
   <scm>
     <url>https://github.com/Activiti/activiti-cloud-acceptance-tests</url>
@@ -24,35 +23,27 @@
       <name>Central Releases - Staging</name>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
-    <snapshotRepository>
-      <id>activiti-enterprise-snapshots</id>
-      <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
-    </snapshotRepository>
   </distributionManagement>
   <properties>
-    <activiti-cloud.version>7.0.77</activiti-cloud.version>
+    <activiti-cloud-api.version>7.0.21</activiti-cloud-api.version>
     <activiti-cloud-acceptance-tests.version>${project.version}</activiti-cloud-acceptance-tests.version>
+    <serenity.version>1.9.6</serenity.version>
+    <serenity-jbehave.version>1.38.0</serenity-jbehave.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <enforcer.skip>true</enforcer.skip>
     <java.version>1.8</java.version>
     <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     <feign-form.version>3.2.2</feign-form.version>
-    <serenity.version>1.9.6</serenity.version>
-    <serenity-jbehave.version>1.38.0</serenity-jbehave.version>
+    <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
     <awaitility.version>3.1.1</awaitility.version>
     <batik.version>1.10</batik.version>
-
-    <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
-    <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
-    <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.dependencies</groupId>
-        <artifactId>activiti-cloud-dependencies</artifactId>
-        <version>${activiti-cloud.version}</version>
+        <groupId>org.activiti.cloud.api</groupId>
+        <artifactId>activiti-cloud-api-dependencies</artifactId>
+        <version>${activiti-cloud-api.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -65,11 +56,6 @@
         <groupId>org.activiti.cloud.acc</groupId>
         <artifactId>activiti-cloud-acceptance-tests-core</artifactId>
         <version>${activiti-cloud-acceptance-tests.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>23.6-jre</version>
       </dependency>
       <dependency>
         <groupId>org.awaitility</groupId>
@@ -136,39 +122,6 @@
         <configuration>
           <skip>true</skip>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${maven-failsafe-plugin.version}</version>
-        <configuration>
-          <includes>
-            <include>**/*Test.java</include>
-            <include>**/*Tests.java</include>
-            <include>**/*TestSuite.java</include>
-          </includes>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>net.serenity-bdd.maven.plugins</groupId>
-        <artifactId>serenity-maven-plugin</artifactId>
-        <version>${serenity.version}</version>
-        <executions>
-          <execution>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>aggregate</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
