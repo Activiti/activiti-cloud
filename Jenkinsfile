@@ -56,7 +56,7 @@ pipeline {
             sh 'mvn clean deploy -DskipTests'
 
             sh 'export VERSION=`cat VERSION`' 
-            sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-dependencies \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.acc:activiti-cloud-acceptance-tests-dependencies \$(cat VERSION)"
             sh "updatebot update --merge false"
           }
         }
