@@ -98,6 +98,7 @@
     <activiti-cloud-audit-service.version>7.0.31</activiti-cloud-audit-service.version>
     <activiti-cloud-connectors.version>7.0.32</activiti-cloud-connectors.version>
     <activiti-cloud-app-service.version>7.0.26</activiti-cloud-app-service.version>
+    <activiti-cloud-acceptance-tests.version>7.0.0</activiti-cloud-acceptance-tests.version>
   </properties>
 
   <dependencyManagement>
@@ -155,6 +156,13 @@
         <groupId>org.activiti.cloud.app</groupId>
         <artifactId>activiti-cloud-app-dependencies</artifactId>
         <version>${activiti-cloud-app-service.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.acc</groupId>
+        <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
+        <version>${activiti-cloud-acceptance-tests.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
