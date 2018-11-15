@@ -35,9 +35,11 @@ Then no diagram is shown
 
 Scenario: complete a process instance that uses a connector
 Given the user is authenticated as testuser
-When the user starts an instance of the process called CONNECTOR_PROCESS_INSTANCE
+When the user starts a process with variables called CONNECTOR_PROCESS_INSTANCE
 Then the status of the process is changed to completed
 And a variable was created with name var1
+And a variable was created with name test-json-variable-result
+And a variable was created with name test-long-json-variable-result
 
 Scenario: check all process definitions are present as admin
 Given the user is authenticated as hradmin
