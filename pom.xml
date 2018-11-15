@@ -32,9 +32,8 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <activiti-cloud.version>7.0.77</activiti-cloud.version>
+    <activiti-cloud.version>7.0.79</activiti-cloud.version>
     <activiti-cloud-modeling.version>7.0.3</activiti-cloud-modeling.version>
-    <activiti-cloud-acceptance-tests.version>7.0.0-SNAPSHOT</activiti-cloud-acceptance-tests.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <enforcer.skip>true</enforcer.skip>
     <java.version>1.8</java.version>
@@ -62,13 +61,6 @@
         <groupId>org.activiti.cloud.dependencies</groupId>
         <artifactId>activiti-cloud-modeling-dependencies</artifactId>
         <version>${activiti-cloud-modeling.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.acc</groupId>
-        <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
-        <version>${activiti-cloud-acceptance-tests.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
