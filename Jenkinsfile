@@ -88,7 +88,7 @@ pipeline {
             sh "jx step git credentials"
 
             sh "echo pushing with update using version \$(cat VERSION)"
-
+            sh "updatebot version"
             sh "updatebot push-version --kind maven org.activiti.cloud.acc:activiti-cloud-acceptance-tests-dependencies \$(cat VERSION)"
             
           }
