@@ -29,7 +29,8 @@ public class CloudIntegrationRequestedImpl extends CloudRuntimeEventImpl<Integra
 
     public CloudIntegrationRequestedImpl(IntegrationContext integrationContext) {
         super(integrationContext);
-        setEntityId(integrationContext.getProcessInstanceId());
+        if (getEntity()!=null) 
+            setEntityId(getEntity().getId());
     }
 
     @Override
