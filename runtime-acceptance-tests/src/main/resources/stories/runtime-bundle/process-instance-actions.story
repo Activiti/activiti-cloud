@@ -40,6 +40,8 @@ Then the status of the process is changed to completed
 And a variable was created with name var1
 And a variable was created with name test-json-variable-result
 And a variable was created with name test-long-json-variable-result
+And a variable was created with name test-int-variable-result
+And a variable was created with name test-bool-variable-result
 
 Scenario: check all process definitions are present as admin
 Given the user is authenticated as hradmin
