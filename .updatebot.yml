@@ -4,3 +4,4 @@ github:
     repositories:
     - name: activiti-cloud-modeling-dependencies
       branch: develop
+      useSinglePullRequest: true      
