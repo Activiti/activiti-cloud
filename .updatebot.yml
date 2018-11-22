@@ -20,3 +20,5 @@ github:
       branch: develop
     - name: activiti-cloud-app-service
       branch: develop
+    - name: activiti-cloud-dependencies
+      branch: develop
