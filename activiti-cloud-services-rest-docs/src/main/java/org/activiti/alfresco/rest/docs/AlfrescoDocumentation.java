@@ -16,8 +16,12 @@
 
 package org.activiti.alfresco.rest.docs;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
+import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 import org.springframework.restdocs.request.PathParametersSnippet;
 import org.springframework.restdocs.request.RequestParametersSnippet;
@@ -44,7 +48,12 @@ public class AlfrescoDocumentation {
 
     public static ResponseFieldsSnippet pagedResourcesResponseFields() {
         return responseFields(
-                subsectionWithPath("list").ignored(),
+                listFieldDescriptors()
+        );
+    }
+
+    private static FieldDescriptor[] listFieldDescriptors() {
+        return new FieldDescriptor[]{subsectionWithPath("list").ignored(),
                 subsectionWithPath("list.entries").description("List of results."),
                 subsectionWithPath("list.entries[].entry").description("Wrapper for each entry in the list of results."),
                 subsectionWithPath("list.pagination").description("Pagination metadata."),
@@ -59,18 +68,27 @@ public class AlfrescoDocumentation {
                                              "in this response. If true then a request with a larger value for either the skipCount or the maxItems " +
                                              "parameter is expected to return further results."),
                 subsectionWithPath("list.pagination.totalItems")
-                        .description("An integer value that indicates the total number of entities in the addressed collection.")
-        );
+                        .description("An integer value that indicates the total number of entities in the addressed collection.")};
+    }
+
+    public static ResponseFieldsSnippet alfrescoPagedProcessDefinitions() {
+        List<FieldDescriptor> allDescriptors = new ArrayList<>(Arrays.asList(listFieldDescriptors()));
+        allDescriptors.addAll(Arrays.asList(processDefinitionFieldDescriptors("list.entries[].entry")));
+        return responseFields(allDescriptors);
     }
 
     public static ResponseFieldsSnippet processDefinitionFields() {
         return responseFields(
-                subsectionWithPath("entry").ignored(),
-                subsectionWithPath("entry.id").description("The process definition id."),
-                subsectionWithPath("entry.name").description("The process definition name."),
-                subsectionWithPath("entry.description").description("The process definition description."),
-                subsectionWithPath("entry.version").description("The process definition version.")
+                processDefinitionFieldDescriptors("entry")
         );
+    }
+
+    private static FieldDescriptor[] processDefinitionFieldDescriptors(String prefix) {
+        return new FieldDescriptor[]{subsectionWithPath(prefix).ignored(),
+                subsectionWithPath(prefix + ".id").description("The process definition id."),
+                subsectionWithPath(prefix + ".name").description("The process definition name."),
+                subsectionWithPath(prefix + ".description").description("The process definition description."),
+                subsectionWithPath(prefix + ".version").description("The process definition version.")};
     }
 
     public static PathParametersSnippet processDefinitionIdParameter() {
