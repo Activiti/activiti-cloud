@@ -16,28 +16,30 @@
 
 package org.activiti.cloud.api.process.model.impl.events;
 
-import org.activiti.api.process.model.SequenceFlow;
+import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 
-public class CloudSequenceFlowTakenImpl extends CloudRuntimeEventImpl<SequenceFlow, SequenceFlowEvent.SequenceFlowEvents> implements CloudSequenceFlowTakenEvent {
+public class CloudSequenceFlowTakenImpl extends CloudRuntimeEventImpl<BPMNSequenceFlow, SequenceFlowEvent.SequenceFlowEvents> implements CloudSequenceFlowTakenEvent {
 
     public CloudSequenceFlowTakenImpl() {
     }
 
-    public CloudSequenceFlowTakenImpl(SequenceFlow sequenceFlow) {
+    public CloudSequenceFlowTakenImpl(BPMNSequenceFlow sequenceFlow) {
         super(sequenceFlow);
         if (getEntity()!=null)
-            setEntityId(getEntity().getSourceActivityElementId());
+            setEntityId(getEntity().getElementId());
     }
 
     public CloudSequenceFlowTakenImpl(String id,
                                       Long timestamp,
-                                      SequenceFlow entity) {
+                                      BPMNSequenceFlow entity) {
         super(id,
               timestamp,
               entity);
+        if (getEntity()!=null)
+            setEntityId(getEntity().getElementId());
     }
 
     @Override
