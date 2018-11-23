@@ -16,11 +16,14 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.service.ModelReferenceService;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
@@ -352,6 +355,42 @@ public class ApplicationControllerIT {
                                                   .node("name").isEqualTo("process-model-2")
                                                   .node("type").isEqualTo("PROCESS")
                                                   .node("version").isEqualTo("0.0.1"));
+    }
+
+    @Test
+    public void testExportApplicationWithValidationErrors() throws Exception {
+        // GIVEN
+        ApplicationEntity application = (ApplicationEntity) applicationRepository
+                .createApplication(application("application-with-models"));
+
+        String processContent = "Invalid process xml";
+        ModelEntity processModel = processModelWithContent(application,
+                                                           "process-model",
+                                                           processContent);
+        doReturn(processModel.getData())
+                .when(modelReferenceService)
+                .getResource(eq(PROCESS),
+                             eq(processModel.getId()));
+
+        modelRepository.createModel(processModel);
+
+        List<ModelValidationError> expectedValidationErrors =
+                Arrays.asList(new ModelValidationError(),
+                              new ModelValidationError());
+
+        doReturn(expectedValidationErrors)
+                .when(modelReferenceService)
+                .validateResourceContent(eq(PROCESS),
+                                         eq(processContent.getBytes()));
+
+        // WHEN
+        MvcResult response = mockMvc.perform(
+                get("{version}/applications/{applicationId}/export",
+                    API_VERSION,
+                    application.getId()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
     }
 
     @Test

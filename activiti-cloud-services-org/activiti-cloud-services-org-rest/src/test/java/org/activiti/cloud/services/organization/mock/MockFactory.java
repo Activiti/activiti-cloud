@@ -42,9 +42,18 @@ public class MockFactory {
 
     public static ModelEntity processModelWithContent(String name,
                                                       String content) {
+        return processModelWithContent(null,
+                                       name,
+                                       content);
+    }
+
+    public static ModelEntity processModelWithContent(ApplicationEntity application,
+                                                      String name,
+                                                      String content) {
         ModelEntity processModel = new ModelEntity(id(),
                                                    name,
                                                    PROCESS);
+        processModel.setApplication(application);
         processModel.setContentType(CONTENT_TYPE_XML);
         processModel.setContent(content);
         processModel.setVersion("0.0.1");

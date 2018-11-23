@@ -240,10 +240,21 @@ public class ModelService {
         return Optional.ofNullable(modelValidatorsMapByModelType.get(modelType));
     }
 
+    public void validateModelContent(Model model) {
+        validateModelContent(model.getType(),
+                             modelRepository.getModelContent(model));
+    }
+
     public void validateModelContent(Model model,
                                      FileContent fileContent) {
-        findModelValidatorByModelType(model.getType())
-                .ifPresent(modelValidator -> modelValidator.validateModelContent(fileContent.getFileContent()));
+        validateModelContent(model.getType(),
+                             fileContent.getFileContent());
+    }
+
+    private void validateModelContent(String modelType,
+                                      byte[] modelContent) {
+        findModelValidatorByModelType(modelType)
+                .ifPresent(modelValidator -> modelValidator.validateModelContent(modelContent));
     }
 
     private ModelType findModelType(Model model) {

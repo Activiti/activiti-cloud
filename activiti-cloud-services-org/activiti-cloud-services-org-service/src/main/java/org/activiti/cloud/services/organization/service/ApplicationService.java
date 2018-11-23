@@ -17,12 +17,17 @@
 package org.activiti.cloud.services.organization.service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.core.error.ImportApplicationException;
+import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.zip.ZipBuilder;
@@ -52,7 +57,6 @@ public class ApplicationService {
     private final ModelService modelService;
 
     private final ModelTypeService modelTypeService;
-
 
     private final JsonConverter<Application> jsonConverter;
 
@@ -123,6 +127,8 @@ public class ApplicationService {
      * @throws IOException in case of I/O error
      */
     public FileContent exportApplication(Application application) throws IOException {
+        validateApplication(application);
+
         ZipBuilder zipBuilder = new ZipBuilder(application.getName())
                 .appendFile(jsonConverter.convertToJsonBytes(application),
                             toJsonFilename(application.getName()));
@@ -192,5 +198,26 @@ public class ApplicationService {
                                                                               fileContent));
         });
         return createdApplication;
+    }
+
+    public void validateApplication(Application application) {
+        List<ModelValidationError> validationErrors = modelService.getAllModels(application)
+                .stream()
+                .flatMap(this::getModelValidationErrors)
+                .collect(Collectors.toList());
+
+        if (!validationErrors.isEmpty()) {
+            throw new SemanticModelValidationException("Validation errors found in application's models",
+                                                       validationErrors);
+        }
+    }
+
+    private Stream<ModelValidationError> getModelValidationErrors(Model model) {
+        try {
+            modelService.validateModelContent(model);
+            return Stream.empty();
+        } catch (SemanticModelValidationException validationException) {
+            return validationException.getValidationErrors().stream();
+        }
     }
 }
