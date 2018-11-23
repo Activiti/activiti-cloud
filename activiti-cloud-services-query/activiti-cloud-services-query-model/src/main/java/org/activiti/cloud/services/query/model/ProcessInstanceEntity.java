@@ -81,6 +81,8 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 		, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private Set<VariableEntity> variables;
 
+    private String parentId;
+
     public ProcessInstanceEntity() {
     }
 
@@ -167,6 +169,15 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @Override
     public String getProcessDefinitionKey() {
         return processDefinitionKey;
+    }
+
+    @Override
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 
     public void setProcessDefinitionKey(String processDefinitionKey) {
