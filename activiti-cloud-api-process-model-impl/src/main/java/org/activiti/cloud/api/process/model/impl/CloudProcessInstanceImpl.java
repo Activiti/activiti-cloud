@@ -33,6 +33,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     private ProcessInstanceStatus status;
     private String processDefinitionId;
     private String processDefinitionKey;
+    private String parentId;
 
     public CloudProcessInstanceImpl() {
     }
@@ -128,5 +129,15 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
 
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
+    }
+
+    
+    public String getParentId() {
+        return parentId;
+    }
+
+    
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 }

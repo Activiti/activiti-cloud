@@ -34,7 +34,7 @@ public abstract class CloudBPMNActivityEventImpl extends CloudRuntimeEventImpl<B
         super(entity);
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
-        setEntityId(processInstanceId);
+        setEntityId(entity.getElementId());
     }
 
     public CloudBPMNActivityEventImpl(String id,
@@ -47,7 +47,7 @@ public abstract class CloudBPMNActivityEventImpl extends CloudRuntimeEventImpl<B
               entity);
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
-        setEntityId(processInstanceId);
+        setEntityId(entity.getElementId());
     }
 
     public String getProcessDefinitionId() {
@@ -63,7 +63,6 @@ public abstract class CloudBPMNActivityEventImpl extends CloudRuntimeEventImpl<B
     }
 
     public void setProcessInstanceId(String processInstanceId) {
-        setEntityId(processInstanceId);
         this.processInstanceId = processInstanceId;
     }
 }

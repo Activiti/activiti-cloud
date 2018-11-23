@@ -29,7 +29,8 @@ public class CloudIntegrationResultReceivedImpl extends CloudRuntimeEventImpl<In
 
     public CloudIntegrationResultReceivedImpl(IntegrationContext integrationContext) {
         super(integrationContext);
-        setEntityId(integrationContext.getProcessInstanceId());
+        if (getEntity()!=null)
+            setEntityId(getEntity().getActivityElementId());
     }
 
     @Override
