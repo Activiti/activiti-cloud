@@ -16,6 +16,12 @@
 
 package org.activiti.cloud.starter.tests;
 
+import java.util.Collection;
+
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.impl.TaskImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -25,8 +31,6 @@ import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.task.model.Task;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,8 +45,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -124,6 +126,7 @@ public class QueryTasksIT {
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
+            assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> task = responseEntity.getBody().getContent();
             assertThat(task)
                     .extracting(Task::getId,
@@ -149,6 +152,7 @@ public class QueryTasksIT {
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
+            assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
             assertThat(tasks)
                     .extracting(Task::getId,
@@ -158,12 +162,48 @@ public class QueryTasksIT {
         });
     }
 
+    @Test
+    public void shouldGetTaskWithUpdatedInfo() {
+        //given
+        Task assignedTask = taskEventContainedBuilder.anAssignedTask("Assigned task",
+                                                                     "testuser",
+                                                                     runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        TaskImpl updatedTask = new TaskImpl(assignedTask.getId(),
+                                            assignedTask.getName(),
+                                            assignedTask.getStatus());
+        updatedTask.setAssignee(assignedTask.getAssignee());
+        updatedTask.setProcessInstanceId(assignedTask.getProcessInstanceId());
+        updatedTask.setDescription("Updated description");
+        updatedTask.setPriority(42);
+
+        //when
+        producer.send(new CloudTaskUpdatedEventImpl(updatedTask));
+
+        await().untilAsserted(() -> {
+
+            ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASKS_URL + "/" + assignedTask.getId(),
+                                                                            HttpMethod.GET,
+                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                            new ParameterizedTypeReference<Task>() {
+                                                                            });
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Task task = responseEntity.getBody();
+            assertThat(task.getDescription()).isEqualTo("Updated description");
+            assertThat(task.getPriority()).isEqualTo(42);
+        });
+    }
 
     @Test
     public void shouldGetAvailableTasksAndFilterParentId() {
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedStandaloneTaskWithParent("Created task with parent");
-
 
         eventsAggregator.sendAll();
 
@@ -176,48 +216,39 @@ public class QueryTasksIT {
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
+            assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> task = responseEntity.getBody().getContent();
             assertThat(task)
                     .extracting(Task::getId,
                                 Task::getStatus,
                                 Task::getParentTaskId)
                     .contains(tuple(createdTask.getId(),
-                            Task.TaskStatus.CREATED,
-                            createdTask.getParentTaskId()));
+                                    Task.TaskStatus.CREATED,
+                                    createdTask.getParentTaskId()));
         });
-
-
     }
-
 
     @Test
     public void shouldGetStandaloneAssignedTasksAndFilterParentId() {
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedStandaloneAssignedTaskWithParent("Created task with parent",
-                "testuser");
-
+                                                                                              "testuser");
 
         eventsAggregator.sendAll();
 
         checkExistingTask(createdTask);
-
-
     }
-
 
     @Test
     public void shouldGetAssignedTasksAndFilterParentId() {
         //given
         Task createdTask = taskEventContainedBuilder.anAssignedTaskWithParent("Created task with parent",
-                "testuser",
-                runningProcessInstance);
-
+                                                                              "testuser",
+                                                                              runningProcessInstance);
 
         eventsAggregator.sendAll();
 
         checkExistingTask(createdTask);
-
-
     }
 
     private void checkExistingTask(Task createdTask) {
@@ -230,17 +261,16 @@ public class QueryTasksIT {
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
+            assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> task = responseEntity.getBody().getContent();
             assertThat(task)
                     .extracting(Task::getId,
-                            Task::getStatus,
-                            Task::getParentTaskId)
+                                Task::getStatus,
+                                Task::getParentTaskId)
                     .contains(tuple(createdTask.getId(),
-                            Task.TaskStatus.ASSIGNED,
-                            createdTask.getParentTaskId()));
+                                    Task.TaskStatus.ASSIGNED,
+                                    createdTask.getParentTaskId()));
         });
-
-
     }
 
     @Test
@@ -257,7 +287,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldNotGetRestrictedTasksWithoutUserPermission() throws Exception {
+    public void shouldNotGetRestrictedTasksWithoutUserPermission() {
         //given
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate("task with candidate",
                                                                                   "specialUser",
@@ -275,8 +305,8 @@ public class QueryTasksIT {
         //given
         //we are logged in as testuser who belongs to testgroup, so it should be able to see the task
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithGroupCandidate("task with candidate",
-                                                                                  "testgroup",
-                                                                                  runningProcessInstance);
+                                                                                   "testgroup",
+                                                                                   runningProcessInstance);
 
         //when
         eventsAggregator.sendAll();
@@ -293,6 +323,7 @@ public class QueryTasksIT {
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
+            assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
             assertThat(tasks)
                     .extracting(Task::getId,
@@ -303,12 +334,12 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldNotGetRestrictedTasksWithoutGroupPermission() throws Exception {
+    public void shouldNotGetRestrictedTasksWithoutGroupPermission() {
         //given
         //we are logged in as test user who does not belong to hrgroup, so it should not be available
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithGroupCandidate("task with candidate",
-                                                                                  "hrgroup",
-                                                                                  runningProcessInstance);
+                                                                                   "hrgroup",
+                                                                                   runningProcessInstance);
         //when
         eventsAggregator.sendAll();
 
@@ -324,6 +355,7 @@ public class QueryTasksIT {
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
+            assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
             //don't see the task as not for me
             assertThat(tasks)
