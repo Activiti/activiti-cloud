@@ -10,6 +10,7 @@ github:
       branch: develop
     - name: activiti-cloud-dependencies
       branch: develop
+      useSinglePullRequest: true
     - name: activiti-cloud-org-service
       branch: develop
     - name: activiti-cloud-process-model-service
