@@ -103,6 +103,13 @@
         <scope>import</scope>
       </dependency>
       <dependency>
+        <groupId>org.keycloak.bom</groupId>
+        <artifactId>keycloak-adapter-bom</artifactId>
+        <version>${keycloak-spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
         <groupId>org.activiti.cloud.common</groupId>
         <artifactId>activiti-cloud-services-auditable</artifactId>
         <version>${activiti-cloud-service-common.version}</version>
@@ -268,17 +275,6 @@
         <version>${keycloak.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-tomcat8-adapter</artifactId>
-        <version>${keycloak.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-spring-boot-adapter-core</artifactId>
-        <version>${keycloak-spring-boot.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-client</artifactId>
         <version>${resteasy.version}</version>
@@ -287,18 +283,6 @@
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-jackson2-provider</artifactId>
         <version>${resteasy.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-spring-boot-2-adapter</artifactId>
-        <version>${keycloak.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.keycloak.bom</groupId>
-        <artifactId>keycloak-adapter-bom</artifactId>
-        <version>${keycloak.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.awaitility</groupId>
