@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.query.rest.config;
 
+import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.VariableEntity;
@@ -37,6 +38,7 @@ public class QueryRepositoryConfig extends RepositoryRestConfigurerAdapter {
         config.exposeIdsFor(ProcessInstanceEntity.class);
         config.exposeIdsFor(TaskEntity.class);
         config.exposeIdsFor(VariableEntity.class);
+        config.exposeIdsFor(ProcessDefinitionEntity.class);
     }
 
 }

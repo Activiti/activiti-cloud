@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-        value = "/v1/" + ProcessInstanceRelProvider.COLLECTION_RESOURCE_REL,
+        value = "/v1/process-instances",
         produces = {
                 MediaTypes.HAL_JSON_VALUE,
                 MediaType.APPLICATION_JSON_VALUE
