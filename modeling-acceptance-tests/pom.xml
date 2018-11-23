@@ -25,5 +25,9 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-aspects</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.common</groupId>
+      <artifactId>activiti-cloud-services-test</artifactId>
+    </dependency>
   </dependencies>
 </project>

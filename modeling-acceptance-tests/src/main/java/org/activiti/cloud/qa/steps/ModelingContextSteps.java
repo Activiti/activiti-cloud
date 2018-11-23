@@ -16,23 +16,27 @@
 
 package org.activiti.cloud.qa.steps;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import feign.Response;
 import net.thucydides.core.annotations.Step;
+import org.activiti.cloud.qa.model.modeling.ModelingContextHandler;
+import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
 import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.activiti.cloud.acc.shared.rest.EnableDirtyContext;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
-import org.activiti.cloud.qa.model.modeling.ModelingContextHandler;
-import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
-
+import org.activiti.cloud.services.common.file.FileContent;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 
+import static org.activiti.cloud.services.common.util.HttpUtils.HEADER_ATTACHEMNT_FILENAME;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
@@ -52,9 +56,7 @@ public abstract class ModelingContextSteps<M> {
                                  M m) {
         Optional<String> uri = modelingContextHandler
                 .getCurrentModelingContext()
-                .map(this::getRelUri)
-                .filter(Optional::isPresent)
-                .map(Optional::get);
+                .flatMap(this::getRelUri);
         if (uri.isPresent()) {
             service().createByUri(uri.get(),
                                   m);
@@ -117,14 +119,16 @@ public abstract class ModelingContextSteps<M> {
                 .ifPresent(modelingContextHandler::setCurrentModelingObject);
     }
 
-    protected Resource<M> checkAndGetCurrentContext(Class<M> expetedCurrentContextClass) {
-        Optional<Resource<?>> currentModelingContext =
-                modelingContextHandler.getCurrentModelingContext();
-        assertThat(currentModelingContext).isNotEmpty();
-        assertThat(currentModelingContext.get().getContent()).isInstanceOf(expetedCurrentContextClass);
-        return (Resource<M>) currentModelingContext.get();
+    protected Resource<M> checkAndGetCurrentContext(Class<M> expectedCurrentContextClass) {
+        Optional<Resource<?>> optionalModelingContext = modelingContextHandler.getCurrentModelingContext();
+        assertThat(optionalModelingContext
+                           .map(Resource::getContent)
+                           .filter(expectedCurrentContextClass::isInstance)
+                           .map(expectedCurrentContextClass::cast)).isNotEmpty();
+        return (Resource<M>) optionalModelingContext.get();
     }
 
+    @Step
     public void openModelingObject(ModelingIdentifier<M> identifier) {
         Optional<Resource<M>> currentModelingObject = getAvailableModelingObjects()
                 .stream()
@@ -138,20 +142,17 @@ public abstract class ModelingContextSteps<M> {
     protected Collection<Resource<M>> getAvailableModelingObjects() {
         return modelingContextHandler
                 .getCurrentModelingContext()
-                .map(this::getRelUri)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(this::getRelUri)
                 .map(this::findAllByUri)
                 .map(PagedResources::getContent)
                 .orElseGet(() -> findAll().getContent());
     }
 
-    protected boolean existsInCurrentContext(ModelingIdentifier<M> identifier) {
+    @Step
+    public boolean existsInCurrentContext(ModelingIdentifier<M> identifier) {
         return modelingContextHandler
                 .getCurrentModelingContext()
-                .map(this::getRelUri)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(this::getRelUri)
                 .map(this::findAllByUri)
                 .map(PagedResources::getContent)
                 .map(resources -> existsInCollection(identifier,
@@ -184,6 +185,29 @@ public abstract class ModelingContextSteps<M> {
 
     protected PagedResources<Resource<M>> findAll() {
         return service().findAll();
+    }
+
+    protected FileContent toFileContent(Response response) throws IOException {
+        String contentType = Optional.ofNullable(response.headers().get("Content-Type"))
+                .map(contentTypes -> contentTypes
+                        .stream()
+                        .map(Object::toString)
+                        .findFirst()
+                        .orElse(null))
+                .orElseThrow(() -> new RuntimeException("No Content-Type header in feign response"));
+
+        String filename = Optional.ofNullable(response.headers().get("Content-Disposition"))
+                .map(contentTypes -> contentTypes
+                        .stream()
+                        .map(Object::toString)
+                        .findFirst()
+                        .filter(contentDisposition -> contentDisposition.startsWith(HEADER_ATTACHEMNT_FILENAME))
+                        .map(contentDisposition -> contentDisposition.substring(HEADER_ATTACHEMNT_FILENAME.length()))
+                        .orElse(null))
+                .orElseThrow(() -> new RuntimeException("No Content-Disposition header in feign response"));
+        return new FileContent(filename,
+                               contentType,
+                               IOUtils.toByteArray(response.body().asInputStream()));
     }
 
     protected abstract Optional<String> getRel();

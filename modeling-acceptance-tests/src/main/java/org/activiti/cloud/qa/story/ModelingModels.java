@@ -65,19 +65,7 @@ public class ModelingModels {
         modelingModelsSteps.deleteAll(modelNamed(modelName));
     }
 
-    @Given("an existing $modelType model '$modelName' with version $modelVersion")
-    public void ensureModelVersionExists(String modelType,
-                                         String modelName,
-                                         String modelVersion) {
-        if (!modelingModelsSteps.exists(identified(modelName,
-                                                   modelType,
-                                                   modelVersion))) {
-            modelingModelsSteps.create(modelName,
-                                       modelType);
-        }
-    }
-
-    @When("the user opens the $modelType model '$modelName'")
+    @When("opens the $modelType model '$modelName'")
     public void openModel(String modelType,
                           String modelName) {
         modelingModelsSteps.openModelingObject(identified(modelName,

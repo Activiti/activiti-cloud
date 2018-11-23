@@ -21,3 +21,14 @@ Given the user is authenticated as modeler
 And an existing application 'Mars Team'
 When the user delete the application 'Mars Team'
 Then the application 'Mars Team' is deleted
+
+Scenario: export an application
+Given the user is authenticated as modeler
+And an application 'Mission Europa' with process model 'landing-rover'
+When the user export the application
+Then the exported application contains the process model landing-rover
+
+Scenario: export an invalid application
+Given the user is authenticated as modeler
+And an application 'Mission Europa' with process model 'landing-rover-not-executable'
+Then the application cannot be exported due to validation errors

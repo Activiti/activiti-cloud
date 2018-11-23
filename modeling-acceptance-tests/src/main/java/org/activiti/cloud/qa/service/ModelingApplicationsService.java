@@ -16,10 +16,20 @@
 
 package org.activiti.cloud.qa.service;
 
+import java.io.File;
+
+import feign.Headers;
+import feign.Param;
+import feign.RequestLine;
+import feign.Response;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
+import feign.form.FormEncoder;
+import feign.jackson.JacksonEncoder;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Model;
+import org.springframework.hateoas.Resource;
 
 import static org.activiti.cloud.qa.rest.ModelingFeignConfiguration.modelingDecoder;
 import static org.activiti.cloud.qa.rest.ModelingFeignConfiguration.modelingEncoder;
@@ -31,9 +41,36 @@ public interface ModelingApplicationsService extends FeignRestDataClient<Modelin
 
     String PATH = "/v1/applications";
 
+    @RequestLine("GET")
+    @Headers("Content-Type: application/json")
+    Response exportApplication();
+
+    @RequestLine("POST")
+    @Headers("Content-Type: multipart/form-data")
+    Resource<Model> importApplicationModel(@Param("file") File file);
+
     @Override
     default Class<ModelingApplicationsService> getType() {
         return ModelingApplicationsService.class;
+    }
+
+    default Response exportApplicationByUri(String uri) {
+        return FeignRestDataClient
+                .builder(new FormEncoder(new JacksonEncoder()),
+                         new Decoder.Default())
+                .target(getType(),
+                        uri)
+                .exportApplication();
+    }
+
+    default Resource<Model> importApplicationModelByUri(String uri,
+                                                        File file) {
+        return FeignRestDataClient
+                .builder(new FormEncoder(new JacksonEncoder()),
+                         modelingDecoder)
+                .target(getType(),
+                        uri)
+                .importApplicationModel(file);
     }
 
     @Override
