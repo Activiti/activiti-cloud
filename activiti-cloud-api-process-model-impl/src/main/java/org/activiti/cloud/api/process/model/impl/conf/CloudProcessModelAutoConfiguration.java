@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.IntegrationEvent;
+import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -44,6 +45,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultRe
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
@@ -65,6 +67,8 @@ public class CloudProcessModelAutoConfiguration {
                                               BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()));
         module.registerSubtypes(new NamedType(CloudBPMNActivityCancelledEventImpl.class,
                                               BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name()));
+        module.registerSubtypes(new NamedType(CloudProcessDeployedEventImpl.class,
+                                              ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name()));
         module.registerSubtypes(new NamedType(CloudProcessStartedEventImpl.class,
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name()));
         module.registerSubtypes(new NamedType(CloudProcessCreatedEventImpl.class,
