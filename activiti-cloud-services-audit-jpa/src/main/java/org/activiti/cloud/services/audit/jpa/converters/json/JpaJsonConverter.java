@@ -30,11 +30,11 @@ import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.SequenceFlow;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
+import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
-import org.activiti.api.runtime.model.impl.SequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -68,8 +68,8 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
                                 TaskImpl.class);
             resolver.addMapping(BPMNActivity.class,
                                 BPMNActivityImpl.class);
-            resolver.addMapping(SequenceFlow.class,
-                                SequenceFlowImpl.class);
+            resolver.addMapping(BPMNSequenceFlow.class,
+                                BPMNSequenceFlowImpl.class);
             module.setAbstractTypes(resolver);
 
             objectMapper.registerModule(module);

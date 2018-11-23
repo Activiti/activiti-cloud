@@ -258,7 +258,13 @@ public class AuditEventsControllerImplIT {
                                         subsectionWithPath("entityId").description("the entity idCloudProcessSuspendedEventImpl"),
                                         subsectionWithPath("entity").description("the process instance entity"),
                                         subsectionWithPath("entity.processDefinitionId").description("The process definition id"),
-                                        subsectionWithPath("entity.id").description("The process instance id")
+                                        subsectionWithPath("entity.id").description("The associated entity id"),
+                                        subsectionWithPath("processInstanceId").description("The process instance id"),
+                                        subsectionWithPath("processDefinitionId").description("The process definition id"),
+                                        subsectionWithPath("processDefinitionKey").description("The process definition key"),
+                                        subsectionWithPath("processDefinitionVersion").description("The process definition version"),
+                                        subsectionWithPath("businessKey").description("The businessKey"),
+                                        subsectionWithPath("parentProcessInstanceId").description("The parent process instance id")
 
                                 )));
     }

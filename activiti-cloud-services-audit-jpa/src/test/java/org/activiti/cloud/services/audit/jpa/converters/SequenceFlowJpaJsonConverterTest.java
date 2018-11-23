@@ -17,9 +17,9 @@
 package org.activiti.cloud.services.audit.jpa.converters;
 
 import org.activiti.api.process.model.BPMNElement;
-import org.activiti.api.process.model.SequenceFlow;
+import org.activiti.api.process.model.BPMNSequenceFlow;
+import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.cloud.services.audit.jpa.converters.json.SequenceFlowJpaJsonConverter;
-import org.activiti.api.runtime.model.impl.SequenceFlowImpl;
 import org.junit.Test;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
@@ -32,7 +32,7 @@ public class SequenceFlowJpaJsonConverterTest {
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation() throws Exception {
         //given
-        SequenceFlowImpl sequenceFlow = new SequenceFlowImpl("source-element-id",
+        BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sequence-flow-element-id","source-element-id",
                                                              "target-element-id");
 
         sequenceFlow.setSourceActivityName("source-activity-name");
@@ -46,6 +46,7 @@ public class SequenceFlowJpaJsonConverterTest {
 
         //then
         assertThatJson(jsonRepresentation)
+                .node("elementId").isEqualTo("sequence-flow-element-id")
                 .node("sourceActivityElementId").isEqualTo("source-element-id")
                 .node("sourceActivityName").isEqualTo("source-activity-name")
                 .node("sourceActivityType").isEqualTo("source-activity-type")
@@ -60,7 +61,8 @@ public class SequenceFlowJpaJsonConverterTest {
     public void convertToEntityAttributeShouldCreateAProcessInstanceWithFieldsSet() throws Exception {
         //given
         String jsonRepresentation =
-                "{\"sourceActivityElementId\":\"source-element-id\"," +
+                "{" +   "\"elementId\":\"sequence-flow-element-id\"," +
+                        "\"sourceActivityElementId\":\"source-element-id\"," +
                         "\"sourceActivityName\":\"source-activity-name\"," +
                         "\"sourceActivityType\":\"source-activity-type\"," +
                         "\"targetActivityElementId\":\"target-element-id\"," +
@@ -70,7 +72,7 @@ public class SequenceFlowJpaJsonConverterTest {
                         "\"processInstanceId\":\"proc-inst-id\"}";
 
         //when
-        SequenceFlow sequenceFlow = converter.convertToEntityAttribute(jsonRepresentation);
+        BPMNSequenceFlow sequenceFlow = converter.convertToEntityAttribute(jsonRepresentation);
 
         //then
         assertThat(sequenceFlow)
@@ -84,6 +86,7 @@ public class SequenceFlowJpaJsonConverterTest {
 
         assertThat((BPMNElement) sequenceFlow)
                 .hasProcessDefinitionId("proc-def-id")
-                .hasProcessInstanceId("proc-inst-id");
+                .hasProcessInstanceId("proc-inst-id")
+                .hasElementId("sequence-flow-element-id");
     }
 }

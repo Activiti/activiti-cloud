@@ -22,7 +22,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 
-import org.activiti.api.process.model.SequenceFlow;
+import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SequenceFlowJpaJsonConverter;
 
@@ -35,7 +35,7 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
     @Convert(converter = SequenceFlowJpaJsonConverter.class)
     @Lob
     @Column
-    private SequenceFlow sequenceFlow;
+    private BPMNSequenceFlow sequenceFlow;
 
     public SequenceFlowAuditEventEntity() {
     }
@@ -55,7 +55,7 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
                                         String serviceFullName,
                                         String serviceType,
                                         String serviceVersion,
-                                        SequenceFlow sequenceFlow) {
+                                        BPMNSequenceFlow sequenceFlow) {
         super(eventId,
               timestamp,
               SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name());
@@ -68,11 +68,11 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
         this.sequenceFlow = sequenceFlow;
     }
 
-    public SequenceFlow getSequenceFlow() {
+    public BPMNSequenceFlow getSequenceFlow() {
         return sequenceFlow;
     }
 
-    public void setSequenceFlow(SequenceFlow sequenceFlow) {
+    public void setSequenceFlow(BPMNSequenceFlow sequenceFlow) {
         this.sequenceFlow = sequenceFlow;
     }
 }
