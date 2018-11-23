@@ -67,10 +67,10 @@ public class BPMNActivityJpaJsonConverterTest {
         assertThat(bpmnActivity)
                 .isNotNull()
                 .hasActivityName("BPMN Activity Name")
-                .hasActivityType("Service Task")
-                .hasElementId("element-id");
+                .hasActivityType("Service Task");
         assertThat((BPMNElement)bpmnActivity)
                 .hasProcessInstanceId("proc-inst-id")
-                .hasProcessDefinitionId("proc-def-id");
+                .hasProcessDefinitionId("proc-def-id")
+                .hasElementId("element-id");
     }
 }
