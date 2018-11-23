@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.TaskCandidateUser;
@@ -86,6 +88,7 @@ public class AuditProducerIT {
         ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
+        assertThat(processDefinitions.getBody()).isNotNull();
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (CloudProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(),
@@ -95,10 +98,15 @@ public class AuditProducerIT {
 
     @Test
     public void shouldProduceEventsDuringSimpleProcessExecution() {
+
         //when
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-                                                                                                           Collections.singletonMap("name",
-                        "peter"));
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(ProcessPayloadBuilder
+                                                                                                                   .start()
+                                                                                                                   .withProcessDefinitionKey(SIMPLE_PROCESS)
+                                                                                                                   .withVariable("name",
+                                                                                                                                 "peter")
+                                                                                                                   .withProcessInstanceName("my instance name")
+                                                                                                                   .build());
 
         //then
         await().untilAsserted(() -> {
@@ -122,6 +130,9 @@ public class AuditProducerIT {
                     .extracting(event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType())
                     .containsExactly("startEvent",
                             "userTask");
+            assertThat(receivedEvents).filteredOn(cloudRuntimeEvent -> PROCESS_STARTED.equals(cloudRuntimeEvent.getEventType()))
+                    .extracting(cloudRuntimeEvent -> ((ProcessInstance)cloudRuntimeEvent.getEntity()).getName())
+                    .containsExactly("my instance name");
         });
 
         //when

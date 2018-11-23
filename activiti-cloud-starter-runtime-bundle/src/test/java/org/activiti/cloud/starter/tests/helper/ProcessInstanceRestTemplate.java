@@ -61,6 +61,10 @@ public class ProcessInstanceRestTemplate {
                 .withBusinessKey(businessKey)
                 .build();
 
+        return startProcess(startProcess);
+    }
+
+    public ResponseEntity<CloudProcessInstance> startProcess(StartProcessPayload startProcess) {
         HttpEntity<StartProcessPayload> requestEntity = new HttpEntity<>(startProcess);
 
         ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL,
@@ -69,6 +73,7 @@ public class ProcessInstanceRestTemplate {
                                                                                         new ParameterizedTypeReference<CloudProcessInstance>() {
                                                                                         });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().getId()).isNotNull();
         return responseEntity;
     }
@@ -108,7 +113,7 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<PagedResources<CloudTask>> getTasks(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
-
+        assertThat(processInstanceEntity.getBody()).isNotNull();
         return getTasks(processInstanceEntity.getBody().getId());
     }
 
@@ -123,7 +128,7 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<Resources<CloudVariableInstance>> getVariables(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
-
+        assertThat(processInstanceEntity.getBody()).isNotNull();
         return getVariables(processInstanceEntity.getBody().getId());
     }
 
@@ -139,6 +144,7 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<CloudProcessInstance> getProcessInstance(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
 
+        assertThat(processInstanceEntity.getBody()).isNotNull();
         ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId(),
                                                                                         HttpMethod.GET,
                                                                                         null,
@@ -150,6 +156,7 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<Void> delete(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
 
+        assertThat(processInstanceEntity.getBody()).isNotNull();
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId(),
                                                                         HttpMethod.DELETE,
                                                                         null,
@@ -160,6 +167,7 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<Void> suspend(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
+        assertThat(processInstanceEntity.getBody()).isNotNull();
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/suspend",
                                                                         HttpMethod.POST,
                                                                         null,
@@ -170,7 +178,9 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<Void> resume(ResponseEntity<CloudProcessInstance> startProcessEntity) {
+        assertThat(startProcessEntity.getBody()).isNotNull();
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startProcessEntity.getBody().getId() + "/resume",
+
                                                                         HttpMethod.POST,
                                                                         null,
                                                                         new ParameterizedTypeReference<Void>() {
