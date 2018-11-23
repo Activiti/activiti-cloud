@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ComponentScan({"org.activiti.cloud.services",
         "org.activiti.cloud.alfresco",
-        "org.activiti.spring.security.policies",
+        "org.activiti.core.common.spring.security.policies",
         "org.activiti.cloud.services.common.security",
         "org.activiti.cloud.services.identity"})
 @Import(SwaggerConfig.class)
