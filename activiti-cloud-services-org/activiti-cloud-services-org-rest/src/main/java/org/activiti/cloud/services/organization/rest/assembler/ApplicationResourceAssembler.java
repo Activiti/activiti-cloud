@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.organization.rest.assembler;
 
+import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.activiti.cloud.organization.api.Application;
@@ -44,9 +45,20 @@ public class ApplicationResourceAssembler implements ResourceAssembler<Applicati
                 application,
                 linkTo(methodOn(ApplicationController.class).getApplication(application.getId())).withSelfRel(),
                 getExportApplicationLink(application.getId()),
+                getImportApplicationModelLink(application.getId()),
                 linkTo(methodOn(ModelController.class).getModels(application.getId(),
                                                                  PROCESS,
                                                                  Pageable.unpaged())).withRel("models"));
+    }
+
+    private Link getImportApplicationModelLink(String applicationId) {
+        try {
+            return linkTo(methodOn(ModelController.class).importModel(applicationId,
+                                                                      PROCESS,
+                                                                      null)).withRel("import");
+        } catch (IOException e) {
+            throw new ModelingException(e);
+        }
     }
 
     private Link getExportApplicationLink(String applicationId) {
