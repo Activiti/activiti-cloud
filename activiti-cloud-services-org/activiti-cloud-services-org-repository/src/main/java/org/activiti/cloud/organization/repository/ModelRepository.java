@@ -17,10 +17,11 @@
 package org.activiti.cloud.organization.repository;
 
 import java.util.Optional;
-import java.util.Set;
 
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -29,22 +30,26 @@ import org.springframework.data.domain.Pageable;
  */
 public interface ModelRepository<A extends Application, M extends Model<A, ?>> {
 
-    Page<M> getTopLevelModels(Set<String> modelTypesFilter,
-                              Pageable pageable);
-
     Page<M> getModels(A application,
-                      Set<String> modelTypesFilter,
+                      ModelType modelTypeFilter,
                       Pageable pageable);
 
     Optional<M> findModelById(String modelId);
 
     byte[] getModelContent(M model);
 
+    byte[] getModelExport(M model);
+
     M createModel(M model);
 
     M updateModel(M modelToUpdate);
 
+    M updateModelContent(M modelToBeUpdate,
+                         FileContent fileContent);
+
     void deleteModel(M model);
 
     Class<M> getModelType();
+
+    Class<?> getModelMetadataView();
 }

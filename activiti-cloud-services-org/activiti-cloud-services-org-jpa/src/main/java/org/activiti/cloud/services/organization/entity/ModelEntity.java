@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.organization.entity;
 
+import java.util.Optional;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -24,6 +25,7 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
@@ -111,6 +113,14 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
     @Override
     public void setApplication(ApplicationEntity application) {
         this.application = application;
+    }
+
+    @Transient
+    @JsonProperty("applicationId")
+    public String applicationId() {
+        return Optional.ofNullable(application)
+                .map(ApplicationEntity::getId)
+                .orElse(null);
     }
 
     @Override

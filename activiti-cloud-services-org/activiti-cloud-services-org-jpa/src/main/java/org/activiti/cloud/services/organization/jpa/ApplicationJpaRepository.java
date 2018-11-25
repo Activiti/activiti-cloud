@@ -63,9 +63,4 @@ public interface ApplicationJpaRepository extends JpaRepository<ApplicationEntit
     default void deleteApplication(ApplicationEntity application) {
         delete(application);
     }
-
-    @Override
-    default Class<ApplicationEntity> getApplicationType() {
-        return ApplicationEntity.class;
-    }
 }

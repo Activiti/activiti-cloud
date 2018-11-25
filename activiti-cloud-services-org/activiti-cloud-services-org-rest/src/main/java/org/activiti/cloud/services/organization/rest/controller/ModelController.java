@@ -72,8 +72,6 @@ public class ModelController implements ModelRestApi {
 
     private final PagedModelTypeAssembler pagedModelTypeAssembler;
 
-    private final ValidationErrorResourceAssembler validationErrorResourceAssembler;
-
     private final ApplicationController applicationController;
 
     public ModelController(ModelService modelService,
@@ -90,20 +88,7 @@ public class ModelController implements ModelRestApi {
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.modelTypeAssembler = modelTypeAssembler;
         this.pagedModelTypeAssembler = pagedModelTypeAssembler;
-        this.validationErrorResourceAssembler = validationErrorResourceAssembler;
         this.applicationController = applicationController;
-    }
-
-    @Override
-    public PagedResources<Resource<Model>> getModels(
-            @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(MODEL_TYPE_PARAM_NAME) Optional<String> type,
-            Pageable pageable) {
-        return pagedResourcesAssembler.toResource(
-                pageable,
-                modelService.getTopLevelModels(type.map(this::findModelType),
-                                               pageable),
-                resourceAssembler);
     }
 
     @Override
@@ -111,13 +96,13 @@ public class ModelController implements ModelRestApi {
             @ApiParam(GET_MODELS_APPLICATION_ID_PARAM_DESCR)
             @PathVariable String applicationId,
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
-            @RequestParam(MODEL_TYPE_PARAM_NAME) Optional<String> type,
+            @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             Pageable pageable) {
         Application application = applicationController.findApplicationById(applicationId);
         return pagedResourcesAssembler.toResource(
                 pageable,
                 modelService.getModels(application,
-                                       type.map(this::findModelType),
+                                       findModelType(type),
                                        pageable),
                 resourceAssembler);
     }
@@ -127,15 +112,6 @@ public class ModelController implements ModelRestApi {
             @ApiParam(GET_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId) {
         return resourceAssembler.toResource(findModelById(modelId));
-    }
-
-    @Override
-    public Resource<Model> createModel(
-            @ApiParam(CREATE_MODEL_PARAM_DESCR)
-            @RequestBody Model model) {
-        return resourceAssembler.toResource(
-                modelService.createModel(null,
-                                         model));
     }
 
     @Override
@@ -187,7 +163,7 @@ public class ModelController implements ModelRestApi {
             @PathVariable String modelId) throws IOException {
         Model model = findModelById(modelId);
         writeFileToResponse(response,
-                            modelService.getModelContent(model),
+                            modelService.getModelContentFile(model),
                             false);
     }
 
@@ -197,7 +173,7 @@ public class ModelController implements ModelRestApi {
             @ApiParam(GET_MODEL_CONTENT_ID_PARAM_DESCR)
             @PathVariable String modelId) throws IOException {
         Model model = findModelById(modelId);
-        FileContent fileContent = modelService.getModelDiagram(model.getId())
+        FileContent fileContent = modelService.getModelDiagramFile(model.getId())
                 .orElseThrow(() -> new NotAcceptableStatusException("Model content cannot be retrieved as svg image: " + modelId));
         writeFileToResponse(response,
                             fileContent,
@@ -248,9 +224,7 @@ public class ModelController implements ModelRestApi {
             @ApiParam(VALIDATE_MODEL_FILE_PARAM_DESCR)
             @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
 
-        Model model = modelService.findModelById(modelId)
-                .orElseThrow(() -> new ResourceNotFoundException("Model not found: " + modelId));
-        modelService.validateModelContent(model,
+        modelService.validateModelContent(findModelById(modelId),
                                           multipartToFileContent(file));
     }
 

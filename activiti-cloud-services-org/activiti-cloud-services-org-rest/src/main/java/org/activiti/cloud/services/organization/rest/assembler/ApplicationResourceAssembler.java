@@ -16,15 +16,20 @@
 
 package org.activiti.cloud.services.organization.rest.assembler;
 
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+
 import org.activiti.cloud.organization.api.Application;
-import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.core.error.ModelingException;
 import org.activiti.cloud.services.organization.rest.controller.ApplicationController;
 import org.activiti.cloud.services.organization.rest.controller.ModelController;
 import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.stereotype.Component;
 
+import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -39,9 +44,34 @@ public class ApplicationResourceAssembler implements ResourceAssembler<Applicati
         return new Resource<>(
                 application,
                 linkTo(methodOn(ApplicationController.class).getApplication(application.getId())).withSelfRel(),
+                getExportApplicationLink(application.getId()),
+                getImportApplicationModelLink(application.getId()),
                 linkTo(methodOn(ModelController.class).getModels(application.getId(),
-                                                                 null,
-                                                                 Pageable.unpaged())).withRel("models")
-        );
+                                                                 PROCESS,
+                                                                 Pageable.unpaged())).withRel("models"));
+    }
+
+    private Link getImportApplicationModelLink(String applicationId) {
+        try {
+            return linkTo(methodOn(ModelController.class).importModel(applicationId,
+                                                                      PROCESS,
+                                                                      null)).withRel("import");
+        } catch (IOException e) {
+            throw new ModelingException(e);
+        }
+    }
+
+    private Link getExportApplicationLink(String applicationId) {
+        try {
+            return linkTo(ApplicationController.class,
+                          ApplicationController.class.getMethod("exportApplication",
+                                                                HttpServletResponse.class,
+                                                                String.class,
+                                                                boolean.class),
+                          applicationId)
+                    .withRel("export");
+        } catch (NoSuchMethodException e) {
+            throw new ModelingException(e);
+        }
     }
 }

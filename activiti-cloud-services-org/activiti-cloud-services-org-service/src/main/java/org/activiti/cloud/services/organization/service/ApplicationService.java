@@ -17,21 +17,21 @@
 package org.activiti.cloud.services.organization.service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.core.error.ImportApplicationException;
-import org.activiti.cloud.organization.core.error.ModelingException;
+import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.zip.ZipBuilder;
 import org.activiti.cloud.services.common.zip.ZipStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,25 +52,23 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFil
 @PreAuthorize("hasRole('ACTIVITI_MODELER')")
 public class ApplicationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ApplicationService.class);
-
     private final ApplicationRepository applicationRepository;
 
     private final ModelService modelService;
 
     private final ModelTypeService modelTypeService;
 
-    private final ObjectMapper jsonMapper;
+    private final JsonConverter<Application> jsonConverter;
 
     @Autowired
     public ApplicationService(ApplicationRepository applicationRepository,
                               ModelService modelService,
                               ModelTypeService modelTypeService,
-                              ObjectMapper jsonMapper) {
+                              JsonConverter<Application> jsonConverter) {
         this.applicationRepository = applicationRepository;
         this.modelService = modelService;
         this.modelTypeService = modelTypeService;
-        this.jsonMapper = jsonMapper;
+        this.jsonConverter = jsonConverter;
     }
 
     /**
@@ -129,8 +127,10 @@ public class ApplicationService {
      * @throws IOException in case of I/O error
      */
     public FileContent exportApplication(Application application) throws IOException {
+        validateApplication(application);
+
         ZipBuilder zipBuilder = new ZipBuilder(application.getName())
-                .appendFile(toJson(application),
+                .appendFile(jsonConverter.convertToJsonBytes(application),
                             toJsonFilename(application.getName()));
         modelService.getAllModels(application)
                 .forEach(model -> modelTypeService.findModelTypeByName(model.getType())
@@ -141,7 +141,7 @@ public class ApplicationService {
                                     .appendFile(modelService.exportModel(model),
                                                 folderName);
                             if (!isJsonContentType(model.getContentType())) {
-                                zipBuilder.appendFile(modelService.getModelJson(model),
+                                zipBuilder.appendFile(modelService.getModelMetadataFile(model),
                                                       folderName);
                             }
                         }));
@@ -165,7 +165,7 @@ public class ApplicationService {
                         .ifPresent(fileContent -> {
                             Optional<String> folderName = zipEntry.getFolderName(0);
                             if (folderName.isPresent()) {
-                                folderName.flatMap(modelTypeService::findModelTypeByZipFolderName).ifPresent(modelType -> {
+                                folderName.flatMap(modelTypeService::findModelTypeByFolderName).ifPresent(modelType -> {
                                     if (fileContent.isJson()) {
                                         String modelName = removeExtension(fileContent.getFilename(),
                                                                            JSON);
@@ -180,7 +180,7 @@ public class ApplicationService {
                                     }
                                 });
                             } else if (fileContent.isJson()) {
-                                jsonToApplication(bytes)
+                                jsonConverter.tryConvertToEntity(bytes)
                                         .ifPresent(applicationHolder::setApplication);
                             }
                         })));
@@ -200,23 +200,24 @@ public class ApplicationService {
         return createdApplication;
     }
 
-    private Optional<Application> jsonToApplication(byte[] json) {
-        try {
-            return Optional.of(jsonMapper.readValue(json,
-                                                    Application.class));
-        } catch (IOException e) {
-            logger.error("Cannot convert json to application metadata: " + new String(json),
-                         e);
+    public void validateApplication(Application application) {
+        List<ModelValidationError> validationErrors = modelService.getAllModels(application)
+                .stream()
+                .flatMap(this::getModelValidationErrors)
+                .collect(Collectors.toList());
+
+        if (!validationErrors.isEmpty()) {
+            throw new SemanticModelValidationException("Validation errors found in application's models",
+                                                       validationErrors);
         }
-        return Optional.empty();
     }
 
-    private byte[] toJson(Application application) {
+    private Stream<ModelValidationError> getModelValidationErrors(Model model) {
         try {
-            return jsonMapper.writeValueAsBytes(application);
-        } catch (JsonProcessingException e) {
-            throw new ModelingException("Cannot convert application metadata to json: " + application.getId(),
-                                        e);
+            modelService.validateModelContent(model);
+            return Stream.empty();
+        } catch (SemanticModelValidationException validationException) {
+            return validationException.getValidationErrors().stream();
         }
     }
 }
