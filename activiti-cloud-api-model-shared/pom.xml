@@ -4,8 +4,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud.api</groupId>
-    <artifactId>activiti-cloud-api</artifactId>
+    <artifactId>activiti-cloud-api-dependencies</artifactId>
     <version>7.0.0-SNAPSHOT</version>
+    <relativePath>../activiti-cloud-api-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-api-model-shared</artifactId>
   <name>Activiti Cloud API :: Model Shared</name>
