@@ -13,6 +13,7 @@
   <packaging>pom</packaging>
   <url>http://activiti.org</url>
   <modules>
+    <module>dependencies-tests</module>
     <module>activiti-cloud-connectors-dependencies</module>
     <module>activiti-cloud-starter-connector</module>
   </modules>
@@ -44,38 +45,32 @@
 
   </properties>
 
-  <dependencyManagement>
-    <!-- This duplicates activiti-cloud-connectors-dependencies module but we can't import that module here as this is its parent
-         and we want to keep a standard Maven structure -->
-    <dependencies>
-      <dependency>
-        <groupId>org.activiti.cloud.build</groupId>
-        <artifactId>activiti-cloud-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
-        <scope>import</scope>
-        <type>pom</type>       
-      </dependency>         
-      <dependency>
-        <groupId>org.activiti.cloud.common</groupId>
-        <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.connector</groupId>
-        <artifactId>activiti-cloud-starter-connector</artifactId>
-        <version>${activiti-cloud-connectors.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <dependencies>
+     <dependency>
+      <groupId>org.activiti.cloud.build</groupId>
+      <artifactId>activiti-cloud-parent</artifactId>
+      <version>${activiti-cloud-build.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.common</groupId>
+      <artifactId>activiti-cloud-service-common-dependencies</artifactId>
+      <version>${activiti-cloud-service-common.version}</version>
+      <type>pom</type>
+    </dependency>  
+  </dependencies>
 
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version></plugin>
+        <version>2.8.2</version>
+        <configuration>
+          <deployAtEnd>true</deployAtEnd>
+        </configuration>
+      </plugin>
     </plugins>
-    </build>
-  </project>
+  </build>
+  
+</project>
