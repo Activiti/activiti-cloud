@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud Runtime Bundle Service :: Parent</name>
   <url>http://activiti.org</url>
-
+ 
   <properties>
     <activiti-dependencies.version>7.0.61</activiti-dependencies.version>
     <activiti-cloud-build.version>7.0.36</activiti-cloud-build.version>
