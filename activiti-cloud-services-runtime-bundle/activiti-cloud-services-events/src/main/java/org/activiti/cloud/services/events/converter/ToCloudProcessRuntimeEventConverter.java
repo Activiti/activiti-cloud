@@ -19,6 +19,7 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.api.process.model.events.BPMNActivityCancelledEvent;
 import org.activiti.api.process.model.events.BPMNActivityCompletedEvent;
 import org.activiti.api.process.model.events.BPMNActivityStartedEvent;
+import org.activiti.api.process.model.events.ProcessDeployedEvent;
 import org.activiti.api.process.model.events.SequenceFlowTakenEvent;
 import org.activiti.api.process.runtime.events.ProcessCancelledEvent;
 import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
@@ -32,6 +33,7 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent
 import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
@@ -42,6 +44,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStarted
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
@@ -120,6 +123,12 @@ public class ToCloudProcessRuntimeEventConverter {
 
     public CloudSequenceFlowTakenEvent from(SequenceFlowTakenEvent event) {
         CloudSequenceFlowTakenImpl cloudEvent = new CloudSequenceFlowTakenImpl(event.getEntity());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+
+    public CloudProcessDeployedEvent from(ProcessDeployedEvent event) {
+        CloudProcessDeployedEventImpl cloudEvent = new CloudProcessDeployedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }

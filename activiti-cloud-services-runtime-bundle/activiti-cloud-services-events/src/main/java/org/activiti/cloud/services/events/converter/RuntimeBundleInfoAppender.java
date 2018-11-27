@@ -28,13 +28,13 @@ public class RuntimeBundleInfoAppender {
         this.properties = properties;
     }
 
-    public void appendRuntimeBundleInfoTo(CloudRuntimeEventImpl<?,?> cloudProcessStartedEvent) {
-        cloudProcessStartedEvent.setAppName(properties.getAppName());
-        cloudProcessStartedEvent.setAppVersion(properties.getAppVersion());
-        cloudProcessStartedEvent.setServiceName(properties.getServiceName());
-        cloudProcessStartedEvent.setServiceFullName(properties.getServiceFullName());
-        cloudProcessStartedEvent.setServiceType(properties.getServiceType());
-        cloudProcessStartedEvent.setServiceVersion(properties.getServiceVersion());
+    public void appendRuntimeBundleInfoTo(CloudRuntimeEventImpl<?,?> cloudRuntimeEvent) {
+        cloudRuntimeEvent.setAppName(properties.getAppName());
+        cloudRuntimeEvent.setAppVersion(properties.getAppVersion());
+        cloudRuntimeEvent.setServiceName(properties.getServiceName());
+        cloudRuntimeEvent.setServiceFullName(properties.getServiceFullName());
+        cloudRuntimeEvent.setServiceType(properties.getServiceType());
+        cloudRuntimeEvent.setServiceVersion(properties.getServiceVersion());
     }
 
     public void appendRuntimeBundleInfoTo(CloudRuntimeEntityImpl cloudRuntimeEntity) {

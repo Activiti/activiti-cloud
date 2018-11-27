@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -97,6 +99,18 @@ public class AuditProducerIT {
     }
 
     @Test
+    public void shouldProduceEventsForProcessDeployment() {
+        //when
+        List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+
+        //then
+        assertThat(receivedEvents)
+                .filteredOn(event -> ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name().equals(event.getEventType().name()))
+                .extracting(event -> ((ProcessDefinition)event.getEntity()).getKey())
+                .contains(SIMPLE_PROCESS);
+    }
+
+    @Test
     public void shouldProduceEventsDuringSimpleProcessExecution() {
 
         //when
@@ -110,7 +124,7 @@ public class AuditProducerIT {
 
         //then
         await().untilAsserted(() -> {
-            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getReceivedEvents();
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
             assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
@@ -139,7 +153,7 @@ public class AuditProducerIT {
         processInstanceRestTemplate.suspend(startProcessEntity);
 
         //then
-        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
+        await().untilAsserted(() -> assertThat(streamHandler.getLatestReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(PROCESS_SUSPENDED.name(),
                         TASK_SUSPENDED.name()));
@@ -148,7 +162,7 @@ public class AuditProducerIT {
         processInstanceRestTemplate.resume(startProcessEntity);
 
         //then
-        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
+        await().untilAsserted(() -> assertThat(streamHandler.getLatestReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(PROCESS_RESUMED.name(),
                         TASK_ACTIVATED.name()));
@@ -159,7 +173,7 @@ public class AuditProducerIT {
                         "paul"));
 
         //then
-        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
+        await().untilAsserted(() -> assertThat(streamHandler.getLatestReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(VARIABLE_UPDATED.name()));
 
@@ -169,7 +183,7 @@ public class AuditProducerIT {
 
         //when
         taskRestTemplate.claim(task);
-        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
+        await().untilAsserted(() -> assertThat(streamHandler.getLatestReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(TASK_ASSIGNED.name()
                 ));
@@ -178,7 +192,7 @@ public class AuditProducerIT {
         taskRestTemplate.complete(task);
 
         //then
-        await().untilAsserted(() -> assertThat(streamHandler.getReceivedEvents())
+        await().untilAsserted(() -> assertThat(streamHandler.getLatestReceivedEvents())
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(VARIABLE_UPDATED.name(),/*task local var copied back to proc var*/
                                  TASK_COMPLETED.name(),
@@ -192,7 +206,7 @@ public class AuditProducerIT {
                                  VARIABLE_DELETED.name(), /*proc var deleted as proc completes*/
                                  PROCESS_COMPLETED.name()));
 
-        assertThat(streamHandler.getReceivedEvents())
+        assertThat(streamHandler.getLatestReceivedEvents())
                 .filteredOn(event -> event.getEventType().equals(TASK_COMPLETED))
                 .extracting(event -> ((Task) event.getEntity()).getStatus())
                 .containsOnly(Task.TaskStatus.COMPLETED);
@@ -208,7 +222,7 @@ public class AuditProducerIT {
 
         //then
         await().untilAsserted(() -> {
-            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getReceivedEvents();
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
             assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(TASK_CANCELLED.name(),
@@ -231,7 +245,7 @@ public class AuditProducerIT {
 
         //then
         await().untilAsserted(() -> {
-            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getReceivedEvents();
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
             assertThat(receivedEvents)
                     .hasSize(2)
                     .extracting(CloudRuntimeEvent::getEventType,

@@ -28,6 +28,7 @@ import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.junit.Before;
@@ -89,9 +90,13 @@ public class ProcessDefinitionAdminControllerImplIT {
     @MockBean
     private ProcessEngineChannels processEngineChannels;
 
+    @MockBean
+    private CloudProcessDeployedProducer processDeployedProducer;
+
     @Before
     public void setUp() {
         assertThat(processEngineChannels).isNotNull();
+        assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test

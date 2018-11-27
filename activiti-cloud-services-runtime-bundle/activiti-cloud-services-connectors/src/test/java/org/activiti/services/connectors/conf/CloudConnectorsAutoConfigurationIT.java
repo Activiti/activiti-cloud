@@ -16,16 +16,18 @@
 
 package org.activiti.services.connectors.conf;
 
+import org.activiti.api.runtime.shared.identity.UserGroupManager;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.core.common.spring.security.policies.ProcessSecurityPoliciesManager;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
-import org.activiti.api.runtime.shared.identity.UserGroupManager;
-import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
 @RunWith(SpringRunner.class)
@@ -61,6 +65,14 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockBean
     private TaskService taskService;
+
+    @MockBean
+    private CloudProcessDeployedProducer processDeployedProducer;
+
+    @Before
+    public void setUp() {
+        doNothing().when(processDeployedProducer).onApplicationEvent(any());
+    }
 
     @Test
     public void shouldProvideMQServiceTaskBehaviorBean() {

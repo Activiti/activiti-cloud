@@ -17,7 +17,6 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -31,8 +30,8 @@ import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -94,6 +93,9 @@ public class ProcessInstanceVariableControllerImplIT {
     @MockBean
     private ProcessEngineChannels processEngineChannels;
 
+    @MockBean
+    private CloudProcessDeployedProducer processDeployedProducer;
+
     @Before
     public void setUp() {
         //this assertion is not really necessary. It's only here to remove warning
@@ -102,6 +104,7 @@ public class ProcessInstanceVariableControllerImplIT {
         //in the controller
         assertThat(resourcesAssembler).isNotNull();
         assertThat(processEngineChannels).isNotNull();
+        assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
