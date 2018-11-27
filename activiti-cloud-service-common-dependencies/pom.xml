@@ -29,9 +29,30 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.activiti.cloud.build</groupId>
+        <artifactId>activiti-cloud-dependencies-parent</artifactId>
+        <version>${activiti-cloud-build.version}</version>
+        <scope>import</scope>
+        <type>pom</type>       
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak.bom</groupId>
+        <artifactId>keycloak-adapter-bom</artifactId>
+        <version>${keycloak-spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>    
+      <dependency>
         <groupId>org.activiti.cloud.api</groupId>
         <artifactId>activiti-cloud-api-dependencies</artifactId>
         <version>${activiti-cloud-api.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.core.common</groupId>
+        <artifactId>activiti-core-common-dependencies</artifactId>
+        <version>${activiti-core-common.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -107,4 +128,5 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+  
 </project>

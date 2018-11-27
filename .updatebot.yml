@@ -4,18 +4,25 @@ github:
     repositories:
     - name: activiti-cloud-query-service
       branch: develop
+      useSinglePullRequest: true
     - name: activiti-cloud-runtime-bundle-service
       branch: develop
+      useSinglePullRequest: true
     - name: activiti-cloud-audit-service
       branch: develop
+      useSinglePullRequest: true
     - name: activiti-cloud-dependencies
       branch: develop
       useSinglePullRequest: true
     - name: activiti-cloud-org-service
       branch: develop
+      useSinglePullRequest: true
     - name: activiti-cloud-process-model-service
       branch: develop
+      useSinglePullRequest: true
     - name: activiti-cloud-app-service
       branch: develop
+      useSinglePullRequest: true
     - name: activiti-cloud-connectors
       branch: develop
+      useSinglePullRequest: true
