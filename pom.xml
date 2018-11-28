@@ -15,6 +15,7 @@
   <packaging>pom</packaging>
   <url>http://activiti.org</url>
   <modules>
+    <module>dependencies-tests</module>
     <module>activiti-cloud-query-dependencies</module>
     <module>activiti-cloud-services-query</module>
     <module>activiti-cloud-starter-query</module>
@@ -46,82 +47,32 @@
     <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
     <json-unit.version>1.24.0</json-unit.version>
   </properties>
- 
+
+  <!-- BoM Marker Dependencies -->
+  <dependencies>
+    <dependency>
+      <groupId>org.activiti.cloud.build</groupId>
+      <artifactId>activiti-cloud-parent</artifactId>
+      <version>${activiti-cloud-build.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.common</groupId>
+      <artifactId>activiti-cloud-service-common-dependencies</artifactId>
+      <version>${activiti-cloud-service-common.version}</version>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+
+  <!-- Internal Managed Dependencies -->
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.activiti.cloud.common</groupId>
-        <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-        <version>${activiti-cloud-service-common.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
       <dependency>
         <groupId>org.activiti.cloud.build</groupId>
         <artifactId>activiti-cloud-dependencies-parent</artifactId>
         <version>${activiti-cloud-build.version}</version>
         <scope>import</scope>
         <type>pom</type>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-parent</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-model</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-repo</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-rest</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-graphql</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-notifications</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-graphql-ws</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-graphql-ws-schema</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-graphql-ws-security</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-stomp</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-graphiql</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-starter-query</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
       </dependency>
       <dependency>
         <groupId>net.javacrumbs.json-unit</groupId>
@@ -131,13 +82,18 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
+  
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version></plugin>
+        <version>2.8.2</version>
+        <configuration>
+          <deployAtEnd>true</deployAtEnd>
+        </configuration>
+      </plugin>
     </plugins>
-    </build>
-  </project>
+  </build>
+  
+</project>
