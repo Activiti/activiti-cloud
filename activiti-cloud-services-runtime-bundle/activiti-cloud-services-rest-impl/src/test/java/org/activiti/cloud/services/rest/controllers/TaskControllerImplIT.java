@@ -32,12 +32,11 @@ import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.runtime.TaskRuntime;
-import org.activiti.cloud.api.model.shared.impl.conf.CloudCommonModelAutoConfiguration;
-import org.activiti.cloud.api.task.model.impl.conf.CloudTaskModelAutoConfiguration;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.junit.Before;
@@ -119,10 +118,14 @@ public class TaskControllerImplIT {
     @Mock
     private Page<Task> taskPage;
 
+    @MockBean
+    private CloudProcessDeployedProducer processDeployedProducer;
+
     @Before
     public void setUp() {
         assertThat(springPageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
+        assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test

@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.starter.tests.services.audit;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,14 +34,20 @@ import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.AU
 @EnableBinding(AuditConsumer.class)
 public class AuditConsumerStreamHandler {
 
-    private List<CloudRuntimeEvent<?,?>> receivedEvents = Collections.emptyList();
+    private List<CloudRuntimeEvent<?,?>> latestReceivedEvents = Collections.emptyList();
+    private List<CloudRuntimeEvent<?,?>> allReceivedEvents = new ArrayList<>();
 
     @StreamListener(AuditConsumer.AUDIT_CONSUMER)
     public void receive(CloudRuntimeEvent<?,?> ... events) {
-        receivedEvents = Arrays.asList(events);
+        latestReceivedEvents = Arrays.asList(events);
+        allReceivedEvents.addAll(latestReceivedEvents);
     }
 
-    public List<CloudRuntimeEvent<?, ?>> getReceivedEvents() {
-        return this.receivedEvents;
+    public List<CloudRuntimeEvent<?, ?>> getLatestReceivedEvents() {
+        return this.latestReceivedEvents;
+    }
+
+    public List<CloudRuntimeEvent<?, ?>> getAllReceivedEvents() {
+        return allReceivedEvents;
     }
 }

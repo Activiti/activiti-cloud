@@ -29,9 +29,9 @@ import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,6 +90,9 @@ public class TaskVariableControllerImplIT {
     @MockBean
     private ProcessEngineChannels processEngineChannels;
 
+    @MockBean
+    private CloudProcessDeployedProducer processDeployedProducer;
+
     private static final String TASK_ID = UUID.randomUUID().toString();
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
 
@@ -102,6 +105,7 @@ public class TaskVariableControllerImplIT {
         assertThat(resourcesAssembler).isNotNull();
         assertThat(variableInstanceResourceAssembler).isNotNull();
         assertThat(processEngineChannels).isNotNull();
+        assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test

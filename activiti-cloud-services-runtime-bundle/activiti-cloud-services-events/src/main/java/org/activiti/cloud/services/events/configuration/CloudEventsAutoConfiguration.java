@@ -27,6 +27,7 @@ import org.activiti.cloud.services.events.listeners.CloudActivityStartedProducer
 import org.activiti.cloud.services.events.listeners.CloudProcessCancelledProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCompletedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCreatedProducer;
+import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessResumedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessStartedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessSuspendedProducer;
@@ -47,6 +48,8 @@ import org.activiti.cloud.services.events.listeners.CloudVariableDeletedProducer
 import org.activiti.cloud.services.events.listeners.CloudVariableUpdatedProducer;
 import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
+import org.activiti.engine.RepositoryService;
+import org.activiti.runtime.api.model.impl.APIProcessDefinitionConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -248,6 +251,15 @@ public class CloudEventsAutoConfiguration {
     public CloudSequenceFlowTakenProducer cloudSequenceFlowTakenProducer(ToCloudProcessRuntimeEventConverter converter,
                                                                          ProcessEngineEventsAggregator eventsAggregator) {
         return new CloudSequenceFlowTakenProducer(converter, eventsAggregator);
+    }
+
+    @Bean
+    public CloudProcessDeployedProducer cloudProcessDeployedProducer(RepositoryService repositoryService,
+                                                                     APIProcessDefinitionConverter converter,
+                                                                     RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                                                     ProcessEngineChannels processEngineChannels) {
+        return new CloudProcessDeployedProducer(repositoryService, converter, runtimeBundleInfoAppender,
+                                                processEngineChannels);
     }
 
 }
