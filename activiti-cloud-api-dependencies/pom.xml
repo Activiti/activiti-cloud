@@ -29,13 +29,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.build</groupId>
-        <artifactId>activiti-cloud-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
-        <scope>import</scope>
-        <type>pom</type>       
-      </dependency>
-      <dependency>
         <groupId>org.activiti.api</groupId>
         <artifactId>activiti-api-dependencies</artifactId>
         <version>${activiti-api.version}</version>
