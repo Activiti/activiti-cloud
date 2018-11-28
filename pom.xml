@@ -47,6 +47,18 @@
     <activiti-cloud-org-service.version>${project.version}</activiti-cloud-org-service.version>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti.cloud.modeling.build</groupId>
+        <artifactId>activiti-cloud-modeling-dependencies-parent</artifactId>
+        <version>${activiti-cloud-modeling-build.version}</version>
+        <scope>import</scope>
+        <type>pom</type>       
+      </dependency>               
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud.modeling.build</groupId>
