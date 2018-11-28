@@ -36,6 +36,13 @@
         <scope>import</scope>
       </dependency>
       <dependency>
+        <groupId>org.activiti.core.common</groupId>
+        <artifactId>activiti-core-common-dependencies</artifactId>
+        <version>${activiti-core-common.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
         <groupId>org.activiti.cloud.common</groupId>
         <artifactId>activiti-cloud-services-auditable</artifactId>
         <version>${activiti-cloud-service-common.version}</version>
@@ -107,4 +114,5 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+  
 </project>
