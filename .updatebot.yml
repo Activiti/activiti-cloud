@@ -3,30 +3,30 @@ github:
   - name: activiti
     repositories:
     - name: ttc-connectors-reward
-      branch: develop
+      branch: master
     - name: ttc-campaigns-service
-      branch: develop
+      branch: master
     - name: ttc-acceptance-tests
-      branch: develop
+      branch: master
     - name: ttc-rb-english-campaign
-      branch: develop
+      branch: master
     - name: ttc-query-campaign
-      branch: develop
+      branch: master
     - name: ttc-connectors-dummytwitter
-      branch: develop
+      branch: master
     - name: ttc-connectors-ranking
-      branch: develop
+      branch: master
     - name: ttc-connectors-processing
-      branch: develop
+      branch: master
     - name: example-runtime-bundle
-      branch: develop
-    - name: activiti-cloud-acceptance-tests
+      branch: master
+    - name: activiti-cloud-acceptance-scenarios
       branch: develop
     - name: example-cloud-connector
-      branch: develop
+      branch: master
     - name: activiti-cloud-modeling
-      branch: develop
+      branch: master
     - name: activiti-cloud-query
-      branch: develop
+      branch: master
     - name: activiti-cloud-audit
-      branch: develop
+      branch: master
