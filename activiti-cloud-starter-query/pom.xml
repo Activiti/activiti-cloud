@@ -150,7 +150,7 @@
                     </ports>
                     <wait>
                       <log>Server startup complete</log>
-                      <time>20000</time>
+                      <time>45000</time>
                       <shutdown>3000</shutdown>
                       <kill>1000</kill>
                     </wait>
