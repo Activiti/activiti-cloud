@@ -21,57 +21,8 @@
     <activiti-api.version>7.0.55</activiti-api.version>
   </properties>
 
-  <dependencyManagement>
-    <!-- This duplicates activiti-cloud-api-dependencies module but we can't import that module here as this is its parent
-         and we want to keep a standard Maven structure -->
-    <dependencies>
-      <dependency>
-        <groupId>org.activiti.cloud.build</groupId>
-        <artifactId>activiti-cloud-dependencies-parent</artifactId>
-        <version>${activiti-cloud-build.version}</version>
-        <scope>import</scope>
-        <type>pom</type>       
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.api</groupId>
-        <artifactId>activiti-api-dependencies</artifactId>
-        <version>${activiti-api.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-model-shared</artifactId>
-        <version>${activiti-cloud-api.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-model-shared-impl</artifactId>
-        <version>${activiti-cloud-api.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-process-model</artifactId>
-        <version>${activiti-cloud-api.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-task-model</artifactId>
-        <version>${activiti-cloud-api.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-process-model-impl</artifactId>
-        <version>${activiti-cloud-api.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-task-model-impl</artifactId>
-        <version>${activiti-cloud-api.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
   <modules>
+    <module>dependencies-tests</module>
     <module>activiti-cloud-api-dependencies</module>
     <module>activiti-cloud-api-model-shared</module>
     <module>activiti-cloud-api-model-shared-impl</module>
@@ -80,6 +31,7 @@
     <module>activiti-cloud-api-task-model</module>
     <module>activiti-cloud-api-task-model-impl</module>
   </modules>
+  
   <repositories>
     <repository>
       <id>alfresco</id>
@@ -90,13 +42,44 @@
       </releases>
     </repository>
   </repositories>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti.cloud.build</groupId>
+        <artifactId>activiti-cloud-dependencies-parent</artifactId>
+        <version>${activiti-cloud-build.version}</version>
+        <scope>import</scope>
+        <type>pom</type>       
+      </dependency>    
+    </dependencies>
+  </dependencyManagement>
 
+  <!-- BoMs markers for dependency convergence tests -->
+  <dependencies>
+    <dependency>
+      <groupId>org.activiti.cloud.build</groupId>
+      <artifactId>activiti-cloud-parent</artifactId>
+      <version>${activiti-cloud-build.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.api</groupId>
+      <artifactId>activiti-api-dependencies</artifactId>
+      <version>${activiti-api.version}</version>
+      <type>pom</type>
+    </dependency>      
+  </dependencies>
+  
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
         <version>2.8.2</version>
+        <configuration>
+          <deployAtEnd>true</deployAtEnd>
+        </configuration>
       </plugin>
     </plugins>
   </build>
