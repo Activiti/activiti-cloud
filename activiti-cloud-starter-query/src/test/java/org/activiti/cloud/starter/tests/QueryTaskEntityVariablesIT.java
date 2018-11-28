@@ -16,6 +16,12 @@
 
 package org.activiti.cloud.starter.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -26,8 +32,6 @@ import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.task.model.Task;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,16 +44,14 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
+@DirtiesContext
 public class QueryTaskEntityVariablesIT {
 
     private static final String VARIABLES_URL = "/v1/tasks/{taskId}/variables";
