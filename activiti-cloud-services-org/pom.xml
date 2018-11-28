@@ -4,8 +4,9 @@
 
   <parent>
     <groupId>org.activiti.cloud.modeling</groupId>
-    <artifactId>activiti-cloud-org-service-parent</artifactId>
+    <artifactId>activiti-cloud-org-dependencies</artifactId>
     <version>7.0.0-SNAPSHOT</version>
+    <relativePath>../activiti-cloud-org-dependencies</relativePath>
   </parent>
 
   <artifactId>activiti-cloud-services-org</artifactId>
