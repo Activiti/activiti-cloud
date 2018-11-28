@@ -75,6 +75,12 @@
         <groupId>net.serenity-bdd</groupId>
         <artifactId>serenity-jbehave</artifactId>
         <version>${serenity-jbehave.version}</version>
+        <exclusions>
+          <exclusion>
+            <artifactId>groovy-all</artifactId>
+            <groupId>org.codehaus.groovy</groupId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>net.serenity-bdd</groupId>
