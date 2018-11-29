@@ -23,6 +23,8 @@ import static org.awaitility.Awaitility.await;
 import java.util.Collection;
 
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
@@ -129,6 +131,59 @@ public class QueryProcessInstancesEntityIT {
                                 ProcessInstanceEntity::getStatus)
                     .containsExactly(tuple(completedProcess.getId(),
                                            ProcessInstance.ProcessInstanceStatus.COMPLETED));
+        });
+    }
+    
+    @Test
+    public void shouldGetProcessWithUpdatedInfo() {
+        //given
+        ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
+
+        
+        eventsAggregator.sendAll();
+        
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
+            assertThat(processInstanceEntities)
+                    .extracting(ProcessInstanceEntity::getId,
+                                ProcessInstanceEntity::getStatus)
+                    .contains(tuple(process.getId(),
+                                    ProcessInstance.ProcessInstanceStatus.RUNNING));
+        });
+        
+        //when
+        ProcessInstanceImpl updatedProcess = new ProcessInstanceImpl();
+        updatedProcess.setId(process.getId());
+        updatedProcess.setBusinessKey("businessKey");
+        updatedProcess.setName("name");
+        
+        
+        producer.send(new CloudProcessUpdatedEventImpl(updatedProcess));
+
+        await().untilAsserted(() -> {
+     
+             ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
+                                                                            HttpMethod.GET,
+                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                            new ParameterizedTypeReference<ProcessInstance>() {
+                                                                            });
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getId()).isNotNull();
+            
+            ProcessInstance responseProcess = responseEntity.getBody();
+            assertThat(responseProcess.getBusinessKey()).isEqualTo(updatedProcess.getBusinessKey());
+            assertThat(responseProcess.getName()).isEqualTo(updatedProcess.getName());
+
         });
     }
 
