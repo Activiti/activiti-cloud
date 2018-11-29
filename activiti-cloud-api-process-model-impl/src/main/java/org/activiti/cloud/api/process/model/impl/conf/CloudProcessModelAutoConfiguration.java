@@ -49,6 +49,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -73,6 +74,8 @@ public class CloudProcessModelAutoConfiguration {
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name()));
         module.registerSubtypes(new NamedType(CloudProcessCreatedEventImpl.class,
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name()));
+        module.registerSubtypes(new NamedType(CloudProcessUpdatedEventImpl.class,
+                                              ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name()));
         module.registerSubtypes(new NamedType(CloudProcessCompletedEventImpl.class,
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name()));
         module.registerSubtypes(new NamedType(CloudProcessSuspendedEventImpl.class,
