@@ -22,9 +22,9 @@ public interface ProcessRuntimeService extends BaseService {
     @Headers("Content-Type: application/json")
     void suspendProcess(@Param("id") String id);
 
-    @RequestLine("POST /v1/process-instances/{id}/activate")
+    @RequestLine("POST /v1/process-instances/{id}/resume")
     @Headers("Content-Type: application/json")
-    void activateProcess(@Param("id") String id);
+    void resumeProcess(@Param("id") String id);
 
     @RequestLine("DELETE /v1/process-instances/{id}")
     @Headers("Content-Type: application/json")

@@ -108,8 +108,8 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public void activateProcessInstance(String processInstanceId) {
-        processRuntimeService.activateProcess(processInstanceId);
+    public void resumeProcessInstance(String processInstanceId) {
+        processRuntimeService.resumeProcess(processInstanceId);
     }
 
     @Step
