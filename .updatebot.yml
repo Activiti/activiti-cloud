@@ -21,7 +21,7 @@ github:
     - name: example-runtime-bundle
       branch: master
     - name: activiti-cloud-acceptance-scenarios
-      branch: develop
+      branch: master
     - name: example-cloud-connector
       branch: master
     - name: activiti-cloud-modeling
