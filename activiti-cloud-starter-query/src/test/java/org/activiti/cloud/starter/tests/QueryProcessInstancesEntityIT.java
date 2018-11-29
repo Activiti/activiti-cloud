@@ -54,6 +54,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class QueryProcessInstancesEntityIT {
 
     private static final String PROC_URL = "/v1/process-instances";
+    private static final String ADMIN_PROC_URL = "/admin/v1/process-instances";
+    
     private static final ParameterizedTypeReference<PagedResources<ProcessInstanceEntity>> PAGED_PROCESS_INSTANCE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<ProcessInstanceEntity>>() {
     };
 
@@ -187,6 +189,35 @@ public class QueryProcessInstancesEntityIT {
         });
     }
 
+    
+    @Test
+    public void shouldGetAdminProcessInfo() {
+        //given
+        ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
+
+        
+        eventsAggregator.sendAll();
+        
+  
+        await().untilAsserted(() -> {
+             keycloakTokenProducer.setKeycloakTestUser("hradmin");
+     
+             ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "/" + process.getId(),
+                                                                            HttpMethod.GET,
+                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                            new ParameterizedTypeReference<ProcessInstance>() {
+                                                                            });
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getId()).isNotNull();
+            
+            ProcessInstance responseProcess = responseEntity.getBody();
+            assertThat(responseProcess.getId()).isEqualTo(process.getId());
+
+        });
+    }
+    
     private ResponseEntity<PagedResources<ProcessInstanceEntity>> executeRequestGetProcInstances() {
 
         return testRestTemplate.exchange(PROC_URL,

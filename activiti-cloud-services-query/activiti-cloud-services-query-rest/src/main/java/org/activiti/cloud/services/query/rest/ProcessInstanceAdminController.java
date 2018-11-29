@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
@@ -31,6 +32,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -50,6 +52,8 @@ public class ProcessInstanceAdminController {
     private ProcessInstanceResourceAssembler processInstanceResourceAssembler;
 
     private AlfrescoPagedResourcesAssembler<ProcessInstanceEntity> pagedResourcesAssembler;
+    
+    private EntityFinder entityFinder;
 
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -66,10 +70,12 @@ public class ProcessInstanceAdminController {
     @Autowired
     public ProcessInstanceAdminController(ProcessInstanceRepository processInstanceRepository,
                                           ProcessInstanceResourceAssembler processInstanceResourceAssembler,
-                                          AlfrescoPagedResourcesAssembler<ProcessInstanceEntity> pagedResourcesAssembler) {
+                                          AlfrescoPagedResourcesAssembler<ProcessInstanceEntity> pagedResourcesAssembler,
+                                          EntityFinder entityFinder) {
         this.processInstanceRepository = processInstanceRepository;
         this.processInstanceResourceAssembler = processInstanceResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.entityFinder=entityFinder;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -82,6 +88,17 @@ public class ProcessInstanceAdminController {
                                                                                     pageable),
                                                   processInstanceResourceAssembler);
     }
+    
+
+    @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
+    public ProcessInstanceResource findById(@PathVariable String processInstanceId) {
+
+        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
+                                                                            processInstanceId,
+                                                                            "Unable to find task for the given id:'" + processInstanceId + "'");
+        return processInstanceResourceAssembler.toResource(processInstanceEntity);
+    }
+
 
 
 }
