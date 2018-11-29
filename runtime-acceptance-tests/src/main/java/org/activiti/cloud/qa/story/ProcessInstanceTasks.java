@@ -265,13 +265,13 @@ public class ProcessInstanceTasks {
 
     @When("activate the process")
     public void activateCurrentProcessInstance() {
-        processRuntimeBundleSteps.activateProcessInstance(processInstance.getId());
+        processRuntimeBundleSteps.resumeProcessInstance(processInstance.getId());
     }
 
     @Then("the process cannot be activated anymore")
     @ExpectRestNotFound("Unable to find process instance for the given id")
     public void cannotActivateProcessInstance() {
-        processRuntimeBundleSteps.activateProcessInstance(processInstance.getId());
+        processRuntimeBundleSteps.resumeProcessInstance(processInstance.getId());
     }
 
     @Then("the user can get events for process with variables instances in admin endpoint")
