@@ -190,12 +190,18 @@ public class ApplicationService {
                 .orElseThrow(() -> new ImportApplicationException("No valid application entry found to import: " + file.getOriginalFilename()));
 
         applicationHolder.getModelJsonFiles().forEach(modelJsonFile -> {
-            Model createdModel = modelService.importJsonModel(createdApplication,
-                                                              modelJsonFile.getModelType(),
-                                                              modelJsonFile.getFileContent());
-            applicationHolder.getModelContentFile(createdModel)
-                    .ifPresent(fileContent -> modelService.updateModelContent(createdModel,
-                                                                              fileContent));
+            if (modelTypeService.isJson(modelJsonFile.getModelType())) {
+                modelService.importModel(createdApplication,
+                                         modelJsonFile.getModelType(),
+                                         modelJsonFile.getFileContent());
+            } else {
+                Model createdModel = modelService.importJsonModel(createdApplication,
+                                                                  modelJsonFile.getModelType(),
+                                                                  modelJsonFile.getFileContent());
+                applicationHolder.getModelContentFile(createdModel)
+                        .ifPresent(fileContent -> modelService.updateModelContent(createdModel,
+                                                                                  fileContent));
+            }
         });
         return createdApplication;
     }
