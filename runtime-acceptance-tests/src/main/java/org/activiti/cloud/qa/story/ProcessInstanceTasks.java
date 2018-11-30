@@ -44,9 +44,11 @@ import org.activiti.cloud.acc.core.steps.runtime.admin.ProcessRuntimeAdminSteps;
 import org.activiti.cloud.acc.shared.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
+import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.springframework.hateoas.PagedResources;
 
 import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
 import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
@@ -333,4 +335,16 @@ public class ProcessInstanceTasks {
                 .extracting(field)
                 .contains(value);
     }
+
+    @Then("The user gets all the process definitions in admin endpoint")
+    public void checkCanGetProcessDefinitionsAsAdmin() {
+        PagedResources<CloudProcessDefinition> processDefinitions = processQueryAdminSteps.getAllProcessDefinitions();
+        assertThat(processDefinitions.getContent())
+                .isNotNull()
+                .extracting(CloudProcessDefinition::getName)
+                .contains("single-task",
+                          "Process with variables",
+                          "ConnectorProcess");
+    }
+
 }

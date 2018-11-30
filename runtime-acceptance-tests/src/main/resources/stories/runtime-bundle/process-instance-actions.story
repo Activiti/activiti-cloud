@@ -39,6 +39,10 @@ When the user starts a CONNECTOR_PROCESS_INSTANCE
 Then the status of the process is changed to completed
 And a variable was created with name var1
 
+Scenario: check all process definitions are present as admin
+Given the user is authenticated as hradmin
+Then The user gets all the process definitions in admin endpoint
+
 Scenario: retrieve process instances as an admin
 Given the user is authenticated as hradmin
 When the user starts a PROCESS_INSTANCE_WITH_VARIABLES
