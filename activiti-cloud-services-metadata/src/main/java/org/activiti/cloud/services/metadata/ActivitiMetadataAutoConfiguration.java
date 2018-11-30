@@ -18,7 +18,7 @@ public class ActivitiMetadataAutoConfiguration {
     private MetadataProperties metadataProperties;
 
     @Bean
-    @ConditionalOnMissingBean(type="MetadataService")
+    @ConditionalOnMissingBean(MetadataService.class)
     MetadataService metadataService(){
         return new MetadataService(metadataProperties);
     }
