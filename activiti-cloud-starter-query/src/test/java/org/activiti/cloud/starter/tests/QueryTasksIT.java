@@ -280,6 +280,7 @@ public class QueryTasksIT {
     @Test
     public void shouldGetRestrictedTasksWithUserPermission() {
         //given
+        keycloakTokenProducer.setKeycloakTestUser("testuser");
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate("task with candidate",
                                                                                   "testuser",
                                                                                   runningProcessInstance);
@@ -353,7 +354,7 @@ public class QueryTasksIT {
     }
     
     private void assertCanRetrieveTask(Task task) {
-        await().untilAsserted(() -> {
+       await().untilAsserted(() -> {
 
             ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
 
