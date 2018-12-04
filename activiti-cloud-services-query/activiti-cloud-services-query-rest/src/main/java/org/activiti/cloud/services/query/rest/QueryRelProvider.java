@@ -21,8 +21,11 @@ import java.util.Map;
 
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.RelProvider;
 
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class QueryRelProvider implements RelProvider {
 
     private Map<Class<?>, ResourceRelationDescriptor> resourceRelationDescriptors;
