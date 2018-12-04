@@ -16,7 +16,12 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextIT.MOCK_DEPENDENCIES_PROFILE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+
 import java.util.Map;
+
 import javax.persistence.EntityManager;
 
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -40,10 +45,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextIT.MOCK_DEPENDENCIES_PROFILE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = QueryEventHandlerContextIT.QueryEventHandlerContextConfig.class)
@@ -115,6 +116,7 @@ public class QueryEventHandlerContextIT {
                 ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name(),
                 ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name(),
                 ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name(),
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_CREATED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name(),
@@ -134,6 +136,7 @@ public class QueryEventHandlerContextIT {
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name())).isInstanceOf(ProcessSuspendedEventHandler.class);
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name())).isInstanceOf(ProcessResumedEventHandler.class);
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name())).isInstanceOf(ProcessCancelledEventHandler.class);
+        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name())).isInstanceOf(ProcessUpdatedEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_CREATED.name())).isInstanceOf(TaskCreatedEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name())).isInstanceOf(TaskAssignedEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name())).isInstanceOf(TaskSuspendedEventHandler.class);

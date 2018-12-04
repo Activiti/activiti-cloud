@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.resources.TaskResource;
@@ -31,6 +32,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -50,14 +52,18 @@ public class TaskAdminController {
     private TaskResourceAssembler taskResourceAssembler;
 
     private AlfrescoPagedResourcesAssembler<TaskEntity> pagedResourcesAssembler;
+    
+    private EntityFinder entityFinder;
 
     @Autowired
     public TaskAdminController(TaskRepository taskRepository,
                                TaskResourceAssembler taskResourceAssembler,
-                               AlfrescoPagedResourcesAssembler<TaskEntity> pagedResourcesAssembler) {
+                               AlfrescoPagedResourcesAssembler<TaskEntity> pagedResourcesAssembler,
+                               EntityFinder entityFinder) {
         this.taskRepository = taskRepository;
         this.taskResourceAssembler = taskResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.entityFinder = entityFinder;
     }
 
     @ExceptionHandler(IllegalStateException.class)
@@ -77,4 +83,16 @@ public class TaskAdminController {
                                                   page,
                                                   taskResourceAssembler);
     }
+    
+
+    @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
+    public TaskResource findById(@PathVariable String taskId) {
+
+        TaskEntity taskEntity = entityFinder.findById(taskRepository,
+                                                      taskId,
+                                                      "Unable to find taskEntity for the given id:'" + taskId + "'");
+   
+        return taskResourceAssembler.toResource(taskEntity);
+    }
+
 }

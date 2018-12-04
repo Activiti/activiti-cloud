@@ -23,6 +23,8 @@ import static org.awaitility.Awaitility.await;
 import java.util.Collection;
 
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
@@ -52,6 +54,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class QueryProcessInstancesEntityIT {
 
     private static final String PROC_URL = "/v1/process-instances";
+    private static final String ADMIN_PROC_URL = "/admin/v1/process-instances";
+    
     private static final ParameterizedTypeReference<PagedResources<ProcessInstanceEntity>> PAGED_PROCESS_INSTANCE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<ProcessInstanceEntity>>() {
     };
 
@@ -131,7 +135,89 @@ public class QueryProcessInstancesEntityIT {
                                            ProcessInstance.ProcessInstanceStatus.COMPLETED));
         });
     }
+    
+    @Test
+    public void shouldGetProcessWithUpdatedInfo() {
+        //given
+        ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
 
+        
+        eventsAggregator.sendAll();
+        
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
+            assertThat(processInstanceEntities)
+                    .extracting(ProcessInstanceEntity::getId,
+                                ProcessInstanceEntity::getStatus)
+                    .contains(tuple(process.getId(),
+                                    ProcessInstance.ProcessInstanceStatus.RUNNING));
+        });
+        
+        //when
+        ProcessInstanceImpl updatedProcess = new ProcessInstanceImpl();
+        updatedProcess.setId(process.getId());
+        updatedProcess.setBusinessKey("businessKey");
+        updatedProcess.setName("name");
+        
+        
+        producer.send(new CloudProcessUpdatedEventImpl(updatedProcess));
+
+        await().untilAsserted(() -> {
+     
+             ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
+                                                                            HttpMethod.GET,
+                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                            new ParameterizedTypeReference<ProcessInstance>() {
+                                                                            });
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getId()).isNotNull();
+            
+            ProcessInstance responseProcess = responseEntity.getBody();
+            assertThat(responseProcess.getBusinessKey()).isEqualTo(updatedProcess.getBusinessKey());
+            assertThat(responseProcess.getName()).isEqualTo(updatedProcess.getName());
+
+        });
+    }
+
+    
+    @Test
+    public void shouldGetAdminProcessInfo() {
+        //given
+        ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
+
+        
+        eventsAggregator.sendAll();
+        
+  
+        await().untilAsserted(() -> {
+             keycloakTokenProducer.setKeycloakTestUser("hradmin");
+     
+             ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "/" + process.getId(),
+                                                                            HttpMethod.GET,
+                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                            new ParameterizedTypeReference<ProcessInstance>() {
+                                                                            });
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getId()).isNotNull();
+            
+            ProcessInstance responseProcess = responseEntity.getBody();
+            assertThat(responseProcess.getId()).isEqualTo(process.getId());
+
+        });
+    }
+    
     private ResponseEntity<PagedResources<ProcessInstanceEntity>> executeRequestGetProcInstances() {
 
         return testRestTemplate.exchange(PROC_URL,

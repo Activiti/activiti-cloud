@@ -58,6 +58,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class QueryTasksIT {
 
     private static final String TASKS_URL = "/v1/tasks";
+    private static final String ADMIN_TASKS_URL = "/admin/v1/tasks";
+    
     private static final ParameterizedTypeReference<PagedResources<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Task>>() {
     };
 
@@ -278,6 +280,7 @@ public class QueryTasksIT {
     @Test
     public void shouldGetRestrictedTasksWithUserPermission() {
         //given
+        keycloakTokenProducer.setKeycloakTestUser("testuser");
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate("task with candidate",
                                                                                   "testuser",
                                                                                   runningProcessInstance);
@@ -317,8 +320,41 @@ public class QueryTasksIT {
         assertCanRetrieveTask(taskWithCandidate);
     }
 
-    private void assertCanRetrieveTask(Task task) {
+    
+
+    @Test
+    public void shouldGetAdminTask() {
+        //given
+              //given
+        Task createdTask = taskEventContainedBuilder.aCreatedTask("Created task",
+                                                                  runningProcessInstance);
+        eventsAggregator.sendAll();
+
         await().untilAsserted(() -> {
+
+            keycloakTokenProducer.setKeycloakTestUser("hradmin");
+            //when
+            ResponseEntity<Task> responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         new ParameterizedTypeReference<Task>() {
+                                         });
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getId()).isNotNull();
+            assertThat(responseEntity.getBody().getId()).isEqualTo(createdTask.getId());
+         
+        });
+ 
+    
+    }
+    
+    private void assertCanRetrieveTask(Task task) {
+       await().untilAsserted(() -> {
 
             ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
 
