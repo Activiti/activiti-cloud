@@ -15,12 +15,15 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import static java.util.Collections.emptyList;
+
 import java.nio.charset.StandardCharsets;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.query.Page;
@@ -46,8 +49,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import static java.util.Collections.emptyList;
 
 @RestController
 public class ProcessInstanceControllerImpl implements ProcessInstanceController {
@@ -149,6 +150,17 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     @Override
     public ProcessInstanceResource deleteProcessInstance(@PathVariable String processInstanceId) {
         return resourceAssembler.toResource(processRuntime.delete(ProcessPayloadBuilder.delete(processInstanceId)));
+    }
+ 
+    @Override
+    public ProcessInstanceResource updateProcess(@PathVariable String processInstanceId,
+                                                 @RequestBody UpdateProcessPayload payload) {
+        if (payload!=null) {
+            payload.setProcessInstanceId(processInstanceId);
+            
+        }
+        
+        return resourceAssembler.toResource(processRuntime.update(payload));
     }
 
 }

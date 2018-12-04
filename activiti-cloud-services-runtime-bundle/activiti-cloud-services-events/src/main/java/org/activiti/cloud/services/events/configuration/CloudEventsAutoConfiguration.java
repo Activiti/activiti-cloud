@@ -31,6 +31,7 @@ import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer
 import org.activiti.cloud.services.events.listeners.CloudProcessResumedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessStartedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessSuspendedProducer;
+import org.activiti.cloud.services.events.listeners.CloudProcessUpdatedProducer;
 import org.activiti.cloud.services.events.listeners.CloudSequenceFlowTakenProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskActivatedProducer;
 import org.activiti.cloud.services.events.listeners.CloudTaskAssignedProducer;
@@ -199,6 +200,13 @@ public class CloudEventsAutoConfiguration {
         return new CloudProcessCancelledProducer(eventConverter,
                                                  eventsAggregator);
     }
+
+    @Bean
+    public CloudProcessUpdatedProducer cloudProcessUpdatedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
+                                                             ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudProcessUpdatedProducer(eventConverter,
+                                            eventsAggregator);
+    } 
 
     @Bean
     public ToCloudVariableEventConverter cloudVariableEventConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {

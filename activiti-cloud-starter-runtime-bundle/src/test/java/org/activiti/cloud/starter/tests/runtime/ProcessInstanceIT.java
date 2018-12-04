@@ -423,6 +423,75 @@ public class ProcessInstanceIT {
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
     }
     
+    @Test
+    public void shouldUpdateProcessInstance() {
+        //given
+       ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                                          null, 
+                                                                                                          "business_key");                                                                                     
+                                                                                               
+        assertThat(startProcessEntity).isNotNull();
+        CloudProcessInstance returnedProcInst = startProcessEntity.getBody();
+        assertThat(returnedProcInst).isNotNull();
+        assertThat(returnedProcInst.getId()).isNotNull();
+        assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
+        assertThat(returnedProcInst.getBusinessKey()).contains("business_key");
+        
+    
+        //when
+        String newBusinessKey=startProcessEntity.getBody().getBusinessKey()!=null ? startProcessEntity.getBody().getBusinessKey()+" UPDATED" : " UPDATED" ;
+        String newName=startProcessEntity.getBody().getName()!=null ? startProcessEntity.getBody().getName()+" UPDATED" : " UPDATED";
+        
+        ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.update(startProcessEntity,
+                                                                                 newBusinessKey,
+                                                                                 newName
+                                                                                 );
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(responseEntity);
+       
+        assertThat(processInstanceEntity.getBody().getBusinessKey()).isEqualTo(newBusinessKey);
+        assertThat(processInstanceEntity.getBody().getName()).isEqualTo(newName);
+    }
+    
+    @Test
+    public void adminShouldUpdateProcessInstance() {
+        //given
+       ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                                          null, 
+                                                                                                          "business_key");                                                                                     
+                                                                                               
+        assertThat(startProcessEntity).isNotNull();
+        CloudProcessInstance returnedProcInst = startProcessEntity.getBody();
+        assertThat(returnedProcInst).isNotNull();
+        assertThat(returnedProcInst.getId()).isNotNull();
+        assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
+        assertThat(returnedProcInst.getBusinessKey()).contains("business_key");
+        
+    
+        //when
+        String newBusinessKey=startProcessEntity.getBody().getBusinessKey()!=null ? startProcessEntity.getBody().getBusinessKey()+" UPDATED" : " UPDATED" ;
+        String newName=startProcessEntity.getBody().getName()!=null ? startProcessEntity.getBody().getName()+" UPDATED" : " UPDATED";
+        
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        
+        
+        
+        ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.adminUpdate(startProcessEntity,
+                                                                                 newBusinessKey,
+                                                                                 newName
+                                                                                 );
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(responseEntity);
+       
+        assertThat(processInstanceEntity.getBody().getBusinessKey()).isEqualTo(newBusinessKey);
+        assertThat(processInstanceEntity.getBody().getName()).isEqualTo(newName);
+    }
+    
+    
     private ResponseEntity<Void> adminExecuteRequestResumeProcess(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
         ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/resume",
                                                                     HttpMethod.POST,

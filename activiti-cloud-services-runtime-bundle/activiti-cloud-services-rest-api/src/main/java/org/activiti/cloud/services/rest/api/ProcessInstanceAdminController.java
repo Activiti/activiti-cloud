@@ -1,6 +1,7 @@
 package org.activiti.cloud.services.rest.api;
 
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
@@ -26,5 +27,9 @@ public interface ProcessInstanceAdminController {
 
     @RequestMapping(method = RequestMethod.POST,value = "{processInstanceId}/resume")
     ProcessInstanceResource resume(@PathVariable String processInstanceId);
+    
+    @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.PUT)
+    ProcessInstanceResource updateProcess(@PathVariable("processInstanceId") String processInstanceId,
+                                    @RequestBody UpdateProcessPayload payload);
 
 }

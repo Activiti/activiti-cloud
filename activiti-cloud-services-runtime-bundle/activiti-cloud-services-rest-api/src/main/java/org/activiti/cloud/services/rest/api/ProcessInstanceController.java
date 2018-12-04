@@ -2,6 +2,7 @@ package org.activiti.cloud.services.rest.api;
 
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
@@ -43,4 +44,8 @@ public interface ProcessInstanceController {
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.DELETE)
     ProcessInstanceResource deleteProcessInstance(@PathVariable String processInstanceId);
+    
+    @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.PUT)
+    ProcessInstanceResource updateProcess(@PathVariable("processInstanceId") String processInstanceId,
+                                    @RequestBody UpdateProcessPayload payload);
 }

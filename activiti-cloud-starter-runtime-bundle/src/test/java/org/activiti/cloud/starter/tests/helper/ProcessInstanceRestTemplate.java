@@ -25,6 +25,7 @@ import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
@@ -222,4 +223,61 @@ public class ProcessInstanceRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
+    
+    public ResponseEntity<CloudProcessInstance> update(ResponseEntity<CloudProcessInstance> processEntity,
+                                                       String businessKey,
+                                                       String name
+                                                       ) {
+
+        UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder.update()
+                .withProcessInstanceId(processEntity.getBody().getId())
+                .withBusinessKey(businessKey)
+                .withProcessInstanceName(name)
+                .build();
+        
+         return  updateProcess(updateProcessPayload);
+    }
+    
+    private ResponseEntity<CloudProcessInstance> updateProcess(UpdateProcessPayload updateProcessPayload) {
+        HttpEntity<UpdateProcessPayload> requestEntity = new HttpEntity<>(updateProcessPayload);
+
+        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL+ updateProcessPayload.getProcessInstanceId(),
+                                                                                        HttpMethod.PUT,
+                                                                                        requestEntity,
+                                                                                        new ParameterizedTypeReference<CloudProcessInstance>() {
+                                                                                        });
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().getId()).isNotNull();
+        return responseEntity;
+    }
+    
+    public ResponseEntity<CloudProcessInstance> adminUpdate(ResponseEntity<CloudProcessInstance> processEntity,
+                                                       String businessKey,
+                                                       String name
+                                                       ) {
+
+        UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder.update()
+                .withProcessInstanceId(processEntity.getBody().getId())
+                .withBusinessKey(businessKey)
+                .withProcessInstanceName(name)
+                .build();
+        
+         return  adminUpdateProcess(updateProcessPayload);
+    }
+    
+    private ResponseEntity<CloudProcessInstance> adminUpdateProcess(UpdateProcessPayload updateProcessPayload) {
+        HttpEntity<UpdateProcessPayload> requestEntity = new HttpEntity<>(updateProcessPayload);
+
+        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL+ updateProcessPayload.getProcessInstanceId(),
+                                                                                        HttpMethod.PUT,
+                                                                                        requestEntity,
+                                                                                        new ParameterizedTypeReference<CloudProcessInstance>() {
+                                                                                        });
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().getId()).isNotNull();
+        return responseEntity;
+    }
+ 
 }
