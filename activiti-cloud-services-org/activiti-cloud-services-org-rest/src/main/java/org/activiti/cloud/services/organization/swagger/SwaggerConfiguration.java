@@ -18,6 +18,7 @@ package org.activiti.cloud.services.organization.swagger;
 
 import org.activiti.cloud.alfresco.rest.model.AlfrescoPageContentListWrapper;
 import org.activiti.cloud.organization.api.Application;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -38,6 +39,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class SwaggerConfiguration {
 
     @Bean
+    @ConditionalOnMissingBean(Docket.class)
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
