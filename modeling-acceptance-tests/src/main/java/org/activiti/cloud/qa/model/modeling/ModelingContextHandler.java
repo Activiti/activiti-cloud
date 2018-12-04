@@ -19,6 +19,7 @@ package org.activiti.cloud.qa.model.modeling;
 import java.util.Optional;
 
 import net.serenitybdd.core.Serenity;
+import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.hateoas.Resource;
 
 /**
@@ -27,6 +28,8 @@ import org.springframework.hateoas.Resource;
 public class ModelingContextHandler {
 
     private static final String MODELING_CURRENT_CONTEXT = "modelingCurrentContext";
+
+    private static final String MODELING_CURRENT_FILE = "modelingCurrentFile";
 
     public Optional<Resource<?>> getCurrentModelingContext() {
         return Optional.ofNullable(Serenity.sessionVariableCalled(MODELING_CURRENT_CONTEXT));
@@ -37,7 +40,17 @@ public class ModelingContextHandler {
                 .to(currentModelingObject);
     }
 
+    public Optional<FileContent> getCurrentModelingFile() {
+        return Optional.ofNullable(Serenity.sessionVariableCalled(MODELING_CURRENT_FILE));
+    }
+
+    public void setCurrentModelingFile(FileContent fileContent) {
+        Serenity.setSessionVariable(MODELING_CURRENT_FILE)
+                .to(fileContent);
+    }
+
     public static void resetCurrentModelingObject() {
         Serenity.setSessionVariable(MODELING_CURRENT_CONTEXT).to(null);
+        Serenity.setSessionVariable(MODELING_CURRENT_FILE).to(null);
     }
 }

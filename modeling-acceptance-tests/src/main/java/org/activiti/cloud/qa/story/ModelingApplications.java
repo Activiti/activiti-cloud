@@ -16,16 +16,28 @@
 
 package org.activiti.cloud.qa.story;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import net.thucydides.core.annotations.Steps;
+import org.activiti.cloud.acc.shared.rest.error.ExpectRestError;
+import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.qa.steps.ModelingApplicationsSteps;
+import org.activiti.cloud.qa.steps.ModelingModelsSteps;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
+import static org.activiti.cloud.organization.api.ProcessModelType.BPMN20_XML;
+import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
+import static org.activiti.cloud.qa.model.modeling.ModelIdentifier.identified;
 import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.applicationNamed;
 import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.applicationsNamed;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsFile;
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 
 /**
  * Modeling applications scenarios
@@ -34,6 +46,9 @@ public class ModelingApplications {
 
     @Steps
     private ModelingApplicationsSteps modelingApplicationsSteps;
+
+    @Steps
+    private ModelingModelsSteps modelingModelsSteps;
 
     @When("the user creates an application '$applicationName'")
     public void createApplication(String applicationName) {
@@ -81,5 +96,59 @@ public class ModelingApplications {
     @Then("the application '$applicationName' is deleted")
     public void checkApplicationNotFound(String applicationName) {
         modelingApplicationsSteps.checkApplicationNotFound(applicationNamed(applicationName));
+    }
+
+    @When("the user export the application")
+    public void exportApplication() throws IOException {
+        modelingApplicationsSteps.exportCurrentApplication();
+    }
+
+    @Given("an application '$applicationName' with $modelType model '$modelName'")
+    public void ensureApplicationWithModelsExists(String applicationName,
+                                                  String modelType,
+                                                  String modelName) {
+        ensureApplicationWithModelsExists(applicationName,
+                                          modelType,
+                                          modelName,
+                                          null);
+    }
+
+    @Given("an application '$applicationName' with $modelType model '$modelName' version $modelVersion")
+    public void ensureApplicationWithModelsExists(String applicationName,
+                                                  String modelType,
+                                                  String modelName,
+                                                  String modelVersion) {
+
+        ensureApplicationExists(applicationName);
+        openApplication(applicationName);
+        if (!modelingModelsSteps.existsInCurrentContext(identified(modelName,
+                                                                   modelType,
+                                                                   modelVersion))) {
+            resourceAsFile(modelType + "/" + setExtension(modelName,
+                                                          getModelType(modelType).getContentFileExtension()))
+                    .map(file -> modelingApplicationsSteps.importModelInCurrentApplication(file))
+                    .orElseGet(() -> modelingModelsSteps.create(modelName,
+                                                                modelType));
+        }
+    }
+
+    @Then("the exported application contains the $modelType model $modelName")
+    public void checkExportedApplicationContainsModel(String modelType,
+                                                      String modelName) {
+        modelingApplicationsSteps.checkExportedApplicationContainsModel(getModelType(modelType),
+                                                                        modelName);
+    }
+
+    @Then("the application cannot be exported due to validation errors")
+    @ExpectRestError(statusCode = SC_BAD_REQUEST, value = "Validation errors found in application's models")
+    public void checkCurrentApplicationExportFailsOnValidation() throws IOException {
+        modelingApplicationsSteps.exportCurrentApplication();
+    }
+
+    private ModelType getModelType(String modelType) {
+        if(modelType.equalsIgnoreCase(PROCESS)) {
+            return new ProcessModelType();
+        }
+        throw new RuntimeException("Unknown model type: " + modelType);
     }
 }

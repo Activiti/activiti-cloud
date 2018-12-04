@@ -16,8 +16,9 @@
 
 package org.activiti.cloud.qa.model.modeling;
 
+import java.util.Optional;
+
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ModelType;
 
 /**
  * Modeling model identifier
@@ -47,10 +48,25 @@ public class ModelIdentifier<M> implements ModelingIdentifier<M> {
 
     @Override
     public boolean test(M modelingContext) {
-        return modelingContext instanceof Model &&
-                modelName.equals(((Model) modelingContext).getName()) &&
-                modelType.equalsIgnoreCase(((Model) modelingContext).getType()) &&
-                (modelVersion == null || modelVersion.equals(((Model) modelingContext).getVersion()));
+        return Optional.ofNullable(modelingContext)
+                .filter(Model.class::isInstance)
+                .map(Model.class::cast)
+                .filter(this::testModelName)
+                .filter(this::testModelType)
+                .filter(this::testModelVersion)
+                .isPresent();
+    }
+
+    private boolean testModelName(Model model) {
+        return modelName.equals(model.getName());
+    }
+
+    private boolean testModelType(Model model) {
+        return modelType.equalsIgnoreCase(model.getType());
+    }
+
+    private boolean testModelVersion(Model model) {
+        return modelVersion == null || modelVersion.equals(model.getVersion());
     }
 
     public static ModelIdentifier identified(String modelName,

@@ -16,17 +16,28 @@
 
 package org.activiti.cloud.qa.steps;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
+import feign.Response;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
 import org.activiti.cloud.qa.service.ModelingApplicationsService;
+import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
+import static org.activiti.cloud.services.test.asserts.AssertFileContent.assertThatFileContent;
+import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
@@ -72,9 +83,55 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
         assertThat(findAll().getContent()
                            .stream()
                            .map(Resource::getContent)
-                           .filter(identifier::test)
+                           .filter(identifier)
                            .findAny())
                 .isEmpty();
+    }
+
+    @Step
+    public Resource<Model> importModelInCurrentApplication(File file) {
+        Resource<Application> currentApplication = checkAndGetCurrentContext(Application.class);
+        Link importModelLink = currentApplication.getLink("import");
+        assertThat(importModelLink).isNotNull();
+
+        return modelingApplicationsService.importApplicationModelByUri(importModelLink.getHref(),
+                                                                       file);
+    }
+
+    @Step
+    public void exportCurrentApplication() throws IOException {
+        Resource<Application> currentApplication = checkAndGetCurrentContext(Application.class);
+        Link exportLink = currentApplication.getLink("export");
+        assertThat(exportLink).isNotNull();
+        Response response = modelingApplicationsService.exportApplicationByUri(exportLink.getHref());
+
+        if (response.status() == SC_OK) {
+            modelingContextHandler.setCurrentModelingFile(toFileContent(response));
+        }
+    }
+
+    @Step
+    public void checkExportedApplicationContainsModel(ModelType modelType,
+                                                      String modelName) {
+        Application currentApplication = checkAndGetCurrentContext(Application.class).getContent();
+        assertThat(modelingContextHandler.getCurrentModelingFile()).hasValueSatisfying(
+                fileContent -> assertThatFileContent(fileContent)
+                        .hasName(currentApplication.getName() + ".zip")
+                        .hasContentType(ContentTypeUtils.CONTENT_TYPE_ZIP)
+                        .isZip()
+                        .hasEntries(
+                                toJsonFilename(currentApplication.getName()),
+                                modelType.getFolderName() + "/",
+                                modelType.getFolderName() + "/" + toJsonFilename(modelName),
+                                modelType.getFolderName() + "/" + setExtension(modelName,
+                                                                               modelType.getContentFileExtension())
+                        )
+                        .hasJsonContentSatisfying(toJsonFilename(currentApplication.getName()),
+                                                  jsonContent -> jsonContent
+                                                          .node("name").isEqualTo(currentApplication.getName()))
+                        .hasJsonContentSatisfying(modelType.getFolderName() + "/" + toJsonFilename(modelName),
+                                                  jsonContent -> jsonContent
+                                                          .node("name").isEqualTo(modelName)));
     }
 
     @Override
