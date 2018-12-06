@@ -6,7 +6,6 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.jbehave.core.annotations.When;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 
-import static org.activiti.cloud.acc.core.helper.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
 
 public class ProcessOperations {
 
@@ -18,7 +17,7 @@ public class ProcessOperations {
     public void startProcess(String processName) {
 
         ProcessInstance processInstance = processRuntimeBundleSteps.startProcess(
-                processDefinitionKeyMatcher(processName), false);
+                processName, false);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
@@ -26,7 +25,7 @@ public class ProcessOperations {
     @When("the user starts a process with variables called $processName")
     public void startProcessWithVariables(String processName){
         ProcessInstance processInstance = processRuntimeBundleSteps.startProcess(
-                processDefinitionKeyMatcher(processName), true);
+                processName, true);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
