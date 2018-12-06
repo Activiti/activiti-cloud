@@ -45,6 +45,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStarted
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
@@ -161,6 +162,40 @@ public class AuditServiceIT {
             }
         });
     }
+    
+    @Test
+    public void shouldGetProcessStartedUpdatedCompletedEvents() {
+        //given
+        List<CloudRuntimeEvent> coveredEvents = getTestProcessStartedUpdatedCompletedEvents();
+        producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
+
+        await().untilAsserted(() -> {
+
+            //when
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("processInstanceId","25");
+  
+            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+            
+
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            assertThat(retrievedEvents).hasSameSizeAs(coveredEvents);
+            for (CloudRuntimeEvent coveredEvent : coveredEvents) {
+
+                assertThat(retrievedEvents)
+                        .extracting(
+                                CloudRuntimeEvent::getEventType,
+                                CloudRuntimeEvent::getServiceName,
+                                CloudRuntimeEvent::getServiceVersion)
+                        .contains(tuple(coveredEvent.getEventType(),
+                                        coveredEvent.getServiceName(),
+                                        coveredEvent.getServiceVersion()));
+            }
+ 
+        });
+    }
+    
 
     @Test
     public void shouldGetEventsForACancelledTask() {
@@ -521,6 +556,48 @@ public class AuditServiceIT {
         testEvents.add(cloudTaskCancelledEvent);
 
 
+        return testEvents;
+    }
+    
+    private List<CloudRuntimeEvent> getTestProcessStartedUpdatedCompletedEvents() {
+        List<CloudRuntimeEvent> testEvents = new ArrayList<>();
+
+        ProcessInstanceImpl processInstanceStarted = new ProcessInstanceImpl();
+        processInstanceStarted.setId("25");
+        processInstanceStarted.setProcessDefinitionId("44");
+
+        CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl("ProcessStartedEventId",
+                                                                                                 System.currentTimeMillis(),
+                                                                                                 processInstanceStarted);
+
+        testEvents.add(cloudProcessStartedEvent);
+  
+            
+        ProcessInstanceImpl processInstanceUpdated = new ProcessInstanceImpl();
+            processInstanceUpdated.setId("25");
+            processInstanceUpdated.setProcessDefinitionId("44");
+            processInstanceUpdated.setBusinessKey("businessKey");
+            processInstanceUpdated.setName("name");
+                  
+
+        CloudProcessUpdatedEventImpl cloudProcessUpdatedEvent = new CloudProcessUpdatedEventImpl("ProcessUpdatedEventId",
+                                                                                                 System.currentTimeMillis(),
+                                                                                                 processInstanceUpdated);
+
+        testEvents.add(cloudProcessUpdatedEvent);
+
+ 
+        ProcessInstanceImpl processInstanceCompleted = new ProcessInstanceImpl();
+        processInstanceCompleted.setId("25");
+        processInstanceCompleted.setProcessDefinitionId("44");
+   
+
+        CloudProcessCompletedEventImpl cloudProcessCompletedEvent = new CloudProcessCompletedEventImpl("ProcessCompletedEventId",
+                                                                                             System.currentTimeMillis(),
+                                                                                             processInstanceCompleted);
+
+        testEvents.add(cloudProcessCompletedEvent);
+    
         return testEvents;
     }
 }
