@@ -65,4 +65,12 @@ public class ProcessQuerySteps {
         });
     }
 
+    @Step
+    public void checkProcessInstanceName(String processInstanceId,
+                                         String processInstanceName) {
+        await().untilAsserted(() -> assertThat(processQueryService.getProcessInstance(processInstanceId).getName())
+                .isNotNull()
+                .isEqualTo(processInstanceName));
+    }
+
 }
