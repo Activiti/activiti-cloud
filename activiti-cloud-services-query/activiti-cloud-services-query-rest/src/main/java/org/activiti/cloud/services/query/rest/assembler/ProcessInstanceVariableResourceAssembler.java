@@ -16,23 +16,17 @@
 
 package org.activiti.cloud.services.query.rest.assembler;
 
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.resources.VariableResource;
-import org.activiti.cloud.services.query.rest.VariableController;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.stereotype.Component;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-
 @Component
-public class VariableResourceAssembler implements ResourceAssembler<VariableEntity, VariableResource> {
+public class ProcessInstanceVariableResourceAssembler implements ResourceAssembler<ProcessVariableEntity, VariableResource> {
 
     @Override
-    public VariableResource toResource(VariableEntity entity) {
-        Link selfRel = linkTo(methodOn(VariableController.class).findById(entity.getId())).withSelfRel();
-        return new VariableResource(entity, selfRel);
+    public VariableResource toResource(ProcessVariableEntity entity) {
+       return new VariableResource(entity);
     }
 
 }

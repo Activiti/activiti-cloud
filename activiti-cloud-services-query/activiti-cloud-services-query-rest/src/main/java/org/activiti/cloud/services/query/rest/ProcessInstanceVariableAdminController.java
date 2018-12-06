@@ -17,11 +17,13 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.activiti.cloud.services.query.resources.VariableResource;
-import org.activiti.cloud.services.query.rest.assembler.VariableResourceAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -30,6 +32,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -37,23 +40,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-        value = "/admin/v1/variables",
+        value = "/admin/v1/process-instances/{processInstanceId}/variables",
         produces = {
                 MediaTypes.HAL_JSON_VALUE,
                 MediaType.APPLICATION_JSON_VALUE
         })
-public class VariableAdminController {
+public class ProcessInstanceVariableAdminController {
 
-    private AlfrescoPagedResourcesAssembler<VariableEntity> pagedVariablesResourcesAssembler;
+    private AlfrescoPagedResourcesAssembler<ProcessVariableEntity> pagedVariablesResourcesAssembler;
 
     private VariableRepository variableRepository;
 
-    private VariableResourceAssembler variableResourceAssembler;
+    private ProcessInstanceVariableResourceAssembler variableResourceAssembler;
 
     @Autowired
-    public VariableAdminController(VariableRepository variableRepository,
-                                   VariableResourceAssembler variableResourceAssembler,
-                                   AlfrescoPagedResourcesAssembler<VariableEntity> pagedVariablesResourcesAssembler) {
+    public ProcessInstanceVariableAdminController(VariableRepository variableRepository,
+                                   ProcessInstanceVariableResourceAssembler variableResourceAssembler,
+                                   AlfrescoPagedResourcesAssembler<ProcessVariableEntity> pagedVariablesResourcesAssembler) {
         this.variableRepository = variableRepository;
         this.variableResourceAssembler = variableResourceAssembler;
         this.pagedVariablesResourcesAssembler = pagedVariablesResourcesAssembler;
@@ -66,12 +69,23 @@ public class VariableAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<VariableResource> findAll(@QuerydslPredicate(root = VariableEntity.class) Predicate predicate,
-                                                    Pageable pageable) {
+    public PagedResources<VariableResource> getVariables(@PathVariable String processInstanceId,
+                                                         @QuerydslPredicate(root = ProcessVariableEntity.class) Predicate predicate,
+                                                         Pageable pageable) {
 
+        QProcessVariableEntity variable = QProcessVariableEntity.processVariableEntity;
+        BooleanExpression expression = variable.processInstanceId.eq(processInstanceId);
+        
+        Predicate extendedPredicated = expression;
+        if (predicate != null) {
+            extendedPredicated = expression.and(predicate);
+        }
+        
         return pagedVariablesResourcesAssembler.toResource(pageable,
-                                                           variableRepository.findAll(predicate,
+                                                           variableRepository.findAll(extendedPredicated,
                                                                                       pageable),
                                                            variableResourceAssembler);
     }
+    
+  
 }

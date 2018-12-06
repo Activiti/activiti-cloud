@@ -19,21 +19,21 @@ package org.activiti.cloud.services.query.events.handlers;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.QVariableEntity;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.model.QTaskVariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TaskVariableDeletedEventHandler {
 
-    private final VariableRepository variableRepository;
+    private final TaskVariableRepository variableRepository;
 
     private final EntityFinder entityFinder;
 
     @Autowired
-    public TaskVariableDeletedEventHandler(VariableRepository variableRepository,
+    public TaskVariableDeletedEventHandler(TaskVariableRepository variableRepository,
                                            EntityFinder entityFinder) {
         this.variableRepository = variableRepository;
         this.entityFinder = entityFinder;
@@ -42,12 +42,12 @@ public class TaskVariableDeletedEventHandler {
     public void handle(CloudVariableDeletedEvent event) {
         String variableName = event.getEntity().getName();
         String taskId = event.getEntity().getTaskId();
-        BooleanExpression predicate = QVariableEntity.variableEntity.taskId.eq(taskId)
+        BooleanExpression predicate = QTaskVariableEntity.taskVariableEntity.taskId.eq(taskId)
                 .and(
-                        QVariableEntity.variableEntity.name.eq(variableName)
+                        QTaskVariableEntity.taskVariableEntity.name.eq(variableName)
 
-                ).and(QVariableEntity.variableEntity.markedAsDeleted.eq(Boolean.FALSE));
-        VariableEntity variableEntity = entityFinder.findOne(variableRepository,
+                ).and(QTaskVariableEntity.taskVariableEntity.markedAsDeleted.eq(Boolean.FALSE));
+        TaskVariableEntity variableEntity = entityFinder.findOne(variableRepository,
                                                              predicate,
                                                              "Unable to find variableEntity with name '" + variableName + "' for task '" + taskId + "'");
         variableEntity.setMarkedAsDeleted(true);

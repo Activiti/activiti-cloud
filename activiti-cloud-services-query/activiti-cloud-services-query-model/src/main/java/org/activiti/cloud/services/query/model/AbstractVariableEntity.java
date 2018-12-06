@@ -21,30 +21,20 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Convert;
-import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.MappedSuperclass;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-@Entity(name="Variable")
-@Table(	name = "VARIABLE",
-		indexes = { 
-				@Index(name = "variable_processInstanceId_idx", columnList = "processInstanceId", unique = false), 
-				@Index(name = "variable_taskId_idx", columnList = "taskId", unique = false),
-				@Index(name = "variable_name_idx", columnList = "name", unique = false), 
-				@Index(name = "variable_executionId_idx", columnList = "executionId", unique = false) 
-		})
-public class VariableEntity extends ActivitiEntityMetadata implements CloudVariableInstance {
+@MappedSuperclass
+public abstract class AbstractVariableEntity extends ActivitiEntityMetadata implements CloudVariableInstance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,10 +43,6 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
     private String type;
 
     private String name;
-
-    private String processInstanceId;
-
-    private String taskId;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date createTime;
@@ -71,23 +57,20 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
     private VariableValue<?> value;
 
     private Boolean markedAsDeleted = false;
-
-    @JsonIgnore
-    @ManyToOne(optional = true, fetch=FetchType.LAZY)
-    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private TaskEntity task;
+    
+    private String processInstanceId;
 
     @JsonIgnore
     @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private ProcessInstanceEntity processInstance;
+    
 
-    public VariableEntity() {
+    public AbstractVariableEntity() {
     }
 
-    public VariableEntity(Long id,
+    public AbstractVariableEntity(Long id,
                           String type,
                           String name,
                           String processInstanceId,
@@ -96,7 +79,6 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
                           String serviceVersion,
                           String appName,
                           String appVersion,
-                          String taskId,
                           Date createTime,
                           Date lastUpdatedTime,
                           String executionId) {
@@ -109,7 +91,6 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
         this.type = type;
         this.name = name;
         this.processInstanceId = processInstanceId;
-        this.taskId = taskId;
         this.createTime = createTime;
         this.lastUpdatedTime = lastUpdatedTime;
         this.executionId = executionId;
@@ -135,24 +116,6 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public String getProcessInstanceId() {
-        return processInstanceId;
-    }
-
-    public void setProcessInstanceId(String processInstanceId) {
-        this.processInstanceId = processInstanceId;
-    }
-
-    @Override
-    public String getTaskId() {
-        return taskId;
-    }
-
-    public void setTaskId(String taskId) {
-        this.taskId = taskId;
     }
 
     public Date getCreateTime() {
@@ -188,22 +151,6 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
         return (T) value.getValue();
     }
 
-    public ProcessInstanceEntity getProcessInstance() {
-        return this.processInstance;
-    }
-
-    public void setProcessInstance(ProcessInstanceEntity processInstanceEntity) {
-        this.processInstance = processInstanceEntity;
-    }
-
-    public TaskEntity getTask() {
-        return this.task;
-    }
-
-    public void setTask(TaskEntity taskEntity) {
-        this.task = taskEntity;
-    }
-
     public Boolean getMarkedAsDeleted() {
         return markedAsDeleted;
     }
@@ -212,8 +159,25 @@ public class VariableEntity extends ActivitiEntityMetadata implements CloudVaria
         this.markedAsDeleted = markedAsDeleted;
     }
 
+    
     @Override
-    public boolean isTaskVariable() {
-        return taskId != null;
+    public String getProcessInstanceId() {
+        return processInstanceId;
     }
-}
+
+    
+    public void setProcessInstanceId(String processInstanceId) {
+        this.processInstanceId = processInstanceId;
+    }
+
+    
+    public ProcessInstanceEntity getProcessInstance() {
+        return processInstance;
+    }
+
+    
+    public void setProcessInstance(ProcessInstanceEntity processInstance) {
+        this.processInstance = processInstance;
+    }
+
+ }

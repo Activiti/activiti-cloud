@@ -16,17 +16,18 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TaskEntityVariableEntityUpdatedEventHandlerTest {
 
@@ -34,7 +35,7 @@ public class TaskEntityVariableEntityUpdatedEventHandlerTest {
     private TaskVariableUpdatedEventHandler handler;
 
     @Mock
-    private VariableUpdater variableUpdater;
+    private TaskVariableUpdater variableUpdater;
 
 
     @Before
@@ -46,7 +47,7 @@ public class TaskEntityVariableEntityUpdatedEventHandlerTest {
     public void handleShouldUpdateVariableValue() {
         //given
         String taskId = "10";
-        VariableEntity updatedVariableEntity = new VariableEntity();
+        TaskVariableEntity updatedVariableEntity = new TaskVariableEntity();
         updatedVariableEntity.setName("var");
         updatedVariableEntity.setType("string");
         updatedVariableEntity.setValue("content");

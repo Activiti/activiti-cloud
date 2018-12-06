@@ -24,7 +24,7 @@ import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -59,7 +59,7 @@ public class ProcessVariableEntityDeletedHandlerTest {
         //given
         CloudVariableDeletedEvent event = buildVariableDeletedEvent();
 
-        VariableEntity variableEntity = new VariableEntity();
+        ProcessVariableEntity variableEntity = new ProcessVariableEntity();
         given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variableEntity);
 
         //when

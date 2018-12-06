@@ -16,23 +16,13 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +39,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @RunWith(SpringRunner.class)
-@WebMvcTest(VariableAdminController.class)
+@WebMvcTest(TaskVariableAdminController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
@@ -63,7 +63,7 @@ public class VariableEntityAdminControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private VariableRepository variableRepository;
+    private TaskVariableRepository variableRepository;
 
     @Test
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
@@ -73,7 +73,7 @@ public class VariableEntityAdminControllerIT {
                                                                   PageRequest.of(0,
                                                                                  20));
 
-        VariableEntity variableEntity = new VariableEntity(1L,
+        TaskVariableEntity variableEntity = new TaskVariableEntity(1L,
                                                            String.class.getName(),
                                                            "firstName",
                                                            UUID.randomUUID().toString(),
@@ -94,8 +94,8 @@ public class VariableEntityAdminControllerIT {
                                            pageRequest,
                                            12));
 
-        //when
-        MvcResult result = mockMvc.perform(get("/admin/v1/variables?skipCount=11&maxItems=10",
+        //when 
+        MvcResult result = mockMvc.perform(get("/admin/v1/tasks/{taskId}/variables?skipCount=11&maxItems=10",
                                                variableEntity.getTaskId())
                                                    .accept(MediaType.APPLICATION_JSON))
                 //then

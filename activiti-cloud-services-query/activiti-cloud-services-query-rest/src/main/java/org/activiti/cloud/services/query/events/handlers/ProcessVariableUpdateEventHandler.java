@@ -17,27 +17,27 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import org.activiti.cloud.services.query.model.QVariableEntity;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProcessVariableUpdateEventHandler {
 
-    private final VariableUpdater variableUpdater;
+    private final ProcessVariableUpdater variableUpdater;
 
     @Autowired
-    public ProcessVariableUpdateEventHandler(VariableUpdater variableUpdater) {
+    public ProcessVariableUpdateEventHandler(ProcessVariableUpdater variableUpdater) {
         this.variableUpdater = variableUpdater;
     }
 
-    public void handle(VariableEntity updatedVariableEntity) {
+    public void handle(ProcessVariableEntity updatedVariableEntity) {
         String variableName = updatedVariableEntity.getName();
         String processInstanceId = updatedVariableEntity.getProcessInstanceId();
-        BooleanExpression predicate = QVariableEntity.variableEntity.name.eq(variableName)
+        BooleanExpression predicate = QProcessVariableEntity.processVariableEntity.name.eq(variableName)
                 .and(
-                        QVariableEntity.variableEntity.processInstanceId.eq(String.valueOf(processInstanceId))
+                        QProcessVariableEntity.processVariableEntity.processInstanceId.eq(String.valueOf(processInstanceId))
                 );
         variableUpdater.update(updatedVariableEntity,
                                predicate,

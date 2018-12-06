@@ -7,7 +7,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.model.QTaskEntity;
-import org.activiti.cloud.services.query.model.QVariableEntity;
+import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -41,7 +41,7 @@ public class TaskLookupRestrictionService {
 
     public Predicate restrictTaskVariableQuery(Predicate predicate){
 
-        QTaskEntity task = QVariableEntity.variableEntity.task;
+        QTaskEntity task = QTaskVariableEntity.taskVariableEntity.task;
 
         Predicate extendedPredicate = addAndConditionToPredicate(predicate,task.isNotNull());
 

@@ -25,42 +25,51 @@ import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.resources.VariableResource;
 import org.activiti.cloud.services.query.rest.assembler.TaskVariableResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-        value = "/v1/tasks/{taskId}/variables",
+        value = "/admin/v1/tasks/{taskId}/variables",
         produces = {
                 MediaTypes.HAL_JSON_VALUE,
                 MediaType.APPLICATION_JSON_VALUE
         })
-public class TaskVariableController {
+public class TaskVariableAdminController {
 
-    private final TaskVariableRepository variableRepository;
+    private AlfrescoPagedResourcesAssembler<TaskVariableEntity> pagedVariablesResourcesAssembler;
+
+    private TaskVariableRepository variableRepository;
 
     private TaskVariableResourceAssembler variableResourceAssembler;
-
-    private AlfrescoPagedResourcesAssembler<TaskVariableEntity> pagedResourcesAssembler;
     
 
     @Autowired
-    public TaskVariableController(TaskVariableRepository variableRepository,
-                                  TaskVariableResourceAssembler variableResourceAssembler,
-                                  AlfrescoPagedResourcesAssembler<TaskVariableEntity> pagedResourcesAssembler) {
+    public TaskVariableAdminController(TaskVariableRepository variableRepository,
+                                   TaskVariableResourceAssembler variableResourceAssembler,
+                                   AlfrescoPagedResourcesAssembler<TaskVariableEntity> pagedVariablesResourcesAssembler) {
         this.variableRepository = variableRepository;
         this.variableResourceAssembler = variableResourceAssembler;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.pagedVariablesResourcesAssembler = pagedVariablesResourcesAssembler;
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleAppException(IllegalStateException ex) {
+        return ex.getMessage();
+    }
+
+    
     @RequestMapping(method = RequestMethod.GET)
     public PagedResources<VariableResource> getVariables(@PathVariable String taskId,
                                                          @QuerydslPredicate(root = TaskVariableEntity.class) Predicate predicate,
@@ -74,12 +83,14 @@ public class TaskVariableController {
             extendedPredicated = expression.and(predicate);
         }
 
-        Page<TaskVariableEntity> variables = variableRepository.findAll(extendedPredicated,
-                                                                    pageable);
-
-        return pagedResourcesAssembler.toResource(pageable,
-                                                  variables,
-                                                  variableResourceAssembler);
+         
+        return pagedVariablesResourcesAssembler.toResource(pageable,
+                                                           variableRepository.findAll(extendedPredicated,
+                                                                                      pageable),
+                                                           variableResourceAssembler); 
     }
-
+    
 }
+
+
+

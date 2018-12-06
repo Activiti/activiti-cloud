@@ -37,8 +37,6 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 @Entity(name="Task")
 @Table(name = "TASK",
 	indexes= {
@@ -104,7 +102,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private Set<VariableEntity> variables;
+
+    private Set<TaskVariableEntity> variables;
 
     public TaskEntity() {
     }
@@ -316,14 +315,14 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     /**
      * @return the variableEntities
      */
-    public Set<VariableEntity> getVariables() {
+    public Set<TaskVariableEntity> getVariables() {
         return this.variables;
     }
 
     /**
      * @param variables the variableEntities to set
      */
-    public void setVariables(Set<VariableEntity> variables) {
+    public void setVariables(Set<TaskVariableEntity> variables) {
         this.variables = variables;
     }
 

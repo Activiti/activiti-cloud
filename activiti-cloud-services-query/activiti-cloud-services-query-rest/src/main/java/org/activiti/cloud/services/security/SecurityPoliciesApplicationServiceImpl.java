@@ -9,7 +9,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.QVariableEntity;
+import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.activiti.core.common.spring.security.policies.BaseSecurityPoliciesManagerImpl;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
@@ -61,7 +61,7 @@ public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPolicies
             return predicate;
         }
 
-        QProcessInstanceEntity processInstance = QVariableEntity.variableEntity.processInstance;
+        QProcessInstanceEntity processInstance = QProcessVariableEntity.processVariableEntity.processInstance;
 
         BooleanExpression varIsProcInstVar = processInstance.isNotNull();
 

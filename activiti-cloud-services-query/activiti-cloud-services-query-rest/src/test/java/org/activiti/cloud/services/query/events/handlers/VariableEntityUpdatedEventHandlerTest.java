@@ -16,20 +16,21 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.test.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class VariableEntityUpdatedEventHandlerTest {
 
@@ -57,10 +58,10 @@ public class VariableEntityUpdatedEventHandlerTest {
         handler.handle(event);
 
         //then
-        ArgumentCaptor<VariableEntity> captor = ArgumentCaptor.forClass(VariableEntity.class);
+        ArgumentCaptor<ProcessVariableEntity> captor = ArgumentCaptor.forClass(ProcessVariableEntity.class);
         verify(processVariableUpdateEventHandler).handle(captor.capture());
 
-        VariableEntity variableEntity = captor.getValue();
+        ProcessVariableEntity variableEntity = captor.getValue();
         Assertions.assertThat(variableEntity)
                 .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
                 .hasName("var")
@@ -88,10 +89,10 @@ public class VariableEntityUpdatedEventHandlerTest {
         handler.handle(event);
 
         //then
-        ArgumentCaptor<VariableEntity> captor = ArgumentCaptor.forClass(VariableEntity.class);
+        ArgumentCaptor<TaskVariableEntity> captor = ArgumentCaptor.forClass(TaskVariableEntity.class);
         verify(taskVariableUpdatedEventHandler).handle(captor.capture());
 
-        VariableEntity variableEntity = captor.getValue();
+        TaskVariableEntity variableEntity = captor.getValue();
         Assertions.assertThat(variableEntity)
                 .hasTaskId("20")
                 .hasName("var")

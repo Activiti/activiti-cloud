@@ -17,27 +17,27 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import org.activiti.cloud.services.query.model.QVariableEntity;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.QTaskVariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TaskVariableUpdatedEventHandler {
 
-    private final VariableUpdater variableUpdater;
+    private final TaskVariableUpdater variableUpdater;
 
     @Autowired
-    public TaskVariableUpdatedEventHandler(VariableUpdater variableUpdater) {
+    public TaskVariableUpdatedEventHandler(TaskVariableUpdater variableUpdater) {
         this.variableUpdater = variableUpdater;
     }
 
-    public void handle(VariableEntity updatedVariableEntity) {
+    public void handle(TaskVariableEntity updatedVariableEntity) {
         String variableName = updatedVariableEntity.getName();
         String taskId = updatedVariableEntity.getTaskId();
-        BooleanExpression predicate = QVariableEntity.variableEntity.name.eq(variableName)
+        BooleanExpression predicate = QTaskVariableEntity.taskVariableEntity.name.eq(variableName)
                 .and(
-                        QVariableEntity.variableEntity.taskId.eq(String.valueOf(taskId))
+                        QTaskVariableEntity.taskVariableEntity.taskId.eq(String.valueOf(taskId))
                 );
         variableUpdater.update(updatedVariableEntity,
                                predicate,

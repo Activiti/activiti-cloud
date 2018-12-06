@@ -16,19 +16,6 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.UUID;
-
-import com.querydsl.core.types.Predicate;
-import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
-import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.VariableEntity;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -37,13 +24,26 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.UUID;
+
+import com.querydsl.core.types.Predicate;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
+import org.activiti.cloud.services.query.app.repository.EntityFinder;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
 public class TaskEntityVariableEntityDeletedEventHandlerTest {
 
     @InjectMocks
     private TaskVariableDeletedEventHandler handler;
 
     @Mock
-    private VariableRepository variableRepository;
+    private TaskVariableRepository variableRepository;
 
     @Mock
     private EntityFinder entityFinder;
@@ -63,7 +63,7 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
         variableInstance.setTaskId(UUID.randomUUID().toString());
         CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(variableInstance);
 
-        VariableEntity variableEntity = new VariableEntity();
+        TaskVariableEntity variableEntity = new TaskVariableEntity();
         given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variableEntity);
 
 

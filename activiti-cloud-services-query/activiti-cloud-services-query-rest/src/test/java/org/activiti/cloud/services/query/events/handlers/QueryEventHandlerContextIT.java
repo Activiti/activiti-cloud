@@ -33,6 +33,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,6 +83,12 @@ public class QueryEventHandlerContextIT {
             return mock(VariableRepository.class);
         }
 
+        @Primary
+        @Bean
+        public TaskVariableRepository getTaskVariableRepository() {
+            return mock(TaskVariableRepository.class);
+        }
+        
         @Primary
         @Bean
         public TaskCandidateGroupRepository taskCandidateGroupRepository() {

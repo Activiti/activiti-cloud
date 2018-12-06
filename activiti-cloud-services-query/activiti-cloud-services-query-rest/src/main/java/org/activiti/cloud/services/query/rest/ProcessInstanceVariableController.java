@@ -20,10 +20,10 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.QVariableEntity;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.activiti.cloud.services.query.resources.VariableResource;
-import org.activiti.cloud.services.query.rest.assembler.VariableResourceAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,14 +47,14 @@ public class ProcessInstanceVariableController {
 
     private final VariableRepository variableRepository;
 
-    private VariableResourceAssembler variableResourceAssembler;
+    private ProcessInstanceVariableResourceAssembler variableResourceAssembler;
 
-    private AlfrescoPagedResourcesAssembler<VariableEntity> pagedResourcesAssembler;
-
+    private AlfrescoPagedResourcesAssembler<ProcessVariableEntity> pagedResourcesAssembler;
+    
     @Autowired
-    public ProcessInstanceVariableController(VariableResourceAssembler variableResourceAssembler,
+    public ProcessInstanceVariableController(ProcessInstanceVariableResourceAssembler variableResourceAssembler,
                                              VariableRepository variableRepository,
-                                             AlfrescoPagedResourcesAssembler<VariableEntity> pagedResourcesAssembler) {
+                                             AlfrescoPagedResourcesAssembler<ProcessVariableEntity> pagedResourcesAssembler) {
         this.variableRepository = variableRepository;
         this.variableResourceAssembler = variableResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
@@ -62,10 +62,10 @@ public class ProcessInstanceVariableController {
 
     @RequestMapping(value = "/variables", method = RequestMethod.GET)
     public PagedResources<VariableResource> getVariables(@PathVariable String processInstanceId,
-                                                         @QuerydslPredicate(root = VariableEntity.class) Predicate predicate,
+                                                         @QuerydslPredicate(root = ProcessVariableEntity.class) Predicate predicate,
                                                          Pageable pageable) {
 
-        QVariableEntity variable = QVariableEntity.variableEntity;
+        QProcessVariableEntity variable = QProcessVariableEntity.processVariableEntity;
         BooleanExpression expression = variable.processInstanceId.eq(processInstanceId);
 
         Predicate extendedPredicate = expression;
@@ -73,11 +73,13 @@ public class ProcessInstanceVariableController {
             extendedPredicate = expression.and(predicate);
         }
 
-        Page<VariableEntity> variables = variableRepository.findAll(extendedPredicate,
+        Page<ProcessVariableEntity> variables = variableRepository.findAll(extendedPredicate,
                                                                     pageable);
 
         return pagedResourcesAssembler.toResource(pageable,
                                                   variables,
                                                   variableResourceAssembler);
     }
+    
+    
 }

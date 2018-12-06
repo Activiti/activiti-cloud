@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.RelProvider;
@@ -42,6 +42,6 @@ public class VariableRelProvider implements RelProvider {
 
     @Override
     public boolean supports(Class<?> aClass) {
-        return VariableEntity.class.isAssignableFrom(aClass);
+        return ProcessVariableEntity.class.isAssignableFrom(aClass);
     }
 }

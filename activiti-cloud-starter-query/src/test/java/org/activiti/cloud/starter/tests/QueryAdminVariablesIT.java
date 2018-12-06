@@ -24,8 +24,10 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
@@ -54,9 +56,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext
 public class QueryAdminVariablesIT {
 
-    private static final String VARIABLES_URL = "/admin/v1/variables?processInstanceId={processInstanceId}";
-    private static final String TASK_VARIABLES_URL = "/admin/v1/variables?taskId={taskId}";
-    private static final ParameterizedTypeReference<PagedResources<VariableEntity>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<VariableEntity>>() {
+    private static final String ADMIN_PROCESS_VARIABLES_URL = "/admin/v1/process-instances/{processInstanceId}/variables";
+    private static final String ADMIN_TASK_VARIABLES_URL = "/admin/v1/tasks/{taskId}/variables";
+    
+    private static final ParameterizedTypeReference<PagedResources<ProcessVariableEntity>> PAGED_PROCESSVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<ProcessVariableEntity>>() {
+    };
+    private static final ParameterizedTypeReference<PagedResources<TaskVariableEntity>> PAGED_TASKVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<TaskVariableEntity>>() {
     };
 
     @Autowired
@@ -72,7 +77,10 @@ public class QueryAdminVariablesIT {
     private TaskRepository taskRepository;
 
     @Autowired
-    private VariableRepository variableRepository;
+    private VariableRepository processVariableRepository;
+    
+    @Autowired
+    private TaskVariableRepository taskVariableRepository;
 
     @Autowired
     private MyProducer producer;
@@ -95,7 +103,8 @@ public class QueryAdminVariablesIT {
 
     @After
     public void tearDown() {
-        variableRepository.deleteAll();
+        processVariableRepository.deleteAll();
+        taskVariableRepository.deleteAll();
         taskRepository.deleteAll();
         processInstanceRepository.deleteAll();
     }
@@ -118,19 +127,19 @@ public class QueryAdminVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<VariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
+            ResponseEntity<PagedResources<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL,
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                      PAGED_VARIABLE_RESPONSE_TYPE,
+                                                                                                      PAGED_PROCESSVARIABLE_RESPONSE_TYPE,
                                                                                                       runningProcessInstance.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody().getContent())
                     .extracting(
-                            VariableEntity::getName,
-                            VariableEntity::getValue,
-                            VariableEntity::getMarkedAsDeleted)
+                            ProcessVariableEntity::getName,
+                            ProcessVariableEntity::getValue,
+                            ProcessVariableEntity::getMarkedAsDeleted)
                     .containsExactly(
                             tuple(
                                     "varUpdated",
@@ -164,18 +173,18 @@ public class QueryAdminVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<VariableEntity>> responseEntity = testRestTemplate.exchange(TASK_VARIABLES_URL,
+            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL,
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                      PAGED_VARIABLE_RESPONSE_TYPE,
+                                                                                                      PAGED_TASKVARIABLE_RESPONSE_TYPE,
                                                                                                       task.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody().getContent())
                     .extracting(
-                            VariableEntity::getName,
-                            VariableEntity::getValue)
+                            TaskVariableEntity::getName,
+                            TaskVariableEntity::getValue)
                     .containsExactly(
                             tuple(
                                     "varCreated",
@@ -187,7 +196,7 @@ public class QueryAdminVariablesIT {
     }
 
     @Test
-    public void shouldFilterOnVariableName() {
+    public void shouldFilterOnProcessVariableName() {
 
         //given
         variableEventContainedBuilder.aCreatedVariable("var1",
@@ -208,10 +217,10 @@ public class QueryAdminVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<VariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "&name={name}",
+            ResponseEntity<PagedResources<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL +  "?name={varName}",
                     HttpMethod.GET,
                     keycloakTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_VARIABLE_RESPONSE_TYPE,
+                    PAGED_PROCESSVARIABLE_RESPONSE_TYPE,
                     runningProcessInstance.getId(),
                     "var2");
 
@@ -219,11 +228,130 @@ public class QueryAdminVariablesIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody().getContent())
                     .extracting(
-                            VariableEntity::getName,
-                            VariableEntity::getValue)
+                            ProcessVariableEntity::getName,
+                            ProcessVariableEntity::getValue)
                     .containsExactly(
                             tuple("var2",
                                     "v2")
+                    );
+        });
+    }
+  
+    @Test
+    public void shouldFilterOnTaskVariableName() {
+
+        //given
+        Task task = taskEventContainedBuilder.aCreatedTask("Created task",
+                                                           runningProcessInstance);
+        
+        variableEventContainedBuilder.aCreatedVariable("var1",
+                                                       "v1",
+                                                       "string")
+                .onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("var2",
+                                                       "v2",
+                                                       "string")
+                .onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("var3",
+                                                       "v3",
+                                                       "string")
+                .onTask(task);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL + "?name={varName}",
+                                                                                                          HttpMethod.GET,
+                                                                                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                          PAGED_TASKVARIABLE_RESPONSE_TYPE,
+                                                                                                          task.getId(),
+                                                                                                          "var2");
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(
+                            TaskVariableEntity::getName,
+                            TaskVariableEntity::getValue)
+                    .containsExactly(
+                            tuple("var2",
+                                    "v2")
+                    );
+        });
+    }
+    
+    //Test a case when a processInstance and a task have variable with the same name
+    @Test
+    public void shouldFilterOnProcessAndTaskVariableName() {
+
+        //given
+        variableEventContainedBuilder.aCreatedVariable("var1",
+                                                       "pv1",
+                                                       "string")
+                .onProcessInstance(runningProcessInstance);
+        
+        variableEventContainedBuilder.aCreatedVariable("var2",
+                                                       "pv2",
+                                                       "string")
+                .onProcessInstance(runningProcessInstance);
+        
+        Task task = taskEventContainedBuilder.aCreatedTask("Created task",
+                                                           runningProcessInstance);
+        
+        //One of task variables has same name like processInstance variable
+        variableEventContainedBuilder.aCreatedVariable("var1",
+                                                       "tv1",
+                                                       "string")
+                .onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("var2",
+                                                       "tv2",
+                                                       "string")
+                .onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("var3",
+                                                       "v3",
+                                                       "string")
+                .onTask(task);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<TaskVariableEntity>> taskResponseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL + "?name={varName}",
+                                                                                                          HttpMethod.GET,
+                                                                                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                          PAGED_TASKVARIABLE_RESPONSE_TYPE,
+                                                                                                          task.getId(),
+                                                                                                          "var1");
+            //then
+            assertThat(taskResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(taskResponseEntity.getBody().getContent())
+                    .extracting(
+                            TaskVariableEntity::getName,
+                            TaskVariableEntity::getValue)
+                    .containsExactly(
+                            tuple("var1",
+                                   "tv1")
+                    );
+            
+            //when
+            ResponseEntity<PagedResources<ProcessVariableEntity>> processResponseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL +  "?name={varName}",
+                                                                                                      HttpMethod.GET,
+                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                                      PAGED_PROCESSVARIABLE_RESPONSE_TYPE,
+                                                                                                      runningProcessInstance.getId(),
+                                                                                                      "var1");
+
+            //then
+            assertThat(processResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(processResponseEntity.getBody().getContent())
+                    .extracting(
+                            ProcessVariableEntity::getName,
+                            ProcessVariableEntity::getValue)
+                    .containsExactly(
+                            tuple("var1",
+                                   "pv1")
                     );
         });
     }

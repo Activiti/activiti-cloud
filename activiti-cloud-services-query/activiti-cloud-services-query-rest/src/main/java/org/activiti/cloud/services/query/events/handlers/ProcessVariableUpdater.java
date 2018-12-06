@@ -16,41 +16,36 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
-import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
+import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProcessVariableDeletedEventHandler {
-
-    private final VariableRepository variableRepository;
+public class ProcessVariableUpdater {
 
     private final EntityFinder entityFinder;
 
+    private VariableRepository variableRepository;
+
     @Autowired
-    public ProcessVariableDeletedEventHandler(VariableRepository variableRepository,
-                                              EntityFinder entityFinder) {
-        this.variableRepository = variableRepository;
+    public ProcessVariableUpdater(EntityFinder entityFinder,
+                           VariableRepository variableRepository) {
         this.entityFinder = entityFinder;
+        this.variableRepository = variableRepository;
     }
 
-    public void handle(CloudVariableDeletedEvent event) {
-        String variableName = event.getEntity().getName();
-        String processInstanceId = event.getEntity().getProcessInstanceId();
-        BooleanExpression predicate = QProcessVariableEntity.processVariableEntity.processInstanceId.eq(processInstanceId)
-                .and(
-                        QProcessVariableEntity.processVariableEntity.name.eq(variableName)
-
-                ).and(QProcessVariableEntity.processVariableEntity.markedAsDeleted.eq(Boolean.FALSE));
+    public void update(ProcessVariableEntity updatedVariableEntity, Predicate predicate, String notFoundMessage) {
         ProcessVariableEntity variableEntity = entityFinder.findOne(variableRepository,
                                                              predicate,
-                                                             "Unable to find variableEntity with name '" + variableName + "' for process instance '" + processInstanceId + "'");
-        variableEntity.setMarkedAsDeleted(true);
+                                                             notFoundMessage);
+        variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
+        variableEntity.setType(updatedVariableEntity.getType());
+        variableEntity.setValue(updatedVariableEntity.getValue());
+
         variableRepository.save(variableEntity);
     }
+
 }

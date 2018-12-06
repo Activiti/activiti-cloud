@@ -23,7 +23,7 @@ import static org.awaitility.Awaitility.await;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
@@ -52,7 +52,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class QueryProcessInstanceEntityVariablesIT {
 
     private static final String VARIABLES_URL = "/v1/process-instances/{processInstanceId}/variables";
-    private static final ParameterizedTypeReference<PagedResources<VariableEntity>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<VariableEntity>>() {
+    private static final ParameterizedTypeReference<PagedResources<ProcessVariableEntity>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<ProcessVariableEntity>>() {
     };
 
     @Autowired
@@ -114,7 +114,7 @@ public class QueryProcessInstanceEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<VariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
+            ResponseEntity<PagedResources<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_VARIABLE_RESPONSE_TYPE,
@@ -124,9 +124,9 @@ public class QueryProcessInstanceEntityVariablesIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody().getContent())
                     .extracting(
-                            VariableEntity::getName,
-                            VariableEntity::getValue,
-                            VariableEntity::getMarkedAsDeleted)
+                            ProcessVariableEntity::getName,
+                            ProcessVariableEntity::getValue,
+                            ProcessVariableEntity::getMarkedAsDeleted)
                     .containsExactly(
                             tuple(
                                     "varCreated",
@@ -158,7 +158,7 @@ public class QueryProcessInstanceEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<VariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
+            ResponseEntity<PagedResources<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_VARIABLE_RESPONSE_TYPE,
@@ -168,8 +168,8 @@ public class QueryProcessInstanceEntityVariablesIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody().getContent())
                     .extracting(
-                            VariableEntity::getName,
-                            VariableEntity::getValue)
+                            ProcessVariableEntity::getName,
+                            ProcessVariableEntity::getValue)
                     .containsExactly(
                             tuple(
                                     "intVar",
@@ -201,7 +201,7 @@ public class QueryProcessInstanceEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<VariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "?name={varName}",
+            ResponseEntity<PagedResources<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL + "?name={varName}",
                                                                                                       HttpMethod.GET,
                                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
                                                                                                       PAGED_VARIABLE_RESPONSE_TYPE,
@@ -212,8 +212,8 @@ public class QueryProcessInstanceEntityVariablesIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody().getContent())
                     .extracting(
-                            VariableEntity::getName,
-                            VariableEntity::getValue)
+                            ProcessVariableEntity::getName,
+                            ProcessVariableEntity::getValue)
                     .containsExactly(
                             tuple("var2",
                                   "v2")

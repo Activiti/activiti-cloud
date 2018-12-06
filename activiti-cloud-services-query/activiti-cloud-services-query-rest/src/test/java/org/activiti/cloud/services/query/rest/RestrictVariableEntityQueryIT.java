@@ -1,5 +1,9 @@
 package org.activiti.cloud.services.query.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import java.util.Arrays;
 
 import com.querydsl.core.types.Predicate;
@@ -9,12 +13,14 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.cloud.services.security.VariableLookupRestrictionService;
@@ -33,17 +39,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 /**
  * This is present in case of a future scenario where we need to filter task or process instance variables more generally rather than per task or per proc.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = {TaskRepository.class, TaskEntity.class, TaskCandidateUserRepository.class, TaskCandidateUser.class, TaskCandidateGroupRepository.class, TaskCandidateGroup.class, TaskLookupRestrictionService.class,
         ProcessInstanceRepository.class, SecurityPoliciesApplicationServiceImpl.class, ProcessInstanceEntity.class,
-        VariableEntity.class, VariableRepository.class, VariableLookupRestrictionService.class, SecurityPoliciesProperties.class})
+        ProcessVariableEntity.class, VariableRepository.class, VariableLookupRestrictionService.class, SecurityPoliciesProperties.class})
 @EnableConfigurationProperties
 @EnableJpaRepositories(basePackages = "org.activiti")
 @EntityScan("org.activiti")
@@ -72,6 +74,9 @@ public class RestrictVariableEntityQueryIT {
     @Autowired
     private VariableRepository variableRepository;
 
+    @Autowired
+    private TaskVariableRepository taskVariableRepository;
+    
     @Before
     public void setUp() throws Exception {
         initMocks(this);
@@ -92,12 +97,12 @@ public class RestrictVariableEntityQueryIT {
         taskEntity.setId("1");
         taskRepository.save(taskEntity);
 
-        VariableEntity variableEntity = new VariableEntity();
+        TaskVariableEntity variableEntity = new TaskVariableEntity();
         variableEntity.setName("name");
         variableEntity.setValue("id");
         variableEntity.setTaskId("1");
         variableEntity.setTask(taskEntity);
-        variableRepository.save(variableEntity);
+        taskVariableRepository.save(variableEntity);
 
         TaskCandidateUser taskCandidateUser = new TaskCandidateUser("1",
                 "testuser");
@@ -108,7 +113,7 @@ public class RestrictVariableEntityQueryIT {
 
         Predicate predicate = variableLookupRestrictionService.restrictTaskVariableQuery(null);
 
-        Iterable<VariableEntity> iterable = variableRepository.findAll(predicate);
+        Iterable<TaskVariableEntity> iterable = taskVariableRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
 
@@ -124,7 +129,7 @@ public class RestrictVariableEntityQueryIT {
         processInstanceEntity.setServiceName("test-cmd-endpoint");
         processInstanceRepository.save(processInstanceEntity);
 
-        VariableEntity variableEntity = new VariableEntity();
+        ProcessVariableEntity variableEntity = new ProcessVariableEntity();
         variableEntity.setName("name");
         variableEntity.setValue("id");
         variableEntity.setProcessInstanceId("15");
@@ -134,7 +139,7 @@ public class RestrictVariableEntityQueryIT {
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
         Predicate predicate = variableLookupRestrictionService.restrictProcessInstanceVariableQuery(null);
-        Iterable<VariableEntity> iterable = variableRepository.findAll(predicate);
+        Iterable<ProcessVariableEntity> iterable = variableRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
 

@@ -19,7 +19,7 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.junit.Before;
@@ -35,7 +35,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class VariableEntityUpdaterTest {
 
     @InjectMocks
-    private VariableUpdater updater;
+    private ProcessVariableUpdater updater;
 
     @Mock
     private EntityFinder entityFinder;
@@ -52,13 +52,13 @@ public class VariableEntityUpdaterTest {
     @Test
     public void updateShouldUpdateVariableRetrievedByPredicate() {
         //given
-        VariableEntity currentVariableEntity = new VariableEntity();
+        ProcessVariableEntity currentVariableEntity = new ProcessVariableEntity();
 
         Predicate predicate = mock(Predicate.class);
         given(entityFinder.findOne(variableRepository, predicate, "error")).willReturn(currentVariableEntity);
 
         Date now = new Date();
-        VariableEntity updatedVariableEntity = new VariableEntity();
+        ProcessVariableEntity updatedVariableEntity = new ProcessVariableEntity();
         updatedVariableEntity.setType("string");
         updatedVariableEntity.setValue("content");
         updatedVariableEntity.setLastUpdatedTime(now);

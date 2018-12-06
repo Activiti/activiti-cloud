@@ -79,7 +79,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @OneToMany(fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
 		, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
-    private Set<VariableEntity> variables;
+    private Set<ProcessVariableEntity> variables;
 
     private String parentId;
 
@@ -158,11 +158,11 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.tasks = tasks;
     }
 
-    public Set<VariableEntity> getVariables() {
+    public Set<ProcessVariableEntity> getVariables() {
         return variables;
     }
 
-    public void setVariables(Set<VariableEntity> variable) {
+    public void setVariables(Set<ProcessVariableEntity> variable) {
         this.variables = variable;
     }
 

@@ -23,6 +23,7 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.resources.TaskResource;
 import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
+import org.activiti.cloud.services.security.ActivitiForbiddenException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,7 +53,7 @@ public class TaskAdminController {
     private TaskResourceAssembler taskResourceAssembler;
 
     private AlfrescoPagedResourcesAssembler<TaskEntity> pagedResourcesAssembler;
-    
+
     private EntityFinder entityFinder;
 
     @Autowired
@@ -65,6 +66,13 @@ public class TaskAdminController {
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.entityFinder = entityFinder;
     }
+
+    @ExceptionHandler(ActivitiForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleAppException(ActivitiForbiddenException ex) {
+        return ex.getMessage();
+    }
+
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -83,7 +91,7 @@ public class TaskAdminController {
                                                   page,
                                                   taskResourceAssembler);
     }
-    
+
 
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
     public TaskResource findById(@PathVariable String taskId) {
@@ -91,7 +99,7 @@ public class TaskAdminController {
         TaskEntity taskEntity = entityFinder.findById(taskRepository,
                                                       taskId,
                                                       "Unable to find taskEntity for the given id:'" + taskId + "'");
-   
+
         return taskResourceAssembler.toResource(taskEntity);
     }
 

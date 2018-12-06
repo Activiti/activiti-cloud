@@ -21,7 +21,8 @@ import java.util.Date;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
-import org.activiti.cloud.services.query.model.VariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,24 +43,38 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudVariableUpdatedEvent variableUpdatedEvent = (CloudVariableUpdatedEvent) event;
-        VariableEntity variableEntity = new VariableEntity(null,
-        		                                           variableUpdatedEvent.getEntity().getType(),
-                                                           variableUpdatedEvent.getEntity().getName(),
-                                                           variableUpdatedEvent.getEntity().getProcessInstanceId(),
-                                                           variableUpdatedEvent.getServiceName(),
-                                                           variableUpdatedEvent.getServiceFullName(),
-                                                           variableUpdatedEvent.getServiceVersion(),
-                                                           variableUpdatedEvent.getAppName(),
-                                                           variableUpdatedEvent.getAppVersion(),
-                                                           variableUpdatedEvent.getEntity().getTaskId(),
-                                                           new Date(variableUpdatedEvent.getTimestamp()),
-                                                           new Date(variableUpdatedEvent.getTimestamp()),
-                                                           null);
-        variableEntity.setValue(variableUpdatedEvent.getEntity().getValue());
+        
         if (variableUpdatedEvent.getEntity().isTaskVariable()) {
-            taskVariableUpdatedEventHandler.handle(variableEntity);
-        } else {
-            processVariableUpdateEventHandler.handle(variableEntity);
+                TaskVariableEntity variableEntity = new TaskVariableEntity(null,
+                                                     variableUpdatedEvent.getEntity().getType(),
+                                                     variableUpdatedEvent.getEntity().getName(),
+                                                     variableUpdatedEvent.getEntity().getProcessInstanceId(),
+                                                     variableUpdatedEvent.getServiceName(),
+                                                     variableUpdatedEvent.getServiceFullName(),
+                                                     variableUpdatedEvent.getServiceVersion(),
+                                                     variableUpdatedEvent.getAppName(),
+                                                     variableUpdatedEvent.getAppVersion(),
+                                                     variableUpdatedEvent.getEntity().getTaskId(),
+                                                     new Date(variableUpdatedEvent.getTimestamp()),
+                                                     new Date(variableUpdatedEvent.getTimestamp()),
+                                                     null);
+                variableEntity.setValue(variableUpdatedEvent.getEntity().getValue());
+                taskVariableUpdatedEventHandler.handle(variableEntity);
+        }  else {
+                ProcessVariableEntity variableEntity = new ProcessVariableEntity(null,
+                                                     variableUpdatedEvent.getEntity().getType(),
+                                                     variableUpdatedEvent.getEntity().getName(),
+                                                     variableUpdatedEvent.getEntity().getProcessInstanceId(),
+                                                     variableUpdatedEvent.getServiceName(),
+                                                     variableUpdatedEvent.getServiceFullName(),
+                                                     variableUpdatedEvent.getServiceVersion(),
+                                                     variableUpdatedEvent.getAppName(),
+                                                     variableUpdatedEvent.getAppVersion(),
+                                                     new Date(variableUpdatedEvent.getTimestamp()),
+                                                     new Date(variableUpdatedEvent.getTimestamp()),
+                                                     null);
+                variableEntity.setValue(variableUpdatedEvent.getEntity().getValue());
+                processVariableUpdateEventHandler.handle(variableEntity);
         }
     }
 
