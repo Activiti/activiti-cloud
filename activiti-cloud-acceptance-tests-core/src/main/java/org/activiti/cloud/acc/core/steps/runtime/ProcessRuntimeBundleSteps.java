@@ -128,8 +128,8 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public void getProcessInstanceById(String id){
-        processRuntimeService.getProcessInstance(id);
+    public CloudProcessInstance getProcessInstanceById(String id){
+        return processRuntimeService.getProcessInstance(id);
     }
 
     @Step

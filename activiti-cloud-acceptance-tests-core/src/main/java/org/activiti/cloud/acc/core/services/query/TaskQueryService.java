@@ -26,4 +26,7 @@ public interface TaskQueryService extends BaseService {
     @Headers("Content-Type: application/json")
     PagedResources<CloudVariableInstance> getTaskVariables(@Param("taskId") String taskId);
 
+    @RequestLine("GET /v1/process-instances/{processInstanceId}/tasks")
+    @Headers("Content-Type: application/json")
+    PagedResources<CloudTask> getTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
 }

@@ -86,4 +86,9 @@ public class TaskQuerySteps {
 
         });
     }
+
+    @Step
+    public PagedResources<CloudTask> getTasksByProcessInstance(String processInstanceId){
+        return taskQueryService.getTasksByProcessInstance(processInstanceId);
+    }
 }
