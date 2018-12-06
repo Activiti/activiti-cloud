@@ -27,7 +27,7 @@ public class ProcessQuerySteps {
     }
 
     @Step
-    public CloudProcessInstance getProcessInstance(String processInstanceId) throws Exception {
+    public CloudProcessInstance getProcessInstance(String processInstanceId){
         return processQueryService.getProcessInstance(processInstanceId);
     }
 

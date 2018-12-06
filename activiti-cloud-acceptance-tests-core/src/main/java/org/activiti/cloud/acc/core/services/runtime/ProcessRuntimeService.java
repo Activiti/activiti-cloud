@@ -54,7 +54,7 @@ public interface ProcessRuntimeService extends BaseService {
     })
     PagedResources<CloudTask> getProcessInstanceTasks(@Param("id") String id);
 
-    @RequestLine("POST /v1/process-definitions/{id}")
+    @RequestLine("POST /v1/process-instances/{id}")
     @Headers("Content-Type: application/json")
     CloudProcessInstance updateProcess(@Param("id") String id,
                             UpdateProcessPayload updateProcessPayload);
