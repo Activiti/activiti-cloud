@@ -111,6 +111,8 @@ public class ProcessInstanceTasks {
     public void startProcess(String processName) {
 
         processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName));
+
+        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
         checkProcessWithTaskCreated(processName);
     }
 
@@ -355,6 +357,14 @@ public class ProcessInstanceTasks {
     @When("the user updates the name of the process instance to $newProcessName")
     public void setTaskName(String newProcessName){
         processInstance = processRuntimeBundleSteps.setProcessName(processInstance.getId(), newProcessName);
+    }
+
+    @Then("the process has the name $newProcessName")
+    public void checkProccessInstanceName (String newProcessName){
+        assertThat(processRuntimeBundleSteps.getProcessInstanceById(processInstance.getId()))
+                .isEqualTo(newProcessName);
+        assertThat(processQuerySteps.getProcessInstance(processInstance.getId()))
+                .isEqualTo(newProcessName);
     }
 
 

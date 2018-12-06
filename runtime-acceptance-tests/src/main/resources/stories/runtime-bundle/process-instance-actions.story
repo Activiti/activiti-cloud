@@ -65,7 +65,7 @@ Then the PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED definition has the formKey f
 Scenario: check the process is updated
 Given the user is authenticated as testuser
 When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
-And the user updates the name of the process to new-process-name
+And the user updates the name of the process instance to new-process-name
 Then the process instance is updated
-And the process has the name new-task-name
+And the process has the name new-process-name
 

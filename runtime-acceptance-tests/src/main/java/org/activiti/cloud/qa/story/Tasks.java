@@ -180,7 +180,11 @@ public class Tasks {
 
     @When("the user updates the name of the task to $newTaskName")
     public void setTaskName(String newTaskName){
-        newTask = taskRuntimeBundleSteps.setTaskName(newTask.getId(), newTaskName);
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+        Collection <CloudTask> tasksCollection = taskQuerySteps.getTasksByProcessInstance(processInstanceId).getContent();
+        List <CloudTask> tasksList = new ArrayList(tasksCollection);
+        newTask = tasksList.get(0);
+        taskRuntimeBundleSteps.setTaskName(newTask.getId(), newTaskName);
     }
 
     @Then("the task has the name $newTaskName")
