@@ -16,10 +16,6 @@
 
 package org.activiti.cloud.starter.audit.tests.it;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,6 +48,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.Before;
@@ -64,6 +61,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -280,12 +281,11 @@ public class AuditServiceIT {
             ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(Collections.singletonMap("entityId",
                                                                                                                                              "1234-abc-5678-def"));
             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(4);
-            for(CloudRuntimeEvent event : retrievedEvents) {
+           assertThat(eventsPagedResources.getBody()).isNotNull();
 
-                assertThat(event.getEntityId()).isEqualTo("1234-abc-5678-def");
-            }
+           assertThat(eventsPagedResources.getBody().getContent())
+                    .extracting(CloudRuntimeEvent::getEntityId)
+                    .containsOnly("1234-abc-5678-def");
        });
     }
 
@@ -308,7 +308,7 @@ public class AuditServiceIT {
             assertThat(cloudBPMNTaskCancelled.getEventType()).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED);
             assertThat(cloudBPMNTaskCancelled.getEntityId()).isEqualTo("1234-abc-5678-def");
             assertThat(cloudBPMNTaskCancelled.getEntity()).isInstanceOf(Task.class);
-            assertThat(((Task)cloudBPMNTaskCancelled.getEntity()).getId()).isEqualTo("1234-abc-5678-def");
+            assertThat(cloudBPMNTaskCancelled.getEntity().getId()).isEqualTo("1234-abc-5678-def");
 
         });
     }
@@ -526,6 +526,12 @@ public class AuditServiceIT {
                                                                                            System.currentTimeMillis(),
                                                                                            taskAssigned);
         testEvents.add(cloudTaskAssignedEvent);
+
+        taskAssigned.setPriority(10);
+        testEvents.add(new CloudTaskUpdatedEventImpl("TaskUpdatedEventId",
+                                                     System.currentTimeMillis(),
+                                                     taskAssigned));
+
 
         TaskImpl taskCompleted = new TaskImpl("1234-abc-5678-def", "task completed",
                                               Task.TaskStatus.COMPLETED);
