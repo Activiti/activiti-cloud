@@ -147,4 +147,11 @@ public class ProcessRuntimeBundleSteps {
         return processRuntimeService
                 .getProcessInstanceTasks(processInstanceId).getContent();
     }
+
+    @Step
+    public CloudProcessInstance setProcessName(String processInstanceId, String processInstanceName){
+        return processRuntimeService.updateProcess(
+                processInstanceId,
+                ProcessPayloadBuilder.update().withProcessInstanceName(processInstanceName).build());
+    }
 }

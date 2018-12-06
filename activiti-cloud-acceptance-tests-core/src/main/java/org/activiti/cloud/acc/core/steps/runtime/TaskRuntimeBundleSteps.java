@@ -130,4 +130,11 @@ public class TaskRuntimeBundleSteps {
                 .withVariables(variables).build());
     }
 
+    @Step
+    public CloudTask setTaskName(String taskId, String taskName){
+        return taskRuntimeService.updateTask(
+                taskId,
+                TaskPayloadBuilder.update().withName(taskName).build());
+    }
+
 }

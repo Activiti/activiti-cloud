@@ -357,4 +357,32 @@ public class AuditSteps {
         String filter = "entityId:";
         return auditService.getEvents(filter + entityId).getContent();
     }
+
+    @Step
+    public void checkTaskUpdatedEvent(String taskId){
+
+        await().untilAsserted(() -> {
+            assertThat(getEventsByEntityId(taskId))
+                    .isNotEmpty()
+                    .extracting("entityId",
+                            "eventType")
+                    .containsExactly(
+                            tuple(taskId,
+                                    TaskRuntimeEvent.TaskEvents.TASK_UPDATED));
+        });
+    }
+
+    @Step
+    public void checkProcessInstanceUpdatedEvent(String processInstanceId){
+
+        await().untilAsserted(() -> {
+            assertThat(getEventsByEntityId(processInstanceId))
+                    .isNotEmpty()
+                    .extracting("entityId",
+                            "eventType")
+                    .containsExactly(
+                            tuple(processInstanceId,
+                                    ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED));
+        });
+    }
 }
