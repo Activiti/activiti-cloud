@@ -111,6 +111,8 @@ public class ProcessInstanceTasks {
     public void startProcess(String processName) {
 
         processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName));
+
+        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
         checkProcessWithTaskCreated(processName);
     }
 
@@ -345,6 +347,39 @@ public class ProcessInstanceTasks {
                 .contains("single-task",
                           "Process with variables",
                           "ConnectorProcess");
+    }
+
+    @Then("the process instance is updated")
+    public void checkIfTaskUpdated (){
+        auditSteps.checkProcessInstanceUpdatedEvent(processInstance.getId());
+    }
+
+    @When("the user updates the name of the process instance to $newProcessName")
+    public void setTaskName(String newProcessName){
+        processInstance = processRuntimeBundleSteps.setProcessName(processInstance.getId(), newProcessName);
+    }
+
+    @Then("the process has the name $newProcessName")
+    public void checkProccessInstanceName (String newProcessName){
+        assertThat(processRuntimeBundleSteps.getProcessInstanceById(processInstance.getId()))
+                .isEqualTo(newProcessName);
+        assertThat(processQuerySteps.getProcessInstance(processInstance.getId()))
+                .isEqualTo(newProcessName);
+    }
+
+
+    @When("the user set a process instance name $myProcessInstanceName and starts the process $processName")
+    public void startProcessWithProcessInstanceName(String myProcessInstanceName,
+                                                    String processName) {
+        processInstance = processRuntimeBundleSteps.startProcessWithProcessInstanceName(processDefinitionKeyMatcher(processName),
+                myProcessInstanceName);
+    }
+    @Then("verify the process instance name is $myProcessInstanceName")
+    public void verifyTheProcessInstanceNameIsTheOneSupplied(String myProcessInstanceName) {
+        processRuntimeBundleSteps.checkProcessInstanceName(processInstance.getId(),
+                myProcessInstanceName);
+        processQuerySteps.checkProcessInstanceName(processInstance.getId(),
+                myProcessInstanceName);
     }
 
 }

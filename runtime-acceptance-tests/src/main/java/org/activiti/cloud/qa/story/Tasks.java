@@ -177,4 +177,26 @@ public class Tasks {
         taskRuntimeBundleSteps.setVariables(newTask.getId(), Collections.singletonMap(variableName,variableValue));
 
     }
+
+    @When("the user updates the name of the task to $newTaskName")
+    public void setTaskName(String newTaskName){
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+        Collection <CloudTask> tasksCollection = taskQuerySteps.getTasksByProcessInstance(processInstanceId).getContent();
+        List <CloudTask> tasksList = new ArrayList(tasksCollection);
+        newTask = tasksList.get(0);
+        taskRuntimeBundleSteps.setTaskName(newTask.getId(), newTaskName);
+    }
+
+    @Then("the task has the name $newTaskName")
+    public void checkTaskName (String newTaskName){
+        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()))
+                .isEqualTo(newTaskName);
+        assertThat(taskQuerySteps.getTaskById(newTask.getId()))
+                .isEqualTo(newTaskName);
+    }
+
+    @Then("the task is updated")
+    public void checkIfTaskUpdated (){
+        auditSteps.checkTaskUpdatedEvent(newTask.getId());
+    }
 }

@@ -111,3 +111,4 @@ And the user claims the task
 And the user completes the task
 And another user is authenticated as hruser
 Then task variable start1 has value start1
+
