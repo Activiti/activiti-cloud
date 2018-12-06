@@ -147,4 +147,20 @@ public class ProcessRuntimeBundleSteps {
         return processRuntimeService
                 .getProcessInstanceTasks(processInstanceId).getContent();
     }
+
+    @Step
+    public CloudProcessInstance startProcessWithProcessInstanceName(String process,
+                                                                    String processName) {
+        return dirtyContextHandler.dirty(processRuntimeService.startProcess(ProcessPayloadBuilder
+                .start()
+                .withProcessInstanceName(processName)
+                .withProcessDefinitionKey(process)
+                .build()));
+    }
+
+    @Step
+    public void checkProcessInstanceName(String processInstanceId,
+                                         String processInstanceName) {
+        assertThat(processRuntimeService.getProcessInstance(processInstanceId).getName()).isEqualTo(processInstanceName);
+    }
 }
