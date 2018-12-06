@@ -62,3 +62,7 @@ Scenario: check the presence of formKey field in task
 Given the user is authenticated as testuser
 Then the PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED definition has the formKey field with value startForm
 
+Scenario: start a process instance with a name
+Given the user is authenticated as testuser
+When the user set a process instance name my_process_instance_name and starts the process SIMPLE_PROCESS_INSTANCE
+Then verify the process instance name is my_process_instance_name

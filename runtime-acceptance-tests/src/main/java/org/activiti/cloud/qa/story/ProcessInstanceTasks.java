@@ -347,4 +347,18 @@ public class ProcessInstanceTasks {
                           "ConnectorProcess");
     }
 
+    @When("the user set a process instance name $myProcessInstanceName and starts the process $processName")
+    public void startProcessWithProcessInstanceName(String myProcessInstanceName,
+                                                    String processName) {
+        processInstance = processRuntimeBundleSteps.startProcessWithProcessInstanceName(processDefinitionKeyMatcher(processName),
+                myProcessInstanceName);
+    }
+    @Then("verify the process instance name is $myProcessInstanceName")
+    public void verifyTheProcessInstanceNameIsTheOneSupplied(String myProcessInstanceName) {
+        processRuntimeBundleSteps.checkProcessInstanceName(processInstance.getId(),
+                myProcessInstanceName);
+        processQuerySteps.checkProcessInstanceName(processInstance.getId(),
+                myProcessInstanceName);
+    }
+
 }
