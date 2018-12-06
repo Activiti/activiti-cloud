@@ -5,6 +5,7 @@ import feign.Param;
 import feign.RequestLine;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.hateoas.PagedResources;
@@ -52,4 +53,9 @@ public interface ProcessRuntimeService extends BaseService {
             "Accept: application/hal+json;charset=UTF-8"
     })
     PagedResources<CloudTask> getProcessInstanceTasks(@Param("id") String id);
+
+    @RequestLine("POST /v1/process-definitions/{id}")
+    @Headers("Content-Type: application/json")
+    CloudProcessInstance updateProcess(@Param("id") String id,
+                            UpdateProcessPayload updateProcessPayload);
 }
