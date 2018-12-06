@@ -22,6 +22,8 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
 import org.springframework.messaging.support.MessageBuilder;
 
+import java.util.Collections;
+
 public class CloudTaskUpdatedProducer implements TaskEventListener<TaskUpdatedEvent> {
 
     private ToCloudTaskRuntimeEventConverter converter;
@@ -36,7 +38,7 @@ public class CloudTaskUpdatedProducer implements TaskEventListener<TaskUpdatedEv
     @Override
     public void onEvent(TaskUpdatedEvent event) {
         producer.auditProducer().send(MessageBuilder.withPayload(
-                converter.from(event)).build());
+                Collections.singletonList(converter.from(event)).toArray()).build());
     }
 
 }

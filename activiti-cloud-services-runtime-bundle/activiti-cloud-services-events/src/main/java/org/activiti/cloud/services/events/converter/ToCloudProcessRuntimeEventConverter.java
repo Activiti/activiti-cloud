@@ -20,7 +20,7 @@ import org.activiti.api.process.model.events.BPMNActivityCancelledEvent;
 import org.activiti.api.process.model.events.BPMNActivityCompletedEvent;
 import org.activiti.api.process.model.events.BPMNActivityStartedEvent;
 import org.activiti.api.process.model.events.ProcessDeployedEvent;
-import org.activiti.api.process.model.events.SequenceFlowTakenEvent;
+import org.activiti.api.process.model.events.BPMNSequenceFlowTakenEvent;
 import org.activiti.api.process.runtime.events.ProcessCancelledEvent;
 import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
 import org.activiti.api.process.runtime.events.ProcessCreatedEvent;
@@ -130,7 +130,7 @@ public class ToCloudProcessRuntimeEventConverter {
         return cloudEvent;
     }
 
-    public CloudSequenceFlowTakenEvent from(SequenceFlowTakenEvent event) {
+    public CloudSequenceFlowTakenEvent from(BPMNSequenceFlowTakenEvent event) {
         CloudSequenceFlowTakenImpl cloudEvent = new CloudSequenceFlowTakenImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
