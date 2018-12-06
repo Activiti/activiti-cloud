@@ -347,4 +347,16 @@ public class ProcessInstanceTasks {
                           "ConnectorProcess");
     }
 
+    @Then("the process instance is updated")
+    public void checkIfTaskUpdated (){
+        auditSteps.checkProcessInstanceUpdatedEvent(processInstance.getId());
+    }
+
+    @When("the user updates the name of the process instance to $newProcessName")
+    public void setTaskName(String newProcessName){
+        processInstance = processRuntimeBundleSteps.setProcessName(processInstance.getId(), newProcessName);
+    }
+
+
+
 }
