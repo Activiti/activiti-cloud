@@ -106,10 +106,13 @@ public class QueryProcessInstancesEntityIT {
             Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
             assertThat(processInstanceEntities)
                     .extracting(ProcessInstanceEntity::getId,
+                                ProcessInstanceEntity::getName,
                                 ProcessInstanceEntity::getStatus)
                     .contains(tuple(completedProcess.getId(),
+                                    "first",
                                     ProcessInstance.ProcessInstanceStatus.COMPLETED),
                               tuple(runningProcess.getId(),
+                                    "second",
                                     ProcessInstance.ProcessInstanceStatus.RUNNING));
         });
 

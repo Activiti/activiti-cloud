@@ -58,7 +58,7 @@ public class ProcessStartedEventHandlerTest {
     }
 
     @Test
-    public void handleShouldUpdateProcessInstanceStatusToRunning() {
+    public void handleShouldUpdateProcessInstanceStatusToRunningAndUpdateInstanceName() {
         //given
         CloudProcessStartedEvent event = buildProcessStartedEvent();
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
@@ -71,6 +71,7 @@ public class ProcessStartedEventHandlerTest {
         //then
         verify(processInstanceRepository).save(currentProcessInstanceEntity);
         verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        verify(currentProcessInstanceEntity).setName(event.getEntity().getName());
     }
 
     @Test
@@ -94,6 +95,7 @@ public class ProcessStartedEventHandlerTest {
     private CloudProcessStartedEvent buildProcessStartedEvent() {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId(UUID.randomUUID().toString());
+        processInstance.setName("my instance name");
         return new CloudProcessStartedEventImpl(processInstance);
     }
 

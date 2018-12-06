@@ -54,6 +54,8 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
                 () -> new QueryException("Unable to find process instance with the given id: " + processInstanceId));
         if (ProcessInstance.ProcessInstanceStatus.CREATED.equals(processInstanceEntity.getStatus())) {
             processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
+            //instance name is not available in ProcessCreatedEvent, so we need to updated it here
+            processInstanceEntity.setName(startedEvent.getEntity().getName());
             processInstanceEntity.setLastModified(new Date(startedEvent.getTimestamp()));
             processInstanceRepository.save(processInstanceEntity);
         }
