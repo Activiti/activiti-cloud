@@ -22,6 +22,7 @@ import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TAS
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_UPDATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -284,6 +285,38 @@ public class AuditProducerIT {
             assertThat(((Task) receivedEvents.get(1).getEntity()).getStatus()).isEqualTo(Task.TaskStatus.CANCELLED);
             assertThat(((Task) receivedEvents.get(1).getEntity()).getId()).isEqualTo(task.getId());
             assertThat(receivedEvents.get(1).getEntityId()).isEqualTo(task.getId());
+        });
+    }
+
+
+    @Test
+    public void shouldEmitEventsForTaskUpdate() {
+        //given
+        CloudTask task = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("my task name 2").withDescription(
+                "long description here").withAssignee("hruser").build());
+
+        //when
+        taskRestTemplate.updateTask(TaskPayloadBuilder.update().withTaskId(task.getId()).withDescription("short description").build());
+
+
+        //then
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+            assertThat(receivedEvents)
+                    .hasSize(1)
+                    .extracting(CloudRuntimeEvent::getEventType,
+                            CloudRuntimeEvent::getEntityId)
+                    .containsExactly(tuple(TASK_UPDATED,
+                                    task.getId())
+                    );
+
+
+            assertThat(receivedEvents.get(0).getEntity()).isNotNull();
+            assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(Task.class);
+            assertThat(((Task) receivedEvents.get(0).getEntity()).getStatus()).isEqualTo(Task.TaskStatus.ASSIGNED);
+            assertThat(((Task) receivedEvents.get(0).getEntity()).getId()).isEqualTo(task.getId());
+            assertThat(receivedEvents.get(0).getEntityId()).isEqualTo(task.getId());
+            assertThat(((Task) receivedEvents.get(0).getEntity()).getDescription()).isEqualTo("short description");
         });
     }
 
