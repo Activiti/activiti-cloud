@@ -30,6 +30,7 @@ public class ProcessUpdatedEventConverter implements EventToEntityConverter<Audi
         processUpdatedAuditEventEntity.setServiceVersion(cloudProcessUpdated.getServiceVersion());
         processUpdatedAuditEventEntity.setProcessDefinitionId(cloudProcessUpdated.getEntity().getProcessDefinitionId());
         processUpdatedAuditEventEntity.setProcessInstanceId(cloudProcessUpdated.getEntity().getId());
+        processUpdatedAuditEventEntity.setProcessInstance(cloudProcessUpdated.getEntity());
 
         return processUpdatedAuditEventEntity;
     }

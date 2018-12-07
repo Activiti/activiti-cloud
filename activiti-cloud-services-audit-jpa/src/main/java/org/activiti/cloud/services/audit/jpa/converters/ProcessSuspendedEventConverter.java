@@ -30,6 +30,7 @@ public class ProcessSuspendedEventConverter implements EventToEntityConverter<Au
         processSuspendedAuditEventEntity.setServiceVersion(cloudProcessSuspended.getServiceVersion());
         processSuspendedAuditEventEntity.setProcessDefinitionId(cloudProcessSuspended.getEntity().getProcessDefinitionId());
         processSuspendedAuditEventEntity.setProcessInstanceId(cloudProcessSuspended.getEntity().getId());
+        processSuspendedAuditEventEntity.setProcessInstance(cloudProcessSuspended.getEntity());
 
         return processSuspendedAuditEventEntity;
     }
