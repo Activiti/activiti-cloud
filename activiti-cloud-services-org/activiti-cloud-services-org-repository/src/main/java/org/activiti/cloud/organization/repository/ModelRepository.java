@@ -42,7 +42,8 @@ public interface ModelRepository<A extends Application, M extends Model<A, ?>> {
 
     M createModel(M model);
 
-    M updateModel(M modelToUpdate);
+    M updateModel(M modelToUpdate,
+                  M newModel);
 
     M updateModelContent(M modelToBeUpdate,
                          FileContent fileContent);

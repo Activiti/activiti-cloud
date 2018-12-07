@@ -43,6 +43,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
@@ -108,8 +109,8 @@ public class ModelService {
 
     public Model updateModel(Model modelToBeUpdated,
                              Model newModel) {
-        modelToBeUpdated.setName(newModel.getName());
-        return modelRepository.updateModel(modelToBeUpdated);
+        return modelRepository.updateModel(modelToBeUpdated,
+                                           newModel);
     }
 
     public void deleteModel(Model model) {
@@ -135,9 +136,10 @@ public class ModelService {
 
     public FileContent getModelMetadataFile(Model model) {
         Class<?> metadataView = modelRepository.getModelMetadataView();
+        Model modelWithFullMetadata = findModelById(model.getId()).orElse(model);
         return new FileContent(toJsonFilename(model.getName()),
                                ContentTypeUtils.CONTENT_TYPE_JSON,
-                               jsonConverter.convertToJsonBytes(model,
+                               jsonConverter.convertToJsonBytes(modelWithFullMetadata,
                                                                 metadataView));
     }
 
@@ -181,12 +183,6 @@ public class ModelService {
                 fileContent.getFilename(),
                 fileContent));
 
-        if (modelTypeService.isJson(modelType)) {
-            return importJsonModel(application,
-                                   modelType,
-                                   fileContent);
-        }
-
         Model model = importModelFromContent(application,
                                              modelType,
                                              fileContent);
@@ -200,13 +196,9 @@ public class ModelService {
                                  FileContent fileContent) {
         Model model = jsonConverter.tryConvertToEntity((fileContent.getFileContent()))
                 .orElseThrow(() -> new ImportModelException("Cannot convert json file content to model: " + fileContent));
-        if (!modelType.getName().equals(model.getType())) {
-            throw new ImportModelException(MessageFormat.format(
-                    "Expected model type {0} was found actually as {1} in the file to import: {2}",
-                    modelType.getName(),
-                    model.getType(),
-                    fileContent.getFilename()));
-        }
+        model.setName(removeExtension(fileContent.getFilename(),
+                                      JSON));
+        model.setType(modelType.getName());
 
         return createModel(application,
                            model);

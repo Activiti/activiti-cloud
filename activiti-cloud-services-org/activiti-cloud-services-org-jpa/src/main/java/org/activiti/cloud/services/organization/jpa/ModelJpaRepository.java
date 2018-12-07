@@ -45,9 +45,6 @@ import static org.activiti.cloud.services.organization.entity.ModelEntityHandler
 public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
                                             ModelRepository<ApplicationEntity, ModelEntity> {
 
-    Page<ModelEntity> findAllByApplicationIdIsNullAndTypeEquals(String modelTypeFilter,
-                                                                Pageable pageable);
-
     Page<ModelEntity> findAllByApplicationIdAndTypeEquals(String applicationId,
                                                           String modelTypeFilter,
                                                           Pageable pageable);
@@ -93,15 +90,18 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
     }
 
     @Override
-    default ModelEntity updateModel(ModelEntity model) {
-        updateModelReference(model);
-        return loadModelReference(save(model));
+    default ModelEntity updateModel(ModelEntity modelToBeUpdated,
+                                    ModelEntity newModel) {
+        modelToBeUpdated.setName(newModel.getName());
+        updateModelReference(modelToBeUpdated);
+        return loadModelReference(save(modelToBeUpdated));
     }
 
     @Override
-    default ModelEntity updateModelContent(ModelEntity modelToBeUpdate,
+    default ModelEntity updateModelContent(ModelEntity modelToBeUpdated,
                                            FileContent fileContent) {
-        return updateModel(modelToBeUpdate);
+        updateModelReference(modelToBeUpdated);
+        return loadModelReference(save(modelToBeUpdated));
     }
 
     @Override
