@@ -5,8 +5,8 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 
-import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
 import org.activiti.api.task.model.Task;
+import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
 
 @Entity
 public abstract class TaskAuditEventEntity extends AuditEventEntity {
@@ -50,8 +50,10 @@ public abstract class TaskAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
-        setProcessDefinitionId((task != null) ? task.getProcessDefinitionId() : null);
-        setProcessInstanceId((task != null) ? task.getProcessInstanceId() : null);
+        if (task != null) {
+            setProcessDefinitionId(task.getProcessDefinitionId());
+            setProcessInstanceId(task.getProcessInstanceId());
+        }
 
         this.task = task;
         if (task != null) {

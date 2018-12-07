@@ -20,10 +20,9 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
-import javax.persistence.MappedSuperclass;
 
-import org.activiti.cloud.services.audit.jpa.converters.json.ActivityJpaJsonConverter;
 import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.cloud.services.audit.jpa.converters.json.ActivityJpaJsonConverter;
 
 @Entity
 public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
@@ -65,7 +64,7 @@ public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
         this.bpmnActivity = bpmnActivity;
-        setEntityId(bpmnActivity.getProcessInstanceId());
+        setEntityId(bpmnActivity.getElementId());
     }
 
     public BPMNActivity getBpmnActivity() {
@@ -74,6 +73,7 @@ public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
 
     public void setBpmnActivity(BPMNActivity bpmnActivity) {
         this.bpmnActivity = bpmnActivity;
+        setEntityId(bpmnActivity.getElementId());
     }
 
 }

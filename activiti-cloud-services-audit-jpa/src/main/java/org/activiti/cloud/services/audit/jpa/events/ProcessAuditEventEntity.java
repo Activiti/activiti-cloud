@@ -20,10 +20,9 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
-import javax.persistence.MappedSuperclass;
 
-import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
 
 @Entity
 public abstract class ProcessAuditEventEntity extends AuditEventEntity {
@@ -69,13 +68,19 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
-        setProcessDefinitionId((processInstance != null) ? processInstance.getProcessDefinitionId() : null);
-        setProcessInstanceId((processInstance != null) ? processInstance.getId() : null);
+        setFattenInfo(processInstance);
 
         this.processInstance = processInstance;
         this.nestedProcessDefinitionId = nestedProcessDefinitionId;
         this.nestedProcessInstanceId = nestedProcessInstanceId;
-        setEntityId(processInstance.getId());
+    }
+
+    private void setFattenInfo(ProcessInstance processInstance) {
+        if (processInstance != null) {
+            setProcessDefinitionId(processInstance.getProcessDefinitionId());
+            setProcessInstanceId(processInstance.getId());
+            setEntityId(processInstance.getId());
+        }
     }
 
     public ProcessAuditEventEntity(String eventId,
@@ -97,11 +102,9 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
-        setProcessDefinitionId((processInstance != null) ? processInstance.getProcessDefinitionId() : null);
-        setProcessInstanceId((processInstance != null) ? processInstance.getId() : null);
+        setFattenInfo(processInstance);
 
         this.processInstance = processInstance;
-        setEntityId(processInstance.getId());
     }
 
     public ProcessInstance getProcessInstance() {
@@ -110,6 +113,7 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
 
     public void setProcessInstance(ProcessInstance processInstance) {
         this.processInstance = processInstance;
+        setFattenInfo(processInstance);
     }
 
     public String getNestedProcessDefinitionId() {
