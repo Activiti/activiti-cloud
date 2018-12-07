@@ -3,14 +3,12 @@ package org.activiti.cloud.acc.core.services.runtime;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SetTaskVariablesPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.acc.shared.service.BaseService;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
 
@@ -59,7 +57,7 @@ public interface TaskRuntimeService extends BaseService {
     @Headers("Content-Type: application/json")
     void setTaskVariables(@Param("taskId") String taskId, SetTaskVariablesPayload variablesPayload);
 
-    @RequestLine("POST /v1/tasks/{taskId}")
+    @RequestLine("PUT /v1/tasks/{taskId}")
     @Headers("Content-Type: application/json")
     CloudTask updateTask(@Param("taskId") String taskId,
                          UpdateTaskPayload updateTaskPayload);
