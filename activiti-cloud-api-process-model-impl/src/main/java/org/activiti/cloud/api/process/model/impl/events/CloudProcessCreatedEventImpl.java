@@ -18,17 +18,15 @@ package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
-import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 
-public class CloudProcessCreatedEventImpl extends CloudRuntimeEventImpl<ProcessInstance, ProcessRuntimeEvent.ProcessEvents> implements CloudProcessCreatedEvent {
+public class CloudProcessCreatedEventImpl extends CloudProcessInstanceEventImpl implements CloudProcessCreatedEvent {
 
     public CloudProcessCreatedEventImpl() {
     }
 
     public CloudProcessCreatedEventImpl(ProcessInstance processInstance) {
         super(processInstance);
-        setEntityId(processInstance.getId());
     }
 
     public CloudProcessCreatedEventImpl(String id,
@@ -37,7 +35,6 @@ public class CloudProcessCreatedEventImpl extends CloudRuntimeEventImpl<ProcessI
         super(id,
               timestamp,
               processInstance);
-        setEntityId(processInstance.getId());
     }
 
     @Override

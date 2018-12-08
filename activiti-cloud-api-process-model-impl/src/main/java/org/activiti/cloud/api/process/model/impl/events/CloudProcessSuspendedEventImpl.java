@@ -17,20 +17,15 @@
 package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
-import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
 
-public class CloudProcessSuspendedEventImpl extends CloudRuntimeEventImpl<ProcessInstance, ProcessRuntimeEvent.ProcessEvents> implements CloudProcessSuspendedEvent {
+public class CloudProcessSuspendedEventImpl extends CloudProcessInstanceEventImpl implements CloudProcessSuspendedEvent {
 
     public CloudProcessSuspendedEventImpl() {
     }
 
     public CloudProcessSuspendedEventImpl(ProcessInstance processInstance) {
         super(processInstance);
-        if(processInstance != null) {
-            setEntityId(processInstance.getId());
-        }
     }
 
     public CloudProcessSuspendedEventImpl(String id,
@@ -39,9 +34,6 @@ public class CloudProcessSuspendedEventImpl extends CloudRuntimeEventImpl<Proces
         super(id,
               timestamp,
               processInstance);
-        if(processInstance != null) {
-            setEntityId(processInstance.getId());
-        }
     }
 
     @Override

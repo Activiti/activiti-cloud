@@ -17,11 +17,9 @@
 package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
-import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
 
-public class CloudProcessCancelledEventImpl extends CloudRuntimeEventImpl<ProcessInstance, ProcessRuntimeEvent.ProcessEvents> implements CloudProcessCancelledEvent {
+public class CloudProcessCancelledEventImpl extends CloudProcessInstanceEventImpl implements CloudProcessCancelledEvent {
 
     private String cause;
 
@@ -36,7 +34,6 @@ public class CloudProcessCancelledEventImpl extends CloudRuntimeEventImpl<Proces
     public CloudProcessCancelledEventImpl(ProcessInstance processInstance,
                                           String cause) {
         super(processInstance);
-        setEntityId(processInstance.getId());
         this.cause = cause;
     }
 
@@ -46,7 +43,6 @@ public class CloudProcessCancelledEventImpl extends CloudRuntimeEventImpl<Proces
         super(id,
               timestamp,
               processInstance);
-        setEntityId(processInstance.getId());
     }
 
     @Override

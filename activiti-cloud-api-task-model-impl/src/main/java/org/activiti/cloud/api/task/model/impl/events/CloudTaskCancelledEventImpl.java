@@ -17,11 +17,9 @@
 package org.activiti.cloud.api.task.model.impl.events;
 
 import org.activiti.api.task.model.Task;
-import org.activiti.api.task.model.events.TaskRuntimeEvent;
-import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 
-public class CloudTaskCancelledEventImpl extends CloudRuntimeEventImpl<Task, TaskRuntimeEvent.TaskEvents>
+public class CloudTaskCancelledEventImpl extends CloudTaskEventImpl
         implements CloudTaskCancelledEvent {
 
     private String cause;
@@ -31,13 +29,11 @@ public class CloudTaskCancelledEventImpl extends CloudRuntimeEventImpl<Task, Tas
 
     public CloudTaskCancelledEventImpl(Task task) {
         super(task);
-        setEntityId(task.getId());
     }
 
     public CloudTaskCancelledEventImpl(Task task,
                                        String cause) {
         super(task);
-        setEntityId(task.getId());
         this.cause = cause;
     }
 
@@ -47,7 +43,6 @@ public class CloudTaskCancelledEventImpl extends CloudRuntimeEventImpl<Task, Tas
         super(id,
               timestamp,
               task);
-        setEntityId(task.getId());
     }
 
     @Override

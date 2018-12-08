@@ -18,10 +18,9 @@ package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
-import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 
-public class CloudProcessStartedEventImpl extends CloudRuntimeEventImpl<ProcessInstance, ProcessRuntimeEvent.ProcessEvents> implements CloudProcessStartedEvent {
+public class CloudProcessStartedEventImpl extends CloudProcessInstanceEventImpl implements CloudProcessStartedEvent {
 
     private String nestedProcessDefinitionId;
     private String nestedProcessInstanceId;
@@ -33,7 +32,6 @@ public class CloudProcessStartedEventImpl extends CloudRuntimeEventImpl<ProcessI
                                         String nestedProcessDefinitionId,
                                         String nestedProcessInstanceId) {
         super(processInstance);
-        setEntityId(processInstance.getId());
         this.nestedProcessDefinitionId = nestedProcessDefinitionId;
         this.nestedProcessInstanceId = nestedProcessInstanceId;
     }
@@ -50,7 +48,6 @@ public class CloudProcessStartedEventImpl extends CloudRuntimeEventImpl<ProcessI
         super(id,
               timestamp,
               processInstance);
-        setEntityId(processInstance.getId());
     }
 
     public CloudProcessStartedEventImpl(String id,
@@ -61,7 +58,6 @@ public class CloudProcessStartedEventImpl extends CloudRuntimeEventImpl<ProcessI
         super(id,
               timestamp,
               processInstance);
-        setEntityId(processInstance.getId());
         this.nestedProcessDefinitionId = nestedProcessDefinitionId;
         this.nestedProcessInstanceId = nestedProcessInstanceId;
     }

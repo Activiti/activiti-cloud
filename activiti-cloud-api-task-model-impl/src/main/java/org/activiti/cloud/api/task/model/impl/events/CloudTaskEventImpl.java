@@ -17,28 +17,34 @@
 package org.activiti.cloud.api.task.model.impl.events;
 
 import org.activiti.api.task.model.Task;
-import org.activiti.cloud.api.task.model.events.CloudTaskSuspendedEvent;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
-public class CloudTaskSuspendedEventImpl extends CloudTaskEventImpl
-        implements CloudTaskSuspendedEvent {
+public abstract class CloudTaskEventImpl extends CloudRuntimeEventImpl<Task, TaskRuntimeEvent.TaskEvents> {
 
-    public CloudTaskSuspendedEventImpl() {
+    public CloudTaskEventImpl() {
     }
 
-    public CloudTaskSuspendedEventImpl(Task task) {
+    public CloudTaskEventImpl(Task task) {
         super(task);
+        setFlattenInformation(task);
     }
 
-    public CloudTaskSuspendedEventImpl(String id,
-                                       Long timestamp,
-                                       Task task) {
+    private void setFlattenInformation(Task task) {
+        if (task != null) {
+            setEntityId(task.getId());
+            setProcessDefinitionId(task.getProcessDefinitionId());
+            setProcessInstanceId(task.getProcessInstanceId());
+        }
+    }
+
+    public CloudTaskEventImpl(String id,
+                              Long timestamp,
+                              Task task) {
         super(id,
               timestamp,
               task);
+        setFlattenInformation(task);
     }
 
-    @Override
-    public TaskEvents getEventType() {
-        return TaskEvents.TASK_SUSPENDED;
-    }
 }

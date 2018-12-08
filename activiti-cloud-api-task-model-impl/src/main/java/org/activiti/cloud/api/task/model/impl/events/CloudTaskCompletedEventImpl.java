@@ -17,11 +17,9 @@
 package org.activiti.cloud.api.task.model.impl.events;
 
 import org.activiti.api.task.model.Task;
-import org.activiti.api.task.model.events.TaskRuntimeEvent;
-import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
 
-public class CloudTaskCompletedEventImpl extends CloudRuntimeEventImpl<Task, TaskRuntimeEvent.TaskEvents>
+public class CloudTaskCompletedEventImpl extends CloudTaskEventImpl
         implements CloudTaskCompletedEvent {
 
     public CloudTaskCompletedEventImpl() {
@@ -29,7 +27,6 @@ public class CloudTaskCompletedEventImpl extends CloudRuntimeEventImpl<Task, Tas
 
     public CloudTaskCompletedEventImpl(Task task) {
         super(task);
-        setEntityId(task.getId());
     }
 
     public CloudTaskCompletedEventImpl(String id,
@@ -38,7 +35,6 @@ public class CloudTaskCompletedEventImpl extends CloudRuntimeEventImpl<Task, Tas
         super(id,
               timestamp,
               task);
-        setEntityId(task.getId());
     }
 
     @Override
