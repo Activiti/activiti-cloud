@@ -17,6 +17,7 @@
 package org.activiti.cloud.acc.core.steps.audit;
 
 import net.thucydides.core.annotations.Step;
+import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.task.model.Task;
@@ -366,10 +367,15 @@ public class AuditSteps {
                     .isNotEmpty()
                     .extracting("entityId",
                             "eventType")
-                    .containsExactly(
+                    .contains(
                             tuple(taskId,
                                     TaskRuntimeEvent.TaskEvents.TASK_UPDATED));
         });
+
+        assertThat(getEventsByEntityId(taskId))
+                .filteredOn(event -> event.getServiceType().equals(TaskRuntimeEvent.TaskEvents.TASK_UPDATED))
+                .extracting(RuntimeEvent::getEntity)
+                .isNotNull();
     }
 
     @Step
@@ -378,11 +384,16 @@ public class AuditSteps {
         await().untilAsserted(() -> {
             assertThat(getEventsByEntityId(processInstanceId))
                     .isNotEmpty()
-                    .extracting("entityId",
+                    .extracting("processInstanceId",
                             "eventType")
-                    .containsExactly(
+                    .contains(
                             tuple(processInstanceId,
                                     ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED));
+
+            assertThat(getEventsByEntityId(processInstanceId))
+                    .filteredOn(event -> event.getServiceType().equals(ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED))
+                    .extracting(RuntimeEvent::getEntity)
+                    .isNotNull();
         });
     }
 }
