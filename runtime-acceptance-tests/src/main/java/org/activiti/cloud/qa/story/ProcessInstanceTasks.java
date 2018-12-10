@@ -107,7 +107,7 @@ public class ProcessInstanceTasks {
         checkProcessWithTaskCreated(processName);
     }
 
-    @When("the user starts a $processName")
+    @When("the user starts an instance of the process called $processName")
     public void startProcess(String processName) {
 
         processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName));
@@ -219,19 +219,20 @@ public class ProcessInstanceTasks {
 
     @Then("the status of the process is changed to completed")
     public void verifyProcessStatus() throws Exception {
-
-        processQuerySteps.checkProcessInstanceStatus(processInstance.getId(),
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+        processQuerySteps.checkProcessInstanceStatus(processId,
                 ProcessInstance.ProcessInstanceStatus.COMPLETED);
-        auditSteps.checkProcessInstanceEvent(processInstance.getId(), ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED);
+        auditSteps.checkProcessInstanceEvent(processId, ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED);
     }
 
     @Then("a variable was created with name $variableName")
     @When("a variable was created with name $variableName")
     public void verifyVariableCreated(String variableName) throws Exception {
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
 
-        processQuerySteps.checkProcessInstanceHasVariable(processInstance.getId(),
+        processQuerySteps.checkProcessInstanceHasVariable(processId,
                 variableName);
-        auditSteps.checkProcessInstanceVariableEvent(processInstance.getId(),
+        auditSteps.checkProcessInstanceVariableEvent(processId,
                 variableName,
                 VariableEvent.VariableEvents.VARIABLE_CREATED);
 

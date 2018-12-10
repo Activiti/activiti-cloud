@@ -23,19 +23,19 @@ Then the process cannot be activated anymore
 
 Scenario: show a process instance diagram
 Given the user is authenticated as testuser
-When the user starts a PROCESS_INSTANCE_WITH_VARIABLES
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
 And open the process diagram
 Then the diagram is shown
 
 Scenario: show diagram for a process instance without graphic info
 Given the user is authenticated as testuser
-When the user starts a PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO
+When the user starts an instance of the process called PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO
 And open the process diagram
 Then no diagram is shown
 
 Scenario: complete a process instance that uses a connector
 Given the user is authenticated as testuser
-When the user starts a CONNECTOR_PROCESS_INSTANCE
+When the user starts an instance of the process called CONNECTOR_PROCESS_INSTANCE
 Then the status of the process is changed to completed
 And a variable was created with name var1
 
@@ -45,17 +45,17 @@ Then The user gets all the process definitions in admin endpoint
 
 Scenario: retrieve process instances as an admin
 Given the user is authenticated as hradmin
-When the user starts a PROCESS_INSTANCE_WITH_VARIABLES
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
 Then the user can get process with variables instances in admin endpoint
 
 Scenario: query process instances as an admin
 Given the user is authenticated as hradmin
-When the user starts a PROCESS_INSTANCE_WITH_VARIABLES
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
 Then the user can query process with variables instances in admin endpoints
 
 Scenario: get events as an admin
 Given the user is authenticated as hradmin
-When the user starts a PROCESS_INSTANCE_WITH_VARIABLES
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
 Then the user can get events for process with variables instances in admin endpoint
 
 Scenario: check the presence of formKey field in task
@@ -64,7 +64,7 @@ Then the PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED definition has the formKey f
 
 Scenario: check the process is updated
 Given the user is authenticated as testuser
-When the user starts a PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
 And the user updates the name of the process instance to new-process-name
 Then the process instance is updated
 And the process has the name new-process-name
