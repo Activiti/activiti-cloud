@@ -31,8 +31,7 @@ import org.jbehave.core.annotations.Then;
 import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
 import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.activiti.cloud.acc.core.helper.ProcessDefinitionRegistry.processDefinitionKeys;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
 
 
 public class SecurityPoliciesActions {

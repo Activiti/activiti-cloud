@@ -52,11 +52,11 @@ import org.springframework.hateoas.PagedResources;
 
 import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
 import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
-import static org.activiti.cloud.acc.core.helper.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
-import static org.activiti.cloud.acc.core.helper.ProcessDefinitionRegistry.withTasks;
-import static org.activiti.cloud.acc.core.helper.ProcessDefinitionRegistry.processDefinitionKeys;
 
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
 
 public class ProcessInstanceTasks {
 
@@ -361,9 +361,9 @@ public class ProcessInstanceTasks {
 
     @Then("the process has the name $newProcessName")
     public void checkProccessInstanceName (String newProcessName){
-        assertThat(processRuntimeBundleSteps.getProcessInstanceById(processInstance.getId()))
+        assertThat(processRuntimeBundleSteps.getProcessInstanceById(processInstance.getId()).getName())
                 .isEqualTo(newProcessName);
-        assertThat(processQuerySteps.getProcessInstance(processInstance.getId()))
+        assertThat(processQuerySteps.getProcessInstance(processInstance.getId()).getName())
                 .isEqualTo(newProcessName);
     }
 
