@@ -24,6 +24,7 @@ import feign.Response;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.service.ModelingModelsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,9 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     @Autowired
     private ModelingModelsService modelingModelsService;
 
+    @Autowired
+    private ModelingTestsConfigurationProperties config;
+
     @Step
     public Resource<Model> create(String modelName,
                                   String modelType) {
@@ -65,7 +69,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         Model model = currentContext.getContent();
         model.setContent("updated content");
 
-        modelingModelsService.updateByUri(currentContext.getLink(REL_SELF).getHref(),
+        modelingModelsService.updateByUri(currentContext.getLink(REL_SELF).getHref().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()),
                                           model);
         updateCurrentModelingObject();
     }

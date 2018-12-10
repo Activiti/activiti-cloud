@@ -24,7 +24,7 @@ Then the application 'Mars Team' is deleted
 
 Scenario: export an application
 Given the user is authenticated as modeler
-And an application 'Mission Europa' with process model 'landing-rover'
+And an application 'Mission Europa First' with process model 'landing-rover'
 When the user export the application
 Then the exported application contains the process model landing-rover
 

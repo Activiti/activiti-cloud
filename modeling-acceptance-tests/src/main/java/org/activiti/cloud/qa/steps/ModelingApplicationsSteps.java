@@ -26,6 +26,7 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
 import org.activiti.cloud.qa.service.ModelingApplicationsService;
@@ -51,6 +52,9 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
     @Autowired
     private ModelingApplicationsService modelingApplicationsService;
 
+    @Autowired
+    private ModelingTestsConfigurationProperties config;
+
     @Step
     public Resource<Application> create(String applicationName) {
         String id = UUID.randomUUID().toString();
@@ -67,7 +71,8 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
         Application application = currentContext.getContent();
         application.setName(newApplicationName);
 
-        modelingApplicationsService.updateByUri(currentContext.getLink(REL_SELF).getHref(),
+        modelingApplicationsService.updateByUri(currentContext.getLink(REL_SELF).getHref()
+                        .replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()),
                                                 application);
     }
 
@@ -94,7 +99,7 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
         Link importModelLink = currentApplication.getLink("import");
         assertThat(importModelLink).isNotNull();
 
-        return modelingApplicationsService.importApplicationModelByUri(importModelLink.getHref(),
+        return modelingApplicationsService.importApplicationModelByUri(importModelLink.getHref().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()),
                                                                        file);
     }
 
@@ -103,7 +108,7 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
         Resource<Application> currentApplication = checkAndGetCurrentContext(Application.class);
         Link exportLink = currentApplication.getLink("export");
         assertThat(exportLink).isNotNull();
-        Response response = modelingApplicationsService.exportApplicationByUri(exportLink.getHref());
+        Response response = modelingApplicationsService.exportApplicationByUri(exportLink.getHref().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()));
 
         if (response.status() == SC_OK) {
             modelingContextHandler.setCurrentModelingFile(toFileContent(response));

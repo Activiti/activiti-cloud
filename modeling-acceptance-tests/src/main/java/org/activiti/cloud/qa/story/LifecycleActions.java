@@ -38,7 +38,7 @@ public class LifecycleActions {
     }
 
     @AfterScenario
-    public void creanup() {
+    public void cleanup() {
         dirtyContextHandler.cleanup();
     }
 }
