@@ -21,10 +21,14 @@
             <artifactId>activiti-cloud-api-task-model-impl</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.activiti.cloud.acc.scenarios</groupId>
-            <artifactId>runtime-acceptance-tests</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.activiti.cloud.acc</groupId>
+            <artifactId>activiti-cloud-acceptance-tests-shared</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.activiti.cloud.acc</groupId>
+            <artifactId>activiti-cloud-acceptance-tests-core</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
