@@ -16,6 +16,14 @@
 
 package org.activiti.cloud.acc.core.steps.audit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -30,14 +38,6 @@ import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.assertj.core.api.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
 
 /**
  * Audit steps
@@ -142,10 +142,6 @@ public class AuditSteps {
             assertThat(events).isNotEmpty();
             assertThat(events).extracting(e -> e.getEventType()).containsOnly(eventType);
             List<CloudRuntimeEvent> varEvents = events.stream().filter(e -> variableName.equals(((CloudVariableEvent) e).getEntity().getName()) && taskId.equals(((CloudVariableEvent) e).getEntity().getTaskId())).collect(Collectors.toList());
-
-            if(processInstanceId!=null){
-                varEvents = varEvents.stream().filter(e -> processInstanceId.equals(((CloudVariableEvent) e).getEntity().getProcessInstanceId())).collect(Collectors.toList());
-            }
 
             assertThat(varEvents.size()).isGreaterThanOrEqualTo(1); //could be more than one if there are multiple vars with same name
             CloudRuntimeEvent resultingEvent = varEvents.get(0);
