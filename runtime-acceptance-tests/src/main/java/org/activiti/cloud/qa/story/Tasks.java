@@ -189,9 +189,9 @@ public class Tasks {
 
     @Then("the task has the name $newTaskName")
     public void checkTaskName (String newTaskName){
-        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()))
+        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getName())
                 .isEqualTo(newTaskName);
-        assertThat(taskQuerySteps.getTaskById(newTask.getId()))
+        assertThat(taskQuerySteps.getTaskById(newTask.getId()).getName())
                 .isEqualTo(newTaskName);
     }
 

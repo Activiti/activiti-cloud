@@ -112,3 +112,10 @@ And the user completes the task
 And another user is authenticated as hruser
 Then task variable start1 has value start1
 
+Scenario: check the task is updated
+Given the user is authenticated as testuser
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
+And the user updates the name of the task to new-task-name
+Then the task is updated
+And the task has the name new-task-name
+

@@ -11,7 +11,7 @@ Then all the process definitions are present
 
 Scenario: delete a process instance
 Given the user is authenticated as testuser
-When the user starts a PROCESS_INSTANCE_WITH_VARIABLES
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
 And the user deletes the process
 Then the process instance is deleted
 
