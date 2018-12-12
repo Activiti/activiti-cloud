@@ -32,7 +32,7 @@ pipeline {
             sh "mvn install"
             sh 'export VERSION=$PREVIEW_VERSION && skaffold build -f skaffold.yaml'
 
-             dir(".charts/$APP_NAME") {
+             dir("./charts/$APP_NAME") {
                sh "make build"
              }
           }
