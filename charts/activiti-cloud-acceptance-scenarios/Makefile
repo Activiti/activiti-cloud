@@ -13,9 +13,7 @@ build: clean
 	helm lint
 
 install: clean build
-	pwd
-	ls
-	sed -i "" -e "s/jx-staging/${PREVIEW_NAMESPACE}/g" values.yaml
+	sed -i -e "s/jx-staging/${PREVIEW_NAMESPACE}/g" values.yaml
 	helm install . --name ${NAME} --namespace ${PREVIEW_NAMESPACE} --wait
 
 upgrade: clean build
