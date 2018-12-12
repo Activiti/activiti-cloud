@@ -3,7 +3,7 @@ pipeline {
     label "jenkins-maven"
   }
   environment {
-    ORG = 'almerico'
+    ORG = 'activiti'
     APP_NAME = 'activiti-cloud-acceptance-scenarios'
     CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
     GATEWAY_HOST = "activiti-cloud-gateway.jx-staging.35.228.195.195.nip.io"
