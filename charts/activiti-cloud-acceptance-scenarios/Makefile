@@ -7,6 +7,7 @@ RELEASE_VERSION := $(shell cat ../../VERSION)
 build: clean
 	helm init --client-only
 	helm repo add charts_activiti https://activiti.github.io/activiti-cloud-charts/
+	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/
 	rm -rf requirements.lock
 	helm dependency build
 	helm lint
