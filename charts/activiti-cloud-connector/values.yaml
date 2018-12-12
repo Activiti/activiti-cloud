@@ -1,0 +1,63 @@
+# Default values for Maven projects.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+global:
+  rabbitmq:
+    host:
+      value: ""
+    username:
+      value: guest
+    password:
+      value: guest
+  keycloak:
+    url: ""
+    name: keycloak
+    service:
+      type: http
+      port: 80
+  ## The list of hostnames to be covered with this ingress record.
+  ## Most likely this will be just one host, but in the event more hosts are needed, this is an array
+  ingress:
+    hostName: ""
+
+## Allows the specification of additional environment variables
+extraEnv: |
+  # - name: ACT_KEYCLOAK_URL
+  #   valueFrom:
+  #     configMapKeyRef:
+  #       name: {{ .Release.Name }}-keycloak-http
+  #       key: expose-keycloak-service-key
+
+javaOpts:
+  xmx: 768m
+  xms: 512m
+  other: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
+image:
+  repository: activiti/example-cloud-connector
+  tag: 7.0.0.Beta3
+  pullPolicy: IfNotPresent
+service:
+  name: example-cloud-connector
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 8080
+  annotations:
+    fabric8.io/expose: "false"
+resources:
+  limits:
+    memory: 768Mi
+  requests:
+    cpu: 400m
+    memory: 768Mi
+probePath: /actuator/health
+livenessProbe:
+  initialDelaySeconds: 140
+  periodSeconds: 15
+  successThreshold: 1
+  timeoutSeconds: 4
+readinessProbe:
+  periodSeconds: 15
+  successThreshold: 1
+  timeoutSeconds: 3
+terminationGracePeriodSeconds: 20
