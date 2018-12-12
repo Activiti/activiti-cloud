@@ -19,6 +19,10 @@ pipeline {
       when {
         branch 'PR-*'
       }
+      environment {
+        GATEWAY_HOST = "activiti-cloud-gateway.$PREVIEW_NAMESPACE.35.228.195.195.nip.io"
+        SSO_HOST = "activiti-keycloak.$PREVIEW_NAMESPACE.35.228.195.195.nip.io"
+      }
 
       steps {
         container('maven') {
@@ -39,6 +43,10 @@ pipeline {
      stage('Build Release') {
        when {
          branch 'master'
+       }
+       environment {
+        GATEWAY_HOST = "activiti-cloud-gateway.activiti-cloud-acceptance-scenarios-master.35.228.195.195.nip.io"
+        SSO_HOST = "activiti-keycloak.activiti-cloud-acceptance-scenarios-master.35.228.195.195.nip.io"
        }
        steps {
          container('maven') {
