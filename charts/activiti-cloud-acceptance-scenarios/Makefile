@@ -1,6 +1,7 @@
 CHART_REPO := http://jenkins-x-chartmuseum:8080
 CURRENT=$(pwd)
-NAME := activiti-cloud-acceptance-scenarios-${BRANCH_NAME}-${BUILD_NUMBER}
+NAME := activiti-cloud-acceptance-scenarios
+HELM_RELEASE_NAME := scenarios-${BRANCH_NAME}-${BUILD_NUMBER}
 OS := $(shell uname)
 RELEASE_VERSION := $(shell cat ../../VERSION)
 
@@ -14,13 +15,13 @@ build: clean
 
 install: clean build
 	sed -i -e "s/jx-staging/${PREVIEW_NAMESPACE}/g" values.yaml
-	helm install . --name ${NAME} --namespace ${PREVIEW_NAMESPACE} --wait
+	helm install . --name ${HELM_RELEASE_NAME} --namespace ${PREVIEW_NAMESPACE} --wait
 
 upgrade: clean build
-	helm upgrade ${NAME} .
+	helm upgrade ${HELM_RELEASE_NAME} .
 
 delete:
-	helm delete --purge ${NAME}
+	helm delete --purge ${HELM_RELEASE_NAME}
 
 clean:
 	rm -rf charts
@@ -30,7 +31,7 @@ release: clean
 	helm dependency build
 	helm lint
 	helm package .
-	curl --fail -u $(CHARTMUSEUM_CREDS_USR):$(CHARTMUSEUM_CREDS_PSW) --data-binary "@$(NAME)-$(shell sed -n 's/^version: //p' Chart.yaml).tgz" $(CHART_REPO)/api/charts
+#	curl --fail -u $(CHARTMUSEUM_CREDS_USR):$(CHARTMUSEUM_CREDS_PSW) --data-binary "@$(NAME)-$(shell sed -n 's/^version: //p' Chart.yaml).tgz" $(CHART_REPO)/api/charts
 	rm -rf ${NAME}*.tgz%
 
 tag:
