@@ -1,0 +1,7 @@
+---
+dependencies:
+- name: "activiti-cloud-full-example"
+  repository: "https://activiti.github.io/activiti-cloud-helm-charts/"
+  #repository: "https://activiti.github.io/activiti-cloud-charts/"
+  version: "0.4.0"
+
