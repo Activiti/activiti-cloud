@@ -71,5 +71,5 @@ updatebot/push-version:
 	$(eval ACTIVITI_CLOUD_DEPENDENCIES_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud-dependencies.version -q -DforceStdout))
 	
 	@echo Doing updatebot push-version.....
-	updatebot push-version --kind --config ../../.updatebot.yml helm $(RELEASE_ARTIFACT) $(RELEASE_VERSION)
-	updatebot push-version --kind --config ../../.updatebot.yml make RB_ACTIVITI_CLOUD_DEPENDENCIES_VERSION $(ACTIVITI_CLOUD_DEPENDENCIES_VERSION)
+	updatebot push-version --kind helm --config ../../.updatebot.yml  $(RELEASE_ARTIFACT) $(RELEASE_VERSION)
+	updatebot push-version --kind make --config ../../.updatebot.yml  RB_ACTIVITI_CLOUD_DEPENDENCIES_VERSION $(ACTIVITI_CLOUD_DEPENDENCIES_VERSION)
