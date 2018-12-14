@@ -16,10 +16,7 @@
 
 package org.activiti.cloud.services.query.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 
@@ -27,13 +24,14 @@ import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 @Table(name = "PROCESS_DEFINITION",
         indexes = {
                 @Index(name = "pd_name_idx", columnList = "name"),
-                @Index(name = "pd_key_idx", columnList = "key")
+                @Index(name = "pd_key_idx", columnList = "processDefinitionKey")
         })
 public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements CloudProcessDefinition {
 
     @Id
     private String id;
     private String name;
+    @Column(name = "processDefinitionKey")
     private String key;
     private String description;
     private int version;
