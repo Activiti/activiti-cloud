@@ -1,2 +1,2 @@
 # activiti-cloud-dependencies
-Activiti Cloud BOM (Bill of Materials)
+Activiti Cloud BOM (Bill of Materials) 
