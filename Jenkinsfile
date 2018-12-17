@@ -1,4 +1,7 @@
 pipeline {
+  options {
+      disableConcurrentBuilds()
+  } 
   agent {
     label "jenkins-maven"
   }
@@ -11,7 +14,7 @@ pipeline {
     REALM = "activiti"
     
     PREVIEW_VERSION = "0.0.0-SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER"
-    PREVIEW_NAMESPACE = "$APP_NAME-$BRANCH_NAME".toLowerCase()
+    PREVIEW_NAMESPACE = "$APP_NAME-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase()
     HELM_RELEASE = "$PREVIEW_NAMESPACE".toLowerCase()
   }
   stages {
@@ -45,8 +48,8 @@ pipeline {
          branch 'master'
        }
        environment {
-        GATEWAY_HOST = "activiti-cloud-gateway.activiti-cloud-acceptance-scenarios-master.35.228.195.195.nip.io"
-        SSO_HOST = "activiti-keycloak.activiti-cloud-acceptance-scenarios-master.35.228.195.195.nip.io"
+        GATEWAY_HOST = "activiti-cloud-gateway.$PREVIEW_NAMESPACE.35.228.195.195.nip.io"
+        SSO_HOST = "activiti-keycloak.$PREVIEW_NAMESPACE.35.228.195.195.nip.io"
        }
        steps {
          container('maven') {
