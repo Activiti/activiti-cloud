@@ -1,7 +1,6 @@
 CHART_REPO := http://jenkins-x-chartmuseum:8080
 CURRENT=$(pwd)
 NAME := activiti-cloud-acceptance-scenarios
-HELM_RELEASE_NAME := scenarios-${BRANCH_NAME}-${BUILD_NUMBER}
 OS := $(shell uname)
 RELEASE_VERSION := $(shell cat ../../VERSION)
 
