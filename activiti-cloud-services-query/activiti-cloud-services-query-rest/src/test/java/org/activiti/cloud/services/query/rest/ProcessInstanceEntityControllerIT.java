@@ -26,7 +26,8 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
+import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
+import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,7 +77,10 @@ public class ProcessInstanceEntityControllerIT {
     private ProcessInstanceRepository processInstanceRepository;
 
     @MockBean
-    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
+    private SecurityPoliciesManager securityPoliciesApplicationService;
+
+    @MockBean
+    private ProcessInstanceRestrictionService processInstanceRestrictionService;
 
     @MockBean
     private SecurityManager securityManager;
@@ -85,7 +89,7 @@ public class ProcessInstanceEntityControllerIT {
     private EntityFinder entityFinder;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("user");
     }
 
@@ -93,7 +97,7 @@ public class ProcessInstanceEntityControllerIT {
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         Predicate restrictedPredicate = mock(Predicate.class);
-        given(securityPoliciesApplicationService.restrictProcessInstanceQuery(any(),
+        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(),
                                                                               eq(SecurityPolicyAccess.READ))).willReturn(restrictedPredicate);
         given(processInstanceRepository.findAll(eq(restrictedPredicate),
                                                 ArgumentMatchers.<Pageable>any())).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),

@@ -31,9 +31,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = {TaskRepository.class, TaskEntity.class,
-        TaskCandidateUserRepository.class, TaskCandidateUser.class,
-        TaskCandidateGroupRepository.class, TaskCandidateGroup.class, TaskLookupRestrictionService.class})
+@SpringBootTest
 @EnableConfigurationProperties
 @EnableJpaRepositories(basePackages = "org.activiti")
 @EntityScan("org.activiti")

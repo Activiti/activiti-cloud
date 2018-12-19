@@ -18,12 +18,15 @@ package org.activiti.cloud.services.query.rest;
 
 import java.util.Collections;
 
+import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.conf.QueryRestAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
+import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,6 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -60,7 +64,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(ProcessDefinitionAdminController.class)
+@WebMvcTest(ProcessDefinitionController.class)
 @Import({
         QueryRestAutoConfiguration.class,
         CommonModelAutoConfiguration.class,
@@ -69,16 +73,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @ComponentScan(basePackages = {"org.activiti.cloud.services.query.rest.assembler", "org.activiti.cloud.alfresco"})
-public class ProcessDefinitionAdminControllerIT {
+public class ProcessDefinitionControllerIT {
 
-    private static final String PROCESS_DEFINITION_IDENTIFIER = "admin-process-definition";
-    private static final String ALFRESCO_PROCESS_DEFINITION_IDENTIFIER = "admin-process-definition-alfresco";
+    private static final String PROCESS_DEFINITION_IDENTIFIER = "process-definition";
+    private static final String ALFRESCO_PROCESS_DEFINITION_IDENTIFIER = "process-definition-alfresco";
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private ProcessDefinitionRepository processDefinitionRepository;
+
+    @MockBean
+    private ProcessDefinitionRestrictionService processDefinitionRestrictionService;
 
     @MockBean
     private SecurityManager securityManager;
@@ -96,23 +103,26 @@ public class ProcessDefinitionAdminControllerIT {
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("user");
         assertThat(securityPoliciesManager).isNotNull();
-        assertThat(securityPoliciesProperties).isNotNull();
         assertThat(taskLookupRestrictionService).isNotNull();
+        assertThat(securityPoliciesProperties).isNotNull();
     }
 
     @Test
     public void shouldReturnAvailableProcessDefinitions() throws Exception {
         //given
+        Predicate predicate = mock(Predicate.class);
+        given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
+                .willReturn(predicate);
         PageRequest pageRequest = PageRequest.of(0,
                                                  10);
-        given(processDefinitionRepository.findAll(any(),
-                                                  eq(pageRequest)))
+        given(processDefinitionRepository.findAll(predicate,
+                                                  pageRequest))
                 .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
                                            pageRequest,
                                            1));
 
         //when
-        mockMvc.perform(get("/admin/v1/process-definitions?page=0&size=10")
+        mockMvc.perform(get("/v1/process-definitions?page=0&size=10")
                                 .accept(MediaTypes.HAL_JSON_VALUE))
                 //then
                 .andExpect(status().isOk())
@@ -125,7 +135,10 @@ public class ProcessDefinitionAdminControllerIT {
     @Test
     public void shouldReturnAvailableProcessDefinitionsUsingAlfrescoFormat() throws Exception {
         //given
-        given(processDefinitionRepository.findAll(any(),
+        Predicate predicate = mock(Predicate.class);
+        given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
+                .willReturn(predicate);
+        given(processDefinitionRepository.findAll(eq(predicate),
                                                   ArgumentMatchers.<Pageable>any()))
                 .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
                                            PageRequest.of(1,
@@ -133,7 +146,7 @@ public class ProcessDefinitionAdminControllerIT {
                                            11));
 
         //when
-        mockMvc.perform(get("/admin/v1/process-definitions?skipCount=10&maxItems=10")
+        mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10")
                                 .accept(MediaType.APPLICATION_JSON))
                 //then
                 .andExpect(status().isOk())
