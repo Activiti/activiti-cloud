@@ -16,6 +16,10 @@
 
 package org.activiti.cloud.starter.audit.tests.it;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,6 +54,9 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
+import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
+import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
+import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.Before;
@@ -62,10 +69,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -81,6 +84,9 @@ public class AuditServiceIT {
 
     @Autowired
     private MyProducer producer;
+    
+    @Autowired
+    private APIEventToEntityConverters eventConverters;
 
     @Before
     public void setUp() {
@@ -411,6 +417,61 @@ public class AuditServiceIT {
         });
     }
 
+    
+    @Test
+    public void checkEventConverters() {
+        //given
+        ProcessInstanceImpl processInstanceStarted = new ProcessInstanceImpl();
+        processInstanceStarted.setId("processInstanceId");
+        processInstanceStarted.setProcessDefinitionId("processDefinitionId");
+        processInstanceStarted.setProcessDefinitionKey("processDefinitionKey");
+        processInstanceStarted.setBusinessKey("businessKey");
+        processInstanceStarted.setParentId("parentId");
+               
+        CloudProcessStartedEventImpl event = new CloudProcessStartedEventImpl("ProcessStartedEventId",
+                                                                              System.currentTimeMillis(),
+                                                                              processInstanceStarted);
+        //Set explicitly to be sure
+        event.setEntityId("entityId");
+        event.setProcessInstanceId(processInstanceStarted.getId());
+        event.setProcessDefinitionId(processInstanceStarted.getProcessDefinitionId());
+        event.setProcessDefinitionKey(processInstanceStarted.getProcessDefinitionKey());
+        event.setBusinessKey(processInstanceStarted.getBusinessKey());
+        event.setParentProcessInstanceId(processInstanceStarted.getParentId());
+        
+             
+        //Check convertToEntity
+        EventToEntityConverter converter = eventConverters.getConverterByEventTypeName(event.getEventType().name());
+        assertThat(converter).isNotNull();
+     
+        AuditEventEntity auditEventEntity= (AuditEventEntity) converter.convertToEntity(event);
+        assertThat(auditEventEntity).isNotNull();
+        
+        assertThat(auditEventEntity.getEntityId()).isEqualTo(event.getEntityId());
+        assertThat(auditEventEntity.getProcessInstanceId()).isEqualTo(event.getProcessInstanceId());
+        assertThat(auditEventEntity.getProcessDefinitionId()).isEqualTo(event.getProcessDefinitionId());
+        assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(event.getProcessDefinitionKey());
+        assertThat(auditEventEntity.getBusinessKey()).isEqualTo(event.getBusinessKey());
+        assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(event.getParentProcessInstanceId());
+            
+        //Check convertToAPI
+        EventToEntityConverter converterAPI = eventConverters.getConverterByEventTypeName(auditEventEntity.getEventType());
+        assertThat(converterAPI).isNotNull();
+     
+        CloudRuntimeEvent cloudEvent= (CloudRuntimeEvent)converterAPI.convertToAPI(auditEventEntity);
+        assertThat(cloudEvent).isNotNull();
+        
+        assertThat(auditEventEntity.getEntityId()).isEqualTo(cloudEvent.getEntityId());
+        assertThat(auditEventEntity.getProcessInstanceId()).isEqualTo(cloudEvent.getProcessInstanceId());
+        assertThat(auditEventEntity.getProcessDefinitionId()).isEqualTo(cloudEvent.getProcessDefinitionId());
+        assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(cloudEvent.getProcessDefinitionKey());
+        assertThat(auditEventEntity.getBusinessKey()).isEqualTo(cloudEvent.getBusinessKey());
+        assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(cloudEvent.getParentProcessInstanceId());
+            
+        
+    }
+    
+    
     private List<CloudRuntimeEvent> getTaskCancelledEvents() {
         List<CloudRuntimeEvent> testEvents = new ArrayList<>();
         TaskImpl taskCreated = new TaskImpl("1234-abc-5678-def",

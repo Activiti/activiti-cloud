@@ -32,9 +32,6 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
     @Column
     private ProcessInstance processInstance;
 
-    private String nestedProcessDefinitionId;
-    private String nestedProcessInstanceId;
-
     public ProcessAuditEventEntity() {
     }
 
@@ -44,43 +41,6 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
         super(eventId,
               timestamp,
               eventType);
-    }
-
-    public ProcessAuditEventEntity(String eventId,
-                                   Long timestamp,
-                                   String eventType,
-                                   String appName,
-                                   String appVersion,
-                                   String serviceName,
-                                   String serviceFullName,
-                                   String serviceType,
-                                   String serviceVersion,
-                                   ProcessInstance processInstance,
-                                   String nestedProcessDefinitionId,
-                                   String nestedProcessInstanceId) {
-        super(eventId,
-              timestamp,
-              eventType);
-
-        setAppName(appName);
-        setAppVersion(appVersion);
-        setServiceName(serviceName);
-        setServiceFullName(serviceFullName);
-        setServiceType(serviceType);
-        setServiceVersion(serviceVersion);
-        setFattenInfo(processInstance);
-
-        this.processInstance = processInstance;
-        this.nestedProcessDefinitionId = nestedProcessDefinitionId;
-        this.nestedProcessInstanceId = nestedProcessInstanceId;
-    }
-
-    private void setFattenInfo(ProcessInstance processInstance) {
-        if (processInstance != null) {
-            setProcessDefinitionId(processInstance.getProcessDefinitionId());
-            setProcessInstanceId(processInstance.getId());
-            setEntityId(processInstance.getId());
-        }
     }
 
     public ProcessAuditEventEntity(String eventId,
@@ -102,9 +62,7 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
-        setFattenInfo(processInstance);
-
-        this.processInstance = processInstance;
+        setProcessInstance(processInstance);
     }
 
     public ProcessInstance getProcessInstance() {
@@ -113,22 +71,6 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
 
     public void setProcessInstance(ProcessInstance processInstance) {
         this.processInstance = processInstance;
-        setFattenInfo(processInstance);
     }
 
-    public String getNestedProcessDefinitionId() {
-        return nestedProcessDefinitionId;
-    }
-
-    public String getNestedProcessInstanceId() {
-        return nestedProcessInstanceId;
-    }
-
-    public void setNestedProcessDefinitionId(String nestedProcessDefinitionId) {
-        this.nestedProcessDefinitionId = nestedProcessDefinitionId;
-    }
-
-    public void setNestedProcessInstanceId(String nestedProcessInstanceId) {
-        this.nestedProcessInstanceId = nestedProcessInstanceId;
-    }
 }

@@ -63,8 +63,7 @@ public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
-        this.bpmnActivity = bpmnActivity;
-        setEntityId(bpmnActivity.getElementId());
+        setBpmnActivity(bpmnActivity);
     }
 
     public BPMNActivity getBpmnActivity() {
@@ -73,7 +72,6 @@ public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
 
     public void setBpmnActivity(BPMNActivity bpmnActivity) {
         this.bpmnActivity = bpmnActivity;
-        setEntityId(bpmnActivity.getElementId());
     }
 
 }

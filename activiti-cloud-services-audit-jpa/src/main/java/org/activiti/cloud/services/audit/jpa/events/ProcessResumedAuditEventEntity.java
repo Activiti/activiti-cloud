@@ -38,30 +38,6 @@ public class ProcessResumedAuditEventEntity extends ProcessAuditEventEntity {
               ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name());
     }
 
-    public ProcessResumedAuditEventEntity(String eventId,
-                                            Long timestamp,
-                                            String appName,
-                                            String appVersion,
-                                            String serviceName,
-                                            String serviceFullName,
-                                            String serviceType,
-                                            String serviceVersion,
-                                            ProcessInstance processInstance,
-                                            String nestedProcessDefinitionId,
-                                            String nestedProcessInstanceId) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              processInstance,
-              nestedProcessDefinitionId,
-              nestedProcessInstanceId);
-    }
 
     public ProcessResumedAuditEventEntity(String eventId,
                                             Long timestamp,

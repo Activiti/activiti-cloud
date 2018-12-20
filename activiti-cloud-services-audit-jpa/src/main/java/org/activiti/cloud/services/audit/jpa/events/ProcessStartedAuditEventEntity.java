@@ -18,10 +18,9 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
 
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 
 @Entity
 @DiscriminatorValue(value = ProcessStartedAuditEventEntity.PROCESS_STARTED_EVENT)
@@ -47,9 +46,7 @@ public class ProcessStartedAuditEventEntity extends ProcessAuditEventEntity {
                                           String serviceFullName,
                                           String serviceType,
                                           String serviceVersion,
-                                          ProcessInstance processInstance,
-                                          String nestedProcessDefinitionId,
-                                          String nestedProcessInstanceId) {
+                                          ProcessInstance processInstance) {
         super(eventId,
               timestamp,
               ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name(),
@@ -59,8 +56,6 @@ public class ProcessStartedAuditEventEntity extends ProcessAuditEventEntity {
               serviceFullName,
               serviceType,
               serviceVersion,
-              processInstance,
-              nestedProcessDefinitionId,
-              nestedProcessInstanceId);
+              processInstance);
     }
 }

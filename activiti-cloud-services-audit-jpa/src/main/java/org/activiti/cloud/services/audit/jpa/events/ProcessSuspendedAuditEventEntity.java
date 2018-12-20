@@ -18,10 +18,9 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
 
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 
 @Entity
 @DiscriminatorValue(value = ProcessSuspendedAuditEventEntity.PROCESS_SUSPENDED_EVENT)
@@ -37,31 +36,6 @@ public class ProcessSuspendedAuditEventEntity extends ProcessAuditEventEntity {
         super(eventId,
               timestamp,
               ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name());
-    }
-
-    public ProcessSuspendedAuditEventEntity(String eventId,
-                                            Long timestamp,
-                                            String appName,
-                                            String appVersion,
-                                            String serviceName,
-                                            String serviceFullName,
-                                            String serviceType,
-                                            String serviceVersion,
-                                            ProcessInstance processInstance,
-                                            String nestedProcessDefinitionId,
-                                            String nestedProcessInstanceId) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              processInstance,
-              nestedProcessDefinitionId,
-              nestedProcessInstanceId);
     }
 
     public ProcessSuspendedAuditEventEntity(String eventId,

@@ -3,37 +3,40 @@ package org.activiti.cloud.services.audit.jpa.converters;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
-import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableUpdatedEventEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class VariableUpdatedEventConverter implements EventToEntityConverter<AuditEventEntity> {
+public class VariableUpdatedEventConverter extends BaseEventToEntityConverter {
 
+    public VariableUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        super(eventContextInfoAppender);
+    }
+    
     @Override
     public String getSupportedEvent() {
         return VariableEvent.VariableEvents.VARIABLE_UPDATED.name();
     }
 
     @Override
-    public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
+    protected VariableUpdatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
         CloudVariableUpdatedEvent cloudVariableUpdatedEvent = (CloudVariableUpdatedEvent) cloudRuntimeEvent;
-        VariableUpdatedEventEntity variableUpdatedEventEntity = new VariableUpdatedEventEntity(cloudVariableUpdatedEvent.getId(),
-                                                                                               cloudVariableUpdatedEvent.getTimestamp(),
-                                                                                               cloudVariableUpdatedEvent.getAppName(),
-                                                                                               cloudVariableUpdatedEvent.getAppVersion(),
-                                                                                               cloudVariableUpdatedEvent.getServiceFullName(),
-                                                                                               cloudVariableUpdatedEvent.getServiceName(),
-                                                                                               cloudVariableUpdatedEvent.getServiceType(),
-                                                                                               cloudVariableUpdatedEvent.getServiceVersion(),
-                                                                                               cloudVariableUpdatedEvent.getEntity());
-        return variableUpdatedEventEntity;
+        return new VariableUpdatedEventEntity(cloudVariableUpdatedEvent.getId(),
+                                              cloudVariableUpdatedEvent.getTimestamp(),
+                                              cloudVariableUpdatedEvent.getAppName(),
+                                              cloudVariableUpdatedEvent.getAppVersion(),
+                                              cloudVariableUpdatedEvent.getServiceFullName(),
+                                              cloudVariableUpdatedEvent.getServiceName(),
+                                              cloudVariableUpdatedEvent.getServiceType(),
+                                              cloudVariableUpdatedEvent.getServiceVersion(),
+                                              cloudVariableUpdatedEvent.getEntity());
     }
 
     @Override
-    public CloudRuntimeEvent convertToAPI(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         VariableUpdatedEventEntity variableUpdatedEventEntity = (VariableUpdatedEventEntity) auditEventEntity;
 
         CloudVariableUpdatedEventImpl variableUpdatedEvent = new CloudVariableUpdatedEventImpl(variableUpdatedEventEntity.getEventId(),
@@ -46,6 +49,8 @@ public class VariableUpdatedEventConverter implements EventToEntityConverter<Aud
         variableUpdatedEvent.setServiceType(variableUpdatedEventEntity.getServiceType());
         variableUpdatedEvent.setServiceVersion(variableUpdatedEventEntity.getServiceVersion());
 
+        variableUpdatedEvent.setProcessDefinitionId(variableUpdatedEventEntity.getProcessDefinitionId());
+        
         return variableUpdatedEvent;
     }
 }

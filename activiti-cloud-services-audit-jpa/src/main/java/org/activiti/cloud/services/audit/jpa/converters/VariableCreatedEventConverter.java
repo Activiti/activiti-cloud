@@ -3,23 +3,28 @@ package org.activiti.cloud.services.audit.jpa.converters;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
-import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableCreatedEventEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class VariableCreatedEventConverter implements EventToEntityConverter<AuditEventEntity> {
+public class VariableCreatedEventConverter extends BaseEventToEntityConverter {
 
+    public VariableCreatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        super(eventContextInfoAppender);
+    }
+    
     @Override
     public String getSupportedEvent() {
         return VariableEvent.VariableEvents.VARIABLE_CREATED.name();
     }
 
     @Override
-    public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
+    protected VariableCreatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
         CloudVariableCreatedEvent cloudVariableCreatedEvent = (CloudVariableCreatedEvent) cloudRuntimeEvent;
+        
         return new VariableCreatedEventEntity(cloudVariableCreatedEvent.getId(),
                                               cloudVariableCreatedEvent.getTimestamp(),
                                               cloudVariableCreatedEvent.getAppName(),
@@ -32,7 +37,7 @@ public class VariableCreatedEventConverter implements EventToEntityConverter<Aud
     }
 
     @Override
-    public CloudRuntimeEvent convertToAPI(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         VariableCreatedEventEntity variableCreatedEventEntity = (VariableCreatedEventEntity) auditEventEntity;
 
         CloudVariableCreatedEventImpl cloudVariableCreatedEvent = new CloudVariableCreatedEventImpl(variableCreatedEventEntity.getEventId(),
@@ -44,6 +49,8 @@ public class VariableCreatedEventConverter implements EventToEntityConverter<Aud
         cloudVariableCreatedEvent.setServiceName(variableCreatedEventEntity.getServiceName());
         cloudVariableCreatedEvent.setServiceType(variableCreatedEventEntity.getServiceType());
         cloudVariableCreatedEvent.setServiceVersion(variableCreatedEventEntity.getServiceVersion());
+        
+        cloudVariableCreatedEvent.setProcessDefinitionId(variableCreatedEventEntity.getProcessDefinitionId());
 
         return cloudVariableCreatedEvent;
     }

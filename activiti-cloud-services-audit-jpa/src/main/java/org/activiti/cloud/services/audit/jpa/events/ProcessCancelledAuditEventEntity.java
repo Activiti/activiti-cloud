@@ -19,8 +19,8 @@ package org.activiti.cloud.services.audit.jpa.events;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 
 @Entity
 @DiscriminatorValue(value = ProcessCancelledAuditEventEntity.PROCESS_CANCELLED_EVENT)
@@ -37,33 +37,6 @@ public class ProcessCancelledAuditEventEntity extends ProcessAuditEventEntity {
         super(eventId,
               timestamp,
               ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name());
-        this.cause = cause;
-    }
-
-    public ProcessCancelledAuditEventEntity(String eventId,
-                                            Long timestamp,
-                                            String appName,
-                                            String appVersion,
-                                            String serviceName,
-                                            String serviceFullName,
-                                            String serviceType,
-                                            String serviceVersion,
-                                            ProcessInstance processInstance,
-                                            String nestedProcessDefinitionId,
-                                            String nestedProcessInstanceId,
-                                            String cause) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              processInstance,
-              nestedProcessDefinitionId,
-              nestedProcessInstanceId);
         this.cause = cause;
     }
 

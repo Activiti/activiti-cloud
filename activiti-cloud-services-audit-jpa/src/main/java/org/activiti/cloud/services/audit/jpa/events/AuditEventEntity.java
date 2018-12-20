@@ -44,10 +44,13 @@ public abstract class AuditEventEntity {
     private String serviceVersion;
 
     /* base Process Data */
+    private String entityId;
     private String processDefinitionId;
     private String processInstanceId;
-    private String entityId;
-
+    private String processDefinitionKey;
+    private String parentProcessInstanceId;
+    private String businessKey;
+    
     public AuditEventEntity() {
     }
 
@@ -58,7 +61,7 @@ public abstract class AuditEventEntity {
         this.timestamp = timestamp;
         this.eventType = eventType;
     }
-
+    
     public String getEventId() {
         return eventId;
     }
@@ -161,5 +164,29 @@ public abstract class AuditEventEntity {
 
     public void setEntityId(String entityId) {
         this.entityId = entityId;
+    }
+    
+    public String getBusinessKey() {
+        return businessKey;
+    }
+
+    public void setBusinessKey(String businessKey) {
+        this.businessKey = businessKey;
+    }
+
+    public String getParentProcessInstanceId() {
+        return parentProcessInstanceId;
+    }
+
+    public void setParentProcessInstanceId(String parentProcessInstanceId) {
+        this.parentProcessInstanceId = parentProcessInstanceId;
+    }
+
+    public String getProcessDefinitionKey() {
+        return processDefinitionKey;
+    }
+
+    public void setProcessDefinitionKey(String processDefinitionKey) {
+        this.processDefinitionKey = processDefinitionKey;
     }
 }

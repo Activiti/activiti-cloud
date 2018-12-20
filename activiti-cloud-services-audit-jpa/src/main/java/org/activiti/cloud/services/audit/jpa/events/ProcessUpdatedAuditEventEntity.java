@@ -46,31 +46,6 @@ public class ProcessUpdatedAuditEventEntity extends ProcessAuditEventEntity {
                                             String serviceFullName,
                                             String serviceType,
                                             String serviceVersion,
-                                            ProcessInstance processInstance,
-                                            String nestedProcessDefinitionId,
-                                            String nestedProcessInstanceId) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              processInstance,
-              nestedProcessDefinitionId,
-              nestedProcessInstanceId);
-    }
-
-    public ProcessUpdatedAuditEventEntity(String eventId,
-                                            Long timestamp,
-                                            String appName,
-                                            String appVersion,
-                                            String serviceName,
-                                            String serviceFullName,
-                                            String serviceType,
-                                            String serviceVersion,
                                             ProcessInstance processInstance) {
         super(eventId,
               timestamp,

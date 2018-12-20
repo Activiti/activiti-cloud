@@ -65,7 +65,7 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
-        this.sequenceFlow = sequenceFlow;
+        setSequenceFlow(sequenceFlow) ;
     }
 
     public BPMNSequenceFlow getSequenceFlow() {

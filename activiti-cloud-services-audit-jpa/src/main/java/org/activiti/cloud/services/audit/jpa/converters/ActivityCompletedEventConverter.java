@@ -2,41 +2,43 @@ package org.activiti.cloud.services.audit.jpa.converters;
 
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
-import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.ActivityCompletedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ActivityCompletedEventConverter implements EventToEntityConverter<AuditEventEntity> {
+public class ActivityCompletedEventConverter extends BaseEventToEntityConverter {
 
+    public ActivityCompletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        super(eventContextInfoAppender);
+    }
+    
     @Override
     public String getSupportedEvent() {
         return BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name();
     }
 
     @Override
-    public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
+    protected ActivityCompletedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
         CloudBPMNActivityCompletedEvent cloudBPMNActivityCompletedEvent = (CloudBPMNActivityCompletedEvent) cloudRuntimeEvent;
-        ActivityCompletedAuditEventEntity activityCompletedAuditEventEntity = new ActivityCompletedAuditEventEntity(cloudBPMNActivityCompletedEvent.getId(),
-                                                                                                                    cloudBPMNActivityCompletedEvent.getTimestamp(),
-                                                                                                                    cloudBPMNActivityCompletedEvent.getAppName(),
-                                                                                                                    cloudBPMNActivityCompletedEvent.getAppVersion(),
-                                                                                                                    cloudBPMNActivityCompletedEvent.getServiceFullName(),
-                                                                                                                    cloudBPMNActivityCompletedEvent.getServiceName(),
-                                                                                                                    cloudBPMNActivityCompletedEvent.getServiceType(),
-                                                                                                                    cloudBPMNActivityCompletedEvent.getServiceVersion(),
-                                                                                                                    cloudBPMNActivityCompletedEvent.getEntity());
-        activityCompletedAuditEventEntity.setEntityId(cloudBPMNActivityCompletedEvent.getProcessInstanceId());
-        activityCompletedAuditEventEntity.setProcessDefinitionId(cloudBPMNActivityCompletedEvent.getProcessDefinitionId());
-        activityCompletedAuditEventEntity.setProcessInstanceId(cloudBPMNActivityCompletedEvent.getProcessInstanceId());
-        return activityCompletedAuditEventEntity;
+
+        return new ActivityCompletedAuditEventEntity(cloudBPMNActivityCompletedEvent.getId(),
+                                                     cloudBPMNActivityCompletedEvent.getTimestamp(),
+                                                     cloudBPMNActivityCompletedEvent.getAppName(),
+                                                     cloudBPMNActivityCompletedEvent.getAppVersion(),
+                                                     cloudBPMNActivityCompletedEvent.getServiceFullName(),
+                                                     cloudBPMNActivityCompletedEvent.getServiceName(),
+                                                     cloudBPMNActivityCompletedEvent.getServiceType(),
+                                                     cloudBPMNActivityCompletedEvent.getServiceVersion(),
+                                                     cloudBPMNActivityCompletedEvent.getEntity());
     }
 
     @Override
-    public CloudRuntimeEvent convertToAPI(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
+  
         ActivityCompletedAuditEventEntity activityCompletedAuditEventEntity = (ActivityCompletedAuditEventEntity) auditEventEntity;
 
         CloudBPMNActivityCompletedEventImpl bpmnActivityCompletedEvent = new CloudBPMNActivityCompletedEventImpl(activityCompletedAuditEventEntity.getEventId(),
@@ -50,6 +52,7 @@ public class ActivityCompletedEventConverter implements EventToEntityConverter<A
         bpmnActivityCompletedEvent.setServiceName(activityCompletedAuditEventEntity.getServiceName());
         bpmnActivityCompletedEvent.setServiceType(activityCompletedAuditEventEntity.getServiceType());
         bpmnActivityCompletedEvent.setServiceVersion(activityCompletedAuditEventEntity.getServiceVersion());
+        
         return bpmnActivityCompletedEvent;
     }
 }

@@ -18,37 +18,42 @@ package org.activiti.cloud.services.audit.jpa.converters;
 
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskUpdatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
-import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TaskUpdatedEventEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TaskUpdatedEventConverter implements EventToEntityConverter<AuditEventEntity> {
+public class TaskUpdatedEventConverter extends BaseEventToEntityConverter {
 
+    public TaskUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        super(eventContextInfoAppender);
+    }
+    
     @Override
     public String getSupportedEvent() {
         return TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name();
     }
 
     @Override
-    public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
+    public TaskUpdatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
         CloudTaskUpdatedEvent cloudTaskUpdatedEvent = (CloudTaskUpdatedEvent) cloudRuntimeEvent;
+                
         return new TaskUpdatedEventEntity(cloudTaskUpdatedEvent.getId(),
                                           cloudTaskUpdatedEvent.getTimestamp(),
                                           cloudTaskUpdatedEvent.getAppName(),
                                           cloudTaskUpdatedEvent.getAppVersion(),
-                                          cloudTaskUpdatedEvent.getServiceFullName(),
                                           cloudTaskUpdatedEvent.getServiceName(),
+                                          cloudTaskUpdatedEvent.getServiceFullName(),
                                           cloudTaskUpdatedEvent.getServiceType(),
                                           cloudTaskUpdatedEvent.getServiceVersion(),
                                           cloudTaskUpdatedEvent.getEntity());
     }
 
     @Override
-    public CloudRuntimeEvent convertToAPI(AuditEventEntity auditEventEntity) {
+    protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TaskUpdatedEventEntity taskUpdatedEventEntity = (TaskUpdatedEventEntity) auditEventEntity;
 
         CloudTaskUpdatedEventImpl cloudTaskUpdatedEvent = new CloudTaskUpdatedEventImpl(taskUpdatedEventEntity.getEventId(),
