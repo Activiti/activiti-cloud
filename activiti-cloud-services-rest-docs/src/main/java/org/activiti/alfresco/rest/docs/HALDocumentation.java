@@ -20,9 +20,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.restdocs.hypermedia.LinkDescriptor;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 
@@ -50,6 +52,10 @@ public class HALDocumentation {
                             .description("The number of pages available"),
                     subsectionWithPath("page.number")
                             .description("The current page number")};
+    }
+
+    public static LinkDescriptor selfLink() {
+        return linkWithRel("self").description("URL called to get this result");
     }
 
     public static ResponseFieldsSnippet pagedProcessDefinitionFields() {

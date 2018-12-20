@@ -20,7 +20,7 @@ public class ActivitiKeycloakAutoConfiguration {
 
 
 
-    @Bean
+    @Bean(name = "userGroupManager")
     @ConditionalOnMissingBean(KeycloakUserGroupManager.class)
     public KeycloakUserGroupManager keycloakUserGroupManager(KeycloakInstanceWrapper keycloakInstanceWrapper) {
         return new KeycloakUserGroupManager(keycloakInstanceWrapper);

@@ -25,9 +25,7 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.stereotype.Component;
 
-@Component("userGroupManager")
 public class KeycloakUserGroupManager implements UserGroupManager {
 
 
