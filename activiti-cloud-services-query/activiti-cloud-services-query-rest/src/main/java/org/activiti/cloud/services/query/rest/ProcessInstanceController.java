@@ -25,7 +25,8 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
-import org.activiti.cloud.services.security.SecurityPoliciesApplicationServiceImpl;
+import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
+import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,9 @@ public class ProcessInstanceController {
 
     private AlfrescoPagedResourcesAssembler<ProcessInstanceEntity> pagedResourcesAssembler;
 
-    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
+    private SecurityPoliciesManager securityPoliciesApplicationService;
+
+    private ProcessInstanceRestrictionService processInstanceRestrictionService;
 
     private SecurityManager securityManager;
 
@@ -82,12 +85,14 @@ public class ProcessInstanceController {
     public ProcessInstanceController(ProcessInstanceRepository processInstanceRepository,
                                      ProcessInstanceResourceAssembler processInstanceResourceAssembler,
                                      AlfrescoPagedResourcesAssembler<ProcessInstanceEntity> pagedResourcesAssembler,
+                                     ProcessInstanceRestrictionService processInstanceRestrictionService,
                                      EntityFinder entityFinder,
-                                     SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService,
+                                     SecurityPoliciesManager securityPoliciesApplicationService,
                                      SecurityManager securityManager) {
         this.processInstanceRepository = processInstanceRepository;
         this.processInstanceResourceAssembler = processInstanceResourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.processInstanceRestrictionService = processInstanceRestrictionService;
         this.entityFinder = entityFinder;
         this.securityPoliciesApplicationService = securityPoliciesApplicationService;
         this.securityManager = securityManager;
@@ -97,7 +102,7 @@ public class ProcessInstanceController {
     public PagedResources<ProcessInstanceResource> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                            Pageable pageable) {
 
-        predicate = securityPoliciesApplicationService.restrictProcessInstanceQuery(predicate,
+        predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(predicate,
                                                                                     SecurityPolicyAccess.READ);
 
         return pagedResourcesAssembler.toResource(pageable,

@@ -20,6 +20,18 @@ import org.activiti.cloud.services.query.app.repository.ProcessDefinitionReposit
 import org.activiti.cloud.services.query.events.handlers.ProcessDeployedEventHandler;
 import org.activiti.cloud.services.query.rest.QueryRelProvider;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionResourceAssembler;
+import org.activiti.cloud.services.security.ProcessDefinitionFilter;
+import org.activiti.cloud.services.security.ProcessDefinitionKeyBasedRestrictionBuilder;
+import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
+import org.activiti.cloud.services.security.ProcessInstanceFilter;
+import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
+import org.activiti.cloud.services.security.ProcessInstanceVariableFilter;
+import org.activiti.cloud.services.security.ProcessVariableLookupRestrictionService;
+import org.activiti.cloud.services.security.ProcessVariableRestrictionService;
+import org.activiti.cloud.services.security.TaskLookupRestrictionService;
+import org.activiti.cloud.services.security.TaskVariableLookupRestrictionService;
+import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
+import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +41,7 @@ public class QueryRestAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDefinitionResourceAssembler processDefinitionResourceAssembler(){
+    public ProcessDefinitionResourceAssembler processDefinitionResourceAssembler() {
         return new ProcessDefinitionResourceAssembler();
     }
 
@@ -41,8 +53,75 @@ public class QueryRestAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public QueryRelProvider processDefinitionRelProvider(){
+    public QueryRelProvider processDefinitionRelProvider() {
         return new QueryRelProvider();
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDefinitionKeyBasedRestrictionBuilder serviceNameRestrictionBuilder(SecurityPoliciesManager securityPoliciesManager,
+                                                                                     SecurityPoliciesProperties securityPoliciesProperties) {
+        return new ProcessDefinitionKeyBasedRestrictionBuilder(securityPoliciesManager,
+                                                               securityPoliciesProperties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceVariableFilter processInstanceVariableFilter() {
+        return new ProcessInstanceVariableFilter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessVariableRestrictionService processVariableRestrictionService(SecurityPoliciesManager securityPoliciesManager,
+                                                                               ProcessInstanceVariableFilter processInstanceVariableFilter,
+                                                                               ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder) {
+        return new ProcessVariableRestrictionService(securityPoliciesManager,
+                                                     processInstanceVariableFilter,
+                                                     restrictionBuilder);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessVariableLookupRestrictionService variableLookupRestrictionService(ProcessVariableRestrictionService restrictionService) {
+        return new ProcessVariableLookupRestrictionService(restrictionService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TaskVariableLookupRestrictionService taskVariableLookupRestrictionService(TaskLookupRestrictionService taskLookupRestrictionService) {
+        return new TaskVariableLookupRestrictionService(taskLookupRestrictionService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceFilter processInstanceFilter() {
+        return new ProcessInstanceFilter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceRestrictionService processInstanceRestrictionService(SecurityPoliciesManager securityPoliciesManager,
+                                                                               ProcessInstanceFilter processInstanceFilter,
+                                                                               ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder) {
+        return new ProcessInstanceRestrictionService(securityPoliciesManager,
+                                                     processInstanceFilter,
+                                                     restrictionBuilder);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDefinitionFilter processDefinitionFilter() {
+        return new ProcessDefinitionFilter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDefinitionRestrictionService processDefinitionRestrictionService(SecurityPoliciesManager securityPoliciesManager,
+                                                                                   ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder,
+                                                                                   ProcessDefinitionFilter processDefinitionFilter) {
+        return new ProcessDefinitionRestrictionService(securityPoliciesManager,
+                                                       restrictionBuilder,
+                                                       processDefinitionFilter);
+    }
 }
