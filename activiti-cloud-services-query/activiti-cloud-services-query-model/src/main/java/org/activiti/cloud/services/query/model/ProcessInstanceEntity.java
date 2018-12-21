@@ -176,6 +176,11 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         return parentId;
     }
 
+    @Override
+    public Integer getProcessDefinitionVersion() {
+        return null; //TODO: this is a stub to be replaced
+    }
+
     public void setParentId(String parentId) {
         this.parentId = parentId;
     }
