@@ -16,13 +16,16 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -74,6 +77,9 @@ public class ProcessVariablesIT {
 
     private static final String PROCESS_WITH_VARIABLES2 = "ProcessWithVariables2";
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Before
     public void setUp() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
@@ -87,7 +93,8 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    public void shouldRetrieveProcessVariablesWithPermission() {
+    public void shouldRetrieveProcessVariablesWithPermission() throws IOException {
+
         //given
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName",
@@ -96,6 +103,10 @@ public class ProcessVariablesIT {
                       "Silva");
         variables.put("age",
                       15);
+        variables.put("boolvar",
+                true);
+        variables.put("customPojo",objectMapper.readTree("{ \"test-json-variable-element1\":\"test-json-variable-value1\"}")
+        );
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
                                                                                                       variables);
 
@@ -115,6 +126,19 @@ public class ProcessVariablesIT {
             assertThat(variablesContainEntry("age",
                                              15,
                                              variableCollection)).isTrue();
+            assertThat(variablesContainEntry("boolVar",
+                    true,
+                    variableCollection)).isTrue();
+
+            assertThat(variableCollection)
+                    .filteredOn("name","customPojo")
+                    .hasSize(1)
+                    .extracting("value")
+                    .hasOnlyElementsOfType(LinkedHashMap.class)
+                    .first()
+                    .toString()
+                    .equalsIgnoreCase("{ \"test-json-variable-element1\":\"test-json-variable-value1\"}");
+
         });
     }
 

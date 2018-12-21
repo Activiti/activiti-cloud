@@ -20,9 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -48,6 +50,12 @@ public class MQServiceTaskIT {
     @Test
     public void shouldContinueExecution() {
         //given
+
+        CustomPojo customPojo = new CustomPojo();
+        customPojo.setField1("field1");
+
+        CustomPojoAnnotated customPojoAnnotated = new CustomPojoAnnotated();
+
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName",
                       "John");
@@ -55,6 +63,11 @@ public class MQServiceTaskIT {
                       "Smith");
         variables.put("age",
                       19);
+        variables.put("boolVar",
+                true);
+        variables.put("customPojo",customPojo
+                     );
+        variables.put("customPojoAnnotated",customPojoAnnotated);
 
         //when
         ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskProcess",
@@ -81,7 +94,17 @@ public class MQServiceTaskIT {
                 .containsEntry("lastName",
                                "Smith")
                 .containsEntry("age",
-                               20);
+                               20)
+                .containsEntry("boolVar",
+                        false);
+
+        //engine can resolve annotated pojo in var to correct type but not without annotation
+        assertThat(updatedVariables.get("customPojo").getClass()).isEqualTo(ObjectNode.class);
+        assertThat(updatedVariables.get("customPojoAnnotated").getClass()).isEqualTo(CustomPojoAnnotated.class);
+
+        assertThat(updatedVariables.get("customPojoTypeInConnector")).isEqualTo("Type of customPojo var in connector is "+ LinkedHashMap.class);
+        assertThat(updatedVariables.get("customPojoField1InConnector")).isEqualTo("Value of field1 on customPojo is field1");
+        assertThat(updatedVariables.get("customPojoAnnotatedTypeInConnector")).isEqualTo("Type of customPojoAnnotated var in connector is "+ LinkedHashMap.class);
 
         //should be able to complete the process
         //when
