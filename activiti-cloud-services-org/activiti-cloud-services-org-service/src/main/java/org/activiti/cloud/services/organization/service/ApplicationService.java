@@ -26,6 +26,7 @@ import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidationError;
+import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.organization.core.error.ImportApplicationException;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.repository.ApplicationRepository;
@@ -141,7 +142,7 @@ public class ApplicationService {
                                     .appendFile(modelService.exportModel(model),
                                                 folderName);
                             if (!isJsonContentType(model.getContentType())) {
-                                zipBuilder.appendFile(modelService.getModelMetadataFile(model),
+                                zipBuilder.appendFile(modelService.getModelMetadataFileContent(model),
                                                       folderName);
                             }
                         }));

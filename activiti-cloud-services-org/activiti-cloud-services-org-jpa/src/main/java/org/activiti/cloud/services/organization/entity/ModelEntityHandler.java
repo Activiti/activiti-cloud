@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.services.organization.entity;
 
-import java.util.List;
-
-import org.activiti.cloud.organization.api.ModelValidationError;
+import org.activiti.cloud.organization.api.Extensions;
+import org.activiti.cloud.organization.converter.JsonConverter;
+import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.service.ModelReferenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,15 +32,17 @@ public class ModelEntityHandler {
 
     private static ModelReferenceService modelReferenceService;
 
+    private static JsonConverter<Extensions> extensionsConverter;
+
     @Autowired
-    public void setApplicationEventPublisher(ModelReferenceService modelReferenceService) {
+    public void setApplicationEventPublisher(ModelReferenceService modelReferenceService,
+                                             JsonConverter<Extensions> extensionsConverter) {
         this.modelReferenceService = modelReferenceService;
+        this.extensionsConverter = extensionsConverter;
     }
 
     public static Page<ModelEntity> loadModelReference(Page<ModelEntity> models) {
-        models.getContent()
-                .stream()
-                .forEach(ModelEntityHandler::loadModelReference);
+        models.getContent().forEach(ModelEntityHandler::loadModelReference);
         return models;
     }
 
@@ -50,15 +52,21 @@ public class ModelEntityHandler {
         return model;
     }
 
+    public static ModelEntity loadFullModelReference(ModelEntity model) {
+        return setModelData(model,
+                            modelReferenceService.getResource(model.getType(),
+                                                              model.getId()));
+    }
+
     public static void createModelReference(ModelEntity model) {
         modelReferenceService.createResource(model.getType(),
-                                             model.getData());
+                                             getModelData(model));
     }
 
     public static void updateModelReference(ModelEntity model) {
         modelReferenceService.updateResource(model.getType(),
                                              model.getId(),
-                                             model.getData());
+                                             getModelData(model));
     }
 
     public static void deleteModelReference(ModelEntity model) {
@@ -66,9 +74,20 @@ public class ModelEntityHandler {
                                              model.getId());
     }
 
-    public static List<ModelValidationError> validateModelReference(ModelEntity model,
-                                                                    byte[] content) {
-        return modelReferenceService.validateResourceContent(model.getType(),
-                                                             content);
+    private static ModelEntity setModelData(ModelEntity model,
+                                            ModelReference data) {
+        model.setData(data);
+        if (data != null) {
+            model.setExtensions(extensionsConverter.convertToEntity(data.getExtensions()));
+        }
+        return model;
+    }
+
+    private static ModelReference getModelData(ModelEntity model) {
+        ModelReference data = model.getData();
+        if (data != null) {
+            data.setExtensions(extensionsConverter.convertToJson(model.getExtensions()));
+        }
+        return data;
     }
 }

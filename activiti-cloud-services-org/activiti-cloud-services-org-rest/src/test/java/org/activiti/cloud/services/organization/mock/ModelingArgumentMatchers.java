@@ -28,4 +28,8 @@ public class ModelingArgumentMatchers {
     public static ModelReference modelReferenceNamed(String name) {
         return argThat(modelReference -> modelReference.getName().equals(name));
     }
+
+    public static ModelReference modelReferenceWithExtensions(String extensions) {
+        return argThat(modelReference -> modelReference.getExtensions().equals(extensions));
+    }
 }

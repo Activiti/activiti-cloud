@@ -30,6 +30,7 @@ import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidator;
+import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.organization.core.error.ImportModelException;
 import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.organization.repository.ModelRepository;
@@ -134,27 +135,25 @@ public class ModelService {
         }
     }
 
-    public FileContent getModelMetadataFile(Model model) {
-        Class<?> metadataView = modelRepository.getModelMetadataView();
+    public FileContent getModelMetadataFileContent(Model model) {
         Model modelWithFullMetadata = findModelById(model.getId()).orElse(model);
         return new FileContent(toJsonFilename(model.getName()),
                                ContentTypeUtils.CONTENT_TYPE_JSON,
-                               jsonConverter.convertToJsonBytes(modelWithFullMetadata,
-                                                                metadataView));
+                               jsonConverter.convertToJsonBytes(modelWithFullMetadata));
     }
 
     public FileContent getModelContentFile(Model model) {
-        return getModelViewFile(model,
-                                modelRepository.getModelContent(model));
+        return getModelFileContent(model,
+                                   modelRepository.getModelContent(model));
     }
 
     public FileContent exportModel(Model model) {
-        return getModelViewFile(model,
-                                modelRepository.getModelExport(model));
+        return getModelFileContent(model,
+                                   modelRepository.getModelExport(model));
     }
 
-    private FileContent getModelViewFile(Model model,
-                                         byte[] modelBytes) {
+    private FileContent getModelFileContent(Model model,
+                                            byte[] modelBytes) {
         return new FileContent(setExtension(model.getName(),
                                             findModelType(model).getContentFileExtension()),
                                model.getContentType(),

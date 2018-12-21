@@ -18,10 +18,13 @@ package org.activiti.cloud.services.organization.entity;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Extensions;
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.converter.JsonConverter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -44,5 +47,11 @@ public class ObjectMapperJpaConfiguration {
 
         module.setAbstractTypes(resolver);
         return module;
+    }
+
+    @Bean
+    public JsonConverter<Extensions> extensionsConverter(ObjectMapper objectMapper) {
+        return new JsonConverter<>(Extensions.class,
+                                   objectMapper);
     }
 }

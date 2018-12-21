@@ -32,6 +32,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.createModelReference;
 import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.deleteModelReference;
+import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.loadFullModelReference;
 import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.loadModelReference;
 import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.updateModelReference;
 
@@ -60,7 +61,7 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
 
     @Override
     default Optional<ModelEntity> findModelById(String id) {
-        return findById(id).map(ModelEntityHandler::loadModelReference);
+        return findById(id).map(ModelEntityHandler::loadFullModelReference);
     }
 
     @Override
@@ -68,11 +69,6 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
         return Optional.ofNullable(model.getContent())
                 .map(String::getBytes)
                 .orElse(new byte[0]);
-    }
-
-    @Override
-    default Class<?> getModelMetadataView() {
-        return null;
     }
 
     @Override
@@ -86,22 +82,23 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
             model.setId(UUID.randomUUID().toString());
         }
         createModelReference(model);
-        return loadModelReference(save(model));
+        return loadFullModelReference(save(model));
     }
 
     @Override
     default ModelEntity updateModel(ModelEntity modelToBeUpdated,
                                     ModelEntity newModel) {
         modelToBeUpdated.setName(newModel.getName());
+        modelToBeUpdated.setExtensions(newModel.getExtensions());
         updateModelReference(modelToBeUpdated);
-        return loadModelReference(save(modelToBeUpdated));
+        return loadFullModelReference(save(modelToBeUpdated));
     }
 
     @Override
     default ModelEntity updateModelContent(ModelEntity modelToBeUpdated,
                                            FileContent fileContent) {
         updateModelReference(modelToBeUpdated);
-        return loadModelReference(save(modelToBeUpdated));
+        return loadFullModelReference(save(modelToBeUpdated));
     }
 
     @Override

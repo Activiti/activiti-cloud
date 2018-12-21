@@ -52,14 +52,18 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.organization.mock.MockFactory.application;
+import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
 import static org.activiti.cloud.services.organization.mock.ModelingArgumentMatchers.modelReferenceNamed;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -283,8 +287,9 @@ public class ApplicationControllerIT {
         Application application = application("application-with-models");
         ModelEntity processModel1 = processModelWithContent(processName1,
                                                             "Process Model Content 1");
-        ModelEntity processModel2 = processModelWithContent(processName2,
-                                                            "Process Model Content 2");
+        ModelEntity processModel2 = processModelWithExtensions(processName2,
+                                                               extensions("var1",
+                                                                          "var2"));
 
         doReturn(processModel1.getData())
                 .when(modelReferenceService)
@@ -346,15 +351,16 @@ public class ApplicationControllerIT {
                 .hasJsonContentSatisfying("processes/process-model-1.json",
                                           jsonContent -> jsonContent
                                                   .node("name").isEqualTo("process-model-1")
-                                                  .node("type").isEqualTo("PROCESS")
-                                                  .node("version").isEqualTo("0.0.1"))
+                                                  .node("type").isEqualTo("PROCESS"))
                 .hasContent("processes/process-model-2.bpmn20.xml",
-                            "Process Model Content 2")
+                            "")
                 .hasJsonContentSatisfying("processes/process-model-2.json",
                                           jsonContent -> jsonContent
                                                   .node("name").isEqualTo("process-model-2")
                                                   .node("type").isEqualTo("PROCESS")
-                                                  .node("version").isEqualTo("0.0.1"));
+                                                  .node("extensions.properties").matches(allOf(hasKey("var1"),
+                                                                                               hasKey("var2")))
+                );
     }
 
     @Test

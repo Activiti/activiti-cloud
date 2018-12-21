@@ -19,6 +19,7 @@ package org.activiti.cloud.services.organization.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.converter.JsonConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

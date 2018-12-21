@@ -13,23 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.activiti.cloud.organization.api;
 
-package org.activiti.cloud.organization.api.impl;
+import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * Model view interface to be used in defining json views for models.
+ * Extensions service parameter
  */
-public interface ModelView {
+public enum VariableMappingType {
+    INPUT,
+    OUTPUT;
 
-    interface ContentView extends ModelView {
-
+    @JsonCreator
+    public static VariableMappingType fromValue(String value) {
+        return Optional.ofNullable(value)
+                .map(String::toUpperCase)
+                .map(VariableMappingType::valueOf)
+                .orElse(null);
     }
 
-    interface MetadataView extends ModelView {
-
-    }
-
-    interface ExportView extends ModelView {
-
-    }
-}
+    @JsonValue
+    public String getValue() {
+        return name().toLowerCase();
+    }}
