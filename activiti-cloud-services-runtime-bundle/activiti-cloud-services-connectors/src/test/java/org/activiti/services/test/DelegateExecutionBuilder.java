@@ -18,15 +18,21 @@ package org.activiti.services.test;
 
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class DelegateExecutionBuilder {
 
-        private DelegateExecution execution;
+        private ExecutionEntity execution;
+        private ExecutionEntity processInstance;
 
         private DelegateExecutionBuilder() {
-            execution = mock(DelegateExecution.class);
+            execution = mock(ExecutionEntity.class);
+            processInstance = mock(ExecutionEntity.class);
+            
+            when(execution.getProcessInstance()).thenReturn(processInstance);
         }
         
         public static DelegateExecutionBuilder anExecution() {
@@ -48,6 +54,11 @@ public class DelegateExecutionBuilder {
             return this;
         }
 
+        public DelegateExecutionBuilder withBusinessKey(String businessKey) {
+            when(execution.getProcessInstanceBusinessKey()).thenReturn(businessKey);
+            return this;
+        }
+        
         public DelegateExecutionBuilder withFlowNodeId(String flowNodeId) {
             when(execution.getCurrentActivityId()).thenReturn(flowNodeId);
             return this;
@@ -58,7 +69,23 @@ public class DelegateExecutionBuilder {
             return this;
         }
         
-        public DelegateExecution  build() {
+        public DelegateExecution build() {
             return execution;
         }
-    }
+
+        public DelegateExecutionBuilder withProcessDefinitionKey(String processDefinitionKey) {
+            when(processInstance.getProcessDefinitionKey()).thenReturn(processDefinitionKey);
+            return this;
+        }
+
+        public DelegateExecutionBuilder withProcessDefinitionVersion(Integer processDefinitionVersion) {
+            when(processInstance.getProcessDefinitionVersion()).thenReturn(processDefinitionVersion);
+            return this;
+        }
+
+        public DelegateExecutionBuilder withParentProcessInstanceId(String parentProcessInstanceId) {
+            when(processInstance.getParentProcessInstanceId()).thenReturn(parentProcessInstanceId);
+            return this;
+        }
+        
+}

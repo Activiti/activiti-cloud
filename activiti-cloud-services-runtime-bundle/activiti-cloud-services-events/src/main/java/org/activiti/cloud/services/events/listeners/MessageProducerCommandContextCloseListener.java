@@ -19,28 +19,68 @@ package org.activiti.cloud.services.events.listeners;
 import java.util.List;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.converter.ExecutionContextInfoAppender;
+import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
+import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.Message;
+import org.springframework.util.Assert;
 
 public class MessageProducerCommandContextCloseListener implements CommandContextCloseListener {
 
     public static final String PROCESS_ENGINE_EVENTS = "processEngineEvents";
+    public static final String EXECUTION_CONTEXT = "executionContext";
 
     private final ProcessEngineChannels producer;
+    private final MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory;
+    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    
+    public MessageProducerCommandContextCloseListener(ProcessEngineChannels producer,
+            MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory,
+            RuntimeBundleInfoAppender runtimeBundleInfoAppender ) {
+        Assert.notNull(producer,
+                       "producer must not be null");
+        Assert.notNull(messageBuilderChainFactory,
+                       "messageBuilderChainFactory must not be null");
+        Assert.notNull(runtimeBundleInfoAppender,
+                "runtimeBundleInfoAppender must not be null");
 
-    public MessageProducerCommandContextCloseListener(ProcessEngineChannels producer) {
         this.producer = producer;
+        this.messageBuilderChainFactory = messageBuilderChainFactory;
+        this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
-
+    
+    protected ExecutionContextInfoAppender createExecutionContextInfoAppender(ExecutionContext executionContext) {
+        return new ExecutionContextInfoAppender(executionContext);
+    }
+    
     @Override
     public void closed(CommandContext commandContext) {
         List<CloudRuntimeEvent<?, ?>> events = commandContext.getGenericAttribute(PROCESS_ENGINE_EVENTS);
+        
         if (events != null && !events.isEmpty()) {
-            producer.auditProducer().send(MessageBuilder.withPayload(
-                    events.toArray(new CloudRuntimeEvent<?, ?>[0]))
-                                                  .build());
+            ExecutionContext executionContext = commandContext.getGenericAttribute(EXECUTION_CONTEXT);
+            
+            ExecutionContextInfoAppender executionContextInfoAppender = createExecutionContextInfoAppender(executionContext);
+
+            // Add execution context attributes to every event 
+            CloudRuntimeEvent<?, ?>[] payload = events.stream()
+                                                      .filter(CloudRuntimeEventImpl.class::isInstance)
+                                                      .map(CloudRuntimeEventImpl.class::cast)
+                                                      .map(runtimeBundleInfoAppender::appendRuntimeBundleInfoTo)
+                                                      .map(executionContextInfoAppender::appendExecutionContextInfoTo)
+                                                      .toArray(CloudRuntimeEvent<?, ?>[]::new);
+
+            // Inject message headers from  execution context
+            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderChainFactory.create(executionContext)
+                                                                                   .withPayload(payload)
+                                                                                   .build();
+            // Send message to audit producer channel
+            producer.auditProducer().send(message);
         }
     }
 

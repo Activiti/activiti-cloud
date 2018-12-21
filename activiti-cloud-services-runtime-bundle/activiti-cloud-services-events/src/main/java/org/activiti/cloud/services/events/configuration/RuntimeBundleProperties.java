@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "activiti.cloud.runtime-bundle")
 public class RuntimeBundleProperties {
-
+	
     @Value("${spring.application.name}")
     private String rbSpringAppName;
 
@@ -40,7 +40,7 @@ public class RuntimeBundleProperties {
     private String appVersion;
 
     private RuntimeBundleEventsProperties eventsProperties = new RuntimeBundleEventsProperties();
-
+    
     public String getRbSpringAppName() {
         return rbSpringAppName;
     }

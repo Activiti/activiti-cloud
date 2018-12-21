@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,9 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:application-test.properties")
@@ -58,6 +58,7 @@ public class MQServiceTaskIT {
 
         //when
         ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskProcess",
+                                                                            "businessKey",
                                                                             variables);
         assertThat(procInst).isNotNull();
 

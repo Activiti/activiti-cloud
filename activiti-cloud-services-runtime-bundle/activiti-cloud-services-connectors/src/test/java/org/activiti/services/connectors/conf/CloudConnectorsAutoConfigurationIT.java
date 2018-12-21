@@ -16,6 +16,11 @@
 
 package org.activiti.services.connectors.conf;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -31,6 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,14 +45,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CloudConnectorsAutoConfigurationIT {
+
+    private static final String HEADERS_ROUTING_KEY = "headers['routingKey']";
 
     @Autowired
     private MQServiceTaskBehavior behavior;
@@ -68,12 +71,21 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
+    
+    @Value("${activiti.spring.cloud.stream.connector.integrationRequestSender.routing-key-expression}")
+    private String routingKeyExpression;
+    
 
     @Before
     public void setUp() {
         doNothing().when(processDeployedProducer).onApplicationEvent(any());
     }
 
+    @Test
+    public void shouldProvideRoutingKeyExpression() {
+        assertThat(routingKeyExpression).isEqualTo(HEADERS_ROUTING_KEY);
+    }
+    
     @Test
     public void shouldProvideMQServiceTaskBehaviorBean() {
         assertThat(behavior).isNotNull();
