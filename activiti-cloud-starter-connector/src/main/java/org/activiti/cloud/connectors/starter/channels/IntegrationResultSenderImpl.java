@@ -39,7 +39,7 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
     @Override
     public void send(Message<IntegrationResult> message) {
         String destination = (resultDestinationOverride == null || resultDestinationOverride.isEmpty())
-                ? "integrationResult:" + message.getPayload().getIntegrationRequest().getServiceFullName() : resultDestinationOverride;
+                ? "integrationResult_" + message.getPayload().getIntegrationRequest().getServiceFullName() : resultDestinationOverride;
         resolver.resolveDestination(destination).send(message);
     }
 }

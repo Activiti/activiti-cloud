@@ -56,7 +56,7 @@ public class IntegrationResultSenderImplTest {
     @Test
     public void sendShouldSendMessageBasedOnTheTargetApplication() throws Exception {
         //given
-        given(resolver.resolveDestination("integrationResult:myApp")).willReturn(messageChannel);
+        given(resolver.resolveDestination("integrationResult_myApp")).willReturn(messageChannel);
         given(connectorProperties.getServiceName()).willReturn("connectorName");
 
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
