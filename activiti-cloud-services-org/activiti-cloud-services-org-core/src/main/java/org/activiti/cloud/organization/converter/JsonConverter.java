@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.service;
+package org.activiti.cloud.organization.converter;
 
 import java.io.IOException;
 import java.util.Optional;

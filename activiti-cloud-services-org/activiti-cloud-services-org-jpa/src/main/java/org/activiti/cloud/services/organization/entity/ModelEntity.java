@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.activiti.cloud.organization.api.Extensions;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
@@ -51,6 +52,9 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
     @Transient
     @JsonIgnore
     private ModelReference data;
+
+    @Transient
+    private Extensions extensions;
 
     public ModelEntity() { // for JPA
         this.data = new ModelReference();
@@ -153,5 +157,15 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
     @Override
     public void setContent(String content) {
         data.setContent(content);
+    }
+
+    @Override
+    public Extensions getExtensions() {
+        return extensions;
+    }
+
+    @Override
+    public void setExtensions(Extensions extensions) {
+        this.extensions = extensions;
     }
 }

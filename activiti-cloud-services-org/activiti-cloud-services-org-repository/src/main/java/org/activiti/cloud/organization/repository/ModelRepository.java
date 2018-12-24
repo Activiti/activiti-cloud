@@ -51,6 +51,4 @@ public interface ModelRepository<A extends Application, M extends Model<A, ?>> {
     void deleteModel(M model);
 
     Class<M> getModelType();
-
-    Class<?> getModelMetadataView();
 }

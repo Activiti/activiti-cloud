@@ -16,12 +16,24 @@
 
 package org.activiti.cloud.services.organization.mock;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
+import org.activiti.cloud.organization.api.Extensions;
+import org.activiti.cloud.organization.api.ProcessVariable;
 import org.activiti.cloud.services.organization.entity.ApplicationEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 
+import static java.util.Collections.singletonMap;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
+import static org.activiti.cloud.organization.api.VariableMappingType.INPUT;
+import static org.activiti.cloud.organization.api.VariableMappingType.OUTPUT;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 
 /**
@@ -34,10 +46,19 @@ public class MockFactory {
                                      name);
     }
 
-    public static ModelEntity processModel(String name) {
-        return new ModelEntity(id(),
-                               name,
-                               PROCESS);
+    public static ModelEntity processModel(String name) throws JsonProcessingException {
+        return processModelWithExtensions(name,
+                            null);
+    }
+
+    public static ModelEntity processModelWithExtensions(String name,
+                                           Extensions extensions) throws JsonProcessingException {
+        ModelEntity model = new ModelEntity(id(),
+                                            name,
+                                            PROCESS);
+        model.setExtensions(extensions);
+        model.getData().setExtensions(new ObjectMapper().writeValueAsString(extensions));
+        return model;
     }
 
     public static ModelEntity processModelWithContent(String name,
@@ -58,6 +79,35 @@ public class MockFactory {
         processModel.setContent(content);
         processModel.setVersion("0.0.1");
         return processModel;
+    }
+
+    public static Extensions extensions(String... processVariables) {
+        Extensions extensions = new Extensions();
+        extensions.setProcessVariables(
+                Arrays.stream(processVariables)
+                        .map(MockFactory::processVariable)
+                        .collect(Collectors.toMap(ProcessVariable::getId,
+                                                  Function.identity())));
+        Map<String, String> autoMapping = Arrays.stream(processVariables)
+                .collect(Collectors.toMap(Function.identity(),
+                                          Function.identity()));
+        extensions.setVariablesMappings(
+                singletonMap("ServiceTask",
+                             ImmutableMap.of(INPUT,
+                                             autoMapping,
+                                             OUTPUT,
+                                             autoMapping))
+        );
+        return extensions;
+    }
+
+    public static ProcessVariable processVariable(String name) {
+        ProcessVariable processVariable = new ProcessVariable();
+        processVariable.setId(name);
+        processVariable.setName(name);
+        processVariable.setType("string");
+        processVariable.setValue(name);
+        return processVariable;
     }
 
     public static String id() {

@@ -56,13 +56,21 @@ import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.organization.mock.MockFactory.application;
+import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
 import static org.activiti.cloud.services.organization.mock.ModelingArgumentMatchers.modelReferenceNamed;
+import static org.activiti.cloud.services.organization.mock.ModelingArgumentMatchers.modelReferenceWithExtensions;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
+import static org.hamcrest.collection.IsMapContaining.hasValue;
+import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -116,7 +124,7 @@ public class ModelControllerIT {
         String parentApplicationId = "parent_application_id";
         Application createdApplication =
                 applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
-                                                                      "Parent Application"));
+                                                                              "Parent Application"));
 
         final String processModelId1 = "process_model_id1";
         final String processModelName1 = "Process Model 1";
@@ -194,6 +202,42 @@ public class ModelControllerIT {
     }
 
     @Test
+    public void testCreateProcessModelWithExtensions() throws Exception {
+        // GIVEN
+        Application application = application("Parent Application");
+        applicationRepository.createApplication(application);
+
+        ModelEntity processModel = processModelWithExtensions("processModelWithExtensions",
+                                                              extensions("variable1",
+                                                                         "variable2"));
+        doReturn(processModel.getData())
+                .when(modelReferenceService)
+                .getResource(eq(PROCESS),
+                             eq(processModel.getId()));
+
+        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+                             API_VERSION,
+                             application.getId())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(processModel)))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.extensions.properties",
+                                    allOf(hasKey("variable1"),
+                                          hasKey("variable2"))))
+                .andExpect(jsonPath("$.extensions.variablesMappings",
+                                    hasEntry(equalTo("ServiceTask"),
+                                             allOf(hasEntry(equalTo("input"),
+                                                            allOf(hasValue("variable1"),
+                                                                  hasValue("variable2"))),
+                                                   hasEntry(equalTo("input"),
+                                                            allOf(hasValue("variable1"),
+                                                                  hasValue("variable2")))
+                                             ))
+                ));
+    }
+
+    @Test
     public void testCreateModelOfUnknownType() throws Exception {
 
         String parentApplicationId = "parent_application_id";
@@ -263,6 +307,41 @@ public class ModelControllerIT {
     }
 
     @Test
+    public void testGetModelWithExtensions() throws Exception {
+        //given
+        ModelEntity processModel = processModelWithExtensions("processModelWithExtensions",
+                                                              extensions("variable1",
+                                                                         "variable2"));
+        modelRepository.createModel(processModel);
+
+        doReturn(processModel.getData())
+                .when(modelReferenceService)
+                .getResource(eq(PROCESS),
+                             eq(processModel.getId()));
+
+        //when
+        mockMvc.perform(get("{version}/models/{modelId}",
+                            API_VERSION,
+                            processModel.getId()))
+                .andDo(print())
+                //then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.extensions.properties",
+                                    allOf(hasKey("variable1"),
+                                          hasKey("variable2"))))
+                .andExpect(jsonPath("$.extensions.variablesMappings",
+                                    hasEntry(equalTo("ServiceTask"),
+                                             allOf(hasEntry(equalTo("input"),
+                                                            allOf(hasValue("variable1"),
+                                                                  hasValue("variable2"))),
+                                                   hasEntry(equalTo("input"),
+                                                            allOf(hasValue("variable1"),
+                                                                  hasValue("variable2")))
+                                             ))
+                ));
+    }
+
+    @Test
     public void testCreateProcessModelInApplication() throws Exception {
         //given
         final String processModelId = "process_model_id";
@@ -292,7 +371,7 @@ public class ModelControllerIT {
     }
 
     @Test
-    public void testUpdateApplication() throws Exception {
+    public void testUpdateModel() throws Exception {
         //given
         final String processModelId = "process_model_id";
         Model processModel = new ModelEntity(processModelId,
@@ -317,6 +396,38 @@ public class ModelControllerIT {
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(newModel)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testUpdateModelWithExtensions() throws Exception {
+        //given
+        ModelEntity processModel = processModelWithExtensions("processModelWithExtensions",
+                                                              extensions("variable1"));
+        modelRepository.createModel(processModel);
+
+        doReturn(processModel.getData())
+                .when(modelReferenceService)
+                .getResource(eq(PROCESS),
+                             eq(processModel.getId()));
+
+        ModelEntity newModel = processModelWithExtensions("processModelWithExtensions",
+                                                          extensions("variable2",
+                                                                     "variable3"));
+        //when
+        mockMvc.perform(put("{version}/models/{modelId}",
+                            API_VERSION,
+                            processModel.getId())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(newModel)))
+                .andExpect(status().isOk());
+
+        //then
+        verify(modelReferenceService,
+               times(1))
+                .updateResource(eq(PROCESS),
+                                eq(processModel.getId()),
+                                modelReferenceWithExtensions(mapper.writeValueAsString(extensions("variable2",
+                                                                                                  "variable3"))));
     }
 
     @Test
