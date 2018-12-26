@@ -21,10 +21,18 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
+import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserRemovedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -384,6 +392,169 @@ public class QueryTasksIT {
         //then
         assertCannotSeeTask(taskWithCandidate);
     }
+    
+    @Test
+    public void shouldGetAddRemoveTaskUserCandidates() {
+        //given
+        Task createdTask = taskEventContainedBuilder.aTaskWithUserCandidate("task with user candidate",
+                                                                            "testuser",
+                                                                            runningProcessInstance);
+        eventsAggregator.sendAll();
+        
+        keycloakTokenProducer.setKeycloakTestUser("testuser");
+
+        //when
+        ResponseEntity<List<String>> responseEntity = getCandidateUsers(createdTask.getId());
+             
+        //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().size()).isEqualTo(1);
+        assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+ 
+        //Check adding user candidate
+        //when
+        TaskCandidateUserImpl addCandidateUser = new TaskCandidateUserImpl("hruser",
+                                                                       createdTask.getId());
+        producer.send(new CloudTaskCandidateUserAddedEventImpl(addCandidateUser));
+   
+        //then
+        responseEntity = getCandidateUsers(createdTask.getId());
+        
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().size()).isEqualTo(2);
+        assertThat(responseEntity.getBody().get(0)).isIn("hruser","testuser");
+        assertThat(responseEntity.getBody().get(1)).isIn("hruser","testuser");
+
+        //Check deleting user candidate
+        //when
+        TaskCandidateUserImpl deleteCandidateUser = new TaskCandidateUserImpl("hruser",
+                                                                              createdTask.getId());
+        producer.send(new CloudTaskCandidateUserRemovedEventImpl(deleteCandidateUser));
+   
+        //then
+        responseEntity = getCandidateUsers(createdTask.getId());
+        
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().size()).isEqualTo(1);
+        assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+            
+    }
+    
+    @Test
+    public void shouldGetAddRemoveTaskGroupCandidates() {
+        //given
+        Task createdTask = taskEventContainedBuilder.aTaskWithGroupCandidate("task with group candidate",
+                                                                             "testgroup",
+                                                                             runningProcessInstance);
+        eventsAggregator.sendAll();
+        
+        keycloakTokenProducer.setKeycloakTestUser("testuser");
+
+        //when
+        ResponseEntity<List<String>> responseEntity = getCandidateGroups(createdTask.getId());
+        
+        //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().size()).isEqualTo(1);
+        assertThat(responseEntity.getBody().get(0)).isEqualTo("testgroup");
+         
+        //Check adding group candidate
+        //when
+        TaskCandidateGroupImpl addCandidateGroup = new TaskCandidateGroupImpl("hrgroup",
+                                                                              createdTask.getId());
+        producer.send(new CloudTaskCandidateGroupAddedEventImpl(addCandidateGroup));
+   
+        //then
+        responseEntity = getCandidateGroups(createdTask.getId());
+        
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().size()).isEqualTo(2);
+        assertThat(responseEntity.getBody().get(0)).isIn("hrgroup","testgroup");
+        assertThat(responseEntity.getBody().get(1)).isIn("hrgroup","testgroup");
+           
+        //Check deleting group candidate
+        //when
+        TaskCandidateGroupImpl deleteCandidateGroup = new TaskCandidateGroupImpl("hrgroup",
+                                                                                 createdTask.getId());
+        producer.send(new CloudTaskCandidateGroupRemovedEventImpl(deleteCandidateGroup));
+       
+        //then
+        responseEntity = getCandidateGroups(createdTask.getId());
+    
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().size()).isEqualTo(1);
+        assertThat(responseEntity.getBody().get(0)).isEqualTo("testgroup");
+    }
+    
+    @Test
+    public void adminShouldAssignTask() {
+        //given
+              //given
+        Task createdTask = taskEventContainedBuilder.aCreatedTask("Created task",
+                                                                  runningProcessInstance);
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            keycloakTokenProducer.setKeycloakTestUser("hradmin");
+            
+            //when
+            ResponseEntity<Task> responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         new ParameterizedTypeReference<Task>() {
+                                         });
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getId()).isEqualTo(createdTask.getId());
+            assertThat(responseEntity.getBody().getAssignee()).isNull();
+            
+            
+            //when
+            TaskImpl assignedTask = new TaskImpl(createdTask.getId(),
+                                                 createdTask.getName(),
+                                                 createdTask.getStatus());
+            assignedTask.setAssignee("hruser");
+          
+            producer.send(new CloudTaskAssignedEventImpl(assignedTask));
+            
+            //then
+            responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         new ParameterizedTypeReference<Task>() {
+                                         });
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getId()).isNotNull();
+            assertThat(responseEntity.getBody().getId()).isEqualTo(createdTask.getId());
+            assertThat(responseEntity.getBody().getAssignee()).isEqualTo("hruser");
+            
+            //Restore user
+            keycloakTokenProducer.setKeycloakTestUser("testuser");
+         
+        });
+    }
+    
 
     private void assertCannotSeeTask(Task task) {
         await().untilAsserted(() -> {
@@ -407,5 +578,21 @@ public class QueryTasksIT {
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_TASKS_RESPONSE_TYPE);
+    }
+    
+    private  ResponseEntity<List<String>> getCandidateUsers(String taskId) {
+        return testRestTemplate.exchange(TASKS_URL + "/" + taskId+"/candidate-users",
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         new ParameterizedTypeReference<List<String>>() {
+                                         });
+    }
+    
+    private  ResponseEntity<List<String>> getCandidateGroups(String taskId) {
+        return testRestTemplate.exchange(TASKS_URL + "/" + taskId+"/candidate-groups",
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         new ParameterizedTypeReference<List<String>>() {
+                                         });
     }
 }
