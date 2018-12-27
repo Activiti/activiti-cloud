@@ -17,11 +17,13 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
@@ -125,5 +127,34 @@ public class ProcessInstanceController {
         }
 
         return processInstanceResourceAssembler.toResource(processInstanceEntity);
+    }
+    
+    
+    @RequestMapping(value = "/{processInstanceId}/subprocesses", method = RequestMethod.GET)
+    public PagedResources<ProcessInstanceResource> subprocesses(@PathVariable String processInstanceId,
+                                                                @QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
+                                                                Pageable pageable) {
+
+        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
+                                                                            processInstanceId,
+                                                                            "Unable to find process for the given id:'" + processInstanceId + "'");
+
+        if (!securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(),
+                                                        processInstanceEntity.getServiceName())) {
+            LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey());
+            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey());
+        }
+
+        QProcessInstanceEntity process = QProcessInstanceEntity.processInstanceEntity;
+        BooleanExpression expression = process.parentId.eq(processInstanceId);
+        Predicate extendedPredicate = expression;
+        if (predicate != null) {
+            extendedPredicate = expression.and(predicate);
+        }
+        
+        return pagedResourcesAssembler.toResource(pageable,
+                                                  processInstanceRepository.findAll(extendedPredicate,
+                                                                                    pageable),
+                                                  processInstanceResourceAssembler);
     }
 }

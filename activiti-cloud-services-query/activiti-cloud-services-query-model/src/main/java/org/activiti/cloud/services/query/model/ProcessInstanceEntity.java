@@ -35,8 +35,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 @Entity(name="ProcessInstance")
 @Table(name = "PROCESS_INSTANCE",
 		indexes= {
@@ -59,6 +57,8 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private String businessKey;
     @Enumerated(EnumType.STRING)
     private ProcessInstanceStatus status;
+    private Integer processDefinitionVersion;
+ 
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModified;
@@ -176,11 +176,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         return parentId;
     }
 
-    @Override
-    public Integer getProcessDefinitionVersion() {
-        return null; //TODO: this is a stub to be replaced
-    }
-
     public void setParentId(String parentId) {
         this.parentId = parentId;
     }
@@ -241,5 +236,14 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
+    }
+
+    @Override
+    public Integer getProcessDefinitionVersion() {
+        return processDefinitionVersion;
+    }
+
+    public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
+        this.processDefinitionVersion = processDefinitionVersion;
     }
 }
