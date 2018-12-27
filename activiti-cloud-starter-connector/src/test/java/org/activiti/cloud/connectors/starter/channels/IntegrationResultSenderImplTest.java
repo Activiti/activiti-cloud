@@ -16,22 +16,23 @@
 
 package org.activiti.cloud.connectors.starter.channels;
 
-import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
+import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
+import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class IntegrationResultSenderImplTest {
@@ -48,6 +49,8 @@ public class IntegrationResultSenderImplTest {
     @Mock
     private ConnectorProperties connectorProperties;
 
+
+
     @Before
     public void setUp() throws Exception {
         initMocks(this);
@@ -56,7 +59,8 @@ public class IntegrationResultSenderImplTest {
     @Test
     public void sendShouldSendMessageBasedOnTheTargetApplication() throws Exception {
         //given
-        given(resolver.resolveDestination("integrationResult_myApp")).willReturn(messageChannel);
+        given(connectorProperties.getMqDestinationSeparator()).willReturn("_");
+        given(resolver.resolveDestination("integrationResult" + connectorProperties.getMqDestinationSeparator() + "myApp")).willReturn(messageChannel);
         given(connectorProperties.getServiceName()).willReturn("connectorName");
 
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
@@ -67,7 +71,7 @@ public class IntegrationResultSenderImplTest {
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
         integrationRequest.setServiceVersion("1.0");
         IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
-                                                                             integrationRequest.getIntegrationContext());
+                integrationRequest.getIntegrationContext());
 
         Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
 

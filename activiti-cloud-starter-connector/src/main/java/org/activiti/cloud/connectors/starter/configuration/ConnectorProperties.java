@@ -21,6 +21,9 @@ public class ConnectorProperties {
     @Value("${activiti.cloud.application.version:}")
     private String appVersion;
 
+    @Value("${activiti.cloud.mq.destination.separator:_}")
+    private String mqDestinationSeparator;
+
     public String getServiceName() {
         return serviceName;
     }
@@ -43,5 +46,9 @@ public class ConnectorProperties {
 
     public String getAppVersion() {
         return appVersion;
+    }
+
+    public String getMqDestinationSeparator() {
+        return mqDestinationSeparator;
     }
 }
