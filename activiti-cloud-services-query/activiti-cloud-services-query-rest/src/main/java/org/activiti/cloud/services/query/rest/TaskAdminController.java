@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.services.query.rest;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -101,6 +104,30 @@ public class TaskAdminController {
                                                       "Unable to find taskEntity for the given id:'" + taskId + "'");
 
         return taskResourceAssembler.toResource(taskEntity);
+    }
+    
+    @RequestMapping(value = "/{taskId}/candidate-users", method = RequestMethod.GET)
+    public List<String> getTaskCandidateUsers(@PathVariable String taskId) {
+        TaskEntity taskEntity = entityFinder.findById(taskRepository,
+                                                      taskId,
+                                                      "Unable to find taskEntity for the given id:'" + taskId + "'");
+
+        List<String> candidateUsers = taskEntity.getTaskCandidateUsers()!=null ? 
+                                      taskEntity.getTaskCandidateUsers().stream().map(it -> it.getUserId()).collect(Collectors.toList()) : 
+                                      null;
+        return candidateUsers;
+    }
+    
+    @RequestMapping(value = "/{taskId}/candidate-groups", method = RequestMethod.GET)
+    public List<String> getTaskCandidateGroups(@PathVariable String taskId) {
+        TaskEntity taskEntity = entityFinder.findById(taskRepository,
+                                                      taskId,
+                                                      "Unable to find taskEntity for the given id:'" + taskId + "'");
+
+        List<String> candidateGroups = taskEntity.getTaskCandidateGroups()!=null ? 
+                                       taskEntity.getTaskCandidateGroups().stream().map(it -> it.getGroupId()).collect(Collectors.toList()) : 
+                                       null;
+        return candidateGroups;
     }
 
 }
