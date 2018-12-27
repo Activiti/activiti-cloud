@@ -16,14 +16,20 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.payloads.AssignTaskPayload;
+import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
+import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
@@ -48,8 +54,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -198,7 +202,7 @@ public class TasksIT {
         assertThat(tasks).extracting(Task::getName).contains("Perform action");
         assertThat(tasks.size()).isGreaterThanOrEqualTo(2);
     }
-
+    
     private ResponseEntity<PagedResources<CloudTask>> executeRequestGetTasks() {
         return testRestTemplate.exchange(TASKS_URL,
                                          HttpMethod.GET,
@@ -212,7 +216,7 @@ public class TasksIT {
                                          null,
                                          PAGED_TASKS_RESPONSE_TYPE);
     }
-
+    
     @Test
     public void shouldGetTasksRelatedToTheGivenProcessInstance() {
         //given
@@ -339,7 +343,193 @@ public class TasksIT {
         //then
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
     }
+    
+    @Test
+    public void adminShouldAssignUser() {
+        //given
+        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+  
+        //when
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = executeRequestGetAdminTasks();
+        assertThat(responseEntity).isNotNull();
+            
+        //then
+        Task task = responseEntity.getBody().iterator().next();
+        assertThat(task.getAssignee()).isNull();
+        
+        //when
+        AssignTaskPayload assignTaskPayload = TaskPayloadBuilder
+                                              .assign()
+                                              .withTaskId(task.getId())
+                                              .withAssignee("hruser")
+                                              .build();
+                                                                                                                                                
+        ResponseEntity<CloudTask> assignResponseEntity = taskRestTemplate.adminAssignTask(assignTaskPayload);
+        //then
+        assertThat(assignResponseEntity).isNotNull();
+        assertThat(assignResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(assignResponseEntity.getBody().getAssignee()).isEqualTo("hruser");
+        
+        //restore user
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+    }
+    
+    @Test
+    public void shouldAddUserCandidateAndClaimTaskAnotherUser() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
+        
+        //then check that we have one candidate
+        ResponseEntity<List<String>> userCandidates = taskRestTemplate.getUserCandidates(task.getId());
+        assertThat(userCandidates).isNotNull();
+        assertThat(userCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(userCandidates.getBody().size()).isEqualTo(1);
+        assertThat(userCandidates.getBody().get(0)).isEqualTo("hruser");
+          
+        taskRestTemplate.claim(task);
+        
+        //when
+        CandidateUsersPayload candidateusers = TaskPayloadBuilder
+                .addCandidateUsers()
+                .withTaskId(task.getId())
+                .withCandidateUser("testuser")
+                .build();
+        ResponseEntity<Void> responseEntity = taskRestTemplate.addUserCandidates(candidateusers);
 
+        //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        
+        userCandidates = taskRestTemplate.getUserCandidates(task.getId());
+      //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(userCandidates.getBody().size()).isEqualTo(2);
+        assertThat(userCandidates.getBody().get(0)).isEqualTo("hruser");
+        assertThat(userCandidates.getBody().get(1)).isEqualTo("testuser");
+        
+        //when
+        taskRestTemplate.release(task);
+        
+        //Claim task by another user
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
+        ResponseEntity<CloudTask> responseTask = taskRestTemplate.claim(task);
+
+        //then
+        assertThat(responseTask).isNotNull();
+        assertThat(responseTask.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseTask.getBody().getAssignee()).isEqualTo("testuser");
+        
+    }
+
+    @Test
+    public void shouldAddDeleteUserCandidate() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
+        
+        //then check that we have one candidate
+        ResponseEntity<List<String>> userCandidates = taskRestTemplate.getUserCandidates(task.getId());
+        assertThat(userCandidates).isNotNull();
+        assertThat(userCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(userCandidates.getBody().size()).isEqualTo(1);
+        assertThat(userCandidates.getBody().get(0)).isEqualTo("hruser");
+          
+        taskRestTemplate.claim(task);
+        
+        //when
+        CandidateUsersPayload candidateusers = TaskPayloadBuilder
+                .addCandidateUsers()
+                .withTaskId(task.getId())
+                .withCandidateUser("testuser")
+                .build();
+        ResponseEntity<Void> responseEntity = taskRestTemplate.addUserCandidates(candidateusers);
+
+        //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        
+        userCandidates = taskRestTemplate.getUserCandidates(task.getId());
+        
+        //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(userCandidates.getBody().size()).isEqualTo(2);
+        assertThat(userCandidates.getBody().get(0)).isEqualTo("hruser");
+        assertThat(userCandidates.getBody().get(1)).isEqualTo("testuser");
+        
+        
+        candidateusers = TaskPayloadBuilder
+                .addCandidateUsers()
+                .withTaskId(task.getId())
+                .withCandidateUser("testuser")
+                .build();
+        responseEntity = taskRestTemplate.deleteUserCandidates(candidateusers);
+
+        //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        
+        userCandidates = taskRestTemplate.getUserCandidates(task.getId());
+      //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(userCandidates.getBody().size()).isEqualTo(1);
+        assertThat(userCandidates.getBody().get(0)).isEqualTo("hruser");
+        
+    }
+    
+    @Test
+    public void shouldDeleteAddGroupCandidate() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
+        
+        //then check that we have no group candidate
+        ResponseEntity<List<String>> groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
+        assertThat(groupCandidates).isNotNull();
+        assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(groupCandidates.getBody().size()).isEqualTo(1);
+        assertThat(groupCandidates.getBody().get(0)).isEqualTo("hr");
+  
+          
+        taskRestTemplate.claim(task);
+        
+        //when
+        CandidateGroupsPayload candidategroups = TaskPayloadBuilder
+                .deleteCandidateGroups()
+                .withTaskId(task.getId())
+                .withCandidateGroup("hr")
+                .build();
+        ResponseEntity<Void> responseEntity = taskRestTemplate.deleteGroupCandidates(candidategroups);
+
+        //then
+        groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(groupCandidates.getBody().size()).isEqualTo(0);
+        
+        //when
+        candidategroups = TaskPayloadBuilder
+                .addCandidateGroups()
+                .withTaskId(task.getId())
+                .withCandidateGroup("hr")
+                .build();
+        
+        responseEntity = taskRestTemplate.addGroupCandidates(candidategroups);
+        
+        //then
+        groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        
+        assertThat(groupCandidates.getBody().size()).isEqualTo(1);
+        assertThat(groupCandidates.getBody().get(0)).isEqualTo("hr");
+
+    }
+ 
     private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
         ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
