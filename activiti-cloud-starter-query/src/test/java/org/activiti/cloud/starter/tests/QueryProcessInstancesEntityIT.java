@@ -24,6 +24,8 @@ import java.util.Collection;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -221,6 +223,42 @@ public class QueryProcessInstancesEntityIT {
         });
     }
     
+    @Test
+    public void shouldGetProcessDefinitionVersion() {
+        //given
+        ProcessInstanceImpl process = new ProcessInstanceImpl();
+        process.setId("process-instance-id");
+        process.setName("process");
+        process.setProcessDefinitionKey("process-definition-key");
+        process.setProcessDefinitionId("process-definition-id");
+        process.setProcessDefinitionVersion(10);
+        
+        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
+                                   new CloudProcessStartedEventImpl(process,
+                                                       null,
+                                                       null));
+        
+        
+        eventsAggregator.sendAll();
+        
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
+                                                                                       HttpMethod.GET,
+                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
+                                                                                       });
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
+            
+  
+        });
+    }
+
     private ResponseEntity<PagedResources<ProcessInstanceEntity>> executeRequestGetProcInstances() {
 
         return testRestTemplate.exchange(PROC_URL,
