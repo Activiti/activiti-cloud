@@ -320,4 +320,20 @@ public class ProcessInstanceControllerImplIT {
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/update"));
         
     }
+    
+    @Test
+    public void subprocesses() throws Exception {
+        
+        //Simply check here that controller is working
+        List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
+        Page<ProcessInstance> processInstances = new PageImpl<>(processInstanceList,
+                                                                processInstanceList.size());
+         
+        when(processRuntime.processInstances(any(),any())).thenReturn(processInstances);
+        
+              
+        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/subprocesses",
+                                 1))
+                .andExpect(status().isOk());
+    }
 }

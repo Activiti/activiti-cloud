@@ -74,8 +74,11 @@ import org.springframework.web.client.RestClientException;
 public class ProcessInstanceIT {
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
+    private static final String SUB_PROCESS = "SubProcess";
+    private static final String PARENT_PROCESS = "ParentProcess";
+    
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
-
+    
     @Autowired
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
@@ -491,6 +494,29 @@ public class ProcessInstanceIT {
         assertThat(processInstanceEntity.getBody().getName()).isEqualTo(newName);
     }
     
+    @Test
+    public void shouldGetSubprocesses() {
+
+        //given
+        ResponseEntity<CloudProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcessByKey(PARENT_PROCESS,
+                                                                                                    null,
+                                                                                                    "business_key");   
+        //when
+        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = restTemplate.exchange( 
+                          PROCESS_INSTANCES_RELATIVE_URL + startedProcessEntity.getBody().getId()+"/subprocesses",
+                          HttpMethod.GET,
+                          null,
+                          new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
+                          });
+        
+        //then
+        assertThat(processInstancesPage.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(processInstancesPage.getBody()).isNotNull();
+        
+        assertThat(processInstancesPage.getBody().getContent().size()).isEqualTo(1);
+        
+        assertThat(processInstancesPage.getBody().getContent().iterator().next().getProcessDefinitionKey()).isEqualTo(SUB_PROCESS);
+    }
     
     private ResponseEntity<Void> adminExecuteRequestResumeProcess(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
         ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/resume",

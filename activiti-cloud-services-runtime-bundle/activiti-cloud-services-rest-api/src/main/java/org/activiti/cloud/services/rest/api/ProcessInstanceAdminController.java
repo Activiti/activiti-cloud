@@ -31,5 +31,9 @@ public interface ProcessInstanceAdminController {
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.PUT)
     ProcessInstanceResource updateProcess(@PathVariable("processInstanceId") String processInstanceId,
                                     @RequestBody UpdateProcessPayload payload);
+    
+    @RequestMapping(value = "/{processInstanceId}/subprocesses", method = RequestMethod.GET)
+    PagedResources<ProcessInstanceResource> subprocesses(@PathVariable("processInstanceId") String processInstanceId,
+                                                         Pageable pageable);
 
 }

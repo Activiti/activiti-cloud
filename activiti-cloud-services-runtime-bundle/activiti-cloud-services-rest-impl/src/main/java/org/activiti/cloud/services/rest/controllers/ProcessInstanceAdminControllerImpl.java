@@ -105,5 +105,15 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
         return resourceAssembler.toResource(processAdminRuntime.update(payload));
     }
 	
+    @Override
+    public PagedResources<ProcessInstanceResource> subprocesses(@PathVariable String processInstanceId,
+                                                                Pageable pageable) {
+        Page<ProcessInstance> processInstancePage = processAdminRuntime.processInstances(pageConverter.toAPIPageable(pageable),
+                                                                                         ProcessPayloadBuilder.subprocesses(processInstanceId));
+                
+        return pagedResourcesAssembler.toResource(pageable,
+                                                  pageConverter.toSpringPage(pageable, processInstancePage),
+                                                  resourceAssembler);
+    }
 
 }
