@@ -7,9 +7,7 @@ import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.SequenceFlowAuditEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class SequenceFlowTakenEventConverter extends BaseEventToEntityConverter {
     
     public SequenceFlowTakenEventConverter(EventContextInfoAppender eventContextInfoAppender) {

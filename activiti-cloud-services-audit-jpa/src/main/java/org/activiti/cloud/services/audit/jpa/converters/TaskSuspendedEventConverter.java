@@ -7,9 +7,7 @@ import org.activiti.cloud.api.task.model.events.CloudTaskSuspendedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TaskSuspendedEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskSuspendedEventConverter extends BaseEventToEntityConverter {
 
     public TaskSuspendedEventConverter(EventContextInfoAppender eventContextInfoAppender) {

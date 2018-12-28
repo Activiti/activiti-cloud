@@ -7,9 +7,7 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableUpdatedEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class VariableUpdatedEventConverter extends BaseEventToEntityConverter {
 
     public VariableUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {

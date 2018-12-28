@@ -7,9 +7,7 @@ import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TaskAssignedEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskAssignedEventConverter extends BaseEventToEntityConverter {
 
     public TaskAssignedEventConverter(EventContextInfoAppender eventContextInfoAppender) {

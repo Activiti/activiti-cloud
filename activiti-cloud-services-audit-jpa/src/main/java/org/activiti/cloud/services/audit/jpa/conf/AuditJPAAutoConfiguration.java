@@ -16,6 +16,10 @@
 
 package org.activiti.cloud.services.audit.jpa.conf;
 
+import java.util.Set;
+
+import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
+import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityStartedEventConverter;
@@ -23,6 +27,7 @@ import org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCreatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessDeployedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessResumedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessStartedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessSuspendedEventConverter;
@@ -168,6 +173,18 @@ public class AuditJPAAutoConfiguration {
     @Bean
     public VariableUpdatedEventConverter variableUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         return new VariableUpdatedEventConverter(eventContextInfoAppender);
-    }      
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDeployedEventConverter processDeployedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new ProcessDeployedEventConverter(eventContextInfoAppender);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public APIEventToEntityConverters apiEventToEntityConverters(Set<EventToEntityConverter> eventToEntityConverters){
+        return new APIEventToEntityConverters(eventToEntityConverters);
+    }
     
 }

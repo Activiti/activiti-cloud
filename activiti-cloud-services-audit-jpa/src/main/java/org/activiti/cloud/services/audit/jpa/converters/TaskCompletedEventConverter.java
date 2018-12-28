@@ -7,9 +7,7 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TaskCompletedEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskCompletedEventConverter extends BaseEventToEntityConverter {
     
     public TaskCompletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {

@@ -23,9 +23,7 @@ import org.activiti.cloud.api.task.model.events.CloudTaskUpdatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TaskUpdatedEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskUpdatedEventConverter extends BaseEventToEntityConverter {
 
     public TaskUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {

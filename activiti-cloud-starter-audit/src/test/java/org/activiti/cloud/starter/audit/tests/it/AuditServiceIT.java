@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
+import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
@@ -44,6 +45,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityComplet
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
@@ -417,7 +419,6 @@ public class AuditServiceIT {
         });
     }
 
-    
     @Test
     public void checkEventConverters() {
         //given
@@ -508,6 +509,8 @@ public class AuditServiceIT {
 
     private List<CloudRuntimeEvent> getTestEvents() {
         List<CloudRuntimeEvent> testEvents = new ArrayList<>();
+
+        testEvents.add(new CloudProcessDeployedEventImpl(buildDefaultProcessDefinition()));
 
         BPMNActivityImpl bpmnActivityCancelled = new BPMNActivityImpl();
         bpmnActivityCancelled.setElementId("elementId");
@@ -644,6 +647,14 @@ public class AuditServiceIT {
         testEvents.add(cloudTaskCancelledEvent);
 
         return testEvents;
+    }
+
+    private ProcessDefinitionImpl buildDefaultProcessDefinition() {
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setName("My process");
+        processDefinition.setKey("my proc");
+        processDefinition.setId("processId");
+        return processDefinition;
     }
 
     private List<CloudRuntimeEvent> getTestProcessStartedUpdatedCompletedEvents() {

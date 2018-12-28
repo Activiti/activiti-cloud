@@ -7,9 +7,7 @@ import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCancelledAuditEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ProcessCancelledEventConverter extends BaseEventToEntityConverter {
 
     public ProcessCancelledEventConverter(EventContextInfoAppender eventContextInfoAppender) {

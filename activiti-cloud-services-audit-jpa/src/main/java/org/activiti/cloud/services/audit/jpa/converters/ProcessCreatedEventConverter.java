@@ -7,9 +7,7 @@ import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCreatedAuditEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ProcessCreatedEventConverter  extends BaseEventToEntityConverter {
 
     public ProcessCreatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {

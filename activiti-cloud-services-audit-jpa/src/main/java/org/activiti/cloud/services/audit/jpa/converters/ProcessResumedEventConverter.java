@@ -7,9 +7,7 @@ import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessResumedAuditEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ProcessResumedEventConverter extends BaseEventToEntityConverter {
 
     public ProcessResumedEventConverter(EventContextInfoAppender eventContextInfoAppender) {

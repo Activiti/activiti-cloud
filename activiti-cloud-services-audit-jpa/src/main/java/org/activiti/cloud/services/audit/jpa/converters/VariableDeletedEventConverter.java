@@ -7,9 +7,7 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableDeletedEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class VariableDeletedEventConverter extends BaseEventToEntityConverter {
 
     public VariableDeletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {

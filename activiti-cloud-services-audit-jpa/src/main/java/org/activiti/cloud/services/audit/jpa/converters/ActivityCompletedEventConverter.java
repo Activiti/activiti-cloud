@@ -7,9 +7,7 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEve
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.ActivityCompletedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ActivityCompletedEventConverter extends BaseEventToEntityConverter {
 
     public ActivityCompletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {

@@ -7,9 +7,7 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.ActivityStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ActivityStartedEventConverter extends BaseEventToEntityConverter {
 
     public ActivityStartedEventConverter(EventContextInfoAppender eventContextInfoAppender) {

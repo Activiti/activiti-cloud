@@ -7,9 +7,7 @@ import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessSuspendedAuditEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ProcessSuspendedEventConverter extends BaseEventToEntityConverter {
 
     public ProcessSuspendedEventConverter(EventContextInfoAppender eventContextInfoAppender) {

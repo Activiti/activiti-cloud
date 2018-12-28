@@ -7,9 +7,7 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TaskCancelledEventEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskCancelledEventConverter extends BaseEventToEntityConverter {
 
     public TaskCancelledEventConverter(EventContextInfoAppender eventContextInfoAppender) {
