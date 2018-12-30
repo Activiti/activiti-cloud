@@ -43,7 +43,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -130,7 +129,6 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-    @Transactional
     public ResponseEntity<Void> sendSignal(@RequestBody SignalPayload cmd) {
         processRuntime.signal(cmd);
         return new ResponseEntity<>(HttpStatus.OK);
