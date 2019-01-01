@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.resources.TaskResource;
 import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
@@ -86,7 +88,6 @@ public class TaskAdminController {
     @RequestMapping(method = RequestMethod.GET)
     public PagedResources<TaskResource> allTasks(@QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
                                                  Pageable pageable) {
-
         Page<TaskEntity> page = taskRepository.findAll(predicate,
                                                        pageable);
 
@@ -95,6 +96,20 @@ public class TaskAdminController {
                                                   taskResourceAssembler);
     }
 
+    @RequestMapping(value = "/rootTasksOnly",method = RequestMethod.GET)
+    public PagedResources<TaskResource> getRootTasks(@QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+                                                     Pageable pageable) {
+        //when request is made for the root tasks set a special condition: parentTaskId is null
+        BooleanExpression parentTaskNull = QTaskEntity.taskEntity.parentTaskId.isNull(); 
+        predicate= predicate !=null ? parentTaskNull.and(predicate) : parentTaskNull;
+              
+        Page<TaskEntity> page = taskRepository.findAll(predicate,
+                                                       pageable);
+
+        return pagedResourcesAssembler.toResource(pageable,
+                                                  page,
+                                                  taskResourceAssembler);
+    }
 
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
     public TaskResource findById(@PathVariable String taskId) {

@@ -22,6 +22,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
@@ -33,6 +34,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAdde
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserRemovedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -261,6 +263,43 @@ public class QueryTasksIT {
         eventsAggregator.sendAll();
 
         checkExistingTask(createdTask);
+    }
+    
+    @Test
+    public void shouldGetAvailableRootTasks() {
+        //given
+        TaskImpl rootTask = new TaskImpl(UUID.randomUUID().toString(),
+                                     "Root task",
+                                     Task.TaskStatus.CREATED);
+        rootTask.setProcessInstanceId(runningProcessInstance.getId());
+        rootTask.setParentTaskId(null);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(rootTask));
+        
+        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
+                                     "Task with parent",
+                                     Task.TaskStatus.CREATED);
+        task.setProcessInstanceId(runningProcessInstance.getId());
+        task.setParentTaskId(rootTask.getId());
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
+        
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "/rootTasksOnly",
+                                                                                            HttpMethod.GET,
+                                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                            PAGED_TASKS_RESPONSE_TYPE);
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId)
+                    .containsExactly(rootTask.getId());
+        });
     }
 
     private void checkExistingTask(Task createdTask) {
