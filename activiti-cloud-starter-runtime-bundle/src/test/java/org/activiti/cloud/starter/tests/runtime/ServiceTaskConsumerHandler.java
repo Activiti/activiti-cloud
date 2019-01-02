@@ -112,6 +112,6 @@ public class ServiceTaskConsumerHandler {
 
         IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
         Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
-        resolver.resolveDestination("integrationResult:" + runtimeBundleProperties.getServiceFullName()).send(message);
+        resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
     }
 }
