@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
 
+import java.util.Date;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -136,5 +137,28 @@ public class TaskRuntimeBundleSteps {
                 taskId,
                 TaskPayloadBuilder.update().withName(taskName).build());
     }
+
+    @Step
+    public CloudTask setTaskFormKey(String taskId, String formKey){
+        return taskRuntimeService.updateTask(
+                taskId,
+                TaskPayloadBuilder.update().withFormKey(formKey).build());
+    }
+
+    @Step
+    public CloudTask setTaskPriority(String taskId, int priority){
+        return taskRuntimeService.updateTask(
+                taskId,
+                TaskPayloadBuilder.update().withPriority(priority).build());
+    }
+
+    @Step
+    public CloudTask setTaskDueDate(String taskId, Date dueDate){
+        return taskRuntimeService.updateTask(
+                taskId,
+                TaskPayloadBuilder.update().withDueDate(dueDate).build());
+    }
+
+
 
 }
