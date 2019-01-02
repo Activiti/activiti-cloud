@@ -119,7 +119,7 @@ public class AuditProducerIT {
         //then
         assertThat(receivedEvents)
                 .filteredOn(event -> ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name().equals(event.getEventType().name()))
-                .extracting(event -> ((ProcessDefinition)event.getEntity()).getKey())
+                .extracting(event -> ((ProcessDefinition) event.getEntity()).getKey())
                 .contains(SIMPLE_PROCESS);
     }
 
@@ -133,7 +133,7 @@ public class AuditProducerIT {
                                                                                                                    .withVariable("name",
                                                                                                                                  "peter")
                                                                                                                    .withProcessInstanceName("my instance name")
-                .withBusinessKey("businessKey")
+                                                                                                                   .withBusinessKey("my business key") 
                                                                                                                    .build());
 
         //then
@@ -159,9 +159,12 @@ public class AuditProducerIT {
                     .filteredOn(event -> ACTIVITY_STARTED.equals(event.getEventType()))
                     .extracting(event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType())
                     .containsExactly("startEvent",
-                            "userTask");
+                                     "userTask");
+            assertThat(receivedEvents).filteredOn(cloudRuntimeEvent -> PROCESS_CREATED.equals(cloudRuntimeEvent.getEventType()))
+                    .extracting(cloudRuntimeEvent -> ((ProcessInstance) cloudRuntimeEvent.getEntity()).getBusinessKey())
+                    .containsExactly("my business key");
             assertThat(receivedEvents).filteredOn(cloudRuntimeEvent -> PROCESS_STARTED.equals(cloudRuntimeEvent.getEventType()))
-                    .extracting(cloudRuntimeEvent -> ((ProcessInstance)cloudRuntimeEvent.getEntity()).getName())
+                    .extracting(cloudRuntimeEvent -> ((ProcessInstance) cloudRuntimeEvent.getEntity()).getName())
                     .containsExactly("my instance name");
         });
 
