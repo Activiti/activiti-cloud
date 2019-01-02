@@ -238,7 +238,7 @@ public class AuditSteps {
 
         await().untilAsserted(() -> assertThat(events).isNotNull()
                                     .isNotEmpty()
-                                    .filteredOn(taskIsMatched).hasSize(2)
+                                    .filteredOn(taskIsMatched).hasSize(3)
                                     .extracting("entity.id",
                                             "entity.status",
                                             "eventType")
@@ -248,7 +248,10 @@ public class AuditSteps {
                                                   TaskRuntimeEvent.TaskEvents.TASK_CREATED),
                                             tuple(taskId,
                                                   Task.TaskStatus.ASSIGNED,
-                                                  TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED)));
+                                                  TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED),
+                                            tuple(taskId,
+                                                  Task.TaskStatus.ASSIGNED,
+                                                  TaskRuntimeEvent.TaskEvents.TASK_UPDATED)));
     }
 
     /**
@@ -272,7 +275,7 @@ public class AuditSteps {
 
         await().untilAsserted(() -> assertThat(events).isNotNull()
                 .isNotEmpty()
-                .filteredOn(taskIsMatched).hasSize(3)
+                .filteredOn(taskIsMatched).hasSize(4)
                 .extracting("entity.id",
                         "entity.status",
                         "eventType")
@@ -283,6 +286,9 @@ public class AuditSteps {
                         tuple(taskId,
                                 Task.TaskStatus.ASSIGNED,
                                 TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED),
+                        tuple(taskId,
+                              Task.TaskStatus.ASSIGNED,
+                              TaskRuntimeEvent.TaskEvents.TASK_UPDATED),
                         tuple(taskId,
                                 Task.TaskStatus.COMPLETED,
                                 TaskRuntimeEvent.TaskEvents.TASK_COMPLETED)));
