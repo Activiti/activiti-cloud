@@ -258,7 +258,7 @@ public class ProcessInstanceControllerImplIT {
     public void sendSignal() throws Exception {
         SignalPayload cmd = ProcessPayloadBuilder.signal().withName("signalInstance").build();
 
-        this.mockMvc.perform(get("/v1/process-instances/signal").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post("/v1/process-instances/signal").contentType(MediaType.APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(cmd)))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/signal"));

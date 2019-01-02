@@ -33,7 +33,7 @@ public interface ProcessInstanceController {
     @ResponseBody
     String getProcessDiagram(@PathVariable String processInstanceId);
 
-    @RequestMapping(value = "/signal")
+    @RequestMapping(value = "/signal", method = RequestMethod.POST) 
     ResponseEntity<Void> sendSignal(@RequestBody SignalPayload signalPayload);
 
     @RequestMapping(value = "{processInstanceId}/suspend", method = RequestMethod.POST)
