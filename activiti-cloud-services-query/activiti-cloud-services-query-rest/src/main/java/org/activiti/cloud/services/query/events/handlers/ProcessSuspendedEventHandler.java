@@ -49,6 +49,8 @@ public class ProcessSuspendedEventHandler implements QueryEventHandler {
                 );
         processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
         processInstanceEntity.setLastModified(new Date(suspendedEvent.getTimestamp()));
+        
+        //All important parameters like processDefinitionKey, businessKey, processDefinitionId etc. are already set by CloudProcessCreatedEvent
         processInstanceRepository.save(processInstanceEntity);
     }
 
