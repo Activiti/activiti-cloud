@@ -1,6 +1,6 @@
 # CHART_REPO := http://jenkins-x-chartmuseum:8080
 CURRENT=$(shell pwd)
-NAME := runtime-bundle
+NAME := example-runtime-bundle
 ORG := $(or $(ORG),activiti)
 APP_NAME := $(or $(APP_NAME),$(NAME))
 OS := $(shell uname)
