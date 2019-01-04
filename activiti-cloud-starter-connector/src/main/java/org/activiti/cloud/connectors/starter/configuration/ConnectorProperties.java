@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ConnectorProperties {
 
-    @Value("${spring.application.name")
+    @Value("${spring.application.name}")
     private String serviceName;
 
     @Value("${activiti.cloud.service.type:}")
