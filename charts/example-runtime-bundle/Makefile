@@ -1,6 +1,6 @@
 # CHART_REPO := http://jenkins-x-chartmuseum:8080
 CURRENT=$(shell pwd)
-NAME := example-runtime-bundle
+NAME := runtime-bundle
 ORG := $(or $(ORG),activiti)
 APP_NAME := $(or $(APP_NAME),$(NAME))
 OS := $(shell uname)
@@ -40,13 +40,12 @@ release: build
 github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
 	git clone -b "$(GITHUB_CHARTS_BRANCH)" "$(GITHUB_CHARTS_REPO)" $(GITHUB_CHARTS_DIR)
-	cp "runtime-bundle-$(RELEASE_VERSION).tgz" $(GITHUB_CHARTS_DIR)
+	cp "$(NAME)-$(RELEASE_VERSION).tgz" $(GITHUB_CHARTS_DIR)
 	cd $(GITHUB_CHARTS_DIR) && \
 	   helm repo index . && \
 	   git add . && \
 	   git status && \
-	   git commit -m "fix:(version) release runtime-bundle-$(RELEASE_VERSION).tgz" && \
-	   git pull && \
+	   git commit -m "fix:(version) release $(NAME)-$(RELEASE_VERSION).tgz" && \
 	   git push origin "$(GITHUB_CHARTS_BRANCH)"
 	rm -rf $(GITHUB_CHARTS_DIR)
 
@@ -69,8 +68,8 @@ endif
 
 updatebot/push-version: 
 	@echo Resolving push versions for artifacts........
-	$(eval ACTIVITI_CLOUD_DEPENDENCIES_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud-dependencies.version -q -DforceStdout -f ../../pom.xml))
+	$(eval ACTIVITI_CLOUD_DEPENDENCIES_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud-dependencies.version -q -DforceStdout))
 	
 	@echo Doing updatebot push-version.....
-	cd ../../ && updatebot push-version --kind helm  $(RELEASE_ARTIFACT) $(RELEASE_VERSION)
-	cd ../../ && updatebot push-version --kind make  RB_ACTIVITI_CLOUD_DEPENDENCIES_VERSION $(ACTIVITI_CLOUD_DEPENDENCIES_VERSION)
+	updatebot push-version --kind helm $(RELEASE_ARTIFACT) $(RELEASE_VERSION)
+	updatebot push-version --kind make RB_ACTIVITI_CLOUD_DEPENDENCIES_VERSION $(ACTIVITI_CLOUD_DEPENDENCIES_VERSION)

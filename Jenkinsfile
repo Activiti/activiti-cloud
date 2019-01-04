@@ -12,7 +12,6 @@ pipeline {
     environment {
       ORG               = 'activiti'
       APP_NAME          = 'example-runtime-bundle'
-      CHARTS_DIR        =  'runtime-bundle'
       CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
       GITHUB_CHARTS_REPO    = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
       GITHUB_HELM_REPO_URL = "https://activiti.github.io/activiti-cloud-helm-charts/"
@@ -37,7 +36,7 @@ pipeline {
    //        sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:$PREVIEW_VERSION"
 
 
-             dir("./charts/$CHARTS_DIR") {
+             dir("./charts/$APP_NAME") {
                sh "make build"
              }
           }
@@ -58,7 +57,7 @@ pipeline {
             sh "echo \$(jx-release-version) > VERSION"
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
 
-            dir ("./charts/$CHARTS_DIR") {
+            dir ("./charts/$APP_NAME") {
               sh "make tag"
             }
             sh 'mvn clean deploy'
@@ -75,7 +74,7 @@ pipeline {
         }
         steps {
           container('maven') {
-            dir ("./charts/$CHARTS_DIR") {
+            dir ("./charts/$APP_NAME") {
               sh 'jx step changelog --version v\$(cat ../../VERSION)'
 
               // release the helm chart
