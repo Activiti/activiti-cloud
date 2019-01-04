@@ -2,6 +2,7 @@ package org.activiti.cloud.acc.core.steps.query;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
@@ -71,6 +72,11 @@ public class ProcessQuerySteps {
         await().untilAsserted(() -> assertThat(processQueryService.getProcessInstance(processInstanceId).getName())
                 .isNotNull()
                 .isEqualTo(processInstanceName));
+    }
+
+    @Step
+    public PagedResources<ProcessDefinition> getProcessDefinitions(){
+        return processQueryService.getProcessDefinitions();
     }
 
 }
