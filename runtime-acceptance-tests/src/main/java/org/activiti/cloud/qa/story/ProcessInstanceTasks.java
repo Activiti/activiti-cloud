@@ -328,14 +328,21 @@ public class ProcessInstanceTasks {
 
     @When("the user gets the process definitions")
     public void getProcessDefinitions(){
-        Collection<ProcessDefinition> processDefinitions = processRuntimeBundleSteps.getProcessDefinitions().getContent();
-        Serenity.setSessionVariable("processDefinitions").to(processDefinitions);
+        Collection<ProcessDefinition> processDefinitionsRuntimeBundle = processRuntimeBundleSteps.getProcessDefinitions().getContent();
+        Collection<ProcessDefinition> processDefinitionsQuery = processQuerySteps.getProcessDefinitions().getContent();
+
+        Serenity.setSessionVariable("processDefinitionsRuntimeBundle").to(processDefinitionsRuntimeBundle);
+        Serenity.setSessionVariable("processDefinitionsQuery").to(processDefinitionsQuery);
     }
 
     @Then("all the process definitions are present")
     public void checkProcessDefinitions(){
-        Collection<ProcessDefinition> processDefinitions = Serenity.sessionVariableCalled("processDefinitions");
-        assertThat(processDefinitions)
+        Collection<ProcessDefinition> processDefinitionsRuntimeBundle = Serenity.sessionVariableCalled("processDefinitionsRuntimeBundle");
+        Collection<ProcessDefinition> processDefinitionsQuery = Serenity.sessionVariableCalled("processDefinitionsQuery");
+        assertThat(processDefinitionsRuntimeBundle)
+                .extracting("key")
+                .containsAll(processDefinitionKeys.values());
+        assertThat(processDefinitionsQuery)
                 .extracting("key")
                 .containsAll(processDefinitionKeys.values());
     }

@@ -9,7 +9,7 @@ pipeline {
     ORG = 'activiti'
     APP_NAME = 'activiti-cloud-acceptance-scenarios'
     CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
-    //this 3 env for test execution 
+    //this 3 env for test execution
     GATEWAY_HOST = "activiti-cloud-gateway.jx-staging.35.228.195.195.nip.io"
     SSO_HOST = "activiti-keycloak.jx-staging.35.228.195.195.nip.io"
     REALM = "activiti"
