@@ -16,10 +16,7 @@
 
 package org.activiti.cloud.qa.story;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
@@ -187,12 +184,45 @@ public class Tasks {
         taskRuntimeBundleSteps.setTaskName(newTask.getId(), newTaskName);
     }
 
-    @Then("the task has the name $newTaskName")
-    public void checkTaskName (String newTaskName){
+    @When("the user updates the updatable fields of the task")
+    public void updateTaskFields(){
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+        Collection <CloudTask> tasksCollection = taskQuerySteps.getTasksByProcessInstance(processInstanceId).getContent();
+        List <CloudTask> tasksList = new ArrayList(tasksCollection);
+        newTask = tasksList.get(0);
+
+        Date tomorrow = new Date(System.currentTimeMillis() + 86400000);
+        Serenity.setSessionVariable("tomorrow").to(tomorrow);
+
+        taskRuntimeBundleSteps.setTaskName(newTask.getId(), "new-task-name");
+        taskRuntimeBundleSteps.setTaskPriority(newTask.getId(), 3);
+        taskRuntimeBundleSteps.setTaskDueDate(newTask.getId(),tomorrow);
+        taskRuntimeBundleSteps.setTaskFormKey(newTask.getId(), "new-task-form-key");
+    }
+
+    @Then("the task has the updated fields")
+    public void checkUpdatedTaskFields (){
+        Date tomorrow = Serenity.sessionVariableCalled("tomorrow");
+
+        //name
         assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getName())
-                .isEqualTo(newTaskName);
+                .isEqualTo("new-task-name");
         assertThat(taskQuerySteps.getTaskById(newTask.getId()).getName())
-                .isEqualTo(newTaskName);
+                .isEqualTo("new-task-name");
+        //priority
+        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getPriority())
+                .isEqualTo(3);
+        assertThat(taskQuerySteps.getTaskById(newTask.getId()).getPriority())
+                .isEqualTo(3);
+        //dueDate
+        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getDueDate())
+                .isEqualTo(tomorrow);
+        assertThat(taskQuerySteps.getTaskById(newTask.getId()).getDueDate())
+                .isEqualTo(tomorrow);
+        //formKey
+        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getFormKey())
+                .isEqualTo("new-task-form-key");
+        //assertThat(taskQuerySteps.getTaskById(newTask.getId()).getFormKey()).isEqualTo("new-task-form-key");
     }
 
     @Then("the task is updated")
