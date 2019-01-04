@@ -3,7 +3,7 @@ kind: Config
 build:
   tagPolicy:
     envTemplate:
-      template: "{{.DOCKER_REGISTRY}}/{{.ORG}}/{{.APP_NAME}}:{{.VERSION}}"
+      template: "{{.DOCKER_REGISTRY}}/{{.ORG}}/example-cloud-connector:{{.VERSION}}"
   artifacts:
   - imageName: changeme
     workspace: .
@@ -17,7 +17,7 @@ profiles:
   build:
     tagPolicy:
       envTemplate:
-        template: "{{.DOCKER_REGISTRY}}/{{.ORG}}/{{.APP_NAME}}:{{.DIGEST_HEX}}"
+        template: "{{.DOCKER_REGISTRY}}/{{.ORG}}/example-cloud-connector:{{.DIGEST_HEX}}"
     artifacts:
     - docker: {}
     local: {}
@@ -27,5 +27,5 @@ profiles:
       - name: "{{.APP_NAME}}"
         chartPath: "charts/{{.APP_NAME}}"
         setValueTemplates:
-          image.repository: "{{.DOCKER_REGISTRY}}/{{.ORG}}/{{.APP_NAME}}"
+          image.repository: "{{.DOCKER_REGISTRY}}/example-cloud-connector/{{.APP_NAME}}"
           image.tag: "{{.DIGEST_HEX}}"
