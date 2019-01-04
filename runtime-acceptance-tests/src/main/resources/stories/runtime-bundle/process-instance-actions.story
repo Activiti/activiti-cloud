@@ -15,6 +15,12 @@ When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VAR
 And the user deletes the process
 Then the process instance is deleted
 
+Scenario: resume a cancelled process instance
+Given the user is authenticated as testuser
+When the user starts an instance of the process called SIMPLE_PROCESS_INSTANCE
+And the user suspends the process instance
+Then the user is able to resume the process instance
+
 Scenario: try activate a cancelled process instance
 Given the user is authenticated as testuser
 And any suspended process instance
@@ -35,9 +41,13 @@ Then no diagram is shown
 
 Scenario: complete a process instance that uses a connector
 Given the user is authenticated as testuser
-When the user starts an instance of the process called CONNECTOR_PROCESS_INSTANCE
+When the user starts a process with variables called ConnectorProcess
 Then the status of the process is changed to completed
 And a variable was created with name var1
+And a variable was created with name test-json-variable-result
+And a variable was created with name test-long-json-variable-result
+And a variable was created with name test-int-variable-result
+And a variable was created with name test-bool-variable-result
 
 Scenario: check all process definitions are present as admin
 Given the user is authenticated as hradmin
