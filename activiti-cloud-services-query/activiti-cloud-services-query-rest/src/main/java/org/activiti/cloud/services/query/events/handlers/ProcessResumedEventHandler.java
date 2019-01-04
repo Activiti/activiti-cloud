@@ -47,10 +47,9 @@ public class ProcessResumedEventHandler implements QueryEventHandler {
         ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(() -> new QueryException("Unable to find process instance with the given id: " + processInstanceId));
         processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
         processInstanceEntity.setLastModified(new Date(processResumedEvent.getTimestamp()));
-        processInstanceEntity.setProcessDefinitionKey(processResumedEvent.getEntity().getProcessDefinitionKey());
-        processInstanceEntity.setInitiator(processResumedEvent.getEntity().getInitiator());
-        processInstanceEntity.setStartDate(processResumedEvent.getEntity().getStartDate());
-        processInstanceEntity.setBusinessKey(processResumedEvent.getEntity().getBusinessKey());
+        
+        //All important parameters like processDefinitionKey, businessKey, processDefinitionId etc. are already set by CloudProcessCreatedEvent
+ 
         processInstanceRepository.save(processInstanceEntity);
     }
 

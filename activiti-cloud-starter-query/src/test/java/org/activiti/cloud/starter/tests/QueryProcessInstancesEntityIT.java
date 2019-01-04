@@ -23,9 +23,12 @@ import static org.awaitility.Awaitility.await;
 import java.util.Collection;
 
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -257,6 +260,86 @@ public class QueryProcessInstancesEntityIT {
             
   
         });
+    }
+    
+    @Test
+    public void shouldSuspendResumeProcess() {
+        //given
+        ProcessInstanceImpl process = new ProcessInstanceImpl();
+        process.setId("process-instance-id");
+        process.setName("process");
+        process.setProcessDefinitionKey("process-definition-key");
+        process.setProcessDefinitionId("process-definition-id");
+        process.setProcessDefinitionVersion(10);
+        
+        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(process),
+                                   new CloudProcessStartedEventImpl(process,
+                                                       null,
+                                                       null));
+        
+        
+        eventsAggregator.sendAll();
+        
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
+                                                                                       HttpMethod.GET,
+                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
+                                                                                       });
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
+            
+        });
+        
+        eventsAggregator.addEvents(new CloudProcessSuspendedEventImpl(process));
+        
+        eventsAggregator.sendAll();
+        
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
+                                                                                       HttpMethod.GET,
+                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
+                                                                                       });
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
+            assertThat(responseEntity.getBody().getProcessDefinitionKey()).isEqualTo("process-definition-key");
+            assertThat(responseEntity.getBody().getStatus()).isEqualTo(ProcessInstanceStatus.SUSPENDED);
+            
+        });
+        
+        eventsAggregator.addEvents(new CloudProcessResumedEventImpl(process));
+        
+        eventsAggregator.sendAll();
+        
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(PROC_URL + "/" + process.getId(),
+                                                                                       HttpMethod.GET,
+                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       new ParameterizedTypeReference<ProcessInstance>() {
+                                                                                       });
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getProcessDefinitionVersion()).isEqualTo(10);
+            assertThat(responseEntity.getBody().getProcessDefinitionKey()).isEqualTo("process-definition-key");
+            assertThat(responseEntity.getBody().getStatus()).isEqualTo(ProcessInstanceStatus.RUNNING);
+            
+        });
+
     }
 
     private ResponseEntity<PagedResources<ProcessInstanceEntity>> executeRequestGetProcInstances() {
