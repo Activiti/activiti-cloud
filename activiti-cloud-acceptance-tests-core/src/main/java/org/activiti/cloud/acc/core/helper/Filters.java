@@ -30,7 +30,7 @@ public class Filters {
         Collection<CloudProcessInstance> rawCollection = resource.getContent();
         Collection<CloudProcessInstance> filteredCollection = new ArrayList<>();
         for(CloudProcessInstance e : rawCollection){
-            if(e.getProcessDefinitionKey().equals(processKey)){
+            if(e.getProcessDefinitionKey().equals(processKey) ){
                 filteredCollection.add(e);
             }
         }

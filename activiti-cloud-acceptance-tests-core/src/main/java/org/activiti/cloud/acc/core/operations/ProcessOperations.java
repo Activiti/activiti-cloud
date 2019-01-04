@@ -3,30 +3,37 @@ package org.activiti.cloud.acc.core.operations;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.acc.core.operations.steps.runtime.ProcessRuntimeSteps;
 import org.jbehave.core.annotations.When;
-import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import java.io.IOException;
+
 
 public class ProcessOperations {
 
     @Steps
-    private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
+    private ProcessRuntimeSteps processRuntimeSteps;
 
-    //TODO: change the reference to this method once the previous one is deleted
-    @When("the user starts a process called $processName")
-    public void startProcess(String processName) throws IOException {
-
-        ProcessInstance processInstance = processRuntimeBundleSteps.startProcess(
-                processName, false);
+    @When("the user starts a process called $processDefinitionName")
+    public void startProcessInstance(String processDefinitionName) throws IOException{
+        ProcessInstance processInstance = processRuntimeSteps.startProcess(processDefinitionName);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
 
-    @When("the user starts a process with variables called $processName")
-    public void startProcessWithVariables(String processName) throws IOException {
-        ProcessInstance processInstance = processRuntimeBundleSteps.startProcess(
-                processName, true);
+    @When("the user deletes the process instance")
+    public void deleteProcessInstance(){
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+        processRuntimeSteps.deleteProcessInstance(processInstanceId);
+    }
 
-        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
+    @When("the user suspends the process instance")
+    public void suspendProcessInstance(){
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+        processRuntimeSteps.suspendProcessInstance(processInstanceId);
+    }
+
+    @When("the user sets variables")
+    public void setVariables(){
+        Serenity.setSessionVariable("variables").to(true);
     }
 }

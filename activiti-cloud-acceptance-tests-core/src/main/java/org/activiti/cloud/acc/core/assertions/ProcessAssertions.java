@@ -52,11 +52,10 @@ public class ProcessAssertions {
 
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
-        //TODO: uncomment processInstanceName check once the issue is solved
         await().untilAsserted(() -> {
             ProcessInstance queryProcessInstance = processQuerySteps.getProcessInstance(processInstanceId);
             assertThat(queryProcessInstance.getBusinessKey()).isEqualTo("businessKey");
-            //assertThat(queryProcessInstance.getName()).isEqualTo("processInstanceName");
+            assertThat(queryProcessInstance.getName()).isEqualTo("processInstanceName");
         });
     }
 
@@ -66,7 +65,6 @@ public class ProcessAssertions {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         await().untilAsserted(() -> {
-            //TODO: uncomment the SequenceFlowTakenEvent once the issue is solved
             Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
             assertThat(events).isNotEmpty();
             assertThat(events)
@@ -89,7 +87,6 @@ public class ProcessAssertions {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         await().untilAsserted(() -> {
-            //TODO: uncomment the SequenceFlowTakenEvent and VariableCreated once the issues are solved
             Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
             assertThat(events).isNotEmpty();
             assertThat(events)
@@ -113,7 +110,6 @@ public class ProcessAssertions {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         await().untilAsserted(() -> {
-            //TODO: uncomment the SequenceFlowTakenEvent and VariableCreated once the issues are solved
             Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
             assertThat(events).isNotEmpty();
             assertThat(events)
@@ -132,6 +128,77 @@ public class ProcessAssertions {
                             ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED);
         });
     }
+
+    @Then("the events are as expected for UserTask with no User or Group Assignment")
+    public void assertThatEventsAreAsExpectedForProcessWithUserTaskWithNoAssignments() throws Exception {
+
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+
+        await().untilAsserted(() -> {
+            Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
+            assertThat(events).isNotEmpty();
+            assertThat(events)
+                    .extracting(CloudRuntimeEvent::getEventType)
+                    .containsExactlyInAnyOrder(
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED,
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
+                            BPMNSequenceFlowTakenEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
+        });
+    }
+
+    @Then("the events are as expected for the deletion of UserTask with no User or Group Assignment")
+    public void assertThatEventsAreAsExpectedForProcessWithUserTaskWithNoAssignmentsWhenDeleted() throws Exception {
+
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+
+        await().untilAsserted(() -> {
+            Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
+            assertThat(events).isNotEmpty();
+            assertThat(events)
+                    .extracting(CloudRuntimeEvent::getEventType)
+                    .containsExactlyInAnyOrder(
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED,
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
+                            BPMNSequenceFlowTakenEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED,
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED);
+        });
+    }
+
+    @Then("the process cannot be found")
+    public void assertThatTheProcessCannotBeFound(){
+
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+
+        assertThatThrownBy(() -> {
+            processRuntimeBundleSteps.getProcessInstanceById(processInstanceId);
+        }).isInstanceOf(Exception.class)
+                .hasMessageContaining("Unable to find process instance for the given id");
+    }
+
+    @Then("the events are as expected for the suspension of UserTask with no User or Group Assignment")
+    public void assertThatEventsAreAsExpectedForProcessWithUserTaskWithNoAssignmentsWhenSuspended() {
+
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+
+        await().untilAsserted(() -> {
+            Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
+            assertThat(events).isNotEmpty();
+            assertThat(events)
+                    .extracting(CloudRuntimeEvent::getEventType)
+                    .contains(
+                            ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED);
+        });
+    }
+
+
+
 
 
 
