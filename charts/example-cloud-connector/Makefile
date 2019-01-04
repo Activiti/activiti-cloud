@@ -1,4 +1,3 @@
-# CHART_REPO := http://jenkins-x-chartmuseum:8080
 CURRENT=$(shell pwd)
 NAME := example-cloud-connector
 ORG := $(or $(ORG),activiti)
@@ -40,12 +39,12 @@ release: build
 github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
 	git clone -b "$(GITHUB_CHARTS_BRANCH)" "$(GITHUB_CHARTS_REPO)" $(GITHUB_CHARTS_DIR)
-	cp "activiti-cloud-connector-$(RELEASE_VERSION).tgz" $(GITHUB_CHARTS_DIR)
+	cp "$(NAME)-$(RELEASE_VERSION).tgz" $(GITHUB_CHARTS_DIR)
 	cd $(GITHUB_CHARTS_DIR) && \
 	   helm repo index . && \
 	   git add . && \
 	   git status && \
-	   git commit -m "fix:(version) release activiti-cloud-connector-$(RELEASE_VERSION).tgz" && \
+	   git commit -m "fix:(version) release $(NAME)-$(RELEASE_VERSION).tgz" && \
 	   git pull && \
 	   git push origin "$(GITHUB_CHARTS_BRANCH)"
 	rm -rf $(GITHUB_CHARTS_DIR)
