@@ -1,44 +1,5 @@
 package org.activiti.cloud.starter.tests.services.audit;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
-import org.activiti.api.process.model.ProcessDefinition;
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
-import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
-import org.activiti.api.process.model.events.BPMNActivityEvent;
-import org.activiti.api.process.model.events.ProcessDefinitionEvent;
-import org.activiti.api.task.model.Task;
-import org.activiti.api.task.model.TaskCandidateUser;
-import org.activiti.api.task.model.builders.TaskPayloadBuilder;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.CloudProcessDefinition;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
-import org.activiti.cloud.api.task.model.CloudTask;
-import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-
 import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_CREATED;
 import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_UPDATED;
 import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED;
@@ -65,6 +26,47 @@ import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TAS
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
+import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.process.model.events.ProcessDefinitionEvent;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.TaskCandidateUser;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
+import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.PagedResources;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
@@ -170,31 +172,38 @@ public class AuditProducerIT {
 
         //when
         processInstanceRestTemplate.suspend(startProcessEntity);
-
-        //then
+        
+       //then
         await().untilAsserted(() -> {
-
-            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+           List<CloudRuntimeEvent<?, ?>> receivedEvents1 = streamHandler.getLatestReceivedEvents();
+           assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
             
-            assertThat(streamHandler.getLatestReceivedEvents())
+           assertThat(receivedEvents1)
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(PROCESS_SUSPENDED.name(),
-                        TASK_SUSPENDED.name());
-        });
+                                 TASK_SUSPENDED.name());
 
+           assertThat(receivedEvents1.get(0).getEntity()).isInstanceOf(ProcessInstance.class);
+           assertThat(((CloudProcessSuspendedEvent)receivedEvents1.get(0)).getProcessDefinitionKey()).isEqualTo(SIMPLE_PROCESS);
+        });
+           
         //when
         processInstanceRestTemplate.resume(startProcessEntity);
-
+        
         //then
         await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents2 = streamHandler.getLatestReceivedEvents();
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
             
-            assertThat(streamHandler.getLatestReceivedEvents())
+            assertThat(receivedEvents2)
                 .extracting(event -> event.getEventType().name())
                 .containsExactly(PROCESS_RESUMED.name(),
-                        TASK_ACTIVATED.name());
-        });
+                                 TASK_ACTIVATED.name());
 
+           assertThat(receivedEvents2.get(0).getEntity()).isInstanceOf(ProcessInstance.class);
+           assertThat(((CloudProcessResumedEvent)receivedEvents2.get(0)).getProcessDefinitionKey()).isEqualTo(SIMPLE_PROCESS);
+        });
+            
         //when
         processInstanceRestTemplate.setVariables(startProcessEntity.getBody().getId(),
                 Collections.singletonMap("name",
