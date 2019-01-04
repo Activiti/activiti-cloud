@@ -2,4 +2,4 @@
 dependencies:
 - name: "activiti-cloud-full-example"
   repository: "https://activiti.github.io/activiti-cloud-helm-charts/"
-  version: "0.0.29"
+  version: "0.0.30"
