@@ -58,41 +58,6 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-graphql</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-notifications</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-graphql-ws</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-graphql-ws-schema</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-graphql-ws-security</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-stomp</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-services-query-graphiql</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
         <artifactId>activiti-cloud-starter-query</artifactId>
         <version>${activiti-cloud-query-service.version}</version>
       </dependency>
