@@ -23,19 +23,6 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-/**
- * Graphql clients can send GET or POST HTTP requests.  The spec does not make an explicit
- * distinction.  So you may need to handle both.  The following was tested using
- * a graphiql client tool found here : https://github.com/skevy/graphiql-app
- *
- * You should consider bundling graphiql in your application
- *
- * https://github.com/graphql/graphiql
- *
- * This outlines more information on how to handle parameters over http
- *
- * http://graphql.org/learn/serving-over-http/
- */
 public class QueryParameters {
 
     String query;
