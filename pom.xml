@@ -18,7 +18,7 @@
   
   <properties>
       <activiti-cloud-build.version>7.0.36</activiti-cloud-build.version>
-      <activiti-cloud-query-dependencies.version>7.0.74</activiti-cloud-query-dependencies.version>
+      <activiti-cloud-query-dependencies.version>7.0.80</activiti-cloud-query-dependencies.version>
       <activiti-cloud-notifications-service-graphql.version>${project.version}</activiti-cloud-notifications-service-graphql.version>
       <graphql-jpa-query.version>0.3.11</graphql-jpa-query.version>
   </properties>
@@ -45,15 +45,15 @@
       <type>pom</type>
     </dependency>
     <dependency>
-      <groupId>org.activiti.cloud.query</groupId>
-      <artifactId>activiti-cloud-query-dependencies</artifactId>
-      <version>${activiti-cloud-query-dependencies.version}</version>
-      <type>pom</type>
-    </dependency>
-    <dependency>
       <groupId>com.introproventures</groupId>
       <artifactId>graphql-jpa-query-dependencies</artifactId>
       <version>${graphql-jpa-query.version}</version>
+      <type>pom</type>
+    </dependency> 
+    <dependency>
+      <groupId>org.activiti.cloud.query</groupId>
+      <artifactId>activiti-cloud-query-dependencies</artifactId>
+      <version>${activiti-cloud-query-dependencies.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>

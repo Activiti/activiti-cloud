@@ -20,9 +20,9 @@
         <groupId>com.introproventures</groupId>
         <artifactId>graphql-jpa-query-dependencies</artifactId>
         <version>${graphql-jpa-query.version}</version>
-        <type>pom</type>
         <scope>import</scope>
-      </dependency>
+        <type>pom</type>
+      </dependency>      
       <dependency>
         <groupId>org.activiti.cloud.query</groupId>
         <artifactId>activiti-cloud-query-dependencies</artifactId>
@@ -73,6 +73,11 @@
       <dependency>
         <groupId>org.activiti.cloud.notifications.graphql</groupId>
         <artifactId>activiti-cloud-services-notifications-graphql-events</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.notifications.graphql</groupId>
+        <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

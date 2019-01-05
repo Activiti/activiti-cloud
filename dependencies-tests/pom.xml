@@ -6,7 +6,7 @@
     <version>7.0.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
-  <artifactId>activiti-cloud-notifications-service-graphql-dependencies-tests</artifactId>
+  <artifactId>activiti-cloud-notifications-graphql-dependencies-tests</artifactId>
   <packaging>pom</packaging>
   
   <name>Activiti Cloud Notifications :: GraphQL Dependencies (Bill Of Materials) Tests</name>
