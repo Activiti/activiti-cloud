@@ -1,0 +1,538 @@
+#
+# Schemas must have at least a query root type
+#
+schema {
+    query: Query
+    subscription : Subscription
+}
+
+type Query {
+    hello : String
+}
+
+type Subscription {
+    engineEvents(
+    	serviceName : String, 
+    	appName : String, 
+    	processDefinitionKey : String,
+		processInstanceId : String. 
+		businessKey : String
+    ) : ProcessEngineNotification
+}
+
+type ProcessEngineNotification {
+	serviceName : String
+	appName : String 
+	processDefinitionKey : String 
+	processInstanceId : String 
+	businessKey : String 
+	PROCESS_STARTED : [PROCESS_STARTED]
+	PROCESS_COMPLETED : [PROCESS_COMPLETED]
+	PROCESS_CREATED : [PROCESS_CREATED]
+	PROCESS_CANCELLED : [PROCESS_CANCELLED]
+	PROCESS_RESUMED : [PROCESS_RESUMED]
+	PROCESS_SUSPENDED : [PROCESS_SUSPENDED]
+	ACTIVITY_STARTED : [ACTIVITY_STARTED]
+	ACTIVITY_CANCELLED : [ACTIVITY_CANCELLED]
+	ACTIVITY_COMPLETED : [ACTIVITY_COMPLETED]
+	VARIABLE_CREATED : [VARIABLE_CREATED]
+	VARIABLE_UPDATED : [VARIABLE_UPDATED]
+	VARIABLE_DELETED : [VARIABLE_DELETED]
+	SEQUENCE_FLOW_TAKEN : [SEQUENCE_FLOW_TAKEN]
+	TASK_CREATED : [TASK_CREATED]
+	TASK_COMPLETED : [TASK_COMPLETED]
+	TASK_ASSIGNED : [TASK_ASSIGNED]
+	TASK_ACTIVATED : [TASK_ACTIVATED]
+	TASK_SUSPENDED : [TASK_SUSPENDED]
+	TASK_CANCELLED : [TASK_CANCELLED]
+	INTEGRATION_REQUESTED : [INTEGRATION_REQUESTED]
+	INTEGRATION_RESULT_RECEIVED : [INTEGRATION_RESULT_RECEIVED]
+	TASK_CANDIDATE_USER_ADDED: [TASK_CANDIDATE_USER_ADDED]
+	TASK_CANDIDATE_USER_REMOVED: [TASK_CANDIDATE_USER_REMOVED]
+	TASK_CANDIDATE_GROUP_ADDED: [TASK_CANDIDATE_GROUP_ADDED]
+	TASK_CANDIDATE_GROUP_REMOVED: [TASK_CANDIDATE_GROUP_REMOVED]
+}
+
+type ProcessInstanceType {
+	id : String
+	parentId : String
+	name : String
+	description : String
+	processDefinitionId : String
+	processDefinitionKey : String
+	processDefinitionVersion : Long
+	businessKey: String
+	initiator : String
+	startDate : String
+	status : String
+}
+
+type PROCESS_RESUMED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+    
+    id : String
+    timestamp : Long
+    entity : ProcessInstanceType
+    eventType : String
+}
+
+type PROCESS_SUSPENDED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+    
+    id : String
+    timestamp : Long
+    entity : ProcessInstanceType
+    eventType : String
+}
+
+type PROCESS_STARTED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : ProcessInstanceType
+    eventType : String
+    
+    nestedProcessDefinitionId : String
+    nestedProcessInstanceId : String    
+}
+
+type PROCESS_COMPLETED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : ProcessInstanceType
+    eventType : String
+}
+
+type PROCESS_CREATED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : ProcessInstanceType
+    eventType : String
+}
+
+type PROCESS_CANCELLED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : ProcessInstanceType
+    eventType : String
+
+    cause: String
+}
+
+type BPMNActivityType {
+    processInstanceId : String
+    pocessDefinitionId : String
+    activityName : String
+    activityType : String
+    elementId : String
+}
+
+type ACTIVITY_COMPLETED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : BPMNActivityType
+    eventType : String
+}
+
+type ACTIVITY_STARTED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : BPMNActivityType
+    eventType : String
+}
+
+type ACTIVITY_CANCELLED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : BPMNActivityType
+    eventType : String
+
+    cause: String
+}
+
+type VariableInstance {
+    name : String
+    type : String
+    processInstanceId : String
+    taskId : String
+    taskVariable : Boolean
+    value : String
+}
+
+
+type VARIABLE_CREATED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : VariableInstance
+    eventType : String
+}
+
+type VARIABLE_DELETED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : VariableInstance
+    eventType : String
+}
+
+type VARIABLE_UPDATED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : VariableInstance
+    eventType : String
+}
+
+
+type SequenceFlowType {
+    processInstanceId : String
+    processDefinitionId : String
+    sourceActivityElementId : String
+    sourceActivityName : String
+    sourceActivityType : String
+    targetActivityElementId : String
+    targetActivityName : String
+    targetActivityType : String
+}
+
+type SEQUENCE_FLOW_TAKEN {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : SequenceFlowType
+    eventType : String
+}
+
+type TaskType {
+    id : String
+    owner : String
+    assignee : String
+    name : String
+    description : String
+    createdDate : String
+	claimedDate : String
+    dueDate : String
+    priority : Long
+    processDefinitionId : String
+    processInstanceId : String
+    parentTaskId : String
+    status : String
+}
+
+type TASK_CREATED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : TaskType
+    eventType : String
+}
+
+type TASK_SUSPENDED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : TaskType
+    eventType : String
+}
+
+type TASK_STARTED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : TaskType
+    eventType : String
+}
+
+type TASK_ACTIVATED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : TaskType
+    eventType : String
+}
+
+type TASK_ASSIGNED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : TaskType
+    eventType : String
+}
+
+type TASK_COMPLETED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : TaskType
+    eventType : String
+}
+
+type TASK_CANCELLED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : TaskType
+    eventType : String
+    
+    cause: String
+}
+
+
+type IntegrationContextType {
+    id : String
+    processInstanceId : String
+    processDefinitionId : String
+    connectorType : String
+    activityElementId : String
+    inBoundVariables : String
+    outBoundVariables : String    
+}
+
+
+type INTEGRATION_REQUESTED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : IntegrationContextType
+    eventType : String
+}
+
+type INTEGRATION_RESULT_RECEIVED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : IntegrationContextType
+    eventType : String
+}
+
+type TaskCandidateUserType {
+    taskId : String
+    userId : String
+}
+
+type TASK_CANDIDATE_USER_ADDED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : TaskCandidateUserType
+    eventType : String
+}
+
+type TASK_CANDIDATE_USER_REMOVED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : TaskCandidateUserType
+    eventType : String
+}
+
+
+type TaskCandidateGroupType {
+    taskId : String
+    groupId : String
+}
+
+type TASK_CANDIDATE_GROUP_ADDED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : TaskCandidateGroupType
+    eventType : String
+}
+
+type TASK_CANDIDATE_GROUP_REMOVED {
+    serviceName : String
+    serviceFullName : String
+    serviceVersion : String
+    serviceType : String
+    appName : String
+    appVersion : String
+    entityId : String
+
+    id : String
+    timestamp : Long
+    entity : TaskCandidateGroupType
+    eventType : String
+}
+
+
