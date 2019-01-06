@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.notifications.graphql.schema;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Map;
+
+import graphql.GraphQL;
 import graphql.Scalars;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
@@ -64,7 +69,14 @@ public class GraphQLSchemaAutoConfigurationTest {
 
     @Test
     public void contextLoads() {
-        // success
+        // given
+        GraphQL graphQL = GraphQL.newGraphQL(graphQLSchema).build();
+
+        // when
+        Map<String, Object> result = graphQL.execute("{hello}").getData();
+        
+        // then
+        assertThat(result.toString()).isEqualTo("{hello=world}");
     }
     
 
