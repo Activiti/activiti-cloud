@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import graphql.ExecutionResult;
 import graphql.GraphQLError;
+import org.activiti.cloud.notifications.graphql.test.EngineEventsMessageProducer;
 import org.activiti.cloud.services.graphql.web.ActivitiGraphQLController.GraphQLQueryRequest;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.junit.Before;
@@ -41,6 +42,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -50,6 +52,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.client.HttpClient.WebsocketSender;
 import reactor.test.StepVerifier;
 
 @RunWith(SpringRunner.class)
@@ -63,7 +66,7 @@ public class ActivitiGraphQLStarterIT {
     private static final String TESTADMIN = "testadmin";
     private static final String TASK_NAME = "task1";
     private static final String GRPAPHQL_URL = "/graphql";
-    private static final Duration TIMEOUT = Duration.ofMillis(10000);
+    private static final Duration TIMEOUT = Duration.ofMillis(20000);
     
     @LocalServerPort
     private String port;
@@ -79,6 +82,7 @@ public class ActivitiGraphQLStarterIT {
     @SpringBootApplication
     @ComponentScan({"org.activiti.cloud.starters.test",
                     "org.activiti.cloud.services.test.identity.keycloak.interceptor"})
+    @Import(EngineEventsMessageProducer.class)
     static class Application {
         // Nothing
     }
@@ -136,6 +140,55 @@ public class ActivitiGraphQLStarterIT {
                     .expectComplete()
                     .verify(TIMEOUT);
     }
+    
+    
+    @Test
+    public void testGraphqlWsSubprotocolServerStartStopSubscription() {
+        ReplayProcessor<String> connect = ReplayProcessor.create();
+        ReplayProcessor<String> data = ReplayProcessor.create();
+        ReplayProcessor<String> complete = ReplayProcessor.create();
+        
+        keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
+        final String auth = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        
+        String startMessage = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"query\":\"subscription {\\n  engineEvents(appName: \\\"default-app\\\") {\\n    appName\\n    serviceName\\n  }\\n}\",\"variables\":null}}";
+        String stopMessage = "{\"id\":\"1\",\"type\":\"stop\"}";
+        
+        WebsocketSender client = HttpClient.create()
+                                           .baseUrl("ws://localhost:" + port)
+                                           .wiretap(true)
+                                           .headers(h -> h.add(AUTHORIZATION, auth))
+                                           .websocket(GRAPHQL_WS)
+                                           .uri(WS_GRAPHQL_URI);
+        
+       // start subscription
+       client.handle((i, o) -> {
+              o.options(NettyPipeline.SendOptions::flushOnEach)
+               .sendString(Mono.just(startMessage))
+               .then()
+               .log("start")
+               .subscribe();
+             
+             return i.receive()
+                     .asString()
+                     .log("data")
+                     .take(2)
+                     .subscribeWith(data);
+        }) // stop subscription
+        .collectList()
+        .subscribe();
+        
+        String ackMessage = "{\"payload\":{},\"id\":null,\"type\":\"connection_ack\"}";
+        String kaMessage = "{\"payload\":{},\"id\":null,\"type\":\"ka\"}";
+        String dataMessage = "{\"payload\":{\"data\":{\"engineEvents\":{\"appName\":\"default-app\",\"serviceName\":\"rb-my-app\"}}},\"id\":\"1\",\"type\":\"data\"}";
+        String completeMessage = "{\"payload\":{},\"id\":\"1\",\"type\":\"complete\"}";
+    
+        StepVerifier.create(data)
+                    .expectNext(dataMessage)
+                    .expectNext(dataMessage)
+                    .expectComplete()
+                    .verify(TIMEOUT);
+    }    
     
     @Test
     public void testGraphqlWsSubprotocolServerWithUserRoleNotAuthorized() {

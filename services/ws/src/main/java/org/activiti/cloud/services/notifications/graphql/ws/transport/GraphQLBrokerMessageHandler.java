@@ -246,6 +246,8 @@ public class GraphQLBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
     @Timed
     protected final void handleStartSubscription(Message<GraphQLMessage> message) {
+        logger.info("handleStartSubscription for message " + message);
+        
         MessageHeaders headers = message.getHeaders();
         String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
         GraphQLMessage operationPayload = message.getPayload();
@@ -321,6 +323,8 @@ public class GraphQLBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
     @Timed
     protected final void handleStopSubscription(Message<GraphQLMessage> message) {
+        logger.info("handleStopSubscription for message " + message);
+        
         MessageHeaders headers = message.getHeaders();
         String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
         GraphQLMessage operationPayload = message.getPayload();
@@ -332,6 +336,8 @@ public class GraphQLBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
     @Timed
     protected final void handleConnectionTerminate(Message<GraphQLMessage> message) {
+        logger.info("handleConnectionTerminate for message " + message);
+
         MessageHeaders headers = message.getHeaders();
         String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 
