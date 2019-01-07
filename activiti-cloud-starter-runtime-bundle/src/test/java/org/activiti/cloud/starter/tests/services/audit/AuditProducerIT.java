@@ -40,6 +40,7 @@ import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.TaskCandidateGroup;
 import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -406,6 +407,161 @@ public class AuditProducerIT {
             assertThat(((Task) receivedEvents.get(0).getEntity()).getId()).isEqualTo(task.getId());
             assertThat(receivedEvents.get(0).getEntityId()).isEqualTo(task.getId());
             assertThat(((Task) receivedEvents.get(0).getEntity()).getDescription()).isEqualTo("short description");
+        });
+    }
+    
+    @Test
+    public void shouldEmitEventsForTaskAddDeleteUserCandidates() {
+        //given
+        CloudTask task = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("task1").withDescription(
+                "task description").withAssignee("hruser").build());
+
+        //when
+        taskRestTemplate.addUserCandidates(TaskPayloadBuilder.addCandidateUsers().withTaskId(task.getId()).withCandidateUser("testuser").build());
+
+        //then
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
+
+            assertThat(receivedEvents)
+                    .hasSize(1)
+                    .extracting(CloudRuntimeEvent::getEventType,
+                                CloudRuntimeEvent::getEntityId)
+                    .containsExactly(tuple(TASK_CANDIDATE_USER_ADDED,
+                                           "testuser")
+                    );
+
+
+            assertThat(receivedEvents.get(0).getEntity()).isNotNull();
+            assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(TaskCandidateUser.class);
+            assertThat(((TaskCandidateUser) receivedEvents.get(0).getEntity()).getTaskId()).isEqualTo(task.getId());
+            assertThat(((TaskCandidateUser) receivedEvents.get(0).getEntity()).getUserId()).isEqualTo("testuser");
+           
+        });
+        
+        ResponseEntity<List<String>> userCandidates = taskRestTemplate.getUserCandidates(task.getId());
+        assertThat(userCandidates).isNotNull();
+        assertThat(userCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(userCandidates.getBody().size()).isEqualTo(2);
+        assertThat(userCandidates.getBody().get(0)).isEqualTo("hruser");
+        assertThat(userCandidates.getBody().get(1)).isEqualTo("testuser");
+        
+        //when
+        taskRestTemplate.deleteUserCandidates(TaskPayloadBuilder.deleteCandidateUsers().withTaskId(task.getId()).withCandidateUser("testuser").build());
+
+        //then
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
+
+            assertThat(receivedEvents)
+                    .hasSize(1)
+                    .extracting(CloudRuntimeEvent::getEventType,
+                                CloudRuntimeEvent::getEntityId)
+                    .containsExactly(tuple(TASK_CANDIDATE_USER_REMOVED,
+                                           "testuser")
+                    );
+
+
+            assertThat(receivedEvents.get(0).getEntity()).isNotNull();
+            assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(TaskCandidateUser.class);
+            assertThat(((TaskCandidateUser) receivedEvents.get(0).getEntity()).getTaskId()).isEqualTo(task.getId());
+            assertThat(((TaskCandidateUser) receivedEvents.get(0).getEntity()).getUserId()).isEqualTo("testuser");
+           
+        });
+        
+        userCandidates = taskRestTemplate.getUserCandidates(task.getId());
+        assertThat(userCandidates).isNotNull();
+        assertThat(userCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(userCandidates.getBody().size()).isEqualTo(1);
+        assertThat(userCandidates.getBody().get(0)).isEqualTo("hruser");
+        
+        //Delete task
+        taskRestTemplate.delete(task);
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+        });
+    }
+    
+    @Test
+    public void shouldEmitEventsForTaskAddDeleteGroupCandidates() {
+        //given
+        CloudTask task = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("task2").withDescription(
+                "test task description").withAssignee("hruser").build());
+
+        ResponseEntity<List<String>> groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
+        assertThat(groupCandidates).isNotNull();
+        assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(groupCandidates.getBody().size()).isEqualTo(0);
+        
+        //when
+        taskRestTemplate.addGroupCandidates(TaskPayloadBuilder.addCandidateGroups().withTaskId(task.getId()).withCandidateGroup("hr").build());
+
+        //then
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
+
+            assertThat(receivedEvents)
+                    .hasSize(1)
+                    .extracting(CloudRuntimeEvent::getEventType,
+                                CloudRuntimeEvent::getEntityId)
+                    .containsExactly(tuple(TASK_CANDIDATE_GROUP_ADDED,
+                                           "hr")
+                    );
+
+
+            assertThat(receivedEvents.get(0).getEntity()).isNotNull();
+            assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(TaskCandidateGroup.class);
+            assertThat(((TaskCandidateGroup) receivedEvents.get(0).getEntity()).getTaskId()).isEqualTo(task.getId());
+            assertThat(((TaskCandidateGroup) receivedEvents.get(0).getEntity()).getGroupId()).isEqualTo("hr");
+           
+        });
+        
+        groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
+        assertThat(groupCandidates).isNotNull();
+        assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(groupCandidates.getBody().size()).isEqualTo(1);
+        assertThat(groupCandidates.getBody().get(0)).isEqualTo("hr");
+        
+        //when
+        taskRestTemplate.deleteGroupCandidates(TaskPayloadBuilder.deleteCandidateGroups().withTaskId(task.getId()).withCandidateGroup("hr").build());
+
+        //then
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
+
+            assertThat(receivedEvents)
+                    .hasSize(1)
+                    .extracting(CloudRuntimeEvent::getEventType,
+                                CloudRuntimeEvent::getEntityId)
+                    .containsExactly(tuple(TASK_CANDIDATE_GROUP_REMOVED,
+                                           "hr")
+                    );
+
+
+            assertThat(receivedEvents.get(0).getEntity()).isNotNull();
+            assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(TaskCandidateGroup.class);
+            assertThat(((TaskCandidateGroup) receivedEvents.get(0).getEntity()).getTaskId()).isEqualTo(task.getId());
+            assertThat(((TaskCandidateGroup) receivedEvents.get(0).getEntity()).getGroupId()).isEqualTo("hr");
+           
+        });
+        
+        groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
+        assertThat(groupCandidates).isNotNull();
+        assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(groupCandidates.getBody().size()).isEqualTo(0);
+        
+        //Delete task
+        taskRestTemplate.delete(task);
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
         });
     }
 
