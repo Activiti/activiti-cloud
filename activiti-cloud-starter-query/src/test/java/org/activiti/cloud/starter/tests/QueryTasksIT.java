@@ -188,10 +188,11 @@ public class QueryTasksIT {
         TaskImpl updatedTask = new TaskImpl(assignedTask.getId(),
                                             assignedTask.getName(),
                                             assignedTask.getStatus());
-        updatedTask.setAssignee(assignedTask.getAssignee());
         updatedTask.setProcessInstanceId(assignedTask.getProcessInstanceId());
+        updatedTask.setName("Updated name");
         updatedTask.setDescription("Updated description");
         updatedTask.setPriority(42);
+        updatedTask.setFormKey("FormKey");
 
         //when
         producer.send(new CloudTaskUpdatedEventImpl(updatedTask));
@@ -209,8 +210,10 @@ public class QueryTasksIT {
 
             assertThat(responseEntity.getBody()).isNotNull();
             Task task = responseEntity.getBody();
-            assertThat(task.getDescription()).isEqualTo("Updated description");
-            assertThat(task.getPriority()).isEqualTo(42);
+            assertThat(task.getName()).isEqualTo(updatedTask.getName());
+            assertThat(task.getDescription()).isEqualTo(updatedTask.getDescription());
+            assertThat(task.getPriority()).isEqualTo(updatedTask.getPriority());
+            assertThat(task.getFormKey()).isEqualTo(updatedTask.getFormKey());
         });
     }
 
