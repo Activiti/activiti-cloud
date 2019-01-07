@@ -161,7 +161,7 @@
                     </ports>
                     <wait>
                       <log>Keycloak .* started in</log>
-                      <time>45000</time>
+                      <time>80000</time>
                       <shutdown>5000</shutdown>
                       <kill>1000</kill>
                     </wait>
@@ -178,7 +178,7 @@
                     </ports>
                     <wait>
                       <log>Server startup complete</log>
-                      <time>45000</time>
+                      <time>80000</time>
                       <shutdown>3000</shutdown>
                       <kill>1000</kill>
                     </wait>
