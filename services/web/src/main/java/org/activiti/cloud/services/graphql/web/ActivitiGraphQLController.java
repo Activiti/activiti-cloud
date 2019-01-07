@@ -44,10 +44,10 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @ConditionalOnWebApplication
-@ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
+@ConditionalOnProperty(name = "spring.activiti.cloud.services.notifications.graphql.enabled", matchIfMissing = true)
 public class ActivitiGraphQLController {
 
-    private static final String PATH = "${spring.activiti.cloud.services.query.graphql.path:/graphql}";
+    private static final String PATH = "${spring.activiti.cloud.services.notifications.graphql.path:/graphql}";
     public static final String APPLICATION_GRAPHQL_VALUE = "application/graphql";
 
     private final GraphQLExecutor graphQLExecutor;

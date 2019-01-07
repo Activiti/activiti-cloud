@@ -24,7 +24,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.validation.annotation.Validated;
 
-@ConfigurationProperties(prefix="spring.activiti.cloud.services.query.graphql")
+@ConfigurationProperties(prefix="spring.activiti.cloud.services.notifications.graphql")
 @Validated
 public class ActivitiGraphQLWebProperties {
 
