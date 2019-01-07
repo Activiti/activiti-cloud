@@ -102,18 +102,17 @@ public class ActivitiGraphQLStarterIT {
     }    
     
     @Test
-    public void testGraphqlWsSubprotocolServerSupported() {
+    public void testGraphqlWsSubprotocolConnectionInitXAuthorizationSupported() {
         ReplayProcessor<String> output = ReplayProcessor.create();
         
         keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
-        final String auth = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        final String accessToken = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
         
-        String initMessage = "{\"type\":\"connection_init\",\"payload\":{\"simpHeartbeat\":1000}}";
+        String initMessage = "{\"type\":\"connection_init\",\"payload\":{\"kaInterval\":1000,\"X-Authorization\":\""+accessToken+"\"}}";
         
         HttpClient.create()
                   .baseUrl("ws://localhost:"+port)
                   .wiretap(true)
-                  .headers(h -> h.add(AUTHORIZATION, auth))
                   .websocket(GRAPHQL_WS)
                   .uri(WS_GRAPHQL_URI)
                   .handle((i, o) -> {
@@ -196,14 +195,13 @@ public class ActivitiGraphQLStarterIT {
 
         keycloakTokenProducer.setKeycloakTestUser(HRUSER);
         
-        final String auth =  keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        final String accessToken =  keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
         
-        String initMessage = "{\"type\":\"connection_init\",\"payload\":{}}";
+        String initMessage = "{\"type\":\"connection_init\",\"payload\":{\"X-Authorization\":\""+accessToken+"\"}}";
         
         HttpClient.create()
                   .baseUrl("ws://localhost:"+port)
                   .wiretap(true)
-                  .headers(h -> h.add(AUTHORIZATION, auth))
                   .websocket(GRAPHQL_WS)
                   .uri(WS_GRAPHQL_URI)
                   .handle((i, o) -> {
