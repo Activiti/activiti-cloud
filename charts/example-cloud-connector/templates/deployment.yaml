@@ -83,3 +83,6 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 12 }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+{{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.service.name }}
+{{- end }}
