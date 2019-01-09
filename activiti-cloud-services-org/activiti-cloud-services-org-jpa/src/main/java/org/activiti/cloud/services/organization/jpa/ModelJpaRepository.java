@@ -22,7 +22,7 @@ import java.util.UUID;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.activiti.cloud.services.organization.entity.ApplicationEntity;
+import org.activiti.cloud.services.organization.entity.ProjectEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntityHandler;
 import org.springframework.data.domain.Page;
@@ -44,19 +44,19 @@ import static org.activiti.cloud.services.organization.entity.ModelEntityHandler
         itemResourceRel = "models",
         exported = false)
 public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
-                                            ModelRepository<ApplicationEntity, ModelEntity> {
+                                            ModelRepository<ProjectEntity, ModelEntity> {
 
-    Page<ModelEntity> findAllByApplicationIdAndTypeEquals(String applicationId,
-                                                          String modelTypeFilter,
-                                                          Pageable pageable);
+    Page<ModelEntity> findAllByProjectIdAndTypeEquals(String projectId,
+                                                      String modelTypeFilter,
+                                                      Pageable pageable);
 
     @Override
-    default Page<ModelEntity> getModels(ApplicationEntity application,
+    default Page<ModelEntity> getModels(ProjectEntity project,
                                         ModelType modelTypeFilter,
                                         Pageable pageable) {
-        return loadModelReference(findAllByApplicationIdAndTypeEquals(application.getId(),
-                                                                      modelTypeFilter.getName(),
-                                                                      pageable));
+        return loadModelReference(findAllByProjectIdAndTypeEquals(project.getId(),
+                                                                  modelTypeFilter.getName(),
+                                                                  pageable));
     }
 
     @Override

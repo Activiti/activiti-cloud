@@ -21,47 +21,47 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.services.common.file.FileContent;
 
 /**
- * Builder for applications
+ * Builder for projects
  */
-public class ApplicationHolder {
+public class ProjectHolder {
 
-    private Application application;
+    private Project project;
 
     private final Map<String, ModelJsonFile> modelJsonFilesMap = new LinkedHashMap<>();
 
     private final Map<String, FileContent> modelContentFilesMap = new LinkedHashMap<>();
 
-    public ApplicationHolder setApplication(Application application) {
-        if (this.application == null) {
-            this.application = application;
+    public ProjectHolder setProject(Project project) {
+        if (this.project == null) {
+            this.project = project;
         }
         return this;
     }
 
-    public ApplicationHolder addModelJsonFile(String modelName,
-                                              ModelType modelType,
-                                              FileContent fileContent) {
+    public ProjectHolder addModelJsonFile(String modelName,
+                                          ModelType modelType,
+                                          FileContent fileContent) {
         modelJsonFilesMap.put(modelName,
                               new ModelJsonFile(modelType,
                                                 fileContent));
         return this;
     }
 
-    public ApplicationHolder addModelContent(String modelName,
-                                             FileContent fileContent) {
+    public ProjectHolder addModelContent(String modelName,
+                                         FileContent fileContent) {
         modelContentFilesMap.put(modelName,
                                  fileContent);
         return this;
     }
 
-    public Optional<Application> getApplicationMetadata() {
-        return Optional.ofNullable(application);
+    public Optional<Project> getProjectMetadata() {
+        return Optional.ofNullable(project);
     }
 
     public Collection<ModelJsonFile> getModelJsonFiles() {

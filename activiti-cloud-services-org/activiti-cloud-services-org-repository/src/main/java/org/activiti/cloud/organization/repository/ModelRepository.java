@@ -18,7 +18,7 @@ package org.activiti.cloud.organization.repository;
 
 import java.util.Optional;
 
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -28,9 +28,9 @@ import org.springframework.data.domain.Pageable;
 /**
  * Interface for {@link Model} entities repository
  */
-public interface ModelRepository<A extends Application, M extends Model<A, ?>> {
+public interface ModelRepository<P extends Project, M extends Model<P, ?>> {
 
-    Page<M> getModels(A application,
+    Page<M> getModels(P project,
                       ModelType modelTypeFilter,
                       Pageable pageable);
 

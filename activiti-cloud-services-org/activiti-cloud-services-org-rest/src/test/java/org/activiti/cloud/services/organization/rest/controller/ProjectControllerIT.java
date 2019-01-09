@@ -21,17 +21,17 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.service.ModelReferenceService;
-import org.activiti.cloud.organization.repository.ApplicationRepository;
+import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
-import org.activiti.cloud.services.organization.entity.ApplicationEntity;
+import org.activiti.cloud.services.organization.entity.ProjectEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
-import org.activiti.cloud.services.organization.jpa.ApplicationJpaRepository;
+import org.activiti.cloud.services.organization.jpa.ProjectJpaRepository;
 import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
 import org.junit.After;
@@ -51,7 +51,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.activiti.cloud.services.organization.mock.MockFactory.application;
+import static org.activiti.cloud.services.organization.mock.MockFactory.project;
 import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
@@ -79,7 +79,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = OrganizationRestApplication.class)
 @WebAppConfiguration
-public class ApplicationControllerIT {
+public class ProjectControllerIT {
 
     private MockMvc mockMvc;
 
@@ -90,7 +90,7 @@ public class ApplicationControllerIT {
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private ApplicationRepository applicationRepository;
+    private ProjectRepository projectRepository;
 
     @Autowired
     private ModelRepository modelRepository;
@@ -106,103 +106,103 @@ public class ApplicationControllerIT {
     @After
     public void tearDown() {
         ((ModelJpaRepository) modelRepository).deleteAllInBatch();
-        ((ApplicationJpaRepository) applicationRepository).deleteAllInBatch();
+        ((ProjectJpaRepository) projectRepository).deleteAllInBatch();
     }
 
     @Test
-    public void testGetApplications() throws Exception {
+    public void testGetProjects() throws Exception {
 
         // GIVEN
-        applicationRepository.createApplication(application("Application1"));
-        applicationRepository.createApplication(application("Application2"));
+        projectRepository.createProject(project("Project1"));
+        projectRepository.createProject(project("Project2"));
 
         // WHEN
-        mockMvc.perform(get("{version}/applications",
+        mockMvc.perform(get("{version}/projects",
                             RepositoryRestConfig.API_VERSION))
                 // THEN
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.applications",
+                .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(2)))
-                .andExpect(jsonPath("$._embedded.applications[0].name",
-                                    is("Application1")))
-                .andExpect(jsonPath("$._embedded.applications[1].name",
-                                    is("Application2")));
+                .andExpect(jsonPath("$._embedded.projects[0].name",
+                                    is("Project1")))
+                .andExpect(jsonPath("$._embedded.projects[1].name",
+                                    is("Project2")));
     }
 
     @Test
-    public void testGetApplication() throws Exception {
+    public void testGetProject() throws Exception {
         // GIVEN
-        Application application = application("Existing Application");
-        applicationRepository.createApplication(application);
+        Project project = project("Existing Project");
+        projectRepository.createProject(project);
 
         // WHEN
-        mockMvc.perform(get("{version}/applications/{applicationId}",
+        mockMvc.perform(get("{version}/projects/{projectId}",
                             API_VERSION,
-                            application.getId()))
+                            project.getId()))
                 // THEN
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name",
-                                    is("Existing Application")));
+                                    is("Existing Project")));
     }
 
     @Test
-    public void testCreateApplication() throws Exception {
+    public void testCreateProject() throws Exception {
         // GIVEN
-        Application application = application("New application name");
+        Project project = project("New project name");
 
         // WHEN
-        mockMvc.perform(post("{version}/applications",
+        mockMvc.perform(post("{version}/projects",
                              API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(application)))
+                                .content(mapper.writeValueAsString(project)))
                 // THEN
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name",
-                                    is("New application name")));
+                                    is("New project name")));
     }
 
     @Test
-    public void testUpdateApplication() throws Exception {
+    public void testUpdateProject() throws Exception {
         // GIVEN
-        Application application = application("Application to update");
-        applicationRepository.createApplication(application);
+        Project project = project("Project to update");
+        projectRepository.createProject(project);
 
         // WHEN
-        mockMvc.perform(put("{version}/applications/{applicationId}",
+        mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
-                            application.getId())
+                            project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(application("Updated application name"))))
+                                .content(mapper.writeValueAsString(project("Updated project name"))))
                 // THEN
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name",
-                                    is("Updated application name")));
+                                    is("Updated project name")));
 
-        assertThat((Optional<Application>) applicationRepository.findApplicationById(application.getId()))
-                .hasValueSatisfying(updatedApplication -> {
-                    assertThat(updatedApplication.getName()).isEqualTo("Updated application name");
+        assertThat((Optional<Project>) projectRepository.findProjectById(project.getId()))
+                .hasValueSatisfying(updatedProject -> {
+                    assertThat(updatedProject.getName()).isEqualTo("Updated project name");
                 });
     }
 
     @Test
-    public void testDeleteApplication() throws Exception {
+    public void testDeleteProject() throws Exception {
         // GIVEN
-        Application application = application("Application to delete");
-        applicationRepository.createApplication(application);
+        Project project = project("Project to delete");
+        projectRepository.createProject(project);
 
         // WHEN
-        mockMvc.perform(delete("{version}/applications/{applicationId}",
+        mockMvc.perform(delete("{version}/projects/{projectId}",
                                API_VERSION,
-                               application.getId()))
+                               project.getId()))
                 // THEN
                 .andExpect(status().isNoContent());
 
-        assertThat(applicationRepository.findApplicationById(application.getId())).isEmpty();
+        assertThat(projectRepository.findProjectById(project.getId())).isEmpty();
     }
 
     @Test
-    public void testCreateApplicationsWithModels() throws Exception {
+    public void testCreateProjectsWithModels() throws Exception {
         // GIVEN
         final String processModelId1 = "process_model_id1";
         final String processModelName1 = "Process Model 1";
@@ -223,15 +223,15 @@ public class ApplicationControllerIT {
                 .getResource(eq(PROCESS),
                              eq(expectedProcessModel2.getModelId()));
 
-        final String applicationWithModelsId = "application_with_models_id";
-        final String applicationWithModelsName = "application with models";
-        Application application = new ApplicationEntity(applicationWithModelsId,
-                                                        applicationWithModelsName);
+        final String projectWithModelsId = "project_with_models_id";
+        final String projectWithModelsName = "project with models";
+        Project project = new ProjectEntity(projectWithModelsId,
+                                                projectWithModelsName);
 
-        mockMvc.perform(post("{version}/applications",
+        mockMvc.perform(post("{version}/projects",
                              RepositoryRestConfig.API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(application)))
+                                .content(mapper.writeValueAsString(project)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
@@ -239,9 +239,9 @@ public class ApplicationControllerIT {
                                               processModelName1,
                                               PROCESS);
 
-        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+        mockMvc.perform(post("{version}/projects/{projectId}/models",
                              RepositoryRestConfig.API_VERSION,
-                             applicationWithModelsId)
+                             projectWithModelsId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel1)))
                 .andDo(print())
@@ -251,18 +251,18 @@ public class ApplicationControllerIT {
                                               processModelName2,
                                               PROCESS);
 
-        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+        mockMvc.perform(post("{version}/projects/{projectId}/models",
                              RepositoryRestConfig.API_VERSION,
-                             applicationWithModelsId)
+                             projectWithModelsId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel2)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
         // WHEN
-        mockMvc.perform(get("{version}/applications/{applicationId}/models?type=PROCESS",
+        mockMvc.perform(get("{version}/projects/{projectId}/models?type=PROCESS",
                             RepositoryRestConfig.API_VERSION,
-                            applicationWithModelsId))
+                            projectWithModelsId))
                 // THEN
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -273,18 +273,18 @@ public class ApplicationControllerIT {
                 .andExpect(jsonPath("$._embedded.models[1].name",
                                     is(processModelName2)));
 
-        mockMvc.perform(delete("/v1/applications/{applicationId}",
-                               applicationWithModelsId))
+        mockMvc.perform(delete("/v1/projects/{projectId}",
+                               projectWithModelsId))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void testExportApplication() throws Exception {
+    public void testExportProject() throws Exception {
         // GIVEN
         String processName1 = "process-model-1";
         String processName2 = "process-model-2";
 
-        Application application = application("application-with-models");
+        Project project = project("project-with-models");
         ModelEntity processModel1 = processModelWithContent(processName1,
                                                             "Process Model Content 1");
         ModelEntity processModel2 = processModelWithExtensions(processName2,
@@ -300,24 +300,24 @@ public class ApplicationControllerIT {
                 .getResource(eq(PROCESS),
                              eq(processModel2.getId()));
 
-        mockMvc.perform(post("{version}/applications",
+        mockMvc.perform(post("{version}/projects",
                              RepositoryRestConfig.API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(application)))
+                                .content(mapper.writeValueAsString(project)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+        mockMvc.perform(post("{version}/projects/{projectId}/models",
                              RepositoryRestConfig.API_VERSION,
-                             application.getId())
+                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel1)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+        mockMvc.perform(post("{version}/projects/{projectId}/models",
                              RepositoryRestConfig.API_VERSION,
-                             application.getId())
+                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel2)))
                 .andDo(print())
@@ -325,9 +325,9 @@ public class ApplicationControllerIT {
 
         // WHEN
         MvcResult response = mockMvc.perform(
-                get("{version}/applications/{applicationId}/export",
+                get("{version}/projects/{projectId}/export",
                     API_VERSION,
-                    application.getId()))
+                    project.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -335,17 +335,17 @@ public class ApplicationControllerIT {
         assertThatResponseContent(response)
                 .isFile()
                 .isZip()
-                .hasName("application-with-models.zip")
+                .hasName("project-with-models.zip")
                 .hasEntries(
-                        "application-with-models.json",
+                        "project-with-models.json",
                         "processes/",
                         "processes/process-model-1.bpmn20.xml",
                         "processes/process-model-1.json",
                         "processes/process-model-2.bpmn20.xml",
                         "processes/process-model-2.json")
-                .hasJsonContentSatisfying("application-with-models.json",
+                .hasJsonContentSatisfying("project-with-models.json",
                                           jsonContent -> jsonContent
-                                                  .node("name").isEqualTo("application-with-models"))
+                                                  .node("name").isEqualTo("project-with-models"))
                 .hasContent("processes/process-model-1.bpmn20.xml",
                             "Process Model Content 1")
                 .hasJsonContentSatisfying("processes/process-model-1.json",
@@ -364,13 +364,13 @@ public class ApplicationControllerIT {
     }
 
     @Test
-    public void testExportApplicationWithValidationErrors() throws Exception {
+    public void testExportProjectWithValidationErrors() throws Exception {
         // GIVEN
-        ApplicationEntity application = (ApplicationEntity) applicationRepository
-                .createApplication(application("application-with-models"));
+        ProjectEntity project = (ProjectEntity) projectRepository
+                .createProject(project("project-with-models"));
 
         String processContent = "Invalid process xml";
-        ModelEntity processModel = processModelWithContent(application,
+        ModelEntity processModel = processModelWithContent(project,
                                                            "process-model",
                                                            processContent);
         doReturn(processModel.getData())
@@ -391,21 +391,21 @@ public class ApplicationControllerIT {
 
         // WHEN
         MvcResult response = mockMvc.perform(
-                get("{version}/applications/{applicationId}/export",
+                get("{version}/projects/{projectId}/export",
                     API_VERSION,
-                    application.getId()))
+                    project.getId()))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andReturn();
     }
 
     @Test
-    public void testImportApplication() throws Exception {
+    public void testImportProject() throws Exception {
         //GIVEN
         MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "application-xy.zip",
-                                                          "application/zip",
-                                                          resourceAsByteArray("application/application-xy.zip"));
+                                                          "project-xy.zip",
+                                                          "project/zip",
+                                                          resourceAsByteArray("project/project-xy.zip"));
 
         doReturn(mock(ModelReference.class))
                 .when(modelReferenceService)
@@ -413,7 +413,7 @@ public class ApplicationControllerIT {
                              anyString());
 
         // WHEN
-        mockMvc.perform(multipart("{version}/applications/import",
+        mockMvc.perform(multipart("{version}/projects/import",
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
@@ -435,31 +435,31 @@ public class ApplicationControllerIT {
     }
 
     @Test
-    public void testImportApplicationNoApplicationJsonFile() throws Exception {
+    public void testImportProjectInvalidJsonFile() throws Exception {
         //GIVEN
         MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "application-xy.zip",
-                                                          "application/zip",
-                                                          resourceAsByteArray("application/application-xy-no-app.zip"));
+                                                          "project-xy.zip",
+                                                          "project/zip",
+                                                          resourceAsByteArray("project/project-xy-invalid.zip"));
 
         // WHEN
-        mockMvc.perform(multipart("{version}/applications/import",
+        mockMvc.perform(multipart("{version}/projects/import",
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
                 // THEN
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(status().reason(is("No valid application entry found to import: application-xy.zip")));
+                .andExpect(status().reason(is("No valid project entry found to import: project-xy.zip")));
     }
 
     @Test
-    public void testImportApplicationInvalidProcessJsonFile() throws Exception {
+    public void testImportProjectInvalidProcessJsonFile() throws Exception {
         //GIVEN
         MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "application-xy.zip",
-                                                          "application/zip",
-                                                          resourceAsByteArray("application/application-xy-invalid-process-json.zip"));
+                                                          "project-xy.zip",
+                                                          "project/zip",
+                                                          resourceAsByteArray("project/project-xy-invalid-process-json.zip"));
 
         doReturn(mock(ModelReference.class))
                 .when(modelReferenceService)
@@ -467,7 +467,7 @@ public class ApplicationControllerIT {
                              anyString());
 
         // WHEN
-        mockMvc.perform(multipart("{version}/applications/import",
+        mockMvc.perform(multipart("{version}/projects/import",
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
