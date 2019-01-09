@@ -10,6 +10,6 @@ roleRef:
   name: {{ .Chart.Name }}
 subjects:
 - kind: ServiceAccount
-  name: {{ .Chart.Name }}
+  name: {{ .Values.service.name }}
   namespace: {{ .Release.Namespace }}
 {{- end -}}
