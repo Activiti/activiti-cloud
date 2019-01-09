@@ -19,6 +19,7 @@ package org.activiti.cloud.services.query.rest;
 import org.activiti.cloud.services.query.model.ActivitiEntityMetadata;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +47,15 @@ public class QueryRelProviderTest {
     }
 
     @Test
+    public void getItemResourceRelForShouldReturnTaskWhenIsTaskEntity() {
+        //when
+        String itemResourceRel = relProvider.getItemResourceRelFor(TaskEntity.class);
+
+        //then
+        assertThat(itemResourceRel).isEqualTo("task");
+    }
+
+    @Test
     public void getCollectionResourceRelForShouldReturnProcessDefinitionsWhenIsProcessDefinitionEntity() {
         //when
         String collectionResourceRel = relProvider.getCollectionResourceRelFor(ProcessDefinitionEntity.class);
@@ -64,6 +74,15 @@ public class QueryRelProviderTest {
     }
 
     @Test
+    public void getCollectionResourceRelForShouldReturnTasksWhenIsTaskEntity() {
+        //when
+        String collectionResourceRel = relProvider.getCollectionResourceRelFor(TaskEntity.class);
+
+        //then
+        assertThat(collectionResourceRel).isEqualTo("tasks");
+    }
+
+    @Test
     public void shouldSupportProcessDefinitionEntity() {
         //when
         boolean supports = relProvider.supports(ProcessDefinitionEntity.class);
@@ -76,6 +95,15 @@ public class QueryRelProviderTest {
     public void shouldSupportProcessInstanceEntity() {
         //when
         boolean supports = relProvider.supports(ProcessInstanceEntity.class);
+
+        //then
+        assertThat(supports).isTrue();
+    }
+
+    @Test
+    public void shouldSupportTaskEntity() {
+        //when
+        boolean supports = relProvider.supports(TaskEntity.class);
 
         //then
         assertThat(supports).isTrue();
