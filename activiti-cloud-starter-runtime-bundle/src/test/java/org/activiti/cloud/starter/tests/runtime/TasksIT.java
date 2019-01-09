@@ -240,7 +240,7 @@ public class TasksIT {
 
         CreateTaskPayload createSubTask = TaskPayloadBuilder.create().withName("sub task").withDescription("This is my sub-task").withParentTaskId(parentTask.getId()).build();
 
-        CloudTask subTask = taskRestTemplate.createSubTask(createSubTask);
+        CloudTask subTask = taskRestTemplate.createTask(createSubTask);
 
         //when
         PagedResources<CloudTask> subTasks = taskRestTemplate.getSubTasks(parentTask);

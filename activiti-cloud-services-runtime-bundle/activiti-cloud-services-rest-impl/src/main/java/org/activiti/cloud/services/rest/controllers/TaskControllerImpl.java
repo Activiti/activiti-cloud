@@ -143,13 +143,6 @@ public class TaskControllerImpl implements TaskController {
     }
 
     @Override
-    public TaskResource createSubtask(@PathVariable String taskId,
-                                      @RequestBody CreateTaskPayload createTaskPayload) {
-        createTaskPayload.setParentTaskId(taskId);
-        return taskResourceAssembler.toResource(taskRuntime.create(createTaskPayload));
-    }
-
-    @Override
     public PagedResources<TaskResource> getSubtasks(Pageable pageable,
                                                     @PathVariable String taskId) {
         Page<Task> taskPage = taskRuntime

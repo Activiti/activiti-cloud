@@ -46,10 +46,6 @@ public interface TaskController {
     TaskResource updateTask(@PathVariable("taskId") String taskId,
                                     @RequestBody UpdateTaskPayload updateTaskPayload);
 
-    @RequestMapping(value = "/{taskId}/subtask", method = RequestMethod.POST)
-    TaskResource createSubtask(@PathVariable String taskId,
-                               @RequestBody CreateTaskPayload createTaskPayload);
-
     @RequestMapping(value = "/{taskId}/subtasks", method = RequestMethod.GET)
     PagedResources<TaskResource> getSubtasks(Pageable pageable, @PathVariable String taskId);
     

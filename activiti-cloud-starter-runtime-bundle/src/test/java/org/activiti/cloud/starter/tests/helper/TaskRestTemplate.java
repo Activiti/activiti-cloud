@@ -158,15 +158,6 @@ public class TaskRestTemplate {
         return responseEntity;
     }
     
-    public CloudTask createSubTask(CreateTaskPayload createTask) {
-        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + createTask.getParentTaskId() + "/subtask",
-                                                                             HttpMethod.POST,
-                                                                             new HttpEntity<>(createTask),
-                                                                             TASK_RESPONSE_TYPE);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        return responseEntity.getBody();
-    }
-
     public PagedResources<CloudTask> getSubTasks(CloudTask parentTask) {
         ResponseEntity<PagedResources<CloudTask>> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + parentTask.getId() + "/subtasks",
                                                                                              HttpMethod.GET,
