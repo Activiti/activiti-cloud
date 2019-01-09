@@ -73,3 +73,9 @@ terminationGracePeriodSeconds: 20
 ingress:
   ## Set to true to enable ingress record generation
   enabled: false
+
+#only needed when using sck8s
+rbac:
+  create: true
+serviceAccount:
+  create: true

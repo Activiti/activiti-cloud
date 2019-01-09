@@ -1,0 +1,12 @@
+#configmap if using sck8s as not mounted (see also extraEnv)
+{{- if .Values.configMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.service.name }}
+data:
+  application.properties: |-
+{{- range $key, $value := .Values.configMap }}
+    {{ $key }}={{ $value }}
+{{- end }}
+{{- end }}
