@@ -16,9 +16,16 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.Lob;
+
+import org.activiti.api.task.model.TaskCandidateUser;
+import org.activiti.api.task.model.events.TaskCandidateUserEvent;
+import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
+import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateUserJpaJsonConverter;
 
 @Entity
 @DiscriminatorValue(value = TaskCandidateUserAddedEventEntity.TASK_CANDIDATE_USER_ADDED_EVENT)
@@ -26,14 +33,33 @@ public class TaskCandidateUserAddedEventEntity extends AuditEventEntity {
 
     protected static final String TASK_CANDIDATE_USER_ADDED_EVENT = "TaskCandidateUserAddedEvent";
 
+    @Convert(converter = TaskCandidateUserJpaJsonConverter.class)
+    @Lob
+    @Column
+    private TaskCandidateUserImpl candidateUser;
+  
+    
     public TaskCandidateUserAddedEventEntity() {
     }
 
     public TaskCandidateUserAddedEventEntity(String eventId,
                                              Long timestamp,
-                                             String eventType) {
+                                             TaskCandidateUser candidateUser) {
         super(eventId,
               timestamp,
-              eventType);
+              TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name());
+        
+        setCandidateUser(candidateUser);
     }
+    
+    public TaskCandidateUser getCandidateUser() {
+        return candidateUser;
+    }
+
+    public void setCandidateUser(TaskCandidateUser candidateUser) {
+        this.candidateUser = new TaskCandidateUserImpl(candidateUser.getUserId(),candidateUser.getTaskId());
+    }
+    
+  
+    
 }

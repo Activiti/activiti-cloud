@@ -35,6 +35,10 @@ import org.activiti.cloud.services.audit.jpa.converters.ProcessUpdatedEventConve
 import org.activiti.cloud.services.audit.jpa.converters.SequenceFlowTakenEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TaskAssignedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TaskCancelledEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskCandidateGroupAddedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskCandidateGroupRemovedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskCandidateUserAddedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TaskCandidateUserRemovedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TaskCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TaskCreatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TaskSuspendedEventConverter;
@@ -187,4 +191,28 @@ public class AuditJPAAutoConfiguration {
         return new APIEventToEntityConverters(eventToEntityConverters);
     }
     
-}
+    @ConditionalOnMissingBean
+    @Bean
+    public TaskCandidateUserAddedEventConverter taskCandidateUserAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new TaskCandidateUserAddedEventConverter(eventContextInfoAppender);
+    }      
+    
+    @ConditionalOnMissingBean
+    @Bean
+    public TaskCandidateUserRemovedEventConverter taskCandidateUserRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new TaskCandidateUserRemovedEventConverter(eventContextInfoAppender);
+    }    
+    
+    @ConditionalOnMissingBean
+    @Bean
+    public TaskCandidateGroupAddedEventConverter taskCandidateGroupAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new TaskCandidateGroupAddedEventConverter(eventContextInfoAppender);
+    }      
+    
+    @ConditionalOnMissingBean
+    @Bean
+    public TaskCandidateGroupRemovedEventConverter taskCandidateGroupRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new TaskCandidateGroupRemovedEventConverter(eventContextInfoAppender);
+    }      
+    
+} 
