@@ -43,7 +43,7 @@
   <properties>
     <activiti-cloud-modeling-build.version>7.0.4</activiti-cloud-modeling-build.version>
     <activiti-cloud-service-common.version>7.0.67</activiti-cloud-service-common.version>
-    <activiti-cloud-process-model-service.version>7.0.49</activiti-cloud-process-model-service.version>
+    <activiti-cloud-process-model-service.version>7.0.50</activiti-cloud-process-model-service.version>
     <activiti-cloud-org-service.version>${project.version}</activiti-cloud-org-service.version>
   </properties>
 
