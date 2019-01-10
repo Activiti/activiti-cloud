@@ -41,7 +41,7 @@ Then no diagram is shown
 
 Scenario: complete a process instance that uses a connector
 Given the user is authenticated as testuser
-When the user starts a process with variables called ConnectorProcess
+When the user starts a process with variables called CONNECTOR_PROCESS_INSTANCE
 Then the status of the process is changed to completed
 And a variable was created with name var1
 And a variable was created with name test-json-variable-result
