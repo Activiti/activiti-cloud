@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.qa.story;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -111,6 +112,15 @@ public class ProcessInstanceTasks {
     public void startProcess(String processName) {
 
         processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName));
+
+        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
+        checkProcessWithTaskCreated(processName);
+    }
+
+    @When("the user starts a process with variables called $processName")
+    public void startProcessWithVariables(String processName) throws IOException {
+
+        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),true);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
         checkProcessWithTaskCreated(processName);
