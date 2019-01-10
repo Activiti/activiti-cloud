@@ -27,7 +27,7 @@
     </repository>
   </distributionManagement>
   <properties>
-    <activiti-cloud-api.version>7.0.39</activiti-cloud-api.version>
+    <activiti-cloud-api.version>7.0.40</activiti-cloud-api.version>
     <activiti-cloud-acceptance-tests.version>${project.version}</activiti-cloud-acceptance-tests.version>
     <serenity.version>1.9.6</serenity.version>
     <serenity-jbehave.version>1.38.0</serenity-jbehave.version>
