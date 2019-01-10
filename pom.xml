@@ -98,7 +98,7 @@
     <activiti-cloud-audit-service.version>7.0.59</activiti-cloud-audit-service.version>
     <activiti-cloud-connectors.version>7.0.52</activiti-cloud-connectors.version>
     <activiti-cloud-app-service.version>7.0.43</activiti-cloud-app-service.version>
-    <activiti-cloud-acceptance-tests.version>7.0.36</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-acceptance-tests.version>7.0.37</activiti-cloud-acceptance-tests.version>
   </properties>
 
   <dependencyManagement>
