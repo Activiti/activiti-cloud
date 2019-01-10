@@ -23,6 +23,7 @@ import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.RelProvider;
@@ -44,6 +45,9 @@ public class QueryRelProvider implements RelProvider {
                                         new ResourceRelationDescriptor("task",
                                                                        "tasks"));
         resourceRelationDescriptors.put(ProcessVariableEntity.class,
+                                        new ResourceRelationDescriptor("variable",
+                                                                       "variables"));
+        resourceRelationDescriptors.put(TaskVariableEntity.class,
                                         new ResourceRelationDescriptor("variable",
                                                                        "variables"));
     }

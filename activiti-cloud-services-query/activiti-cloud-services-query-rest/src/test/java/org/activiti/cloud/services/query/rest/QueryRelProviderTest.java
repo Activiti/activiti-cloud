@@ -21,6 +21,7 @@ import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,6 +67,15 @@ public class QueryRelProviderTest {
     }
 
     @Test
+    public void getItemResourceRelForShouldReturnVariableWhenIsTaskVariableEntity() {
+        //when
+        String itemResourceRel = relProvider.getItemResourceRelFor(TaskVariableEntity.class);
+
+        //then
+        assertThat(itemResourceRel).isEqualTo("variable");
+    }
+
+    @Test
     public void getCollectionResourceRelForShouldReturnProcessDefinitionsWhenIsProcessDefinitionEntity() {
         //when
         String collectionResourceRel = relProvider.getCollectionResourceRelFor(ProcessDefinitionEntity.class);
@@ -102,6 +112,15 @@ public class QueryRelProviderTest {
     }
 
     @Test
+    public void getCollectionResourceRelForShouldReturnVariablesWhenIsTaskVariableEntity() {
+        //when
+        String collectionResourceRel = relProvider.getCollectionResourceRelFor(TaskVariableEntity.class);
+
+        //then
+        assertThat(collectionResourceRel).isEqualTo("variables");
+    }
+
+    @Test
     public void shouldSupportProcessDefinitionEntity() {
         //when
         boolean supports = relProvider.supports(ProcessDefinitionEntity.class);
@@ -132,6 +151,15 @@ public class QueryRelProviderTest {
     public void shouldSupportProcessVariableEntity() {
         //when
         boolean supports = relProvider.supports(ProcessVariableEntity.class);
+
+        //then
+        assertThat(supports).isTrue();
+    }
+
+    @Test
+    public void shouldSupportTaskVariableEntity() {
+        //when
+        boolean supports = relProvider.supports(TaskVariableEntity.class);
 
         //then
         assertThat(supports).isTrue();

@@ -168,6 +168,7 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
                 //then
                 .andExpect(status().isOk())
                 .andDo(document(PROCESS_INSTANCE_VARIABLE_IDENTIFIER + "/list",
+                                processInstanceIdParameter(),
                                 pageLinks(),
                                 pagedVariablesFields()
 
