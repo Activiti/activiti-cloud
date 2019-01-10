@@ -18,7 +18,7 @@
   <properties>
     <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
     <activiti-cloud-build.version>7.0.36</activiti-cloud-build.version>
-    <activiti-api.version>7.0.65</activiti-api.version>
+    <activiti-api.version>7.0.66</activiti-api.version>
   </properties>
 
   <modules>
