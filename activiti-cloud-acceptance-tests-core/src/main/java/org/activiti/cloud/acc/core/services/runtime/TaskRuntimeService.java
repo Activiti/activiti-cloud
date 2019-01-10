@@ -35,14 +35,6 @@ public interface TaskRuntimeService extends BaseService {
     @RequestLine("DELETE /v1/tasks/{id}")
     void deleteTask(@Param("id") String id);
 
-    @RequestLine("POST /v1/tasks/{parentTaskId}/subtask")
-    @Headers({
-            "Content-Type: application/json",
-            "Accept: application/hal+json;charset=UTF-8"
-    })
-    CloudTask createSubtask(@Param("parentTaskId") String parentTaskId,
-                            CreateTaskPayload createTaskPayload);
-
     @RequestLine("GET /v1/tasks/{parentTaskId}/subtasks")
     Resources<CloudTask> getSubtasks(@Param("parentTaskId") String parentTaskId);
 

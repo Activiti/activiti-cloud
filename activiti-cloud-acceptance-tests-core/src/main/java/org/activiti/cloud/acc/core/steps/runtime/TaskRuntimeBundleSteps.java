@@ -1,5 +1,11 @@
 package org.activiti.cloud.acc.core.steps.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import java.util.Date;
+import java.util.Map;
+
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -12,12 +18,6 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
-
-import java.util.Date;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @EnableRuntimeFeignContext
 public class TaskRuntimeBundleSteps {
@@ -85,9 +85,9 @@ public class TaskRuntimeBundleSteps {
                 .withName("subtask")
                 .withDescription("subtask-description")
                 .withAssignee("testuser")
+                .withParentTaskId(parentTaskId)
                 .build();
-        return taskRuntimeService.createSubtask(parentTaskId,
-                subTask);
+        return taskRuntimeService.createTask(subTask);
     }
 
     public Resources<CloudTask> getSubtasks(String parentTaskId) {
