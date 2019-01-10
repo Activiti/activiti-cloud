@@ -59,7 +59,10 @@ public class TaskVariableControllerImpl implements TaskVariableController {
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String taskId,
                                              @RequestBody SetTaskVariablesPayload setTaskVariablesCmd) {
+        
+        setTaskVariablesCmd.setTaskId(taskId);
         taskRuntime.setVariables(setTaskVariablesCmd);
+        
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

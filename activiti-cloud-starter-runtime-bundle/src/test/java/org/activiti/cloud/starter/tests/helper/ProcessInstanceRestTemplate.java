@@ -193,7 +193,7 @@ public class ProcessInstanceRestTemplate {
     public ResponseEntity<Void> setVariables(String processInstanceId,
                                              Map<String, Object> variables) {
         SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder.setVariables()
-                .withProcessInstanceId(processInstanceId).withVariables(variables).build();
+                .withVariables(variables).build();
 
         HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(
                 setProcessVariablesPayload,
