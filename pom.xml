@@ -61,6 +61,9 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
            
     <java.version>11</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>       
+           
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
     <generated-assertions-package>org.activiti.test</generated-assertions-package>
