@@ -1,6 +1,6 @@
 pipeline {
     agent {
-      label "jenkins-maven"
+      label "jenkins-maven-java11"
     }
     environment {
       ORG               = 'activiti'
@@ -22,9 +22,11 @@ pipeline {
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
             sh 'export VERSION=$PREVIEW_VERSION'
+            sh '''
+              mvn clean deploy -P !alfresco -P central
+              '''
 
-
-            sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:$PREVIEW_VERSION"
+//            sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:$PREVIEW_VERSION"
           }
 
         }
@@ -102,12 +104,6 @@ pipeline {
     post {
         always {
             cleanWs()
-        }
-        failure {
-            input """Pipeline failed. 
-We will keep the build pod around to help you diagnose any failures. 
-
-Select Proceed or Abort to terminate the build pod"""
         }
     }
   }
