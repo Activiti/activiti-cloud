@@ -20,7 +20,9 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
+import org.activiti.runtime.api.connector.ConnectorActionDefinitionFinder;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
+import org.activiti.runtime.api.connector.VariablesMatchHelper;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.conf.activiti.runtime.api.ConnectorsAutoConfiguration;
@@ -74,11 +76,15 @@ public class CloudConnectorsAutoConfiguration {
                                                        ApplicationEventPublisher eventPublisher,
                                                        ApplicationContext applicationContext,
                                                        IntegrationContextBuilder integrationContextBuilder,
+                                                       ConnectorActionDefinitionFinder connectorActionDefinitionFinder,
+                                                       VariablesMatchHelper variablesMatchHelper,
                                                        RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
         return new MQServiceTaskBehavior(integrationContextManager,
                                          eventPublisher,
                                          applicationContext,
                                          integrationContextBuilder,
+                                         connectorActionDefinitionFinder,
+                                         variablesMatchHelper,
                                          runtimeBundleInfoAppender);
     }
 }

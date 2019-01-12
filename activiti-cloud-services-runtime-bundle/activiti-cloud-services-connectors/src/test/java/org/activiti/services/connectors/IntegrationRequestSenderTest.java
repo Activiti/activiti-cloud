@@ -22,7 +22,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-
+import org.activiti.runtime.api.connector.VariablesMatchHelper;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -95,7 +95,7 @@ public class IntegrationRequestSenderTest {
     private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
 
     private IntegrationContextMessageBuilderFactory messageBuilderFactory;
-    
+
     @Mock
     private IntegrationContextEntity integrationContextEntity;
 
@@ -114,7 +114,7 @@ public class IntegrationRequestSenderTest {
         initMocks(this);
 
         messageBuilderFactory = new IntegrationContextMessageBuilderFactory(runtimeBundleProperties);
-        
+
         integrationRequestSender = new IntegrationRequestSender(runtimeBundleProperties,
                                                                 auditProducer,
                                                                 resolver,
@@ -131,8 +131,8 @@ public class IntegrationRequestSenderTest {
 
         IntegrationContextEntity contextEntity = mock(IntegrationContextEntity.class);
         given(contextEntity.getId()).willReturn(INTEGRATION_CONTEXT_ID);
-        
-        IntegrationContext integrationContext = new IntegrationContextBuilder(null).from(contextEntity, delegateExecution, null);
+
+        IntegrationContext integrationContext = new IntegrationContextBuilder(new VariablesMatchHelper()).from(contextEntity, delegateExecution, null);
         integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setServiceFullName(APP_NAME);
     }
@@ -220,8 +220,8 @@ public class IntegrationRequestSenderTest {
             .containsEntry("serviceName",SPRING_APP_NAME)
             .containsEntry("serviceType",SERVICE_TYPE)
             .containsEntry("serviceVersion",SERVICE_VERSION)
-            .containsEntry("serviceFullName",APP_NAME);        
-        
+            .containsEntry("serviceFullName",APP_NAME);
+
 
         CloudIntegrationRequestedImpl integrationRequested = (CloudIntegrationRequestedImpl) message.getPayload();
 
@@ -230,5 +230,5 @@ public class IntegrationRequestSenderTest {
         assertThat(integrationRequested.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequested);
     }
-    
+
 }
