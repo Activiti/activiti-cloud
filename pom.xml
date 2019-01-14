@@ -243,12 +243,6 @@
       <version>${activiti-core-common.version}</version>
       <type>pom</type>
     </dependency>
-      <!--for moving from JDK8 to JDK11 -->
-      <dependency>
-          <groupId>javax.annotation</groupId>
-          <artifactId>javax.annotation-api</artifactId>
-          <version>${javax.annotation.version}</version>
-      </dependency>
   </dependencies>
 
   <build>
