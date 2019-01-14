@@ -1,5 +1,11 @@
 package org.activiti.cloud.acc.core.steps.query;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
+import java.util.Collection;
+
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.task.model.Task;
@@ -9,12 +15,6 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
-
-import java.util.Collection;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
 
 @EnableRuntimeFeignContext
 public class TaskQuerySteps {
@@ -91,4 +91,11 @@ public class TaskQuerySteps {
     public PagedResources<CloudTask> getTasksByProcessInstance(String processInstanceId){
         return taskQueryService.getTasksByProcessInstance(processInstanceId);
     }
+    
+    @Step
+    public PagedResources<CloudTask> getRootTasksByProcessInstance(String processInstanceId){
+        return taskQueryService.getRootTasksByProcessInstance(processInstanceId);
+    }
+    
+    
 }
