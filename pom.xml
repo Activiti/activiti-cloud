@@ -19,8 +19,8 @@
   <properties>
     <activiti-cloud-build.version>0.0.0-SNAPSHOT-PR-81-5</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
-    <activiti-core-common.version>7.0.35</activiti-core-common.version>       
-    <activiti-cloud-api.version>7.0.41</activiti-cloud-api.version>
+    <activiti-core-common.version>0.0.0-SNAPSHOT-PR-41-5</activiti-core-common.version>       
+    <activiti-cloud-api.version>0.0.0-SNAPSHOT-PR-51-6</activiti-cloud-api.version>
 
     <!-- dependencies -->
     <awaitility.version>3.0.0</awaitility.version>
