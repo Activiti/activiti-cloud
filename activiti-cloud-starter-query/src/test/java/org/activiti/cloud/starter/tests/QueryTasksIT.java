@@ -30,16 +30,13 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserRemovedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -607,18 +604,15 @@ public class QueryTasksIT {
     @Test
     public void shouldGetCorrectCompletedDateAndDurationWhenCompleted(){
         //given
+
         Date now = new Date(System.currentTimeMillis());
-        Date tomorrow = new Date(System.currentTimeMillis() + 86400000);
+        Date yesterday = new Date(System.currentTimeMillis() - 86400000);
 
-        Task completedTask = new TaskImpl(UUID.randomUUID().toString(), "Completed task", Task.TaskStatus.COMPLETED);
-
-        ((TaskImpl)completedTask).setProcessInstanceId(runningProcessInstance.getId());
-        ((TaskImpl) completedTask).setCreatedDate(now);
-
-        //when
-        this.eventsAggregator.addEvents(new CloudTaskCreatedEventImpl("task-created-event-id", now.getTime(),completedTask),
-                new CloudTaskAssignedEventImpl(completedTask),
-                new CloudTaskCompletedEventImpl("task-completed-event-id", tomorrow.getTime(), completedTask));
+        Task completedTask = taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate("Completed task",
+                runningProcessInstance,
+                yesterday,
+                now);
+        
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
@@ -634,9 +628,9 @@ public class QueryTasksIT {
             Task task = responseEntity.getBody();
 
             assertThat(task.getCompletedDate()).isNotNull();
-            assertThat(task.getCompletedDate()).isEqualTo(tomorrow);
+            assertThat(task.getCompletedDate()).isEqualTo(now);
 
-            assertThat(task.getDuration()).isEqualTo(tomorrow.getTime() - now.getTime());
+            assertThat(task.getDuration()).isEqualTo(now.getTime() - yesterday.getTime());
             assertThat(task.getDuration()).isNotNull();
 
         });
