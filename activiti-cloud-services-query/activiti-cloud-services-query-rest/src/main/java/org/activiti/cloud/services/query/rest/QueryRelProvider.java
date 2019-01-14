@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,9 @@ import java.util.Map;
 
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.RelProvider;
@@ -38,6 +41,15 @@ public class QueryRelProvider implements RelProvider {
         resourceRelationDescriptors.put(ProcessInstanceEntity.class,
                                         new ResourceRelationDescriptor("processInstance",
                                                                        "processInstances"));
+        resourceRelationDescriptors.put(TaskEntity.class,
+                                        new ResourceRelationDescriptor("task",
+                                                                       "tasks"));
+        resourceRelationDescriptors.put(ProcessVariableEntity.class,
+                                        new ResourceRelationDescriptor("variable",
+                                                                       "variables"));
+        resourceRelationDescriptors.put(TaskVariableEntity.class,
+                                        new ResourceRelationDescriptor("variable",
+                                                                       "variables"));
     }
 
     @Override
