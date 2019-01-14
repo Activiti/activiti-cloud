@@ -29,6 +29,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAdded
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
+import java.util.Date;
 
 public class TaskEventContainedBuilder {
 
@@ -102,6 +103,22 @@ public class TaskEventContainedBuilder {
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
                                    new CloudTaskAssignedEventImpl(task),
                                    new CloudTaskCompletedEventImpl(task));
+        return task;
+    }
+
+    public Task aCompletedTaskWithCreationDateAndCompletionDate(String taskName,
+                                                                ProcessInstance processInstance,
+                                                                Date createdDate,
+                                                                Date completedDate){
+        Task task = buildTask(taskName,
+                Task.TaskStatus.COMPLETED,
+                processInstance);
+
+        ((TaskImpl) task).setCreatedDate(createdDate);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl("task-created-event-id" + UUID.randomUUID().toString(), createdDate.getTime(), task),
+                                    new CloudTaskAssignedEventImpl(task),
+                                    new CloudTaskCompletedEventImpl("task-completed-event-id" + UUID.randomUUID().toString(), completedDate.getTime(), task));
         return task;
     }
 
