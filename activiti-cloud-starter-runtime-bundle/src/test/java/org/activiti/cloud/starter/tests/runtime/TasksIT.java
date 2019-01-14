@@ -131,7 +131,7 @@ public class TasksIT {
     }
 
     @Test
-    public void shouldUpdateDescription() {
+    public void shouldUpdateNameDescription() {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         ResponseEntity<PagedResources<CloudTask>> responseEntity = processInstanceRestTemplate.getTasks(processInstanceEntity);
@@ -140,7 +140,10 @@ public class TasksIT {
         CloudTask task = tasks.iterator().next();
         taskRestTemplate.claim(task);
 
-        UpdateTaskPayload updateTask = TaskPayloadBuilder.update().withTaskId(task.getId()).withDescription("Updated description").build();
+        UpdateTaskPayload updateTask = TaskPayloadBuilder.update().withTaskId(task.getId())
+                .withName("Updated name")
+                .withDescription("Updated description")
+                .build();
 
         //when
         taskRestTemplate.updateTask(updateTask);
@@ -148,9 +151,25 @@ public class TasksIT {
         //then
         ResponseEntity<CloudTask> taskResponseEntity = taskRestTemplate.getTask(task.getId());
 
+        assertThat(taskResponseEntity.getBody().getName()).isEqualTo("Updated name");
         assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("Updated description");
-    }
+        
+        //Check UpdateTaskPayload without taskId
+        updateTask = TaskPayloadBuilder.update()
+                .withName("New Updated name")
+                .withDescription("New Updated description")
+                .build();
 
+        //when
+        taskRestTemplate.updateTask(task.getId(),updateTask);
+
+        //then
+        taskResponseEntity = taskRestTemplate.getTask(task.getId());
+
+        assertThat(taskResponseEntity.getBody().getName()).isEqualTo("New Updated name");
+        assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("New Updated description");
+    }
+    
     @Test
     public void shouldNotGetTasksWithoutPermission() {
 

@@ -194,6 +194,15 @@ public class TaskRestTemplate {
                                                                         });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
+    
+    public void updateTask(String taskId,UpdateTaskPayload updateTask) {
+        ResponseEntity<Task> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + taskId,
+                                                                        HttpMethod.PUT,
+                                                                        new HttpEntity<>(updateTask),
+                                                                        new ParameterizedTypeReference<Task>() {
+                                                                        });
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 
     public ResponseEntity<Void> setVariables(String taskId,
                                              Map<String, Object> variables) {
