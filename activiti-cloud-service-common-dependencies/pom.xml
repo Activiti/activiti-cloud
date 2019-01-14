@@ -112,6 +112,12 @@
         <artifactId>activiti-cloud-services-rest-docs</artifactId>
         <version>${activiti-cloud-service-common.version}</version>
       </dependency>
+       <!--for moving from JDK8 to JDK11 -->
+      <dependency>
+          <groupId>javax.annotation</groupId>
+          <artifactId>javax.annotation-api</artifactId>
+          <version>${javax.annotation.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   
