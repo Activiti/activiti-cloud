@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>0.0.0-SNAPSHOT-PR-81-7</version>
+    <version>0.0.0-SNAPSHOT-PR-81-8</version>
   </parent>
 
   <groupId>org.activiti.cloud.api</groupId>
@@ -17,7 +17,7 @@
 
   <properties>
     <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
-    <activiti-cloud-build.version>0.0.0-SNAPSHOT-PR-81-7</activiti-cloud-build.version>
+    <activiti-cloud-build.version>0.0.0-SNAPSHOT-PR-81-8</activiti-cloud-build.version>
     <activiti-api.version>0.0.0-SNAPSHOT-PR-65-14</activiti-api.version>
   </properties>
 
