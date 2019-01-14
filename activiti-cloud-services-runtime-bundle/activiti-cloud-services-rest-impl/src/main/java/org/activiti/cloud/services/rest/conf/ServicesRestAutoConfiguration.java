@@ -29,7 +29,9 @@ import org.activiti.cloud.services.rest.assemblers.ToCloudProcessInstanceConvert
 import org.activiti.cloud.services.rest.assemblers.ToCloudTaskConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCloudVariableInstanceConverter;
 import org.activiti.cloud.services.rest.controllers.ResourcesAssembler;
+import org.activiti.cloud.services.rest.controllers.RuntimeBundleRelProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -96,5 +98,11 @@ public class ServicesRestAutoConfiguration implements WebMvcConfigurer {
             }
         }
 
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public RuntimeBundleRelProvider runtimeBundleRelProvider() {
+        return new RuntimeBundleRelProvider();
     }
 }
