@@ -18,7 +18,7 @@
   <properties>
     <activiti-dependencies.version>0.0.0-SNAPSHOT-PR-105-3</activiti-dependencies.version>
     <activiti-cloud-build.version>0.0.0-SNAPSHOT-PR-81-8</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>0.0.0-SNAPSHOT-PR-122-6</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>0.0.0-SNAPSHOT-PR-122-7</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>${project.version}</activiti-cloud-runtime-bundle-service.version>
   </properties>
 
