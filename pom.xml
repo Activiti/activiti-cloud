@@ -43,7 +43,7 @@
   <properties>
     <activiti-cloud-modeling-build.version>0.0.0-SNAPSHOT-PR-4-1</activiti-cloud-modeling-build.version>
     <activiti-cloud-service-common.version>0.0.0-SNAPSHOT-PR-122-7</activiti-cloud-service-common.version>
-    <activiti-cloud-process-model-service.version>7.0.55</activiti-cloud-process-model-service.version>
+    <activiti-cloud-process-model-service.version>0.0.0-SNAPSHOT-PR-90-2</activiti-cloud-process-model-service.version>
     <activiti-cloud-org-service.version>${project.version}</activiti-cloud-org-service.version>
   </properties>
 
