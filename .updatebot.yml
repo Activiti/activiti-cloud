@@ -32,3 +32,6 @@ github:
     - name: activiti-cloud-dependencies
       branch: develop
       useSinglePullRequest: true
+    - name: activiti-cloud-acceptance-tests
+      branch: develop
+      useSinglePullRequest: true
