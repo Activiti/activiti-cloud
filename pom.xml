@@ -21,7 +21,6 @@
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
     <activiti-core-common.version>0.0.0-SNAPSHOT-PR-41-6</activiti-core-common.version>
     <activiti-cloud-api.version>0.0.0-SNAPSHOT-PR-51-6</activiti-cloud-api.version>
-
     <!-- dependencies -->
     <awaitility.version>3.0.0</awaitility.version>
     <commons-beanutils.version>1.9.3</commons-beanutils.version>
