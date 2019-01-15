@@ -21,8 +21,9 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Date;
 import java.util.UUID;
+import java.util.List;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
@@ -30,11 +31,12 @@ import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserRemovedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -70,8 +72,9 @@ public class QueryTasksIT {
     private static final String TASKS_URL = "/v1/tasks";
     private static final String ADMIN_TASKS_URL = "/admin/v1/tasks";
     
-    private static final ParameterizedTypeReference<PagedResources<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Task>>() {
-    };
+    private static final ParameterizedTypeReference<PagedResources<Task>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<Task>>() {};
+
+    private static final ParameterizedTypeReference<Task> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {};
 
     @Autowired
     private KeycloakTokenProducer keycloakTokenProducer;
@@ -267,7 +270,7 @@ public class QueryTasksIT {
 
         checkExistingTask(createdTask);
     }
-    
+
     @Test
     public void shouldGetAvailableRootTasks() {
         //given
@@ -277,14 +280,14 @@ public class QueryTasksIT {
         rootTask.setProcessInstanceId(runningProcessInstance.getId());
         rootTask.setParentTaskId(null);
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(rootTask));
-        
+
         TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
                                      "Task with parent",
                                      Task.TaskStatus.CREATED);
         task.setProcessInstanceId(runningProcessInstance.getId());
         task.setParentTaskId(rootTask.getId());
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
-        
+
         eventsAggregator.sendAll();
 
         await().untilAsserted(() -> {
@@ -434,7 +437,7 @@ public class QueryTasksIT {
         //then
         assertCannotSeeTask(taskWithCandidate);
     }
-    
+
     @Test
     public void shouldGetAddRemoveTaskUserCandidates() {
         //given
@@ -442,28 +445,28 @@ public class QueryTasksIT {
                                                                             "testuser",
                                                                             runningProcessInstance);
         eventsAggregator.sendAll();
-        
+
         keycloakTokenProducer.setKeycloakTestUser("testuser");
 
         //when
         ResponseEntity<List<String>> responseEntity = getCandidateUsers(createdTask.getId());
-             
+
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().size()).isEqualTo(1);
         assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
- 
+
         //Check adding user candidate
         //when
         TaskCandidateUserImpl addCandidateUser = new TaskCandidateUserImpl("hruser",
                                                                        createdTask.getId());
         producer.send(new CloudTaskCandidateUserAddedEventImpl(addCandidateUser));
-   
+
         //then
         responseEntity = getCandidateUsers(createdTask.getId());
-        
+
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
@@ -476,18 +479,18 @@ public class QueryTasksIT {
         TaskCandidateUserImpl deleteCandidateUser = new TaskCandidateUserImpl("hruser",
                                                                               createdTask.getId());
         producer.send(new CloudTaskCandidateUserRemovedEventImpl(deleteCandidateUser));
-   
+
         //then
         responseEntity = getCandidateUsers(createdTask.getId());
-        
+
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().size()).isEqualTo(1);
         assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
-            
+
     }
-    
+
     @Test
     public void shouldGetAddRemoveTaskGroupCandidates() {
         //given
@@ -495,51 +498,51 @@ public class QueryTasksIT {
                                                                              "testgroup",
                                                                              runningProcessInstance);
         eventsAggregator.sendAll();
-        
+
         keycloakTokenProducer.setKeycloakTestUser("testuser");
 
         //when
         ResponseEntity<List<String>> responseEntity = getCandidateGroups(createdTask.getId());
-        
+
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().size()).isEqualTo(1);
         assertThat(responseEntity.getBody().get(0)).isEqualTo("testgroup");
-         
+
         //Check adding group candidate
         //when
         TaskCandidateGroupImpl addCandidateGroup = new TaskCandidateGroupImpl("hrgroup",
                                                                               createdTask.getId());
         producer.send(new CloudTaskCandidateGroupAddedEventImpl(addCandidateGroup));
-   
+
         //then
         responseEntity = getCandidateGroups(createdTask.getId());
-        
+
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().size()).isEqualTo(2);
         assertThat(responseEntity.getBody().get(0)).isIn("hrgroup","testgroup");
         assertThat(responseEntity.getBody().get(1)).isIn("hrgroup","testgroup");
-           
+
         //Check deleting group candidate
         //when
         TaskCandidateGroupImpl deleteCandidateGroup = new TaskCandidateGroupImpl("hrgroup",
                                                                                  createdTask.getId());
         producer.send(new CloudTaskCandidateGroupRemovedEventImpl(deleteCandidateGroup));
-       
+
         //then
         responseEntity = getCandidateGroups(createdTask.getId());
-    
+
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().size()).isEqualTo(1);
         assertThat(responseEntity.getBody().get(0)).isEqualTo("testgroup");
     }
-    
+
     @Test
     public void adminShouldAssignTask() {
         //given
@@ -551,7 +554,7 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
 
             keycloakTokenProducer.setKeycloakTestUser("hradmin");
-            
+
             //when
             ResponseEntity<Task> responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
                                          HttpMethod.GET,
@@ -565,16 +568,16 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getId()).isEqualTo(createdTask.getId());
             assertThat(responseEntity.getBody().getAssignee()).isNull();
-            
-            
+
+
             //when
             TaskImpl assignedTask = new TaskImpl(createdTask.getId(),
                                                  createdTask.getName(),
                                                  createdTask.getStatus());
             assignedTask.setAssignee("hruser");
-          
+
             producer.send(new CloudTaskAssignedEventImpl(assignedTask));
-            
+
             //then
             responseEntity = testRestTemplate.exchange(ADMIN_TASKS_URL + "/" + createdTask.getId(),
                                          HttpMethod.GET,
@@ -590,13 +593,49 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody().getId()).isNotNull();
             assertThat(responseEntity.getBody().getId()).isEqualTo(createdTask.getId());
             assertThat(responseEntity.getBody().getAssignee()).isEqualTo("hruser");
-            
+
             //Restore user
             keycloakTokenProducer.setKeycloakTestUser("testuser");
-         
+
         });
     }
-    
+
+
+    @Test
+    public void shouldGetCorrectCompletedDateAndDurationWhenCompleted(){
+        //given
+
+        Date now = new Date(System.currentTimeMillis());
+        Date yesterday = new Date(System.currentTimeMillis() - 86400000);
+
+        Task completedTask = taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate("Completed task",
+                runningProcessInstance,
+                yesterday,
+                now);
+        
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<Task> responseEntity = executeRequestGetTasksById(completedTask.getId());
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Task task = responseEntity.getBody();
+
+            assertThat(task.getCompletedDate()).isNotNull();
+            assertThat(task.getCompletedDate()).isEqualTo(now);
+
+            assertThat(task.getDuration()).isEqualTo(now.getTime() - yesterday.getTime());
+            assertThat(task.getDuration()).isNotNull();
+
+        });
+
+    }
 
     private void assertCannotSeeTask(Task task) {
         await().untilAsserted(() -> {
@@ -621,7 +660,14 @@ public class QueryTasksIT {
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_TASKS_RESPONSE_TYPE);
     }
-    
+
+    private ResponseEntity<Task> executeRequestGetTasksById(String id) {
+        return testRestTemplate.exchange(TASKS_URL + "/" + id,
+                HttpMethod.GET,
+                keycloakTokenProducer.entityWithAuthorizationHeader(),
+                SINGLE_TASK_RESPONSE_TYPE);
+    }
+
     private  ResponseEntity<List<String>> getCandidateUsers(String taskId) {
         return testRestTemplate.exchange(TASKS_URL + "/" + taskId+"/candidate-users",
                                          HttpMethod.GET,
@@ -629,7 +675,7 @@ public class QueryTasksIT {
                                          new ParameterizedTypeReference<List<String>>() {
                                          });
     }
-    
+
     private  ResponseEntity<List<String>> getCandidateGroups(String taskId) {
         return testRestTemplate.exchange(TASKS_URL + "/" + taskId+"/candidate-groups",
                                          HttpMethod.GET,
