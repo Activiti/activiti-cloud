@@ -16,7 +16,7 @@
   </scm>
   <properties>
     <java.version>1.8</java.version>
-    <activiti-cloud-dependencies.version>7.0.151</activiti-cloud-dependencies.version>
+    <activiti-cloud-dependencies.version>7.0.152</activiti-cloud-dependencies.version>
     <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
     <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
