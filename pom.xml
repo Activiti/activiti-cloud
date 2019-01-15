@@ -43,7 +43,7 @@
 
   <properties>
     <activiti-cloud-build.version>0.0.0-SNAPSHOT-PR-81-8</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>0.0.0-SNAPSHOT-PR-122-7</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>0.0.0-SNAPSHOT-PR-122-8</activiti-cloud-service-common.version>
     <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
     <json-unit.version>1.24.0</json-unit.version>
   </properties>
