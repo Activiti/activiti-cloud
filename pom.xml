@@ -96,7 +96,7 @@
     <activiti-cloud-runtime-bundle-service.version>0.0.0-SNAPSHOT-PR-212-8</activiti-cloud-runtime-bundle-service.version>
     <activiti-cloud-query-service.version>0.0.0-SNAPSHOT-PR-168-3</activiti-cloud-query-service.version>
     <activiti-cloud-audit-service.version>0.0.0-SNAPSHOT-PR-125-1</activiti-cloud-audit-service.version>
-    <activiti-cloud-connectors.version>0.0.0-SNAPSHOT-PR-88-2</activiti-cloud-connectors.version>
+    <activiti-cloud-connectors.version>0.0.0-SNAPSHOT-PR-88-3</activiti-cloud-connectors.version>
     <activiti-cloud-app-service.version>0.0.0-SNAPSHOT-PR-76-1</activiti-cloud-app-service.version>
     <activiti-cloud-acceptance-tests.version>0.0.0-SNAPSHOT-PR-100-3</activiti-cloud-acceptance-tests.version>
   </properties>
