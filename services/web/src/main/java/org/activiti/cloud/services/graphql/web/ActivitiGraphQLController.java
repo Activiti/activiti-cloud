@@ -22,10 +22,6 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
-import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
-import graphql.ExecutionResult;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.MediaType;
@@ -37,6 +33,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
+import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
+
+
 
 /**
  * Activiti GraphQL Query Spring Rest Controller with HTTP mapping endpoints for GraphQLExecutor relay
@@ -76,17 +78,17 @@ public class ActivitiGraphQLController {
      * }
      * </pre>
      * @param queryRequest object
-     * @return {@link ExecutionResult} response
+     * @return {@link Map<String,Object>} response
      * @throws IOException
      */
     @PostMapping(value = PATH,
             consumes = {MediaType.APPLICATION_JSON_VALUE},
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ExecutionResult executePostJsonRequest(@RequestBody @Valid final GraphQLQueryRequest queryRequest) throws IOException {
+    public Map<String,Object> executePostJsonRequest(@RequestBody @Valid final GraphQLQueryRequest queryRequest) throws IOException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         return graphQLExecutor.execute(queryRequest.getQuery(),
-                                       queryRequest.getVariables());
+                                       queryRequest.getVariables()).toSpecification();
         
     }
 
@@ -99,19 +101,19 @@ public class ActivitiGraphQLController {
      * query parameter called variables.
      * @param query encoded JSON string
      * @param variables encoded JSON string
-     * @return {@link ExecutionResult} response
+     * @return {@link Map<String,Object>} response
      * @throws IOException
      */
     @GetMapping(value = PATH,
             consumes = {APPLICATION_GRAPHQL_VALUE},
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ExecutionResult executeGetQueryRequest(
+    public Map<String,Object> executeGetQueryRequest(
             @RequestParam(name = "query") final String query,
             @RequestParam(name = "variables", required = false) final String variables) throws IOException {
         Map<String, Object> variablesMap = variablesStringToMap(variables);
 
         return graphQLExecutor.execute(query,
-                                       variablesMap);
+                                       variablesMap).toSpecification();
     }
 
     /**
@@ -122,35 +124,35 @@ public class ActivitiGraphQLController {
      * query parameter called variables.
      * @param query encoded JSON string
      * @param variables encoded JSON string
-     * @return {@link ExecutionResult} response
+     * @return {@link Map<String,Object>} response
      * @throws IOException
      */
     @PostMapping(value = PATH,
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ExecutionResult executePostFormRequest(
+    public Map<String,Object> executePostFormRequest(
             @RequestParam(name = "query") final String query,
             @RequestParam(name = "variables", required = false) final String variables) throws IOException {
         Map<String, Object> variablesMap = variablesStringToMap(variables);
 
         return graphQLExecutor.execute(query,
-                                       variablesMap);
+                                       variablesMap).toSpecification();
     }
 
     /**
      * Handle POST with the "application/graphql" Content-Type header.
      * Treat the HTTP POST body contents as the GraphQL query string.
      * @param queryRequest a valid {@link GraphQLQueryRequest} input argument
-     * @return {@link ExecutionResult} response
+     * @return {@link Map<String,Object>} response
      * @throws IOException
      */
     @PostMapping(value = PATH,
             consumes = APPLICATION_GRAPHQL_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ExecutionResult executePostApplicationGraphQL(
+    public Map<String,Object> executePostApplicationGraphQL(
             @RequestBody final String query) throws IOException {
         return graphQLExecutor.execute(query,
-                                       null);
+                                       null).toSpecification();
     }
 
     /**
