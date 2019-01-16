@@ -7,11 +7,13 @@
     <version>1.0-SNAPSHOT</version>
     <name>Activiti Cloud :: Example Cloud Connector</name>
     <properties>
-        <java.version>1.8</java.version>
-        <activiti-cloud-dependencies.version>7.0.152</activiti-cloud-dependencies.version>
+        <java.version>11</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <activiti-cloud-dependencies.version>0.0.0-SNAPSHOT-PR-271-3</activiti-cloud-dependencies.version>
         <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
-        <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
-        <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.0.0-M3</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version> <!-- required for jx -->
     </properties>
     <dependencyManagement>
@@ -83,8 +85,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <!-- <release>${java.version}</release> -->
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
                     <optimize>true</optimize>
