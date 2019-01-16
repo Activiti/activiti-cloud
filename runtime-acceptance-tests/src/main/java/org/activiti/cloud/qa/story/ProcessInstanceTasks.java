@@ -422,11 +422,11 @@ public class ProcessInstanceTasks {
                 .filter(cloudRuntimeEvent -> cloudRuntimeEvent.getEventType().equals(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED))
                 .collect(Collectors.toList());
 
-        assertThat(taskCompletedEvents.get(0).getEventType()).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
-        Task completedTask = (Task)taskCompletedEvents.get(0).getEntity();
-
-        assertThat(queriedTask.getCompletedDate()).isEqualTo(taskCompletedEvents.get(0).getTimestamp());
-        assertThat(queriedTask.getDuration().getTime())
+        assertThat(taskCompletedEvents.get(0).getEventType())
+                .isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
+        assertThat(queriedTask.getCompletedDate().getTime())
+                .isEqualTo(taskCompletedEvents.get(0).getTimestamp());
+        assertThat(queriedTask.getDuration())
                 .isEqualTo(taskCompletedEvents.get(0).getTimestamp() - queriedTask.getCreatedDate().getTime());
     }
 
