@@ -140,7 +140,9 @@ public class AlfrescoDocumentation {
                         .description("The name of the application which started this process instance."),
                 subsectionWithPath("entry.status").description("The process instance status."),
                 subsectionWithPath("entry.lastModified").optional().description("The process instance last modified date.").type(Date.class),
-                subsectionWithPath("entry.claimedDate").description("The date when this task was claimed.")
+                subsectionWithPath("entry.claimedDate").description("The date when this task was claimed."),
+                subsectionWithPath("entry.duration").optional().description("The time between creation date and completion date").type(Long.class),
+                subsectionWithPath("entry.completedDate").optional().description("The date when the task was completed").type(Date.class)
         );
     }
 

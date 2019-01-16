@@ -18,6 +18,7 @@ package org.activiti.alfresco.rest.docs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.restdocs.hypermedia.LinkDescriptor;
@@ -227,6 +228,14 @@ public class HALDocumentation {
                 subsectionWithPath("_embedded.tasks.[].appVersion")
                         .description("The version of the application where this task comes from")
                         .type(String.class)
+                        .optional(),
+                subsectionWithPath("_embedded.tasks.[].duration")
+                        .description("The time between creation date and completion date")
+                        .type(Long.class)
+                        .optional(),
+                subsectionWithPath("_embedded.tasks.[].completedDate")
+                        .description("The date when the task was completed")
+                        .type(Date.class)
                         .optional()
         );
     }
