@@ -8,7 +8,6 @@ pipeline {
               // Add pod configuration to Jenkins builder pod template
               yamlFile "maven-dind.yaml"
       }
-
     }
     environment {
       ORG               = 'activiti'
