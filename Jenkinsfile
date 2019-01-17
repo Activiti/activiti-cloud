@@ -1,14 +1,13 @@
 pipeline {
     agent {
-        // kubernetes {
-        //       // Change the name of jenkins-maven label to be able to use yaml configuration snippet
-        //       label "maven-dind"
-        //       // Inherit from Jx Maven pod template
-        //       inheritFrom "maven"
-        //       // Add pod configuration to Jenkins builder pod template
-        //       yamlFile "maven-dind.yaml"
-        // }
-        label "jenkins-maven-java11"
+        kubernetes {
+              // Change the name of jenkins-maven label to be able to use yaml configuration snippet
+              label "maven-dind"
+              // Inherit from Jx Maven pod template
+              inheritFrom "maven-java11"
+              // Add pod configuration to Jenkins builder pod template
+              yamlFile "maven-dind.yaml"
+        }
     }
     environment {
       ORG               = 'activiti'
