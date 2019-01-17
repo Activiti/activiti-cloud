@@ -52,3 +52,5 @@ hs_err_pid*
 #node
 node_modules
 .project
+.classpath
+.settings/org.eclipse.core.resources.prefs
