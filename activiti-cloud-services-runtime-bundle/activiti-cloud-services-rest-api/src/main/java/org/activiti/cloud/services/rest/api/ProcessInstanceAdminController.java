@@ -16,10 +16,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface ProcessInstanceAdminController {
 
     @RequestMapping(method = RequestMethod.GET)
-    PagedResources<ProcessInstanceResource> getAllProcessInstances(Pageable pageable);
+    PagedResources<ProcessInstanceResource> getProcessInstances(Pageable pageable);
 
     @RequestMapping(method = RequestMethod.POST)
     ProcessInstanceResource startProcess(@RequestBody StartProcessPayload cmd);
+    
+    @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
+    ProcessInstanceResource getProcessInstanceById(@PathVariable String processInstanceId);
     
     @RequestMapping(method = RequestMethod.POST,value = "{processInstanceId}/suspend")
     ProcessInstanceResource suspend(@PathVariable String processInstanceId);
@@ -27,6 +30,9 @@ public interface ProcessInstanceAdminController {
 
     @RequestMapping(method = RequestMethod.POST,value = "{processInstanceId}/resume")
     ProcessInstanceResource resume(@PathVariable String processInstanceId);
+    
+    @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.DELETE)
+    ProcessInstanceResource deleteProcessInstance(@PathVariable String processInstanceId);
     
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.PUT)
     ProcessInstanceResource updateProcess(@PathVariable("processInstanceId") String processInstanceId,

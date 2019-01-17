@@ -488,7 +488,7 @@ public class ProcessInstanceIT {
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(responseEntity);
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.adminGetProcessInstance(responseEntity);
        
         assertThat(processInstanceEntity.getBody().getBusinessKey()).isEqualTo(newBusinessKey);
         assertThat(processInstanceEntity.getBody().getName()).isEqualTo(newName);
@@ -518,6 +518,54 @@ public class ProcessInstanceIT {
         assertThat(processInstancesPage.getBody().getContent().iterator().next().getProcessDefinitionKey()).isEqualTo(SUB_PROCESS);
     }
     
+    @Test
+    public void nonAdminShouldBeAbleToDeleteProcessInstance() {
+        //given
+       ResponseEntity<CloudProcessInstance> processEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                                          null, 
+                                                                                                          "business_key");                                                                                     
+                                                                                               
+        assertThat(processEntity).isNotNull();
+        assertThat(processEntity.getBody()).isNotNull();
+        assertThat(processEntity.getBody().getId()).isNotNull();
+        assertThat(processEntity.getBody().getProcessDefinitionId()).contains("SimpleProcess:");
+        
+    
+        //when
+        ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.delete(processEntity);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        
+        
+        assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+        processInstanceRestTemplate.getProcessInstance(processEntity));
+    }
+    
+    @Test
+    public void adminShouldDeleteProcessInstance() {
+        //given
+        ResponseEntity<CloudProcessInstance> processEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                                           null, 
+                                                                                                           "business_key");                                                                                     
+                                                                                                
+        assertThat(processEntity).isNotNull();
+        assertThat(processEntity.getBody()).isNotNull();
+        assertThat(processEntity.getBody().getId()).isNotNull();
+        assertThat(processEntity.getBody().getProcessDefinitionId()).contains("SimpleProcess:");
+        
+    
+        //when
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.adminDelete(processEntity);
+        
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+        processInstanceRestTemplate.getProcessInstance(processEntity));
+    }
+    
     private ResponseEntity<Void> adminExecuteRequestResumeProcess(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
         ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/resume",
                                                                     HttpMethod.POST,
@@ -526,7 +574,7 @@ public class ProcessInstanceIT {
                                                                     });
         return responseEntity;
     }
-
+    
     private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
         ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
