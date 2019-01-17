@@ -38,3 +38,5 @@ hs_err_pid*
 .updatebot-repos/**
 
 *.versionsBackup
+apps-acceptance-tests/.factorypath
+modeling-acceptance-tests/.factorypath
