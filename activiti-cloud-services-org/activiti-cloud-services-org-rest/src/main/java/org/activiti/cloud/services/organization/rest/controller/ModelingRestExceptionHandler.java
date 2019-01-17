@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
-import org.activiti.cloud.organization.core.error.ImportApplicationException;
+import org.activiti.cloud.organization.core.error.ImportProjectException;
 import org.activiti.cloud.organization.core.error.ImportModelException;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.core.error.SyntacticModelValidationException;
@@ -69,7 +69,7 @@ public class ModelingRestExceptionHandler {
             UnknownModelTypeException.class,
             SyntacticModelValidationException.class,
             SemanticModelValidationException.class,
-            ImportApplicationException.class,
+            ImportProjectException.class,
             ImportModelException.class
     })
     public void handleBadRequestException(Exception ex,

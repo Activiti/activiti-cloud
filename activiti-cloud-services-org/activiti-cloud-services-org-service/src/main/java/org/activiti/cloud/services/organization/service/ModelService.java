@@ -26,7 +26,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidator;
@@ -82,10 +82,10 @@ public class ModelService {
                                           Function.identity()));
     }
 
-    public List<Model> getAllModels(Application application) {
+    public List<Model> getAllModels(Project project) {
         return modelTypeService.getAvailableModelTypes()
                 .stream()
-                .map(modelType -> getModels(application,
+                .map(modelType -> getModels(project,
                                             modelType,
                                             Pageable.unpaged()))
                 .map(Page::getContent)
@@ -93,18 +93,18 @@ public class ModelService {
                 .collect(Collectors.toList());
     }
 
-    public Page<Model> getModels(Application application,
+    public Page<Model> getModels(Project project,
                                  ModelType modelType,
                                  Pageable pageable) {
-        return modelRepository.getModels(application,
+        return modelRepository.getModels(project,
                                          modelType,
                                          pageable);
     }
 
-    public Model createModel(Application application,
+    public Model createModel(Project project,
                              Model model) {
         findModelType(model);
-        model.setApplication(application);
+        model.setProject(project);
         return modelRepository.createModel(model);
     }
 
@@ -173,7 +173,7 @@ public class ModelService {
                                                   fileContent);
     }
 
-    public Model importModel(Application application,
+    public Model importModel(Project project,
                              ModelType modelType,
                              FileContent fileContent) {
         logger.debug(MessageFormat.format(
@@ -182,7 +182,7 @@ public class ModelService {
                 fileContent.getFilename(),
                 fileContent));
 
-        Model model = importModelFromContent(application,
+        Model model = importModelFromContent(project,
                                              modelType,
                                              fileContent);
 
@@ -190,7 +190,7 @@ public class ModelService {
                                   fileContent);
     }
 
-    public Model importJsonModel(Application application,
+    public Model importJsonModel(Project project,
                                  ModelType modelType,
                                  FileContent fileContent) {
         Model model = jsonConverter.tryConvertToEntity((fileContent.getFileContent()))
@@ -199,18 +199,18 @@ public class ModelService {
                                       JSON));
         model.setType(modelType.getName());
 
-        return createModel(application,
+        return createModel(project,
                            model);
     }
 
-    public Model importModelFromContent(Application application,
+    public Model importModelFromContent(Project project,
                                         ModelType modelType,
                                         FileContent fileContent) {
         return contentFilenameToModelName(fileContent.getFilename(),
                                           modelType)
                 .map(modelName -> newModelInstance(modelType.getName(),
                                                    modelName))
-                .map(model -> createModel(application,
+                .map(model -> createModel(project,
                                           model))
                 .orElseThrow(() -> new ImportModelException(MessageFormat.format(
                         "Unexpected extension was found for file to import model of type {0}: {1}",

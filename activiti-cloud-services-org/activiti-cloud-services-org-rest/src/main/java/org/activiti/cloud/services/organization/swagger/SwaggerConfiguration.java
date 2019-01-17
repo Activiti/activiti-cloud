@@ -17,7 +17,7 @@
 package org.activiti.cloud.services.organization.swagger;
 
 import org.activiti.cloud.alfresco.rest.model.AlfrescoPageContentListWrapper;
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -69,7 +69,7 @@ public class SwaggerConfiguration {
      * This is a shim class that serves to generate a meaningful swagger spec
      * See: https://github.com/swagger-api/swagger-core/issues/498
      */
-    public class AlfrescoApplicationPage extends AlfrescoPageContentListWrapper<Application> {
+    public class AlfrescoProjectsPage extends AlfrescoPageContentListWrapper<Project> {
 
     }
 }

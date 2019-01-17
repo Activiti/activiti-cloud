@@ -14,44 +14,37 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.entity;
+package org.activiti.cloud.organization.api.impl;
 
-import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.activiti.cloud.organization.api.Application;
-import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.services.auditable.AbstractAuditable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
- * Application model entity
+ * Implementation for {@link Project}
  */
-@Entity(name = "Application")
+@ApiModel("Project")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ApplicationEntity extends AuditableEntity<String> implements Application<String> {
+public class ProjectImpl extends AbstractAuditable<String> implements Project<String> {
 
-    @OneToMany
-    @JsonIgnore
-    private List<ModelEntity> models;
-
-    @Id
-    //TODO: to auto-generate the uuid
+    @ApiModelProperty(value = "The unique identifier of the project", readOnly = true)
     private String id;
 
+    @ApiModelProperty(value = "The name of the project")
     private String name;
 
-    public ApplicationEntity() {  // for JPA
+    public ProjectImpl() {
+
     }
 
-    public ApplicationEntity(String id,
-                             String name) {
+    public ProjectImpl(String id,
+                       String name) {
         this.id = id;
         this.name = name;
     }
@@ -64,14 +57,6 @@ public class ApplicationEntity extends AuditableEntity<String> implements Applic
     @Override
     public void setId(String id) {
         this.id = id;
-    }
-
-    public List<ModelEntity> getModels() {
-        return models;
-    }
-
-    public void setModels(List<ModelEntity> models) {
-        this.models = models;
     }
 
     @Override

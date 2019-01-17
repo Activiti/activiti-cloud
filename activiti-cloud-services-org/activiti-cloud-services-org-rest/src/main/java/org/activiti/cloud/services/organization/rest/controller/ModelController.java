@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -49,9 +49,9 @@ import org.springframework.web.server.ServerWebInputException;
 
 import static org.activiti.cloud.services.common.util.HttpUtils.multipartToFileContent;
 import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
-import static org.activiti.cloud.services.organization.rest.api.ApplicationRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
-import static org.activiti.cloud.services.organization.rest.api.ApplicationRestApi.UPLOAD_FILE_PARAM_NAME;
-import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.ATTACHMENT_API_PARAM_DESCR;
+import static org.activiti.cloud.services.organization.rest.api.ProjectRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
+import static org.activiti.cloud.services.organization.rest.api.ProjectRestApi.UPLOAD_FILE_PARAM_NAME;
+import static org.activiti.cloud.services.organization.rest.controller.ProjectController.ATTACHMENT_API_PARAM_DESCR;
 
 /**
  * Controller for {@link Model} resources
@@ -72,7 +72,7 @@ public class ModelController implements ModelRestApi {
 
     private final PagedModelTypeAssembler pagedModelTypeAssembler;
 
-    private final ApplicationController applicationController;
+    private final ProjectController projectController;
 
     public ModelController(ModelService modelService,
                            ModelTypeService modelTypeService,
@@ -80,28 +80,27 @@ public class ModelController implements ModelRestApi {
                            AlfrescoPagedResourcesAssembler<Model> pagedResourcesAssembler,
                            ModelTypeResourceAssembler modelTypeAssembler,
                            PagedModelTypeAssembler pagedModelTypeAssembler,
-                           ValidationErrorResourceAssembler validationErrorResourceAssembler,
-                           ApplicationController applicationController) {
+                           ProjectController projectController) {
         this.modelService = modelService;
         this.modelTypeService = modelTypeService;
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.modelTypeAssembler = modelTypeAssembler;
         this.pagedModelTypeAssembler = pagedModelTypeAssembler;
-        this.applicationController = applicationController;
+        this.projectController = projectController;
     }
 
     @Override
     public PagedResources<Resource<Model>> getModels(
-            @ApiParam(GET_MODELS_APPLICATION_ID_PARAM_DESCR)
-            @PathVariable String applicationId,
+            @ApiParam(GET_MODELS_PROJECT_ID_PARAM_DESCR)
+            @PathVariable String projectId,
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
             @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             Pageable pageable) {
-        Application application = applicationController.findApplicationById(applicationId);
+        Project project = projectController.findProjectById(projectId);
         return pagedResourcesAssembler.toResource(
                 pageable,
-                modelService.getModels(application,
+                modelService.getModels(project,
                                        findModelType(type),
                                        pageable),
                 resourceAssembler);
@@ -116,13 +115,13 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public Resource<Model> createModel(
-            @ApiParam(CREATE_MODEL_APPLICATION_ID_PARAM_DESCR)
-            @PathVariable String applicationId,
+            @ApiParam(CREATE_MODEL_PROJECT_ID_PARAM_DESCR)
+            @PathVariable String projectId,
             @ApiParam(CREATE_MODEL_PARAM_DESCR)
             @RequestBody Model model) {
-        Application application = applicationController.findApplicationById(applicationId);
+        Project project = projectController.findProjectById(projectId);
         return resourceAssembler.toResource(
-                modelService.createModel(application,
+                modelService.createModel(project,
                                          model));
     }
 
@@ -182,15 +181,15 @@ public class ModelController implements ModelRestApi {
 
     @Override
     public Resource<Model> importModel(
-            @ApiParam(CREATE_MODEL_APPLICATION_ID_PARAM_DESCR)
-            @PathVariable String applicationId,
+            @ApiParam(CREATE_MODEL_PROJECT_ID_PARAM_DESCR)
+            @PathVariable String projectId,
             @ApiParam(IMPORT_MODEL_TYPE_PARAM_DESCR)
             @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             @ApiParam(IMPORT_MODEL_FILE_PARAM_DESCR)
             @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
-        Application application = applicationController.findApplicationById(applicationId);
+        Project project = projectController.findProjectById(projectId);
         return resourceAssembler.toResource(
-                modelService.importModel(application,
+                modelService.importModel(project,
                                          findModelType(type),
                                          multipartToFileContent(file)));
     }

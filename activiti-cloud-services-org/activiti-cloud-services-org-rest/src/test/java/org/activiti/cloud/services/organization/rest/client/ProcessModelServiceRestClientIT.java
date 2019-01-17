@@ -18,10 +18,10 @@ package org.activiti.cloud.services.organization.rest.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.repository.ApplicationRepository;
+import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
-import org.activiti.cloud.services.organization.entity.ApplicationEntity;
+import org.activiti.cloud.services.organization.entity.ProjectEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +53,7 @@ public class ProcessModelServiceRestClientIT {
     private WebApplicationContext context;
 
     @Autowired
-    private ApplicationRepository applicationRepository;
+    private ProjectRepository projectRepository;
 
     @Autowired
     private ModelRepository modelRepository;
@@ -67,9 +67,9 @@ public class ProcessModelServiceRestClientIT {
 
     @Test
     public void testCreateProcessModel() throws Exception {
-        String parentApplicationId = "parent_application_id";
-        applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
-                                                                      "Parent Application"));
+        String parentProjectId = "parent_project_id";
+        projectRepository.createProject(new ProjectEntity(parentProjectId,
+                                                          "Parent Project"));
 
         Model processModel = new ModelEntity("contractNewProcesModelId",
                                              "newProcesModelName",
@@ -78,8 +78,8 @@ public class ProcessModelServiceRestClientIT {
         given()
                 .contentType(APPLICATION_JSON_VALUE)
                 .body(mapper.writeValueAsString(processModel))
-                .post("/v1/applications/{applicationId}/models",
-                      parentApplicationId)
+                .post("/v1/projects/{projectId}/models",
+                      parentProjectId)
                 .then().expect(status().isCreated());
     }
 

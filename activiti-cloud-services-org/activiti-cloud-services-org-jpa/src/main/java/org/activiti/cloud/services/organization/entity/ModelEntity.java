@@ -39,13 +39,13 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Entity(name = "Model")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ModelEntity extends AuditableEntity<String> implements Model<ApplicationEntity, String> {
+public class ModelEntity extends AuditableEntity<String> implements Model<ProjectEntity, String> {
 
     @Id
     private String id;
 
     @ManyToOne
-    private ApplicationEntity application;
+    private ProjectEntity project;
 
     private String type;
 
@@ -110,20 +110,20 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Applic
 
     @Override
     @JsonIgnore
-    public ApplicationEntity getApplication() {
-        return application;
+    public ProjectEntity getProject() {
+        return project;
     }
 
     @Override
-    public void setApplication(ApplicationEntity application) {
-        this.application = application;
+    public void setProject(ProjectEntity project) {
+        this.project = project;
     }
 
     @Transient
-    @JsonProperty("applicationId")
-    public String applicationId() {
-        return Optional.ofNullable(application)
-                .map(ApplicationEntity::getId)
+    @JsonProperty("projectId")
+    public String projectId() {
+        return Optional.ofNullable(project)
+                .map(ProjectEntity::getId)
                 .orElse(null);
     }
 
