@@ -29,6 +29,8 @@
       <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
       <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>   
       <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
+      <javax.xml.bind.version>2.3.0</javax.xml.bind.version>
+
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencyManagement>
@@ -43,6 +45,11 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
+   <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>${javax.xml.bind.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.activiti.cloud.rb</groupId>
       <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
