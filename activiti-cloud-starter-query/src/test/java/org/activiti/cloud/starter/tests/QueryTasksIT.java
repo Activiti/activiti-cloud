@@ -22,8 +22,8 @@ import static org.awaitility.Awaitility.await;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
@@ -31,12 +31,11 @@ import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserRemovedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -272,8 +271,16 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableRootTasks() {
+    public void shouldGetAvailableRootTasksWithStatus() {
         //given
+        TaskImpl rootTaskNoSubtask = new TaskImpl(UUID.randomUUID().toString(),
+                                         "Root task without subtask",
+                                         Task.TaskStatus.ASSIGNED);
+            rootTaskNoSubtask.setProcessInstanceId(runningProcessInstance.getId());
+            rootTaskNoSubtask.setParentTaskId(null);
+            eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(rootTaskNoSubtask));
+
+            
         TaskImpl rootTask = new TaskImpl(UUID.randomUUID().toString(),
                                      "Root task",
                                      Task.TaskStatus.CREATED);
@@ -292,10 +299,11 @@ public class QueryTasksIT {
 
         await().untilAsserted(() -> {
             //when
-            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "/rootTasksOnly",
+            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?rootTasksOnly=true&status={status}",
                                                                                             HttpMethod.GET,
                                                                                             keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                            PAGED_TASKS_RESPONSE_TYPE);
+                                                                                            PAGED_TASKS_RESPONSE_TYPE,
+                                                                                            Task.TaskStatus.CREATED);
             //then
             assertThat(responseEntity).isNotNull();
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
