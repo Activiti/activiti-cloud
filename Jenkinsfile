@@ -72,7 +72,8 @@ pipeline {
         steps {
           container('maven') {
             dir ("./charts/$APP_NAME") {
-              sh 'jx step changelog --version v\$(cat ../../VERSION)'
+                //looks like bug in JX
+              //sh 'jx step changelog --version v\$(cat ../../VERSION)'
 
               // release the helm chart
               sh 'make release'
