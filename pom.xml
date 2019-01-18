@@ -30,7 +30,6 @@
       <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>   
       <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
       <javax.xml.bind.version>2.3.0</javax.xml.bind.version>
-
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencyManagement>
