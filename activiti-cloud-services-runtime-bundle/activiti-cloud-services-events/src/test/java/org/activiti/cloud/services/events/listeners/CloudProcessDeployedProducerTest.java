@@ -102,10 +102,6 @@ public class CloudProcessDeployedProducerTest {
         //then
         verify(runtimeBundleInfoAppender, times(2)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
         verify(auditProducer).send(messageCaptor.capture());
-        // Message<CloudProcessDeployedEvent[]> message = messageCaptor.getValue();
-        // assertThat(message.getPayload())
-        //         .extracting(CloudProcessDeployedEvent::getEntity)
-        //         .containsExactlyElementsOf(apiProcessDefinitions);
         Message<CloudRuntimeEvent<?, ?>[]> message = messageCaptor.getValue();
         List<org.activiti.api.process.model.ProcessDefinition> processDefinitions = Arrays.stream(message.getPayload()).map(e -> (org.activiti.api.process.model.ProcessDefinition) e.getEntity()).collect(Collectors.toList());
         assertThat(processDefinitions)
