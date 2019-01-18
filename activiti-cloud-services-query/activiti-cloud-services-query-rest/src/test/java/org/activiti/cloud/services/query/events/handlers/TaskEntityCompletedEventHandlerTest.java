@@ -62,7 +62,11 @@ public class TaskEntityCompletedEventHandlerTest {
         //given
         CloudTaskCompletedEventImpl event = buildTaskCompletedEvent();
         String taskId = event.getEntity().getId();
-        TaskEntity eventTaskEntity = aTask().withId(taskId).build();
+        TaskEntity eventTaskEntity = aTask()
+                                    .withId(taskId)
+                                    .withCreatedDate(new Date(System.currentTimeMillis() - 86400000L))
+                                    .withCompletedDate(new Date())
+                                    .build();
 
         given(taskRepository.findById(taskId)).willReturn(Optional.of(eventTaskEntity));
 

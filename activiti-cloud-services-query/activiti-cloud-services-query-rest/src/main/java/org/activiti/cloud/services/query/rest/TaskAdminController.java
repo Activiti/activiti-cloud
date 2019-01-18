@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -86,24 +87,15 @@ public class TaskAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<TaskResource> allTasks(@QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
-                                                 Pageable pageable) {
-        Page<TaskEntity> page = taskRepository.findAll(predicate,
-                                                       pageable);
-
-        return pagedResourcesAssembler.toResource(pageable,
-                                                  page,
-                                                  taskResourceAssembler);
-    }
-
-    @RequestMapping(value = "/rootTasksOnly",method = RequestMethod.GET)
-    public PagedResources<TaskResource> getRootTasks(@QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
-                                                     Pageable pageable) {
-        //when request is made for the root tasks set a special condition: parentTaskId is null
-        BooleanExpression parentTaskNull = QTaskEntity.taskEntity.parentTaskId.isNull(); 
-        predicate= predicate !=null ? parentTaskNull.and(predicate) : parentTaskNull;
-              
-        Page<TaskEntity> page = taskRepository.findAll(predicate,
+    public PagedResources<TaskResource> findAll(@QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+                                                @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,  
+                                                Pageable pageable) {
+        Predicate extendedPredicate=predicate;
+        if (rootTasksOnly) {
+            BooleanExpression parentTaskNull = QTaskEntity.taskEntity.parentTaskId.isNull(); 
+            extendedPredicate= extendedPredicate !=null ? parentTaskNull.and(extendedPredicate) : parentTaskNull;
+        }
+        Page<TaskEntity> page = taskRepository.findAll(extendedPredicate,
                                                        pageable);
 
         return pagedResourcesAssembler.toResource(pageable,

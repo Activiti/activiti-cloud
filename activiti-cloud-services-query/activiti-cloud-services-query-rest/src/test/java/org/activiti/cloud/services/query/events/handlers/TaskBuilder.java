@@ -74,6 +74,16 @@ public class TaskBuilder {
         when(taskEntity.getAssignee()).thenReturn(assignee);
         return this;
     }
+
+    public TaskBuilder withCreatedDate(Date createdDate){
+        when(taskEntity.getCreatedDate()).thenReturn(createdDate);
+        return this;
+    }
+
+    public TaskBuilder withCompletedDate(Date completedDate){
+        when(taskEntity.getCompletedDate()).thenReturn(completedDate);
+        return this;
+    }
     
     public TaskEntity build() {
         return taskEntity;
