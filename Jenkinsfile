@@ -1,6 +1,6 @@
 pipeline {
     agent {
-      label "jenkins-maven"
+      label "jenkins-maven-java11"
     }
     environment {
       ORG               = 'activiti'
@@ -22,17 +22,7 @@ pipeline {
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
             sh 'export VERSION=$PREVIEW_VERSION' // && skaffold build -f skaffold.yaml'
-
-
-          //  sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:$PREVIEW_VERSION"
           }
-
-          //dir ('./charts/preview') {
-          // container('maven') {
-          //   sh "make preview"
-          //   sh "jx preview --app $APP_NAME --dir ../.."
-          // }
-          //}
         }
       }
       stage('Build Release') {
@@ -57,11 +47,6 @@ pipeline {
             sh "git push origin v\$(cat VERSION)"
 
           }
-          //dir ('./charts/activiti-cloud-api') {
-          //  container('maven') {
-          //    sh "make tag"
-          //  }
-          //}
           container('maven') {
             sh 'mvn clean deploy -DskipTests'
 
@@ -69,7 +54,6 @@ pipeline {
             sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-dependencies \$(cat VERSION)"
             sh "updatebot update --merge false"
 
-            //sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
           }
         }
       }
@@ -104,30 +88,11 @@ pipeline {
             sh "echo pushing with update using version \$(cat VERSION)"
 
             sh "updatebot push-version --kind maven org.activiti.cloud.api:activiti-cloud-api-dependencies \$(cat VERSION)"
-            //sh "updatebot update-loop"
 
-        //    sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
           }
         }
       }
-      // stage('Promote to Environments') {
-      //   when {
-      //     branch 'develop'
-      //   }
-      //   steps {
-      //     dir ('./charts/activiti-cloud-api') {
-      //       container('maven') {
-      //         sh 'jx step changelog --version v\$(cat ../../VERSION)'
 
-      //         // release the helm chart
-      //         sh 'jx step helm release'
-
-      //         // promote through all 'Auto' promotion Environments
-      //         sh 'jx promote -b --all-auto --timeout 1h --version \$(cat ../../VERSION)'
-      //       }
-      //     }
-      //   }
-      // }
     }
     post {
         always {
