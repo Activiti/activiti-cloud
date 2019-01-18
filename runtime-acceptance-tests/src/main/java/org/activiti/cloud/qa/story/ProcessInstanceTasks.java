@@ -410,4 +410,24 @@ public class ProcessInstanceTasks {
                 myProcessInstanceName);
     }
 
+    @Then("the task has the completion fields set")
+    public void verifyTheCorrectCompletionFieldsAreSet(){
+        Task queriedTask = taskQuerySteps.getTaskById(currentTask.getId());
+
+        assertThat(queriedTask.getCompletedDate()).isNotNull();
+        assertThat(queriedTask.getDuration()).isNotNull();
+
+        List <CloudRuntimeEvent> taskCompletedEvents = auditSteps.getEventsByEntityId(currentTask.getId())
+                .stream()
+                .filter(cloudRuntimeEvent -> cloudRuntimeEvent.getEventType().equals(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED))
+                .collect(Collectors.toList());
+
+        assertThat(taskCompletedEvents.get(0).getEventType())
+                .isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
+        assertThat(queriedTask.getCompletedDate().getTime())
+                .isEqualTo(taskCompletedEvents.get(0).getTimestamp());
+        assertThat(queriedTask.getDuration())
+                .isEqualTo(taskCompletedEvents.get(0).getTimestamp() - queriedTask.getCreatedDate().getTime());
+    }
+
 }
