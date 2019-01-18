@@ -2,6 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.1.0.RELEASE</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
   <groupId>org.activiti.cloud.examples</groupId>
   <artifactId>example-runtime-bundle</artifactId>
   <name>Activiti Cloud :: Runtime Bundle</name>
@@ -14,12 +20,16 @@
     <tag>HEAD</tag>
   </scm>
   <properties>
-    <java.version>1.8</java.version>
-    <activiti-cloud-dependencies.version>7.0.156</activiti-cloud-dependencies.version>
-    <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
-    <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
-    <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
-    <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
+      <java.version>11</java.version>
+      <maven.compiler.source>${java.version}</maven.compiler.source>
+      <maven.compiler.target>${java.version}</maven.compiler.target>
+      <activiti-cloud-dependencies.version>0.0.0-SNAPSHOT-PR-271-3</activiti-cloud-dependencies.version>
+      <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+      <maven-failsafe-plugin.version>3.0.0-M3</maven-failsafe-plugin.version>
+      <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
+      <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>   
+      <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
+      <javax.xml.bind.version>2.3.0</javax.xml.bind.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencyManagement>
@@ -34,6 +44,11 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
+   <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>${javax.xml.bind.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.activiti.cloud.rb</groupId>
       <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
@@ -70,8 +85,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
+          <release>${java.version}</release>
           <showDeprecation>true</showDeprecation>
           <showWarnings>true</showWarnings>
           <optimize>true</optimize>
@@ -92,7 +106,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
+        <version>${maven-deploy-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
