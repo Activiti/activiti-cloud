@@ -30,7 +30,7 @@ public interface TaskQueryService extends BaseService {
     @Headers("Content-Type: application/json")
     PagedResources<CloudTask> getTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
     
-    @RequestLine("GET /v1/tasks/rootTasksOnly?processInstanceId={processInstanceId}&sort=createdDate,desc&sort=id,desc")
+    @RequestLine("GET /v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
     PagedResources<CloudTask> getRootTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
 }
