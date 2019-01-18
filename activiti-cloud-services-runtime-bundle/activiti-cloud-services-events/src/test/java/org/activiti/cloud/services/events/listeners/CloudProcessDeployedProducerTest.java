@@ -19,6 +19,8 @@ package org.activiti.cloud.services.events.listeners;
 import java.util.Arrays;
 import java.util.List;
 
+import org.activiti.cloud.api.model.shared.events.*;
+import java.util.stream.Collectors;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -38,6 +40,7 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -70,7 +73,7 @@ public class CloudProcessDeployedProducerTest {
     private MessageChannel auditProducer;
 
     @Captor
-    private ArgumentCaptor<Message<CloudProcessDeployedEvent[]>> messageCaptor;
+    private ArgumentCaptor<Message<CloudRuntimeEvent<?, ?>[]>> messageCaptor;
 
     @Before
     public void setUp() {
@@ -99,11 +102,11 @@ public class CloudProcessDeployedProducerTest {
         //then
         verify(runtimeBundleInfoAppender, times(2)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
         verify(auditProducer).send(messageCaptor.capture());
-        Message<CloudProcessDeployedEvent[]> message = messageCaptor.getValue();
-        assertThat(message.getPayload())
-                .extracting(CloudProcessDeployedEvent::getEntity)
-                .containsExactlyElementsOf(apiProcessDefinitions);
-    }
+        Message<CloudRuntimeEvent<?, ?>[]> message = messageCaptor.getValue();
+        List<org.activiti.api.process.model.ProcessDefinition> processDefinitions = Arrays.stream(message.getPayload()).map(e -> (org.activiti.api.process.model.ProcessDefinition) e.getEntity()).collect(Collectors.toList());
+        assertThat(processDefinitions)
+        .containsExactlyElementsOf(apiProcessDefinitions);           
+     }
 
     private ApplicationReadyEvent buildApplicationReadyEvent(WebApplicationType applicationType) {
         ApplicationReadyEvent applicationReadyEvent = mock(ApplicationReadyEvent.class);

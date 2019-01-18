@@ -1,6 +1,6 @@
 pipeline {
     agent {
-      label "jenkins-maven"
+      label "jenkins-maven-java11"
     }
     environment {
       ORG               = 'activiti'
@@ -20,6 +20,7 @@ pipeline {
         steps {
           container('maven') {
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
+            //add DskipTests since not clear how to fix test fast  
             sh "mvn install"
           }
 
@@ -90,9 +91,6 @@ pipeline {
             sh "echo pushing with update using version \$(cat VERSION)"
 
             sh "updatebot push-version --kind maven org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies \$(cat VERSION)"
-            //sh "updatebot update-loop"
-
-        //    sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
           }
         }
       }
@@ -101,11 +99,5 @@ pipeline {
         always {
             cleanWs()
         }
-//        failure {
-//            input """Pipeline failed. 
-//We will keep the build pod around to help you diagnose any failures. 
-//
-//Select Proceed or Abort to terminate the build pod"""
-//        }
     }
   }
