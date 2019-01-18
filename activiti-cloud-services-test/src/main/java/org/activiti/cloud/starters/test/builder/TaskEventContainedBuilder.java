@@ -102,7 +102,7 @@ public class TaskEventContainedBuilder {
                               processInstance);
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
                                    new CloudTaskAssignedEventImpl(task),
-                                   new CloudTaskCompletedEventImpl(task));
+                                   new CloudTaskCompletedEventImpl(UUID.randomUUID().toString(), new Date().getTime(), task));
         return task;
     }
 
@@ -152,6 +152,7 @@ public class TaskEventContainedBuilder {
         TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
                                      taskName,
                                      status);
+        task.setCreatedDate(new Date());
         if(processInstance != null) {
             task.setProcessInstanceId(processInstance.getId());
         }
