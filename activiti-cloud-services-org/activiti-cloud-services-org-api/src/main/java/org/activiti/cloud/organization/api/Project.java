@@ -19,9 +19,9 @@ package org.activiti.cloud.organization.api;
 import org.activiti.cloud.services.auditable.Auditable;
 
 /**
- * Interface for applications
+ * Interface for projects
  */
-public interface Application<U> extends Auditable<U> {
+public interface Project<U> extends Auditable<U> {
 
     String getId();
 

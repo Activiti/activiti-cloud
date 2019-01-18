@@ -21,7 +21,7 @@ import org.activiti.cloud.services.auditable.Auditable;
 /**
  * Interface for models
  */
-public interface Model<A extends Application, U> extends Auditable<U> {
+public interface Model<A extends Project, U> extends Auditable<U> {
 
     String getId();
 
@@ -35,9 +35,9 @@ public interface Model<A extends Application, U> extends Auditable<U> {
 
     void setType(String type);
 
-    A getApplication();
+    A getProject();
 
-    void setApplication(A application);
+    void setProject(A project);
 
     String getVersion();
 

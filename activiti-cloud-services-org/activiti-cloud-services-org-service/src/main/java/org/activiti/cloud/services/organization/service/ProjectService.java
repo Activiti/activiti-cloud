@@ -22,14 +22,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.converter.JsonConverter;
-import org.activiti.cloud.organization.core.error.ImportApplicationException;
+import org.activiti.cloud.organization.core.error.ImportProjectException;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
-import org.activiti.cloud.organization.repository.ApplicationRepository;
+import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.zip.ZipBuilder;
 import org.activiti.cloud.services.common.zip.ZipStream;
@@ -47,93 +47,93 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExt
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 
 /**
- * Business logic related to {@link Application} entities
+ * Business logic related to {@link Project} entities
  */
 @Service
 @PreAuthorize("hasRole('ACTIVITI_MODELER')")
-public class ApplicationService {
+public class ProjectService {
 
-    private final ApplicationRepository applicationRepository;
+    private final ProjectRepository projectRepository;
 
     private final ModelService modelService;
 
     private final ModelTypeService modelTypeService;
 
-    private final JsonConverter<Application> jsonConverter;
+    private final JsonConverter<Project> jsonConverter;
 
     @Autowired
-    public ApplicationService(ApplicationRepository applicationRepository,
-                              ModelService modelService,
-                              ModelTypeService modelTypeService,
-                              JsonConverter<Application> jsonConverter) {
-        this.applicationRepository = applicationRepository;
+    public ProjectService(ProjectRepository projectRepository,
+                          ModelService modelService,
+                          ModelTypeService modelTypeService,
+                          JsonConverter<Project> jsonConverter) {
+        this.projectRepository = projectRepository;
         this.modelService = modelService;
         this.modelTypeService = modelTypeService;
         this.jsonConverter = jsonConverter;
     }
 
     /**
-     * Get a page of applications.
+     * Get a page of projects.
      * @param pageable the pagination information
      * @return the page
      */
-    public Page<Application> getApplications(Pageable pageable) {
-        return applicationRepository.getApplications(pageable);
+    public Page<Project> getProjects(Pageable pageable) {
+        return projectRepository.getProjects(pageable);
     }
 
     /**
-     * Create an application.
-     * @param application the application to create
-     * @return the created application
+     * Create an project.
+     * @param project the project to create
+     * @return the created project
      */
-    public Application createApplication(Application application) {
-        return applicationRepository.createApplication(application);
+    public Project createProject(Project project) {
+        return projectRepository.createProject(project);
     }
 
     /**
-     * Update an application.
-     * @param applicationToUpdate the application to update
-     * @param newApplication the application containing the new values to be used for update
-     * @return the the updated application
+     * Update an project.
+     * @param projectToUpdate the project to update
+     * @param newProject the project containing the new values to be used for update
+     * @return the the updated project
      */
-    public Application updateApplication(Application applicationToUpdate,
-                                         Application newApplication) {
-        applicationToUpdate.setName(newApplication.getName());
-        return applicationRepository.updateApplication(applicationToUpdate);
+    public Project updateProject(Project projectToUpdate,
+                                 Project newProject) {
+        projectToUpdate.setName(newProject.getName());
+        return projectRepository.updateProject(projectToUpdate);
     }
 
     /**
-     * Delete an application.
-     * @param application the application to be deleted
+     * Delete an project.
+     * @param project the project to be deleted
      */
-    public void deleteApplication(Application application) {
-        modelService.getAllModels(application)
+    public void deleteProject(Project project) {
+        modelService.getAllModels(project)
                 .forEach(modelService::deleteModel);
-        applicationRepository.deleteApplication(application);
+        projectRepository.deleteProject(project);
     }
 
     /**
-     * Find an application by id.
-     * @param applicationId the id to search for
-     * @return the found application, or {@literal Optional#empty()}
+     * Find an project by id.
+     * @param projectId the id to search for
+     * @return the found project, or {@literal Optional#empty()}
      */
-    public Optional<Application> findApplicationById(String applicationId) {
-        return applicationRepository.findApplicationById(applicationId);
+    public Optional<Project> findProjectById(String projectId) {
+        return projectRepository.findProjectById(projectId);
     }
 
     /**
-     * Export an application to a zip file.
-     * @param application the application to export
+     * Export an project to a zip file.
+     * @param project the project to export
      * @return the {@link FileContent} with zip content
      * @throws IOException in case of I/O error
      */
-    public FileContent exportApplication(Application application) throws IOException {
-        validateApplication(application);
+    public FileContent exportProject(Project project) throws IOException {
+        validateProject(project);
 
-        ZipBuilder zipBuilder = new ZipBuilder(application.getName())
-                .appendFile(jsonConverter.convertToJsonBytes(application),
-                            toJsonFilename(application.getName()));
-        modelService.getAllModels(application)
+        ZipBuilder zipBuilder = new ZipBuilder(project.getName())
+                .appendFile(jsonConverter.convertToJsonBytes(project),
+                            toJsonFilename(project.getName()));
+        modelService.getAllModels(project)
                 .forEach(model -> modelTypeService.findModelTypeByName(model.getType())
                         .map(ModelType::getFolderName)
                         .ifPresent(folderName -> {
@@ -150,13 +150,13 @@ public class ApplicationService {
     }
 
     /**
-     * Import an application form a zip multipart file.
+     * Import an project form a zip multipart file.
      * @param file the multipart zip file to import from
-     * @return the imported application
+     * @return the imported project
      * @throws IOException in case of multipart file input stream access error
      */
-    public Application importApplication(MultipartFile file) throws IOException {
-        ApplicationHolder applicationHolder = new ApplicationHolder();
+    public Project importProject(MultipartFile file) throws IOException {
+        ProjectHolder projectHolder = new ProjectHolder();
 
         ZipStream.of(file).forEach(zipEntry -> zipEntry.getContent()
                 .ifPresent(bytes -> getContentTypeByPath(zipEntry.getFileName())
@@ -170,51 +170,51 @@ public class ApplicationService {
                                     if (fileContent.isJson()) {
                                         String modelName = removeExtension(fileContent.getFilename(),
                                                                            JSON);
-                                        applicationHolder.addModelJsonFile(modelName,
+                                        projectHolder.addModelJsonFile(modelName,
                                                                            modelType,
                                                                            fileContent);
                                     } else {
                                         modelService.contentFilenameToModelName(zipEntry.getFileName(),
                                                                                 modelType)
-                                                .ifPresent(modelName -> applicationHolder.addModelContent(modelName,
+                                                .ifPresent(modelName -> projectHolder.addModelContent(modelName,
                                                                                                           fileContent));
                                     }
                                 });
                             } else if (fileContent.isJson()) {
                                 jsonConverter.tryConvertToEntity(bytes)
-                                        .ifPresent(applicationHolder::setApplication);
+                                        .ifPresent(projectHolder::setProject);
                             }
                         })));
 
-        Application createdApplication = applicationHolder.getApplicationMetadata()
-                .map(this::createApplication)
-                .orElseThrow(() -> new ImportApplicationException("No valid application entry found to import: " + file.getOriginalFilename()));
+        Project createdProject = projectHolder.getProjectMetadata()
+                .map(this::createProject)
+                .orElseThrow(() -> new ImportProjectException("No valid project entry found to import: " + file.getOriginalFilename()));
 
-        applicationHolder.getModelJsonFiles().forEach(modelJsonFile -> {
+        projectHolder.getModelJsonFiles().forEach(modelJsonFile -> {
             if (modelTypeService.isJson(modelJsonFile.getModelType())) {
-                modelService.importModel(createdApplication,
+                modelService.importModel(createdProject,
                                          modelJsonFile.getModelType(),
                                          modelJsonFile.getFileContent());
             } else {
-                Model createdModel = modelService.importJsonModel(createdApplication,
+                Model createdModel = modelService.importJsonModel(createdProject,
                                                                   modelJsonFile.getModelType(),
                                                                   modelJsonFile.getFileContent());
-                applicationHolder.getModelContentFile(createdModel)
+                projectHolder.getModelContentFile(createdModel)
                         .ifPresent(fileContent -> modelService.updateModelContent(createdModel,
                                                                                   fileContent));
             }
         });
-        return createdApplication;
+        return createdProject;
     }
 
-    public void validateApplication(Application application) {
-        List<ModelValidationError> validationErrors = modelService.getAllModels(application)
+    public void validateProject(Project project) {
+        List<ModelValidationError> validationErrors = modelService.getAllModels(project)
                 .stream()
                 .flatMap(this::getModelValidationErrors)
                 .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
-            throw new SemanticModelValidationException("Validation errors found in application's models",
+            throw new SemanticModelValidationException("Validation errors found in project's models",
                                                        validationErrors);
         }
     }

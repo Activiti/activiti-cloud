@@ -43,15 +43,14 @@ import org.springframework.web.multipart.MultipartFile;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_SVG;
 import static org.activiti.cloud.services.organization.rest.api.ModelRestApi.MODELS;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
-import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.ATTACHMENT_API_PARAM_DESCR;
-import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.EXPORT_AS_ATTACHMENT_PARAM_NAME;
-import static org.activiti.cloud.services.organization.rest.controller.ApplicationController.UPLOAD_FILE_PARAM_NAME;
+import static org.activiti.cloud.services.organization.rest.controller.ProjectController.ATTACHMENT_API_PARAM_DESCR;
+import static org.activiti.cloud.services.organization.rest.controller.ProjectController.EXPORT_AS_ATTACHMENT_PARAM_NAME;
+import static org.activiti.cloud.services.organization.rest.controller.ProjectController.UPLOAD_FILE_PARAM_NAME;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 /**
  * Controller for process resources.
@@ -65,13 +64,13 @@ public interface ModelRestApi {
 
     String GET_MODELS_TYPE_PARAM_DESCR = "The type of the model to filter";
 
-    String GET_MODELS_APPLICATION_ID_PARAM_DESCR = "The id of the application to get the models for";
+    String GET_MODELS_PROJECT_ID_PARAM_DESCR = "The id of the project to get the models for";
 
     String GET_MODEL_ID_PARAM_DESCR = "The id of the model to retrieve";
 
     String CREATE_MODEL_PARAM_DESCR = "The details of the model to create";
 
-    String CREATE_MODEL_APPLICATION_ID_PARAM_DESCR = "The id of the application to associate the new model with";
+    String CREATE_MODEL_PROJECT_ID_PARAM_DESCR = "The id of the project to associate the new model with";
 
     String UPDATE_MODEL_ID_PARAM_DESCR = "The id of the model to update";
 
@@ -97,15 +96,15 @@ public interface ModelRestApi {
 
     @ApiOperation(
             tags = MODELS,
-            value = "List models for an application",
-            notes = "Get the models associated with an application. " +
+            value = "List models for an project",
+            notes = "Get the models associated with an project. " +
                     "Minimal information for each model is returned."
             //response = AlfrescoModelPage.class
     )
-    @GetMapping(path = "/applications/{applicationId}/models")
+    @GetMapping(path = "/projects/{projectId}/models")
     PagedResources<Resource<Model>> getModels(
-            @ApiParam(GET_MODELS_APPLICATION_ID_PARAM_DESCR)
-            @PathVariable String applicationId,
+            @ApiParam(GET_MODELS_PROJECT_ID_PARAM_DESCR)
+            @PathVariable String projectId,
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
             @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             Pageable pageable);
@@ -120,13 +119,13 @@ public interface ModelRestApi {
 
     @ApiOperation(
             tags = MODELS,
-            value = "Create new model belonging to an application",
-            notes = "Create a new model related to an existing application")
-    @PostMapping(path = "/applications/{applicationId}/models")
+            value = "Create new model belonging to an project",
+            notes = "Create a new model related to an existing project")
+    @PostMapping(path = "/projects/{projectId}/models")
     @ResponseStatus(CREATED)
     Resource<Model> createModel(
-            @ApiParam(CREATE_MODEL_APPLICATION_ID_PARAM_DESCR)
-            @PathVariable String applicationId,
+            @ApiParam(CREATE_MODEL_PROJECT_ID_PARAM_DESCR)
+            @PathVariable String projectId,
             @ApiParam(CREATE_MODEL_PARAM_DESCR)
             @RequestBody Model model);
 
@@ -186,11 +185,11 @@ public interface ModelRestApi {
             tags = MODELS,
             value = "Import a model from file",
             notes = "Allows a file to be uploaded containing a model definition.")
-    @PostMapping(path = "/applications/{applicationId}/models/import", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = "/projects/{projectId}/models/import", consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(CREATED)
     Resource<Model> importModel(
-            @ApiParam(CREATE_MODEL_APPLICATION_ID_PARAM_DESCR)
-            @PathVariable String applicationId,
+            @ApiParam(CREATE_MODEL_PROJECT_ID_PARAM_DESCR)
+            @PathVariable String projectId,
             @ApiParam(IMPORT_MODEL_TYPE_PARAM_DESCR)
             @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
             @ApiParam(IMPORT_MODEL_FILE_PARAM_DESCR)

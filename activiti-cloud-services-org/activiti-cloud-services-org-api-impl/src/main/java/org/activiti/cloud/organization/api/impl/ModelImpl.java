@@ -33,7 +33,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @ApiModel("Model")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ModelImpl extends AbstractAuditable<String> implements Model<ApplicationImpl, String> {
+public class ModelImpl extends AbstractAuditable<String> implements Model<ProjectImpl, String> {
 
     @ApiModelProperty(readOnly = true)
     private String id;
@@ -55,10 +55,10 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
 
     @ApiModelProperty(hidden = true)
     @JsonIgnore
-    private ApplicationImpl application;
+    private ProjectImpl project;
 
-    @ApiModelProperty("The parent application id")
-    private String applicationId;
+    @ApiModelProperty("The parent project id")
+    private String projectId;
 
     @ApiModelProperty(value = "The extensions of the model", readOnly = true)
     private Extensions extensions;
@@ -106,18 +106,18 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Applic
     }
 
     @Override
-    public ApplicationImpl getApplication() {
-        return application;
+    public ProjectImpl getProject() {
+        return project;
     }
 
-    public String getApplicationId() {
-        return applicationId;
+    public String getProjectId() {
+        return projectId;
     }
 
     @Override
-    public void setApplication(ApplicationImpl application) {
-        this.application = application;
-        this.applicationId = application.getId();
+    public void setProject(ProjectImpl project) {
+        this.project = project;
+        this.projectId = project.getId();
     }
 
     @Override

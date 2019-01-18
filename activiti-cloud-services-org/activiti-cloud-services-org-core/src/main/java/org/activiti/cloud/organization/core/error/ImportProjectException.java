@@ -17,23 +17,23 @@
 package org.activiti.cloud.organization.core.error;
 
 /**
- * Exception thrown when an application cannot be imported from a given zip file
+ * Exception thrown when a project cannot be imported from a given zip file
  */
-public class ImportApplicationException extends ModelingException {
+public class ImportProjectException extends ModelingException {
 
-    public ImportApplicationException() {
+    public ImportProjectException() {
     }
 
-    public ImportApplicationException(Throwable cause) {
+    public ImportProjectException(Throwable cause) {
         super(cause);
     }
 
-    public ImportApplicationException(String message) {
+    public ImportProjectException(String message) {
         super(message);
     }
 
-    public ImportApplicationException(String message,
-                                      Throwable cause) {
+    public ImportProjectException(String message,
+                                  Throwable cause) {
         super(message,
               cause);
     }

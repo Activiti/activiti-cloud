@@ -19,9 +19,9 @@ package org.activiti.cloud.services.organization.rest.assembler;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.core.error.ModelingException;
-import org.activiti.cloud.services.organization.rest.controller.ApplicationController;
+import org.activiti.cloud.services.organization.rest.controller.ProjectController;
 import org.activiti.cloud.services.organization.rest.controller.ModelController;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
@@ -34,26 +34,26 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
- * Assembler for {@link Application} resource
+ * Assembler for {@link Project} resource
  */
 @Component
-public class ApplicationResourceAssembler implements ResourceAssembler<Application, Resource<Application>> {
+public class ProjectResourceAssembler implements ResourceAssembler<Project, Resource<Project>> {
 
     @Override
-    public Resource<Application> toResource(Application application) {
+    public Resource<Project> toResource(Project project) {
         return new Resource<>(
-                application,
-                linkTo(methodOn(ApplicationController.class).getApplication(application.getId())).withSelfRel(),
-                getExportApplicationLink(application.getId()),
-                getImportApplicationModelLink(application.getId()),
-                linkTo(methodOn(ModelController.class).getModels(application.getId(),
+                project,
+                linkTo(methodOn(ProjectController.class).getProject(project.getId())).withSelfRel(),
+                getExportProjectLink(project.getId()),
+                getImportProjectModelLink(project.getId()),
+                linkTo(methodOn(ModelController.class).getModels(project.getId(),
                                                                  PROCESS,
                                                                  Pageable.unpaged())).withRel("models"));
     }
 
-    private Link getImportApplicationModelLink(String applicationId) {
+    private Link getImportProjectModelLink(String projectId) {
         try {
-            return linkTo(methodOn(ModelController.class).importModel(applicationId,
+            return linkTo(methodOn(ModelController.class).importModel(projectId,
                                                                       PROCESS,
                                                                       null)).withRel("import");
         } catch (IOException e) {
@@ -61,14 +61,14 @@ public class ApplicationResourceAssembler implements ResourceAssembler<Applicati
         }
     }
 
-    private Link getExportApplicationLink(String applicationId) {
+    private Link getExportProjectLink(String projectId) {
         try {
-            return linkTo(ApplicationController.class,
-                          ApplicationController.class.getMethod("exportApplication",
-                                                                HttpServletResponse.class,
-                                                                String.class,
-                                                                boolean.class),
-                          applicationId)
+            return linkTo(ProjectController.class,
+                          ProjectController.class.getMethod("exportProject",
+                                                            HttpServletResponse.class,
+                                                            String.class,
+                                                            boolean.class),
+                          projectId)
                     .withRel("export");
         } catch (NoSuchMethodException e) {
             throw new ModelingException(e);

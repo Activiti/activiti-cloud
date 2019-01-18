@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.activiti.cloud.organization.api.Extensions;
 import org.activiti.cloud.organization.api.ProcessVariable;
-import org.activiti.cloud.services.organization.entity.ApplicationEntity;
+import org.activiti.cloud.services.organization.entity.ProjectEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 
 import static java.util.Collections.singletonMap;
@@ -41,9 +41,9 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_T
  */
 public class MockFactory {
 
-    public static ApplicationEntity application(String name) {
-        return new ApplicationEntity(id(),
-                                     name);
+    public static ProjectEntity project(String name) {
+        return new ProjectEntity(id(),
+                                 name);
     }
 
     public static ModelEntity processModel(String name) throws JsonProcessingException {
@@ -68,13 +68,13 @@ public class MockFactory {
                                        content);
     }
 
-    public static ModelEntity processModelWithContent(ApplicationEntity application,
+    public static ModelEntity processModelWithContent(ProjectEntity project,
                                                       String name,
                                                       String content) {
         ModelEntity processModel = new ModelEntity(id(),
                                                    name,
                                                    PROCESS);
-        processModel.setApplication(application);
+        processModel.setProject(project);
         processModel.setContentType(CONTENT_TYPE_XML);
         processModel.setContent(content);
         processModel.setVersion("0.0.1");

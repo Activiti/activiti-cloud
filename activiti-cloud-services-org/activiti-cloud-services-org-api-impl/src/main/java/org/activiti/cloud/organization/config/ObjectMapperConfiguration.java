@@ -20,9 +20,9 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.impl.ApplicationImpl;
+import org.activiti.cloud.organization.api.impl.ProjectImpl;
 import org.activiti.cloud.organization.api.impl.ModelImpl;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -39,8 +39,8 @@ public class ObjectMapperConfiguration {
                                                Version.unknownVersion());
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
 
-        resolver.addMapping(Application.class,
-                            ApplicationImpl.class);
+        resolver.addMapping(Project.class,
+                            ProjectImpl.class);
         resolver.addMapping(Model.class,
                             ModelImpl.class);
 

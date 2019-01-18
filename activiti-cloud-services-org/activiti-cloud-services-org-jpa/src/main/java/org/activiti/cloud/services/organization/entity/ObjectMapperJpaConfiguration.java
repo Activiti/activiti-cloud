@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Extensions;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.converter.JsonConverter;
@@ -40,8 +40,8 @@ public class ObjectMapperJpaConfiguration {
                                                Version.unknownVersion());
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
 
-        resolver.addMapping(Application.class,
-                            ApplicationEntity.class);
+        resolver.addMapping(Project.class,
+                            ProjectEntity.class);
         resolver.addMapping(Model.class,
                             ModelEntity.class);
 

@@ -20,17 +20,17 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.organization.core.rest.client.service.ModelReferenceService;
-import org.activiti.cloud.organization.repository.ApplicationRepository;
+import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
-import org.activiti.cloud.services.organization.entity.ApplicationEntity;
+import org.activiti.cloud.services.organization.entity.ProjectEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
-import org.activiti.cloud.services.organization.jpa.ApplicationJpaRepository;
+import org.activiti.cloud.services.organization.jpa.ProjectJpaRepository;
 import org.activiti.cloud.services.organization.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
 import org.junit.After;
@@ -55,7 +55,7 @@ import org.springframework.web.util.NestedServletException;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.activiti.cloud.services.organization.mock.MockFactory.application;
+import static org.activiti.cloud.services.organization.mock.MockFactory.project;
 import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
@@ -100,7 +100,7 @@ public class ModelControllerIT {
     private ObjectMapper mapper;
 
     @Autowired
-    private ApplicationRepository applicationRepository;
+    private ProjectRepository projectRepository;
 
     @Autowired
     private ModelRepository modelRepository;
@@ -116,15 +116,15 @@ public class ModelControllerIT {
     @After
     public void tearDown() {
         ((ModelJpaRepository) modelRepository).deleteAllInBatch();
-        ((ApplicationJpaRepository) applicationRepository).deleteAllInBatch();
+        ((ProjectJpaRepository) projectRepository).deleteAllInBatch();
     }
 
     @Test
     public void testGetModels() throws Exception {
-        String parentApplicationId = "parent_application_id";
-        Application createdApplication =
-                applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
-                                                                              "Parent Application"));
+        String parentProjectId = "parent_project_id";
+        Project createdProject =
+                projectRepository.createProject(new ProjectEntity(parentProjectId,
+                                                                  "Parent Project"));
 
         final String processModelId1 = "process_model_id1";
         final String processModelName1 = "Process Model 1";
@@ -146,22 +146,22 @@ public class ModelControllerIT {
         Model processModel1 = new ModelEntity(processModelId1,
                                               processModelName1,
                                               PROCESS);
-        processModel1.setApplication(createdApplication);
+        processModel1.setProject(createdProject);
         processModel1 = modelRepository.createModel(processModel1);
         assertThat(processModel1).isNotNull();
 
         Model processModel2 = new ModelEntity(processModelId2,
                                               processModelName2,
                                               PROCESS);
-        processModel2.setApplication(createdApplication);
+        processModel2.setProject(createdProject);
         processModel2 = modelRepository.createModel(processModel2);
         assertThat(processModel2).isNotNull();
 
         //when
         final ResultActions resultActions = mockMvc
-                .perform(get("{version}/applications/{applicationId}/models?type=PROCESS",
+                .perform(get("{version}/projects/{projectId}/models?type=PROCESS",
                              API_VERSION,
-                             parentApplicationId))
+                             parentProjectId))
                 .andDo(print());
 
         //then
@@ -177,9 +177,9 @@ public class ModelControllerIT {
     @Test
     public void testCreateModel() throws Exception {
 
-        String parentApplicationId = "parent_application_id";
-        applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
-                                                                      "Parent Application"));
+        String parentProjectId = "parent_project_id";
+        projectRepository.createProject(new ProjectEntity(parentProjectId,
+                                                          "Parent Project"));
 
         final String processModelId = "process_model_id";
         final String processModelName = "Process Model";
@@ -192,9 +192,9 @@ public class ModelControllerIT {
         doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(PROCESS),
                                                                                eq(processModelId));
 
-        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+        mockMvc.perform(post("{version}/projects/{projectId}/models",
                              API_VERSION,
-                             parentApplicationId)
+                             parentProjectId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())
@@ -204,8 +204,8 @@ public class ModelControllerIT {
     @Test
     public void testCreateProcessModelWithExtensions() throws Exception {
         // GIVEN
-        Application application = application("Parent Application");
-        applicationRepository.createApplication(application);
+        Project project = project("Parent Project");
+        projectRepository.createProject(project);
 
         ModelEntity processModel = processModelWithExtensions("processModelWithExtensions",
                                                               extensions("variable1",
@@ -215,9 +215,9 @@ public class ModelControllerIT {
                 .getResource(eq(PROCESS),
                              eq(processModel.getId()));
 
-        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+        mockMvc.perform(post("{version}/projects/{projectId}/models",
                              API_VERSION,
-                             application.getId())
+                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())
@@ -240,17 +240,17 @@ public class ModelControllerIT {
     @Test
     public void testCreateModelOfUnknownType() throws Exception {
 
-        String parentApplicationId = "parent_application_id";
-        applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
-                                                                      "Parent Application"));
+        String parentProjectId = "parent_project_id";
+        projectRepository.createProject(new ProjectEntity(parentProjectId,
+                                                          "Parent Project"));
 
         Model formModel = new ModelEntity("id",
                                           "name",
                                           "FORM");
 
-        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+        mockMvc.perform(post("{version}/projects/{projectId}/models",
                              API_VERSION,
-                             parentApplicationId)
+                             parentProjectId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(formModel)))
                 .andDo(print())
@@ -260,9 +260,9 @@ public class ModelControllerIT {
     @Test
     public void testCreateModelProducerException() throws Exception {
 
-        String parentApplicationId = "parent_application_id";
-        applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
-                                                                      "Parent Application"));
+        String parentProjectId = "parent_project_id";
+        projectRepository.createProject(new ProjectEntity(parentProjectId,
+                                                          "Parent Project"));
 
         final String processModelId = "process_model_id";
         final String processModelName = "Process Model";
@@ -274,9 +274,9 @@ public class ModelControllerIT {
                                                                                    any(ModelReference.class));
 
         expectedException.expect(NestedServletException.class);
-        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+        mockMvc.perform(post("{version}/projects/{projectId}/models",
                              API_VERSION,
-                             parentApplicationId)
+                             parentProjectId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())
@@ -342,7 +342,7 @@ public class ModelControllerIT {
     }
 
     @Test
-    public void testCreateProcessModelInApplication() throws Exception {
+    public void testCreateProcessModelInProject() throws Exception {
         //given
         final String processModelId = "process_model_id";
         Model processModel = new ModelEntity(processModelId,
@@ -354,14 +354,14 @@ public class ModelControllerIT {
         doReturn(expectedProcessModel).when(modelReferenceService).getResource(eq(PROCESS),
                                                                                eq(processModelId));
 
-        String parentApplicationId = "parent_application_id";
-        applicationRepository.createApplication(new ApplicationEntity(parentApplicationId,
-                                                                      "Parent Application"));
+        String parentProjectId = "parent_project_id";
+        projectRepository.createProject(new ProjectEntity(parentProjectId,
+                                                          "Parent Project"));
 
         //when
-        mockMvc.perform(post("{version}/applications/{applicationId}/models",
+        mockMvc.perform(post("{version}/projects/{projectId}/models",
                              API_VERSION,
-                             parentApplicationId)
+                             parentProjectId)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(processModel)))
                 .andExpect(status().isCreated());
@@ -431,7 +431,7 @@ public class ModelControllerIT {
     }
 
     @Test
-    public void testDeleteApplication() throws Exception {
+    public void testDeleteModel() throws Exception {
         //given
         final String processModelId = "process_model_id";
         Model processModel = new ModelEntity(processModelId,
@@ -552,12 +552,12 @@ public class ModelControllerIT {
     @Test
     public void testImportModel() throws Exception {
         //GIVEN
-        Application parentApplication = application("Parent Application");
-        applicationRepository.createApplication(parentApplication);
+        Project parentProject = project("Parent Project");
+        projectRepository.createProject(parentProject);
 
         MockMultipartFile zipFile = new MockMultipartFile("file",
                                                           "x-19022.bpmn20.xml",
-                                                          "application/xml",
+                                                          "project/xml",
                                                           resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
         doReturn(mock(ModelReference.class))
@@ -566,9 +566,9 @@ public class ModelControllerIT {
                              anyString());
 
         // WHEN
-        mockMvc.perform(multipart("{version}/applications/{applicationId}/models/import",
+        mockMvc.perform(multipart("{version}/projects/{projectId}/models/import",
                                   API_VERSION,
-                                  parentApplication.getId())
+                                  parentProject.getId())
                                 .file(zipFile)
                                 .param("type",
                                        PROCESS)
@@ -586,18 +586,18 @@ public class ModelControllerIT {
     @Test
     public void testImportModelWrongFileName() throws Exception {
         //GIVEN
-        Application parentApplication = application("Parent Application");
-        applicationRepository.createApplication(parentApplication);
+        Project parentProject = project("Parent Project");
+        projectRepository.createProject(parentProject);
 
         MockMultipartFile zipFile = new MockMultipartFile("file",
                                                           "x-19022",
-                                                          "application/xml",
+                                                          "project/xml",
                                                           resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
         // WHEN
-        mockMvc.perform(multipart("{version}/applications/{applicationId}/models/import",
+        mockMvc.perform(multipart("{version}/projects/{projectId}/models/import",
                                   API_VERSION,
-                                  parentApplication.getId())
+                                  parentProject.getId())
                                 .file(zipFile)
                                 .param("type",
                                        PROCESS)
@@ -611,18 +611,18 @@ public class ModelControllerIT {
     @Test
     public void testImportModelWrongModelType() throws Exception {
         //GIVEN
-        Application parentApplication = application("Parent Application");
-        applicationRepository.createApplication(parentApplication);
+        Project parentProject = project("Parent Project");
+        projectRepository.createProject(parentProject);
 
         MockMultipartFile zipFile = new MockMultipartFile("file",
                                                           "x-19022.xml",
-                                                          "application/xml",
+                                                          "project/xml",
                                                           resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
         // WHEN
-        mockMvc.perform(multipart("{version}/applications/{applicationId}/models/import",
+        mockMvc.perform(multipart("{version}/projects/{projectId}/models/import",
                                   API_VERSION,
-                                  parentApplication.getId())
+                                  parentProject.getId())
                                 .file(zipFile)
                                 .param("type",
                                        "WRONG_TYPE"))
@@ -633,15 +633,15 @@ public class ModelControllerIT {
     }
 
     @Test
-    public void testImportModelApplicationNotFound() throws Exception {
+    public void testImportModelProjectNotFound() throws Exception {
         //GIVEN
         MockMultipartFile zipFile = new MockMultipartFile("file",
                                                           "x-19022.xml",
-                                                          "application/xml",
+                                                          "project/xml",
                                                           resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
         // WHEN
-        mockMvc.perform(multipart("{version}/applications/not_existing_application/models/import",
+        mockMvc.perform(multipart("{version}/projects/not_existing_project/models/import",
                                   API_VERSION)
                                 .file(zipFile)
                                 .param("type",
