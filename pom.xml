@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.0.36</version>
+    <version>0.0.0-SNAPSHOT-PR-81-8</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.query</groupId>
@@ -88,7 +88,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
+        <version>3.0.0-M1</version>
         <configuration>
           <deployAtEnd>true</deployAtEnd>
         </configuration>

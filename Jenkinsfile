@@ -1,6 +1,6 @@
 pipeline {
     agent {
-      label "jenkins-maven"
+      label "jenkins-maven-java11"
     }
     environment {
       ORG               = 'activiti'
@@ -21,11 +21,7 @@ pipeline {
           container('maven') {
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
-            sh 'export VERSION=$PREVIEW_VERSION' 
-
-
           }
-
         }
       }
       stage('Build Release') {
@@ -57,7 +53,6 @@ pipeline {
             sh "jx step git credentials"
             sh "updatebot push-version --kind maven org.activiti.cloud.query:activiti-cloud-query-dependencies \$(cat VERSION)"
             sh "updatebot update --merge false"
-
           }
         }
       }
@@ -93,9 +88,6 @@ pipeline {
 
             //will need to add updatebot yaml file and specify downtream repos
             sh "updatebot push-version --kind maven org.activiti.cloud.query:activiti-cloud-query-dependencies \$(cat VERSION)"
-            //sh "updatebot update-loop"
-
-        //    sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
           }
         }
       }
