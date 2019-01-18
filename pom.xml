@@ -16,9 +16,9 @@
   <url>http://activiti.org</url>
 
   <properties>
-    <activiti-dependencies.version>0.0.0-SNAPSHOT-PR-105-3</activiti-dependencies.version>
-    <activiti-cloud-build.version>0.0.0-SNAPSHOT-PR-81-8</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>0.0.0-SNAPSHOT-PR-122-8</activiti-cloud-service-common.version>
+    <activiti-dependencies.version>7.0.90</activiti-dependencies.version>
+    <activiti-cloud-build.version>7.0.36</activiti-cloud-build.version>
+    <activiti-cloud-service-common.version>7.0.76</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>${project.version}</activiti-cloud-runtime-bundle-service.version>
   </properties>
 
@@ -93,7 +93,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
+        <version>3.0.0-M1</version>
         <configuration>
           <deployAtEnd>true</deployAtEnd>
         </configuration>

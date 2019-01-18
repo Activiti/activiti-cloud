@@ -49,9 +49,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
+import static org.activiti.alfresco.rest.docs.HALDocumentation.unpagedVariableFields;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -117,17 +119,19 @@ public class ProcessInstanceVariableControllerImplIT {
                                                                        Integer.class.getName(),
                                                                        12,
                                                                        PROCESS_INSTANCE_ID);
-        given(processRuntime.variables(ProcessPayloadBuilder.variables()
-                                                                               .withProcessInstanceId(PROCESS_INSTANCE_ID).build()))
+        given(processRuntime.variables(any()))
                 .willReturn(Arrays.asList(name,
                                           age));
 
-        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables/",
+        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables",
                                  1,
                                  1).accept(MediaTypes.HAL_JSON_VALUE))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+                                processInstanceIdParameter(),
+                                unpagedVariableFields()
+                       ));
     }
 
     @Test

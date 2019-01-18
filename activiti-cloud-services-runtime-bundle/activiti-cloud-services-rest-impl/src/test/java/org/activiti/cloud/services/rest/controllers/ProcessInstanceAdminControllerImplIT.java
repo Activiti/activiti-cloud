@@ -16,10 +16,30 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
+import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedProcessInstanceFields;
+import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
@@ -43,26 +63,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceAdminControllerImpl.class)
@@ -83,6 +89,9 @@ public class ProcessInstanceAdminControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
+    
+    @Autowired
+    private ObjectMapper mapper;
 
     @MockBean
     private ProcessEngineChannels processEngineChannels;
@@ -107,14 +116,14 @@ public class ProcessInstanceAdminControllerImplIT {
                 processInstanceList.size());
         when(processAdminRuntime.processInstances(any())).thenReturn(processInstances);
 
-        this.mockMvc.perform(get("/admin/v1/process-instances"))
+        this.mockMvc.perform(get("/admin/v1/process-instances?page=0&size=10")
+                             .accept(MediaTypes.HAL_JSON_VALUE))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                        responseFields(subsectionWithPath("page").description("Pagination details."),
-                                subsectionWithPath("_links").description("The hypermedia links."),
-                                subsectionWithPath("_embedded").description("The process definitions."))));
+                                pagedProcessInstanceFields()));
     }
-
+    
     @Test
     public void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
 
@@ -158,5 +167,38 @@ public class ProcessInstanceAdminControllerImplIT {
                .andDo(MockMvcResultHandlers.print())
                .andDo(document(DOCUMENTATION_IDENTIFIER + "/suspend",
                        pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+    }
+    
+    @Test
+    public void deleteProcessInstance() throws Exception {
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
+        when(processAdminRuntime.delete(any())).thenReturn(defaultProcessInstance());
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}",
+                                    1))
+                .andExpect(status().isOk())
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
+                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
+    }
+    
+    @Test
+    public void update() throws Exception {
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
+        when(processAdminRuntime.update(any())).thenReturn(defaultProcessInstance());
+        
+        UpdateProcessPayload cmd = ProcessPayloadBuilder.update()
+                .withProcessInstanceId("1")
+                .withBusinessKey("businessKey")
+                .withProcessInstanceName("name")
+                .build();
+
+        this.mockMvc.perform(put("/admin/v1/process-instances/{processInstanceId}",
+                                 1)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(mapper.writeValueAsString(cmd)))
+                .andExpect(status().isOk())
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/update"));
+        
     }
 }

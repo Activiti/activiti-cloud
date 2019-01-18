@@ -43,10 +43,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.taskIdParameter;
+import static org.activiti.alfresco.rest.docs.HALDocumentation.unpagedVariableFields;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -56,6 +59,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -114,17 +118,22 @@ public class TaskVariableControllerImplIT {
                                                                        String.class.getName(),
                                                                        "Paul",
                                                                        PROCESS_INSTANCE_ID);
+        name.setTaskId(TASK_ID);
         VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>("age",
                                                                        Integer.class.getName(),
                                                                        12,
                                                                        PROCESS_INSTANCE_ID);
-        given(taskRuntime.variables(TaskPayloadBuilder.variables().withTaskId(TASK_ID).build())).willReturn(Arrays.asList(name,
+        age.setTaskId(TASK_ID);
+        given(taskRuntime.variables(any())).willReturn(Arrays.asList(name,
                                                                                                                           age));
-        this.mockMvc.perform(get("/v1/tasks/{taskId}/variables/",
-                                 TASK_ID))
+        this.mockMvc.perform(get("/v1/tasks/{taskId}/variables",
+                                 TASK_ID).accept(MediaTypes.HAL_JSON_VALUE))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
-                                pathParameters(parameterWithName("taskId").description("The task id"))));
+                                taskIdParameter(),
+                                unpagedVariableFields()
+                       ));
     }
 
 
