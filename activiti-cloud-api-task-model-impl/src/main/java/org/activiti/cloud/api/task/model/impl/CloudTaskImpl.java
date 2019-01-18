@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +38,8 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private String parentTaskId;
     private String formKey;
     private TaskStatus status;
+    private Date completedDate;
+    private Long duration;
 
     public CloudTaskImpl() {
     }
@@ -183,6 +185,23 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
 
     public void setStatus(TaskStatus status) {
         this.status = status;
+    }
+
+    public Date getCompletedDate() {
+        return completedDate;
+    }
+
+    public void setCompletedDate(Date completedDate) {
+        this.completedDate = completedDate;
+    }
+
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
+
+    public Long getDuration() {
+        return duration;
     }
 
     @Override
