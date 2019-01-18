@@ -12,6 +12,10 @@
   <name>Activiti Cloud Services :: Metadata</name>
   <dependencies>
     <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+    </dependency>       
+    <dependency>
       <groupId>com.netflix.eureka</groupId>
       <artifactId>eureka-client</artifactId>
       <scope>provided</scope>
