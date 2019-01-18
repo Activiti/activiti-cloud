@@ -8,6 +8,7 @@ spec:
   containers:
   # Override Docker config in Maven to use DinD
   - name: maven
+    image: jenkinsxio/builder-maven-java11:0.1.198
     env:
     - name: DOCKER_HOST
       value: tcp://localhost:2375
