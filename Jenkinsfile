@@ -3,7 +3,7 @@ pipeline {
       disableConcurrentBuilds()
   }
   agent {
-label "jenkins-maven-java11"
+    label "jenkins-maven-java11"
   }
   environment {
     ORG = 'activiti'
