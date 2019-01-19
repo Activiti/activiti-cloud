@@ -16,7 +16,13 @@
 
 package org.activiti.cloud.qa.story;
 
-import java.util.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
@@ -34,8 +40,6 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class Tasks {
 
@@ -228,5 +232,14 @@ public class Tasks {
     @Then("the task is updated")
     public void checkIfTaskUpdated (){
         auditSteps.checkTaskUpdatedEvent(newTask.getId());
+    }
+    
+    @Then("the user will see $numberRootTasks root task for the process")
+    public void checkNumberOfRootTasks(Integer numberRootTasks){
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+        Collection <CloudTask> rootTasksCollection = taskQuerySteps.getRootTasksByProcessInstance(processInstanceId).getContent();
+        
+        assertThat(rootTasksCollection).isNotNull();
+        assertThat(rootTasksCollection.size()).isEqualTo(numberRootTasks);
     }
 }

@@ -53,7 +53,7 @@
   </properties>
   <dependencyManagement>
     <dependencies>
-      <dependency>
+  	  <dependency>
         <groupId>org.activiti.cloud.dependencies</groupId>
         <artifactId>activiti-cloud-dependencies</artifactId>
         <version>${activiti-cloud.version}</version>

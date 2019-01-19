@@ -119,8 +119,14 @@ And the user updates the updatable fields of the task
 Then the task is updated
 And the task has the updated fields
 
+Scenario: check root tasks for the process TWO_TASK_PROCESS
+Given the user is authenticated as testuser
+When the user starts an instance of the process called TWO_TASK_PROCESS
+Then the user will see 1 root task for the process
+
 Scenario: check the task has completion fields
 Given the user is authenticated as testuser
 When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
 And the user completes the task
 Then the task has the completion fields set
+
