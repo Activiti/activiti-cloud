@@ -16,19 +16,15 @@
 
 package org.activiti.cloud.qa.steps;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
-import feign.Response;
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.organization.api.Application;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.service.ModelingModelsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
 import static org.assertj.core.api.Assertions.*;
@@ -41,7 +37,7 @@ import static org.springframework.hateoas.Link.REL_SELF;
 @EnableModelingContext
 public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
-    public static final String APPLICATION_MODELS_REL = "models";
+    public static final String PROJECT_MODELS_REL = "models";
 
     @Autowired
     private ModelingModelsService modelingModelsService;
@@ -83,7 +79,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     @Override
     protected Optional<String> getRel() {
-        return Optional.of(APPLICATION_MODELS_REL);
+        return Optional.of(PROJECT_MODELS_REL);
     }
 
     @Override

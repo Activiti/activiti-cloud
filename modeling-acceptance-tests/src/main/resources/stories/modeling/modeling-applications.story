@@ -2,33 +2,33 @@ Meta:
 
 Narrative:
 As a user
-I want to manage applications
+I want to manage projects
 
-Scenario: create an application
+Scenario: create an project
 Given the user is authenticated as modeler
-When the user creates an application 'Mars Team'
-Then the application 'Mars Team' is created
+When the user creates a project 'Mars Team'
+Then the project 'Mars Team' is created
 
-Scenario: update an application
+Scenario: update an project
 Given the user is authenticated as modeler
-And an existing application 'Mars Team'
-When the user opens the application 'Mars Team'
-And update the application name to 'Mars Terraforming Team'
-Then the application name is updated to 'Mars Terraforming Team'
+And an existing project 'Mars Team'
+When the user opens the project 'Mars Team'
+And update the project name to 'Mars Terraforming Team'
+Then the project name is updated to 'Mars Terraforming Team'
 
-Scenario: delete an application
+Scenario: delete an project
 Given the user is authenticated as modeler
-And an existing application 'Mars Team'
-When the user delete the application 'Mars Team'
-Then the application 'Mars Team' is deleted
+And an existing project 'Mars Team'
+When the user delete the project 'Mars Team'
+Then the project 'Mars Team' is deleted
 
-Scenario: export an application
+Scenario: export an project
 Given the user is authenticated as modeler
-And an application 'Mission Europa First' with process model 'landing-rover'
-When the user export the application
-Then the exported application contains the process model landing-rover
+And an project 'Mission Europa First' with process model 'landing-rover'
+When the user export the project
+Then the exported project contains the process model landing-rover
 
-Scenario: export an invalid application
+Scenario: export an invalid project
 Given the user is authenticated as modeler
-And an application 'Mission Europa' with process model 'landing-rover-not-executable'
-Then the application cannot be exported due to validation errors
+And an project 'Mission Europa' with process model 'landing-rover-not-executable'
+Then the project cannot be exported due to validation errors

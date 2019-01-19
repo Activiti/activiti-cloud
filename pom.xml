@@ -33,7 +33,7 @@
   </distributionManagement>
   <properties>
     <activiti-cloud.version>7.0.157</activiti-cloud.version>
-    <activiti-cloud-modeling.version>7.0.46</activiti-cloud-modeling.version>
+    <activiti-cloud-modeling.version>7.0.47</activiti-cloud-modeling.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <enforcer.skip>true</enforcer.skip>
     <java.version>11</java.version>

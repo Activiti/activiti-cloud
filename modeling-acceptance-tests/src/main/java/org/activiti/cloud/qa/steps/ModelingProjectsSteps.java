@@ -23,13 +23,13 @@ import java.util.UUID;
 
 import feign.Response;
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
-import org.activiti.cloud.qa.service.ModelingApplicationsService;
+import org.activiti.cloud.qa.service.ModelingProjectsService;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
@@ -44,47 +44,47 @@ import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
 /**
- * Modeling applications steps
+ * Modeling projects steps
  */
 @EnableModelingContext
-public class ModelingApplicationsSteps extends ModelingContextSteps<Application> {
+public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
 
     @Autowired
-    private ModelingApplicationsService modelingApplicationsService;
+    private ModelingProjectsService modelingProjectService;
 
     @Autowired
     private ModelingTestsConfigurationProperties config;
 
     @Step
-    public Resource<Application> create(String applicationName) {
+    public Resource<Project> create(String projectName) {
         String id = UUID.randomUUID().toString();
-        Application application = mock(Application.class);
-        doReturn(id).when(application).getId();
-        doReturn(applicationName).when(application).getName();
+        Project project = mock(Project.class);
+        doReturn(id).when(project).getId();
+        doReturn(projectName).when(project).getName();
         return create(id,
-                      application);
+                      project);
     }
 
     @Step
-    public void updateApplicationName(String newApplicationName) {
-        Resource<Application> currentContext = checkAndGetCurrentContext(Application.class);
-        Application application = currentContext.getContent();
-        application.setName(newApplicationName);
+    public void updateProjectName(String newProjectName) {
+        Resource<Project> currentContext = checkAndGetCurrentContext(Project.class);
+        Project project = currentContext.getContent();
+        project.setName(newProjectName);
 
-        modelingApplicationsService.updateByUri(currentContext.getLink(REL_SELF).getHref()
+        modelingProjectService.updateByUri(currentContext.getLink(REL_SELF).getHref()
                         .replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()),
-                                                application);
+                                           project);
     }
 
     @Step
-    public void checkCurrentApplicationName(String applicationName) {
+    public void checkCurrentProjectName(String projectName) {
         updateCurrentModelingObject();
-        Resource<Application> currentContext = checkAndGetCurrentContext(Application.class);
-        assertThat(currentContext.getContent().getName()).isEqualTo(applicationName);
+        Resource<Project> currentContext = checkAndGetCurrentContext(Project.class);
+        assertThat(currentContext.getContent().getName()).isEqualTo(projectName);
     }
 
     @Step
-    public void checkApplicationNotFound(ModelingIdentifier identifier) {
+    public void checkProjectNotFound(ModelingIdentifier identifier) {
         assertThat(findAll().getContent()
                            .stream()
                            .map(Resource::getContent)
@@ -94,21 +94,21 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
     }
 
     @Step
-    public Resource<Model> importModelInCurrentApplication(File file) {
-        Resource<Application> currentApplication = checkAndGetCurrentContext(Application.class);
-        Link importModelLink = currentApplication.getLink("import");
+    public Resource<Model> importModelInCurrentProject(File file) {
+        Resource<Project> currentProject = checkAndGetCurrentContext(Project.class);
+        Link importModelLink = currentProject.getLink("import");
         assertThat(importModelLink).isNotNull();
 
-        return modelingApplicationsService.importApplicationModelByUri(importModelLink.getHref().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()),
-                                                                       file);
+        return modelingProjectService.importProjectModelByUri(importModelLink.getHref().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()),
+                                                              file);
     }
 
     @Step
-    public void exportCurrentApplication() throws IOException {
-        Resource<Application> currentApplication = checkAndGetCurrentContext(Application.class);
-        Link exportLink = currentApplication.getLink("export");
+    public void exportCurrentProject() throws IOException {
+        Resource<Project> currentProject = checkAndGetCurrentContext(Project.class);
+        Link exportLink = currentProject.getLink("export");
         assertThat(exportLink).isNotNull();
-        Response response = modelingApplicationsService.exportApplicationByUri(exportLink.getHref().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()));
+        Response response = modelingProjectService.exportProjectByUri(exportLink.getHref().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()));
 
         if (response.status() == SC_OK) {
             modelingContextHandler.setCurrentModelingFile(toFileContent(response));
@@ -116,24 +116,24 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
     }
 
     @Step
-    public void checkExportedApplicationContainsModel(ModelType modelType,
-                                                      String modelName) {
-        Application currentApplication = checkAndGetCurrentContext(Application.class).getContent();
+    public void checkExportedProjectContainsModel(ModelType modelType,
+                                                  String modelName) {
+        Project currentProject = checkAndGetCurrentContext(Project.class).getContent();
         assertThat(modelingContextHandler.getCurrentModelingFile()).hasValueSatisfying(
                 fileContent -> assertThatFileContent(fileContent)
-                        .hasName(currentApplication.getName() + ".zip")
+                        .hasName(currentProject.getName() + ".zip")
                         .hasContentType(ContentTypeUtils.CONTENT_TYPE_ZIP)
                         .isZip()
                         .hasEntries(
-                                toJsonFilename(currentApplication.getName()),
+                                toJsonFilename(currentProject.getName()),
                                 modelType.getFolderName() + "/",
                                 modelType.getFolderName() + "/" + toJsonFilename(modelName),
                                 modelType.getFolderName() + "/" + setExtension(modelName,
                                                                                modelType.getContentFileExtension())
                         )
-                        .hasJsonContentSatisfying(toJsonFilename(currentApplication.getName()),
+                        .hasJsonContentSatisfying(toJsonFilename(currentProject.getName()),
                                                   jsonContent -> jsonContent
-                                                          .node("name").isEqualTo(currentApplication.getName()))
+                                                          .node("name").isEqualTo(currentProject.getName()))
                         .hasJsonContentSatisfying(modelType.getFolderName() + "/" + toJsonFilename(modelName),
                                                   jsonContent -> jsonContent
                                                           .node("name").isEqualTo(modelName)));
@@ -145,7 +145,7 @@ public class ModelingApplicationsSteps extends ModelingContextSteps<Application>
     }
 
     @Override
-    public ModelingApplicationsService service() {
-        return modelingApplicationsService;
+    public ModelingProjectsService service() {
+        return modelingProjectService;
     }
 }

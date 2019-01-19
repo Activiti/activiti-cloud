@@ -25,7 +25,7 @@ import feign.jackson.JacksonEncoder;
 import org.activiti.cloud.acc.shared.rest.feign.FeignConfiguration;
 import org.activiti.cloud.organization.config.ObjectMapperConfiguration;
 import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
-import org.activiti.cloud.qa.service.ModelingApplicationsService;
+import org.activiti.cloud.qa.service.ModelingProjectsService;
 import org.activiti.cloud.qa.service.ModelingModelsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -68,9 +68,9 @@ public class ModelingFeignConfiguration {
     }
 
     @Bean
-    public ModelingApplicationsService modelingApplicationsService(Encoder modelingEncoder,
-                                                                   Decoder modelingDecoder) {
-        return ModelingApplicationsService
+    public ModelingProjectsService modelingApplicationsService(Encoder modelingEncoder,
+                                                               Decoder modelingDecoder) {
+        return ModelingProjectsService
                 .build(modelingEncoder,
                        modelingDecoder,
                        modelingTestsConfigurationProperties.getModelingUrl());

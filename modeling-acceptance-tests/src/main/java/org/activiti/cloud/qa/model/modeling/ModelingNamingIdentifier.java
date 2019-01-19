@@ -19,7 +19,7 @@ package org.activiti.cloud.qa.model.modeling;
 import java.util.Arrays;
 import java.util.List;
 
-import org.activiti.cloud.organization.api.Application;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 
 /**
@@ -48,20 +48,20 @@ public abstract class ModelingNamingIdentifier<M> implements ModelingIdentifier<
 
     protected abstract String getName(M modelingContext);
 
-    public static ModelingNamingIdentifier<Application> applicationNamed(String name) {
-        return new ModelingNamingIdentifier<Application>(name) {
+    public static ModelingNamingIdentifier<Project> projectNamed(String name) {
+        return new ModelingNamingIdentifier<Project>(name) {
             @Override
-            protected String getName(Application application) {
-                return application.getName();
+            protected String getName(Project project) {
+                return project.getName();
             }
         };
     }
 
-    public static ModelingNamingIdentifier applicationsNamed(List<String> names) {
-        return new ModelingNamingIdentifier<Application>(names) {
+    public static ModelingNamingIdentifier projectsNamed(List<String> names) {
+        return new ModelingNamingIdentifier<Project>(names) {
             @Override
-            protected String getName(Application application) {
-                return application.getName();
+            protected String getName(Project project) {
+                return project.getName();
             }
         };
     }
@@ -69,8 +69,8 @@ public abstract class ModelingNamingIdentifier<M> implements ModelingIdentifier<
     public static ModelingNamingIdentifier modelNamed(String name) {
         return new ModelingNamingIdentifier<Model>(name) {
             @Override
-            protected String getName(Model application) {
-                return application.getName();
+            protected String getName(Model project) {
+                return project.getName();
             }
         };
     }

@@ -17,9 +17,8 @@
 package org.activiti.cloud.qa.story;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.steps.ModelingApplicationsSteps;
+import org.activiti.cloud.qa.steps.ModelingProjectsSteps;
 import org.activiti.cloud.qa.steps.ModelingModelsSteps;
-import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
@@ -32,7 +31,7 @@ import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.mode
 public class ModelingModels {
 
     @Steps
-    private ModelingApplicationsSteps modelingApplicationsSteps;
+    private ModelingProjectsSteps modelingApplicationsSteps;
 
     @Steps
     private ModelingModelsSteps modelingModelsSteps;
