@@ -165,9 +165,10 @@
                   // use fetch, and could instead implement graphQLFetcher however you like,
                   // as long as it returns a Promise or Observable.
                   function graphQLFetcher(graphQLParams) {
-                	  return keycloak.updateToken().then(result => {
-                      // This example expects a GraphQL server at the path /graphql.
-                      // Change this to point wherever you host your GraphQL server.
+                	  return keycloak.updateToken()
+                	    .then(result => {
+	                      // This example expects a GraphQL server at the path /graphql.
+	                      // Change this to point wherever you host your GraphQL server.
                           return fetch(config.graphqlWebPath, {
                            method: 'post',
                            headers: {
@@ -185,8 +186,8 @@
                            } catch (error) {
                              return responseBody;
                            }
-                         });
-                	  });
+                         })
+                	  }).catch(err => console.error(err));;
                   };
 
                   // Build websocket endpoint
@@ -196,26 +197,33 @@
 
                   //  create a SubscriptionClient with your subscriptions endpoint
                   var subscriptionsClient = new window.SubscriptionsTransportWs.SubscriptionClient( wsURL,
-                          { connectionParams: {
-                             'kaInterval': 2000,
-                             'X-Authorization': getToken()
+                          { connectionParams: function() {
+	                             return {
+	                            	 'kaInterval': 2000,
+	                                 'X-Authorization': 'Bearer '+getToken()
+	                             };
                           }, reconnect: true, lazy: true });
-
-                  var compositeFetcher = window.GraphiQLSubscriptionsFetcher.graphQLFetcher(subscriptionsClient, graphQLFetcher);
-
-                  // TODO: fix updateToken for subscription  
-                  //var fetcher = function(request) {
-                  //  return keycloak.updateToken().then(result => {
-                  //	  return subscriptionsFetcher(request);
-                  //  });
-                  //} 
                   
+                  // Let's update token and refresh backend session on every subscription request 
+                  var keycloakMiddleware = { 
+               		  applyMiddleware: function(options, next) {
+               			  graphQLFetcher("{hello}")
+           			  		.then(result => next())
+	               	        .catch(err => next(err))
+		              }
+               	  }; 
+                  
+                  // Let's apply middleware action for subscriptions
+                  subscriptionsClient.use([keycloakMiddleware]);
+
+                  var subscriptionsFetcher = window.GraphiQLSubscriptionsFetcher.graphQLFetcher(subscriptionsClient, graphQLFetcher);
+
                   // Render <GraphiQL /> into the body.
                   // See the README in the top level of this module to learn more about
                   // how you can customize GraphiQL by providing different values or
                   // additional child elements.
                   ReactDOM.render(React.createElement(GraphiQL, {
-                    fetcher: compositeFetcher,
+                    fetcher: subscriptionsFetcher,
                     query: parameters.query,
                     variables: parameters.variables,
                     operationName: parameters.operationName,
