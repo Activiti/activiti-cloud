@@ -1,6 +1,7 @@
 package org.activiti.cloud.notifications.graphql.starter;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,6 +16,7 @@ public class ActivitiNotificationsGraphQLStarterAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value="keycloak.cors", matchIfMissing = true)
 		public WebMvcConfigurer graphQLBackendCorsConfiguration() {
 			return new WebMvcConfigurer() {
 				@Override
