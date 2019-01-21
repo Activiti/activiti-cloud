@@ -36,6 +36,7 @@
       favored resource bundler.
       -->
     <link rel="stylesheet" href="graphiql.css" />
+    <script src="config.js"></script>
     <script src="graphiql.js"></script>
     <script src="vendor/unpkg.com/subscriptions-transport-ws@0.8.3/browser/client.js"></script>
     <script src="vendor/unpkg.com/graphiql-subscriptions-fetcher@0.0.2/browser/client.js"></script>
@@ -113,7 +114,37 @@
             }).join('&');
         history.replaceState(null, null, newSearch);
       }
+      
+      
+      function fetchGraphqlConfig(configUrl, accessToken) {
+    	  return fetch(configUrl, {
+              method: 'get',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer '+ accessToken
+              },
+             credentials: 'include'
+          }).then(function(response) {
+            return response.json();
+          }).then(function(json) {
+       	    console.log('Loaded Graphiql Json:', json)
+            return json;
+          })    	  
+      }
 
+      function getGraphqlApi() {
+	      console.log('Using Graphql Api Config:', window.GraphqlApi)
+    	  return Promise.resolve(window.GraphqlApi);    	  
+      }
+      
+      function setCookie(name, value) {
+    	  document.cookie = name +'='+ value +'; Path=/;';
+    	}
+    	function deleteCookie(name) {
+    	  document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    	}      
+      
       keycloak.init({
           onLoad: 'login-required',
         })
@@ -121,70 +152,83 @@
           
           function getToken() {
               return keycloak.token;
-          }  
+          } 
+          
+          keycloak.loadUserProfile().then(function(userProfile) {
+        	  console.log('Loaded User Profile:', userProfile)
+        	  
+        	  // Let's reset ingress cookie on load
+        	  deleteCookie('activiti-cloud-notifications-graphql');
+        	  
+              getGraphqlApi().then(function(config) {
+                  // Defines a GraphQL fetcher using the fetch API. You're not required to
+                  // use fetch, and could instead implement graphQLFetcher however you like,
+                  // as long as it returns a Promise or Observable.
+                  function graphQLFetcher(graphQLParams) {
+                	  return keycloak.updateToken().then(result => {
+                      // This example expects a GraphQL server at the path /graphql.
+                      // Change this to point wherever you host your GraphQL server.
+                          return fetch(config.graphqlWebPath, {
+                           method: 'post',
+                           headers: {
+                             'Accept': 'application/json',
+                             'Content-Type': 'application/json',
+                             'Authorization': 'Bearer ' + getToken()
+                           },
+                           body: JSON.stringify(graphQLParams),
+                           credentials: 'include',
+                         }).then(function(response) {
+                           return response.text();
+                         }).then(function(responseBody) {
+                           try {
+                             return JSON.parse(responseBody);
+                           } catch (error) {
+                             return responseBody;
+                           }
+                         });
+                	  });
+                  };
+
+                  // Build websocket endpoint
+                  var wsURL = (window.location.protocol == "https:" ? "wss://" : "ws://") 
+                  				+ window.location.host 
+                  				+ config.graphqlWsPath;
+
+                  //  create a SubscriptionClient with your subscriptions endpoint
+                  var subscriptionsClient = new window.SubscriptionsTransportWs.SubscriptionClient( wsURL,
+                          { connectionParams: {
+                             'kaInterval': 2000,
+                             'X-Authorization': getToken()
+                          }, reconnect: true, lazy: true });
+
+                  var compositeFetcher = window.GraphiQLSubscriptionsFetcher.graphQLFetcher(subscriptionsClient, graphQLFetcher);
+
+                  // TODO: fix updateToken for subscription  
+                  //var fetcher = function(request) {
+                  //  return keycloak.updateToken().then(result => {
+                  //	  return subscriptionsFetcher(request);
+                  //  });
+                  //} 
+                  
+                  // Render <GraphiQL /> into the body.
+                  // See the README in the top level of this module to learn more about
+                  // how you can customize GraphiQL by providing different values or
+                  // additional child elements.
+                  ReactDOM.render(React.createElement(GraphiQL, {
+                    fetcher: compositeFetcher,
+                    query: parameters.query,
+                    variables: parameters.variables,
+                    operationName: parameters.operationName,
+                    onEditQuery: onEditQuery,
+                    onEditVariables: onEditVariables,
+                    onEditOperationName: onEditOperationName
+                  }), document.getElementById('graphiql'));
+            	  
+              })
+          }, function() {
+            alert('failed to load user profile');
+          });            
             
-          // Defines a GraphQL fetcher using the fetch API. You're not required to
-          // use fetch, and could instead implement graphQLFetcher however you like,
-          // as long as it returns a Promise or Observable.
-          function graphQLFetcher(graphQLParams) {
-              // This example expects a GraphQL server at the path /graphql.
-              // Change this to point wherever you host your GraphQL server.
-              return keycloak.updateToken().then(result => {
-                  //Experimental
-                  //document.cookie = 'X-Authorization=Bearer ' + getToken() + '; path=/';
-
-                  return fetch('/graphql', {
-                   method: 'post',
-                   headers: {
-                     'Accept': 'application/json',
-                     'Content-Type': 'application/json',
-                     'Authorization': 'Bearer ' + getToken()
-                   },
-                   body: JSON.stringify(graphQLParams),
-                   credentials: 'include',
-                 }).then(function(response) {
-                   return response.text();
-                 }).then(function(responseBody) {
-                   try {
-                     return JSON.parse(responseBody);
-                   } catch (error) {
-                     return responseBody;
-                   }
-                 });
-              });
-          };
-
-          // Build websocket endpoint
-          var wsURL = (window.location.protocol == "https:" ? "wss://" : "ws://") + window.location.host + "/ws/graphql";
-
-          //  create a SubscriptionClient with your subscriptions endpoint
-          var subscriptionsClient = new window.SubscriptionsTransportWs.SubscriptionClient( wsURL,
-                  { connectionParams: {
-                     'kaInterval': 2000,
-                     // experimental
-                     //stomp: { 
-                     //    'id' : 'myid',
-                     //    'durable' : true,
-                     //    'auto-delete': false,
-                     //},
-                     'X-Authorization': getToken()
-                  }, reconnect: true, lazy: true });
-
-          var subscriptionsFetcher = window.GraphiQLSubscriptionsFetcher.graphQLFetcher(subscriptionsClient, graphQLFetcher);
-
-          // Render <GraphiQL /> into the body.
-          // See the README in the top level of this module to learn more about
-          // how you can customize GraphiQL by providing different values or
-          // additional child elements.
-          ReactDOM.render(React.createElement(GraphiQL, {
-            fetcher: subscriptionsFetcher,
-            query: parameters.query,
-            variables: parameters.variables,
-            operationName: parameters.operationName,
-            onEditQuery: onEditQuery,
-            onEditVariables: onEditVariables,
-            onEditOperationName: onEditOperationName
-          }), document.getElementById('graphiql'));
         }).error(function() {
           alert('failed to initialize Keycloak');
         });    </script>

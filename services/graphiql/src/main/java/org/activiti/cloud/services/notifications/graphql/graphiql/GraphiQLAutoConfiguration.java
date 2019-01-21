@@ -26,7 +26,7 @@ public class GraphiQLAutoConfiguration {
 
     @Configuration
     @PropertySource(value="classpath:keycloak-json.properties", ignoreResourceNotFound = true)
-    @Import(KeycloakJsonController.class)
+    @Import({KeycloakJsonController.class, GraphiQLIndexController.class, GraphiQLConfigController.class})
     public static class DefaultGraphiQLConfiguration {
 
     }
