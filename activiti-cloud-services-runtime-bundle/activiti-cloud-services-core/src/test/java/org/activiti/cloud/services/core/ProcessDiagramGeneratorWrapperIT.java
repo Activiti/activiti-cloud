@@ -198,6 +198,8 @@ public class ProcessDiagramGeneratorWrapperIT {
         //test-process-diagram.properties:
         //activiti.engine.diagram.activity.font=Lucida
         //activiti.engine.diagram.label.font=InvalidFont
+        when(processDiagramGenerator.getAvailableFonts())
+                .thenReturn(new String[]{"Lucida"});
 
         //WHEN
         String activityFont = processDiagramGenerator.getActivityFontName();
