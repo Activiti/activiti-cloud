@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.activiti.cloud.build</groupId>
+    <artifactId>activiti-cloud-parent</artifactId>
+    <version>7.0.38</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>org.activiti.cloud.notifications.graphql</groupId>
+  <artifactId>activiti-cloud-notifications-service-graphql-parent</artifactId>
+  <name>Activiti Cloud Notifications GraphQL Service :: Parent</name>
+  <version>7.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <url>http://activiti.org</url>
+  
+  <properties>
+      <activiti-cloud-build.version>7.0.38</activiti-cloud-build.version>
+      <activiti-cloud-query-dependencies.version>7.0.94</activiti-cloud-query-dependencies.version>
+      <activiti-cloud-notifications-service-graphql.version>${project.version}</activiti-cloud-notifications-service-graphql.version>
+      <graphql-jpa-query.version>0.3.11</graphql-jpa-query.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti.cloud.build</groupId>
+        <artifactId>activiti-cloud-dependencies-parent</artifactId>
+        <version>${activiti-cloud-build.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
+  
+  <!-- BoM Marker Dependencies -->
+  <dependencies>
+    <dependency>
+      <groupId>org.activiti.cloud.build</groupId>
+      <artifactId>activiti-cloud-parent</artifactId>
+      <version>${activiti-cloud-build.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>com.introproventures</groupId>
+      <artifactId>graphql-jpa-query-dependencies</artifactId>
+      <version>${graphql-jpa-query.version}</version>
+      <type>pom</type>
+    </dependency> 
+    <dependency>
+      <groupId>org.activiti.cloud.query</groupId>
+      <artifactId>activiti-cloud-query-dependencies</artifactId>
+      <version>${activiti-cloud-query-dependencies.version}</version>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+    
+  <modules>
+    <module>dependencies-tests</module>
+    <module>dependencies</module>
+    <module>services</module>
+    <module>starter</module>
+  </modules>
+  <scm>
+    <url>https://github.com/Activiti/activiti-cloud-notifications-service-graphql</url>
+    <connection>scm:git:https://github.com/Activiti/activiti-cloud-notifications-service-graphql.git</connection>
+    <developerConnection>scm:git:https://github.com/Activiti/activiti-cloud-notifications-service-graphql.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+  <ciManagement>
+    <system>Travis</system>
+    <url>https://travis-ci.org/Activiti/activiti-cloud-notifications-service-graphql</url>
+  </ciManagement>
+  <repositories>
+    <repository>
+      <id>activiti-snapshots</id>
+      <name>Activiti Snapshots</name>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+    <repository>
+      <id>activiti-releases</id>
+      <name>Activiti Releases</name>
+      <url> https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+  </repositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <compilerArgs>
+              <arg>-parameters</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+    
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.8.2</version>
+        <configuration>
+          <deployAtEnd>true</deployAtEnd>
+        </configuration>
+     </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M3</version>
+      </plugin>
+    </plugins>
+    </build>
+  </project>
