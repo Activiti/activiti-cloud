@@ -30,3 +30,5 @@ github:
       branch: master
     - name: activiti-cloud-audit
       branch: master
+    - name: activiti-cloud-notifications-graphql
+      branch: master

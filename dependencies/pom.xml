@@ -41,6 +41,13 @@
         <scope>import</scope>
       </dependency>
       <dependency>
+        <groupId>org.activiti.cloud.notifications.graphql</groupId>
+        <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
+        <version>${activiti-cloud-notifications-graphql-service.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-audit-dependencies</artifactId>
         <version>${activiti-cloud-audit-service.version}</version>
