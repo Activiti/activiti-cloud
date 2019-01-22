@@ -5,3 +5,6 @@ github:
     - name: activiti-cloud-dependencies
       branch: develop
       useSinglePullRequest: true
+    - name: activiti-cloud-notifications-service-graphql
+      branch: develop
+      useSinglePullRequest: true
