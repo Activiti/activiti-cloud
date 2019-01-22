@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
@@ -64,6 +65,15 @@ public class TaskAdminControllerImpl implements TaskAdminController {
                                                   pageConverter.toSpringPage(pageable,
                                                                              tasksPage),
                                                   taskResourceAssembler);
+    }
+    
+    @Override
+    public TaskResource deleteTask(@PathVariable String taskId) {
+        Task task = taskAdminRuntime.delete(TaskPayloadBuilder
+                                           .delete()
+                                           .withTaskId(taskId)
+                                           .build());
+        return taskResourceAssembler.toResource(task);
     }
     
     public TaskResource assign(@PathVariable String taskId,

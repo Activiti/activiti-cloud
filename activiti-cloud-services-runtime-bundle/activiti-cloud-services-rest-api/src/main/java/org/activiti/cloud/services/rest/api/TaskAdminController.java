@@ -21,6 +21,9 @@ public interface TaskAdminController {
     @RequestMapping( method = RequestMethod.GET)
     PagedResources<TaskResource> getAllTasks(Pageable pageable);
     
+    @RequestMapping(value = "/{taskId}", method = RequestMethod.DELETE)
+    TaskResource deleteTask(@PathVariable String taskId);
+    
     @RequestMapping(value = "/{taskId}/assign", method = RequestMethod.POST)
     TaskResource assign(@PathVariable("taskId") String taskId,
                         @RequestBody AssignTaskPayload assignTaskPayload);

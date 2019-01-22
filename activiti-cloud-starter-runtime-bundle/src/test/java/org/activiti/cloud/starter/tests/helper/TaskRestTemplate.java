@@ -72,6 +72,15 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
         return responseEntity;
     }
+    
+    public ResponseEntity<CloudTask> adminDelete(Task task) {
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(ADMIN_TASK_VAR_RELATIVE_URL + task.getId(),
+                                                                        HttpMethod.DELETE,
+                                                                        null,
+                                                                        TASK_RESPONSE_TYPE);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        return responseEntity;
+    }
 
     public ResponseEntity<CloudTask> claim(Task task) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId() + "/claim",
