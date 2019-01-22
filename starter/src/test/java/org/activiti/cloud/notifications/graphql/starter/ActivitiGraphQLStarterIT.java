@@ -25,10 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import graphql.ExecutionResult;
-import graphql.GraphQLError;
 import org.activiti.cloud.notifications.graphql.test.EngineEventsMessageProducer;
 import org.activiti.cloud.services.graphql.web.ActivitiGraphQLController.GraphQLQueryRequest;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
@@ -48,6 +44,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+import graphql.ExecutionResult;
+import graphql.GraphQLError;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.netty.NettyPipeline;
@@ -65,7 +67,7 @@ public class ActivitiGraphQLStarterIT {
     private static final String AUTHORIZATION = "Authorization";
     private static final String TESTADMIN = "testadmin";
     private static final String TASK_NAME = "task1";
-    private static final String GRPAPHQL_URL = "/graphql";
+    private static final String GRAPHQL_URL = "/graphql";
     private static final Duration TIMEOUT = Duration.ofMillis(20000);
     
     @LocalServerPort
@@ -266,7 +268,7 @@ public class ActivitiGraphQLStarterIT {
     public void testGraphql() {
         GraphQLQueryRequest query = new GraphQLQueryRequest("{Tasks(where:{name:{EQ: \"" + TASK_NAME + "\"}}){select{id assignee priority}}}");
         
-        ResponseEntity<Result> entity = rest.postForEntity(GRPAPHQL_URL, new HttpEntity<>(query,authHeaders), Result.class);
+        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query,authHeaders), Result.class);
 
         assertThat(HttpStatus.OK)
             .describedAs(entity.toString())
@@ -275,9 +277,8 @@ public class ActivitiGraphQLStarterIT {
         Result result = entity.getBody();
 
         assertThat(result).isNotNull();
-        assertThat(result.getErrors().isEmpty())
-            .describedAs(result.getErrors().toString())
-            .isTrue();
+        assertThat(result.getErrors())
+            .isNull();
 
         assertThat("{Tasks={select=[{id=1, assignee=assignee, priority=5}]}}")
             .isEqualTo(result.getData().toString());
@@ -291,7 +292,7 @@ public class ActivitiGraphQLStarterIT {
         keycloakTokenProducer.setKeycloakTestUser(HRUSER);
         authHeaders = keycloakTokenProducer.authorizationHeaders();
         
-        ResponseEntity<Result> entity = rest.postForEntity(GRPAPHQL_URL, new HttpEntity<>(query,authHeaders), Result.class);
+        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query,authHeaders), Result.class);
 
         assertThat(HttpStatus.FORBIDDEN)
             .describedAs(entity.toString())
@@ -322,7 +323,7 @@ public class ActivitiGraphQLStarterIT {
         	    "	}");
        // @formatter:on
 
-        ResponseEntity<Result> entity = rest.postForEntity(GRPAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
+        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
 
         assertThat(HttpStatus.OK)
             .describedAs(entity.toString())
@@ -331,9 +332,9 @@ public class ActivitiGraphQLStarterIT {
         Result result = entity.getBody();
 
         assertThat(result).isNotNull();
-        assertThat(result.getErrors().isEmpty())
-            .describedAs(result.getErrors().toString())
-            .isTrue();
+        assertThat(result.getErrors())
+            .isNull();
+        
         assertThat(((Map<String, Object>) result.getData()).get("ProcessInstances")).isNotNull();
     }
 
@@ -370,7 +371,7 @@ public class ActivitiGraphQLStarterIT {
                 + "}");
        // @formatter:on
 
-        ResponseEntity<Result> entity = rest.postForEntity(GRPAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
+        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
 
         assertThat(HttpStatus.OK)
             .describedAs(entity.toString())
@@ -379,9 +380,9 @@ public class ActivitiGraphQLStarterIT {
         Result result = entity.getBody();
 
         assertThat(result).isNotNull();
-        assertThat(result.getErrors().isEmpty())
-            .describedAs(result.getErrors().toString())
-            .isTrue();
+        assertThat(result.getErrors())
+            .isNull();
+        
         assertThat(((Map<String, Object>) result.getData()).get("ProcessInstances")).isNotNull();
     }
 
@@ -404,7 +405,7 @@ public class ActivitiGraphQLStarterIT {
         		);
        // @formatter:on
 
-        ResponseEntity<Result> entity = rest.postForEntity(GRPAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
+        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
 
         assertThat(HttpStatus.OK)
             .describedAs(entity.toString())
@@ -413,9 +414,9 @@ public class ActivitiGraphQLStarterIT {
         Result result = entity.getBody();
 
         assertThat(result).isNotNull();
-        assertThat(result.getErrors().isEmpty())
-            .describedAs(result.getErrors().toString())
-            .isTrue();
+        assertThat(result.getErrors())
+            .isNull();
+        
         assertThat(((Map<String, Object>) result.getData()).get("ProcessVariables")).isNotNull();
     }
     
@@ -428,7 +429,7 @@ public class ActivitiGraphQLStarterIT {
 
         query.setVariables(variables);
 
-        ResponseEntity<Result> entity = rest.postForEntity(GRPAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
+        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
 
         assertThat(HttpStatus.OK)
             .describedAs(entity.toString())
@@ -437,9 +438,8 @@ public class ActivitiGraphQLStarterIT {
         Result result = entity.getBody();
 
         assertThat(result).isNotNull();
-        assertThat(result.getErrors().isEmpty())
-            .describedAs(result.getErrors().toString())
-            .isTrue();
+        assertThat(result.getErrors())
+            .isNull();
 
         assertThat("{Tasks={select=[{id=1, assignee=assignee, priority=5}]}}")
             .isEqualTo(result.getData().toString());
