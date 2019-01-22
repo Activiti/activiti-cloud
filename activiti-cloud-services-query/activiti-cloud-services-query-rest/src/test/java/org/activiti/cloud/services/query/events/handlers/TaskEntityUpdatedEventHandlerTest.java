@@ -16,6 +16,14 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,13 +42,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class TaskEntityUpdatedEventHandlerTest {
 
@@ -64,7 +65,10 @@ public class TaskEntityUpdatedEventHandlerTest {
         CloudTaskUpdatedEvent event = buildTaskUpdateEvent();
         String taskId = event.getEntity().getId();
         TaskEntity eventTaskEntity = aTask().withId(taskId)
-                .withAssignee("user")
+                .withName("name")
+                .withDescription("description")
+                .withPriority(10)
+                .withFormKey("formKey")
                 .build();
 
         given(taskRepository.findById(taskId)).willReturn(Optional.of(eventTaskEntity));
@@ -77,9 +81,11 @@ public class TaskEntityUpdatedEventHandlerTest {
         verify(eventTaskEntity).setName(event.getEntity().getName());
         verify(eventTaskEntity).setDescription(event.getEntity().getDescription());
         verify(eventTaskEntity).setPriority(event.getEntity().getPriority());
-        verify(eventTaskEntity).setAssignee(event.getEntity().getAssignee());
         verify(eventTaskEntity).setDueDate(event.getEntity().getDueDate());
+        verify(eventTaskEntity).setFormKey(event.getEntity().getFormKey());
+        verify(eventTaskEntity).setParentTaskId(event.getEntity().getParentTaskId());
         verify(eventTaskEntity).setLastModified(any(Date.class));
+        
         verifyNoMoreInteractions(eventTaskEntity);
     }
 

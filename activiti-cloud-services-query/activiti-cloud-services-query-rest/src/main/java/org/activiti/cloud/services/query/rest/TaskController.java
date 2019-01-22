@@ -45,12 +45,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-        value = "/v1/" + TaskRelProvider.COLLECTION_RESOURCE_REL,
+        value = "/v1/tasks",
         produces = {
                 MediaTypes.HAL_JSON_VALUE,
                 MediaType.APPLICATION_JSON_VALUE
@@ -99,10 +100,15 @@ public class TaskController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<TaskResource> findAll(@QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+    public PagedResources<TaskResource> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+                                                @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
                                                 Pageable pageable) {
-   
-        Predicate extendedPredicate = taskLookupRestrictionService.restrictTaskQuery(predicate);
+        Predicate extendedPredicate=predicate;
+        if (rootTasksOnly) {
+            BooleanExpression parentTaskNull = QTaskEntity.taskEntity.parentTaskId.isNull(); 
+            extendedPredicate= extendedPredicate !=null ? parentTaskNull.and(extendedPredicate) : parentTaskNull;
+        }
+        extendedPredicate = taskLookupRestrictionService.restrictTaskQuery(extendedPredicate);
         Page<TaskEntity> page = taskRepository.findAll(extendedPredicate,
                                                        pageable);
 
@@ -110,24 +116,7 @@ public class TaskController {
                                                   page,
                                                   taskResourceAssembler);
     }
-    
-    @RequestMapping(value = "/rootTasksOnly",method = RequestMethod.GET)
-    public PagedResources<TaskResource> getRootTasks(@QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
-                                                     Pageable pageable) {
-        //when request is made for the root tasks set a special condition parentTaskId is null
-        BooleanExpression parentTaskNull = QTaskEntity.taskEntity.parentTaskId.isNull(); 
-        predicate= predicate !=null ? parentTaskNull.and(predicate) : parentTaskNull;
-              
-        Predicate extendedPredicate = taskLookupRestrictionService.restrictTaskQuery(predicate);
-        Page<TaskEntity> page = taskRepository.findAll(extendedPredicate,
-                                                       pageable);
-
-        return pagedResourcesAssembler.toResource(pageable,
-                                                  page,
-                                                  taskResourceAssembler);
-    }
-    
-    
+      
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
     public TaskResource findById(@PathVariable String taskId) {
 

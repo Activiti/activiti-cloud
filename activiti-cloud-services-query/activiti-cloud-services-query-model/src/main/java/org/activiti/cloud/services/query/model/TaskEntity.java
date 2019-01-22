@@ -70,6 +70,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     private String owner;
     private String parentTaskId;
     private String formKey;
+    private Date completedDate;
+    private Long duration;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModified;
@@ -371,4 +373,21 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public void setFormKey(String formKey) {
         this.formKey = formKey;
     }
+
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
+
+    public Date getCompletedDate() {
+        return completedDate;
+    }
+
+    public void setCompletedDate(Date endDate) {
+        this.completedDate = endDate;
+    }
+
 }

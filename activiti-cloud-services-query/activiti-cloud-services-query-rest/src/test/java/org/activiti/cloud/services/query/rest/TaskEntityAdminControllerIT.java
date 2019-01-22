@@ -21,11 +21,19 @@ import java.util.Date;
 import java.util.UUID;
 
 import com.querydsl.core.types.Predicate;
+import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
+import org.activiti.cloud.conf.QueryRestAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
+import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.security.TaskLookupRestrictionService;
+import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
+import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +42,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -47,6 +57,9 @@ import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestP
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.taskFields;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.taskIdParameter;
+import static org.activiti.alfresco.rest.docs.HALDocumentation.pageLinks;
+import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedTasksFields;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -58,6 +71,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(TaskAdminController.class)
+@Import({
+        QueryRestAutoConfiguration.class,
+        CommonModelAutoConfiguration.class,
+})
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
@@ -65,6 +82,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TaskEntityAdminControllerIT {
 
     private static final String TASK_ADMIN_ALFRESCO_IDENTIFIER = "task-admin-alfresco";
+    private static final String TASK_ADMIN_IDENTIFIER = "task-admin";
 
     @Autowired
     private MockMvc mockMvc;
@@ -74,6 +92,30 @@ public class TaskEntityAdminControllerIT {
 
     @MockBean
     private EntityFinder entityFinder;
+
+    @MockBean
+    private SecurityManager securityManager;
+
+    @MockBean
+    private SecurityPoliciesManager securityPoliciesManager;
+
+    @MockBean
+    private ProcessDefinitionRepository processDefinitionRepository;
+
+    @MockBean
+    private SecurityPoliciesProperties securityPoliciesProperties;
+
+    @MockBean
+    private TaskLookupRestrictionService taskLookupRestrictionService;
+
+    @Before
+    public void setUp() {
+        assertThat(securityManager).isNotNull();
+        assertThat(securityPoliciesManager).isNotNull();
+        assertThat(processDefinitionRepository).isNotNull();
+        assertThat(securityPoliciesProperties).isNotNull();
+        assertThat(taskLookupRestrictionService).isNotNull();
+    }
 
     @Test
     public void allTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
@@ -107,6 +149,31 @@ public class TaskEntityAdminControllerIT {
                 .node("list.pagination.count").isEqualTo(1)
                 .node("list.pagination.hasMoreItems").isEqualTo(false)
                 .node("list.pagination.totalItems").isEqualTo(12);
+    }
+
+    @Test
+    public void allTasksShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
+        //given
+        PageRequest pageRequest = PageRequest.of(1,
+                                                 10);
+
+        given(taskRepository.findAll(any(),
+                                     eq(pageRequest)))
+                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()),
+                                           pageRequest,
+                                           11));
+
+        //when
+        mockMvc.perform(get("/admin/v1/tasks?page=1&size=10")
+                                                   .accept(MediaTypes.HAL_JSON_VALUE))
+                //then
+                .andExpect(status().isOk())
+                .andDo(document(TASK_ADMIN_IDENTIFIER + "/list",
+                                pageLinks(),
+                                pagedTasksFields()
+
+                ));
+
     }
 
     private TaskEntity buildDefaultTask() {
