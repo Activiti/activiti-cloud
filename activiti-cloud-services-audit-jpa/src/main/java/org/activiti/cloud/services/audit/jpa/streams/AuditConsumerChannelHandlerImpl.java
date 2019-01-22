@@ -17,6 +17,8 @@
 package org.activiti.cloud.services.audit.jpa.streams;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskActivatedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler;
@@ -28,7 +30,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @EnableBinding(AuditConsumerChannels.class)
@@ -49,11 +56,14 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
 
     @Override
     @StreamListener(AuditConsumerChannels.AUDIT_CONSUMER)
-    public void receiveCloudRuntimeEvent(CloudRuntimeEvent<?, ?>... events) {
+    public void receiveCloudRuntimeEvent(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {
         if (events != null) {
+            AtomicInteger counter = new AtomicInteger(0);
             for (CloudRuntimeEvent event : events) {
                 EventToEntityConverter converter = eventConverters.getConverterByEventTypeName(event.getEventType().name());
                 if (converter != null) {
+                    ((CloudRuntimeEventImpl)event).setMessageId((String) headers.get(MessageHeaders.ID));
+                    ((CloudRuntimeEventImpl)event).setSequenceNumber(counter.getAndIncrement());
                     eventsRepository.save((AuditEventEntity) converter.convertToEntity(event));
                 } else {
                     LOGGER.warn(">>> Ignoring CloudRuntimeEvents type: " + event.getEventType().name());
