@@ -18,7 +18,7 @@ pipeline {
           HELM_RELEASE = "$PREVIEW_NAMESPACE".toLowerCase()
         }
         steps {
-          container('maven') {
+          container('maven-java11') {
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
           }
@@ -29,7 +29,7 @@ pipeline {
           branch 'develop'
         }
         steps {
-          container('maven') {
+          container('maven-java11') {
             // ensure we're not on a detached head
             sh "git checkout develop"
             sh "git config --global credential.helper store"
@@ -45,7 +45,7 @@ pipeline {
             sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
             sh "git push origin v\$(cat VERSION)"
           }
-          container('maven') {
+          container('maven-java11') {
             sh 'mvn clean deploy -DskipTest'
 
             sh 'export VERSION=`cat VERSION`'
@@ -71,7 +71,7 @@ pipeline {
             sh "echo \$TAG_NAME > VERSION"
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
           }
-          container('maven') {
+          container('maven-java11') {
             sh '''
               mvn clean deploy -P !alfresco -P central
               '''
