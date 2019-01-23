@@ -130,9 +130,13 @@
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
           <release>${java.version}</release>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
           <showDeprecation>true</showDeprecation>
           <showWarnings>true</showWarnings>
           <optimize>true</optimize>
+          <!-- See https://stackoverflow.com/questions/46878649/maven-compilation-issue-with-java-9 -->
+          <forceJavacCompilerUse>true</forceJavacCompilerUse> 
         </configuration>
       </plugin>
       <plugin>
@@ -153,6 +157,7 @@
             <include>**/*Tests.java</include>
             <include>**/*TestSuite.java</include>
           </includes>
+          <forkCount>0</forkCount>
         </configuration>
         <executions>
           <execution>

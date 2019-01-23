@@ -1,4 +1,4 @@
-target
+target 
 
 # Compiled class file
 *.class
@@ -38,5 +38,4 @@ hs_err_pid*
 .updatebot-repos/**
 
 *.versionsBackup
-apps-acceptance-tests/.factorypath
-modeling-acceptance-tests/.factorypath
+.factorypath
