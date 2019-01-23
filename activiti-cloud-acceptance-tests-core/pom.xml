@@ -26,6 +26,18 @@
             <artifactId>activiti-cloud-acceptance-tests-shared</artifactId>
         </dependency>
         <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-reactor-netty</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>${awaitility.version}</version>

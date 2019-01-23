@@ -41,6 +41,12 @@ public class RuntimeTestsConfigurationProperties {
     @Value("${query.url}")
     private String queryUrl;
 
+    @Value("${graphql.ws.url}")
+    private String graphqlWsUrl;
+
+    @Value("${graphql.url}")
+    private String graphqlUrl;
+    
     public String getAuditEventUrl() {
         return auditEventUrl;
     }
@@ -53,4 +59,12 @@ public class RuntimeTestsConfigurationProperties {
         return queryUrl;
     }
 
+    public String getGraphqlWsUrl() {
+        return graphqlWsUrl;
+    }
+
+    public String getGraphqlUrl() {
+        return graphqlUrl;
+    }
+    
 }
