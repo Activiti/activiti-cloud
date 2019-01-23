@@ -48,6 +48,8 @@ public class TaskCancelledEventEntity extends TaskAuditEventEntity {
                                     String serviceFullName,
                                     String serviceType,
                                     String serviceVersion,
+                                    String messageId,
+                                    Integer sequenceNumber,
                                     Task task,
                                     String cause) {
         super(eventId,
@@ -59,6 +61,8 @@ public class TaskCancelledEventEntity extends TaskAuditEventEntity {
               serviceFullName,
               serviceType,
               serviceVersion,
+              messageId,
+              sequenceNumber,
               task);
         this.cause = cause;
     }

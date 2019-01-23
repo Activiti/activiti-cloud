@@ -40,6 +40,8 @@ public abstract class TaskAuditEventEntity extends AuditEventEntity {
                                 String serviceFullName,
                                 String serviceType,
                                 String serviceVersion,
+                                String messageId,
+                                Integer sequenceNumber,
                                 Task task) {
         super(eventId,
               timestamp,
@@ -50,6 +52,8 @@ public abstract class TaskAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
+        setMessageId(messageId);
+        setSequenceNumber(sequenceNumber);
         if (task != null) {
             setProcessDefinitionId(task.getProcessDefinitionId());
             setProcessInstanceId(task.getProcessInstanceId());
