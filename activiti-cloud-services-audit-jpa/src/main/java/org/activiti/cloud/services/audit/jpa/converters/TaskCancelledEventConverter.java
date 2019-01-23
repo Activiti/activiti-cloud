@@ -30,6 +30,8 @@ public class TaskCancelledEventConverter extends BaseEventToEntityConverter {
                                             cloudTaskCancelledEvent.getServiceFullName(),
                                             cloudTaskCancelledEvent.getServiceType(),
                                             cloudTaskCancelledEvent.getServiceVersion(),
+                                            cloudTaskCancelledEvent.getMessageId(),
+                                            cloudTaskCancelledEvent.getSequenceNumber(),
                                             cloudTaskCancelledEvent.getEntity(),
                                             cloudTaskCancelledEvent.getCause());
     }
@@ -48,6 +50,8 @@ public class TaskCancelledEventConverter extends BaseEventToEntityConverter {
         cloudTaskCancelledEvent.setServiceType(taskCancelledEventEntity.getServiceType());
         cloudTaskCancelledEvent.setServiceVersion(taskCancelledEventEntity.getServiceVersion());
         cloudTaskCancelledEvent.setCause(taskCancelledEventEntity.getCause());
+        cloudTaskCancelledEvent.setMessageId(taskCancelledEventEntity.getMessageId());
+        cloudTaskCancelledEvent.setSequenceNumber(taskCancelledEventEntity.getSequenceNumber());
 
         return cloudTaskCancelledEvent;
     }
