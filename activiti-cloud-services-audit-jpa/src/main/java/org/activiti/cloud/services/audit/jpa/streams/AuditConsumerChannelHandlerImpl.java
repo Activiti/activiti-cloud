@@ -62,7 +62,7 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
             for (CloudRuntimeEvent event : events) {
                 EventToEntityConverter converter = eventConverters.getConverterByEventTypeName(event.getEventType().name());
                 if (converter != null) {
-                    ((CloudRuntimeEventImpl)event).setMessageId((String) headers.get(MessageHeaders.ID));
+                    ((CloudRuntimeEventImpl)event).setMessageId((headers.get(MessageHeaders.ID).toString()));
                     ((CloudRuntimeEventImpl)event).setSequenceNumber(counter.getAndIncrement());
                     eventsRepository.save((AuditEventEntity) converter.convertToEntity(event));
                 } else {
