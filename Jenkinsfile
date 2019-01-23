@@ -5,8 +5,7 @@ pipeline {
     environment {
       ORG               = "activiti"
       APP_NAME          = "activiti-cloud-notifications-service-graphql"
-      RELEASE_ARTIFACT  = "org.activiti.cloud.notificactions.graphql:activiti-cloud-notifications-graphql-dependencies"
-      
+      RELEASE_ARTIFACT  = "org.activiti.cloud.notifications.graphql:activiti-cloud-notifications-graphql-dependencies"
       CHARTMUSEUM_CREDS = credentials("jenkins-x-chartmuseum")
       RELEASE_BRANCH    = "develop"
     }
