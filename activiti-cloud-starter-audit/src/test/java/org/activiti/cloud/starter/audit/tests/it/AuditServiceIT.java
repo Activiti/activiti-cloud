@@ -491,6 +491,8 @@ public class AuditServiceIT {
         cloudTaskCreatedEvent.setProcessDefinitionKey("processDefinitionKey");
         cloudTaskCreatedEvent.setBusinessKey("businessKey");
         cloudTaskCreatedEvent.setParentProcessInstanceId("parentProcessInstanceId");
+        cloudTaskCreatedEvent.setMessageId("messageId");
+        cloudTaskCreatedEvent.setSequenceNumber(0);
         
              
         //Check convertToEntity
@@ -600,6 +602,62 @@ public class AuditServiceIT {
 
         });
     }
+
+    @Test
+    public void eventsShouldHaveSequenceNumberSet() {
+        //given
+        List <CloudRuntimeEvent> testEvents= getTaskCancelledEvents();
+
+        producer.send(testEvents.toArray(new CloudRuntimeEvent[testEvents.size()]));
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFindAll();
+
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            List <CloudRuntimeEvent> retrievedEventsList = new ArrayList<>(retrievedEvents);
+
+            assertThat(retrievedEvents).hasSameSizeAs(testEvents);
+
+            for(int i = 0; i < testEvents.size(); i++ ){
+                assertThat(retrievedEventsList.get(i).getSequenceNumber())
+                        .isEqualTo(i);
+            }
+
+        });
+    }
+
+    @Test
+    public void eventsShouldHaveMessageIdSet() {
+        //given
+        List <CloudRuntimeEvent> testEvents= getTaskCancelledEvents();
+
+        producer.send(testEvents.toArray(new CloudRuntimeEvent[testEvents.size()]));
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFindAll();
+
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            List <CloudRuntimeEvent> retrievedEventsList = new ArrayList<>(retrievedEvents);
+
+            assertThat(retrievedEvents).hasSameSizeAs(testEvents);
+            String commonMessageId = retrievedEventsList.get(0).getMessageId();
+
+            for(int i = 0; i < testEvents.size(); i++ ){
+                assertThat(retrievedEventsList.get(i).getMessageId())
+                        .isNotNull()
+                        .isEqualTo(commonMessageId);
+            }
+
+        });
+    }
+
+
     
     
     private List<CloudRuntimeEvent> getTaskCancelledEvents() {
