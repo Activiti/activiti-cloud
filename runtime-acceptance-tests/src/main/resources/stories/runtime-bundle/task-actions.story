@@ -110,6 +110,8 @@ And task variable start1 has value start1modified
 And the user claims the task
 And the user completes the task
 And another user is authenticated as hruser
+And a task variable was created with name start1
+And a task variable was created with name start2
 Then task variable start1 has value start1
 
 Scenario: check the task is updated
