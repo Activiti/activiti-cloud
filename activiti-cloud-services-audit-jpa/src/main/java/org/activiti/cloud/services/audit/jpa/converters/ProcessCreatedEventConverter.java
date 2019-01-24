@@ -23,14 +23,16 @@ public class ProcessCreatedEventConverter  extends BaseEventToEntityConverter {
     protected ProcessCreatedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
         CloudProcessCreatedEvent cloudProcessCreated = (CloudProcessCreatedEvent) cloudRuntimeEvent;
         return new ProcessCreatedAuditEventEntity(cloudProcessCreated.getId(),
-                                                                                        cloudProcessCreated.getTimestamp(),
-                                                                                        cloudProcessCreated.getAppName(),
-                                                                                        cloudProcessCreated.getAppVersion(),
-                                                                                        cloudProcessCreated.getServiceName(),
-                                                                                        cloudProcessCreated.getServiceFullName(),
-                                                                                        cloudProcessCreated.getServiceType(),
-                                                                                        cloudProcessCreated.getServiceVersion(),
-                                                                                        cloudProcessCreated.getEntity());
+                                                    cloudProcessCreated.getTimestamp(),
+                                                    cloudProcessCreated.getAppName(),
+                                                    cloudProcessCreated.getAppVersion(),
+                                                    cloudProcessCreated.getServiceName(),
+                                                    cloudProcessCreated.getServiceFullName(),
+                                                    cloudProcessCreated.getServiceType(),
+                                                    cloudProcessCreated.getServiceVersion(),
+                                                    cloudProcessCreated.getMessageId(),
+                                                    cloudProcessCreated.getSequenceNumber(),
+                                                    cloudProcessCreated.getEntity());
     }
 
     @Override
@@ -45,6 +47,8 @@ public class ProcessCreatedEventConverter  extends BaseEventToEntityConverter {
         processCreatedEvent.setServiceName(processCreatedAuditEventEntity.getServiceName());
         processCreatedEvent.setServiceType(processCreatedAuditEventEntity.getServiceType());
         processCreatedEvent.setServiceVersion(processCreatedAuditEventEntity.getServiceVersion());
+        processCreatedEvent.setMessageId(processCreatedAuditEventEntity.getMessageId());
+        processCreatedEvent.setSequenceNumber(processCreatedAuditEventEntity.getSequenceNumber());
         return processCreatedEvent;
     }
 }

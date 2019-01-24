@@ -43,11 +43,26 @@ public class TaskCandidateGroupRemovedEventEntity extends AuditEventEntity {
 
     public TaskCandidateGroupRemovedEventEntity(String eventId,
                                                 Long timestamp,
+                                                String appName,
+                                                String appVersion,
+                                                String serviceName,
+                                                String serviceFullName,
+                                                String serviceType,
+                                                String serviceVersion,
+                                                String messageId,
+                                                Integer sequenceNumber,
                                                 TaskCandidateGroup candidateGroup) {
         super(eventId,
               timestamp,
               TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name());
-        
+        setAppName(appName);
+        setAppVersion(appVersion);
+        setServiceName(serviceName);
+        setServiceFullName(serviceFullName);
+        setServiceType(serviceType);
+        setServiceVersion(serviceVersion);
+        setMessageId(messageId);
+        setSequenceNumber(sequenceNumber);
         setCandidateGroup(candidateGroup);
     }
     

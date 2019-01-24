@@ -31,6 +31,8 @@ public class VariableCreatedEventConverter extends BaseEventToEntityConverter {
                                               cloudVariableCreatedEvent.getServiceName(),
                                               cloudVariableCreatedEvent.getServiceType(),
                                               cloudVariableCreatedEvent.getServiceVersion(),
+                                              cloudVariableCreatedEvent.getMessageId(),
+                                              cloudVariableCreatedEvent.getSequenceNumber(),
                                               cloudVariableCreatedEvent.getEntity());
     }
 
@@ -47,6 +49,8 @@ public class VariableCreatedEventConverter extends BaseEventToEntityConverter {
         cloudVariableCreatedEvent.setServiceName(variableCreatedEventEntity.getServiceName());
         cloudVariableCreatedEvent.setServiceType(variableCreatedEventEntity.getServiceType());
         cloudVariableCreatedEvent.setServiceVersion(variableCreatedEventEntity.getServiceVersion());
+        cloudVariableCreatedEvent.setMessageId(variableCreatedEventEntity.getMessageId());
+        cloudVariableCreatedEvent.setSequenceNumber(variableCreatedEventEntity.getSequenceNumber());
         
         cloudVariableCreatedEvent.setProcessDefinitionId(variableCreatedEventEntity.getProcessDefinitionId());
 

@@ -43,11 +43,27 @@ public class TaskCandidateUserRemovedEventEntity extends AuditEventEntity {
 
     public TaskCandidateUserRemovedEventEntity(String eventId,
                                                Long timestamp,
+                                               String appName,
+                                               String appVersion,
+                                               String serviceName,
+                                               String serviceFullName,
+                                               String serviceType,
+                                               String serviceVersion,
+                                               String messageId,
+                                               Integer sequenceNumber,
                                                TaskCandidateUser candidateUser) {
         super(eventId,
               timestamp,
               TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name());
-        
+
+        setAppName(appName);
+        setAppVersion(appVersion);
+        setServiceName(serviceName);
+        setServiceFullName(serviceFullName);
+        setServiceType(serviceType);
+        setServiceVersion(serviceVersion);
+        setMessageId(messageId);
+        setSequenceNumber(sequenceNumber);
         setCandidateUser(candidateUser);
     }
     

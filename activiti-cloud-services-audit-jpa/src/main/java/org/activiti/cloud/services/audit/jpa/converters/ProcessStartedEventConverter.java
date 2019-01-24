@@ -30,6 +30,8 @@ public class ProcessStartedEventConverter extends BaseEventToEntityConverter {
                                                   cloudProcessStartedEvent.getServiceFullName(),
                                                   cloudProcessStartedEvent.getServiceType(),
                                                   cloudProcessStartedEvent.getServiceVersion(),
+                                                  cloudProcessStartedEvent.getMessageId(),
+                                                  cloudProcessStartedEvent.getSequenceNumber(),
                                                   cloudProcessStartedEvent.getEntity());
     }
 
@@ -45,6 +47,8 @@ public class ProcessStartedEventConverter extends BaseEventToEntityConverter {
         cloudProcessStartedEvent.setServiceName(processStartedAuditEventEntity.getServiceName());
         cloudProcessStartedEvent.setServiceType(processStartedAuditEventEntity.getServiceType());
         cloudProcessStartedEvent.setServiceVersion(processStartedAuditEventEntity.getServiceVersion());
+        cloudProcessStartedEvent.setMessageId(processStartedAuditEventEntity.getMessageId());
+        cloudProcessStartedEvent.setSequenceNumber(processStartedAuditEventEntity.getSequenceNumber());
         return cloudProcessStartedEvent;
     }
 }

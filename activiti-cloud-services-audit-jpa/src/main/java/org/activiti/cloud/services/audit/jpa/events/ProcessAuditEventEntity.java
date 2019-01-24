@@ -52,6 +52,8 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
                                    String serviceFullName,
                                    String serviceType,
                                    String serviceVersion,
+                                   String messageId,
+                                   Integer sequenceNumber,
                                    ProcessInstance processInstance) {
         super(eventId,
               timestamp,
@@ -62,6 +64,8 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
+        setMessageId(messageId);
+        setSequenceNumber(sequenceNumber);
         setProcessInstance(processInstance);
     }
 

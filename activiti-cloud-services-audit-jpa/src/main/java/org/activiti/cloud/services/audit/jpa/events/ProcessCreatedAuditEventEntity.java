@@ -47,6 +47,8 @@ public class ProcessCreatedAuditEventEntity extends ProcessAuditEventEntity {
                                           String serviceFullName,
                                           String serviceType,
                                           String serviceVersion,
+                                          String messageId,
+                                          Integer sequenceNumber,
                                           ProcessInstance processInstance) {
         super(eventId,
               timestamp,
@@ -57,6 +59,8 @@ public class ProcessCreatedAuditEventEntity extends ProcessAuditEventEntity {
               serviceFullName,
               serviceType,
               serviceVersion,
+              messageId,
+              sequenceNumber,
               processInstance);
     }
 }

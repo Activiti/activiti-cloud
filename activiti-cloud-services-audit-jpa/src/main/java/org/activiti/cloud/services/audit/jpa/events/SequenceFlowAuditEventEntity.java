@@ -55,6 +55,8 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
                                         String serviceFullName,
                                         String serviceType,
                                         String serviceVersion,
+                                        String messageId,
+                                        Integer sequenceNumber,
                                         BPMNSequenceFlow sequenceFlow) {
         super(eventId,
               timestamp,
@@ -65,6 +67,8 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
+        setMessageId(messageId);
+        setSequenceNumber(sequenceNumber);
         setSequenceFlow(sequenceFlow) ;
     }
 

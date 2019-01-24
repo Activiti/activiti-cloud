@@ -30,6 +30,8 @@ public class VariableDeletedEventConverter extends BaseEventToEntityConverter {
                                               cloudVariableDeletedEvent.getServiceName(),
                                               cloudVariableDeletedEvent.getServiceType(),
                                               cloudVariableDeletedEvent.getServiceVersion(),
+                                              cloudVariableDeletedEvent.getMessageId(),
+                                              cloudVariableDeletedEvent.getSequenceNumber(),
                                               cloudVariableDeletedEvent.getEntity());
         
     }
@@ -47,6 +49,8 @@ public class VariableDeletedEventConverter extends BaseEventToEntityConverter {
         variableDeletedEvent.setServiceName(variableDeletedEventEntity.getServiceName());
         variableDeletedEvent.setServiceType(variableDeletedEventEntity.getServiceType());
         variableDeletedEvent.setServiceVersion(variableDeletedEventEntity.getServiceVersion());
+        variableDeletedEvent.setMessageId(variableDeletedEventEntity.getMessageId());
+        variableDeletedEvent.setSequenceNumber(variableDeletedEventEntity.getSequenceNumber());
         
         variableDeletedEvent.setProcessDefinitionId(variableDeletedEventEntity.getProcessDefinitionId());
 

@@ -41,6 +41,14 @@ public class TaskCandidateUserRemovedEventConverter extends BaseEventToEntityCon
                 
         return new TaskCandidateUserRemovedEventEntity(event.getId(),
                                                        event.getTimestamp(),
+                                                       event.getAppName(),
+                                                       event.getAppVersion(),
+                                                       event.getServiceFullName(),
+                                                       event.getServiceName(),
+                                                       event.getServiceType(),
+                                                       event.getServiceVersion(),
+                                                       event.getMessageId(),
+                                                       event.getSequenceNumber(),
                                                        event.getEntity());
     }
 
@@ -57,6 +65,8 @@ public class TaskCandidateUserRemovedEventConverter extends BaseEventToEntityCon
         cloudEvent.setServiceName(eventEntity.getServiceName());
         cloudEvent.setServiceType(eventEntity.getServiceType());
         cloudEvent.setServiceVersion(eventEntity.getServiceVersion());
+        cloudEvent.setMessageId(eventEntity.getMessageId());
+        cloudEvent.setSequenceNumber(eventEntity.getSequenceNumber());
 
         return cloudEvent;
     }

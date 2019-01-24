@@ -30,6 +30,8 @@ public class ProcessCancelledEventConverter extends BaseEventToEntityConverter {
                                                     cloudProcessCancelledEvent.getServiceFullName(),
                                                     cloudProcessCancelledEvent.getServiceType(),
                                                     cloudProcessCancelledEvent.getServiceVersion(),
+                                                    cloudProcessCancelledEvent.getMessageId(),
+                                                    cloudProcessCancelledEvent.getSequenceNumber(),
                                                     cloudProcessCancelledEvent.getEntity(),
                                                     cloudProcessCancelledEvent.getCause()); 
     }
@@ -46,6 +48,8 @@ public class ProcessCancelledEventConverter extends BaseEventToEntityConverter {
         cloudProcessCancelledEvent.setServiceName(processCancelledAuditEventEntity.getServiceName());
         cloudProcessCancelledEvent.setServiceType(processCancelledAuditEventEntity.getServiceType());
         cloudProcessCancelledEvent.setServiceVersion(processCancelledAuditEventEntity.getServiceVersion());
+        cloudProcessCancelledEvent.setMessageId(processCancelledAuditEventEntity.getMessageId());
+        cloudProcessCancelledEvent.setSequenceNumber(processCancelledAuditEventEntity.getSequenceNumber());
         cloudProcessCancelledEvent.setCause(processCancelledAuditEventEntity.getCause());
         return cloudProcessCancelledEvent;
     }
