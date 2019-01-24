@@ -264,7 +264,9 @@ public class AuditEventsControllerImplIT {
                                         subsectionWithPath("processDefinitionKey").description("The process definition key"),
                                         subsectionWithPath("processDefinitionVersion").description("The process definition version"),
                                         subsectionWithPath("businessKey").description("The businessKey"),
-                                        subsectionWithPath("parentProcessInstanceId").description("The parent process instance id")
+                                        subsectionWithPath("parentProcessInstanceId").description("The parent process instance id"),
+                                        subsectionWithPath("messageId").description("The transaction id coming from received message"),
+                                        subsectionWithPath("sequenceNumber").description("The position of the event within the transaction")
 
                                 )));
     }
@@ -291,7 +293,9 @@ public class AuditEventsControllerImplIT {
                                         subsectionWithPath("entry.eventType").description("The event type"),
                                         subsectionWithPath("entry.entity.processDefinitionId").description("The process definition id"),
                                         subsectionWithPath("entry.entity.id").description("The process instance id"),
-                                        subsectionWithPath("entry.serviceName").description("The service name")
+                                        subsectionWithPath("entry.serviceName").description("The service name"),
+                                        subsectionWithPath("entry.messageId").description("The transaction id coming from received message"),
+                                        subsectionWithPath("entry.sequenceNumber").description("The position of the event within the transaction")
                                 )));
     }
 
