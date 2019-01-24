@@ -39,6 +39,7 @@ import org.springframework.messaging.handler.annotation.Headers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -79,6 +80,28 @@ public class AuditConsumerChannelHandlerImplTest {
 
         //then
         verify(eventsRepository).save(entity);
+    }
+
+    @Test
+    public void messageIdShouldBeSet(){
+        //given
+        CloudRuntimeEvent cloudRuntimeEvent = mock(CloudRuntimeEventImpl.class);
+        when(cloudRuntimeEvent.getEventType()).thenReturn(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED);
+        EventToEntityConverter converter = mock(EventToEntityConverter.class);
+        when(converters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name())).thenReturn(converter);
+        AuditEventEntity entity = mock(AuditEventEntity.class);
+        when(converter.convertToEntity(cloudRuntimeEvent)).thenReturn(entity);
+
+        CloudRuntimeEvent[] events = {cloudRuntimeEvent};
+
+        HashMap <String,Object> headers = new HashMap<>();
+        headers.put("id", UUID.randomUUID());
+
+        //when
+        handler.receiveCloudRuntimeEvent(headers, events);
+
+        //then
+        verify((CloudRuntimeEventImpl)cloudRuntimeEvent).setMessageId(headers.get("id").toString());
     }
 
 }
