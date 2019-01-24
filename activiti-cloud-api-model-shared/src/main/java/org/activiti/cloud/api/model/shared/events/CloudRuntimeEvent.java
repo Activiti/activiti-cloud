@@ -32,6 +32,10 @@ public interface CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE extends Enum<?>> exte
 
     String getServiceVersion();
 
+    Integer getSequenceNumber();
+
+    String getMessageId();
+
     String getEntityId();
 
 }

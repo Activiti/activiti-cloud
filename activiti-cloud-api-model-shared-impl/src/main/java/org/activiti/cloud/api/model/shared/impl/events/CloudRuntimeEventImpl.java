@@ -29,6 +29,8 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
     private String serviceVersion;
     private String serviceType;
     private String entityId;
+    private Integer sequenceNumber;
+    private String messageId;
 
     public CloudRuntimeEventImpl() {
     }
@@ -106,5 +108,23 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
 
     public void setEntityId(String entityId) {
         this.entityId = entityId;
+    }
+
+    @Override
+    public Integer getSequenceNumber() {
+        return sequenceNumber;
+    }
+
+    public void setSequenceNumber(Integer sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
+    }
+
+    @Override
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
     }
 }
