@@ -39,7 +39,7 @@ public class AuditProducerRoutingKeyResolverTest {
         String routingKey = subject.resolve(headers);
         
         // then
-        assertThat(routingKey).isEqualTo("service-name.app-name.process-definition-key.process-instance-id.business-key");
+        assertThat(routingKey).isEqualTo("engineEvents.service-name.app-name.process-definition-key.process-instance-id.business-key");
                 
     }
 
@@ -56,7 +56,7 @@ public class AuditProducerRoutingKeyResolverTest {
         String routingKey = subject.resolve(headers);
         
         // then
-        assertThat(routingKey).isEqualTo("service-name.app-name.process-definition-key.process-instance-id._");
+        assertThat(routingKey).isEqualTo("engineEvents.service-name.app-name.process-definition-key.process-instance-id._");
                 
     }
 
@@ -73,7 +73,7 @@ public class AuditProducerRoutingKeyResolverTest {
         String routingKey = subject.resolve(headers);
         
         // then
-        assertThat(routingKey).isEqualTo("service-name.app-name.process-definition-key.process-instance-id._");
+        assertThat(routingKey).isEqualTo("engineEvents.service-name.app-name.process-definition-key.process-instance-id._");
                 
     }
 
@@ -90,7 +90,7 @@ public class AuditProducerRoutingKeyResolverTest {
         String routingKey = subject.resolve(headers);
         
         // then
-        assertThat(routingKey).isEqualTo("service-name.app-name.process-definition-key.process-instance-id.business-key");
+        assertThat(routingKey).isEqualTo("engineEvents.service-name.app-name.process-definition-key.process-instance-id.business-key");
                 
     }
     
@@ -103,7 +103,7 @@ public class AuditProducerRoutingKeyResolverTest {
         String routingKey = subject.resolve(headers);
         
         // then
-        assertThat(routingKey).isEqualTo("_._._._._");
+        assertThat(routingKey).isEqualTo("engineEvents._._._._._");
                 
     }
     

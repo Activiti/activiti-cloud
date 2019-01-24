@@ -39,7 +39,7 @@ public class IntegrationContextRoutingKeyResolverTest {
         String routingKey = subject.resolve(headers);
         
         // then
-        assertThat(routingKey).isEqualTo("service-name.app-name.connector-type.process-instance-id.business-key");
+        assertThat(routingKey).isEqualTo("integrationContext.service-name.app-name.connector-type.process-instance-id.business-key");
                 
     }
     

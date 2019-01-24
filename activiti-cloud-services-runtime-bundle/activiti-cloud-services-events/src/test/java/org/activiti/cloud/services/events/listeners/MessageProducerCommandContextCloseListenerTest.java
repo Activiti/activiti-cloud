@@ -51,7 +51,7 @@ import org.springframework.messaging.MessageChannel;
 
 public class MessageProducerCommandContextCloseListenerTest {
 
-    private static final String MOCK_ROUTING_KEY = "springAppName.appName.mockProcessDefinitionKey.mockProcessInstanceId.mockBusinessKey";
+    private static final String MOCK_ROUTING_KEY = "engineEvents.springAppName.appName.mockProcessDefinitionKey.mockProcessInstanceId.mockBusinessKey";
     private static final String MOCK_PARENT_PROCESS_NAME = "mockParentProcessName";
     private static final String LORG_ACTIVITI_CLOUD_API_MODEL_SHARED_EVENTS_CLOUD_RUNTIME_EVENT = "[Lorg.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;";
     private static final String MOCK_PROCESS_NAME = "mockProcessName";

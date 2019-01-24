@@ -31,7 +31,7 @@ public abstract class AbstractMessageHeadersRoutingKeyResolver implements Routin
     public abstract String resolve(Map<String, Object> headers);
 
     protected String build(Map<String, Object> headers, String... keys) {
-        return Stream.of(keys)
+        return getPrefix() + DELIMITER + Stream.of(keys)
                      .map(headers::get)
                      .map(Optional::ofNullable)
                      .map(this::mapNullOrEmptyValue)
@@ -48,5 +48,7 @@ public abstract class AbstractMessageHeadersRoutingKeyResolver implements Routin
     protected String escapeIllegalCharacters(String value) {
         return value.replaceAll(ILLEGAL_CHARACTERS, REPLACEMENT);
     }
+    
+    public abstract String getPrefix(); 
 
 }

@@ -86,9 +86,16 @@ public class MessageBuilderAppenderChain {
     // Default implementation 
     static class DefaultRoutingKeyResolver extends AbstractMessageHeadersRoutingKeyResolver {
 
+        private static final String EVENT_MESSAGE = "eventMessage";
+
         @Override
         public String resolve(Map<String, Object> headers) {
             return build(headers, MESSAGE_PAYLOAD_TYPE);
+        }
+
+        @Override
+        public String getPrefix() {
+            return EVENT_MESSAGE;
         }
         
     }
