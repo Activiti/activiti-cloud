@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -136,6 +137,17 @@ public class TaskAdminControllerImplIT {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
+                                pathParameters(parameterWithName("taskId").description("The task id"))));
+    }
+    
+    @Test
+    public void completeTask() throws Exception {
+        given(taskAdminRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
+        this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/complete",
+                                  1))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/complete",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
 }

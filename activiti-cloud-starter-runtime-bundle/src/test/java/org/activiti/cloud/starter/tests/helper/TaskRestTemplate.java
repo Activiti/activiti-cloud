@@ -63,6 +63,16 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
         return responseEntity;
     }
+    
+    public ResponseEntity<Task> adminComplete(Task task) {
+        ResponseEntity<Task> responseEntity = testRestTemplate.exchange(ADMIN_TASK_VAR_RELATIVE_URL + task.getId() + "/complete",
+                                                                        HttpMethod.POST,
+                                                                        null,
+                                                                        new ParameterizedTypeReference<Task>() {
+                                                                        });
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        return responseEntity;
+    }
 
     public ResponseEntity<CloudTask> delete(Task task) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId(),
