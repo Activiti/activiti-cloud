@@ -18,7 +18,6 @@ package org.activiti.cloud.services.audit.jpa.streams;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskActivatedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler;

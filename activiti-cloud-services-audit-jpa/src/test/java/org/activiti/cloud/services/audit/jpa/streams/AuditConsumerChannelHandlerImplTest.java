@@ -19,29 +19,19 @@ package org.activiti.cloud.services.audit.jpa.streams;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
-import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.events.ProcessCreatedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.hibernate.validator.constraints.ModCheck;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
-import org.springframework.messaging.handler.annotation.Headers;
-
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -76,7 +66,7 @@ public class AuditConsumerChannelHandlerImplTest {
         CloudRuntimeEvent[] events = {cloudRuntimeEvent};
 
         //when
-        handler.receiveCloudRuntimeEvent(new HashMap<>(), events);
+        handler.receiveCloudRuntimeEvent(new HashMap<>(){{put("id", UUID.randomUUID());}}, events);
 
         //then
         verify(eventsRepository).save(entity);
