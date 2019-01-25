@@ -1,5 +1,12 @@
 package org.activiti.cloud.services.core.commands;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.model.shared.Result;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -12,13 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class StartProcessInstanceCmdExecutorTest {
 
@@ -40,7 +40,7 @@ public class StartProcessInstanceCmdExecutorTest {
     public void startProcessInstanceCmdExecutorTest() {
         StartProcessPayload startProcessInstanceCmd = ProcessPayloadBuilder.start()
                 .withProcessDefinitionKey("def key")
-                .withProcessInstanceName("name")
+                .withName("name")
                 .withBusinessKey("business key")
         .build();
 

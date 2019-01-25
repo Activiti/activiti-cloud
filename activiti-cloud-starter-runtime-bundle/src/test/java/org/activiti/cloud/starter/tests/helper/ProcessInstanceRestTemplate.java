@@ -256,7 +256,7 @@ public class ProcessInstanceRestTemplate {
         UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder.update()
                 .withProcessInstanceId(processEntity.getBody().getId())
                 .withBusinessKey(businessKey)
-                .withProcessInstanceName(name)
+                .withName(name)
                 .build();
         
          return  updateProcess(updateProcessPayload);
@@ -284,7 +284,7 @@ public class ProcessInstanceRestTemplate {
         UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder.update()
                 .withProcessInstanceId(processEntity.getBody().getId())
                 .withBusinessKey(businessKey)
-                .withProcessInstanceName(name)
+                .withName(name)
                 .build();
         
          return  adminUpdateProcess(updateProcessPayload);

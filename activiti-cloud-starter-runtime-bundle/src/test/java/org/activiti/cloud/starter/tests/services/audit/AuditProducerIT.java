@@ -135,7 +135,7 @@ public class AuditProducerIT {
                                                                                                                    .withProcessDefinitionKey(SIMPLE_PROCESS)
                                                                                                                    .withVariable("name",
                                                                                                                                  "peter")
-                                                                                                                   .withProcessInstanceName("my instance name")
+                                                                                                                   .withName("my instance name")
                                                                                                                    .withBusinessKey("my business key") 
                                                                                                                    .build());
 
@@ -266,7 +266,7 @@ public class AuditProducerIT {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(new StartProcessPayloadBuilder()
                                                                                                                .withProcessDefinitionId(processDefinitionIds.get(SIMPLE_PROCESS))
-                                                                                                               .withProcessInstanceName("processInstanceName")
+                                                                                                               .withName("processInstanceName")
                                                                                                                .withBusinessKey("businessKey")
                                                                                                                .withVariables(Collections.emptyMap())
                                                                                                                .build());

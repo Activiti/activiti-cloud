@@ -190,7 +190,7 @@ public class ProcessInstanceAdminControllerImplIT {
         UpdateProcessPayload cmd = ProcessPayloadBuilder.update()
                 .withProcessInstanceId("1")
                 .withBusinessKey("businessKey")
-                .withProcessInstanceName("name")
+                .withName("name")
                 .build();
 
         this.mockMvc.perform(put("/admin/v1/process-instances/{processInstanceId}",
