@@ -30,14 +30,18 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -78,6 +82,9 @@ public class TaskAdminControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
@@ -139,7 +146,24 @@ public class TaskAdminControllerImplIT {
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
-    
+
+
+    @Test
+    public void updateTask() throws Exception {
+        given(taskAdminRuntime.update(any())).willReturn(buildDefaultAssignedTask());
+        UpdateTaskPayload updateTaskCmd = TaskPayloadBuilder.update()
+                .withTaskId("1")
+                .withName("update-task")
+                .withDescription("update-description")
+                .build();
+
+        this.mockMvc.perform(put("/admin/v1/tasks/{taskId}",
+                                 1).contentType(MediaType.APPLICATION_JSON)
+                                 .content(mapper.writeValueAsString(updateTaskCmd)))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
     @Test
     public void completeTask() throws Exception {
         given(taskAdminRuntime.complete(any())).willReturn(buildDefaultAssignedTask());

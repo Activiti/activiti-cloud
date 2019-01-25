@@ -23,6 +23,7 @@ import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
+import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
@@ -82,7 +83,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         Task task = taskAdminRuntime.complete(completeTaskPayload);
         return taskResourceAssembler.toResource(task);
     }
-    
+
     @Override
     public TaskResource deleteTask(@PathVariable String taskId) {
         Task task = taskAdminRuntime.delete(TaskPayloadBuilder
@@ -92,6 +93,15 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         return taskResourceAssembler.toResource(task);
     }
     
+    @Override
+    public TaskResource updateTask(@PathVariable String taskId,
+                                   @RequestBody UpdateTaskPayload updateTaskPayload) {
+        if (updateTaskPayload != null) {
+            updateTaskPayload.setTaskId(taskId);
+        }
+        return taskResourceAssembler.toResource(taskAdminRuntime.update(updateTaskPayload));
+    }
+
     public TaskResource assign(@PathVariable String taskId,
                                @RequestBody AssignTaskPayload assignTaskPayload) {
         if (assignTaskPayload!=null)

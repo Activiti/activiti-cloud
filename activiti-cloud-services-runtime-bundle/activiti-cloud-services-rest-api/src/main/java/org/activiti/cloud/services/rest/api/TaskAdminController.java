@@ -6,6 +6,7 @@ import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
@@ -22,10 +23,14 @@ public interface TaskAdminController {
     @RequestMapping( method = RequestMethod.GET)
     PagedResources<TaskResource> getAllTasks(Pageable pageable);
     
+    @RequestMapping(value = "/{taskId}", method = RequestMethod.PUT)
+    TaskResource updateTask(@PathVariable("taskId") String taskId,
+                            @RequestBody UpdateTaskPayload updateTaskPayload);
+
     @RequestMapping(value = "/{taskId}/complete", method = RequestMethod.POST)
     TaskResource completeTask(@PathVariable String taskId,
                               @RequestBody(required = false) CompleteTaskPayload completeTaskPayload);
-    
+
     @RequestMapping(value = "/{taskId}", method = RequestMethod.DELETE)
     TaskResource deleteTask(@PathVariable String taskId);
     

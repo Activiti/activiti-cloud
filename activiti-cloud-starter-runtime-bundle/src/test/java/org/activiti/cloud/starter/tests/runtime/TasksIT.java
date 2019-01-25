@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,6 +52,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -164,6 +164,51 @@ public class TasksIT {
         taskRestTemplate.updateTask(task.getId(),updateTask);
 
         //then
+        taskResponseEntity = taskRestTemplate.getTask(task.getId());
+
+        assertThat(taskResponseEntity.getBody().getName()).isEqualTo("New Updated name");
+        assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("New Updated description");
+    }
+    
+    @Test
+    public void adminShouldUpdateNameDescription() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = processInstanceRestTemplate.getTasks(processInstanceEntity);
+        assertThat(responseEntity).isNotNull();
+        Collection<CloudTask> tasks = responseEntity.getBody().getContent();
+        CloudTask task = tasks.iterator().next();
+
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+
+        UpdateTaskPayload updateTask = TaskPayloadBuilder.update().withTaskId(task.getId())
+                .withName("Updated name")
+                .withDescription("Updated description")
+                .build();
+
+        //when
+        taskRestTemplate.adminUpdateTask(updateTask);
+
+        //then
+        //once admin/v1/tasks/{taskId} is available there will be no need to switch users
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+        ResponseEntity<CloudTask> taskResponseEntity = taskRestTemplate.getTask(task.getId());
+
+        assertThat(taskResponseEntity.getBody().getName()).isEqualTo("Updated name");
+        assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("Updated description");
+
+        //Check UpdateTaskPayload without taskId
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        updateTask = TaskPayloadBuilder.update()
+                .withName("New Updated name")
+                .withDescription("New Updated description")
+                .build();
+
+        //when
+        taskRestTemplate.adminUpdateTask(task.getId(),updateTask);
+
+        //then
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
         taskResponseEntity = taskRestTemplate.getTask(task.getId());
 
         assertThat(taskResponseEntity.getBody().getName()).isEqualTo("New Updated name");
@@ -348,7 +393,7 @@ public class TasksIT {
         taskRestTemplate.claim(task);
 
         //when
-        ResponseEntity<Task> responseEntity = taskRestTemplate.complete(task);
+        ResponseEntity<CloudTask> responseEntity = taskRestTemplate.complete(task);
 
         //then
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
@@ -362,7 +407,7 @@ public class TasksIT {
     
         //when
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
-        ResponseEntity<Task> responseEntity = taskRestTemplate.adminComplete(task);
+        ResponseEntity<CloudTask> responseEntity = taskRestTemplate.adminComplete(task);
 
         //then
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
