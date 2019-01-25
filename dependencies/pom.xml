@@ -43,7 +43,7 @@
       <dependency>
         <groupId>org.activiti.cloud.notifications.graphql</groupId>
         <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
-        <version>${activiti-cloud-notifications-graphql-service.version}</version>
+        <version>${activiti-cloud-notifications-service-graphql.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
