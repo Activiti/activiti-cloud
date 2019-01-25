@@ -1,5 +1,13 @@
 package org.activiti.cloud.acc.core.steps.runtime;
 
+import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import net.thucydides.core.annotations.Step;
@@ -15,14 +23,6 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
-
-import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @EnableRuntimeFeignContext
 public class ProcessRuntimeBundleSteps {
@@ -50,7 +50,7 @@ public class ProcessRuntimeBundleSteps {
         StartProcessPayloadBuilder payload = ProcessPayloadBuilder
                 .start()
                 .withProcessDefinitionKey(process)
-                .withProcessInstanceName("processInstanceName")
+                .withName("processInstanceName")
                 .withBusinessKey("businessKey");
 
         if(variables){
@@ -163,7 +163,7 @@ public class ProcessRuntimeBundleSteps {
                                                                     String processName) {
         return dirtyContextHandler.dirty(processRuntimeService.startProcess(ProcessPayloadBuilder
                 .start()
-                .withProcessInstanceName(processName)
+                .withName(processName)
                 .withProcessDefinitionKey(process)
                 .build()));
     }
@@ -179,7 +179,7 @@ public class ProcessRuntimeBundleSteps {
     public CloudProcessInstance setProcessName(String processInstanceId, String processInstanceName){
         return processRuntimeService.updateProcess(
                 processInstanceId,
-                ProcessPayloadBuilder.update().withProcessInstanceName(processInstanceName).build());
+                ProcessPayloadBuilder.update().withName(processInstanceName).build());
 
     }
 }
