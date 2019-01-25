@@ -20,9 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import org.activiti.api.process.model.ProcessInstance;
@@ -690,5 +692,60 @@ public class QueryTasksIT {
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                          new ParameterizedTypeReference<List<String>>() {
                                          });
+    }
+    
+    @Test
+    public void shouldFilterTaskByCreatedDateFromTo(){
+        //given
+        SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        
+        long currentMillis = System.currentTimeMillis();
+        Date start1,complete1,start2,complete2,start3,complete3;
+
+        complete1 = new Date(currentMillis);
+        start1 = new Date(currentMillis - 86400000);
+        Task task1 = taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate("Completed task 1",
+                runningProcessInstance,
+                start1,
+                complete1);
+        
+        complete2 = new Date(currentMillis - 86400000);
+        start2 = new Date(currentMillis - (2*86400000));
+        Task task2 = taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate("Completed task 2",
+                runningProcessInstance,
+                start2,
+                complete2);
+        
+ 
+        
+        complete3 = new Date(currentMillis - (3*86400000));
+        start3 = new Date(currentMillis - (4*86400000));
+        Task task3 = taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate("Completed task 3",
+                runningProcessInstance,
+                start3,
+                complete3);
+        
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            //set check date 1 hour back from start2: we expect 2 tasks
+            Date checkDate=new Date(start2.getTime() - 3600000);
+            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL+"?createdFrom="+sdf.format(checkDate),
+                                                 HttpMethod.GET,
+                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                 PAGED_TASKS_RESPONSE_TYPE
+                                                 );
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.size()).isEqualTo(2);
+
+        });
+
     }
 }

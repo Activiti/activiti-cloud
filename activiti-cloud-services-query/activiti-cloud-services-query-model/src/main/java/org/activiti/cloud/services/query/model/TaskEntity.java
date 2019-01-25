@@ -62,7 +62,6 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date claimedDate;
     private int priority;
-    private String category;
     private String processDefinitionId;
     private String processInstanceId;
     @Enumerated(EnumType.STRING)
@@ -76,12 +75,38 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModified;
 
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private Date createdTo;
+
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private Date createdFrom;
+    
+    @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModifiedTo;
 
+    @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModifiedFrom;
+    
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private Date lastClaimedTo;
 
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private Date lastClaimedFrom;
+
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private Date completedTo;
+
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private Date completedFrom;
+    
     @JsonIgnore
     @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
@@ -117,7 +142,6 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
                       Date createTime,
                       Date dueDate,
                       int priority,
-                      String category,
                       String processDefinitionId,
                       String processInstanceId,
                       String serviceName,
@@ -143,7 +167,6 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.createdDate = createTime;
         this.dueDate = dueDate;
         this.priority = priority;
-        this.category = category;
         this.processDefinitionId = processDefinitionId;
         this.processInstanceId = processInstanceId;
         this.status = status;
@@ -187,10 +210,6 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @Override
     public int getPriority() {
         return priority;
-    }
-
-    public String getCategory() {
-        return category;
     }
 
     @Override
@@ -242,10 +261,6 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
 
     public void setPriority(int priority) {
         this.priority = priority;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
     }
 
     public void setProcessDefinitionId(String processDefinitionId) {
@@ -382,12 +397,72 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.duration = duration;
     }
 
+    @Transient
     public Date getCompletedDate() {
         return completedDate;
     }
 
     public void setCompletedDate(Date endDate) {
         this.completedDate = endDate;
+    }
+    
+    @Transient
+    public Date getCreatedTo() {
+        return createdTo;
+    }
+
+    
+    public void setCreatedTo(Date createdTo) {
+        this.createdTo = createdTo;
+    }
+
+    @Transient
+    public Date getCreatedFrom() {
+        return createdFrom;
+    }
+
+    
+    public void setCreatedFrom(Date createdFrom) {
+        this.createdFrom = createdFrom;
+    }
+
+    @Transient
+    public Date getLastClaimedTo() {
+        return lastClaimedTo;
+    }
+
+    
+    public void setLastClaimedTo(Date lastClaimedTo) {
+        this.lastClaimedTo = lastClaimedTo;
+    }
+
+    @Transient
+    public Date getLastClaimedFrom() {
+        return lastClaimedFrom;
+    }
+
+    
+    public void setLastClaimedFrom(Date lastClaimedFrom) {
+        this.lastClaimedFrom = lastClaimedFrom;
+    }
+
+    @Transient
+    public Date getCompletedTo() {
+        return completedTo;
+    }
+
+    
+    public void setCompletedTo(Date completedTo) {
+        this.completedTo = completedTo;
+    }
+
+    @Transient
+    public Date getCompletedFrom() {
+        return completedFrom;
+    }
+
+    public void setCompletedFrom(Date completedFrom) {
+        this.completedFrom = completedFrom;
     }
 
 }

@@ -51,7 +51,6 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
                                                     eventEntity.getCreatedDate(),
                                                     eventEntity.getDueDate(),
                                                     eventEntity.getPriority(),
-                                                    null,
                                                     eventEntity.getProcessDefinitionId(),
                                                     eventEntity.getProcessInstanceId(),
                                                     event.getServiceName(),

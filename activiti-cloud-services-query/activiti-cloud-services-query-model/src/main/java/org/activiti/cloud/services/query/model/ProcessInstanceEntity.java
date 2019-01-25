@@ -63,12 +63,22 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModified;
 
+    @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModifiedTo;
 
+    @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date lastModifiedFrom;
 
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private Date startFrom;
+    
+    @JsonIgnore
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private Date startTo;
+    
     @JsonIgnore
     @OneToMany(fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
@@ -245,5 +255,25 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
+    }
+    
+    @Transient
+    public Date getStartFrom() {
+        return startFrom;
+    }
+
+    
+    public void setStartFrom(Date startFrom) {
+        this.startFrom = startFrom;
+    }
+
+    @Transient
+    public Date getStartTo() {
+        return startTo;
+    }
+
+    
+    public void setStartTo(Date startTo) {
+        this.startTo = startTo;
     }
 }
