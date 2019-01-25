@@ -17,11 +17,7 @@
 package org.activiti.cloud.qa.story;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import net.serenitybdd.core.Serenity;
@@ -428,6 +424,31 @@ public class ProcessInstanceTasks {
                 .isEqualTo(taskCompletedEvents.get(0).getTimestamp());
         assertThat(queriedTask.getDuration())
                 .isEqualTo(taskCompletedEvents.get(0).getTimestamp() - queriedTask.getCreatedDate().getTime());
+    }
+
+    @Then("the generated events have sequence number set")
+    public void verifyEventSequenceNumberIsSet(){
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+        Collection<CloudRuntimeEvent> generatedEvents = auditSteps.getEventsByEntityId(processId);
+        List <CloudRuntimeEvent> generatedEventList = new ArrayList(generatedEvents);
+        for(int i= 0; i <= generatedEventList.size(); i++){
+            assertThat(generatedEventList.get(i).getSequenceNumber()).isEqualTo(i);
+        }
+    }
+
+    @Then("the generated events have the same message id")
+    public void verifyEventMessageIdIsSet(){
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+        Collection<CloudRuntimeEvent> generatedEvents = auditSteps.getEventsByEntityId(processId);
+
+        String messageIdTest = generatedEvents
+                                        .stream()
+                                        .findFirst()
+                                        .get().getMessageId();
+        generatedEvents
+                .forEach(event ->
+                        assertThat(event.getMessageId()).isEqualTo(messageIdTest)
+                );
     }
 
 }
