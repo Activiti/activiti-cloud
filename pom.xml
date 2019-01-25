@@ -18,7 +18,7 @@
   
   <properties>
       <activiti-cloud-build.version>7.0.38</activiti-cloud-build.version>
-      <activiti-cloud-query-dependencies.version>7.0.98</activiti-cloud-query-dependencies.version>
+      <activiti-cloud-query-service.version>7.0.98</activiti-cloud-query-service.version>
       <activiti-cloud-notifications-service-graphql.version>${project.version}</activiti-cloud-notifications-service-graphql.version>
       <graphql-jpa-query.version>0.3.11</graphql-jpa-query.version>
   </properties>
@@ -53,7 +53,7 @@
     <dependency>
       <groupId>org.activiti.cloud.query</groupId>
       <artifactId>activiti-cloud-query-dependencies</artifactId>
-      <version>${activiti-cloud-query-dependencies.version}</version>
+      <version>${activiti-cloud-query-service.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>
