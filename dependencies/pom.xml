@@ -26,7 +26,7 @@
       <dependency>
         <groupId>org.activiti.cloud.query</groupId>
         <artifactId>activiti-cloud-query-dependencies</artifactId>
-        <version>${activiti-cloud-query-dependencies.version}</version>
+        <version>${activiti-cloud-query-service.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
