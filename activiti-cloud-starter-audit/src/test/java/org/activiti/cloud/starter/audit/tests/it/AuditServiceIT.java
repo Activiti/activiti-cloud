@@ -444,6 +444,9 @@ public class AuditServiceIT {
         event.setProcessDefinitionKey(processInstanceStarted.getProcessDefinitionKey());
         event.setBusinessKey(processInstanceStarted.getBusinessKey());
         event.setParentProcessInstanceId(processInstanceStarted.getParentId());
+        event.setMessageId("message-id");
+        event.setSequenceNumber(0);
+
         
              
         //Check convertToEntity
@@ -539,6 +542,8 @@ public class AuditServiceIT {
         candidateUserAddedEvent.setProcessDefinitionKey("processDefinitionKey");
         candidateUserAddedEvent.setBusinessKey("businessKey");
         candidateUserAddedEvent.setParentProcessInstanceId("parentProcessInstanceId");
+        candidateUserAddedEvent.setMessageId("messageId");
+        candidateUserAddedEvent.setSequenceNumber(0);
         
              
         //Check convertToEntity
