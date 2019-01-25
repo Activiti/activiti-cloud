@@ -99,7 +99,7 @@
     <activiti-cloud-connectors.version>7.0.71</activiti-cloud-connectors.version>
     <activiti-cloud-app-service.version>7.0.61</activiti-cloud-app-service.version>
     <activiti-cloud-acceptance-tests.version>7.0.49</activiti-cloud-acceptance-tests.version>
-    <activiti-cloud-notifications-graphql-service.version>7.0.6</activiti-cloud-notifications-graphql-service.version>
+    <activiti-cloud-notifications-service-graphql.version>7.0.6</activiti-cloud-notifications-service-graphql.version>
   </properties>
 
   <dependencyManagement>
@@ -172,7 +172,7 @@
     <dependency>
       <groupId>org.activiti.cloud.notifications.graphql</groupId>
       <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
-      <version>${activiti-cloud-notifications-graphql-service.version}</version>
+      <version>${activiti-cloud-notifications-service-graphql.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>
