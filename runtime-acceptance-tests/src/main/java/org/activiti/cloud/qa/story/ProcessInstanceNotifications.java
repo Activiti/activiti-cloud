@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 
+import net.serenitybdd.core.Serenity;
+import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.acc.core.steps.notifications.NotificationsSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
@@ -29,9 +31,6 @@ import org.activiti.cloud.acc.shared.model.AuthToken;
 import org.activiti.cloud.acc.shared.rest.TokenHolder;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-
-import net.serenitybdd.core.Serenity;
-import net.thucydides.core.annotations.Steps;
 import reactor.core.publisher.ReplayProcessor;
 
 public class ProcessInstanceNotifications {
@@ -60,6 +59,9 @@ public class ProcessInstanceNotifications {
         AuthToken authToken = TokenHolder.getAuthToken();
          
         data = notificationsSteps.subscribe(authToken.getAccess_token());
+
+        // Let's wait for subscription to initialize from cold start
+        Thread.sleep(2000);
         
         processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),true);
 
