@@ -30,6 +30,8 @@ public class TaskSuspendedEventConverter extends BaseEventToEntityConverter {
                                             cloudTaskSuspendedEvent.getServiceFullName(),
                                             cloudTaskSuspendedEvent.getServiceType(),
                                             cloudTaskSuspendedEvent.getServiceVersion(),
+                                            cloudTaskSuspendedEvent.getMessageId(),
+                                            cloudTaskSuspendedEvent.getSequenceNumber(),
                                             cloudTaskSuspendedEvent.getEntity());
     }
 
@@ -46,6 +48,8 @@ public class TaskSuspendedEventConverter extends BaseEventToEntityConverter {
         cloudTaskSuspendedEvent.setServiceName(taskSuspendedEventEntity.getServiceName());
         cloudTaskSuspendedEvent.setServiceType(taskSuspendedEventEntity.getServiceType());
         cloudTaskSuspendedEvent.setServiceVersion(taskSuspendedEventEntity.getServiceVersion());
+        cloudTaskSuspendedEvent.setMessageId(taskSuspendedEventEntity.getMessageId());
+        cloudTaskSuspendedEvent.setSequenceNumber(taskSuspendedEventEntity.getSequenceNumber());
 
         return cloudTaskSuspendedEvent;
     }

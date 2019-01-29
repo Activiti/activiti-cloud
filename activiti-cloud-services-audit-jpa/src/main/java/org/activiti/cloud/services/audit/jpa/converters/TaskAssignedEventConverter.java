@@ -31,6 +31,8 @@ public class TaskAssignedEventConverter extends BaseEventToEntityConverter {
                                            cloudTaskAssignedEvent.getServiceFullName(),
                                            cloudTaskAssignedEvent.getServiceType(),
                                            cloudTaskAssignedEvent.getServiceVersion(),
+                                           cloudTaskAssignedEvent.getMessageId(),
+                                           cloudTaskAssignedEvent.getSequenceNumber(),
                                            cloudTaskAssignedEvent.getEntity());
     }
 
@@ -47,6 +49,8 @@ public class TaskAssignedEventConverter extends BaseEventToEntityConverter {
         cloudTaskAssignedEvent.setServiceName(taskAssignedEventEntity.getServiceName());
         cloudTaskAssignedEvent.setServiceType(taskAssignedEventEntity.getServiceType());
         cloudTaskAssignedEvent.setServiceVersion(taskAssignedEventEntity.getServiceVersion());
+        cloudTaskAssignedEvent.setMessageId(taskAssignedEventEntity.getMessageId());
+        cloudTaskAssignedEvent.setSequenceNumber(taskAssignedEventEntity.getSequenceNumber());
 
         return cloudTaskAssignedEvent;
     }

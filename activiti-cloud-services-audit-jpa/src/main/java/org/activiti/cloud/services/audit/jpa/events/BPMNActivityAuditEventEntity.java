@@ -53,6 +53,8 @@ public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
                                         String serviceFullName,
                                         String serviceType,
                                         String serviceVersion,
+                                        String messageId,
+                                        Integer sequenceNumber,
                                         BPMNActivity bpmnActivity) {
         super(eventId,
               timestamp,
@@ -63,6 +65,8 @@ public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
+        setMessageId(messageId);
+        setSequenceNumber(sequenceNumber);
         setBpmnActivity(bpmnActivity);
     }
 

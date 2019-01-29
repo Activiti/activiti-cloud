@@ -296,6 +296,7 @@ public class AuditEventsControllerImplIT {
                                         subsectionWithPath("entry.serviceName").description("The service name"),
                                         subsectionWithPath("entry.messageId").description("The transaction id coming from received message"),
                                         subsectionWithPath("entry.sequenceNumber").description("The position of the event within the transaction")
+
                                 )));
     }
 

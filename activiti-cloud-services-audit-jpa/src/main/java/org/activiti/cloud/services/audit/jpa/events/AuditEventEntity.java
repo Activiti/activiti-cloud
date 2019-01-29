@@ -42,6 +42,8 @@ public abstract class AuditEventEntity {
     private String serviceFullName;
     private String serviceType;
     private String serviceVersion;
+    private int sequenceNumber;
+    private String messageId;
 
     /* base Process Data */
     private String entityId;
@@ -188,5 +190,21 @@ public abstract class AuditEventEntity {
 
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
+    }
+
+    public int getSequenceNumber() {
+        return sequenceNumber;
+    }
+
+    public void setSequenceNumber(int sequeceNumber) {
+        this.sequenceNumber = sequeceNumber;
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
     }
 }

@@ -30,6 +30,8 @@ public class ActivityCancelledEventConverter extends BaseEventToEntityConverter 
                                                      cloudBPMNActivityCancelledEvent.getServiceName(),
                                                      cloudBPMNActivityCancelledEvent.getServiceType(),
                                                      cloudBPMNActivityCancelledEvent.getServiceVersion(),
+                                                     cloudBPMNActivityCancelledEvent.getMessageId(),
+                                                     cloudBPMNActivityCancelledEvent.getSequenceNumber(),
                                                      cloudBPMNActivityCancelledEvent.getEntity(),
                                                      cloudBPMNActivityCancelledEvent.getCause());
     }
@@ -50,6 +52,8 @@ public class ActivityCancelledEventConverter extends BaseEventToEntityConverter 
         bpmnActivityCancelledEvent.setServiceName(activityCancelledAuditEventEntity.getServiceName());
         bpmnActivityCancelledEvent.setServiceType(activityCancelledAuditEventEntity.getServiceType());
         bpmnActivityCancelledEvent.setServiceVersion(activityCancelledAuditEventEntity.getServiceVersion());
+        bpmnActivityCancelledEvent.setMessageId(activityCancelledAuditEventEntity.getMessageId());
+        bpmnActivityCancelledEvent.setSequenceNumber(activityCancelledAuditEventEntity.getSequenceNumber());
 
         return bpmnActivityCancelledEvent;
     }

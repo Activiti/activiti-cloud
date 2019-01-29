@@ -31,6 +31,8 @@ public class ProcessUpdatedEventConverter extends BaseEventToEntityConverter {
                                                   cloudProcessUpdated.getServiceFullName(),
                                                   cloudProcessUpdated.getServiceType(),
                                                   cloudProcessUpdated.getServiceVersion(),
+                                                  cloudProcessUpdated.getMessageId(),
+                                                  cloudProcessUpdated.getSequenceNumber(),
                                                   cloudProcessUpdated.getEntity());
     }
 
@@ -46,6 +48,8 @@ public class ProcessUpdatedEventConverter extends BaseEventToEntityConverter {
         cloudProcessUpdatedEvent.setServiceName(processUpdatedAuditEventEntity.getServiceName());
         cloudProcessUpdatedEvent.setServiceType(processUpdatedAuditEventEntity.getServiceType());
         cloudProcessUpdatedEvent.setServiceVersion(processUpdatedAuditEventEntity.getServiceVersion());
+        cloudProcessUpdatedEvent.setMessageId(processUpdatedAuditEventEntity.getMessageId());
+        cloudProcessUpdatedEvent.setSequenceNumber(processUpdatedAuditEventEntity.getSequenceNumber());
 
         return cloudProcessUpdatedEvent;
     }

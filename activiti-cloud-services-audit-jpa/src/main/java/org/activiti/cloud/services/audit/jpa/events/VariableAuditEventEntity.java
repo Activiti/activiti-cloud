@@ -40,6 +40,8 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
                                     String serviceFullName,
                                     String serviceType,
                                     String serviceVersion,
+                                    String messageId,
+                                    Integer sequenceNumber,
                                     VariableInstance variableInstance) {
         super(eventId,
               timestamp,
@@ -50,6 +52,8 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
+        setMessageId(messageId);
+        setSequenceNumber(sequenceNumber);
         setVariableInstance(variableInstance);
     }
 

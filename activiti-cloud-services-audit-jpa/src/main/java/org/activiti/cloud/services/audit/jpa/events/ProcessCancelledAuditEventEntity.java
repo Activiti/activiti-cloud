@@ -48,6 +48,8 @@ public class ProcessCancelledAuditEventEntity extends ProcessAuditEventEntity {
                                             String serviceFullName,
                                             String serviceType,
                                             String serviceVersion,
+                                            String messageId,
+                                            Integer sequenceNumber,
                                             ProcessInstance processInstance,
                                             String cause) {
         super(eventId,
@@ -59,6 +61,8 @@ public class ProcessCancelledAuditEventEntity extends ProcessAuditEventEntity {
               serviceFullName,
               serviceType,
               serviceVersion,
+              messageId,
+              sequenceNumber,
               processInstance);
         this.cause = cause;
     }

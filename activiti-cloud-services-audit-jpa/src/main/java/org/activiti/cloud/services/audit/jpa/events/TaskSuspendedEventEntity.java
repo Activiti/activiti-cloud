@@ -46,6 +46,8 @@ public class TaskSuspendedEventEntity extends TaskAuditEventEntity {
                                     String serviceFullName,
                                     String serviceType,
                                     String serviceVersion,
+                                    String messageId,
+                                    Integer sequenceNumber,
                                     Task task) {
         super(eventId,
               timestamp,
@@ -56,6 +58,8 @@ public class TaskSuspendedEventEntity extends TaskAuditEventEntity {
               serviceFullName,
               serviceType,
               serviceVersion,
+              messageId,
+              sequenceNumber,
               task);
     }
 }

@@ -30,6 +30,8 @@ public class ProcessCompletedEventConverter  extends BaseEventToEntityConverter 
                                                cloudProcessCompletedEvent.getServiceFullName(),
                                                cloudProcessCompletedEvent.getServiceType(),
                                                cloudProcessCompletedEvent.getServiceVersion(),
+                                               cloudProcessCompletedEvent.getMessageId(),
+                                               cloudProcessCompletedEvent.getSequenceNumber(),
                                                cloudProcessCompletedEvent.getEntity());
     }
 
@@ -45,6 +47,8 @@ public class ProcessCompletedEventConverter  extends BaseEventToEntityConverter 
         cloudProcessCompletedEvent.setServiceName(processCompletedEventEntity.getServiceName());
         cloudProcessCompletedEvent.setServiceType(processCompletedEventEntity.getServiceType());
         cloudProcessCompletedEvent.setServiceVersion(processCompletedEventEntity.getServiceVersion());
+        cloudProcessCompletedEvent.setMessageId(processCompletedEventEntity.getMessageId());
+        cloudProcessCompletedEvent.setSequenceNumber(processCompletedEventEntity.getSequenceNumber());
         return cloudProcessCompletedEvent;
     }
 }

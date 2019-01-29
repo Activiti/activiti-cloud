@@ -54,6 +54,8 @@ public class ProcessDeployedAuditEventEntity extends AuditEventEntity {
                                            String serviceFullName,
                                            String serviceType,
                                            String serviceVersion,
+                                           String messageId,
+                                           Integer sequenceNumber,
                                            ProcessDefinition processDefinition) {
         this(eventId,
               timestamp);
@@ -64,6 +66,8 @@ public class ProcessDeployedAuditEventEntity extends AuditEventEntity {
         setServiceFullName(serviceFullName);
         setServiceType(serviceType);
         setServiceVersion(serviceVersion);
+        setMessageId(messageId);
+        setSequenceNumber(sequenceNumber);
         setProcessDefinition(processDefinition);
     }
 

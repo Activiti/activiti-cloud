@@ -47,6 +47,8 @@ public class ActivityCompletedAuditEventEntity extends BPMNActivityAuditEventEnt
                                              String serviceFullName,
                                              String serviceType,
                                              String serviceVersion,
+                                             String messageId,
+                                             Integer sequenceNumber,
                                              BPMNActivity bpmnActivity) {
         super(eventId,
               timestamp,
@@ -57,6 +59,8 @@ public class ActivityCompletedAuditEventEntity extends BPMNActivityAuditEventEnt
               serviceFullName,
               serviceType,
               serviceVersion,
+              messageId,
+              sequenceNumber,
               bpmnActivity);
     }
 }

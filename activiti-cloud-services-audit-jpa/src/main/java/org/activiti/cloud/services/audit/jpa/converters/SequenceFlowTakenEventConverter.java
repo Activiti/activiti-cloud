@@ -31,6 +31,8 @@ public class SequenceFlowTakenEventConverter extends BaseEventToEntityConverter 
                                                 cloudSequenceFlowTaken.getServiceFullName(),
                                                 cloudSequenceFlowTaken.getServiceType(),
                                                 cloudSequenceFlowTaken.getServiceVersion(),
+                                                cloudSequenceFlowTaken.getMessageId(),
+                                                cloudSequenceFlowTaken.getSequenceNumber(),
                                                 cloudSequenceFlowTaken.getEntity());
     }
 
@@ -46,7 +48,9 @@ public class SequenceFlowTakenEventConverter extends BaseEventToEntityConverter 
         cloudSequenceFlowTakenEvent.setServiceName(sequenceFlowTakenAuditEventEntity.getServiceName());
         cloudSequenceFlowTakenEvent.setServiceType(sequenceFlowTakenAuditEventEntity.getServiceType());
         cloudSequenceFlowTakenEvent.setServiceVersion(sequenceFlowTakenAuditEventEntity.getServiceVersion());
-        
+        cloudSequenceFlowTakenEvent.setMessageId(sequenceFlowTakenAuditEventEntity.getMessageId());
+        cloudSequenceFlowTakenEvent.setSequenceNumber(sequenceFlowTakenAuditEventEntity.getSequenceNumber());
+
         cloudSequenceFlowTakenEvent.setEntityId(sequenceFlowTakenAuditEventEntity.getProcessInstanceId());
         cloudSequenceFlowTakenEvent.setProcessDefinitionId(sequenceFlowTakenAuditEventEntity.getProcessDefinitionId());
         cloudSequenceFlowTakenEvent.setProcessInstanceId(sequenceFlowTakenAuditEventEntity.getProcessInstanceId());

@@ -30,6 +30,8 @@ public class ActivityStartedEventConverter extends BaseEventToEntityConverter {
                                                    cloudActivityStartedEvent.getServiceName(),
                                                    cloudActivityStartedEvent.getServiceType(),
                                                    cloudActivityStartedEvent.getServiceVersion(),
+                                                   cloudActivityStartedEvent.getMessageId(),
+                                                   cloudActivityStartedEvent.getSequenceNumber(),
                                                    cloudActivityStartedEvent.getEntity());
                
     }
@@ -49,6 +51,8 @@ public class ActivityStartedEventConverter extends BaseEventToEntityConverter {
         bpmnActivityStartedEvent.setServiceName(activityStartedAuditEventEntity.getServiceName());
         bpmnActivityStartedEvent.setServiceType(activityStartedAuditEventEntity.getServiceType());
         bpmnActivityStartedEvent.setServiceVersion(activityStartedAuditEventEntity.getServiceVersion());
+        bpmnActivityStartedEvent.setMessageId(activityStartedAuditEventEntity.getMessageId());
+        bpmnActivityStartedEvent.setSequenceNumber(activityStartedAuditEventEntity.getSequenceNumber());
 
         return bpmnActivityStartedEvent;
     }

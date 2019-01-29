@@ -31,6 +31,8 @@ public class ActivityCompletedEventConverter extends BaseEventToEntityConverter 
                                                      cloudBPMNActivityCompletedEvent.getServiceName(),
                                                      cloudBPMNActivityCompletedEvent.getServiceType(),
                                                      cloudBPMNActivityCompletedEvent.getServiceVersion(),
+                                                     cloudBPMNActivityCompletedEvent.getMessageId(),
+                                                     cloudBPMNActivityCompletedEvent.getSequenceNumber(),
                                                      cloudBPMNActivityCompletedEvent.getEntity());
     }
 
@@ -50,6 +52,8 @@ public class ActivityCompletedEventConverter extends BaseEventToEntityConverter 
         bpmnActivityCompletedEvent.setServiceName(activityCompletedAuditEventEntity.getServiceName());
         bpmnActivityCompletedEvent.setServiceType(activityCompletedAuditEventEntity.getServiceType());
         bpmnActivityCompletedEvent.setServiceVersion(activityCompletedAuditEventEntity.getServiceVersion());
+        bpmnActivityCompletedEvent.setMessageId(activityCompletedAuditEventEntity.getMessageId());
+        bpmnActivityCompletedEvent.setSequenceNumber(activityCompletedAuditEventEntity.getSequenceNumber());
         
         return bpmnActivityCompletedEvent;
     }

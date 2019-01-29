@@ -31,6 +31,8 @@ public class ProcessSuspendedEventConverter extends BaseEventToEntityConverter {
                                                     cloudProcessSuspended.getServiceFullName(),
                                                     cloudProcessSuspended.getServiceType(),
                                                     cloudProcessSuspended.getServiceVersion(),
+                                                    cloudProcessSuspended.getMessageId(),
+                                                    cloudProcessSuspended.getSequenceNumber(),
                                                     cloudProcessSuspended.getEntity());
  
     }
@@ -47,6 +49,8 @@ public class ProcessSuspendedEventConverter extends BaseEventToEntityConverter {
         cloudProcessSuspendedEvent.setServiceName(processSuspendedAuditEventEntity.getServiceName());
         cloudProcessSuspendedEvent.setServiceType(processSuspendedAuditEventEntity.getServiceType());
         cloudProcessSuspendedEvent.setServiceVersion(processSuspendedAuditEventEntity.getServiceVersion());
+        cloudProcessSuspendedEvent.setMessageId(processSuspendedAuditEventEntity.getMessageId());
+        cloudProcessSuspendedEvent.setSequenceNumber(processSuspendedAuditEventEntity.getSequenceNumber());
 
         return cloudProcessSuspendedEvent;
     }

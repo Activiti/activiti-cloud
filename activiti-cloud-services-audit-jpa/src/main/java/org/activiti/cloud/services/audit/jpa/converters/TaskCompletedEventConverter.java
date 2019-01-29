@@ -31,6 +31,8 @@ public class TaskCompletedEventConverter extends BaseEventToEntityConverter {
                                             cloudTaskCompletedEvent.getServiceFullName(),
                                             cloudTaskCompletedEvent.getServiceType(),
                                             cloudTaskCompletedEvent.getServiceVersion(),
+                                            cloudTaskCompletedEvent.getMessageId(),
+                                            cloudTaskCompletedEvent.getSequenceNumber(),
                                             cloudTaskCompletedEvent.getEntity());
         
 
@@ -49,6 +51,8 @@ public class TaskCompletedEventConverter extends BaseEventToEntityConverter {
         cloudTaskCompletedEvent.setServiceName(taskCompletedEventEntity.getServiceName());
         cloudTaskCompletedEvent.setServiceType(taskCompletedEventEntity.getServiceType());
         cloudTaskCompletedEvent.setServiceVersion(taskCompletedEventEntity.getServiceVersion());
+        cloudTaskCompletedEvent.setMessageId(taskCompletedEventEntity.getMessageId());
+        cloudTaskCompletedEvent.setSequenceNumber(taskCompletedEventEntity.getSequenceNumber());
 
         return cloudTaskCompletedEvent;
     }

@@ -51,6 +51,8 @@ public class ActivityCancelledAuditEventEntity extends BPMNActivityAuditEventEnt
                                              String serviceFullName,
                                              String serviceType,
                                              String serviceVersion,
+                                             String messageId,
+                                             Integer sequenceNumber,
                                              BPMNActivity bpmnActivity,
                                              String cause) {
         super(eventId,
@@ -62,6 +64,8 @@ public class ActivityCancelledAuditEventEntity extends BPMNActivityAuditEventEnt
               serviceFullName,
               serviceType,
               serviceVersion,
+              messageId,
+              sequenceNumber,
               bpmnActivity);
         this.cause = cause;
     }
