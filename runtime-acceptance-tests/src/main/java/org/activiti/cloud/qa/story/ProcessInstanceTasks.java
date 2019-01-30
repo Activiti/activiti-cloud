@@ -431,7 +431,7 @@ public class ProcessInstanceTasks {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
         Collection<CloudRuntimeEvent> generatedEvents = auditSteps.getEventsByEntityId(processId);
         List <CloudRuntimeEvent> generatedEventList = new ArrayList(generatedEvents);
-        for(int i= 0; i <= generatedEventList.size(); i++){
+        for(int i= 0; i <= generatedEventList.size() - 1; i++){
             assertThat(generatedEventList.get(i).getSequenceNumber()).isEqualTo(i);
         }
     }
