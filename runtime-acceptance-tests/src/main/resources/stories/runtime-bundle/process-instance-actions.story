@@ -85,7 +85,7 @@ When the user set a process instance name my_process_instance_name and starts th
 Then verify the process instance name is my_process_instance_name
 
 Scenario: check sequence number and message id for events
-Given the user is authenticated as testsuser
+Given the user is authenticated as testuser
 When the user starts an instance of the process called SIMPLE_PROCESS_INSTANCE
 Then the generated events have sequence number set
 And the generated events have the same message id
