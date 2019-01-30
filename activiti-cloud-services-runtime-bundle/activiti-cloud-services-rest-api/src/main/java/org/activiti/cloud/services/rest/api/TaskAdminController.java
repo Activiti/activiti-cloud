@@ -21,7 +21,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface TaskAdminController {
 
     @RequestMapping( method = RequestMethod.GET)
-    PagedResources<TaskResource> getAllTasks(Pageable pageable);
+    PagedResources<TaskResource> getTasks(Pageable pageable);
+    
+    @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
+    TaskResource getTaskById(@PathVariable String taskId);
     
     @RequestMapping(value = "/{taskId}", method = RequestMethod.PUT)
     TaskResource updateTask(@PathVariable("taskId") String taskId,

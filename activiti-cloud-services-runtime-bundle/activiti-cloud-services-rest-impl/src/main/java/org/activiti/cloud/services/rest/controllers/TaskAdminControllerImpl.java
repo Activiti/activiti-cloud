@@ -23,8 +23,8 @@ import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
-import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
@@ -61,12 +61,18 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     }
 
     @Override
-    public PagedResources<TaskResource> getAllTasks(Pageable pageable) {
+    public PagedResources<TaskResource> getTasks(Pageable pageable) {
         Page<Task> tasksPage = taskAdminRuntime.tasks(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
                                                   pageConverter.toSpringPage(pageable,
                                                                              tasksPage),
                                                   taskResourceAssembler);
+    }
+    
+    @Override
+    public TaskResource getTaskById(@PathVariable String taskId) {
+        Task task = taskAdminRuntime.task(taskId);
+        return taskResourceAssembler.toResource(task);
     }
     
     @Override

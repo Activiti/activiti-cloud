@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +26,7 @@ import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
+import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SetTaskVariablesPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
@@ -40,8 +43,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @Component
 public class TaskRestTemplate {
 
@@ -49,6 +50,8 @@ public class TaskRestTemplate {
     private static final String ADMIN_TASK_VAR_RELATIVE_URL = "/admin/v1/tasks/";
 
     private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
+    };
+    private static final ParameterizedTypeReference<PagedResources<CloudTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
     };
     public static final ParameterizedTypeReference<List<String>> CANDIDATES_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
     };
@@ -60,24 +63,39 @@ public class TaskRestTemplate {
 
     public ResponseEntity<CloudTask> complete(Task task) {
         return complete(task,
-                        TASK_VAR_RELATIVE_URL);
+                        null);
     }
 
     public ResponseEntity<CloudTask> adminComplete(Task task) {
+        return adminComplete(task,
+                             null);
+    }
+    
+    public ResponseEntity<CloudTask> complete(Task task,CompleteTaskPayload completeTaskPayload) {
         return complete(task,
-                        ADMIN_TASK_VAR_RELATIVE_URL);
+                        TASK_VAR_RELATIVE_URL,
+                        completeTaskPayload);
     }
 
+    public ResponseEntity<CloudTask> adminComplete(Task task,CompleteTaskPayload completeTaskPayload) {
+        return complete(task,
+                        ADMIN_TASK_VAR_RELATIVE_URL,
+                        completeTaskPayload);
+    }
+    
+
     private ResponseEntity<CloudTask> complete(Task task,
-                                               String baseURL) {
+                                               String baseURL,
+                                               CompleteTaskPayload completeTaskPayload
+                                               ) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(baseURL + task.getId() + "/complete",
                                                                              HttpMethod.POST,
-                                                                             null,
+                                                                             completeTaskPayload!=null ?  new HttpEntity<>(completeTaskPayload) : null,
                                                                              TASK_RESPONSE_TYPE);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
         return responseEntity;
     }
-
+    
     public ResponseEntity<CloudTask> delete(Task task) {
         return delete(task,
                       TASK_VAR_RELATIVE_URL);
@@ -99,7 +117,11 @@ public class TaskRestTemplate {
     }
 
     public ResponseEntity<CloudTask> claim(Task task) {
-        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId() + "/claim",
+        return claim(task.getId());
+    }
+    
+    public ResponseEntity<CloudTask> claim(String taskId) {
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + taskId + "/claim",
                                                                              HttpMethod.POST,
                                                                              null,
                                                                              TASK_RESPONSE_TYPE);
@@ -108,7 +130,11 @@ public class TaskRestTemplate {
     }
     
     public ResponseEntity<CloudTask> release(Task task) {
-        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId() + "/release",
+        return release(task.getId());
+    }
+    
+    public ResponseEntity<CloudTask> release(String taskId) {
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + taskId + "/release",
                                                                              HttpMethod.POST,
                                                                              null,
                                                                              TASK_RESPONSE_TYPE);
@@ -195,9 +221,32 @@ public class TaskRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity.getBody();
     }
+    
+    public ResponseEntity<PagedResources<CloudTask>> getTasks() {
+        return getTasks(TASK_VAR_RELATIVE_URL);
+    }
+    
+    public ResponseEntity<PagedResources<CloudTask>> adminGetTasks() {
+        return getTasks(ADMIN_TASK_VAR_RELATIVE_URL);
+    }
+    
+    private ResponseEntity<PagedResources<CloudTask>> getTasks(String baseURL) {
+        return testRestTemplate.exchange(baseURL,
+                                         HttpMethod.GET,
+                                         null,
+                                         PAGED_TASKS_RESPONSE_TYPE);
+    }
 
     public ResponseEntity<CloudTask> getTask(String taskId) {
-        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + taskId,
+        return getTask(taskId,TASK_VAR_RELATIVE_URL);
+    }
+    
+    public ResponseEntity<CloudTask> adminGetTask(String taskId) {
+        return getTask(taskId,ADMIN_TASK_VAR_RELATIVE_URL);
+    }
+    
+    private ResponseEntity<CloudTask> getTask(String taskId,String baseURL) {
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(baseURL + taskId,
                                                                              HttpMethod.GET,
                                                                              null,
                                                                              TASK_RESPONSE_TYPE);

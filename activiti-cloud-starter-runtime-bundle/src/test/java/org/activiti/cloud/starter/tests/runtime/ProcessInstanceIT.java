@@ -16,13 +16,10 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_ADMIN_RELATIVE_URL;
-import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,6 +38,7 @@ import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.engine.impl.util.IoUtil;
@@ -51,20 +49,12 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 
 @RunWith(SpringRunner.class)
@@ -77,19 +67,17 @@ public class ProcessInstanceIT {
     private static final String SUB_PROCESS = "SubProcess";
     private static final String PARENT_PROCESS = "ParentProcess";
     
-    public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
-    
     @Autowired
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
-
-    @Autowired
-    private TestRestTemplate restTemplate;
 
     @Autowired
     private ProcessDiagramGenerator processDiagramGenerator;
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
+    
+    @Autowired
+    private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
 
     @Value("${activiti.keycloak.test-user}")
     protected String keycloakTestUser;
@@ -103,7 +91,7 @@ public class ProcessInstanceIT {
     public void setUp() {
         keycloakTestUser = "hruser";
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
@@ -170,19 +158,12 @@ public class ProcessInstanceIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
 
         StartProcessPayload startProcess = ProcessPayloadBuilder.start()
-
                 .withProcessDefinitionKey(SIMPLE_PROCESS)
                 .withBusinessKey("business_key")
                 .build();
 
-        HttpEntity<StartProcessPayload> requestEntity = new HttpEntity<>(startProcess);
-
-        ResponseEntity<CloudProcessInstance> entity = restTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL,
-                HttpMethod.POST,
-                requestEntity,
-                new ParameterizedTypeReference<CloudProcessInstance>() {
-                });
-
+        ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.adminStartProcess(startProcess);
+                
         //then
         assertThat(entity).isNotNull();
         ProcessInstance returnedProcInst = entity.getBody();
@@ -201,14 +182,8 @@ public class ProcessInstanceIT {
         ResponseEntity<CloudProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-
-        ResponseEntity<CloudProcessInstance> retrievedEntity = restTemplate.exchange(
-                PROCESS_INSTANCES_RELATIVE_URL + startedProcessEntity.getBody().getId(),
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<CloudProcessInstance>() {
-                });
-
+        ResponseEntity<CloudProcessInstance> retrievedEntity = processInstanceRestTemplate.getProcessInstance(startedProcessEntity);
+                
         //then
         assertThat(retrievedEntity.getBody()).isNotNull();
         assertThat(retrievedEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -222,12 +197,8 @@ public class ProcessInstanceIT {
         ResponseEntity<CloudProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        String responseData = executeRequest(
-                PROCESS_INSTANCES_RELATIVE_URL + startedProcessEntity.getBody()
-                        .getId() + "/model",
-                HttpMethod.GET,
-                "image/svg+xml");
-
+        String responseData = processInstanceRestTemplate.getModel(startedProcessEntity.getBody().getId());
+ 
         //then
         assertThat(responseData).isNotNull();
 
@@ -269,11 +240,7 @@ public class ProcessInstanceIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "?page=0&size=2",
-                                                                                                     HttpMethod.GET,
-                                                                                                     null,
-                                                                                                     new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
-                                                                                                     });
+        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getPagedProcessInstances();
 
         //then
         assertThat(processInstancesPage).isNotNull();
@@ -294,11 +261,7 @@ public class ProcessInstanceIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
 
         //when
-        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + "?page=0&size=2",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
-                });
+        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getPagedProcessInstances();
 
         //then
         assertThat(processInstancesPage).isNotNull();
@@ -307,12 +270,7 @@ public class ProcessInstanceIT {
 
         //but testadmin should see process instances at admin endpoint
         //when
-        processInstancesPage = restTemplate
-                .exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + "?page=0&size=2",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
-                });
+        processInstancesPage = processInstanceRestTemplate.adminGetPagedProcessInstances();
 
         //then
         assertThat(processInstancesPage).isNotNull();
@@ -327,22 +285,12 @@ public class ProcessInstanceIT {
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<Void> responseEntity = executeRequestSuspendProcess(startProcessEntity);
+        ResponseEntity<Void> responseEntity = processInstanceRestTemplate.suspend(startProcessEntity);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
-    }
-    
-    private ResponseEntity<Void> executeRequestSuspendProcess(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
-        ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/suspend",
-                                                                    HttpMethod.POST,
-                                                                    null,
-                                                                    new ParameterizedTypeReference<Void>() {
-                                                                    });
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        return responseEntity;
     }
     
     @Test
@@ -351,7 +299,7 @@ public class ProcessInstanceIT {
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         
         //when
-        ResponseEntity<Void> responseEntity = adminExecuteRequestSuspendProcess(startProcessEntity);
+        ResponseEntity<Void> responseEntity = processInstanceRestTemplate.adminSuspend(startProcessEntity);
 
         //then
         //No User specified: should get an error, because admin endpoint
@@ -360,7 +308,7 @@ public class ProcessInstanceIT {
         //when
         //testadmin should see process instances at admin endpoint
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
-        responseEntity = adminExecuteRequestSuspendProcess(startProcessEntity);
+        responseEntity = processInstanceRestTemplate.adminSuspend(startProcessEntity);
         
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -368,20 +316,11 @@ public class ProcessInstanceIT {
         assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
     }
     
-    private ResponseEntity<Void> adminExecuteRequestSuspendProcess(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
-        ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/suspend",
-                                                                    HttpMethod.POST,
-                                                                    null,
-                                                                    new ParameterizedTypeReference<Void>() {
-                                                                    });
-        return responseEntity;
-    }
-
     @Test
     public void resumeShouldPutASuspendedProcessInstanceBackToActiveState() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
-        executeRequestSuspendProcess(startProcessEntity);
+        processInstanceRestTemplate.suspend(startProcessEntity);
 
         //when
         ResponseEntity<Void> responseEntity = processInstanceRestTemplate.resume(startProcessEntity);
@@ -400,7 +339,7 @@ public class ProcessInstanceIT {
         //First suspend process and check that everything is OK
         //testadmin should see process instances at admin endpoint
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
-        ResponseEntity<Void> responseEntity = adminExecuteRequestSuspendProcess(startProcessEntity);
+        ResponseEntity<Void> responseEntity = processInstanceRestTemplate.adminSuspend(startProcessEntity);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
         //Check that process is really in a suspended state
@@ -409,7 +348,7 @@ public class ProcessInstanceIT {
         //when
         //change user
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
-        responseEntity = adminExecuteRequestResumeProcess(startProcessEntity);
+        responseEntity = processInstanceRestTemplate.adminResume(startProcessEntity);
 
         //then
         //Bad user specified: should get an error, because admin endpoint
@@ -418,7 +357,7 @@ public class ProcessInstanceIT {
         //when
         //testadmin should see process instances at admin endpoint
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
-        responseEntity = adminExecuteRequestResumeProcess(startProcessEntity);
+        responseEntity = processInstanceRestTemplate.adminResume(startProcessEntity);
         
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -502,13 +441,8 @@ public class ProcessInstanceIT {
                                                                                                     null,
                                                                                                     "business_key");   
         //when
-        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = restTemplate.exchange( 
-                          PROCESS_INSTANCES_RELATIVE_URL + startedProcessEntity.getBody().getId()+"/subprocesses",
-                          HttpMethod.GET,
-                          null,
-                          new ParameterizedTypeReference<PagedResources<ProcessInstance>>() {
-                          });
-        
+        ResponseEntity<PagedResources<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getSubprocesses(startedProcessEntity.getBody().getId());
+                
         //then
         assertThat(processInstancesPage.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(processInstancesPage.getBody()).isNotNull();
@@ -564,50 +498,5 @@ public class ProcessInstanceIT {
 
         assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
         processInstanceRestTemplate.getProcessInstance(processEntity));
-    }
-    
-    private ResponseEntity<Void> adminExecuteRequestResumeProcess(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
-        ResponseEntity<Void> responseEntity = restTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processInstanceEntity.getBody().getId() + "/resume",
-                                                                    HttpMethod.POST,
-                                                                    null,
-                                                                    new ParameterizedTypeReference<Void>() {
-                                                                    });
-        return responseEntity;
-    }
-    
-    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
-        };
-
-        return restTemplate.exchange(PROCESS_DEFINITIONS_URL,
-                                     HttpMethod.GET,
-                                     null,
-                                     responseType);
-    }
-
-    private String executeRequest(String url,
-                                  HttpMethod method,
-                                  String contentType) {
-        return restTemplate.execute(url,
-                                    method,
-                                    new RequestCallback() {
-                                        @Override
-                                        public void doWithRequest(ClientHttpRequest request) throws IOException {
-                                            if (contentType != null && !contentType.isEmpty()) {
-                                                request.getHeaders().add("Content-Type",
-                                                                         contentType);
-                                            }
-                                        }
-                                    },
-                                    new ResponseExtractor<String>() {
-
-                                        @Override
-                                        public String extractData(ClientHttpResponse response)
-                                                throws IOException {
-                                            return new String(IoUtil.readInputStream(response.getBody(),
-                                                                                     null),
-                                                              "UTF-8");
-                                        }
-                                    });
     }
 }
