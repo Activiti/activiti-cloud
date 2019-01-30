@@ -87,14 +87,20 @@ public class TaskAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<TaskResource> findAll(@QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
-                                                @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,  
+    public PagedResources<TaskResource> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+                                                @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
+                                                @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
                                                 Pageable pageable) {
         Predicate extendedPredicate=predicate;
         if (rootTasksOnly) {
             BooleanExpression parentTaskNull = QTaskEntity.taskEntity.parentTaskId.isNull(); 
             extendedPredicate= extendedPredicate !=null ? parentTaskNull.and(extendedPredicate) : parentTaskNull;
         }
+        if (standalone) {
+            BooleanExpression processInstanceIdNull = QTaskEntity.taskEntity.processInstanceId.isNull(); 
+            extendedPredicate= extendedPredicate !=null ? processInstanceIdNull.and(extendedPredicate) : processInstanceIdNull;
+        }
+        
         Page<TaskEntity> page = taskRepository.findAll(extendedPredicate,
                                                        pageable);
 

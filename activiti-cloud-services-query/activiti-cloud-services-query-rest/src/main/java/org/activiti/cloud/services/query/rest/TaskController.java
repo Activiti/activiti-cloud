@@ -101,6 +101,7 @@ public class TaskController {
 
     @RequestMapping(method = RequestMethod.GET)
     public PagedResources<TaskResource> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+                                                @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
                                                 @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
                                                 Pageable pageable) {
         Predicate extendedPredicate=predicate;
@@ -108,6 +109,11 @@ public class TaskController {
             BooleanExpression parentTaskNull = QTaskEntity.taskEntity.parentTaskId.isNull(); 
             extendedPredicate= extendedPredicate !=null ? parentTaskNull.and(extendedPredicate) : parentTaskNull;
         }
+        if (standalone) {
+            BooleanExpression processInstanceIdNull = QTaskEntity.taskEntity.processInstanceId.isNull(); 
+            extendedPredicate= extendedPredicate !=null ? processInstanceIdNull.and(extendedPredicate) : processInstanceIdNull;
+        }
+        
         extendedPredicate = taskLookupRestrictionService.restrictTaskQuery(extendedPredicate);
         Page<TaskEntity> page = taskRepository.findAll(extendedPredicate,
                                                        pageable);

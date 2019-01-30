@@ -317,6 +317,42 @@ public class QueryTasksIT {
                     .containsExactly(rootTask.getId());
         });
     }
+    
+    @Test
+    public void shouldGetAvailableStandaloneTasksWithStatus() {
+        //given
+        TaskImpl processTask = new TaskImpl(UUID.randomUUID().toString(),
+                                            "Task1",
+                                            Task.TaskStatus.ASSIGNED);
+        processTask.setProcessInstanceId(runningProcessInstance.getId());
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(processTask));
+
+            
+        TaskImpl standAloneTask = new TaskImpl(UUID.randomUUID().toString(),
+                                               "Task2",
+                                               Task.TaskStatus.CREATED);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(standAloneTask));
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?standalone=true&status={status}",
+                                                                                            HttpMethod.GET,
+                                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                            PAGED_TASKS_RESPONSE_TYPE,
+                                                                                            Task.TaskStatus.CREATED);
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId)
+                    .containsExactly(standAloneTask.getId());
+        });
+    }
 
     private void checkExistingTask(Task createdTask) {
         await().untilAsserted(() -> {
