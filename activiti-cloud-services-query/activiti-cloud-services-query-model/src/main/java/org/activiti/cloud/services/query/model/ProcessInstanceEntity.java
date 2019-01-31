@@ -59,24 +59,23 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private ProcessInstanceStatus status;
     private Integer processDefinitionVersion;
  
-
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastModified;
 
     @JsonIgnore
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastModifiedTo;
 
     @JsonIgnore
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastModifiedFrom;
 
     @JsonIgnore
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date startFrom;
     
     @JsonIgnore
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date startTo;
     
     @JsonIgnore

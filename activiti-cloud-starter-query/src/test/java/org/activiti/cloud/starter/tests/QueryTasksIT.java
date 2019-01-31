@@ -733,30 +733,28 @@ public class QueryTasksIT {
     @Test
     public void shouldFilterTaskByCreatedDateFromTo(){
         //given
-        SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"); 
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-        
-        long currentMillis = System.currentTimeMillis();
+        Date now = new Date();   
         Date start1,complete1,start2,complete2,start3,complete3;
+     
 
-        complete1 = new Date(currentMillis);
-        start1 = new Date(currentMillis - 86400000);
+        complete1 = now;
+        start1 = new Date(now.getTime() - 86400000);
         Task task1 = taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate("Completed task 1",
                 runningProcessInstance,
                 start1,
                 complete1);
         
-        complete2 = new Date(currentMillis - 86400000);
-        start2 = new Date(currentMillis - (2*86400000));
+        complete2 = new Date(now.getTime() - 86400000);
+        start2 = new Date(now.getTime() - (2*86400000));
         Task task2 = taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate("Completed task 2",
                 runningProcessInstance,
                 start2,
                 complete2);
         
- 
-        
-        complete3 = new Date(currentMillis - (3*86400000));
-        start3 = new Date(currentMillis - (4*86400000));
+        complete3 = new Date(now.getTime() - (3*86400000));
+        start3 = new Date(now.getTime() - (4*86400000));
         Task task3 = taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate("Completed task 3",
                 runningProcessInstance,
                 start3,
@@ -780,6 +778,55 @@ public class QueryTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             Collection<Task> tasks = responseEntity.getBody().getContent();
             assertThat(tasks.size()).isEqualTo(2);
+            
+            //when
+            //set check date 1 hour after start2: we expect 1 task
+            checkDate=new Date(start2.getTime() + 3600000);
+            responseEntity = testRestTemplate.exchange(TASKS_URL+"?createdFrom="+sdf.format(checkDate),
+                                                 HttpMethod.GET,
+                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                 PAGED_TASKS_RESPONSE_TYPE
+                                                 );
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.size()).isEqualTo(1);
+            
+            //when
+            //set check date for createdTo 1 hour after start2: we expect 2 tasks
+            checkDate=new Date(start2.getTime() + 3600000);
+            responseEntity = testRestTemplate.exchange(TASKS_URL+"?createdTo="+sdf.format(checkDate),
+                                                 HttpMethod.GET,
+                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                 PAGED_TASKS_RESPONSE_TYPE
+                                                 );
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.size()).isEqualTo(2);
+            
+            //when
+            //set check date for createdFrom 1 hour before start2
+            //set check date for createdTo 1 hour after start2
+            //we expect 1 task
+            checkDate=new Date(start2.getTime() - 3600000);
+            Date checkDate1=new Date(start2.getTime() + 3600000);
+                    
+            responseEntity = testRestTemplate.exchange(TASKS_URL+"?createdFrom="+sdf.format(checkDate)+"&createdTo="+sdf.format(checkDate1),
+                                                 HttpMethod.GET,
+                                                 keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                 PAGED_TASKS_RESPONSE_TYPE
+                                                 );
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            tasks = responseEntity.getBody().getContent();
+            assertThat(tasks.size()).isEqualTo(1);
 
         });
 
