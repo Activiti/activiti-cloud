@@ -65,11 +65,12 @@ livenessProbe:
   initialDelaySeconds: 140
   periodSeconds: 15
   timeoutSeconds: 20
-  failureThreshold: 10
+  failureThreshold: 20
 readinessProbe:
-  initialDelaySeconds: 40
+  initialDelaySeconds: 30
   periodSeconds: 15
   timeoutSeconds: 20
+  failureThreshold: 20
 terminationGracePeriodSeconds: 20
 ingress:
   ## Set to true to enable ingress record generation
