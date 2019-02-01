@@ -17,7 +17,7 @@ public interface TaskRuntimeService extends BaseService {
     String TASKS_PATH = "/v1/tasks/";
 
     @RequestLine("POST /v1/tasks/{id}/claim")
-    @Headers("Content-Type: application/x-www-form-urlencoded")
+    @Headers("Content-Type: application/json")
     void claimTask(@Param("id") String id);
 
     @RequestLine("POST /v1/tasks/{id}/complete")
@@ -30,19 +30,18 @@ public interface TaskRuntimeService extends BaseService {
     CloudTask createTask(CreateTaskPayload task);
 
     @RequestLine("GET /v1/tasks/{id}")
+    @Headers("Accept: application/hal+json;charset=UTF-8")
     CloudTask getTask(@Param("id") String id);
 
     @RequestLine("DELETE /v1/tasks/{id}")
     void deleteTask(@Param("id") String id);
 
     @RequestLine("GET /v1/tasks/{parentTaskId}/subtasks")
+    @Headers("Accept: application/hal+json;charset=UTF-8")
     Resources<CloudTask> getSubtasks(@Param("parentTaskId") String parentTaskId);
 
     @RequestLine("GET /v1/tasks")
-    @Headers({
-            "Content-Type: application/json",
-            "Accept: application/hal+json;charset=UTF-8"
-    })
+    @Headers("Accept: application/hal+json;charset=UTF-8")
     PagedResources<CloudTask> getTasks();
 
     @RequestLine("POST /v1/tasks/{taskId}/variables")
