@@ -30,7 +30,7 @@ extraEnv: |
   #       key: expose-keycloak-service-key
 
 javaOpts:
-  xmx: 768m
+  xmx: 1024m
   xms: 512m
   other: -XX:+UnlockExperimentalVMOptions   -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
 image:
@@ -46,20 +46,22 @@ service:
     fabric8.io/expose: "false"
 resources:
   limits:
-    memory: 768Mi
+    cpu: 1
+    memory: 1024Mi
   requests:
-    cpu: 400m
-    memory: 768Mi
+    cpu: 500m
+    memory: 512Mi
 probePath: /actuator/health
 livenessProbe:
   initialDelaySeconds: 140
   periodSeconds: 15
-  successThreshold: 1
-  timeoutSeconds: 4
+  timeoutSeconds: 20
+  failureThreshold: 20
 readinessProbe:
+  initialDelaySeconds: 30
   periodSeconds: 15
-  successThreshold: 1
-  timeoutSeconds: 3
+  timeoutSeconds: 20
+  failureThreshold: 20
 terminationGracePeriodSeconds: 20
 
 #only needed when using sck8s
