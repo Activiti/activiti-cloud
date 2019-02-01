@@ -97,5 +97,10 @@ public class TaskQuerySteps {
         return taskQueryService.getRootTasksByProcessInstance(processInstanceId);
     }
     
+    @Step
+    public PagedResources<CloudTask> getStandaloneTasks(){
+        return taskQueryService.getStandaloneTasks();
+    }
+    
     
 }

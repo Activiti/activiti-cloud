@@ -1,4 +1,4 @@
-package org.activiti.cloud.acc.core.services.query;
+package org.activiti.cloud.acc.core.services.query; 
 
 import feign.Headers;
 import feign.Param;
@@ -33,4 +33,9 @@ public interface TaskQueryService extends BaseService {
     @RequestLine("GET /v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate,desc&sort=id,desc")
     @Headers("Content-Type: application/json")
     PagedResources<CloudTask> getRootTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
+    
+    @RequestLine("GET /v1/tasks?standalone=true&sort=createdDate,desc&sort=id,desc")
+    @Headers("Accept: application/hal+json;charset=UTF-8")
+    PagedResources<CloudTask> getStandaloneTasks();
+
 }
