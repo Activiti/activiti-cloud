@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 /**
  * Auditor implementation.
  */
-@Component
+@Component("auditorAware")
 public class AuditorAwareImpl implements AuditorAware<String> {
 
     private final SecurityManager securityManager;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2019 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.rest.client.service;
+package org.activiti.cloud.services.organization.entity;
 
-import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
+import org.activiti.cloud.organization.api.Extensions;
 
 /**
- * Model rest client service interface
+ * Jon to model extensions converter
  */
-public interface ModelReferenceService extends RestClientService<String, ModelReference, String> {
+public class ExtensionsJsonConverter extends JpaJsonConverter<Extensions> {
 
+    @Override
+    protected Class<Extensions> getEntityClass() {
+        return Extensions.class;
+    }
 }

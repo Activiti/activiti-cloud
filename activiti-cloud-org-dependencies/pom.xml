@@ -36,13 +36,6 @@
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.process.model</groupId>
-        <artifactId>activiti-cloud-process-model-dependencies</artifactId>
-        <version>${activiti-cloud-process-model-service.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
         <groupId>org.activiti.cloud.modeling</groupId>
         <artifactId>activiti-cloud-org-service-parent</artifactId>
         <version>${activiti-cloud-org-service.version}</version>
@@ -86,6 +79,21 @@
         <groupId>org.activiti.cloud.modeling</groupId>
         <artifactId>activiti-cloud-starter-org</artifactId>
         <version>${activiti-cloud-org-service.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.erosb</groupId>
+        <artifactId>everit-json-schema</artifactId>
+        <version>${everit-json-schema.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>${org.json.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-collections4</artifactId>
+        <version>${org.apache.common.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

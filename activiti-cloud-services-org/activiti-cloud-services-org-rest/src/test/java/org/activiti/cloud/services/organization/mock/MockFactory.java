@@ -22,13 +22,11 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.activiti.cloud.organization.api.Extensions;
 import org.activiti.cloud.organization.api.ProcessVariable;
-import org.activiti.cloud.services.organization.entity.ProjectEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
+import org.activiti.cloud.services.organization.entity.ProjectEntity;
 
 import static java.util.Collections.singletonMap;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
@@ -42,22 +40,35 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_T
 public class MockFactory {
 
     public static ProjectEntity project(String name) {
-        return new ProjectEntity(id(),
-                                 name);
+        return new ProjectEntity(name);
     }
 
-    public static ModelEntity processModel(String name) throws JsonProcessingException {
+    public static ModelEntity processModel(String name) {
         return processModelWithExtensions(name,
-                            null);
+                                          null);
+    }
+
+    public static ModelEntity processModel(ProjectEntity parentProject,
+                                           String name) {
+        ModelEntity model = processModel(name);
+        model.setProject(parentProject);
+        return model;
     }
 
     public static ModelEntity processModelWithExtensions(String name,
-                                           Extensions extensions) throws JsonProcessingException {
-        ModelEntity model = new ModelEntity(id(),
-                                            name,
+                                                         Extensions extensions) {
+        return processModelWithExtensions(null,
+                                          name,
+                                          extensions);
+    }
+
+    public static ModelEntity processModelWithExtensions(ProjectEntity parentProject,
+                                                         String name,
+                                                         Extensions extensions) {
+        ModelEntity model = new ModelEntity(name,
                                             PROCESS);
+        model.setProject(parentProject);
         model.setExtensions(extensions);
-        model.getData().setExtensions(new ObjectMapper().writeValueAsString(extensions));
         return model;
     }
 
@@ -70,14 +81,40 @@ public class MockFactory {
 
     public static ModelEntity processModelWithContent(ProjectEntity project,
                                                       String name,
+                                                      byte[] content) {
+        return processModelWithContent(project,
+                                       name,
+                                       new String(content));
+    }
+
+    public static ModelEntity processModelWithContent(ProjectEntity project,
+                                                      String name,
                                                       String content) {
-        ModelEntity processModel = new ModelEntity(id(),
-                                                   name,
-                                                   PROCESS);
+        return processModelWithContent(project,
+                                       name,
+                                       null,
+                                       content);
+    }
+
+    public static ModelEntity processModelWithContent(ProjectEntity project,
+                                                      String name,
+                                                      Extensions extensions,
+                                                      byte[] content) {
+        return processModelWithContent(project,
+                                       name,
+                                       extensions,
+                                       new String(content));
+    }
+
+    public static ModelEntity processModelWithContent(ProjectEntity project,
+                                                      String name,
+                                                      Extensions extensions,
+                                                      String content) {
+        ModelEntity processModel = processModel(name);
         processModel.setProject(project);
+        processModel.setExtensions(extensions);
         processModel.setContentType(CONTENT_TYPE_XML);
         processModel.setContent(content);
-        processModel.setVersion("0.0.1");
         return processModel;
     }
 
