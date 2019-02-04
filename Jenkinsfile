@@ -55,7 +55,9 @@ pipeline {
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
 
             dir ("./charts/$APP_NAME") {
-              sh "make tag"
+              retry(5) {  
+                sh "make tag"
+              }
             }
             sh 'mvn clean deploy'
 
