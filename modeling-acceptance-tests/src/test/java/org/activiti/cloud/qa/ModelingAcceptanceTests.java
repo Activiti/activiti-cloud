@@ -23,7 +23,7 @@ public class ModelingAcceptanceTests extends SerenityStories {
     //TODO: We need this for now to pick up classes from the classpath
     //TODO: It won't be necessary once the ProcessInstanceTasks,RuntimeLifeCycleActions and Task classes are part of core (operations and assertions)
     protected String getRootPackage() {
-        return "org.activiti.cloud.qa";
+        return "org.activiti.cloud";
     }
 
 }
