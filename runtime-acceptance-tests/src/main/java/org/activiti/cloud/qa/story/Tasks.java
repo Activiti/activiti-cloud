@@ -234,21 +234,28 @@ public class Tasks {
         auditSteps.checkTaskUpdatedEvent(newTask.getId());
     }
     
-    @Then("the user will see $numberRootTasks root task for the process")
-    public void checkNumberOfRootTasks(Integer numberRootTasks){
+    @Then("the user will see only root tasks when quering for root tasks")
+    public void checkRootTasks(){
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
         Collection <CloudTask> rootTasksCollection = taskQuerySteps.getRootTasksByProcessInstance(processInstanceId).getContent();
 
         assertThat(rootTasksCollection).isNotNull();
-        assertThat(rootTasksCollection.size()).isEqualTo(numberRootTasks);
+        assertThat(rootTasksCollection).isNotEmpty();
+        
+        rootTasksCollection.forEach(
+                task -> assertThat(task.getParentTaskId()).isNull()
+        );
     }
     
-    @Then("the user will see $numberOfTasks standalone tasks")
-    public void checkNumberOfStandaloneTasks(Integer numberOfTasks){
+    @Then("the user will see only standalone tasks when quering for standalone tasks")
+    public void checkStandaloneTasks(){
         Collection <CloudTask> standaloneTasksCollection = taskQuerySteps.getStandaloneTasks().getContent();
 
         assertThat(standaloneTasksCollection).isNotNull();
-        assertThat(standaloneTasksCollection.size()).isEqualTo(numberOfTasks);
+        assertThat(standaloneTasksCollection).isNotEmpty();
+        standaloneTasksCollection.forEach(
+                task -> assertThat(task.getProcessInstanceId()).isNull()
+        );
     }
    
 }
