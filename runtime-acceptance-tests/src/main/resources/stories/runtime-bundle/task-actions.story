@@ -132,3 +132,9 @@ When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SIN
 And the user completes the task
 Then the task has the completion fields set
 
+Scenario: check standalone tasks query
+Given the user is authenticated as testuser
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
+And the user claims the task
+And the user creates a standalone task
+Then the user will see 1 standalone tasks
