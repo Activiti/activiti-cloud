@@ -98,7 +98,7 @@ public class ModelingProjects {
 
     @When("the user export the project")
     public void exportProject() throws IOException {
-        modelingProjectsSteps.exportCurrentProject();
+        modelingProjectsSteps.checkCurrentProjectExport();
     }
 
     @Given("an project '$projectName' with $modelType model '$modelName'")
@@ -138,9 +138,8 @@ public class ModelingProjects {
     }
 
     @Then("the project cannot be exported due to validation errors")
-    @ExpectRestError(statusCode = SC_BAD_REQUEST, value = "Validation errors found in project's models")
     public void checkCurrentProjectExportFailsOnValidation() throws IOException {
-        modelingProjectsSteps.exportCurrentProject();
+        modelingProjectsSteps.checkCurrentProjectExportFails("Validation errors found in project's models");
     }
 
     private ModelType getModelType(String modelType) {

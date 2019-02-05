@@ -18,6 +18,7 @@ package org.activiti.cloud.qa.steps;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,6 +32,7 @@ import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
 import org.activiti.cloud.qa.service.ModelingProjectsService;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -38,6 +40,7 @@ import org.springframework.hateoas.Resource;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import static org.activiti.cloud.services.test.asserts.AssertFileContent.assertThatFileContent;
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -104,15 +107,26 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     }
 
     @Step
-    public void exportCurrentProject() throws IOException {
+    public void checkCurrentProjectExport() throws IOException {
+        Response response = exportCurrentProject();
+        assertThat(response.status()).isEqualTo(SC_OK);
+        modelingContextHandler.setCurrentModelingFile(toFileContent(response));
+    }
+
+    @Step
+    public void checkCurrentProjectExportFails(String errorMessage) throws IOException {
+        Response response = exportCurrentProject();
+        assertThat(response.status()).isEqualTo(SC_BAD_REQUEST);
+        assertThat(IOUtils.toString(response.body().asInputStream(),
+                                    StandardCharsets.UTF_8)).contains(errorMessage);
+    }
+
+    private Response exportCurrentProject() {
         Resource<Project> currentProject = checkAndGetCurrentContext(Project.class);
         Link exportLink = currentProject.getLink("export");
         assertThat(exportLink).isNotNull();
-        Response response = modelingProjectService.exportProjectByUri(exportLink.getHref().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()));
-
-        if (response.status() == SC_OK) {
-            modelingContextHandler.setCurrentModelingFile(toFileContent(response));
-        }
+        return modelingProjectService.exportProjectByUri(exportLink.getHref().replace("http://activiti-cloud-modeling-backend",
+                                                                                      config.getModelingUrl()));
     }
 
     @Step
