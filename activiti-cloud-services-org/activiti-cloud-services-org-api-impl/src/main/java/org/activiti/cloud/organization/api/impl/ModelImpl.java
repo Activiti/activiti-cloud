@@ -125,7 +125,6 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
         return version;
     }
 
-    @Override
     public void setVersion(String version) {
         this.version = version;
     }

@@ -16,21 +16,25 @@
 
 package org.activiti.cloud.services.organization.jpa.config;
 
+import org.activiti.cloud.services.organization.jpa.version.ExtendedJpaRepositoryFactoryBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * Organization Test Configuration
  */
-@EnableAutoConfiguration
 @ComponentScan("org.activiti.cloud")
-@EnableFeignClients("org.activiti.cloud.organization.core.rest.client.feign")
-@EnableJpaRepositories("org.activiti.cloud.services.organization.jpa")
+@ComponentScan("org.activiti")
+@EnableJpaRepositories(
+        basePackages = {"org.activiti.cloud.services.organization.jpa"},
+        repositoryFactoryBeanClass = ExtendedJpaRepositoryFactoryBean.class)
+@EnableJpaAuditing(auditorAwareRef = "auditorAware")
 @EntityScan("org.activiti.cloud.services.organization.entity")
 @SpringBootApplication
 public class OrganizationJpaApplication {

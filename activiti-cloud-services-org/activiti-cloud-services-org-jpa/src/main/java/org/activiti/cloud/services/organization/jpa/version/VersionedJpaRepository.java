@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2019 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.core.rest.client.feign;
+package org.activiti.cloud.services.organization.jpa.version;
 
-import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
-import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.NoRepositoryBean;
 
 /**
- * Feign client for process model REST service
+ * Custom JPA Repository for version entities
  */
-@FeignClient(url = "#{'${activiti.cloud.modeling.url:activiti-cloud-modeling}'}",
-        name = "activiti-cloud-modeling",
-        path = "/v1/process-models")
-public interface ProcessModelReferenceService extends BaseModelService<ModelReference> {
+@NoRepositoryBean
+public interface VersionedJpaRepository<T extends VersionedEntity, K, V extends VersionEntity>
+        extends JpaRepository<T, K> {
 
 }

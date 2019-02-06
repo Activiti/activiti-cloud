@@ -42,9 +42,12 @@
   </repositories>
   <properties>
     <activiti-cloud-modeling-build.version>7.0.7</activiti-cloud-modeling-build.version>
+    <activiti-dependencies.version>7.0.99</activiti-dependencies.version>
     <activiti-cloud-service-common.version>7.0.83</activiti-cloud-service-common.version>
-    <activiti-cloud-process-model-service.version>7.0.68</activiti-cloud-process-model-service.version>
     <activiti-cloud-org-service.version>${project.version}</activiti-cloud-org-service.version>
+    <everit-json-schema.version>1.11.0</everit-json-schema.version>
+    <org.json.version>20180813</org.json.version>
+    <org.apache.common.version>4.1</org.apache.common.version>
   </properties>
 
   <dependencyManagement>
@@ -55,7 +58,14 @@
         <version>${activiti-cloud-modeling-build.version}</version>
         <scope>import</scope>
         <type>pom</type>       
-      </dependency>               
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.dependencies</groupId>
+        <artifactId>activiti-dependencies</artifactId>
+        <version>${activiti-dependencies.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -70,12 +80,6 @@
       <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-service-common-dependencies</artifactId>
       <version>${activiti-cloud-service-common.version}</version>
-      <type>pom</type>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud.process.model</groupId>
-      <artifactId>activiti-cloud-process-model-dependencies</artifactId>
-      <version>${activiti-cloud-process-model-service.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>
