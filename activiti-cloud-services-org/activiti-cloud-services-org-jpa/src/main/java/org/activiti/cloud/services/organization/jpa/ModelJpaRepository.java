@@ -22,19 +22,14 @@ import java.util.UUID;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.activiti.cloud.services.organization.entity.ProjectEntity;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
-import org.activiti.cloud.services.organization.entity.ModelEntityHandler;
+import org.activiti.cloud.services.organization.entity.ModelVersionEntity;
+import org.activiti.cloud.services.organization.entity.ProjectEntity;
+import org.activiti.cloud.services.organization.jpa.version.VersionedJpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-
-import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.createModelReference;
-import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.deleteModelReference;
-import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.loadFullModelReference;
-import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.loadModelReference;
-import static org.activiti.cloud.services.organization.entity.ModelEntityHandler.updateModelReference;
+import org.springframework.stereotype.Repository;
 
 /**
  * JPA Repository for {@link ModelEntity} entity
@@ -43,7 +38,7 @@ import static org.activiti.cloud.services.organization.entity.ModelEntityHandler
         collectionResourceRel = "models",
         itemResourceRel = "models",
         exported = false)
-public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
+public interface ModelJpaRepository extends VersionedJpaRepository<ModelEntity, String, ModelVersionEntity>,
                                             ModelRepository<ProjectEntity, ModelEntity> {
 
     Page<ModelEntity> findAllByProjectIdAndTypeEquals(String projectId,
@@ -54,14 +49,14 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
     default Page<ModelEntity> getModels(ProjectEntity project,
                                         ModelType modelTypeFilter,
                                         Pageable pageable) {
-        return loadModelReference(findAllByProjectIdAndTypeEquals(project.getId(),
-                                                                  modelTypeFilter.getName(),
-                                                                  pageable));
+        return findAllByProjectIdAndTypeEquals(project.getId(),
+                                               modelTypeFilter.getName(),
+                                               pageable);
     }
 
     @Override
     default Optional<ModelEntity> findModelById(String id) {
-        return findById(id).map(ModelEntityHandler::loadFullModelReference);
+        return findById(id);
     }
 
     @Override
@@ -78,11 +73,7 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
 
     @Override
     default ModelEntity createModel(ModelEntity model) {
-        if (model.getId() == null) {
-            model.setId(UUID.randomUUID().toString());
-        }
-        createModelReference(model);
-        return loadFullModelReference(save(model));
+        return save(model);
     }
 
     @Override
@@ -90,20 +81,17 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String>,
                                     ModelEntity newModel) {
         modelToBeUpdated.setName(newModel.getName());
         modelToBeUpdated.setExtensions(newModel.getExtensions());
-        updateModelReference(modelToBeUpdated);
-        return loadFullModelReference(save(modelToBeUpdated));
+        return save(modelToBeUpdated);
     }
 
     @Override
     default ModelEntity updateModelContent(ModelEntity modelToBeUpdated,
                                            FileContent fileContent) {
-        updateModelReference(modelToBeUpdated);
-        return loadFullModelReference(save(modelToBeUpdated));
+        return save(modelToBeUpdated);
     }
 
     @Override
     default void deleteModel(ModelEntity model) {
-        deleteModelReference(model);
         delete(model);
     }
 

@@ -41,8 +41,6 @@ public interface Model<A extends Project, U> extends Auditable<U> {
 
     String getVersion();
 
-    void setVersion(String version);
-
     String getContentType();
 
     void setContentType(String contentType);

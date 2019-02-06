@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.stereotype.Repository;
 
 /**
  * JPA Repository for {@link ProjectEntity} entity
@@ -48,9 +49,6 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Strin
 
     @Override
     default ProjectEntity createProject(ProjectEntity project) {
-        if (project.getId() == null) {
-            project.setId(UUID.randomUUID().toString());
-        }
         return save(project);
     }
 

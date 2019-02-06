@@ -16,10 +16,16 @@
 
 package org.activiti.cloud.services.organization.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,8 +34,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.activiti.cloud.organization.api.Extensions;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.core.rest.client.model.ModelReference;
 import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
+import org.activiti.cloud.services.organization.jpa.version.VersionedEntity;
+import org.hibernate.annotations.GenericGenerator;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
@@ -39,34 +46,37 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Entity(name = "Model")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ModelEntity extends AuditableEntity<String> implements Model<ProjectEntity, String> {
+public class ModelEntity extends AuditableEntity<String> implements Model<ProjectEntity, String>,
+                                                                    VersionedEntity<ModelVersionEntity> {
 
     @Id
+    @GeneratedValue(generator = "system-uuid")
+    @GenericGenerator(name = "system-uuid", strategy = "uuid")
     private String id;
 
     @ManyToOne
+    @JsonIgnore
     private ProjectEntity project;
+
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<ModelVersionEntity> versions = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonIgnore
+    private ModelVersionEntity latestVersion = new ModelVersionEntity();
 
     private String type;
 
-    @Transient
-    @JsonIgnore
-    private ModelReference data;
-
-    @Transient
-    private Extensions extensions;
+    private String name;
 
     public ModelEntity() { // for JPA
-        this.data = new ModelReference();
     }
 
-    public ModelEntity(String id,
-                       String name,
+    public ModelEntity(String name,
                        String type) {
-        this.id = id;
+        this.name = name;
         this.type = type;
-        this.data = new ModelReference(id,
-                                       name);
     }
 
     @Override
@@ -77,17 +87,16 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     @Override
     public void setId(String id) {
         this.id = id;
-        data.setModelId(id);
     }
 
     @Override
     public String getName() {
-        return data.getName();
+        return name;
     }
 
     @Override
     public void setName(String name) {
-        data.setName(name);
+        this.name = name;
     }
 
     @Override
@@ -100,16 +109,7 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
         this.type = type;
     }
 
-    public ModelReference getData() {
-        return data;
-    }
-
-    public void setData(ModelReference data) {
-        this.data = data;
-    }
-
     @Override
-    @JsonIgnore
     public ProjectEntity getProject() {
         return project;
     }
@@ -127,45 +127,60 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
                 .orElse(null);
     }
 
+    @Transient
     @Override
     public String getVersion() {
-        return data.getVersion();
-    }
-
-    @Override
-    public void setVersion(String version) {
-        data.setVersion(version);
+        return latestVersion.getVersion();
     }
 
     @Override
     @JsonIgnore
     public String getContentType() {
-        return data.getContentType();
+        return latestVersion.getContentType();
     }
 
     @Override
     public void setContentType(String contentType) {
-        data.setContentType(contentType);
+        latestVersion.setContentType(contentType);
     }
 
     @Override
     @JsonIgnore
     public String getContent() {
-        return data.getContent();
+        return latestVersion.getContent();
     }
 
     @Override
     public void setContent(String content) {
-        data.setContent(content);
+        latestVersion.setContent(content);
     }
 
     @Override
     public Extensions getExtensions() {
-        return extensions;
+        return latestVersion.getExtensions();
     }
 
     @Override
     public void setExtensions(Extensions extensions) {
-        this.extensions = extensions;
+        latestVersion.setExtensions(extensions);
+    }
+
+    @Override
+    public List<ModelVersionEntity> getVersions() {
+        return versions;
+    }
+
+    public void setVersions(List<ModelVersionEntity> versions) {
+        this.versions = versions;
+    }
+
+    @Override
+    public void setLatestVersion(ModelVersionEntity latestVersion) {
+        this.latestVersion = latestVersion;
+    }
+
+    @Override
+    public ModelVersionEntity getLatestVersion() {
+        return latestVersion;
     }
 }

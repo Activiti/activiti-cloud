@@ -22,19 +22,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.activiti.cloud.services.organization.jpa.version.ExtendedJpaRepositoryFactoryBean;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @EnableAutoConfiguration
-@ComponentScan({"org.activiti.cloud.organization", "org.activiti.cloud.services.organization" })
-@EnableFeignClients("org.activiti.cloud.organization.core.rest.client.feign")
-@EnableJpaRepositories("org.activiti.cloud.services.organization.jpa")
+@ComponentScan({"org.activiti.cloud.organization", "org.activiti.cloud.services.organization"})
+@EnableJpaRepositories(
+        basePackages = {"org.activiti.cloud.services.organization.jpa"},
+        repositoryFactoryBeanClass = ExtendedJpaRepositoryFactoryBean.class)
+@EnableJpaAuditing(auditorAwareRef = "auditorAware")
 @EntityScan("org.activiti.cloud.services.organization.entity")
 @Inherited
 @EnableDiscoveryClient

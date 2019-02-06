@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2019 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.activiti.cloud.organization.api;
 
-package org.activiti.cloud.organization;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+/**
+ * Json based model type
+ */
+public abstract class JsonModelType implements ModelType {
 
-@SpringBootApplication
-@EnableActivitiOrganization
-@ComponentScan({"org.activiti.cloud"})
-public class Application {
+    @Override
+    public String getContentFileExtension() {
+        return JSON;
+    }
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class,
-                              args);
+    @Override
+    public String[] getAllowedContentFileExtension() {
+        return new String[]{JSON};
     }
 }

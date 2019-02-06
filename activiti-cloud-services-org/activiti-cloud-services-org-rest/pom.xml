@@ -186,23 +186,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-contract-verifier</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud.process.model</groupId>
-      <artifactId>activiti-cloud-services-process-model-rest</artifactId>
-      <version>${activiti-cloud-process-model-service.version}</version>
-      <classifier>stubs</classifier>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy</artifactId>
       <scope>test</scope>

@@ -22,14 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidator;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.organization.core.error.ImportModelException;
 import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
@@ -126,7 +125,6 @@ public class ModelService {
                                   String name) {
         try {
             Model model = (Model) modelRepository.getModelType().newInstance();
-            model.setId(UUID.randomUUID().toString());
             model.setType(type);
             model.setName(name);
             return model;

@@ -18,6 +18,7 @@ package org.activiti.cloud.services.organization.entity;
 
 import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
+import org.hibernate.annotations.GenericGenerator;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
@@ -42,7 +44,8 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     private List<ModelEntity> models;
 
     @Id
-    //TODO: to auto-generate the uuid
+    @GeneratedValue(generator = "system-uuid")
+    @GenericGenerator(name = "system-uuid", strategy = "uuid")
     private String id;
 
     private String name;
@@ -50,9 +53,7 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     public ProjectEntity() {  // for JPA
     }
 
-    public ProjectEntity(String id,
-                         String name) {
-        this.id = id;
+    public ProjectEntity(String name) {
         this.name = name;
     }
 

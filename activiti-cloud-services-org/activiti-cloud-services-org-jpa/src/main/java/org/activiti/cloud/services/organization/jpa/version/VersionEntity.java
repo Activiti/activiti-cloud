@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2019 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization;
+package org.activiti.cloud.services.organization.jpa.version;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+/**
+ * Interface for version entity
+ */
+public interface VersionEntity<T extends VersionedEntity> {
 
-@SpringBootApplication
-@EnableActivitiOrganization
-@ComponentScan({"org.activiti.cloud"})
-public class Application {
+    void setVersionIdentifier(VersionIdentifier versionIdentifier);
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class,
-                              args);
-    }
+    void setVersionedEntity(T versionedEntity);
+
+    String getVersion();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2019 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.activiti.cloud.organization.api;
 
-package org.activiti.cloud.organization;
+import org.springframework.stereotype.Component;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+/**
+ * Connector model type
+ */
+@Component
+public class ConnectorModelType extends JsonModelType {
 
-@SpringBootApplication
-@EnableActivitiOrganization
-@ComponentScan({"org.activiti.cloud"})
-public class Application {
+    public static final String NAME = "CONNECTOR";
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class,
-                              args);
+    public static final String FOLDER_NAME = "connectors";
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
+    @Override
+    public String getFolderName() {
+        return FOLDER_NAME;
     }
 }
