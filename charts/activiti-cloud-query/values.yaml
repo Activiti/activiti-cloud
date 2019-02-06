@@ -28,8 +28,8 @@ db:
   ddlAuto: update
 
 javaOpts:
-  xmx: 1280m
-  xms: 768m
+  xmx: 2048m
+  xms: 1024m
   other: -XX:+UnlockExperimentalVMOptions   -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
 
 querypostgresql:
@@ -58,21 +58,21 @@ service:
 resources:
   limits:
     cpu: 1
-    memory: 1280Mi
+    memory: 2048Mi
   requests:
-    cpu: 500m
-    memory: 768Mi
+    cpu: 800m
+    memory: 1024Mi
 probePath: /actuator/health
 livenessProbe:
   initialDelaySeconds: 140
   periodSeconds: 15
   timeoutSeconds: 20
-  failureThreshold: 20
+  failureThreshold: 40
 readinessProbe:
-  initialDelaySeconds: 30
-  periodSeconds: 15
-  timeoutSeconds: 20
-  failureThreshold: 20
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 40
 terminationGracePeriodSeconds: 20
 ingress:
   ## Set to true to enable ingress record generation
