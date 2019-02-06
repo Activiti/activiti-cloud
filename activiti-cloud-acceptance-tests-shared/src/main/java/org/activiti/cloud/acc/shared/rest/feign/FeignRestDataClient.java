@@ -37,7 +37,7 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
 
     @RequestLine("POST")
     @Headers("Content-Type: application/json")
-    void create(R resource);
+    Resource<R> create(R resource);
 
     @RequestLine("GET /{id}")
     @Headers("Content-Type: application/json")
@@ -84,9 +84,9 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
         return buildByUri(uri).get();
     }
 
-    default void createByUri(String uri,
+    default Resource<R> createByUri(String uri,
                              R resource) {
-        buildByUri(uri).create(resource);
+        return buildByUri(uri).create(resource);
     }
 
     default void updateByUri(String uri,
