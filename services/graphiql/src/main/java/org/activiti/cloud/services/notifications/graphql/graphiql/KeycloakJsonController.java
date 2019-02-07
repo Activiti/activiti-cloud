@@ -51,7 +51,7 @@ public class KeycloakJsonController {
         // 
     }
     
-    @GetMapping(value="keycloak.json",  produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value="graphiql/keycloak.json",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String,Object>> get() {
         Map<String, Object> values = new LinkedHashMap<>();
         

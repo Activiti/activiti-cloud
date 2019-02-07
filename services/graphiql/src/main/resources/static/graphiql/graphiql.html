@@ -26,26 +26,26 @@
       If you do not want to rely on a CDN, you can host these files locally or
       include them directly in your favored resource bunder.
       -->
-    <script src="vendor/cdn.jsdelivr.net/es6-promise/4.0.5/es6-promise.auto.min.js"></script>
-    <script src="vendor/cdn.jsdelivr.net/fetch/0.9.0/fetch.min.js"></script>
-    <script src="vendor/cdn.jsdelivr.net/react/15.4.2/react.min.js"></script>
-    <script src="vendor/cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
+    <script src="graphiql/vendor/cdn.jsdelivr.net/es6-promise/4.0.5/es6-promise.auto.min.js"></script>
+    <script src="graphiql/vendor/cdn.jsdelivr.net/fetch/0.9.0/fetch.min.js"></script>
+    <script src="graphiql/vendor/cdn.jsdelivr.net/react/15.4.2/react.min.js"></script>
+    <script src="graphiql/vendor/cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
     <!--
       These two files can be found in the npm module, however you may wish to
       copy them directly into your environment, or perhaps include them in your
       favored resource bundler.
       -->
-    <link rel="stylesheet" href="graphiql.css" />
-    <script src="config.js"></script>
-    <script src="graphiql.js"></script>
-    <script src="vendor/unpkg.com/subscriptions-transport-ws@0.8.3/browser/client.js"></script>
-    <script src="vendor/unpkg.com/graphiql-subscriptions-fetcher@0.0.2/browser/client.js"></script>
-    <script src="vendor/keycloak/auth/js/keycloak.js"></script>
+    <link rel="stylesheet" href="graphiql/graphiql.css" />
+    <script src="graphiql/config.js"></script>
+    <script src="graphiql/graphiql.js"></script>
+    <script src="graphiql/vendor/unpkg.com/subscriptions-transport-ws@0.8.3/browser/client.js"></script>
+    <script src="graphiql/vendor/unpkg.com/graphiql-subscriptions-fetcher@0.0.2/browser/client.js"></script>
+    <script src="graphiql/vendor/keycloak/auth/js/keycloak.js"></script>
   </head>
   <body>
     <div id="graphiql">Loading...</div>
     <script>
-      var keycloak = Keycloak('keycloak.json');
+      var keycloak = Keycloak('graphiql/keycloak.json');
 
       // Ensures string values are safe to be used within a <script> tag.
       function safeSerialize(data) {
@@ -158,7 +158,7 @@
         	  console.log('Loaded User Profile:', userProfile)
         	  
         	  // Let's reset ingress cookie on load
-        	  deleteCookie('activiti-cloud-notifications-graphql');
+        	  deleteCookie('activiti-cloud-notifications-graphql-route');
         	  
               getGraphqlApi().then(function(config) {
                   // Defines a GraphQL fetcher using the fetch API. You're not required to
