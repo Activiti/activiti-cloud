@@ -47,6 +47,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
+import static org.apache.commons.lang3.StringUtils.removeEnd;
 
 /**
  * Business logic related to {@link Model} entities
@@ -197,8 +198,9 @@ public class ModelService {
                                  FileContent fileContent) {
         Model model = jsonConverter.tryConvertToEntity((fileContent.getFileContent()))
                 .orElseThrow(() -> new ImportModelException("Cannot convert json file content to model: " + fileContent));
-        model.setName(removeExtension(fileContent.getFilename(),
-                                      JSON));
+        model.setName(removeEnd(removeExtension(fileContent.getFilename(),
+                                                JSON),
+                                modelType.getMetadataFileSuffix()));
         model.setType(modelType.getName());
 
         return createModel(project,

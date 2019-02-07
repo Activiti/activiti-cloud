@@ -73,6 +73,7 @@ public interface ModelJpaRepository extends VersionedJpaRepository<ModelEntity, 
 
     @Override
     default ModelEntity createModel(ModelEntity model) {
+        model.setId(null);
         return save(model);
     }
 
