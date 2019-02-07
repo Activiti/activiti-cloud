@@ -67,11 +67,13 @@ livenessProbe:
   initialDelaySeconds: 140
   periodSeconds: 15
   timeoutSeconds: 20
+  successThreshold: 1
   failureThreshold: 40
 readinessProbe:
   initialDelaySeconds: 20
   periodSeconds: 10
   timeoutSeconds: 10
+  successThreshold: 1
   failureThreshold: 40
 terminationGracePeriodSeconds: 20
 ingress:
