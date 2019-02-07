@@ -33,7 +33,6 @@ import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
-import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.ResumeProcessPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
@@ -151,8 +150,8 @@ public class CommandEndpointIT {
 
         setTaskVariables(task);
 
-        setAndRemoveProcessVariables(processInstanceId);
-
+        setProcessVariables(processInstanceId);
+        
         claimTask(task);
 
         releaseTask(task);
@@ -230,7 +229,7 @@ public class CommandEndpointIT {
                                 "v1"));
     }
 
-    private void setAndRemoveProcessVariables(String proInstanceId) {
+    private void setProcessVariables(String proInstanceId) {
         Map<String, Object> variables = Collections.singletonMap("procVar",
                                                                  "v2");
         SetProcessVariablesPayload setProcessVariables = ProcessPayloadBuilder.setVariables().withProcessInstanceId(proInstanceId).withVariables(variables).build();
@@ -246,22 +245,6 @@ public class CommandEndpointIT {
                             VariableInstance::getValue)
                 .contains(tuple("procVar",
                                 "v2"));
-
-        RemoveProcessVariablesPayload removeProcessVariables = ProcessPayloadBuilder.removeVariables()
-                .withProcessInstanceId(proInstanceId)
-                .withVariableNames(Collections.singletonList("procVar")).build();
-
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(removeProcessVariables).setHeader("cmdId",
-                                                                                                       removeProcessVariables.getId()).build());
-
-        await("Variable to be removed").untilTrue(streamHandler.getRemoveProcessVariablesAck());
-
-        retrievedVars = processInstanceRestTemplate.getVariables(proInstanceId);
-        assertThat(retrievedVars.getBody().getContent())
-                .extracting(VariableInstance::getName,
-                            VariableInstance::getValue)
-                .doesNotContain(tuple("procVar",
-                                      "v2"));
     }
 
     private void claimTask(Task task) {

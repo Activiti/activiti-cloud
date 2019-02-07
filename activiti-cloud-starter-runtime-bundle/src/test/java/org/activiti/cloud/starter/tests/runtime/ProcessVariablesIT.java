@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,35 +31,24 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
-import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
-import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
-import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
+import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -65,13 +57,13 @@ import static org.awaitility.Awaitility.await;
 public class ProcessVariablesIT {
 
     @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
+    
+    @Autowired
+    private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
@@ -84,7 +76,7 @@ public class ProcessVariablesIT {
     public void setUp() {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
 
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(),
@@ -157,7 +149,7 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    public void shouldDeleteProcessVariables() {
+    public void adminShouldDeleteProcessVariables() {
         //given
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName",
@@ -166,21 +158,16 @@ public class ProcessVariablesIT {
                       "Silver");
         variables.put("age",
                       19);
+        
+        List<String> variablesNames = new ArrayList<>(variables.keySet());
+        
         ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
                                                                                                       variables);
 
-        List<String> variablesNames = new ArrayList<>(variables.keySet());
-
-        HttpEntity<RemoveProcessVariablesPayload> entity = new HttpEntity<>(ProcessPayloadBuilder
-                                                                                    .removeVariables().withProcessInstanceId(startResponse.getBody().getId()).withVariableNames(variablesNames).build());
-
-        //when
-        ResponseEntity<Resource<Map<String, Object>>> variablesResponse = restTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + startResponse.getBody().getId() + "/variables",
-                                                                                                HttpMethod.DELETE,
-                                                                                                entity,
-                                                                                                new ParameterizedTypeReference<Resource<Map<String, Object>>>() {
-                                                                                                });
-
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        
+        ResponseEntity<Void> variablesResponse= processInstanceRestTemplate.adminRemoveVariables(startResponse.getBody().getId(),variablesNames);
+        
         //then
         assertThat(variablesResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
@@ -248,12 +235,9 @@ public class ProcessVariablesIT {
 
         await().untilAsserted(() -> {
 
-            ResponseEntity<String> variablesEntity = restTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + startResponse.getBody().getId() + "/variables",
-                                                                           HttpMethod.GET,
-                                                                           null,
-                                                                           new ParameterizedTypeReference<String>() {
-                                                                           });
-            assertThat(variablesEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            ResponseEntity<String> variablesResponse = processInstanceRestTemplate.callGetVariablesWithErrorResponse(startResponse.getBody().getId());
+            assertThat(variablesResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            
         });
     }
 
@@ -292,14 +276,5 @@ public class ProcessVariablesIT {
                                              5,
                                              variableCollection)).isTrue();
         });
-    }
-
-    private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
-        };
-        return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL,
-                                     HttpMethod.GET,
-                                     null,
-                                     responseType);
     }
 }

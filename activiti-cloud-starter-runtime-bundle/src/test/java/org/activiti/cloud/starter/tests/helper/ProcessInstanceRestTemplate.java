@@ -147,12 +147,26 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<Resources<CloudVariableInstance>> getVariables(String processInstanceId) {
-        ResponseEntity<Resources<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(ProcessInstanceRestTemplate.PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
+        ResponseEntity<Resources<CloudVariableInstance>> responseEntity = getVariablesNoReplyCheck(processInstanceId);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+    
+    public ResponseEntity<Resources<CloudVariableInstance>> getVariablesNoReplyCheck(String processInstanceId) {
+        ResponseEntity<Resources<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
                                                                                                     HttpMethod.GET,
                                                                                                     null,
                                                                                                     new ParameterizedTypeReference<Resources<CloudVariableInstance>>() {
                                                                                                     });
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+    
+    public ResponseEntity<String> callGetVariablesWithErrorResponse(String processInstanceId) {
+        ResponseEntity<String> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
+                                                                                                    HttpMethod.GET,
+                                                                                                    null,
+                                                                                                    new ParameterizedTypeReference<String>() {
+                                                                                                    });
         return responseEntity;
     }
 
@@ -264,15 +278,15 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Void> removeVariables(String processId,
-                                                List<String> variableNames) {
+    public ResponseEntity<Void> adminRemoveVariables(String processId,
+                                                     List<String> variableNames) {
         RemoveProcessVariablesPayload removeProcessVariablesPayload = ProcessPayloadBuilder.removeVariables()
-                .withProcessInstanceId(processId).withVariableNames(variableNames).build();
+                .withVariableNames(variableNames).build();
 
         HttpEntity<RemoveProcessVariablesPayload> requestEntity = new HttpEntity<>(
                 removeProcessVariablesPayload,
                 null);
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processId + "/variables/",
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processId + "/variables/",
                                                                         HttpMethod.DELETE,
                                                                         requestEntity,
                                                                         new ParameterizedTypeReference<Void>() {

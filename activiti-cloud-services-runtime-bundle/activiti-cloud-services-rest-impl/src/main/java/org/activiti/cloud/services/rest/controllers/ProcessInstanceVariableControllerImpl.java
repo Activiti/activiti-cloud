@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
-import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
@@ -75,14 +74,6 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
                                              @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
         setProcessVariablesPayload.setProcessInstanceId(processInstanceId);
         processRuntime.setVariables(setProcessVariablesPayload);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
-                                                @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload) {
-        processRuntime.removeVariables(removeProcessVariablesPayload);
-
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

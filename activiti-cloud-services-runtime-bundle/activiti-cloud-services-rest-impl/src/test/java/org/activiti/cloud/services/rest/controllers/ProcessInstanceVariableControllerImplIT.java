@@ -16,6 +16,20 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
+import static org.activiti.alfresco.rest.docs.HALDocumentation.unpagedVariableFields;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,21 +62,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.unpagedVariableFields;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceVariableControllerImpl.class)
@@ -152,18 +151,4 @@ public class ProcessInstanceVariableControllerImplIT {
         verify(processRuntime).setVariables(any());
     }
 
-    @Test
-    public void deleteVariables() throws Exception {
-        this.mockMvc.perform(delete("/v1/process-instances/{processInstanceId}/variables",
-                                    PROCESS_INSTANCE_ID)
-                                     .accept(MediaTypes.HAL_JSON_VALUE)
-                                     .contentType(MediaType.APPLICATION_JSON)
-                                     .content(mapper.writeValueAsString(ProcessPayloadBuilder.removeVariables().withProcessInstanceId(PROCESS_INSTANCE_ID).withVariableNames(Arrays.asList("varName1",
-                                                                                                                                                                                           "varName2")).build())))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
-                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
-        verify(processRuntime).removeVariables(any());
-    }
 }
