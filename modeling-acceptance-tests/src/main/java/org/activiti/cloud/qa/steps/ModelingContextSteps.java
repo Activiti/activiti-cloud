@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
 
 import feign.Response;
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
-import org.activiti.cloud.qa.model.modeling.ModelingContextHandler;
-import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
 import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.activiti.cloud.acc.shared.rest.EnableDirtyContext;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
+import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
+import org.activiti.cloud.qa.model.modeling.ModelingContextHandler;
+import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,18 +56,15 @@ public abstract class ModelingContextSteps<M> {
     @Autowired
     private ModelingTestsConfigurationProperties config;
 
-    protected Resource<M> create(String id,
-                                 M m) {
-        Optional<String> uri = modelingContextHandler
+    protected Resource<M> create(M m) {
+        Resource<M> model = modelingContextHandler
                 .getCurrentModelingContext()
-                .flatMap(this::getRelUri);
-        if (uri.isPresent()) {
-            service().createByUri(uri.get().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()),
-                                  m);
-        } else {
-            service().create(m);
-        }
-        return dirty(service().findById(id));
+                .flatMap(this::getRelUri)
+                .map(uri -> service().createByUri(uri.replace("http://activiti-cloud-modeling-backend",
+                                                              config.getModelingUrl()),
+                                                  m))
+                .orElseGet(() -> service().create(m));
+        return dirty(model);
     }
 
     @Step
@@ -87,7 +84,8 @@ public abstract class ModelingContextSteps<M> {
                 .stream()
                 .filter(resource -> identifier.test(resource.getContent()))
                 .map(resource -> resource.getLink(REL_SELF))
-                .map(link -> link.getHref().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()))
+                .map(link -> link.getHref().replace("http://activiti-cloud-modeling-backend",
+                                                    config.getModelingUrl()))
                 .collect(Collectors.toList())
                 .forEach(service()::deleteByUri);
     }
@@ -118,7 +116,8 @@ public abstract class ModelingContextSteps<M> {
         modelingContextHandler
                 .getCurrentModelingContext()
                 .map(resource -> resource.getLink(REL_SELF))
-                .map(link -> link.getHref().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()))
+                .map(link -> link.getHref().replace("http://activiti-cloud-modeling-backend",
+                                                    config.getModelingUrl()))
                 .map(this::findByUri)
                 .ifPresent(modelingContextHandler::setCurrentModelingObject);
     }
@@ -177,8 +176,8 @@ public abstract class ModelingContextSteps<M> {
 
     protected Resource<M> dirty(Resource<M> resource) {
         dirtyContextHandler.dirty(resource.getLink("self").getHref()
-                .replace("http://activiti-cloud-modeling-backend",
-                        config.getModelingUrl()));
+                                          .replace("http://activiti-cloud-modeling-backend",
+                                                   config.getModelingUrl()));
         return resource;
     }
 
@@ -187,7 +186,8 @@ public abstract class ModelingContextSteps<M> {
     }
 
     protected PagedResources<Resource<M>> findAllByUri(String uri) {
-        String replacedURI = uri.replace("http://activiti-cloud-modeling-backend", config.getModelingUrl());
+        String replacedURI = uri.replace("http://activiti-cloud-modeling-backend",
+                                         config.getModelingUrl());
         return service().findAllByUri(replacedURI);
     }
 

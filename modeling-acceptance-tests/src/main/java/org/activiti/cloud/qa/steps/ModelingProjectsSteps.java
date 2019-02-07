@@ -20,13 +20,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.UUID;
 
 import feign.Response;
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
@@ -60,12 +59,9 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
 
     @Step
     public Resource<Project> create(String projectName) {
-        String id = UUID.randomUUID().toString();
         Project project = mock(Project.class);
-        doReturn(id).when(project).getId();
         doReturn(projectName).when(project).getName();
-        return create(id,
-                      project);
+        return create(project);
     }
 
     @Step
@@ -75,7 +71,8 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
         project.setName(newProjectName);
 
         modelingProjectService.updateByUri(currentContext.getLink(REL_SELF).getHref()
-                        .replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()),
+                                                   .replace("http://activiti-cloud-modeling-backend",
+                                                            config.getModelingUrl()),
                                            project);
     }
 
@@ -102,7 +99,8 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
         Link importModelLink = currentProject.getLink("import");
         assertThat(importModelLink).isNotNull();
 
-        return modelingProjectService.importProjectModelByUri(importModelLink.getHref().replace("http://activiti-cloud-modeling-backend", config.getModelingUrl()),
+        return modelingProjectService.importProjectModelByUri(importModelLink.getHref().replace("http://activiti-cloud-modeling-backend",
+                                                                                                config.getModelingUrl()),
                                                               file);
     }
 

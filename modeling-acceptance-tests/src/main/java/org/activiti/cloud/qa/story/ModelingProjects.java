@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.List;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.acc.shared.rest.error.ExpectRestError;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.qa.steps.ModelingModelsSteps;
@@ -35,7 +34,6 @@ import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.proj
 import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.projectsNamed;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsFile;
-import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 
 /**
  * Modeling projects scenarios

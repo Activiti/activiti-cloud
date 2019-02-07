@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
 /**
- * Modeling steps for process models, from models, ...
+ * Modeling steps for models
  */
 @EnableModelingContext
 public class ModelingModelsSteps extends ModelingContextSteps<Model> {
@@ -48,13 +48,10 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     @Step
     public Resource<Model> create(String modelName,
                                   String modelType) {
-        String id = UUID.randomUUID().toString();
         Model model = mock(Model.class);
-        doReturn(id).when(model).getId();
         doReturn(modelType.toUpperCase()).when(model).getType();
         doReturn(modelName).when(model).getName();
-        return create(id,
-                      model);
+        return create(model);
     }
 
     @Step
