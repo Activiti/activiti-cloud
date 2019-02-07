@@ -139,14 +139,14 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
                         .hasEntries(
                                 toJsonFilename(currentProject.getName()),
                                 modelType.getFolderName() + "/",
-                                modelType.getFolderName() + "/" + toJsonFilename(modelName),
+                                modelType.getFolderName() + "/" + toJsonFilename(modelName + modelType.getMetadataFileSuffix()),
                                 modelType.getFolderName() + "/" + setExtension(modelName,
                                                                                modelType.getContentFileExtension())
                         )
                         .hasJsonContentSatisfying(toJsonFilename(currentProject.getName()),
                                                   jsonContent -> jsonContent
                                                           .node("name").isEqualTo(currentProject.getName()))
-                        .hasJsonContentSatisfying(modelType.getFolderName() + "/" + toJsonFilename(modelName),
+                        .hasJsonContentSatisfying(modelType.getFolderName() + "/" + toJsonFilename(modelName + modelType.getMetadataFileSuffix()),
                                                   jsonContent -> jsonContent
                                                           .node("name").isEqualTo(modelName)));
     }
