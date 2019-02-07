@@ -16,7 +16,21 @@
 
 package org.activiti.services.connectors.channel;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Collections;
+import java.util.Map;
+
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
+import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
@@ -38,22 +52,16 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import java.util.Collections;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 public class ServiceTaskIntegrationResultEventHandlerTest {
 
     private static final String EXECUTION_ID = "execId";
     private static final String ENTITY_ID = "entityId";
     private static final String PROC_INST_ID = "procInstId";
     private static final String PROC_DEF_ID = "procDefId";
-
+    private static final String CLIENT_ID = "entityId";
+    private static final String CLIENT_NAME = "serviceTaskName";
+    private static final String CLIENT_TYPE = ServiceTask.class.getSimpleName();
+ 
     @InjectMocks
     private ServiceTaskIntegrationResultEventHandler handler;
 
@@ -168,6 +176,12 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         assertThat(event.getEntity().getId()).isEqualTo(ENTITY_ID);
         assertThat(event.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(event.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
+        
+        
+        assertThat(event.getEntity().getClientId()).isEqualTo(CLIENT_ID);
+        assertThat(event.getEntity().getClientName()).isEqualTo(CLIENT_NAME);
+        assertThat(event.getEntity().getClientType()).isEqualTo(CLIENT_TYPE);
+        
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(event);
     }
 
@@ -177,6 +191,10 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
         integrationContext.setProcessInstanceId(PROC_INST_ID);
         integrationContext.addOutBoundVariables(variables);
+        integrationContext.setClientId(CLIENT_ID);
+        integrationContext.setClientName(CLIENT_NAME);
+        integrationContext.setClientType(CLIENT_TYPE);
+        
         return integrationContext;
     }
 

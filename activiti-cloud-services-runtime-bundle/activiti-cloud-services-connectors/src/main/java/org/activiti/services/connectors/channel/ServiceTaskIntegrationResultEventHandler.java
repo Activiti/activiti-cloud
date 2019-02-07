@@ -16,6 +16,8 @@
 
 package org.activiti.services.connectors.channel;
 
+import java.util.Optional;
+
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -34,8 +36,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 @EnableBinding(ProcessEngineIntegrationChannels.class)
@@ -89,7 +89,7 @@ public class ServiceTaskIntegrationResultEventHandler {
             } else {
                 String message = "No task is in this RB is waiting for integration result with execution id `" +
                         integrationContextEntity.getExecutionId() +
-                        ", flow node id `" + integrationResult.getIntegrationContext().getActivityElementId() +
+                        ", flow node id `" + integrationResult.getIntegrationContext().getClientId() +
                         "`. The integration result for the integration context `" + integrationResult.getIntegrationContext().getId() + "` will be ignored.";
                 LOGGER.debug(message);
             }
