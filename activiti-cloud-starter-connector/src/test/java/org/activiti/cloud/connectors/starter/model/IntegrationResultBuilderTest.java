@@ -16,18 +16,18 @@
 
 package org.activiti.cloud.connectors.starter.model;
 
+import static org.activiti.test.Assertions.assertThat;
+
 import java.util.Collections;
 
-import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
+import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
-
-import static org.activiti.test.Assertions.assertThat;
 
 public class IntegrationResultBuilderTest {
 
@@ -45,7 +45,7 @@ public class IntegrationResultBuilderTest {
     public void shouldBuildIntegrationResultBasedOnInformationFromIntegrationRequest() throws Exception {
         //given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        integrationContext.setActivityElementId(ACTIVITY_ELEMENT_ID);
+        integrationContext.setClientId(ACTIVITY_ELEMENT_ID);
         integrationContext.setInBoundVariables(Collections.emptyMap());
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
         integrationContext.setProcessInstanceId(PROC_INST_ID);
@@ -66,7 +66,7 @@ public class IntegrationResultBuilderTest {
                 .hasIntegrationContext(integrationContext)
                 .hasIntegrationRequest(integrationRequestEvent);
         assertThat(integrationContext)
-                .hasActivityElementId(ACTIVITY_ELEMENT_ID)
+                .hasClientId(ACTIVITY_ELEMENT_ID)
                 .hasOutBoundVariables(Collections.singletonMap(VAR,
                                                                VALUE));
     }
@@ -75,7 +75,7 @@ public class IntegrationResultBuilderTest {
     public void shouldBuildMessageWithTargetApplicationHeader() throws Exception {
         //given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        integrationContext.setActivityElementId(ACTIVITY_ELEMENT_ID);
+        integrationContext.setClientId(ACTIVITY_ELEMENT_ID);
         integrationContext.setInBoundVariables(Collections.emptyMap());
         integrationContext.setProcessDefinitionId(PROC_DEF_ID);
         integrationContext.setProcessInstanceId(PROC_INST_ID);
