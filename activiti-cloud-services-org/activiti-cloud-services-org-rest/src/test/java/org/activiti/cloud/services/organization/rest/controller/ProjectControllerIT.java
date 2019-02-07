@@ -203,13 +203,13 @@ public class ProjectControllerIT {
                         "project-with-models.json",
                         "processes/",
                         "processes/process-model.bpmn20.xml",
-                        "processes/process-model.json")
+                        "processes/process-model-extensions.json")
                 .hasJsonContentSatisfying("project-with-models.json",
                                           jsonContent -> jsonContent
                                                   .node("name").isEqualTo("project-with-models"))
                 .hasContent("processes/process-model.bpmn20.xml",
                             resourceAsByteArray("process/x-19022.bpmn20.xml"))
-                .hasJsonContentSatisfying("processes/process-model.json",
+                .hasJsonContentSatisfying("processes/process-model-extensions.json",
                                           jsonContent -> jsonContent
                                                   .node("name").isEqualTo("process-model")
                                                   .node("type").isEqualTo("PROCESS")

@@ -135,9 +135,13 @@ public class ModelService {
 
     public FileContent getModelMetadataFileContent(Model model) {
         Model modelWithFullMetadata = findModelById(model.getId()).orElse(model);
-        return new FileContent(toJsonFilename(model.getName()),
+        return new FileContent(getMetadataFilename(model),
                                ContentTypeUtils.CONTENT_TYPE_JSON,
                                jsonConverter.convertToJsonBytes(modelWithFullMetadata));
+    }
+
+    public String getMetadataFilename(Model model) {
+        return toJsonFilename(model.getName() + findModelType(model).getMetadataFileSuffix());
     }
 
     public FileContent getModelContentFile(Model model) {

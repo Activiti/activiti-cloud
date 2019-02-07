@@ -28,4 +28,8 @@ public interface ModelType {
     String getContentFileExtension();
 
     String[] getAllowedContentFileExtension();
+
+    default String getMetadataFileSuffix() {
+        return "";
+    }
 }
