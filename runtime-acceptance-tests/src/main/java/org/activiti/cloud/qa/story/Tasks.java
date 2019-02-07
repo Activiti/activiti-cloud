@@ -28,6 +28,7 @@ import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.acc.core.steps.audit.AuditSteps;
 import org.activiti.cloud.acc.core.steps.audit.admin.AuditAdminSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
@@ -36,6 +37,7 @@ import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.TaskRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.admin.ProcessRuntimeAdminSteps;
+import org.activiti.cloud.acc.core.steps.runtime.admin.TaskRuntimeAdminSteps;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
@@ -48,12 +50,16 @@ public class Tasks {
     @Steps
     private TaskRuntimeBundleSteps taskRuntimeBundleSteps;
     @Steps
+    private TaskRuntimeAdminSteps taskRuntimeAdminSteps;
+    
+    @Steps
     private ProcessRuntimeAdminSteps processRuntimeAdminSteps;
 
     @Steps
     private ProcessQuerySteps processQuerySteps;
     @Steps
     private TaskQuerySteps taskQuerySteps;
+        
     @Steps
     private ProcessQueryAdminSteps processQueryAdminSteps;
 
@@ -92,6 +98,11 @@ public class Tasks {
     @When("the user deletes the standalone task")
     public void deleteCurrentTask() {
         taskRuntimeBundleSteps.deleteTask(newTask.getId());
+    }
+    
+    @When("the admin deletes the standalone task")
+    public void adminDeleteCurrentTask() {
+        taskRuntimeAdminSteps.deleteTask(newTask.getId());
     }
 
     @Then("the standalone task is deleted")
@@ -204,6 +215,26 @@ public class Tasks {
         taskRuntimeBundleSteps.setTaskFormKey(newTask.getId(), "new-task-form-key");
     }
 
+    @When("the admin updates the updatable fields of the task")
+    public void adminUpdateTaskFields(){
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+        Collection <CloudTask> tasksCollection = taskQuerySteps.getTasksByProcessInstance(processInstanceId).getContent();
+        List <CloudTask> tasksList = new ArrayList(tasksCollection);
+        newTask = tasksList.get(0);
+
+        Date tomorrow = new Date(System.currentTimeMillis() + 86400000);
+        Serenity.setSessionVariable("tomorrow").to(tomorrow);
+
+        taskRuntimeAdminSteps.updateTask(newTask.getId(), 
+                                         TaskPayloadBuilder
+                                         .update()
+                                         .withName("new-task-name")
+                                         .withPriority(3)
+                                         .withDueDate(tomorrow)
+                                         .withFormKey("new-task-form-key")
+                                         .build());
+    }
+    
     @Then("the task has the updated fields")
     public void checkUpdatedTaskFields (){
         Date tomorrow = Serenity.sessionVariableCalled("tomorrow");

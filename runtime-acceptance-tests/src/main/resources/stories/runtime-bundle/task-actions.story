@@ -138,3 +138,22 @@ When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VAR
 And the user claims the task
 And the user creates a standalone task
 Then the user will see only standalone tasks when quering for standalone tasks
+
+Scenario: admin completes tasks in a running process
+Given the user is authenticated as testadmin
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
+And the admin completes the task
+Then the status of the process and the task is changed to completed
+
+Scenario: check the task is updated by admin
+Given the user is authenticated as testadmin
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
+And the admin updates the updatable fields of the task
+Then the task is updated
+And the task has the updated fields
+
+Scenario: admin delete a standalone task
+Given the user is authenticated as testadmin
+And the user creates a standalone task
+When the admin deletes the standalone task
+Then the standalone task is deleted

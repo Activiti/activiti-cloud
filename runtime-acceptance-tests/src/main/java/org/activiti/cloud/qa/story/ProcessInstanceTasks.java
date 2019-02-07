@@ -16,6 +16,13 @@
 
 package org.activiti.cloud.qa.story;
 
+import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
+import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,22 +45,14 @@ import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.TaskRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.admin.ProcessRuntimeAdminSteps;
+import org.activiti.cloud.acc.core.steps.runtime.admin.TaskRuntimeAdminSteps;
 import org.activiti.cloud.acc.shared.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedResources;
-
-import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
-import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
-
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
 
 public class ProcessInstanceTasks {
 
@@ -61,6 +60,9 @@ public class ProcessInstanceTasks {
     private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
     @Steps
     private TaskRuntimeBundleSteps taskRuntimeBundleSteps;
+    @Steps
+    private TaskRuntimeAdminSteps taskRuntimeAdminSteps;
+    
     @Steps
     private ProcessRuntimeAdminSteps processRuntimeAdminSteps;
 
@@ -160,6 +162,15 @@ public class ProcessInstanceTasks {
                         .withTaskId(currentTask.getId())
                         .build());
     }
+    
+    @When("the admin completes the task")
+    public void adminCompleteTask() throws Exception {
+        taskRuntimeAdminSteps.completeTask(currentTask.getId(),
+                TaskPayloadBuilder
+                        .complete()
+                        .withTaskId(currentTask.getId())
+                        .build());
+    }
 
     @Then("the user cannot complete the task")
     public void cannotCompleteTask() throws Exception {
@@ -247,6 +258,11 @@ public class ProcessInstanceTasks {
     @When("the user deletes the process")
     public void deleteCurrentProcessInstance() throws Exception {
         processRuntimeBundleSteps.deleteProcessInstance(processInstance.getId());
+    }
+    
+    @When("the admin deletes the process")
+    public void adminDeleteCurrentProcessInstance() throws Exception {
+        processRuntimeAdminSteps.deleteProcessInstance(processInstance.getId());
     }
 
     @When("the user suspends the process instance")
