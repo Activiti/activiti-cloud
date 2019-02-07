@@ -56,12 +56,14 @@ livenessProbe:
   initialDelaySeconds: 140
   periodSeconds: 15
   timeoutSeconds: 20
-  failureThreshold: 20
+  successThreshold: 1
+  failureThreshold: 40
 readinessProbe:
   initialDelaySeconds: 30
   periodSeconds: 15
-  timeoutSeconds: 20
-  failureThreshold: 20
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 40
 terminationGracePeriodSeconds: 20
 
 #only needed when using sck8s
