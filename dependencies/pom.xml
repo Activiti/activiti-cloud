@@ -17,20 +17,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>com.introproventures</groupId>
-        <artifactId>graphql-jpa-query-dependencies</artifactId>
-        <version>${graphql-jpa-query.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>      
-      <dependency>
-        <groupId>org.activiti.cloud.query</groupId>
-        <artifactId>activiti-cloud-query-dependencies</artifactId>
-        <version>${activiti-cloud-query-service.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-      <dependency>
         <groupId>org.activiti.cloud.notifications.graphql</groupId>
         <artifactId>activiti-cloud-services-notifications-graphql-schema</artifactId>
         <version>${project.version}</version>

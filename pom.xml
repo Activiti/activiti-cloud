@@ -32,9 +32,22 @@
         <scope>import</scope>
         <type>pom</type>
       </dependency>
+      <dependency>
+        <groupId>com.introproventures</groupId>
+        <artifactId>graphql-jpa-query-dependencies</artifactId>
+        <version>${graphql-jpa-query.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>      
+      <dependency>
+        <groupId>org.activiti.cloud.query</groupId>
+        <artifactId>activiti-cloud-query-dependencies</artifactId>
+        <version>${activiti-cloud-query-service.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
     </dependencies>
   </dependencyManagement>
-  
   
   <!-- BoM Marker Dependencies -->
   <dependencies>
