@@ -151,7 +151,7 @@ public class ProcessInstanceRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-    
+
     public ResponseEntity<Resources<CloudVariableInstance>> getVariablesNoReplyCheck(String processInstanceId) {
         ResponseEntity<Resources<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
                                                                                                     HttpMethod.GET,
@@ -160,7 +160,7 @@ public class ProcessInstanceRestTemplate {
                                                                                                     });
         return responseEntity;
     }
-    
+
     public ResponseEntity<String> callGetVariablesWithErrorResponse(String processInstanceId) {
         ResponseEntity<String> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
                                                                                                     HttpMethod.GET,
@@ -275,6 +275,25 @@ public class ProcessInstanceRestTemplate {
                                                                         new ParameterizedTypeReference<Void>() {
                                                                         });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+
+    public ResponseEntity<Void> adminSetVariables(String processInstanceId,
+                                                  Map<String, Object> variables) {
+        SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder.setVariables()
+                .withVariables(variables).build();
+
+        HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(
+                setProcessVariablesPayload,
+                null);
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL
+                        + processInstanceId + "/variables/",
+                HttpMethod.PUT,
+                requestEntity,
+                new ParameterizedTypeReference<Void>() {
+                });
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
         return responseEntity;
     }
 

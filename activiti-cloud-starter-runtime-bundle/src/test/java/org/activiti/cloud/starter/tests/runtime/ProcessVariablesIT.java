@@ -218,6 +218,54 @@ public class ProcessVariablesIT {
     }
 
     @Test
+    public void adminShouldUpdateProcessVariables() {
+        //given
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hradmin");
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("firstName",
+                "Peter");
+        variables.put("lastName",
+                "Silver");
+        variables.put("age",
+                19);
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(PROCESS_WITH_VARIABLES2),
+                variables);
+
+        variables.put("firstName",
+                "Kermit");
+        variables.put("lastName",
+                "Frog");
+        variables.put("age",
+                100);
+
+        //when
+        processInstanceRestTemplate.adminSetVariables(startResponse.getBody().getId(),
+                variables);
+
+        await().untilAsserted(() -> {
+
+            // when
+            ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(startResponse);
+
+            // then
+            Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
+
+            assertThat(variableCollection).isNotEmpty();
+            assertThat(variablesContainEntry("firstName",
+                    "Kermit",
+                    variableCollection)).isTrue();
+            assertThat(variablesContainEntry("lastName",
+                    "Frog",
+                    variableCollection)).isTrue();
+            assertThat(variablesContainEntry("age",
+                    100,
+                    variableCollection)).isTrue();
+        });
+    }
+
+
+    @Test
     public void shouldNotRetrieveProcessVariablesWithoutPermission() {
         //given
         Map<String, Object> variables = new HashMap<>();
