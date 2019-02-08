@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.qa.story;
 
-import feign.FeignException;
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 
@@ -74,11 +74,10 @@ public class SecurityPoliciesActions {
 
     @Then("the user cannot start the process with variables")
     public void startProcess() throws Exception {
-        try {
-            processRuntimeBundleSteps.startProcess(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
-        }catch (FeignException exception){
-            assertThat(exception.getMessage()).contains("Unable to find process definition for the given id:'ProcessWithVariables'");
-        }
+        assertThatRestNotFoundErrorIsThrownBy(
+                () -> processRuntimeBundleSteps.startProcess(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))
+        ).withMessageContaining("Unable to find process definition for the given id:'ProcessWithVariables'");
+
     }
 
     @Then("the user can get simple process instances")
