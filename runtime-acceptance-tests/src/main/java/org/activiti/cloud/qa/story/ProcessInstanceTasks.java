@@ -230,7 +230,7 @@ public class ProcessInstanceTasks {
                                                  currentTask.getId(),
                                                  TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
         //the process instance disappears once it is completed
-        processRuntimeBundleSteps.checkProcessInstanceIsNotPresent(processInstance.getId());
+        processRuntimeBundleSteps.checkProcessInstanceNotFound(processInstance.getId());
 
     }
 
