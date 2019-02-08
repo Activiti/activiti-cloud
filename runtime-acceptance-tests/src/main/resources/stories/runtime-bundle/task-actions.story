@@ -150,6 +150,7 @@ Given the user is authenticated as testuser
 When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
 And another user is authenticated as testadmin
 And the admin updates the updatable fields of the task
+And another user is authenticated as testuser
 Then the task is updated
 And the task has the updated fields
 
