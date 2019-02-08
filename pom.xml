@@ -104,6 +104,7 @@
     <profile>
       <id>integration-test</id>
       <activation>
+        <activeByDefault>false</activeByDefault>
         <property>
           <name>skipITs</name>
           <value>false</value>
@@ -180,13 +181,7 @@
   <repositories>
     <repository>
       <id>activiti-releases</id>
-      <name>Activiti Releases</name>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-    </repository>
-    <repository>
-      <id>activiti-snapshots</id>
-      <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
     </repository>
   </repositories>
 </project>
