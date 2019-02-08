@@ -1,15 +1,10 @@
 package org.activiti.cloud.acc.core.steps.runtime;
 
-import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -23,6 +18,10 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
+
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
+import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
+import static org.assertj.core.api.Assertions.*;
 
 @EnableRuntimeFeignContext
 public class ProcessRuntimeBundleSteps {
@@ -91,9 +90,9 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public void checkProcessInstanceNotFound(String processInstanceId) {
-        assertThatExceptionOfType(Exception.class).isThrownBy(
+        assertThatRestNotFoundErrorIsThrownBy(
                 () -> processRuntimeService.getProcessInstance(processInstanceId)
-        ).withMessageContaining("Unable to find process instance for the given id:");
+        ).withMessageContaining("Unable to find process instance for the given id:'" + processInstanceId + "'");
     }
 
     @Step
@@ -125,16 +124,6 @@ public class ProcessRuntimeBundleSteps {
     @Step
     public PagedResources<CloudProcessInstance> getAllProcessInstances(){
         return processRuntimeService.getAllProcessInstances();
-    }
-
-    @Step
-    public void checkProcessInstanceIsNotPresent(String id){
-        try{
-            processRuntimeService.getProcessInstance(id);
-
-        }catch (FeignException exception) {
-            assertThat(exception.getMessage()).contains("Unable to find process instance for the given id:'" + id + "'");
-        }
     }
 
     @Step
@@ -172,9 +161,9 @@ public class ProcessRuntimeBundleSteps {
     public void checkProcessInstanceName(String processInstanceId,
                                          String processInstanceName) {
         assertThat(processRuntimeService.getProcessInstance(processInstanceId).getName()).isEqualTo(processInstanceName);
-    }    
+    }
 
-  
+
     @Step
     public CloudProcessInstance setProcessName(String processInstanceId, String processInstanceName){
         return processRuntimeService.updateProcess(

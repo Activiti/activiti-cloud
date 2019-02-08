@@ -1,7 +1,7 @@
 package org.activiti.cloud.acc.core.steps.runtime;
 
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Date;
 import java.util.Map;
@@ -42,11 +42,9 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public void cannotClaimTask(String id){
-        assertThatExceptionOfType(Exception.class)
-                .isThrownBy(() -> {
-                    taskRuntimeService
-                            .claimTask(id);
-                }).withMessageContaining("Unable to find task for the given id: " + id);
+        assertThatRestNotFoundErrorIsThrownBy(
+                () -> taskRuntimeService.claimTask(id)
+        ).withMessageContaining("Unable to find task for the given id: " + id);
     }
 
     @Step
@@ -58,12 +56,9 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public void cannotCompleteTask(String id, CompleteTaskPayload createTaskPayload) {
-        assertThatExceptionOfType(Exception.class)
-                .isThrownBy(() -> {
-                            taskRuntimeService
-                                    .completeTask(id, createTaskPayload);
-                        }
-                ).withMessageContaining("Unable to find task for the given id: " + id);
+        assertThatRestNotFoundErrorIsThrownBy(
+                () -> taskRuntimeService.completeTask(id, createTaskPayload)
+        ).withMessageContaining("Unable to find task for the given id: " + id);
     }
 
     @Step
@@ -106,7 +101,7 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public void checkTaskNotFound(String taskId) {
-        assertThatExceptionOfType(Exception.class).isThrownBy(
+        assertThatRestNotFoundErrorIsThrownBy(
                 () -> taskRuntimeService.getTask(taskId)
         ).withMessageContaining("Unable to find task");
     }
