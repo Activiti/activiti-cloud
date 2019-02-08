@@ -146,8 +146,9 @@ And the admin completes the task
 Then the status of the process and the task is changed to completed
 
 Scenario: check the task is updated by admin
-Given the user is authenticated as testadmin
+Given the user is authenticated as testuser
 When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
+And another user is authenticated as testadmin
 And the admin updates the updatable fields of the task
 Then the task is updated
 And the task has the updated fields
