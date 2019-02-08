@@ -341,10 +341,61 @@ public class QueryProcessInstancesEntityIT {
         });
 
     }
+    
+    @Test
+    public void shouldGetProcessInstancesFilteredByNameDescription() {
+        //given
+        ProcessInstance completedProcess = processInstanceBuilder.aCompletedProcessInstance("Process for filter");
+        ProcessInstance runningProcess = processInstanceBuilder.aRunningProcessInstance("Process");
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstancesFiltered("for filter",null);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
+            assertThat(processInstanceEntities)
+                    .extracting(ProcessInstanceEntity::getId,
+                                ProcessInstanceEntity::getName,
+                                ProcessInstanceEntity::getStatus)
+                    .contains(tuple(completedProcess.getId(),
+                                    completedProcess.getName(),
+                                    ProcessInstance.ProcessInstanceStatus.COMPLETED));
+        });
+    }
 
     private ResponseEntity<PagedResources<ProcessInstanceEntity>> executeRequestGetProcInstances() {
 
         return testRestTemplate.exchange(PROC_URL,
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);
+    }
+    
+    private ResponseEntity<PagedResources<ProcessInstanceEntity>> executeRequestGetProcInstancesFiltered(String name,String description) {
+        String url=PROC_URL;
+        boolean add = false;
+        if (name != null || description != null) {
+            url += "?";
+            if (name != null) {
+                url += "name=" + name;
+                add = true;
+            }
+            if (description != null) {
+                if (add) {
+                    url += "&";
+                }
+                url += "description=" + description;
+            }
+            
+        }
+        return testRestTemplate.exchange(url,
                                          HttpMethod.GET,
                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
                                          PAGED_PROCESS_INSTANCE_RESPONSE_TYPE);

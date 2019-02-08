@@ -700,6 +700,29 @@ public class QueryTasksIT {
         });
     }
 
+    private ResponseEntity<PagedResources<Task>> executeRequestGetTasksFiltered(String name,String description) {
+        String url=TASKS_URL;
+        boolean add = false;
+        if (name != null || description != null) {
+            url += "?";
+            if (name != null) {
+                url += "name=" + name;
+                add = true;
+            }
+            if (description != null) {
+                if (add) {
+                    url += "&";
+                }
+                url += "description=" + description;
+            }
+            
+        }
+        return testRestTemplate.exchange(url,
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         PAGED_TASKS_RESPONSE_TYPE);
+    }
+    
     private ResponseEntity<PagedResources<Task>> executeRequestGetTasks() {
         return testRestTemplate.exchange(TASKS_URL,
                                          HttpMethod.GET,
@@ -830,5 +853,66 @@ public class QueryTasksIT {
 
         });
 
+    }
+    
+    @Test
+    public void shouldGetAvailableStandaloneTasksFilteredByNameDescription() {
+      //given
+        Task task1 = taskEventContainedBuilder.aCreatedTask("Task 1 for filter",
+                                                            runningProcessInstance);
+        Task task2 = taskEventContainedBuilder.aCreatedTask("Task 2 not filter",
+                                                            null);
+        
+        Task task3 = taskEventContainedBuilder.aCreatedTask("Task 3 for filter standalone",
+                                                            null);
+    
+        TaskImpl task4 = new TaskImpl(UUID.randomUUID().toString(),
+                                      "Task 4 for filter description",
+                                      Task.TaskStatus.CREATED);
+        task4.setDescription("My task description");
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task4));
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasksFiltered("for filter",null);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> task = responseEntity.getBody().getContent();
+            assertThat(task)
+                    .extracting(Task::getId,
+                                Task::getStatus)
+                    .contains(tuple(task1.getId(),
+                                    Task.TaskStatus.CREATED),
+                              tuple(task3.getId(),
+                                    Task.TaskStatus.CREATED),
+                              tuple(task4.getId(),
+                                    Task.TaskStatus.CREATED));
+        });
+        
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasksFiltered("for filter","task descr");
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> task = responseEntity.getBody().getContent();
+            assertThat(task)
+                    .extracting(Task::getId,
+                                Task::getStatus)
+                    .contains(tuple(task4.getId(),
+                                    Task.TaskStatus.CREATED));
+        });
+        
     }
 }
