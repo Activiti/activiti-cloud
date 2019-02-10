@@ -1,6 +1,5 @@
 package org.activiti.cloud.services.rest.api;
 
-import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
@@ -8,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,8 +42,4 @@ public interface ProcessInstanceAdminController {
     PagedResources<ProcessInstanceResource> subprocesses(@PathVariable("processInstanceId") String processInstanceId,
                                                          Pageable pageable);
     
-    @RequestMapping(value = "/{processInstanceId}/variables", method = RequestMethod.DELETE)
-    ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
-                                         @RequestBody RemoveProcessVariablesPayload payload);
-
 }

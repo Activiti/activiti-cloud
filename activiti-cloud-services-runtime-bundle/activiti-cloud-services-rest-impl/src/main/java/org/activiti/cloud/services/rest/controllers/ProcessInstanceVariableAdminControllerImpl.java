@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.NotFoundException;
@@ -81,7 +82,7 @@ public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstan
     }
 
     @Override
-    public ResponseEntity<List<String>> setVariables(@PathVariable String processInstanceId,
+    public ResponseEntity<List<String>> updateVariables(@PathVariable String processInstanceId,
                                                      @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
         final Optional<Map<String, VariableDefinition>> variableDefinitionMap = getVariableDefinitionMap(processInstanceId);
         if (variableDefinitionMap.isPresent()) {
@@ -142,5 +143,17 @@ public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstan
         return Optional.ofNullable(processExtensionModel)
                 .map(ProcessExtensionModel::getExtensions)
                 .map(Extension::getProperties);
+    }
+    
+    @Override
+    public ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
+                                                @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload) {
+        if (removeProcessVariablesPayload!=null) {
+            removeProcessVariablesPayload.setProcessInstanceId(processInstanceId);
+            
+        }
+        processAdminRuntime.removeVariables(removeProcessVariablesPayload);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

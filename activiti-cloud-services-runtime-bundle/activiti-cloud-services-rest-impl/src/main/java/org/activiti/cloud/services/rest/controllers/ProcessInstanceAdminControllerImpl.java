@@ -17,7 +17,6 @@ package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
-import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
@@ -32,7 +31,6 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -126,18 +124,6 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
         return pagedResourcesAssembler.toResource(pageable,
                                                   pageConverter.toSpringPage(pageable, processInstancePage),
                                                   resourceAssembler);
-    }
-    
-    @Override
-    public ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
-                                                @RequestBody RemoveProcessVariablesPayload payload) {
-        if (payload!=null) {
-            payload.setProcessInstanceId(processInstanceId);
-            
-        }
-        processAdminRuntime.removeVariables(payload);
-
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

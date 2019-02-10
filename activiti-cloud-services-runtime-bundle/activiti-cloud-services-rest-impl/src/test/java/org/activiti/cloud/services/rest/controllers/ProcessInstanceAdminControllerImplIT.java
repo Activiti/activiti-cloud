@@ -23,7 +23,6 @@ import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSample
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -34,7 +33,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -204,19 +202,4 @@ public class ProcessInstanceAdminControllerImplIT {
         
     }
     
-    @Test
-    public void deleteVariables() throws Exception {
-        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/variables",
-                                    "1")
-                                    .accept(MediaTypes.HAL_JSON_VALUE)
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(mapper.writeValueAsString(ProcessPayloadBuilder.removeVariables().withVariableNames(Arrays.asList("varName1",
-                                                                                                                                               "varName2"))
-                                    .build())))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/delete",
-                                pathParameters(parameterWithName("processInstanceId").description("The process instance id"))));
-        verify(processAdminRuntime).removeVariables(any());
-    }
 }
