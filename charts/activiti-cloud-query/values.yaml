@@ -41,6 +41,13 @@ javaOpts:
 
 querypostgresql:
    postgresPassword: query
+   resources:
+     requests:
+       memory: 512Mi
+       cpu: 400m
+     limits:
+      memory: 1024Mi
+      cpu: 800m
 
 ## Allows the specification of additional environment variables
 extraEnv: |
