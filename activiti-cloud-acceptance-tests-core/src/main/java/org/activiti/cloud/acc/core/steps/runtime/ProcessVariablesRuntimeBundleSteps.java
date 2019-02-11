@@ -23,12 +23,12 @@ public class ProcessVariablesRuntimeBundleSteps {
     }
     
     @Step
-    Resources<CloudVariableInstance> getVariables(String id) {
+    public Resources<CloudVariableInstance> getVariables(String id) {
         return processVariablesRuntimeService.getVariables(id);
     }
     
     @Step
-    ResponseEntity<Void> setVariables(String id,
+    public ResponseEntity<Void> setVariables(String id,
                                       SetProcessVariablesPayload setProcessVariablesPayload) {
         return processVariablesRuntimeService.setVariables(id, setProcessVariablesPayload);
     }
