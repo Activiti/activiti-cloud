@@ -34,6 +34,9 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
 @Component
 @EnableBinding(ConnectorIntegrationChannels.class)
 public class ServiceTaskConsumerHandler {
@@ -114,4 +117,47 @@ public class ServiceTaskConsumerHandler {
         Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
         resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
     }
+
+    @StreamListener(value = ConnectorIntegrationChannels.VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
+    public void receive(IntegrationRequest integrationRequest) {
+        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+        Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
+        String variableOne = "input-variable-name-1";
+        String variableTwo = "input-variable-name-2";
+        String variableThree = "input-variable-name-3";
+
+        //this variable is not mapped, but its name matches with a process variable
+        //so value will be provided from process variable
+        String unmappedMatchingVariable = "input-unmapped-variable-with-matching-name";
+
+        Integer currentAge = (Integer) inBoundVariables.get(variableTwo);
+        Integer offSet = (Integer) inBoundVariables.get(variableThree);
+
+        assertThat(inBoundVariables.entrySet())
+                .extracting(Map.Entry::getKey,
+                            Map.Entry::getValue)
+                .containsOnly(
+                        tuple(variableOne,
+                              "inName"),
+                        tuple(variableTwo,
+                              20),
+                        tuple(variableThree,
+                              5),
+                        tuple(unmappedMatchingVariable,
+                              "inTest"));
+
+        integrationContext.addOutBoundVariable("out-variable-name-1",
+                                               "outName");
+        integrationContext.addOutBoundVariable("out-variable-name-2",
+                                               currentAge + offSet);
+        integrationContext.addOutBoundVariable("out-unmapped-variable-matching-name",
+                                               "outTest");
+        integrationContext.addOutBoundVariable("out-unmapped-variable-non-matching-name",
+                                               "outTest");
+
+        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
+        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
+        resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
+    }
+
 }

@@ -16,25 +16,35 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
+import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.Resources;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:application-test.properties")
@@ -46,6 +56,20 @@ public class MQServiceTaskIT {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
+
+    @Autowired
+    private ProcessInstanceRestTemplate processInstanceRestTemplate;
+
+    @Value("${activiti.keycloak.test-user:hruser}")
+    protected String keycloakTestUser;
+
+    @Before
+    public void setUp() {
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
+    }
 
     @Test
     public void shouldContinueExecution() {
@@ -64,10 +88,12 @@ public class MQServiceTaskIT {
         variables.put("age",
                       19);
         variables.put("boolVar",
-                true);
-        variables.put("customPojo",customPojo
-                     );
-        variables.put("customPojoAnnotated",customPojoAnnotated);
+                      true);
+        variables.put("customPojo",
+                      customPojo
+        );
+        variables.put("customPojoAnnotated",
+                      customPojoAnnotated);
 
         //when
         ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskProcess",
@@ -96,15 +122,15 @@ public class MQServiceTaskIT {
                 .containsEntry("age",
                                20)
                 .containsEntry("boolVar",
-                        false);
+                               false);
 
         //engine can resolve annotated pojo in var to correct type but not without annotation
         assertThat(updatedVariables.get("customPojo").getClass()).isEqualTo(ObjectNode.class);
         assertThat(updatedVariables.get("customPojoAnnotated").getClass()).isEqualTo(CustomPojoAnnotated.class);
 
-        assertThat(updatedVariables.get("customPojoTypeInConnector")).isEqualTo("Type of customPojo var in connector is "+ LinkedHashMap.class);
+        assertThat(updatedVariables.get("customPojoTypeInConnector")).isEqualTo("Type of customPojo var in connector is " + LinkedHashMap.class);
         assertThat(updatedVariables.get("customPojoField1InConnector")).isEqualTo("Value of field1 on customPojo is field1");
-        assertThat(updatedVariables.get("customPojoAnnotatedTypeInConnector")).isEqualTo("Type of customPojoAnnotated var in connector is "+ LinkedHashMap.class);
+        assertThat(updatedVariables.get("customPojoAnnotatedTypeInConnector")).isEqualTo("Type of customPojoAnnotated var in connector is " + LinkedHashMap.class);
 
         //should be able to complete the process
         //when
@@ -135,5 +161,40 @@ public class MQServiceTaskIT {
         //the process should finish
         List<ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery().processInstanceId(procInst.getId()).list();
         assertThat(processInstances).isEmpty();
+    }
+
+    @Test
+    public void shouldHandleVariableMappings() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
+                ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey("connectorVarMapping")
+                        .build());
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                    .isNotNull()
+                    .extracting(CloudVariableInstance::getName,
+                                CloudVariableInstance::getValue)
+                    .containsOnly(tuple("name",
+                                        "outName"),
+                                  tuple("age",
+                                        25),
+                                  tuple("input-unmapped-variable-with-matching-name",
+                                        "inTest"),
+                                  tuple("input-unmapped-variable-with-non-matching-connector-input-name",
+                                        "inTest"),
+                                  tuple("nickName",
+                                        "testName"),
+                                  tuple("out-unmapped-variable-matching-name",
+                                        "outTest"),
+                                  tuple("output-unmapped-variable-with-non-matching-connector-output-name",
+                                        "default"));
+        });
     }
 }

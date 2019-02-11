@@ -21,8 +21,9 @@ import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.runtime.api.connector.ConnectorActionDefinitionFinder;
+import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
-import org.activiti.runtime.api.connector.VariablesMatchHelper;
+import org.activiti.runtime.api.connector.OutboundVariablesProvider;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.conf.activiti.runtime.api.ConnectorsAutoConfiguration;
@@ -41,28 +42,44 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("classpath:config/integration-result-stream.properties")
 public class CloudConnectorsAutoConfiguration {
 
-    
+    private static final String LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME = "localServiceTaskBehaviour";
+
     @Bean
     @ConditionalOnMissingBean
     public IntegrationContextMessageBuilderFactory integrationContextMessageBuilderFactory(RuntimeBundleProperties properties) {
         return new IntegrationContextMessageBuilderFactory(properties);
+    }
+
+    @Bean(name = LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME)
+    @ConditionalOnMissingBean(name = LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME)
+    public DefaultServiceTaskBehavior localServiceTaskBehavior(ApplicationContext applicationContext,
+                                                               ConnectorActionDefinitionFinder connectorActionDefinitionFinder,
+                                                               IntegrationContextBuilder integrationContextBuilder,
+                                                               OutboundVariablesProvider outboundVariablesProvider) {
+        // this bean is exposed under two different names (LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME and
+        // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME) to allow MQServiceTaskBehavior
+        // to use composition instead of inheritance, this will make maintenance easier as changes in constructor
+        // of DefaultServiceTaskBehavior will not impact the constructor of MQServiceTaskBehavior.
+        // LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME will be injected in MQServiceTaskBehavior;
+        // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME will be available only in non-cloud environment:
+        // MQServiceTaskBehavior will replace it for cloud environment.
+        return new DefaultServiceTaskBehavior(applicationContext,
+                                              integrationContextBuilder,
+                                              connectorActionDefinitionFinder,
+                                              outboundVariablesProvider);
     }
     
     @Bean(name = DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME)
     @ConditionalOnMissingBean(name = DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME)
     public MQServiceTaskBehavior mqServiceTaskBehavior(IntegrationContextManager integrationContextManager,
                                                        ApplicationEventPublisher eventPublisher,
-                                                       ApplicationContext applicationContext,
                                                        IntegrationContextBuilder integrationContextBuilder,
-                                                       ConnectorActionDefinitionFinder connectorActionDefinitionFinder,
-                                                       VariablesMatchHelper variablesMatchHelper,
-                                                       RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+                                                       RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                                       DefaultServiceTaskBehavior defaultServiceTaskBehavior) {
         return new MQServiceTaskBehavior(integrationContextManager,
                                          eventPublisher,
-                                         applicationContext,
                                          integrationContextBuilder,
-                                         connectorActionDefinitionFinder,
-                                         variablesMatchHelper,
-                                         runtimeBundleInfoAppender);
+                                         runtimeBundleInfoAppender,
+                                         defaultServiceTaskBehavior);
     }
 }

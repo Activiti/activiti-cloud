@@ -16,16 +16,6 @@
 
 package org.activiti.services.connectors.channel;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import java.util.Collections;
 import java.util.Map;
 
@@ -42,7 +32,7 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
-import org.activiti.runtime.api.connector.ConnectorActionDefinitionFinder;
+import org.activiti.runtime.api.connector.OutboundVariablesProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -51,6 +41,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ServiceTaskIntegrationResultEventHandlerTest {
 
@@ -81,7 +81,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @Mock
-    private ConnectorActionDefinitionFinder connectorActionDefinitionFinder;
+    private OutboundVariablesProvider outboundVariablesProvider;
 
     @Mock
     private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
@@ -118,6 +118,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
                 "v");
 
         IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
+
+        given(outboundVariablesProvider.calculateVariables(integrationContext)).willReturn(variables);
 
         //when
         handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));

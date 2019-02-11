@@ -16,14 +16,19 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionResourceAssembler;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.activiti.core.common.spring.connector.autoconfigure.ConnectorAutoConfiguration;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.conf.activiti.runtime.api.ConnectorsAutoConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
@@ -32,9 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -54,8 +57,13 @@ public class ConnectorDefinitionControllerImplIT {
     @SpyBean
     private ResourcesAssembler resourceAssembler;
 
+    @MockBean
+    private ProcessExtensionService processExtensionService;
+
     @Before
     public void setup() {
+        assertThat(processExtensionService).isNotNull();
+
         List<ConnectorDefinition> connectorDefinitions = new ArrayList<>();
         ConnectorDefinition connectorDefinition1 = new ConnectorDefinition();
         connectorDefinition1.setId("id1");

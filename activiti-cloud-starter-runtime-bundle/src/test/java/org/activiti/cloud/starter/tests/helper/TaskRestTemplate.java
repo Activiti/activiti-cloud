@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +41,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @Component
 public class TaskRestTemplate {
 
@@ -53,9 +53,9 @@ public class TaskRestTemplate {
     };
     private static final ParameterizedTypeReference<PagedResources<CloudTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
     };
-    public static final ParameterizedTypeReference<List<String>> CANDIDATES_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
+    private static final ParameterizedTypeReference<List<String>> CANDIDATES_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
     };
-    public static final ParameterizedTypeReference<Void> VOID_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
+    private static final ParameterizedTypeReference<Void> VOID_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
     };
 
     @Autowired
@@ -107,8 +107,8 @@ public class TaskRestTemplate {
     }
 
     private ResponseEntity<CloudTask> delete(Task task,
-                                             String adminTaskVarRelativeUrl) {
-        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(adminTaskVarRelativeUrl + task.getId(),
+                                             String taskVarRelativeUrl) {
+        ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(taskVarRelativeUrl + task.getId(),
                                                                              HttpMethod.DELETE,
                                                                              null,
                                                                              TASK_RESPONSE_TYPE);

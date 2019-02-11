@@ -24,9 +24,8 @@ import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
-import org.activiti.runtime.api.connector.ConnectorActionDefinitionFinder;
+import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
-import org.activiti.runtime.api.connector.VariablesMatchHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -72,13 +71,10 @@ public class MQServiceTaskBehaviorTest {
     private IntegrationContextBuilder integrationContextBuilder;
 
     @Mock
-    private ConnectorActionDefinitionFinder connectorActionDefinitionFinder;
-
-    @Mock
-    private VariablesMatchHelper variablesMatchHelper;
-
-    @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+
+    @Mock
+    private DefaultServiceTaskBehavior defaultServiceTaskBehavior;
 
     @Captor
     private ArgumentCaptor<IntegrationRequestImpl> integrationRequestCaptor;
@@ -87,9 +83,23 @@ public class MQServiceTaskBehaviorTest {
     public void setUp() {
         initMocks(this);
         behavior = spy(new MQServiceTaskBehavior(integrationContextManager,
-                                                 eventPublisher, applicationContext,
-                                                 integrationContextBuilder,connectorActionDefinitionFinder, variablesMatchHelper,
-                                                 runtimeBundleInfoAppender));
+                                                 eventPublisher,
+                                                 integrationContextBuilder,
+                                                 runtimeBundleInfoAppender,
+                                                 defaultServiceTaskBehavior));
+    }
+
+    @Test
+    public void executeShouldDelegateToDefaultBehaviourWhenBeanIsAvailable() {
+        //given
+        DelegateExecution execution = mock(DelegateExecution.class);
+        given(defaultServiceTaskBehavior.hasConnectorBean(execution)).willReturn(true);
+
+        //when
+        behavior.execute(execution);
+
+        //then
+        verify(defaultServiceTaskBehavior).execute(execution);
     }
 
     @Test

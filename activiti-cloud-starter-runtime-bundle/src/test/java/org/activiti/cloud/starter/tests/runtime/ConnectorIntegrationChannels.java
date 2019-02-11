@@ -26,4 +26,9 @@ public interface ConnectorIntegrationChannels {
     @Input(INTEGRATION_EVENTS_CONSUMER)
     SubscribableChannel integrationEventsConsumer();
 
+    String VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER = "varMappingIntegrationEventsConsumer";
+
+    @Input(VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
+    SubscribableChannel varMappingIntegrationEventsConsumer();
+
 }
