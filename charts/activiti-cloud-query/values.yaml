@@ -26,6 +26,13 @@ db:
   port: 5432
   generateDdl: true
   ddlAuto: update
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 400m
+    limits:
+      memory: 1024Mi
+      cpu: 800m
 
 javaOpts:
   xmx: 2048m
