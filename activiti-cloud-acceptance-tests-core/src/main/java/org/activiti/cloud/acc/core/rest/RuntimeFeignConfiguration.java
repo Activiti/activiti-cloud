@@ -17,8 +17,6 @@
 package org.activiti.cloud.acc.core.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.acc.shared.rest.feign.*;
-import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import feign.Feign;
 import feign.Logger;
 import feign.gson.GsonEncoder;
@@ -26,13 +24,7 @@ import feign.jackson.JacksonEncoder;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.conf.impl.ProcessModelAutoConfiguration;
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
-import org.activiti.cloud.api.model.shared.impl.conf.CloudCommonModelAutoConfiguration;
-import org.activiti.cloud.api.process.model.impl.conf.CloudProcessModelAutoConfiguration;
-import org.activiti.cloud.api.task.model.impl.conf.CloudTaskModelAutoConfiguration;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.acc.core.services.audit.AuditService;
 import org.activiti.cloud.acc.core.services.audit.admin.AuditAdminService;
 import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
@@ -40,10 +32,24 @@ import org.activiti.cloud.acc.core.services.query.TaskQueryService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminService;
 import org.activiti.cloud.acc.core.services.query.admin.TaskQueryAdminService;
 import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
+import org.activiti.cloud.acc.core.services.runtime.ProcessVariablesRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.TaskRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessRuntimeAdminService;
+import org.activiti.cloud.acc.core.services.runtime.admin.ProcessVariablesRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.admin.TaskRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.diagram.ProcessRuntimeDiagramService;
+import org.activiti.cloud.acc.shared.rest.feign.FeignConfiguration;
+import org.activiti.cloud.acc.shared.rest.feign.FeignErrorDecoder;
+import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
+import org.activiti.cloud.acc.shared.rest.feign.HalDecoder;
+import org.activiti.cloud.acc.shared.rest.feign.OAuth2FeignRequestInterceptor;
+import org.activiti.cloud.api.model.shared.impl.conf.CloudCommonModelAutoConfiguration;
+import org.activiti.cloud.api.process.model.impl.conf.CloudProcessModelAutoConfiguration;
+import org.activiti.cloud.api.task.model.impl.conf.CloudTaskModelAutoConfiguration;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * Feign Configuration
@@ -169,5 +175,23 @@ public class RuntimeFeignConfiguration {
                         new HalDecoder(objectMapper))
                 .target(AuditAdminService.class,
                         runtimeTestsConfigurationProperties.getAuditEventUrl());
+    }
+    
+    @Bean
+    public ProcessVariablesRuntimeAdminService processVariablesRuntimeAdminService() {
+        return FeignRestDataClient
+                .builder(new JacksonEncoder(objectMapper),
+                        new HalDecoder(objectMapper))
+                .target(ProcessVariablesRuntimeAdminService.class,
+                        runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+    
+    @Bean
+    public ProcessVariablesRuntimeService processVariablesRuntimeService() {
+        return FeignRestDataClient
+                .builder(new JacksonEncoder(objectMapper),
+                        new HalDecoder(objectMapper))
+                .target(ProcessVariablesRuntimeService.class,
+                        runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 }
