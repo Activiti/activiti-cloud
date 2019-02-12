@@ -17,6 +17,7 @@
 package org.activiti.cloud.qa.story;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import net.serenitybdd.core.Serenity;
@@ -52,26 +53,12 @@ public class ProcessInstanceVariables {
                 assertThat(cloudVariableInstanceResource).isNotNull();
                 assertThat(cloudVariableInstanceResource).isNotEmpty();
                 
-                String variableName,actualValue;
-                boolean found1,found2;
-                found1 = found2 = false;
-                
-                for (CloudVariableInstance cloudVariableInstance : cloudVariableInstanceResource.getContent()) {
-                    variableName = cloudVariableInstance.getName();
-                    actualValue = cloudVariableInstance.getValue();
-                    if (variableName.equals(variableName1)) {
-                        assertThat(value1).isEqualTo(actualValue);
-                        found1=true;
-                    } else {
-                        if (variableName.equals(variableName2)) {
-                            assertThat(value2).isEqualTo(actualValue);
-                            found2 = true;
-                        }
-                    }
-                }
-                
-                assertThat(found1).isEqualTo(true);
-                assertThat(found2).isEqualTo(true);
+                assertThat(cloudVariableInstanceResource.getContent()).extracting(VariableInstance::getName, 
+                                                                                  VariableInstance::getValue)
+                                                                        .contains(
+                                                                                  tuple(variableName1, value1),
+                                                                                  tuple(variableName2, value2)
+                                                                         );
         });       
     }
 

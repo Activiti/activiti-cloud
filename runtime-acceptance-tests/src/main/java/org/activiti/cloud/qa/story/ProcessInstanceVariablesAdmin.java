@@ -17,6 +17,7 @@
 package org.activiti.cloud.qa.story;
 
 import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
 import java.util.List;
@@ -88,7 +89,9 @@ public class ProcessInstanceVariablesAdmin {
     public void checkUpdateVarsErrorMessagesIsEmpty() {
         List<String> updateVarsErrorMessages = Serenity.sessionVariableCalled("updateVarsErrorMessages");
 
-        //assertThat(updateVarsErrorMessages).isEmpty();
+        if (updateVarsErrorMessages!=null) {
+            assertThat(updateVarsErrorMessages).isEmpty();
+        }
     }
     
     private Map<String, Object> getVariablesMap(String variableName1, String variableValue1, String variableName2, String variableValue2) {
