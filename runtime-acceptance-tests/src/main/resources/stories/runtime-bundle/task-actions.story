@@ -159,3 +159,8 @@ Given the user is authenticated as testadmin
 And the user creates a standalone task
 When the admin deletes the standalone task
 Then the standalone task is deleted
+
+Scenario: query tasks by name and description using LIKE operator
+Given the user is authenticated as testuser
+When the user creates a standalone task
+Then the standalone task can be queried using LIKE operator

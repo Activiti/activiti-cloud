@@ -42,6 +42,7 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.springframework.hateoas.PagedResources;
 
 public class Tasks {
 
@@ -287,6 +288,18 @@ public class Tasks {
         standaloneTasksCollection.forEach(
                 task -> assertThat(task.getProcessInstanceId()).isNull()
         );
+    }
+
+    @Then("the standalone task can be queried using LIKE operator")
+    public void queryNameAndDescriptionWithLikeOperator(){
+
+        PagedResources<CloudTask> retrievedTasks = taskQuerySteps.getTasksByNameAndDescription(newTask.getName().substring(0,2),
+                newTask.getDescription().substring(0,2));
+
+        for(CloudTask task : retrievedTasks){
+            assertThat(task.getName()).contains(newTask.getName().substring(0,2));
+            assertThat(task.getDescription()).contains(newTask.getDescription().substring(0,2));
+        }
     }
    
 }

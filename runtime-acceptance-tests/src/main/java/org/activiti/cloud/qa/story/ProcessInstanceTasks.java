@@ -49,6 +49,7 @@ import org.activiti.cloud.acc.core.steps.runtime.admin.TaskRuntimeAdminSteps;
 import org.activiti.cloud.acc.shared.rest.error.ExpectRestNotFound;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -466,5 +467,14 @@ public class ProcessInstanceTasks {
                         assertThat(event.getMessageId()).isEqualTo(messageIdTest)
                 );
     }
+
+    @Then("the process instance can be queried using LIKE operator")
+    public void queryProcessByNameNameWithLikeOperator(){
+        PagedResources <CloudProcessInstance> retrievedProcesses = processQuerySteps.getProcessInstancesByName( processInstance.getName().substring(0,2));
+        for(ProcessInstance process : retrievedProcesses){
+            assertThat(process.getName()).contains(processInstance.getName().substring(0,2));
+        }
+    }
+
 
 }
