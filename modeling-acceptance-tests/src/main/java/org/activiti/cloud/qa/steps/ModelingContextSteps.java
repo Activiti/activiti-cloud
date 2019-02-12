@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,8 +60,8 @@ public abstract class ModelingContextSteps<M> {
         Resource<M> model = modelingContextHandler
                 .getCurrentModelingContext()
                 .flatMap(this::getRelUri)
-                .map(uri -> service().createByUri(uri.replace("http://activiti-cloud-modeling-backend",
-                                                              config.getModelingUrl()),
+                .map(this::modelingUri)
+                .map(uri -> service().createByUri(uri,
                                                   m))
                 .orElseGet(() -> service().create(m));
         return dirty(model);
@@ -84,8 +84,8 @@ public abstract class ModelingContextSteps<M> {
                 .stream()
                 .filter(resource -> identifier.test(resource.getContent()))
                 .map(resource -> resource.getLink(REL_SELF))
-                .map(link -> link.getHref().replace("http://activiti-cloud-modeling-backend",
-                                                    config.getModelingUrl()))
+                .map(Link::getHref)
+                .map(this::modelingUri)
                 .collect(Collectors.toList())
                 .forEach(service()::deleteByUri);
     }
@@ -116,8 +116,8 @@ public abstract class ModelingContextSteps<M> {
         modelingContextHandler
                 .getCurrentModelingContext()
                 .map(resource -> resource.getLink(REL_SELF))
-                .map(link -> link.getHref().replace("http://activiti-cloud-modeling-backend",
-                                                    config.getModelingUrl()))
+                .map(Link::getHref)
+                .map(this::modelingUri)
                 .map(this::findByUri)
                 .ifPresent(modelingContextHandler::setCurrentModelingObject);
     }
@@ -139,6 +139,7 @@ public abstract class ModelingContextSteps<M> {
                 .findFirst()
                 .map(resource -> resource.getLink("self"))
                 .map(Link::getHref)
+                .map(this::modelingUri)
                 .map(this::findByUri);
         assertThat(currentModelingObject.isPresent()).isTrue();
 
@@ -178,9 +179,7 @@ public abstract class ModelingContextSteps<M> {
     }
 
     protected Resource<M> dirty(Resource<M> resource) {
-        dirtyContextHandler.dirty(resource.getLink("self").getHref()
-                                          .replace("http://activiti-cloud-modeling-backend",
-                                                   config.getModelingUrl()));
+        dirtyContextHandler.dirty(modelingUri(resource.getLink("self").getHref()));
         return resource;
     }
 
@@ -189,9 +188,7 @@ public abstract class ModelingContextSteps<M> {
     }
 
     protected PagedResources<Resource<M>> findAllByUri(String uri) {
-        String replacedURI = uri.replace("http://activiti-cloud-modeling-backend",
-                                         config.getModelingUrl());
-        return service().findAllByUri(replacedURI);
+        return service().findAllByUri(modelingUri(uri));
     }
 
     protected PagedResources<Resource<M>> findAll() {
@@ -219,6 +216,11 @@ public abstract class ModelingContextSteps<M> {
         return new FileContent(filename,
                                contentType,
                                IOUtils.toByteArray(response.body().asInputStream()));
+    }
+
+    protected String modelingUri(String uri) {
+        return uri.replace("http://activiti-cloud-modeling-backend",
+                           config.getModelingUrl());
     }
 
     protected abstract Optional<String> getRel();

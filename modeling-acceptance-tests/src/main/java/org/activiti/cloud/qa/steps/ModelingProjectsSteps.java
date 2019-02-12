@@ -76,9 +76,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
         Project project = currentContext.getContent();
         project.setName(newProjectName);
 
-        modelingProjectService.updateByUri(currentContext.getLink(REL_SELF).getHref()
-                                                   .replace("http://activiti-cloud-modeling-backend",
-                                                            config.getModelingUrl()),
+        modelingProjectService.updateByUri(modelingUri(currentContext.getLink(REL_SELF).getHref()),
                                            project);
     }
 
@@ -105,8 +103,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
         Link importModelLink = currentProject.getLink("import");
         assertThat(importModelLink).isNotNull();
 
-        return modelingProjectService.importProjectModelByUri(importModelLink.getHref().replace("http://activiti-cloud-modeling-backend",
-                                                                                                config.getModelingUrl()),
+        return modelingProjectService.importProjectModelByUri(modelingUri(importModelLink.getHref()),
                                                               file);
     }
 
@@ -129,8 +126,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
         Resource<Project> currentProject = checkAndGetCurrentContext(Project.class);
         Link exportLink = currentProject.getLink("export");
         assertThat(exportLink).isNotNull();
-        return modelingProjectService.exportProjectByUri(exportLink.getHref().replace("http://activiti-cloud-modeling-backend",
-                                                                                      config.getModelingUrl()));
+        return modelingProjectService.exportProjectByUri(modelingUri(exportLink.getHref()));
     }
 
     @Step

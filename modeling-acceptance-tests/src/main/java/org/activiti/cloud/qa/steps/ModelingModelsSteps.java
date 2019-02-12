@@ -132,8 +132,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     @Step
     public void saveModel(Resource<Model> model) {
-        modelingModelsService.updateByUri(model.getLink(REL_SELF).getHref().replace("http://activiti-cloud-modeling-backend",
-                                                                                    config.getModelingUrl()),
+        modelingModelsService.updateByUri(modelingUri(model.getLink(REL_SELF).getHref()),
                                           model.getContent());
     }
 
