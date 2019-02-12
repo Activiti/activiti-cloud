@@ -47,6 +47,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
+import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
@@ -155,6 +156,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
                         .hasJsonContentSatisfying(
                                 modelType.getFolderName() + "/" + toJsonFilename(modelName + modelType.getMetadataFileSuffix()),
                                 jsonContent -> {
+                                    jsonContent.node("id").matches(startsWith("process-"));
                                     jsonContent.node("name").isEqualTo(modelName);
                                     processVariables.forEach(processVariable -> {
                                         jsonContent.node("extensions.properties")
