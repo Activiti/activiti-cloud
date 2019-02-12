@@ -136,7 +136,10 @@ public abstract class ModelingContextSteps<M> {
         Optional<Resource<M>> currentModelingObject = getAvailableModelingObjects()
                 .stream()
                 .filter(modelingObject -> identifier.test(modelingObject.getContent()))
-                .findFirst();
+                .findFirst()
+                .map(resource -> resource.getLink("self"))
+                .map(Link::getHref)
+                .map(this::findByUri);
         assertThat(currentModelingObject.isPresent()).isTrue();
 
         modelingContextHandler.setCurrentModelingObject(currentModelingObject.get());

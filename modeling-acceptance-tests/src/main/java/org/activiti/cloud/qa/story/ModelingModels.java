@@ -16,9 +16,13 @@
 
 package org.activiti.cloud.qa.story;
 
+import java.util.Collections;
+import java.util.List;
+
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.steps.ModelingProjectsSteps;
 import org.activiti.cloud.qa.steps.ModelingModelsSteps;
+import org.activiti.cloud.qa.steps.ModelingProjectsSteps;
+import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
@@ -31,7 +35,7 @@ import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.mode
 public class ModelingModels {
 
     @Steps
-    private ModelingProjectsSteps modelingApplicationsSteps;
+    private ModelingProjectsSteps modelingProjectSteps;
 
     @Steps
     private ModelingModelsSteps modelingModelsSteps;
@@ -39,24 +43,40 @@ public class ModelingModels {
     @When("creates the $modelType model '$modelName'")
     public void createModel(String modelType,
                             String modelName) {
+        createModel(modelType,
+                    modelName,
+                    null);
+    }
+
+    @When("creates the $modelType model $modelName with process variables '$processVariables'")
+    public void createModel(String modelType,
+                            String modelName,
+                            List<String> processVariables) {
         modelingModelsSteps.create(modelName,
-                                   modelType);
+                                   modelType,
+                                   processVariables);
     }
 
     @Then("the $modelType model '$modelName' is created")
-    public void checkModelExistsInCurrentApplication(String modelType,
-                                                     String modelName) {
+    public void checkModelExistsInCurrentProject(String modelType,
+                                                 String modelName) {
         modelingModelsSteps.checkExistsInCurrentContext(identified(modelName,
                                                                    modelType));
     }
 
     @Then("the version of the $modelType model '$modelName' is $modelVersion")
-    public void checkModelVersionInCurrentApplication(String modelType,
-                                                      String modelName,
-                                                      String modelVersion) {
+    public void checkModelVersionInCurrentProject(String modelType,
+                                                  String modelName,
+                                                  String modelVersion) {
         modelingModelsSteps.checkExistsInCurrentContext(identified(modelName,
                                                                    modelType,
                                                                    modelVersion));
+    }
+
+    @Then("it contains process variables '$procressVariables'")
+    @Alias("the model is saved with the process variables '$procressVariables'")
+    public void checkCurrentModelContainsVariables(List<String> processVariables) {
+        modelingModelsSteps.checkCurrentModelContainsVariables(processVariables.toArray(new String[0]));
     }
 
     @Then("delete model '$modelName'")
@@ -73,11 +93,26 @@ public class ModelingModels {
 
     @When("edits and saves the model")
     public void editAndSaveCurrentModel() {
-        modelingModelsSteps.editAndSaveCurrentModel();
+        modelingModelsSteps.saveCurrentModel(true);
+    }
+
+    @When("saves the model")
+    public void saveCurrentModel() {
+        modelingModelsSteps.saveCurrentModel(false);
     }
 
     @Then("the model is saved with the version $modelVersion")
     public void checkCurrentModelVersion(String modelVersion) {
         modelingModelsSteps.checkCurrentModelVersion(modelVersion);
+    }
+
+    @When("removes the process variable '$processVariable'")
+    public void removeProcessVariableInCurrentModel(String processVariable) {
+        modelingModelsSteps.removeProcessVariableInCurrentModel(processVariable);
+    }
+
+    @When("adds the process variable '$processVariable'")
+    public void addProcessVariableInCurrentModela(String processVariable) {
+        modelingModelsSteps.addProcessVariableInCurrentModel(Collections.singletonList(processVariable));
     }
 }

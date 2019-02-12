@@ -19,6 +19,7 @@ package org.activiti.cloud.qa.steps;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 import feign.Response;
@@ -36,12 +37,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
+import static org.activiti.cloud.qa.model.modeling.ProcessExtensions.EXTENSIONS_TASK_NAME;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import static org.activiti.cloud.services.test.asserts.AssertFileContent.assertThatFileContent;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
+import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
@@ -129,7 +134,8 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
 
     @Step
     public void checkExportedProjectContainsModel(ModelType modelType,
-                                                  String modelName) {
+                                                  String modelName,
+                                                  List<String> processVariables) {
         Project currentProject = checkAndGetCurrentContext(Project.class).getContent();
         assertThat(modelingContextHandler.getCurrentModelingFile()).hasValueSatisfying(
                 fileContent -> assertThatFileContent(fileContent)
@@ -146,9 +152,44 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
                         .hasJsonContentSatisfying(toJsonFilename(currentProject.getName()),
                                                   jsonContent -> jsonContent
                                                           .node("name").isEqualTo(currentProject.getName()))
-                        .hasJsonContentSatisfying(modelType.getFolderName() + "/" + toJsonFilename(modelName + modelType.getMetadataFileSuffix()),
-                                                  jsonContent -> jsonContent
-                                                          .node("name").isEqualTo(modelName)));
+                        .hasJsonContentSatisfying(
+                                modelType.getFolderName() + "/" + toJsonFilename(modelName + modelType.getMetadataFileSuffix()),
+                                jsonContent -> {
+                                    jsonContent.node("name").isEqualTo(modelName);
+                                    processVariables.forEach(processVariable -> {
+                                        jsonContent.node("extensions.properties")
+                                                .matches(hasEntry(equalTo(processVariable),
+                                                                  allOf(hasEntry(equalTo("id"),
+                                                                                 equalTo(processVariable)),
+                                                                        hasEntry(equalTo("name"),
+                                                                                 equalTo(processVariable)),
+                                                                        hasEntry(equalTo("type"),
+                                                                                 equalTo("boolean")),
+                                                                        hasEntry(equalTo("value"),
+                                                                                 equalTo("true"))
+                                                                  )));
+                                        jsonContent.node("extensions.mappings").matches(
+                                                hasEntry(equalTo(EXTENSIONS_TASK_NAME),
+                                                         allOf(hasEntry(equalTo("inputs"),
+                                                                        hasEntry(equalTo(processVariable),
+                                                                                 allOf(hasEntry(equalTo("type"),
+                                                                                                equalTo("value")),
+                                                                                       hasEntry(equalTo("value"),
+                                                                                                equalTo(processVariable))
+                                                                                 ))),
+                                                               hasEntry(equalTo("outputs"),
+                                                                        hasEntry(equalTo(processVariable),
+                                                                                 allOf(hasEntry(equalTo("type"),
+                                                                                                equalTo("variable")),
+                                                                                       hasEntry(equalTo("value"),
+                                                                                                equalTo("${host}"))
+                                                                                 ))
+                                                               ))
+                                                )
+                                        );
+                                    });
+                                }
+                        ));
     }
 
     @Override
