@@ -136,6 +136,8 @@ public class ModelService {
 
     public FileContent getModelMetadataFileContent(Model model) {
         Model modelWithFullMetadata = findModelById(model.getId()).orElse(model);
+        //TODO: this is an workaround for https://github.com/Activiti/Activiti/issues/2497 - a better should be done in coordination with the FE
+        modelWithFullMetadata.setId("process-" + modelWithFullMetadata.getId());
         return new FileContent(getMetadataFilename(model),
                                ContentTypeUtils.CONTENT_TYPE_JSON,
                                jsonConverter.convertToJsonBytes(modelWithFullMetadata));
