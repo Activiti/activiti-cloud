@@ -18,6 +18,7 @@ public interface ProcessVariablesRuntimeAdminService extends BaseService {
                                                  SetProcessVariablesPayload setProcessVariablesPayload);
     
     @RequestLine("DELETE /admin/v1/process-instances/{id}/variables")
+    @Headers("Content-Type: application/json")
     ResponseEntity<Void> removeVariables(@Param("id") String id,
                                          RemoveProcessVariablesPayload removeProcessVariablesPayload);
 
