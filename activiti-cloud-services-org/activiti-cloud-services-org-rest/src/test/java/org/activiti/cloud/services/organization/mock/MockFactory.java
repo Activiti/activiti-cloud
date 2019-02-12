@@ -30,8 +30,8 @@ import org.activiti.cloud.services.organization.entity.ProjectEntity;
 
 import static java.util.Collections.singletonMap;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
-import static org.activiti.cloud.organization.api.VariableMappingType.INPUT;
-import static org.activiti.cloud.organization.api.VariableMappingType.OUTPUT;
+import static org.activiti.cloud.organization.api.VariableMappingType.INPUTS;
+import static org.activiti.cloud.organization.api.VariableMappingType.OUTPUTS;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 
 /**
@@ -130,9 +130,9 @@ public class MockFactory {
                                           Function.identity()));
         extensions.setVariablesMappings(
                 singletonMap("ServiceTask",
-                             ImmutableMap.of(INPUT,
+                             ImmutableMap.of(INPUTS,
                                              autoMapping,
-                                             OUTPUT,
+                                             OUTPUTS,
                                              autoMapping))
         );
         return extensions;

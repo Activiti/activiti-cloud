@@ -166,12 +166,12 @@ public class ModelControllerIT {
                 .andExpect(jsonPath("$.extensions.properties",
                                     allOf(hasKey("variable1"),
                                           hasKey("variable2"))))
-                .andExpect(jsonPath("$.extensions.variablesMappings",
+                .andExpect(jsonPath("$.extensions.mappings",
                                     hasEntry(equalTo("ServiceTask"),
-                                             allOf(hasEntry(equalTo("input"),
+                                             allOf(hasEntry(equalTo("inputs"),
                                                             allOf(hasValue("variable1"),
                                                                   hasValue("variable2"))),
-                                                   hasEntry(equalTo("input"),
+                                                   hasEntry(equalTo("outputs"),
                                                             allOf(hasValue("variable1"),
                                                                   hasValue("variable2")))
                                              ))
@@ -227,12 +227,12 @@ public class ModelControllerIT {
                 .andExpect(jsonPath("$.extensions.properties",
                                     allOf(hasKey("variable1"),
                                           hasKey("variable2"))))
-                .andExpect(jsonPath("$.extensions.variablesMappings",
+                .andExpect(jsonPath("$.extensions.mappings",
                                     hasEntry(equalTo("ServiceTask"),
-                                             allOf(hasEntry(equalTo("input"),
+                                             allOf(hasEntry(equalTo("inputs"),
                                                             allOf(hasValue("variable1"),
                                                                   hasValue("variable2"))),
-                                                   hasEntry(equalTo("input"),
+                                                   hasEntry(equalTo("outputs"),
                                                             allOf(hasValue("variable1"),
                                                                   hasValue("variable2")))
                                              ))

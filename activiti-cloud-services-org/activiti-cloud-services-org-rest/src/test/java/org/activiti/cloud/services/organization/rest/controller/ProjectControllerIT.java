@@ -51,8 +51,10 @@ import static org.activiti.cloud.services.test.asserts.AssertResponseContent.ass
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
@@ -215,6 +217,15 @@ public class ProjectControllerIT {
                                                   .node("type").isEqualTo("PROCESS")
                                                   .node("extensions.properties").matches(allOf(hasKey("var1"),
                                                                                                hasKey("var2")))
+                                                  .node("extensions.mappings").matches(
+                                                          hasEntry(equalTo("ServiceTask"),
+                                                                   allOf(hasEntry(equalTo("inputs"),
+                                                                                  allOf(hasKey("var1"),
+                                                                                        hasKey("var2"))),
+                                                                         hasEntry(equalTo("outputs"),
+                                                                                  allOf(hasKey("var1"),
+                                                                                        hasKey("var2"))))))
+
                 );
     }
 

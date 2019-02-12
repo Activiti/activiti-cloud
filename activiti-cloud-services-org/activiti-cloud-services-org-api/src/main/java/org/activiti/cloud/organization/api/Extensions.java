@@ -34,6 +34,7 @@ public class Extensions {
     @JsonProperty("properties")
     private Map<String, ProcessVariable> processVariables = new HashMap<>();
 
+    @JsonProperty("mappings")
     private Map<String, Map<VariableMappingType, Map<String, String>>> variablesMappings = new HashMap<>();
 
     public Map<String, ProcessVariable> getProcessVariables() {

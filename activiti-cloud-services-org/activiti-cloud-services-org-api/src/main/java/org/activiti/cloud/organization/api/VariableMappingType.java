@@ -24,8 +24,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Extensions service parameter
  */
 public enum VariableMappingType {
-    INPUT,
-    OUTPUT;
+    INPUTS,
+    OUTPUTS;
 
     @JsonCreator
     public static VariableMappingType fromValue(String value) {
