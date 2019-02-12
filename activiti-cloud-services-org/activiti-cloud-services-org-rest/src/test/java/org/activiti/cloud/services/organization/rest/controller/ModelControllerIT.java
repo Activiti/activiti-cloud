@@ -64,7 +64,6 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.hamcrest.collection.IsMapContaining.hasValue;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
@@ -169,11 +168,11 @@ public class ModelControllerIT {
                 .andExpect(jsonPath("$.extensions.mappings",
                                     hasEntry(equalTo("ServiceTask"),
                                              allOf(hasEntry(equalTo("inputs"),
-                                                            allOf(hasValue("variable1"),
-                                                                  hasValue("variable2"))),
+                                                            allOf(hasKey("variable1"),
+                                                                  hasKey("variable2"))),
                                                    hasEntry(equalTo("outputs"),
-                                                            allOf(hasValue("variable1"),
-                                                                  hasValue("variable2")))
+                                                            allOf(hasKey("variable1"),
+                                                                  hasKey("variable2")))
                                              ))
                 ));
     }
@@ -225,16 +224,54 @@ public class ModelControllerIT {
                 //then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.extensions.properties",
-                                    allOf(hasKey("variable1"),
-                                          hasKey("variable2"))))
+                                    allOf(hasEntry(equalTo("variable1"),
+                                                   allOf(hasEntry(equalTo("id"),
+                                                                  equalTo("variable1")),
+                                                         hasEntry(equalTo("name"),
+                                                                  equalTo("variable1")),
+                                                         hasEntry(equalTo("type"),
+                                                                  equalTo("string")),
+                                                         hasEntry(equalTo("value"),
+                                                                  equalTo("variable1"))
+                                                   )),
+                                          hasEntry(equalTo("variable2"),
+                                                   allOf(hasEntry(equalTo("id"),
+                                                                  equalTo("variable2")),
+                                                         hasEntry(equalTo("name"),
+                                                                  equalTo("variable2")),
+                                                         hasEntry(equalTo("type"),
+                                                                  equalTo("string")),
+                                                         hasEntry(equalTo("value"),
+                                                                  equalTo("variable2")))
+                                          ))))
                 .andExpect(jsonPath("$.extensions.mappings",
                                     hasEntry(equalTo("ServiceTask"),
                                              allOf(hasEntry(equalTo("inputs"),
-                                                            allOf(hasValue("variable1"),
-                                                                  hasValue("variable2"))),
+                                                            allOf(hasEntry(equalTo("variable1"),
+                                                                           allOf(hasEntry(equalTo("type"),
+                                                                                          equalTo("value")),
+                                                                                 hasEntry(equalTo("value"),
+                                                                                          equalTo("variable1"))
+                                                                           )),
+                                                                  hasEntry(equalTo("variable2"),
+                                                                           allOf(hasEntry(equalTo("type"),
+                                                                                          equalTo("value")),
+                                                                                 hasEntry(equalTo("value"),
+                                                                                          equalTo("variable2"))
+                                                                           )))),
                                                    hasEntry(equalTo("outputs"),
-                                                            allOf(hasValue("variable1"),
-                                                                  hasValue("variable2")))
+                                                            allOf(hasEntry(equalTo("variable1"),
+                                                                           allOf(hasEntry(equalTo("type"),
+                                                                                          equalTo("value")),
+                                                                                 hasEntry(equalTo("value"),
+                                                                                          equalTo("variable1"))
+                                                                           )),
+                                                                  hasEntry(equalTo("variable2"),
+                                                                           allOf(hasEntry(equalTo("type"),
+                                                                                          equalTo("value")),
+                                                                                 hasEntry(equalTo("value"),
+                                                                                          equalTo("variable2"))
+                                                                           ))))
                                              ))
                 ));
     }
@@ -290,14 +327,6 @@ public class ModelControllerIT {
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(newModel)))
                 .andExpect(status().isOk());
-
-        //then
-//        verify(modelReferenceService,
-//               times(1))
-//                .updateResource(eq(PROCESS),
-//                                eq(processModel.getId()),
-//                                modelReferenceWithExtensions(mapper.writeValueAsString(extensions("variable2",
-//                                                                                                  "variable3"))));
     }
 
     @Test
