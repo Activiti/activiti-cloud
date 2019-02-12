@@ -17,15 +17,16 @@
 package org.activiti.cloud.qa.story;
 
 import net.thucydides.core.annotations.Steps;
-
 import org.activiti.cloud.acc.core.steps.audit.AuditSteps;
 import org.activiti.cloud.acc.core.steps.audit.admin.AuditAdminSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.query.TaskQuerySteps;
 import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
+import org.activiti.cloud.acc.core.steps.runtime.ProcessVariablesRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.TaskRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.admin.ProcessRuntimeAdminSteps;
+import org.activiti.cloud.acc.core.steps.runtime.admin.ProcessVariablesRuntimeAdminSteps;
 import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.activiti.cloud.acc.shared.rest.EnableDirtyContext;
 import org.activiti.cloud.acc.shared.steps.AuthenticationSteps;
@@ -64,6 +65,12 @@ public class RuntimeLifecycleActions {
     private AuditSteps auditSteps;
     @Steps
     private AuditAdminSteps auditAdminSteps;
+    
+    @Steps
+    private ProcessVariablesRuntimeBundleSteps processVariablesRuntimeBundleSteps;
+     
+    @Steps
+    private ProcessVariablesRuntimeAdminSteps processVariablesRuntimeAdminSteps;
 
     public RuntimeLifecycleActions() {
     }
@@ -79,6 +86,8 @@ public class RuntimeLifecycleActions {
         processQueryAdminSteps.checkServicesHealth();
         auditSteps.checkServicesHealth();
         auditAdminSteps.checkServicesHealth();
+        processVariablesRuntimeBundleSteps.checkServicesHealth();
+        processVariablesRuntimeAdminSteps.checkServicesHealth();
     }
 
     @AfterScenario
