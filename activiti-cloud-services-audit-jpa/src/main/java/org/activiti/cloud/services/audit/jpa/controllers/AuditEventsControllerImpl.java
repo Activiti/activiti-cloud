@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Joiner;
+import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.assembler.EventResourceAssembler;
@@ -36,6 +37,7 @@ import org.activiti.cloud.services.audit.jpa.repository.EventSpecificationsBuild
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.repository.SearchOperation;
 import org.activiti.cloud.services.audit.jpa.security.SecurityPoliciesApplicationServiceImpl;
+import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,11 +48,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -68,7 +73,20 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     private final APIEventToEntityConverters eventConverters;
+    
+    @ExceptionHandler(ActivitiForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleAppException(ActivitiForbiddenException ex) {
+        return ex.getMessage();
+    }
 
+    @ExceptionHandler({NotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleAppException(RuntimeException ex) {
+        return ex.getMessage();
+    }
+
+ 
     @Autowired
     public AuditEventsControllerImpl(EventsRepository eventsRepository,
                                      EventResourceAssembler eventResourceAssembler,
@@ -86,12 +104,12 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     public EventResource findById(@PathVariable String eventId) {
         Optional<AuditEventEntity> findResult = eventsRepository.findByEventId(eventId);
         if (!findResult.isPresent()) {
-            throw new RuntimeException("Unable to find event for the given id:'" + eventId + "'");
+            throw new NotFoundException("Unable to find event for the given id:'" + eventId + "'");
         }
         AuditEventEntity auditEventEntity = findResult.get();
         if (!securityPoliciesApplicationService.canRead(auditEventEntity.getProcessDefinitionId(),
                                                         auditEventEntity.getServiceFullName())) {
-            throw new RuntimeException("Operation not permitted for " + auditEventEntity.getProcessDefinitionId());
+            throw new ActivitiForbiddenException("Operation not permitted for " + auditEventEntity.getProcessDefinitionId());
         }
 
         CloudRuntimeEvent cloudRuntimeEvent = eventConverters.getConverterByEventTypeName(auditEventEntity.getEventType()).convertToAPI(auditEventEntity);
