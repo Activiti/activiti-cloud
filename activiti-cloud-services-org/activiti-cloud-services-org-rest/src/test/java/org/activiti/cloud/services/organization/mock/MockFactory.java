@@ -25,13 +25,15 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableMap;
 import org.activiti.cloud.organization.api.Extensions;
 import org.activiti.cloud.organization.api.ProcessVariable;
+import org.activiti.cloud.organization.api.ProcessVariableMapping;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.entity.ProjectEntity;
 
 import static java.util.Collections.singletonMap;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
-import static org.activiti.cloud.organization.api.VariableMappingType.INPUTS;
-import static org.activiti.cloud.organization.api.VariableMappingType.OUTPUTS;
+import static org.activiti.cloud.organization.api.ServiceTaskActionType.INPUTS;
+import static org.activiti.cloud.organization.api.ServiceTaskActionType.OUTPUTS;
+import static org.activiti.cloud.organization.api.VariableMappingType.VALUE;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 
 /**
@@ -125,15 +127,15 @@ public class MockFactory {
                         .map(MockFactory::processVariable)
                         .collect(Collectors.toMap(ProcessVariable::getId,
                                                   Function.identity())));
-        Map<String, String> autoMapping = Arrays.stream(processVariables)
+        Map<String, ProcessVariableMapping> variableMapping = Arrays.stream(processVariables)
                 .collect(Collectors.toMap(Function.identity(),
-                                          Function.identity()));
+                                          MockFactory::processVariableMapping));
         extensions.setVariablesMappings(
                 singletonMap("ServiceTask",
                              ImmutableMap.of(INPUTS,
-                                             autoMapping,
+                                             variableMapping,
                                              OUTPUTS,
-                                             autoMapping))
+                                             variableMapping))
         );
         return extensions;
     }
@@ -145,6 +147,13 @@ public class MockFactory {
         processVariable.setType("string");
         processVariable.setValue(name);
         return processVariable;
+    }
+
+    public static ProcessVariableMapping processVariableMapping(String name) {
+        ProcessVariableMapping processVariableMapping = new ProcessVariableMapping();
+        processVariableMapping.setType(VALUE);
+        processVariableMapping.setValue(name);
+        return processVariableMapping;
     }
 
     public static String id() {

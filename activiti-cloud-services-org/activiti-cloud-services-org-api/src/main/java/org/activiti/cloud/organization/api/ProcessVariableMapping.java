@@ -16,28 +16,35 @@
 
 package org.activiti.cloud.organization.api;
 
-import java.util.Optional;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
- * Extensions variable mapping types
+ * Process variable mapping item
  */
-public enum VariableMappingType {
-    VARIABLE,
-    VALUE;
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(NON_NULL)
+public class ProcessVariableMapping {
 
-    @JsonCreator
-    public static VariableMappingType fromValue(String value) {
-        return Optional.ofNullable(value)
-                .map(String::toUpperCase)
-                .map(VariableMappingType::valueOf)
-                .orElse(null);
+    private VariableMappingType type;
+
+    private String value;
+
+    public VariableMappingType getType() {
+        return type;
     }
 
-    @JsonValue
+    public void setType(VariableMappingType type) {
+        this.type = type;
+    }
+
     public String getValue() {
-        return name().toLowerCase();
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }
