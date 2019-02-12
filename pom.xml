@@ -42,7 +42,7 @@
   </repositories>
   <properties>
     <activiti-cloud-modeling-build.version>7.0.7</activiti-cloud-modeling-build.version>
-    <activiti-dependencies.version>7.0.99</activiti-dependencies.version>
+    <activiti-dependencies.version>7.0.104</activiti-dependencies.version>
     <activiti-cloud-service-common.version>7.0.86</activiti-cloud-service-common.version>
     <activiti-cloud-org-service.version>${project.version}</activiti-cloud-org-service.version>
     <everit-json-schema.version>1.11.0</everit-json-schema.version>
