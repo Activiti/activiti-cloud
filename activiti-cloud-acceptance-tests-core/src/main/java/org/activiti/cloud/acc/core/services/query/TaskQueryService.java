@@ -38,4 +38,8 @@ public interface TaskQueryService extends BaseService {
     @Headers("Accept: application/hal+json;charset=UTF-8")
     PagedResources<CloudTask> getStandaloneTasks();
 
+    @RequestLine("GET /v1/tasks?name={taskName}&description={taskDescription}")
+    PagedResources<CloudTask> getTasksByNameAndDescription(@Param("taskName") String taskName,
+                                                            @Param("taskDescription") String taskDescription);
+
 }

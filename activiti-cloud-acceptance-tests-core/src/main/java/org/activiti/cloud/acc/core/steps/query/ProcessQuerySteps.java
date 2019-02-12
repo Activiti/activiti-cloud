@@ -79,4 +79,9 @@ public class ProcessQuerySteps {
         return processQueryService.getProcessDefinitions();
     }
 
+    @Step
+    public PagedResources<CloudProcessInstance> getProcessInstancesByName(String processName){
+        return processQueryService.getProcessInstancesByName(processName);
+    }
+
 }

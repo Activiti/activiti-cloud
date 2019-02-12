@@ -70,6 +70,7 @@ public class ProcessRuntimeBundleSteps {
         return dirtyContextHandler.dirty(processRuntimeService.startProcess(ProcessPayloadBuilder
                 .start()
                 .withProcessDefinitionKey(process)
+                .withName("process-instance-name")
                 .build()));
     }
 
