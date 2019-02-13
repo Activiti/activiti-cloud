@@ -30,7 +30,7 @@ extraEnv: |
   #       key: expose-keycloak-service-key
 
 javaOpts:
-  xmx: 1024m
+  xmx: 2048m
   xms: 512m
   other: -XX:+UnlockExperimentalVMOptions   -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
 image:
@@ -47,23 +47,23 @@ service:
 resources:
   limits:
     cpu: 1
-    memory: 1024Mi
+    memory: 2048Mi
   requests:
-    cpu: 500m
-    memory: 512Mi
+    cpu: 200m
+    memory: 512i
 probePath: /actuator/health
 livenessProbe:
-  initialDelaySeconds: 140
-  periodSeconds: 15
-  timeoutSeconds: 20
-  successThreshold: 1
-  failureThreshold: 40
-readinessProbe:
-  initialDelaySeconds: 30
+  initialDelaySeconds: 60
   periodSeconds: 15
   timeoutSeconds: 10
   successThreshold: 1
-  failureThreshold: 40
+  failureThreshold: 8
+readinessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 80
 terminationGracePeriodSeconds: 20
 
 #only needed when using sck8s
