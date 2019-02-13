@@ -29,7 +29,7 @@ db:
 
 javaOpts:
   xmx: 2048m
-  xms: 1024m
+  xms: 512m
   other: -XX:+UnlockExperimentalVMOptions   -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
 
 querypostgresql:
@@ -37,10 +37,10 @@ querypostgresql:
    resources:
      requests:
        memory: 512Mi
-       cpu: 400m
+       cpu: 300m
      limits:
-      memory: 1024Mi
-      cpu: 800m
+      memory: 2048Mi
+      cpu: 1
 
 ## Allows the specification of additional environment variables
 extraEnv: |
@@ -67,21 +67,21 @@ resources:
     cpu: 1
     memory: 2048Mi
   requests:
-    cpu: 800m
-    memory: 1024Mi
+    cpu: 200m
+    memory: 512Mi
 probePath: /actuator/health
 livenessProbe:
   initialDelaySeconds: 60
   periodSeconds: 15
   timeoutSeconds: 15
   successThreshold: 1
-  failureThreshold: 5
+  failureThreshold: 8
 readinessProbe:
   initialDelaySeconds: 20
-  periodSeconds: 10
+  periodSeconds: 5
   timeoutSeconds: 10
   successThreshold: 1
-  failureThreshold: 40
+  failureThreshold: 80
 terminationGracePeriodSeconds: 20
 ingress:
   ## Set to true to enable ingress record generation
