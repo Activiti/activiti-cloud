@@ -58,19 +58,19 @@ resources:
   limits:
     memory: 2048Mi
   requests:
-    cpu: 800m
+    cpu: 400m
     memory: 768Mi
 probePath: /actuator/health
 livenessProbe:
   initialDelaySeconds: 140
   periodSeconds: 15
   timeoutSeconds: 20
-  failureThreshold: 20
+  failureThreshold: 40
 readinessProbe:
   initialDelaySeconds: 30
-  periodSeconds: 15
-  timeoutSeconds: 20
-  failureThreshold: 20
+  periodSeconds: 5
+  timeoutSeconds: 10
+  failureThreshold: 80
 terminationGracePeriodSeconds: 20
 ingress:
   ## Set to true to enable ingress record generation
