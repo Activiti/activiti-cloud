@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.activiti.cloud.modeling.build</groupId>
     <artifactId>activiti-cloud-modeling-parent</artifactId>
-    <version>7.0.7</version>
+    <version>7.1.0</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.modeling</groupId>
   <artifactId>activiti-cloud-org-service-parent</artifactId>
-  <version>7.0.0-SNAPSHOT</version>
+  <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Organization Services :: Parent</name>
   <url>http://activiti.org</url>
@@ -41,8 +41,8 @@
     </repository>
   </repositories>
   <properties>
-    <activiti-cloud-modeling-build.version>7.0.7</activiti-cloud-modeling-build.version>
-    <activiti-dependencies.version>7.0.105</activiti-dependencies.version>
+    <activiti-cloud-modeling-build.version>7.1.0</activiti-cloud-modeling-build.version>
+    <activiti-dependencies.version>7.1.0</activiti-dependencies.version>
     <activiti-cloud-service-common.version>7.1.0</activiti-cloud-service-common.version>
     <activiti-cloud-org-service.version>${project.version}</activiti-cloud-org-service.version>
     <everit-json-schema.version>1.11.0</everit-json-schema.version>
