@@ -88,6 +88,8 @@ public class QueryTaskEntityVariablesIT {
 
     private Task task;
 
+    private Task standAloneTask;
+
     @Before
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
@@ -99,6 +101,7 @@ public class QueryTaskEntityVariablesIT {
 
         task = taskEventContainedBuilder.aCreatedTask("Created task",
                                                       runningProcessInstance);
+        standAloneTask = taskEventContainedBuilder.aCreatedStandaloneTaskWithParent("StandAlone task");
     }
 
     @After
@@ -211,6 +214,42 @@ public class QueryTaskEntityVariablesIT {
                              task.getId());
          //then
          assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void shouldRetrieveVariablesFromStandAloneTask(){
+        //given
+
+        variableEventContainedBuilder.aCreatedVariable("varCreated",
+                "v1",
+                "string")
+                .onTask(standAloneTask);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_VARIABLE_RESPONSE_TYPE,
+                    standAloneTask.getId());
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(TaskVariableEntity::getName,
+                            TaskVariableEntity::getValue,
+                            TaskVariableEntity::getType)
+                    .contains(
+
+                            tuple("varCreated",
+                                            "v1",
+                                            "string"
+                            ));
+
+        });
     }
     
 
