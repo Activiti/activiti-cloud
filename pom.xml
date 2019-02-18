@@ -10,7 +10,7 @@
   </parent>
   <groupId>org.activiti.cloud.audit</groupId>
   <artifactId>activiti-cloud-audit-service-parent</artifactId>
-  <version>7.0.0-SNAPSHOT</version>
+  <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud Audit :: Parent</name>
   <url>http://activiti.org</url>
