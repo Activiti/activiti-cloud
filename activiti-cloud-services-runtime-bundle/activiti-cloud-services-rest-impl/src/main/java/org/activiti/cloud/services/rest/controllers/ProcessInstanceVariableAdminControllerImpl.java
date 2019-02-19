@@ -28,7 +28,7 @@ import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
-import org.activiti.api.process.runtime.ProcessRuntime;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableAdminController;
@@ -49,12 +49,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstanceVariableAdminController {
-    private final ProcessRuntime processAdminRuntime;
+    private final ProcessAdminRuntime processAdminRuntime;
     private final Map<String, ProcessExtensionModel> processExtensionModelMap;
     private final VariableValidationService variableValidationService;
 
     @Autowired
-    public ProcessInstanceVariableAdminControllerImpl(ProcessRuntime processAdminRuntime,
+    public ProcessInstanceVariableAdminControllerImpl(ProcessAdminRuntime processAdminRuntime,
                                                       Map<String, ProcessExtensionModel> processExtensionModelMap,
                                                       VariableValidationService variableValidationService
     ) {

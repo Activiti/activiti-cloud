@@ -31,6 +31,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.conf.impl.ProcessModelAutoConfiguration;
@@ -84,7 +85,7 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private ProcessRuntime processAdminRuntime;
+    private ProcessAdminRuntime processAdminRuntime;
 
     @MockBean
     private Map<String, ProcessExtensionModel> processExtensionModelMap;
