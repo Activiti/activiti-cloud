@@ -123,10 +123,14 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
     }
     
     private ProcessInstanceEntity getProcessInstance(CloudVariableCreatedEvent variableCreatedEvent) {
-        ProcessInstanceEntity processInstanceEntity = entityManager
-                .getReference(ProcessInstanceEntity.class,
-                              variableCreatedEvent.getEntity().getProcessInstanceId());
-        return processInstanceEntity;
+        if(variableCreatedEvent.getEntity().getProcessInstanceId() == null){
+            return null;
+        }else {
+            ProcessInstanceEntity processInstanceEntity = entityManager
+                    .getReference(ProcessInstanceEntity.class,
+                            variableCreatedEvent.getEntity().getProcessInstanceId());
+            return processInstanceEntity;
+        }
     }
 
     @Override
