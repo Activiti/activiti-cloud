@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2019 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.starter.rb.configuration;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.PathSelectors;
@@ -24,16 +25,20 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import static org.activiti.cloud.starter.rb.configuration.SwaggerModels.applyPayloadModelSubstitutions;
+
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
 
     @Bean
+    @ConditionalOnMissingBean(Docket.class)
     public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2).select()
-                                                      .apis(RequestHandlerSelectors.basePackage("org.activiti.cloud.services"))
-                                                      .paths(PathSelectors.any())
-                                                      .build();
+        Docket docket = new Docket(DocumentationType.SWAGGER_2)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("org.activiti.cloud.services"))
+                .paths(PathSelectors.any())
+                .build();
+        return applyPayloadModelSubstitutions(docket);
     }
-
 }
