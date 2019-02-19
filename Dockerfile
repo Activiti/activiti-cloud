@@ -2,7 +2,7 @@
 #FROM adoptopenjdk/openjdk11:jdk-11.0.2.9-slim
 #FROM adoptopenjdk/openjdk11:jdk-11.0.2.7-alpine-slim
 FROM openjdk:11.0.1-jre-slim-stretch
-RUN apk --update add fontconfig ttf-dejavu msttcorefonts-installer fontconfig update-ms-fonts fc-cache -f
+#RUN apk --update add fontconfig ttf-dejavu msttcorefonts-installer fontconfig update-ms-fonts fc-cache -f
 ENV PORT 8080
 EXPOSE 8080
 COPY target/*.jar /opt/app.jar
