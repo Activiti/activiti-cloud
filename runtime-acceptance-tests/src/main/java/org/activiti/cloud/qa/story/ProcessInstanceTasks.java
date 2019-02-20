@@ -240,7 +240,7 @@ public class ProcessInstanceTasks {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
         processQuerySteps.checkProcessInstanceStatus(processId,
                 ProcessInstance.ProcessInstanceStatus.COMPLETED);
-        auditSteps.checkProcessInstanceEvent(processId, ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED);
+        auditSteps.checkProcessInstanceEvent(processId, ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED,20);
     }
 
     @Then("a variable was created with name $variableName")
