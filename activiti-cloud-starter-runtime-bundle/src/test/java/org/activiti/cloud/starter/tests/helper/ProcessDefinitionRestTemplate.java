@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 public class ProcessDefinitionRestTemplate {
 
     private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
-    private static final ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> PAGED_DEFINITIONS_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
+    private static final ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> PAGED_DEFINITIONS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
     };
 
     @Autowired
