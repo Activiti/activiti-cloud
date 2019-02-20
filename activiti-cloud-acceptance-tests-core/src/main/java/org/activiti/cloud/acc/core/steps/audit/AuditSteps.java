@@ -22,6 +22,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import net.thucydides.core.annotations.Step;
@@ -61,12 +62,20 @@ public class AuditSteps {
 
     @Step
     public void checkProcessInstanceEvent(String processInstanceId,
-                                          ProcessRuntimeEvent.ProcessEvents eventType) throws Exception {
+                                          ProcessRuntimeEvent.ProcessEvents eventType) throws Exception{
+        checkProcessInstanceEvent(processInstanceId,eventType,10); //this is awaitility default
+    }
+
+    @Step
+    public void checkProcessInstanceEvent(String processInstanceId,
+                                          ProcessRuntimeEvent.ProcessEvents eventType,
+                                          long timeoutSeconds) throws Exception {
 
         Collection<CloudRuntimeEvent> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
                                                                                         eventType.name());
 
-        await().untilAsserted(() -> {
+        await().atMost(timeoutSeconds,
+                        TimeUnit.SECONDS).untilAsserted(() -> {
 
             assertThat(events).isNotEmpty();
             CloudRuntimeEvent resultingEvent = events.iterator().next();
