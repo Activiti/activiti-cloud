@@ -66,7 +66,7 @@ public class AuditConsumerChannelHandlerImplTest {
         CloudRuntimeEvent[] events = {cloudRuntimeEvent};
 
         //when
-        handler.receiveCloudRuntimeEvent(new HashMap<>(){{put("id", UUID.randomUUID());}}, events);
+        handler.receiveCloudRuntimeEvent(new HashMap<String,Object>(){{put("id", UUID.randomUUID());}}, events);
 
         //then
         verify(eventsRepository).save(entity);
