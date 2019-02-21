@@ -35,6 +35,7 @@ import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
+import org.activiti.cloud.services.organization.validation.ProcessModelValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,8 +137,14 @@ public class ModelService {
 
     public FileContent getModelMetadataFileContent(Model model) {
         Model modelWithFullMetadata = findModelById(model.getId()).orElse(model);
-        //TODO: this is an workaround for https://github.com/Activiti/Activiti/issues/2497 - a better should be done in coordination with the FE
-        modelWithFullMetadata.setId("process-" + modelWithFullMetadata.getId());
+        byte[] modelContent = modelRepository.getModelContent(model);
+        String bpmnModelId = findModelValidatorByModelType(model.getType())
+                .filter(ProcessModelValidator.class::isInstance)
+                .map(ProcessModelValidator.class::cast)
+                .map(validator -> validator.convertAndGetModelId(modelContent))
+                .orElseGet(() -> getBpmnModeId(model));
+        modelWithFullMetadata.setId(bpmnModelId);
+
         return new FileContent(getMetadataFilename(model),
                                ContentTypeUtils.CONTENT_TYPE_JSON,
                                jsonConverter.convertToJsonBytes(modelWithFullMetadata));
@@ -172,10 +179,32 @@ public class ModelService {
 
     public Model updateModelContent(Model modelToBeUpdate,
                                     FileContent fileContent) {
-        modelToBeUpdate.setContentType(fileContent.getContentType());
-        modelToBeUpdate.setContent(fileContent.toString());
+        FileContent validatedFileContent = validateAndFixModelContent(modelToBeUpdate,
+                                                                      fileContent);
+
+        modelToBeUpdate.setContentType(validatedFileContent.getContentType());
+        modelToBeUpdate.setContent(validatedFileContent.toString());
         return modelRepository.updateModelContent(modelToBeUpdate,
-                                                  fileContent);
+                                                  validatedFileContent);
+    }
+
+    public FileContent validateAndFixModelContent(Model model,
+                                                  FileContent fileContent) {
+        return findModelValidatorByModelType(model.getType())
+                .filter(ProcessModelValidator.class::isInstance)
+                .map(ProcessModelValidator.class::cast)
+                .map(validator -> validator.convertAndFixModelId(fileContent.getFileContent(),
+                                                                 getBpmnModeId(model)))
+                .map(content -> new FileContent(fileContent.getFilename(),
+                                                fileContent.getContentType(),
+                                                content))
+                .orElse(fileContent);
+    }
+
+    public String getBpmnModeId(Model model) {
+        return String.join("-",
+                           model.getType().toLowerCase(),
+                           model.getId());
     }
 
     public Model importModel(Project project,
