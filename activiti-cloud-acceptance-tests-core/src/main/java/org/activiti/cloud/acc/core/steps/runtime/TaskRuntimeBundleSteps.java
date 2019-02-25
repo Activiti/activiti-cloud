@@ -14,6 +14,7 @@ import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.TaskRuntimeService;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
@@ -124,6 +125,11 @@ public class TaskRuntimeBundleSteps {
 
         taskRuntimeService.setTaskVariables(taskId,TaskPayloadBuilder.setVariables().withTaskId(taskId)
                 .withVariables(variables).build());
+    }
+
+    @Step
+    public Resources<CloudVariableInstance> getVariables(String taskId){
+        return taskRuntimeService.getVariables(taskId);
     }
 
     @Step

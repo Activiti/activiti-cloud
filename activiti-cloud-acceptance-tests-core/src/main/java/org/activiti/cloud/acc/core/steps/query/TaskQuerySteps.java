@@ -15,6 +15,7 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resources;
 
 @EnableRuntimeFeignContext
 public class TaskQuerySteps {
@@ -106,6 +107,11 @@ public class TaskQuerySteps {
     public PagedResources<CloudTask> getTasksByNameAndDescription(String taskName, String taskDescription){
         return taskQueryService.getTasksByNameAndDescription(taskName,
                                                                 taskDescription);
+    }
+
+    @Step
+    public Resources<CloudVariableInstance> getVariables(String taskId){
+        return taskQueryService.getVariables(taskId);
     }
     
     

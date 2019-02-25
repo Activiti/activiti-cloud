@@ -8,6 +8,7 @@ import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resources;
 
 public interface TaskQueryService extends BaseService {
 
@@ -41,5 +42,9 @@ public interface TaskQueryService extends BaseService {
     @RequestLine("GET /v1/tasks?name={taskName}&description={taskDescription}")
     PagedResources<CloudTask> getTasksByNameAndDescription(@Param("taskName") String taskName,
                                                             @Param("taskDescription") String taskDescription);
+
+    @RequestLine("GET /v1/tasks/{id}/variables")
+    @Headers("Accept: application/hal+json;charset=UTF-8")
+    Resources<CloudVariableInstance> getVariables(@Param("id") String id);
 
 }
