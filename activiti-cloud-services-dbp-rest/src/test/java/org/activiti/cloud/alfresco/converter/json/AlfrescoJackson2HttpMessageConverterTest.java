@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 
@@ -55,6 +56,9 @@ public class AlfrescoJackson2HttpMessageConverterTest {
 
     @Mock
     private PagedResources<Resource<String>> basePagedResources;
+
+    @Mock
+    private Resources<Resource<String>> baseResources;
 
     @Mock
     private Type type;
@@ -90,6 +94,29 @@ public class AlfrescoJackson2HttpMessageConverterTest {
                                                           type,
                                                           outputMessage);
     }
+
+    @Test
+    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsAGroupOfResources() throws Exception {
+
+        //given
+        given(pagedResourcesConverter.toAlfrescoContentListWrapper(baseResources))
+                .willReturn(alfrescoPageContentListWrapper);
+
+        doNothing().when(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
+                type,
+                outputMessage);
+
+        //when
+        httpMessageConverter.writeInternal(baseResources,
+                type,
+                outputMessage);
+
+        //then
+        verify(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
+                type,
+                outputMessage);
+    }
+
 
     @Test
     public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsASingleResource() throws Exception {

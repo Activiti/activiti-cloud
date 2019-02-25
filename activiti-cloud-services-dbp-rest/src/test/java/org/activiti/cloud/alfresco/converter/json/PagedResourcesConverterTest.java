@@ -28,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -68,6 +69,21 @@ public class PagedResourcesConverterTest {
                 .containsExactly("any");
         assertThat(alfrescoPageContentListWrapper.getList().getPagination()).isEqualTo(alfrescoPageMetadata);
 
+    }
+
+    @Test
+    public void toAlfrescoContentListWrapperShouldConvertFromResourcesToAlfrescoContentListWrapper() throws Exception {
+        //given
+        List<Resource<String>> elements = Collections.singletonList(new Resource<>("any"));
+
+        //when
+        AlfrescoPageContentListWrapper<String> alfrescoPageContentListWrapper = pagedResourcesConverter.toAlfrescoContentListWrapper(new Resources<>(elements));
+
+        //then
+        assertThat(alfrescoPageContentListWrapper).isNotNull();
+        assertThat(alfrescoPageContentListWrapper.getList().getEntries())
+                .extracting(AlfrescoContentEntry::getEntry)
+                .containsExactly("any");
     }
 
 }

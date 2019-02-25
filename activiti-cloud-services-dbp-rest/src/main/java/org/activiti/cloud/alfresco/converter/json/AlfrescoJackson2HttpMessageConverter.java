@@ -23,6 +23,7 @@ import java.util.Collections;
 import org.activiti.cloud.alfresco.rest.model.AlfrescoContentEntry;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -47,7 +48,11 @@ public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2Http
         Object transformedObject = object;
         if (object instanceof PagedResources) {
             transformedObject = pagedResourcesConverter.toAlfrescoContentListWrapper((PagedResources<Resource<T>>) object);
-        } else if (object instanceof Resource) {
+        }
+        else if (object instanceof Resources){
+            transformedObject = pagedResourcesConverter.toAlfrescoContentListWrapper((Resources<Resource<T>>) object);
+        }
+        else if (object instanceof Resource) {
             transformedObject = new AlfrescoContentEntry<>(((Resource<T>) object).getContent());
         }
         defaultWriteInternal(transformedObject,
