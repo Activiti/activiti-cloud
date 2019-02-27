@@ -46,7 +46,10 @@ public class RuntimeTestsConfigurationProperties {
 
     @Value("${graphql.url}")
     private String graphqlUrl;
-    
+
+    @Value("${runtime.bundle.service.name:rb-my-app}")
+    private String runtimeBundleServiceName;
+
     public String getAuditEventUrl() {
         return auditEventUrl;
     }
@@ -66,5 +69,9 @@ public class RuntimeTestsConfigurationProperties {
     public String getGraphqlUrl() {
         return graphqlUrl;
     }
-    
+
+    public String getRuntimeBundleServiceName() {
+        return runtimeBundleServiceName;
+    }
+
 }
