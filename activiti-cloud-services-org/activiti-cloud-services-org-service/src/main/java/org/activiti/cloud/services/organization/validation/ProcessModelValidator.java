@@ -43,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 
 /**
  * {@link ModelValidator} implementation of process models
@@ -142,5 +143,10 @@ public class ProcessModelValidator implements ModelValidator {
     @Override
     public ModelType getHandledModelType() {
         return processModelType;
+    }
+
+    @Override
+    public String getContentType() {
+        return CONTENT_TYPE_XML;
     }
 }

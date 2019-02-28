@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.activiti.cloud.organization.api.Model;
@@ -64,7 +63,7 @@ public class ModelService {
 
     private final ModelTypeService modelTypeService;
 
-    private final Map<String, ModelValidator> modelValidatorsMapByModelType;
+    private final Map<String, List<ModelValidator>> modelValidatorsMapByModelType;
 
     private final JsonConverter<Model> jsonConverter;
 
@@ -79,8 +78,7 @@ public class ModelService {
 
         this.modelValidatorsMapByModelType = modelValidators
                 .stream()
-                .collect(Collectors.toMap((modelValidationService) -> modelValidationService.getHandledModelType().getName(),
-                                          Function.identity()));
+                .collect(Collectors.groupingBy(validator -> validator.getHandledModelType().getName()));
     }
 
     public List<Model> getAllModels(Project project) {
@@ -138,10 +136,13 @@ public class ModelService {
     public FileContent getModelMetadataFileContent(Model model) {
         Model modelWithFullMetadata = findModelById(model.getId()).orElse(model);
         byte[] modelContent = modelRepository.getModelContent(model);
-        String bpmnModelId = findModelValidatorByModelType(model.getType())
+        final String bpmnModelId = findModelValidatorByModelType(model.getType())
+                .stream()
                 .filter(ProcessModelValidator.class::isInstance)
                 .map(ProcessModelValidator.class::cast)
+                .filter(validator -> validator.getContentType().equals(model.getContentType()))
                 .map(validator -> validator.convertAndGetModelId(modelContent))
+                .findAny()
                 .orElseGet(() -> getBpmnModeId(model));
         modelWithFullMetadata.setId(bpmnModelId);
 
@@ -191,13 +192,16 @@ public class ModelService {
     public FileContent validateAndFixModelContent(Model model,
                                                   FileContent fileContent) {
         return findModelValidatorByModelType(model.getType())
+                .stream()
                 .filter(ProcessModelValidator.class::isInstance)
                 .map(ProcessModelValidator.class::cast)
+                .filter(validator -> validator.getContentType().equals(model.getContent()))
                 .map(validator -> validator.convertAndFixModelId(fileContent.getFileContent(),
                                                                  getBpmnModeId(model)))
                 .map(content -> new FileContent(fileContent.getFilename(),
                                                 fileContent.getContentType(),
                                                 content))
+                .findAny()
                 .orElse(fileContent);
     }
 
@@ -262,25 +266,30 @@ public class ModelService {
                                                   extension));
     }
 
-    public Optional<ModelValidator> findModelValidatorByModelType(String modelType) {
-        return Optional.ofNullable(modelValidatorsMapByModelType.get(modelType));
+    public List<ModelValidator> findModelValidatorByModelType(String modelType) {
+        return modelValidatorsMapByModelType.get(modelType);
     }
 
     public void validateModelContent(Model model) {
         validateModelContent(model.getType(),
-                             modelRepository.getModelContent(model));
+                             modelRepository.getModelContent(model),
+                             model.getContentType());
     }
 
     public void validateModelContent(Model model,
                                      FileContent fileContent) {
         validateModelContent(model.getType(),
-                             fileContent.getFileContent());
+                             fileContent.getFileContent(),
+                             fileContent.getContentType());
     }
 
     private void validateModelContent(String modelType,
-                                      byte[] modelContent) {
+                                      byte[] modelContent,
+                                      String contentType) {
         findModelValidatorByModelType(modelType)
-                .ifPresent(modelValidator -> modelValidator.validateModelContent(modelContent));
+                .stream()
+                .filter(validator -> validator.getContentType().equals(contentType))
+                .forEach(validator -> validator.validateModelContent(modelContent));
     }
 
     private ModelType findModelType(Model model) {

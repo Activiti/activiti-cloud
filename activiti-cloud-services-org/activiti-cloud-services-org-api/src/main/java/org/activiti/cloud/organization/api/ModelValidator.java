@@ -24,4 +24,7 @@ public interface ModelValidator {
     void validateModelContent(byte[] modelContent);
 
     ModelType getHandledModelType();
+
+    String getContentType();
+
 }

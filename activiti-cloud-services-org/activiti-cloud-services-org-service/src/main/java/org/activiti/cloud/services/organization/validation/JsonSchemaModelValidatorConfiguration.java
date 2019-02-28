@@ -32,9 +32,17 @@ public class JsonSchemaModelValidatorConfiguration {
     @Value("${activiti.validation.connector-schema:schema/connector-schema.json}")
     private String connectorSchema;
 
+    @Value("${activiti.validation.process-extensions-schema:schema/process-extensions-schema.json}")
+    private String processExtensionsSchema;
+
     @Bean(name = "connectorSchemaLoader")
     public SchemaLoader getConnectorSchemaLoader() throws IOException {
         return buildSchemaLoaderFromClasspath(connectorSchema);
+    }
+
+    @Bean(name = "processExtensionsSchemaLoader")
+    public SchemaLoader getProcessExtensionsSchemaLoader() throws IOException {
+        return buildSchemaLoaderFromClasspath(processExtensionsSchema);
     }
 
     private SchemaLoader buildSchemaLoaderFromClasspath(String schemaFileName) throws IOException {

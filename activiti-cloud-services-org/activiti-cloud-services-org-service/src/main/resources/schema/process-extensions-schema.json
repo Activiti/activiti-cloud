@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Process extensions schema",
+  "description": "Process extensions schema",
+  "type": "object",
+  "definitions": {
+    "extensions": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "The extensions properties",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/properties"
+          }
+        },
+        "mappings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "enum": [
+                "inputs",
+                "outputs"
+              ]
+            },
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "$ref": "#/definitions/mappings"
+              }
+            }
+          }
+        }
+      }
+    },
+    "properties": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "required",
+        "value"
+      ]
+    },
+    "mappings": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "variable",
+            "value"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "dependencies": {
+        "type": [
+          "value"
+        ],
+        "value": [
+          "type"
+        ]
+      }
+    }
+  },
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "extensions": {
+      "$ref": "#/definitions/extensions"
+    }
+  },
+  "required": [
+    "id"
+  ]
+}

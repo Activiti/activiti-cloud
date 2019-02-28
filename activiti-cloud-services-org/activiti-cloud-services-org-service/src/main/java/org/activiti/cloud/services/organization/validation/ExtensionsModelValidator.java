@@ -15,35 +15,31 @@
  */
 package org.activiti.cloud.services.organization.validation;
 
-import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.api.ModelValidator;
+import org.activiti.cloud.organization.api.ProcessModelType;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 
-/**
- * {@link ModelValidator} implementation of connector models
- */
 @Component
-public class ConnectorModelValidator extends JsonSchemaModelValidator {
+public class ExtensionsModelValidator extends JsonSchemaModelValidator {
 
-    private final SchemaLoader connectorSchemaLoader;
+    private final SchemaLoader processExtensionsSchemaLoader;
 
-    private final ConnectorModelType connectorModelType;
+    private final ProcessModelType processModelType;
 
     @Autowired
-    public ConnectorModelValidator(SchemaLoader connectorSchemaLoader,
-                                   ConnectorModelType connectorModelType) {
-        this.connectorSchemaLoader = connectorSchemaLoader;
-        this.connectorModelType = connectorModelType;
+    public ExtensionsModelValidator(SchemaLoader processExtensionsSchemaLoader,
+                                    ProcessModelType processModelType) {
+        this.processExtensionsSchemaLoader = processExtensionsSchemaLoader;
+        this.processModelType = processModelType;
     }
 
     @Override
     public ModelType getHandledModelType() {
-        return connectorModelType;
+        return processModelType;
     }
 
     @Override
@@ -53,6 +49,6 @@ public class ConnectorModelValidator extends JsonSchemaModelValidator {
 
     @Override
     public SchemaLoader schemaLoader() {
-        return connectorSchemaLoader;
+        return processExtensionsSchemaLoader;
     }
 }

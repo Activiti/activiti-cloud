@@ -16,15 +16,15 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.ConnectorModelType;
+import org.activiti.cloud.organization.api.Extensions;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
@@ -49,6 +49,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
@@ -83,22 +84,17 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 public class ModelControllerIT {
 
-    private MockMvc mockMvc;
-
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @Autowired
-    private ObjectMapper mapper;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private ModelRepository modelRepository;
-
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+    private MockMvc mockMvc;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+    @Autowired
+    private ObjectMapper mapper;
+    @Autowired
+    private ProjectRepository projectRepository;
+    @Autowired
+    private ModelRepository modelRepository;
 
     @Before
     public void setUp() {
@@ -359,18 +355,35 @@ public class ModelControllerIT {
     }
 
     @Test
-    public void validateProcessModel() throws Exception {
+    public void validateProcessModelWithValidContent() throws Exception {
+        // given
+        byte[] validContent = resourceAsByteArray("process/x-19022.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "process.xml",
+                                                       CONTENT_TYPE_XML,
+                                                       validContent);
+        Model processModel = modelRepository.createModel(processModel("Process-Model"));
+
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId()).file(file))
+                .andDo(print());
+
+        // then
+        resultActions.andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void validateProcessModelWithInvalidContent() throws Exception {
 
         // given
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "diagram.bpm",
-                                                       "text/plain",
+                                                       CONTENT_TYPE_XML,
                                                        "BPMN diagram".getBytes());
         Model processModel = modelRepository.createModel(processModel("Process-Model"));
-
-        List<ModelValidationError> expectedValidationErrors =
-                Arrays.asList(new ModelValidationError(),
-                              new ModelValidationError());
 
         // when
         final ResultActions resultActions = mockMvc
@@ -381,6 +394,66 @@ public class ModelControllerIT {
 
         // then
         resultActions.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void validateProcessExtensionsWithValidContent() throws Exception {
+
+        // given
+        byte[] validContent = resourceAsByteArray("process-extensions/valid-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       validContent);
+
+        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+                                                                                    new Extensions()));
+
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId()).file(file))
+                .andDo(print());
+
+        // then
+        resultActions.andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void validateProcessExtensionsWithInvalidContent() throws Exception {
+
+        // given
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       invalidContent);
+
+        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+                                                                                    new Extensions()));
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId()).file(file))
+                .andDo(print());
+        // then
+        resultActions.andExpect(status().isBadRequest());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage()).isEqualTo("#/extensions: 2 schema violations found");
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(2)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription)
+                .containsOnly(tuple("inputds is not a valid enum value",
+                                    "#/extensions/mappings/ServiceTask_06crg3b/inputds: inputds is not a valid enum value"),
+                              tuple("required key [type] not found",
+                                    "#/extensions/properties/db995012-b417-4cea-a981-cef287de8e4a: required key [type] not found"));
     }
 
     @Test
