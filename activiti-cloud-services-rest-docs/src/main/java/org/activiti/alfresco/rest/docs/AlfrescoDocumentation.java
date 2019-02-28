@@ -48,11 +48,24 @@ public class AlfrescoDocumentation {
 
     public static ResponseFieldsSnippet pagedResourcesResponseFields() {
         return responseFields(
-                listFieldDescriptors()
+                pagedListFieldDescriptors()
         );
     }
 
+    public static ResponseFieldsSnippet resourcesResponseFields() {
+        return responseFields(
+                listFieldDescriptors()
+        );
+
+    }
+
     private static FieldDescriptor[] listFieldDescriptors() {
+        return new FieldDescriptor[]{subsectionWithPath("list").ignored(),
+                subsectionWithPath("list.entries").description("List of results."),
+                subsectionWithPath("list.entries[].entry").description("Wrapper for each entry in the list of results.")};
+    }
+
+    private static FieldDescriptor[] pagedListFieldDescriptors() {
         return new FieldDescriptor[]{subsectionWithPath("list").ignored(),
                 subsectionWithPath("list.entries").description("List of results."),
                 subsectionWithPath("list.entries[].entry").description("Wrapper for each entry in the list of results."),
@@ -72,7 +85,7 @@ public class AlfrescoDocumentation {
     }
 
     public static ResponseFieldsSnippet alfrescoPagedProcessDefinitions() {
-        List<FieldDescriptor> allDescriptors = new ArrayList<>(Arrays.asList(listFieldDescriptors()));
+        List<FieldDescriptor> allDescriptors = new ArrayList<>(Arrays.asList(pagedListFieldDescriptors()));
         allDescriptors.addAll(Arrays.asList(processDefinitionFieldDescriptors("list.entries[].entry")));
         return responseFields(allDescriptors);
     }
