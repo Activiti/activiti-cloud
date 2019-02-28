@@ -17,7 +17,6 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
-
 import javax.persistence.EntityManager;
 
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -32,10 +31,7 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class VariableCreatedEventHandler implements QueryEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VariableCreatedEventHandler.class);
@@ -44,7 +40,6 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
     private final TaskVariableRepository taskVariableRepository;
     private final EntityManager entityManager;
 
-    @Autowired
     public VariableCreatedEventHandler(VariableRepository variableRepository,
                                        TaskVariableRepository taskVariableRepository,
                                        EntityManager entityManager) {
@@ -126,10 +121,9 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
         if(variableCreatedEvent.getEntity().getProcessInstanceId() == null){
             return null;
         }else {
-            ProcessInstanceEntity processInstanceEntity = entityManager
+            return entityManager
                     .getReference(ProcessInstanceEntity.class,
                             variableCreatedEvent.getEntity().getProcessInstanceId());
-            return processInstanceEntity;
         }
     }
 

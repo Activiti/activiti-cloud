@@ -20,17 +20,13 @@ import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskVariableUpdater {
 
     private final EntityFinder entityFinder;
 
     private TaskVariableRepository variableRepository;
 
-    @Autowired
     public TaskVariableUpdater(EntityFinder entityFinder,
                            TaskVariableRepository variableRepository) {
         this.entityFinder = entityFinder;

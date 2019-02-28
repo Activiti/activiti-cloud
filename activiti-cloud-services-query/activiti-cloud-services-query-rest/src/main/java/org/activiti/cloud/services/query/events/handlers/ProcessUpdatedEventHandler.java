@@ -25,15 +25,11 @@ import org.activiti.cloud.api.process.model.events.CloudProcessUpdatedEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ProcessUpdatedEventHandler implements QueryEventHandler {
 
     private ProcessInstanceRepository processInstanceRepository;
 
-    @Autowired
     public ProcessUpdatedEventHandler(ProcessInstanceRepository processInstanceRepository) {
         this.processInstanceRepository = processInstanceRepository;
     }

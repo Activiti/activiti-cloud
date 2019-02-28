@@ -22,17 +22,13 @@ import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskVariableDeletedEventHandler {
 
     private final TaskVariableRepository variableRepository;
 
     private final EntityFinder entityFinder;
 
-    @Autowired
     public TaskVariableDeletedEventHandler(TaskVariableRepository variableRepository,
                                            EntityFinder entityFinder) {
         this.variableRepository = variableRepository;

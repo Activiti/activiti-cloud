@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.conf;
 
-import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
-import org.activiti.cloud.services.query.events.handlers.ProcessDeployedEventHandler;
 import org.activiti.cloud.services.query.rest.QueryRelProvider;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionResourceAssembler;
 import org.activiti.cloud.services.security.ProcessDefinitionFilter;
@@ -43,12 +41,6 @@ public class QueryRestAutoConfiguration {
     @ConditionalOnMissingBean
     public ProcessDefinitionResourceAssembler processDefinitionResourceAssembler() {
         return new ProcessDefinitionResourceAssembler();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ProcessDeployedEventHandler processDeployedEventHandler(ProcessDefinitionRepository processDefinitionRepository) {
-        return new ProcessDeployedEventHandler(processDefinitionRepository);
     }
 
     @Bean

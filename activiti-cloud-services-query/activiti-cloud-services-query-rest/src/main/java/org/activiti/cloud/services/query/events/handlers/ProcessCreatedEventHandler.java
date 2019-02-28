@@ -26,16 +26,12 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ProcessCreatedEventHandler implements QueryEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessCreatedEventHandler.class);
     private ProcessInstanceRepository processInstanceRepository;
 
-    @Autowired
     public ProcessCreatedEventHandler(ProcessInstanceRepository processInstanceRepository) {
         this.processInstanceRepository = processInstanceRepository;
     }

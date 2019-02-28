@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.starter.tests;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import org.activiti.api.process.model.ProcessDefinition;
@@ -23,19 +25,18 @@ import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
+import org.activiti.cloud.services.query.test.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starters.test.MyProducer;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -50,18 +51,17 @@ import static org.assertj.core.api.Assertions.tuple;
 @DirtiesContext
 public class QueryProcessDefinitionIT {
 
-    private static final String PROC_DEFINITIONS_URL = "/v1/process-definitions";
-    private static final ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> PAGED_PROCESS_DEFINITION_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
-    };
-
     @Autowired
     private KeycloakTokenProducer keycloakTokenProducer;
 
     @Autowired
-    private TestRestTemplate testRestTemplate;
+    private ProcessDefinitionRestTemplate restTemplate;
 
     @Autowired
     private ProcessDefinitionRepository processDefinitionRepository;
+
+    @Autowired
+    private ProcessModelRepository processModelRepository;
 
     @Autowired
     private MyProducer producer;
@@ -73,6 +73,7 @@ public class QueryProcessDefinitionIT {
 
     @After
     public void tearDown() {
+        processModelRepository.deleteAll();
         processDefinitionRepository.deleteAll();
     }
 
@@ -92,7 +93,7 @@ public class QueryProcessDefinitionIT {
                       new CloudProcessDeployedEventImpl(secondProcessDefinition));
 
         //when
-        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = executeRequestGetProcDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
 
         //then
         assertThat(responseEntity.getBody())
@@ -108,23 +109,42 @@ public class QueryProcessDefinitionIT {
                                        "mySecondProcess"));
     }
 
-    private ResponseEntity<PagedResources<CloudProcessDefinition>> executeRequestGetProcDefinitions() {
-        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(PROC_DEFINITIONS_URL,
-                                                                                                          HttpMethod.GET,
-                                                                                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                          PAGED_PROCESS_DEFINITION_RESPONSE_TYPE);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        return responseEntity;
-    }
+    @Test
+    public void shouldGetAvailableProcessModels() throws Exception {
+        //given
+        ProcessDefinitionImpl firstProcessDefinition = new ProcessDefinitionImpl();
+        firstProcessDefinition.setId(UUID.randomUUID().toString());
+        firstProcessDefinition.setKey("myFirstProcessKey");
+        firstProcessDefinition.setName("My First Process");
 
-    private ResponseEntity<PagedResources<CloudProcessDefinition>> executeRequestGetProcDefinitionsFilteredOnKey(String key) {
-        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(PROC_DEFINITIONS_URL + "?key={key}",
-                                                                                                          HttpMethod.GET,
-                                                                                                          keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                          PAGED_PROCESS_DEFINITION_RESPONSE_TYPE,
-                                                                                                          key);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        return responseEntity;
+        ProcessDefinitionImpl secondProcessDefinition = new ProcessDefinitionImpl();
+        secondProcessDefinition.setId(UUID.randomUUID().toString());
+        secondProcessDefinition.setKey("mySecondProcess");
+        secondProcessDefinition.setName("My second Process");
+        CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(firstProcessDefinition);
+        firstProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
+                                                                                   StandardCharsets.UTF_8));
+        CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(secondProcessDefinition);
+        secondProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
+                StandardCharsets.UTF_8));
+        producer.send(firstProcessDeployedEvent,
+                      secondProcessDeployedEvent);
+
+        //when
+        ResponseEntity<String> responseEntity = restTemplate.getProcDefinitionModel(firstProcessDefinition.getId());
+
+        //then
+        assertThat(responseEntity.getBody())
+                .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/processWithVariables.bpmn20.xml"));
+
+        //when
+        responseEntity = restTemplate.getProcDefinitionModel(secondProcessDefinition.getId());
+
+        //then
+        assertThat(responseEntity.getBody())
+                .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
     }
 
     @Test
@@ -143,7 +163,7 @@ public class QueryProcessDefinitionIT {
                       new CloudProcessDeployedEventImpl(secondProcessDefinition));
 
         //when
-        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = executeRequestGetProcDefinitionsFilteredOnKey("mySecondProcess");
+        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitionsFilteredOnKey("mySecondProcess");
 
         //then
         assertThat(responseEntity.getBody())
@@ -174,7 +194,7 @@ public class QueryProcessDefinitionIT {
                       new CloudProcessDeployedEventImpl(duplicatedProcessDefinition));
 
         //when
-        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = executeRequestGetProcDefinitions();
+        ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
 
         //then
         assertThat(responseEntity.getBody())
@@ -188,4 +208,32 @@ public class QueryProcessDefinitionIT {
                                        "My Process updated",
                                        "Updated description"));
     }
+
+    @Test
+    public void shouldUpdateProcessModelOnDuplicate() throws Exception {
+        //given
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId(UUID.randomUUID().toString());
+        processDefinition.setKey("myFirstProcessKey");
+        processDefinition.setName("My First Process");
+
+        CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
+        firstProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
+                StandardCharsets.UTF_8));
+        CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
+        secondProcessDeployedEvent.setProcessModelContent(IOUtils.toString(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
+                StandardCharsets.UTF_8));
+        producer.send(firstProcessDeployedEvent,
+                      secondProcessDeployedEvent);
+
+        //when
+        ResponseEntity<String> responseEntity = restTemplate.getProcDefinitionModel(processDefinition.getId());
+
+        //then
+        assertThat(responseEntity.getBody())
+                .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
+    }
+
 }

@@ -21,7 +21,9 @@ import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
+import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +31,13 @@ public class ProcessDeployedEventHandler implements QueryEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessDeployedEventHandler.class);
 
-    private ProcessDefinitionRepository repository;
+    private ProcessDefinitionRepository processDefinitionRepository;
+    private ProcessModelRepository processModelRepository;
 
-    public ProcessDeployedEventHandler(ProcessDefinitionRepository repository) {
-        this.repository = repository;
+    public ProcessDeployedEventHandler(ProcessDefinitionRepository processDefinitionRepository,
+                                       ProcessModelRepository processModelRepository) {
+        this.processDefinitionRepository = processDefinitionRepository;
+        this.processModelRepository = processModelRepository;
     }
 
     @Override
@@ -52,7 +57,12 @@ public class ProcessDeployedEventHandler implements QueryEventHandler {
         processDefinition.setName(eventProcessDefinition.getName());
         processDefinition.setVersion(eventProcessDefinition.getVersion());
         processDefinition.setServiceType(processDeployedEvent.getServiceType());
-        repository.save(processDefinition);
+        processDefinitionRepository.save(processDefinition);
+
+        ProcessModelEntity processModelEntity = new ProcessModelEntity(processDefinition,
+                                                                       processDeployedEvent.getProcessModelContent());
+        processModelEntity.setId(processDefinition.getId());
+        processModelRepository.save(processModelEntity);
     }
 
     @Override

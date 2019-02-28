@@ -22,15 +22,11 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
 
     private final TaskCandidateUserRepository taskCandidateUserRepository;
 
-    @Autowired
     public TaskCandidateUserAddedEventHandler(TaskCandidateUserRepository taskCandidateUserRepository) {
         this.taskCandidateUserRepository = taskCandidateUserRepository;
     }

@@ -26,9 +26,7 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskCreatedEventHandler implements QueryEventHandler {
 
     private final TaskRepository taskRepository;

@@ -26,15 +26,11 @@ import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ProcessResumedEventHandler implements QueryEventHandler {
 
     private ProcessInstanceRepository processInstanceRepository;
 
-    @Autowired
     public ProcessResumedEventHandler(ProcessInstanceRepository processInstanceRepository) {
         this.processInstanceRepository = processInstanceRepository;
     }

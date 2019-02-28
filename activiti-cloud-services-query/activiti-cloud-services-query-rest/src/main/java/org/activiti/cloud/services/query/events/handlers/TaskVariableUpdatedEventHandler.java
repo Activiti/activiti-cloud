@@ -19,15 +19,11 @@ package org.activiti.cloud.services.query.events.handlers;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskVariableUpdatedEventHandler {
 
     private final TaskVariableUpdater variableUpdater;
 
-    @Autowired
     public TaskVariableUpdatedEventHandler(TaskVariableUpdater variableUpdater) {
         this.variableUpdater = variableUpdater;
     }

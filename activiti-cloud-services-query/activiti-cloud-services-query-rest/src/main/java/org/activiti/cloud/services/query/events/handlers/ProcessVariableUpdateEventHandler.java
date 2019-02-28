@@ -19,15 +19,11 @@ package org.activiti.cloud.services.query.events.handlers;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ProcessVariableUpdateEventHandler {
 
     private final ProcessVariableUpdater variableUpdater;
 
-    @Autowired
     public ProcessVariableUpdateEventHandler(ProcessVariableUpdater variableUpdater) {
         this.variableUpdater = variableUpdater;
     }

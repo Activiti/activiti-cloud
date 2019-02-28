@@ -25,15 +25,11 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskCancelledEventHandler implements QueryEventHandler {
 
     private final TaskRepository taskRepository;
 
-    @Autowired
     public TaskCancelledEventHandler(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
     }

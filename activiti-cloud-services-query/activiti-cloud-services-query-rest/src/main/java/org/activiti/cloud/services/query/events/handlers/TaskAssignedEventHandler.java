@@ -26,15 +26,11 @@ import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskAssignedEventHandler implements QueryEventHandler {
 
     private final TaskRepository taskRepository;
 
-    @Autowired
     public TaskAssignedEventHandler(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
     }

@@ -22,17 +22,13 @@ import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ProcessVariableDeletedEventHandler {
 
     private final VariableRepository variableRepository;
 
     private final EntityFinder entityFinder;
 
-    @Autowired
     public ProcessVariableDeletedEventHandler(VariableRepository variableRepository,
                                               EntityFinder entityFinder) {
         this.variableRepository = variableRepository;

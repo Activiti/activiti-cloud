@@ -23,17 +23,13 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class VariableUpdatedEventHandler implements QueryEventHandler {
 
     private ProcessVariableUpdateEventHandler processVariableUpdateEventHandler;
 
     private TaskVariableUpdatedEventHandler taskVariableUpdatedEventHandler;
 
-    @Autowired
     public VariableUpdatedEventHandler(ProcessVariableUpdateEventHandler processVariableUpdateEventHandler,
                                        TaskVariableUpdatedEventHandler taskVariableUpdatedEventHandler) {
         this.processVariableUpdateEventHandler = processVariableUpdateEventHandler;

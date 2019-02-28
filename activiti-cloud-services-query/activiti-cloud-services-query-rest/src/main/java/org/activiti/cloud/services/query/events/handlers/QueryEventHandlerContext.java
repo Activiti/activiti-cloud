@@ -24,17 +24,13 @@ import java.util.stream.Collectors;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class QueryEventHandlerContext {
 
     private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContext.class);
 
     private Map<String, QueryEventHandler> handlers;
 
-    @Autowired
     public QueryEventHandlerContext(Set<QueryEventHandler> handlers) {
         this.handlers = handlers.stream().collect(Collectors.toMap(QueryEventHandler::getHandledEvent,
                                                                    Function.identity()));
