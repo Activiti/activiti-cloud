@@ -49,10 +49,9 @@ import org.activiti.cloud.services.events.listeners.CloudVariableDeletedProducer
 import org.activiti.cloud.services.events.listeners.CloudVariableUpdatedProducer;
 import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
-import org.activiti.engine.RepositoryService;
-import org.activiti.runtime.api.model.impl.APIProcessDefinitionConverter;
 import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
+import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -318,12 +317,17 @@ public class CloudEventsAutoConfiguration {
     }
 
     @Bean
-    public CloudProcessDeployedProducer cloudProcessDeployedProducer(RepositoryService repositoryService,
-                                                                     APIProcessDefinitionConverter converter,
-                                                                     RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                                     ProcessEngineChannels processEngineChannels) {
-        return new CloudProcessDeployedProducer(repositoryService, converter, runtimeBundleInfoAppender,
-                                                processEngineChannels);
+    public CloudProcessDeployedProducer cloudProcessDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                                                     ProcessEngineChannels processEngineChannels,
+                                                                     RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
+        return new CloudProcessDeployedProducer(runtimeBundleInfoAppender,
+                                                processEngineChannels,
+                                                runtimeBundleMessageBuilderFactory);
+    }
+
+    @Bean
+    public RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory(RuntimeBundleProperties properties) {
+        return new RuntimeBundleMessageBuilderFactory(properties);
     }
 
 }

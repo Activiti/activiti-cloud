@@ -18,37 +18,36 @@ package org.activiti.cloud.services.events.listeners;
 
 import java.util.Arrays;
 import java.util.List;
-
-import org.activiti.cloud.api.model.shared.events.*;
 import java.util.stream.Collectors;
+
+import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.events.ProcessDeployedEvent;
+import org.activiti.api.runtime.event.impl.ProcessDeployedEventImpl;
+import org.activiti.api.runtime.event.impl.ProcessDeployedEvents;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.repository.ProcessDefinitionQuery;
-import org.activiti.runtime.api.model.impl.APIProcessDefinitionConverter;
+import org.activiti.cloud.services.events.message.MessageBuilderAppenderChain;
+import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-
+import org.springframework.messaging.support.MessageBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -56,12 +55,6 @@ public class CloudProcessDeployedProducerTest {
 
     @InjectMocks
     private CloudProcessDeployedProducer processDeployedProducer;
-
-    @Mock
-    private RepositoryService repositoryService;
-
-    @Mock
-    private APIProcessDefinitionConverter processDefinitionConverter;
 
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
@@ -72,57 +65,51 @@ public class CloudProcessDeployedProducerTest {
     @Mock
     private MessageChannel auditProducer;
 
+    @Mock
+    private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
+
+    @Mock
+    private MessageBuilderAppenderChain messageBuilderAppenderChain;
+
     @Captor
-    private ArgumentCaptor<Message<CloudRuntimeEvent<?, ?>[]>> messageCaptor;
+    private ArgumentCaptor<CloudRuntimeEvent<?, ?>[]> messagePayloadCaptor;
 
     @Before
     public void setUp() {
         initMocks(this);
         when(producer.auditProducer()).thenReturn(auditProducer);
+        when(runtimeBundleMessageBuilderFactory.create()).thenReturn(messageBuilderAppenderChain);
     }
 
     @Test
     public void shouldSendMessageWithDeployedProcessesWhenWebApplicationTypeIsServlet() {
         //given
-        ProcessDefinitionQuery definitionQuery = mock(ProcessDefinitionQuery.class);
-        given(repositoryService.createProcessDefinitionQuery()).willReturn(definitionQuery);
-
-        List<ProcessDefinition> internalProcessDefinitions = Arrays.asList(mock(ProcessDefinition.class),
-                                                                           mock(ProcessDefinition.class));
-
-        given(definitionQuery.list()).willReturn(internalProcessDefinitions);
-
-        List<org.activiti.api.process.model.ProcessDefinition> apiProcessDefinitions = Arrays.asList(mock(org.activiti.api.process.model.ProcessDefinition.class),
-                                                                                                     mock(org.activiti.api.process.model.ProcessDefinition.class));
-        given(processDefinitionConverter.from(internalProcessDefinitions)).willReturn(apiProcessDefinitions);
+        ProcessDefinition def1 = mock(ProcessDefinition.class);
+        ProcessDefinition def2 = mock(ProcessDefinition.class);
+        List<ProcessDeployedEvent> processDeployedEventList = Arrays.asList(new ProcessDeployedEventImpl(def1,
+                                                                                                         "content1"),
+                                                                            new ProcessDeployedEventImpl(def2,
+                                                                                                         "content2"));
+        given(messageBuilderAppenderChain.withPayload(ArgumentMatchers.<CloudRuntimeEvent<?, ?>[]>any())).willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2]));
 
         //when
-        processDeployedProducer.onApplicationEvent(buildApplicationReadyEvent(WebApplicationType.SERVLET));
+        processDeployedProducer.sendProcessDeployedEvents(new ProcessDeployedEvents(processDeployedEventList));
 
         //then
-        verify(runtimeBundleInfoAppender, times(2)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
-        verify(auditProducer).send(messageCaptor.capture());
-        Message<CloudRuntimeEvent<?, ?>[]> message = messageCaptor.getValue();
-        List<org.activiti.api.process.model.ProcessDefinition> processDefinitions = Arrays.stream(message.getPayload()).map(e -> (org.activiti.api.process.model.ProcessDefinition) e.getEntity()).collect(Collectors.toList());
-        assertThat(processDefinitions)
-        .containsExactlyElementsOf(apiProcessDefinitions);           
-     }
+        verify(runtimeBundleInfoAppender,
+               times(2)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(auditProducer).send(any());
 
-    private ApplicationReadyEvent buildApplicationReadyEvent(WebApplicationType applicationType) {
-        ApplicationReadyEvent applicationReadyEvent = mock(ApplicationReadyEvent.class);
-        SpringApplication springApplication = mock(SpringApplication.class);
-        given(springApplication.getWebApplicationType()).willReturn(applicationType);
-        given(applicationReadyEvent.getSpringApplication()).willReturn(springApplication);
-        return applicationReadyEvent;
+        verify(messageBuilderAppenderChain).withPayload(messagePayloadCaptor.capture());
+        List<CloudProcessDeployedEvent> cloudProcessDeployedEvents = Arrays.stream(messagePayloadCaptor.getValue())
+                .map(CloudProcessDeployedEvent.class::cast)
+                .collect(Collectors.toList());
+        assertThat(cloudProcessDeployedEvents)
+                .extracting(CloudProcessDeployedEvent::getEntity,
+                            CloudProcessDeployedEvent::getProcessModelContent)
+                .containsOnly(tuple(def1,
+                                    "content1"),
+                              tuple(def2,
+                                    "content2"));
     }
-
-    @Test
-    public void shouldNotSentMessageWhenWebApplicationTypeIsNone() {
-        //when
-        processDeployedProducer.onApplicationEvent(buildApplicationReadyEvent(WebApplicationType.NONE));
-
-        //then
-        verifyZeroInteractions(auditProducer);
-    }
-
 }

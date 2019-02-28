@@ -16,53 +16,42 @@
 
 package org.activiti.cloud.services.events.listeners;
 
-import java.util.List;
-
-import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.runtime.event.impl.ProcessDeployedEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
-import org.activiti.engine.RepositoryService;
-import org.activiti.runtime.api.model.impl.APIProcessDefinitionConverter;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.messaging.support.MessageBuilder;
+import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
+import org.springframework.context.event.EventListener;
 
-public class CloudProcessDeployedProducer implements ApplicationListener<ApplicationReadyEvent> {
+public class CloudProcessDeployedProducer {
 
-    private RepositoryService repositoryService;
-    private APIProcessDefinitionConverter processDefinitionConverter;
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private ProcessEngineChannels producer;
+    private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
 
-    public CloudProcessDeployedProducer(RepositoryService repositoryService,
-                                        APIProcessDefinitionConverter processDefinitionConverter,
-                                        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                        ProcessEngineChannels producer) {
-        this.repositoryService = repositoryService;
-        this.processDefinitionConverter = processDefinitionConverter;
+    public CloudProcessDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                        ProcessEngineChannels producer,
+                                        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.producer = producer;
+        this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
     }
 
-    @Override
-    public void onApplicationEvent(ApplicationReadyEvent event) {
-        if (!WebApplicationType.NONE.equals(event.getSpringApplication().getWebApplicationType())) {
-            List<ProcessDefinition> processDefinitions = processDefinitionConverter.from(repositoryService.createProcessDefinitionQuery().list());
-            producer.auditProducer().send(
-                    MessageBuilder
-                            .withPayload(
-                                    processDefinitions
-                                            .stream()
-                                            .map(definition -> {
-                                                CloudProcessDeployedEventImpl deployedEvent = new CloudProcessDeployedEventImpl(definition);
-                                                runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(deployedEvent);
-                                                return deployedEvent;
-                                            })
-                                            .toArray(CloudRuntimeEvent<?, ?>[]::new))
-                            .build());
-        }
+    @EventListener
+    public void sendProcessDeployedEvents(ProcessDeployedEvents processDeployedEvents) {
+        producer.auditProducer().send(
+                runtimeBundleMessageBuilderFactory.create()
+                        .withPayload(
+                                processDeployedEvents.getProcessDeployedEvents()
+                                        .stream()
+                                        .map(processDeployedEvent -> {
+                                            CloudProcessDeployedEventImpl cloudProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDeployedEvent.getEntity());
+                                            cloudProcessDeployedEvent.setProcessModelContent(processDeployedEvent.getProcessModelContent());
+                                            runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessDeployedEvent);
+                                            return cloudProcessDeployedEvent;
+                                        })
+                                        .toArray(CloudRuntimeEvent<?, ?>[]::new))
+                        .build());
     }
 }

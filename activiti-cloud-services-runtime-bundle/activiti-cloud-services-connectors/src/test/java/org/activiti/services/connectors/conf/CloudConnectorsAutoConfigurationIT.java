@@ -76,11 +76,6 @@ public class CloudConnectorsAutoConfigurationIT {
     private String routingKeyExpression;
     
 
-    @Before
-    public void setUp() {
-        doNothing().when(processDeployedProducer).onApplicationEvent(any());
-    }
-
     @Test
     public void shouldProvideRoutingKeyExpression() {
         assertThat(routingKeyExpression).isEqualTo(HEADERS_ROUTING_KEY);
