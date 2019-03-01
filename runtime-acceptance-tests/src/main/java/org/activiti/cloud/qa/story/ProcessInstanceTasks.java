@@ -492,4 +492,12 @@ public class ProcessInstanceTasks {
     }
 
 
+    @Then("the user is able to delete all process instances in query service")
+    public void deleteAllProcessInstancesQuery(){
+        assertThat(processQuerySteps.getAllProcessInstances()).isNotNull();
+        processQueryAdminSteps.deleteProcessInstancesAdmin();
+        assertThat(processQuerySteps.getAllProcessInstances()).isNull();
+    }
+
+
 }

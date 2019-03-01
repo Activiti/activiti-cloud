@@ -33,6 +33,7 @@ import org.activiti.cloud.acc.core.steps.audit.admin.AuditAdminSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.query.TaskQuerySteps;
 import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
+import org.activiti.cloud.acc.core.steps.query.admin.TaskQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.TaskRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.admin.ProcessRuntimeAdminSteps;
@@ -68,6 +69,9 @@ public class Tasks {
         
     @Steps
     private ProcessQueryAdminSteps processQueryAdminSteps;
+
+    @Steps
+    private TaskQueryAdminSteps taskQueryAdminSteps;
 
     @Steps
     private AuditSteps auditSteps;
@@ -162,12 +166,12 @@ public class Tasks {
 
         CloudProcessInstance processFromQuery = processQuerySteps.getProcessInstance(Serenity.sessionVariableCalled("processInstanceId").toString());
         assertThat(processFromQuery).isNotNull();
-      
+
         CloudTask taskFromRB = taskRuntimeBundleSteps.getTaskById(newTask.getId());
         assertThat(taskFromRB).isNotNull();
         assertThat(taskFromRB.getFormKey()).isEqualTo("taskForm");
         assertThat(taskFromRB.getProcessDefinitionId()).isEqualTo(processFromQuery.getProcessDefinitionId());
-        
+
         CloudTask taskFromQuery = taskQuerySteps.getTaskById(newTask.getId());
         assertThat(taskFromQuery).isNotNull();
         assertThat(taskFromQuery.getFormKey()).isEqualTo("taskForm");
@@ -370,5 +374,15 @@ public class Tasks {
     public void checkTaskStatusInRBAndQuery(Task.TaskStatus taskStatus){
         taskRuntimeBundleSteps.checkTaskStatus(newTask.getId(), taskStatus);
         taskQuerySteps.checkTaskStatus(newTask.getId(), taskStatus);
+    }
+
+    @Then("the user is able to delete all tasks in query service")
+    public void deleteAllTasksQuery(){
+        //check embedded tasks have already been deleted along with the processes they belong to
+        assertThat(taskQuerySteps.getStandaloneTasks()).isEqualTo(taskQuerySteps.getAllTasks());
+        //check standalone tasks
+        assertThat(taskQuerySteps.getAllTasks()).isNotNull();
+        taskQueryAdminSteps.deleteTasks();
+        assertThat(taskQuerySteps.getAllTasks()).isNull();
     }
 }
