@@ -28,7 +28,9 @@ import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.acc.core.services.audit.AuditService;
 import org.activiti.cloud.acc.core.services.audit.admin.AuditAdminService;
 import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
+import org.activiti.cloud.acc.core.services.query.ProcessModelQueryService;
 import org.activiti.cloud.acc.core.services.query.TaskQueryService;
+import org.activiti.cloud.acc.core.services.query.admin.ProcessModelQueryAdminService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminService;
 import org.activiti.cloud.acc.core.services.query.admin.TaskQueryAdminService;
 import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
@@ -194,4 +196,21 @@ public class RuntimeFeignConfiguration {
                 .target(ProcessVariablesRuntimeService.class,
                         runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
+
+    @Bean
+    public ProcessModelQueryService processModelQueryService(){
+        return FeignRestDataClient
+                .builder(new feign.codec.Encoder.Default(),
+                         new feign.codec.Decoder.Default())
+                .target(ProcessModelQueryService.class, runtimeTestsConfigurationProperties.getQueryUrl());
+    }
+
+    @Bean
+    public ProcessModelQueryAdminService processModelQueryAdminService(){
+        return FeignRestDataClient
+                .builder(new feign.codec.Encoder.Default(),
+                         new feign.codec.Decoder.Default())
+                .target(ProcessModelQueryAdminService.class, runtimeTestsConfigurationProperties.getQueryUrl());
+    }
+
 }

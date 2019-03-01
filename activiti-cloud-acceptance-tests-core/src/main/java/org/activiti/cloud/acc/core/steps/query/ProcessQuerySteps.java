@@ -1,17 +1,18 @@
 package org.activiti.cloud.acc.core.steps.query;
 
+import java.util.Collection;
+
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
+import org.activiti.cloud.acc.core.services.query.ProcessModelQueryService;
 import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
-
-import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -21,6 +22,9 @@ public class ProcessQuerySteps {
 
     @Autowired
     private ProcessQueryService processQueryService;
+
+    @Autowired
+    private ProcessModelQueryService processModelQueryService;
 
     @Step
     public void checkServicesHealth() {
@@ -39,7 +43,7 @@ public class ProcessQuerySteps {
 
     @Step
     public void checkProcessInstanceStatus(String processInstanceId,
-                                           ProcessInstance.ProcessInstanceStatus expectedStatus) throws Exception {
+                                           ProcessInstance.ProcessInstanceStatus expectedStatus) {
 
         await().untilAsserted(() -> {
 
@@ -54,7 +58,7 @@ public class ProcessQuerySteps {
     }
 
     @Step
-    public void checkProcessInstanceHasVariable(String processInstanceId, String variableName) throws Exception {
+    public void checkProcessInstanceHasVariable(String processInstanceId, String variableName) {
 
         await().untilAsserted(() -> {
             assertThat(variableName).isNotNull();
@@ -77,6 +81,11 @@ public class ProcessQuerySteps {
     @Step
     public PagedResources<ProcessDefinition> getProcessDefinitions(){
         return processQueryService.getProcessDefinitions();
+    }
+
+    @Step
+    public String getProcessModel(String processDefinitionId){
+        return processModelQueryService.getProcessModel(processDefinitionId);
     }
 
     @Step
