@@ -27,6 +27,7 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
@@ -62,15 +63,18 @@ public class TaskVariablesIT {
 
     @Autowired
     private TaskRestTemplate taskRestTemplate;
+    
+    @Autowired
+    private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
-
-    public static final String TASK_VARIABLES_URL = "/v1/taskId/";
-
+    
     @Before
     public void setUp() {
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("hruser");
+
         ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
@@ -89,10 +93,10 @@ public class TaskVariablesIT {
         ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
-        Map<String, Object> taskVariables = new HashMap<>();
-        taskVariables.put("var2",
-                          "test2");
-        taskRestTemplate.setVariables(taskId, taskVariables);
+      
+        taskRestTemplate.claim(taskId);
+        
+        taskRestTemplate.createVariable(taskId, "var2", "test2");
 
         //when
         ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(taskId);
@@ -112,12 +116,11 @@ public class TaskVariablesIT {
         assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
 
         // give
-        taskVariables = new HashMap<>();
-        taskVariables.put("var2",
-                          "test2-update");
-        taskVariables.put("var3",
-                          "test3");
-        taskRestTemplate.setVariables(taskId, taskVariables);
+        taskRestTemplate.updateVariable(taskId, "var2", "test2-update" );
+        
+        
+        taskRestTemplate.createVariable(taskId, "var3", "test3" );
+
 
         // when
         variablesResponse = taskRestTemplate.getVariables(taskId);
@@ -127,8 +130,70 @@ public class TaskVariablesIT {
         assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var3","test3",variablesResponse.getBody().getContent())).isTrue();
+        
+        //given
+        taskRestTemplate.updateVariable(taskId, "var3", "test3-update");
+
+        // when
+        variablesResponse = taskRestTemplate.getVariables(taskId);
+
+        // then
+        assertThat(variablesResponse).isNotNull();
+        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var3","test3-update",variablesResponse.getBody().getContent())).isTrue();
 
 
+    }
+    
+    @Test
+    public void adminShouldSetGetUpdateTaskVariables() {
+        //given
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("var1",
+                      "test1");
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                                      variables);
+        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
+
+        String taskId = tasks.getBody().getContent().iterator().next().getId();
+        
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        taskRestTemplate.adminCreateVariable(taskId, "var2", "test2");
+
+        //when
+        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.adminGetVariables(taskId);
+
+        //then
+        assertThat(variablesResponse).isNotNull();
+        assertThat(variablesContainEntry("var2","test2",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
+
+    
+        //given
+        taskRestTemplate.adminUpdateVariable(taskId, "var2","test2-update");
+        taskRestTemplate.adminCreateVariable(taskId, "var3","test3");
+
+        // when
+        variablesResponse = taskRestTemplate.adminGetVariables(taskId);
+
+        // then
+        assertThat(variablesResponse).isNotNull();
+        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var3","test3",variablesResponse.getBody().getContent())).isTrue();
+        
+        //given
+        taskRestTemplate.adminUpdateVariable(taskId, "var3", "test3-update");
+
+        // when
+        variablesResponse = taskRestTemplate.adminGetVariables(taskId);
+
+        // then
+        assertThat(variablesResponse).isNotNull();
+        assertThat(variablesContainEntry("var2","test2-update",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("var3","test3-update",variablesResponse.getBody().getContent())).isTrue();
     }
 
     private boolean variablesContainEntry(String key, Object value, Collection<CloudVariableInstance> variableCollection){

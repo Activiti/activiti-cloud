@@ -12,8 +12,9 @@ import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.SuspendProcessPayload;
 import org.activiti.api.task.model.payloads.ClaimTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.ReleaseTaskPayload;
-import org.activiti.api.task.model.payloads.SetTaskVariablesPayload;
+import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Profile;
@@ -37,9 +38,10 @@ public class CommandEndPointITStreamHandler {
     private AtomicBoolean releasedTaskAck = new AtomicBoolean(false);
     private AtomicBoolean completedTaskAck = new AtomicBoolean(false);
     private AtomicBoolean sendSignalAck = new AtomicBoolean(false);
-    private AtomicBoolean setTaskVariablesAck = new AtomicBoolean(false);
     private AtomicBoolean setProcessVariablesAck = new AtomicBoolean(false);
     private AtomicBoolean removeProcessVariablesAck = new AtomicBoolean(false);
+    private AtomicBoolean createTaskVariableAck = new AtomicBoolean(false);
+    private AtomicBoolean updateTaskVariableAck = new AtomicBoolean(false);
 
     @StreamListener(MessageClientStream.MY_CMD_RESULTS)
     public <T extends Result> void consumeStartProcessInstanceResults(Result result) {
@@ -61,8 +63,10 @@ public class CommandEndPointITStreamHandler {
             completedTaskAck.set(true);
         } else if (result.getPayload() instanceof SignalPayload) {
             sendSignalAck.set(true);
-        } else if (result.getPayload() instanceof SetTaskVariablesPayload) {
-            setTaskVariablesAck.set(true);
+        } else if (result.getPayload() instanceof CreateTaskVariablePayload) {
+            createTaskVariableAck.set(true);
+        } else if (result.getPayload() instanceof UpdateTaskVariablePayload) {
+            updateTaskVariableAck.set(true);
         } else if (result.getPayload() instanceof SetProcessVariablesPayload) {
             setProcessVariablesAck.set(true);
         } else if (result.getPayload() instanceof RemoveProcessVariablesPayload) {
@@ -102,8 +106,12 @@ public class CommandEndPointITStreamHandler {
         return sendSignalAck;
     }
 
-    public AtomicBoolean getSetTaskVariablesAck() {
-        return setTaskVariablesAck;
+    public AtomicBoolean getCreateTaskVariableAck() {
+        return createTaskVariableAck;
+    }
+    
+    public AtomicBoolean getUpdateTaskVariableAck() {
+        return updateTaskVariableAck;
     }
 
     public AtomicBoolean getSetProcessVariablesAck() {

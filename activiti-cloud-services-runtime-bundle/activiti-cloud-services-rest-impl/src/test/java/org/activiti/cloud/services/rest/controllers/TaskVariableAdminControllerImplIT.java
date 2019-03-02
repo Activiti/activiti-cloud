@@ -24,7 +24,7 @@ import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
-import org.activiti.api.task.runtime.TaskRuntime;
+import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -63,7 +63,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = TaskVariableControllerImpl.class, secure = false)
+@WebMvcTest(controllers = TaskVariableAdminControllerImpl.class, secure = false)
 @EnableSpringDataWebSupport()
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
@@ -72,7 +72,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ServicesRestAutoConfiguration.class})
-public class TaskVariableControllerImplIT {
+public class TaskVariableAdminControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "task-variable";
 
@@ -83,7 +83,7 @@ public class TaskVariableControllerImplIT {
     private ObjectMapper mapper;
 
     @MockBean
-    private TaskRuntime taskRuntime;
+    private TaskAdminRuntime taskRuntime;
 
     @SpyBean
     private TaskVariableInstanceResourceAssembler variableInstanceResourceAssembler;
@@ -126,23 +126,23 @@ public class TaskVariableControllerImplIT {
         age.setTaskId(TASK_ID);
         given(taskRuntime.variables(any())).willReturn(Arrays.asList(name,
                                                                      age));
-        this.mockMvc.perform(get("/v1/tasks/{taskId}/variables",
+        this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/variables",
                                  TASK_ID).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
                                 taskIdParameter(),
                                 unpagedVariableFields()
-                       ));
+                ));
     }
-
 
     @Test
     public void createVariable() throws Exception {
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/variables/",
+        this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/variables/",
                                   TASK_ID).contentType(MediaType.APPLICATION_JSON).content(
                 mapper.writeValueAsString(TaskPayloadBuilder.createVariable().withTaskId(TASK_ID)
-                                          .withVariable("name","Alice").build())))
+                                                  .withVariable("name",
+                                                                "Alice").build())))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/set",
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
@@ -153,11 +153,11 @@ public class TaskVariableControllerImplIT {
     @Test
     public void updateVariable() throws Exception {
         //WHEN
-        this.mockMvc.perform(put("/v1/tasks/{taskId}/variables/{variableName}",
-                                  TASK_ID,
-                                 "name").contentType(MediaType.APPLICATION_JSON).content(
+        this.mockMvc.perform(put("/admin/v1/tasks/{taskId}/variables/{variableName}",
+                                                               TASK_ID, "name").contentType(MediaType.APPLICATION_JSON).content(
                 mapper.writeValueAsString(TaskPayloadBuilder.updateVariable().withTaskId(TASK_ID)
-                                          .withVariable("name","Alice").build())))
+                                                  .withVariable("name",
+                                                                "Alice").build())))
                 .andExpect(status().isOk());
 
         verify(taskRuntime).updateVariable(any());

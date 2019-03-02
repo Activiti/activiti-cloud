@@ -28,8 +28,9 @@ import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
-import org.activiti.api.task.model.payloads.SetTaskVariablesPayload;
+import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
+import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import springfox.documentation.spring.web.plugins.Docket;
 
 /**
@@ -59,8 +60,10 @@ public class SwaggerModels {
                                        CandidateUsersPayloadApiModel.class)
                 .directModelSubstitute(CreateTaskPayload.class,
                                        CreateTaskPayloadApiModel.class)
-                .directModelSubstitute(SetTaskVariablesPayload.class,
-                                       SetTaskVariablesPayloadApiModel.class)
+                .directModelSubstitute(CreateTaskVariablePayload.class,
+                                       CreateTaskVariablePayloadApiModel.class)
+                .directModelSubstitute(UpdateTaskVariablePayload.class,
+                                       UpdateTaskVariablePayloadApiModel.class)
                 .directModelSubstitute(UpdateTaskPayload.class,
                                        UpdateTaskPayloadApiModel.class)
                 ;
@@ -136,10 +139,17 @@ public class SwaggerModels {
         public String payloadType;
     }
 
-    @ApiModel("SetTaskVariablesPayload")
-    public class SetTaskVariablesPayloadApiModel extends SetTaskVariablesPayload {
+    @ApiModel("CreateTaskVariablePayload")
+    public class CreateTaskVariablePayloadApiModel extends CreateTaskVariablePayload {
 
-        @ApiModelProperty(allowableValues = "SetTaskVariablesPayload")
+        @ApiModelProperty(allowableValues = "CreateTaskVariablePayload")
+        public String payloadType;
+    }
+
+    @ApiModel("UpdateTaskVariablePayload")
+    public class UpdateTaskVariablePayloadApiModel extends UpdateTaskVariablePayload {
+
+        @ApiModelProperty(allowableValues = "UpdateTaskVariablePayload")
         public String payloadType;
     }
 

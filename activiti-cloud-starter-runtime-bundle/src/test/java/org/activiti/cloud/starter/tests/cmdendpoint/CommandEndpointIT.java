@@ -43,7 +43,6 @@ import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.ClaimTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.ReleaseTaskPayload;
-import org.activiti.api.task.model.payloads.SetTaskVariablesPayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -148,8 +147,6 @@ public class CommandEndpointIT {
 
         Task task = tasks.iterator().next();
 
-        setTaskVariables(task);
-
         setProcessVariables(processInstanceId);
         
         claimTask(task);
@@ -208,25 +205,6 @@ public class CommandEndpointIT {
 
         assertThatTaskHasStatus(task.getId(),
                                 CREATED);
-    }
-
-    private void setTaskVariables(Task task) {
-        Map<String, Object> variables = Collections.singletonMap("taskVar",
-                                                                 "v1");
-        SetTaskVariablesPayload setTaskVariables = TaskPayloadBuilder.setVariables().withTaskId(task.getId()).withVariables(
-                variables).build();
-
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(setTaskVariables).setHeader("cmdId",
-                                                                                                 setTaskVariables.getId()).build());
-
-        await("Variable to be set").untilTrue(streamHandler.getSetTaskVariablesAck());
-
-        ResponseEntity<Resources<CloudVariableInstance>> retrievedVars = taskRestTemplate.getVariables(task.getId());
-        assertThat(retrievedVars.getBody().getContent())
-                .extracting(VariableInstance::getName,
-                            VariableInstance::getValue)
-                .contains(tuple("taskVar",
-                                "v1"));
     }
 
     private void setProcessVariables(String proInstanceId) {

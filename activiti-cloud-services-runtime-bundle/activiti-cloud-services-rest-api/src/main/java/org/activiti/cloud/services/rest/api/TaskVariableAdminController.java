@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@RequestMapping(value = "/v1/tasks/{taskId}/variables",
+@RequestMapping(value = "/admin/v1/tasks/{taskId}/variables",
         produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
-public interface TaskVariableController {
+public interface TaskVariableAdminController {
 
     @RequestMapping(method = RequestMethod.GET)
     Resources<VariableInstanceResource> getVariables(@PathVariable String taskId);
