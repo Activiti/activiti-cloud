@@ -71,5 +71,8 @@ updatebot/push-version:
 	@echo Resolving push versions for artifacts........
 	$(eval ACTIVITI_CLOUD_DEPENDENCIES_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud-dependencies.version -q -DforceStdout -f ../../pom.xml))
 	@echo Doing updatebot push-version.....
-	cd ../../ && updatebot push-version --kind helm  $(RELEASE_ARTIFACT) $(RELEASE_VERSION)
-	cd ../../ && updatebot push-version --kind make  RB_ACTIVITI_CLOUD_DEPENDENCIES_VERSION $(ACTIVITI_CLOUD_DEPENDENCIES_VERSION)
+	for run in {1..2}
+	do
+	  cd ../../ && updatebot push-version --kind helm  $(RELEASE_ARTIFACT) $(RELEASE_VERSION) --merge-method=merge
+	  cd ../../ && updatebot push-version --kind make  RB_ACTIVITI_CLOUD_DEPENDENCIES_VERSION $(ACTIVITI_CLOUD_DEPENDENCIES_VERSION) --merge-method=merge
+	done
