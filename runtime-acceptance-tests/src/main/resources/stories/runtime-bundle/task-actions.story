@@ -105,9 +105,9 @@ When the user starts with variables for TWO_TASK_PROCESS with variables start1 a
 And a task variable was created with name start1
 And task variable start1 has value start1
 And a task variable was created with name start2
-And we set task variable start1 to start1modified
-And task variable start1 has value start1modified
 And the user claims the task
+And we update task variable start1 to start1modified
+And task variable start1 has value start1modified
 And the user completes the task
 And another user is authenticated as hruser
 And a task variable was created with name start1
