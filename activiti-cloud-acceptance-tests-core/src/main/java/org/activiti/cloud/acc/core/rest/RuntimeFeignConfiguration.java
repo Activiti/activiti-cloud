@@ -39,6 +39,7 @@ import org.activiti.cloud.acc.core.services.runtime.TaskRuntimeService;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.admin.ProcessVariablesRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.admin.TaskRuntimeAdminService;
+import org.activiti.cloud.acc.core.services.runtime.admin.TaskVariablesRuntimeAdminService;
 import org.activiti.cloud.acc.core.services.runtime.diagram.ProcessRuntimeDiagramService;
 import org.activiti.cloud.acc.shared.rest.feign.FeignConfiguration;
 import org.activiti.cloud.acc.shared.rest.feign.FeignErrorDecoder;
@@ -211,6 +212,15 @@ public class RuntimeFeignConfiguration {
                 .builder(new feign.codec.Encoder.Default(),
                          new feign.codec.Decoder.Default())
                 .target(ProcessModelQueryAdminService.class, runtimeTestsConfigurationProperties.getQueryUrl());
+    }
+
+    @Bean
+    public TaskVariablesRuntimeAdminService taskVariablesRuntimeAdminService(){
+        return FeignRestDataClient
+                .builder(new JacksonEncoder(objectMapper),
+                         new HalDecoder(objectMapper))
+                .target(TaskVariablesRuntimeAdminService.class,
+                        runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 
 }

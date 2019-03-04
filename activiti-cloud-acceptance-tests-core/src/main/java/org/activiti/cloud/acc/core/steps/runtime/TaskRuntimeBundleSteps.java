@@ -1,10 +1,6 @@
 package org.activiti.cloud.acc.core.steps.runtime;
 
-import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Date;
-import java.util.Map;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.task.model.Task;
@@ -19,6 +15,9 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
+
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableRuntimeFeignContext
 public class TaskRuntimeBundleSteps {
@@ -121,10 +120,24 @@ public class TaskRuntimeBundleSteps {
     }
 
     @Step
-    public void setVariables(String taskId, Map<String, Object> variables){
+    public void updateVariable(String taskId, String name, Object value){
 
-        taskRuntimeService.setTaskVariables(taskId,TaskPayloadBuilder.setVariables().withTaskId(taskId)
-                .withVariables(variables).build());
+        taskRuntimeService.updateTaskVariable(taskId, name, TaskPayloadBuilder.updateVariable().withTaskId(taskId)
+                .withVariable(name, value).build());
+    }
+
+    @Step
+    public void createVariable(String taskId,
+                               String name,
+                               Object value) {
+
+        taskRuntimeService.createTaskVariable(taskId,
+                                              TaskPayloadBuilder
+                                                      .createVariable()
+                                                      .withTaskId(taskId)
+                                                      .withVariable(name,
+                                                                    value)
+                                                      .build());
     }
 
     @Step
