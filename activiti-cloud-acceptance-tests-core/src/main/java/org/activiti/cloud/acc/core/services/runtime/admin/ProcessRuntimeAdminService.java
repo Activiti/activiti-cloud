@@ -9,7 +9,7 @@ import org.springframework.hateoas.PagedResources;
 
 public interface ProcessRuntimeAdminService extends BaseService {
 
-    @RequestLine("GET /admin/v1/process-instances")
+    @RequestLine("GET /admin/v1/process-instances?sort=startDate,desc&sort=id,desc")
     @Headers("Accept: application/hal+json;charset=UTF-8")
     PagedResources<CloudProcessInstance> getProcessInstances();
     
