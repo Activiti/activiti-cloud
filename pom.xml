@@ -62,7 +62,7 @@
   	  <dependency>
         <groupId>org.activiti.cloud.dependencies</groupId>
         <artifactId>activiti-cloud-dependencies</artifactId>
-        <version>${activiti-cloud.version}</version>
+        <version>${activiti-cloud-dependencies.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
