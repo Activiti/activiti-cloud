@@ -74,6 +74,7 @@ updatebot/push-version:
 	@echo Doing updatebot push-version.....
 	cd ../../ && updatebot push-version --kind helm $(RELEASE_ARTIFACT) $(RELEASE_VERSION)
 	cd ../../ && updatebot push-version --kind  make  QUERY_ACTIVITI_CLOUD_DEPENDENCIES_VERSION $(ACTIVITI_CLOUD_DEPENDENCIES_VERSION)
+	cd ../../ && rm -rf .updatebot-repos/
 	sleep $$[ ( $$RANDOM % 10 )  + 1 ]s
 	cd ../../ && updatebot push-version --kind helm $(RELEASE_ARTIFACT) $(RELEASE_VERSION)
 	cd ../../ && updatebot push-version --kind  make  QUERY_ACTIVITI_CLOUD_DEPENDENCIES_VERSION $(ACTIVITI_CLOUD_DEPENDENCIES_VERSION)
