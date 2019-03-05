@@ -37,8 +37,8 @@ spec:
           key: docker.registry
     resources:
       requests:
-        cpu: 512m
-        memory: 1024Mi
+        cpu: 350m
+        memory: 600Mi
       limits:
         cpu: 1
         memory: 2048Mi
