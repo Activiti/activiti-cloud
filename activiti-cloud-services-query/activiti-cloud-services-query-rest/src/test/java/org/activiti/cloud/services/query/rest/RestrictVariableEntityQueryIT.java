@@ -120,7 +120,6 @@ public class RestrictVariableEntityQueryIT {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("15");
         processInstanceEntity.setName("name");
-        processInstanceEntity.setDescription("desc");
         processInstanceEntity.setInitiator("initiator");
         processInstanceEntity.setProcessDefinitionKey("defKey1");
         processInstanceEntity.setServiceName("test-cmd-endpoint");
