@@ -21,8 +21,6 @@ import java.util.List;
 
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.qa.steps.ModelingModelsSteps;
 import org.activiti.cloud.qa.steps.ModelingProjectsSteps;
 import org.jbehave.core.annotations.Given;
@@ -30,7 +28,6 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.Resource;
 
-import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.qa.model.modeling.ModelIdentifier.identified;
 import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.projectNamed;
 import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.projectsNamed;
@@ -153,7 +150,7 @@ public class ModelingProjects {
                                                                    modelType,
                                                                    modelVersion))) {
             resourceAsFile(modelType + "/" + setExtension(modelName,
-                                                          getModelType(modelType).getContentFileExtension()))
+                                                          modelingModelsSteps.getModelType(modelType).getContentFileExtension()))
                     .map(file -> {
                         Resource<Model> model = modelingProjectsSteps.importModelInCurrentProject(file);
                         if (processVariables != null) {
@@ -173,20 +170,14 @@ public class ModelingProjects {
     public void checkExportedProjectContainsModel(String modelType,
                                                   String modelName,
                                                   List<String> processVariables) {
-        modelingProjectsSteps.checkExportedProjectContainsModel(getModelType(modelType),
-                                                                modelName,
-                                                                processVariables);
+        modelingProjectsSteps.checkExportedProjectContainsModel(
+                modelingProjectsSteps.getModelType(modelType),
+                modelName,
+                processVariables);
     }
 
     @Then("the project cannot be exported due to validation errors")
     public void checkCurrentProjectExportFailsOnValidation() throws IOException {
         modelingProjectsSteps.checkCurrentProjectExportFails("Validation errors found in project's models");
-    }
-
-    private ModelType getModelType(String modelType) {
-        if (modelType.equalsIgnoreCase(PROCESS)) {
-            return new ProcessModelType();
-        }
-        throw new RuntimeException("Unknown model type: " + modelType);
     }
 }

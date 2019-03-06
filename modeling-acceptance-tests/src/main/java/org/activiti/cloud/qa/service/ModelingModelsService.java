@@ -16,8 +16,14 @@
 
 package org.activiti.cloud.qa.service;
 
+import feign.Headers;
+import feign.Param;
+import feign.RequestLine;
+import feign.Response;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
+import feign.form.FormData;
+import feign.form.FormEncoder;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.organization.api.Model;
 
@@ -30,6 +36,20 @@ import static org.activiti.cloud.qa.rest.ModelingFeignConfiguration.modelingEnco
 public interface ModelingModelsService extends FeignRestDataClient<ModelingModelsService, Model> {
 
     String PATH = "/v1/models";
+
+    static ModelingModelsService build(Encoder encoder,
+                                       Decoder decoder,
+                                       String baseUrl) {
+        return FeignRestDataClient
+                .builder(encoder,
+                         decoder)
+                .target(ModelingModelsService.class,
+                        baseUrl + PATH);
+    }
+
+    @RequestLine("POST")
+    @Headers("Content-Type: multipart/form-data")
+    Response validateModel(@Param("file") FormData file);
 
     @Override
     default Encoder encoder() {
@@ -46,13 +66,13 @@ public interface ModelingModelsService extends FeignRestDataClient<ModelingModel
         return ModelingModelsService.class;
     }
 
-    static ModelingModelsService build(Encoder encoder,
-                                       Decoder decoder,
-                                       String baseUrl) {
+    default Response validateModelByUri(String uri,
+                                        FormData file) {
         return FeignRestDataClient
-                .builder(encoder,
-                         decoder)
-                .target(ModelingModelsService.class,
-                        baseUrl + PATH);
+                .builder(new FormEncoder(encoder()),
+                         modelingDecoder)
+                .target(getType(),
+                        uri)
+                .validateModel(file);
     }
 }

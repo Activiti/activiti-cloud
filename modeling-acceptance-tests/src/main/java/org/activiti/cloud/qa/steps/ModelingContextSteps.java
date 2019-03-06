@@ -27,6 +27,8 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.activiti.cloud.acc.shared.rest.EnableDirtyContext;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
+import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.model.modeling.ModelingContextHandler;
 import org.activiti.cloud.qa.model.modeling.ModelingIdentifier;
@@ -37,6 +39,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 
+import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.HttpUtils.HEADER_ATTACHEMNT_FILENAME;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.Link.REL_SELF;
@@ -48,11 +51,9 @@ import static org.springframework.hateoas.Link.REL_SELF;
 public abstract class ModelingContextSteps<M> {
 
     @Autowired
-    private DirtyContextHandler dirtyContextHandler;
-
-    @Autowired
     protected ModelingContextHandler modelingContextHandler;
-
+    @Autowired
+    private DirtyContextHandler dirtyContextHandler;
     @Autowired
     private ModelingTestsConfigurationProperties config;
 
@@ -221,6 +222,13 @@ public abstract class ModelingContextSteps<M> {
     protected String modelingUri(String uri) {
         return uri.replace("http://activiti-cloud-modeling-backend",
                            config.getModelingUrl());
+    }
+
+    public ModelType getModelType(String modelType) {
+        if (modelType.equalsIgnoreCase(PROCESS)) {
+            return new ProcessModelType();
+        }
+        throw new RuntimeException("Unknown model type: " + modelType);
     }
 
     protected abstract Optional<String> getRel();

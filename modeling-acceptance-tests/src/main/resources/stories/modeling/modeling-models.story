@@ -36,3 +36,19 @@ And removes the process variable 'age'
 And adds the process variable 'experience'
 And saves the model
 Then the model is saved with the process variables 'gender, experience'
+
+Scenario: validate process model file
+Given the user is authenticated as modeler
+And an existing project 'Mars Team'
+When the user opens the project 'Mars Team'
+And creates the process model landing-rover with process variables 'age, gender'
+And opens the process model 'landing-rover'
+Then the model is valid
+
+Scenario: validate invalid process model file
+Given the user is authenticated as modeler
+And an existing project 'Nasa Team'
+When the user opens the project 'Nasa Team'
+And creates the process model spacex-launch with process variables 'age, gender'
+And opens the process model 'spacex-launch'
+Then 3 validation errors are shown for extensions

@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.qa.story;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -114,5 +115,15 @@ public class ModelingModels {
     @When("adds the process variable '$processVariable'")
     public void addProcessVariableInCurrentModela(String processVariable) {
         modelingModelsSteps.addProcessVariableInCurrentModel(Collections.singletonList(processVariable));
+    }
+
+    @Then("the model is valid")
+    public void validateModelFile() throws IOException {
+        modelingModelsSteps.checkCurrentModelValidation();
+    }
+
+    @Then("$numberOfErrors validation errors are shown for extensions")
+    public void checkCurrentModelValidationErrorsForExtensions(String numberOfErrors) throws IOException {
+        modelingModelsSteps.checkCurrentModelValidationFailureForExtensions("#: " + numberOfErrors + " schema violations found");
     }
 }

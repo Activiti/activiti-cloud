@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.qa.steps;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +26,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.Response;
+import feign.form.FormData;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.organization.api.Extensions;
 import org.activiti.cloud.organization.api.Model;
@@ -31,7 +38,9 @@ import org.activiti.cloud.organization.api.ServiceTaskActionType;
 import org.activiti.cloud.qa.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.qa.model.modeling.EnableModelingContext;
 import org.activiti.cloud.qa.service.ModelingModelsService;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
 import static org.activiti.cloud.organization.api.ServiceTaskActionType.INPUTS;
@@ -41,6 +50,10 @@ import static org.activiti.cloud.organization.api.VariableMappingType.VARIABLE;
 import static org.activiti.cloud.qa.model.modeling.ProcessExtensions.EXTENSIONS_TASK_NAME;
 import static org.activiti.cloud.qa.model.modeling.ProcessExtensions.HOST_VALUE;
 import static org.activiti.cloud.qa.model.modeling.ProcessExtensions.extensions;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
@@ -51,11 +64,10 @@ import static org.springframework.hateoas.Link.REL_SELF;
 @EnableModelingContext
 public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
-    public static final String PROJECT_MODELS_REL = "models";
+    private static final String PROJECT_MODELS_REL = "models";
 
     @Autowired
     private ModelingModelsService modelingModelsService;
-
     @Autowired
     private ModelingTestsConfigurationProperties config;
 
@@ -134,6 +146,72 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     public void saveModel(Resource<Model> model) {
         modelingModelsService.updateByUri(modelingUri(model.getLink(REL_SELF).getHref()),
                                           model.getContent());
+    }
+
+    private List<Response> validateCurrentModel() throws IOException {
+        Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
+        assertThat(currentContext.getContent()).isInstanceOf(Model.class);
+        final Model model = currentContext.getContent();
+        List<Response> responses = new ArrayList<>();
+        responses.add(validateModel(currentContext,
+                                    getFormData(model)));
+        if (Optional.ofNullable(model.getExtensions()).isPresent()) {
+            responses.add(validateModel(currentContext,
+                                        getFormData(model,
+                                                    true)));
+        }
+        return responses;
+    }
+
+    private FormData getFormData(Model model,
+                                 boolean isExtensionType) throws IOException {
+        final String fileExtension = isExtensionType ? CONTENT_TYPE_JSON : getModelType(model.getType()).getContentFileExtension();
+        final String fileName = isExtensionType ? toJsonFilename(model.getName() + getModelType(model.getType()).getMetadataFileSuffix()) : setExtension(model.getName(),
+                                                                                                                                                         fileExtension);
+        return new FormData(fileExtension,
+                            fileName,
+                            resourceAsByteArray(model.getType().toLowerCase() + "/" + fileName));
+    }
+
+    private FormData getFormData(Model model) throws IOException {
+        return getFormData(model,
+                           false);
+    }
+
+    @Step
+    public void checkCurrentModelValidation() throws IOException {
+        assertThat(validateCurrentModel())
+                .extracting(Response::status)
+                .containsOnly(HttpStatus.SC_NO_CONTENT);
+    }
+
+    @Step
+    public void checkCurrentModelValidationFailureForExtensions(String errorMessage) throws IOException {
+        assertThat(validateCurrentModel()).extracting(Response::status)
+                .contains(HttpStatus.SC_BAD_REQUEST);
+        validateCurrentModel().stream()
+                .filter(response -> response.status() == HttpStatus.SC_BAD_REQUEST)
+                .map(this::convertResponseBodyAsJsonNode)
+                .map(node -> node.get("message").asText())
+                .forEach(message -> assertThat(message).contains(errorMessage));
+    }
+
+    private JsonNode convertResponseBodyAsJsonNode(Response response) {
+        try (InputStream in = response.body().asInputStream()) {
+            return new ObjectMapper().readTree(in);
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot parse response body as json",
+                                       e);
+        }
+    }
+
+    @Step
+    public Response validateModel(Resource<Model> model,
+                                  FormData file) {
+        Link validateModelLink = model.getLink("self");
+        assertThat(validateModelLink).isNotNull();
+        return modelingModelsService.validateModelByUri(modelingUri(validateModelLink.getHref() + "/validate"),
+                                                        file);
     }
 
     @Step
