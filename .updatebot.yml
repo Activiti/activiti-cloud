@@ -22,6 +22,7 @@ github:
       branch: master
     - name: activiti-cloud-acceptance-scenarios
       branch: master
+      useSinglePullRequest: true
     - name: example-cloud-connector
       branch: master
     - name: activiti-cloud-modeling

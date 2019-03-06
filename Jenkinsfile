@@ -40,10 +40,12 @@ pipeline {
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
             sh "mvn clean verify"
 
-            sh "git add --all"
-            sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
-            sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
-            sh "git push origin v\$(cat VERSION)"
+            retry(5){
+              sh "git add --all"
+              sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
+              sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
+              sh "git push origin v\$(cat VERSION)"
+            }
           }
           container('maven') {
             sh 'mvn clean deploy -DskipTests'
@@ -53,9 +55,12 @@ pipeline {
 
             sh "jx step git credentials"
             sh "echo 'not pushing to downstream for now'"
-            //sh "updatebot push --ref develop"
-            sh "updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies \$(cat VERSION) --merge false"
-            //sh "updatebot update --merge false"
+            retry(2){
+              sh "updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies \$(cat VERSION) --merge false"
+              sh "rm -rf .updatebot-repos/"
+              sh "sleep \$((RANDOM % 10))"
+              sh "updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies \$(cat VERSION) --merge false"
+            }
           }
         }
       }
