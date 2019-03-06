@@ -41,11 +41,12 @@ pipeline {
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
 
             sh 'mvn clean verify'
-
-            sh "git add --all"
-            sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
-            sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
-            sh "git push origin v\$(cat VERSION)"
+            retry(5){
+              sh "git add --all"
+              sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
+              sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
+              sh "git push origin v\$(cat VERSION)"
+            }
           }
           container('maven') {
 
@@ -56,9 +57,12 @@ pipeline {
             sh "git config --global credential.helper store"
 
             sh "jx step git credentials"
-
-            sh "updatebot push-version --kind maven org.activiti.cloud.common:activiti-cloud-service-common-dependencies \$(cat VERSION)"
-            sh "updatebot update --merge false"
+            retry(2){
+              sh "updatebot push-version --kind maven org.activiti.cloud.common:activiti-cloud-service-common-dependencies \$(cat VERSION)"
+              sh "rm -rf .updatebot-repos/"
+              sh "sleep \$((RANDOM % 10))"
+              sh "updatebot push-version --kind maven org.activiti.cloud.common:activiti-cloud-service-common-dependencies \$(cat VERSION)"
+            }
 
           }
         }
