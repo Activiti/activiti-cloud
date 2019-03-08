@@ -30,7 +30,6 @@ import org.activiti.cloud.services.organization.rest.api.ModelRestApi;
 import org.activiti.cloud.services.organization.rest.assembler.ModelResourceAssembler;
 import org.activiti.cloud.services.organization.rest.assembler.ModelTypeResourceAssembler;
 import org.activiti.cloud.services.organization.rest.assembler.PagedModelTypeAssembler;
-import org.activiti.cloud.services.organization.rest.assembler.ValidationErrorResourceAssembler;
 import org.activiti.cloud.services.organization.service.ModelService;
 import org.activiti.cloud.services.organization.service.ModelTypeService;
 import org.springframework.data.domain.Pageable;

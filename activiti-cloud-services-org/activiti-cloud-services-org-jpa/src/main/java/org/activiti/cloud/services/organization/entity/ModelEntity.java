@@ -51,7 +51,7 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
 
     @Id
     @GeneratedValue(generator = "system-uuid")
-    @GenericGenerator(name = "system-uuid", strategy = "uuid")
+    @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     private String id;
 
     @ManyToOne

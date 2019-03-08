@@ -17,7 +17,6 @@
 package org.activiti.cloud.services.organization.jpa;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.repository.ModelRepository;
@@ -29,7 +28,6 @@ import org.activiti.cloud.services.organization.jpa.version.VersionedJpaReposito
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.stereotype.Repository;
 
 /**
  * JPA Repository for {@link ModelEntity} entity

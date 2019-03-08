@@ -17,7 +17,6 @@
 package org.activiti.cloud.services.organization.jpa;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.organization.entity.ProjectEntity;
@@ -25,7 +24,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.stereotype.Repository;
 
 /**
  * JPA Repository for {@link ProjectEntity} entity

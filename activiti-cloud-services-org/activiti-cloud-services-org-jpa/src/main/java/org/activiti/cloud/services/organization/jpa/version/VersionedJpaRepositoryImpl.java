@@ -19,7 +19,6 @@ package org.activiti.cloud.services.organization.jpa.version;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Optional;
 import javax.persistence.EntityManager;
 
 import org.springframework.dao.DataIntegrityViolationException;

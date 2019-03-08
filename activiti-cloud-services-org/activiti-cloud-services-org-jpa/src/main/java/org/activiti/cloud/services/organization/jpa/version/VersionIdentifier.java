@@ -18,7 +18,6 @@ package org.activiti.cloud.services.organization.jpa.version;
 
 import java.io.Serializable;
 import java.util.Objects;
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
@@ -29,7 +28,6 @@ public class VersionIdentifier implements Serializable {
 
     private String version;
 
-    //@Column(name = "versioned_entity_id")
     private String versionedEntityId;
 
     public VersionIdentifier() {
