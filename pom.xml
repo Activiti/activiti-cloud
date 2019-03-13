@@ -18,6 +18,7 @@
     <module>activiti-cloud-acceptance-tests-dependencies</module>
     <module>activiti-cloud-acceptance-tests-shared</module>
     <module>activiti-cloud-acceptance-tests-core</module>
+    <module>activiti-cloud-acceptance-tests-modeling</module>
   </modules>
   <distributionManagement>
     <repository>
