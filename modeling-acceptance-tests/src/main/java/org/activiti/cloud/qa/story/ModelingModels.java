@@ -21,14 +21,14 @@ import java.util.Collections;
 import java.util.List;
 
 import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.qa.steps.ModelingModelsSteps;
-import org.activiti.cloud.qa.steps.ModelingProjectsSteps;
+import org.activiti.cloud.acc.modeling.steps.ModelingModelsSteps;
+import org.activiti.cloud.acc.modeling.steps.ModelingProjectsSteps;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
-import static org.activiti.cloud.qa.model.modeling.ModelIdentifier.identified;
-import static org.activiti.cloud.qa.model.modeling.ModelingNamingIdentifier.modelNamed;
+import static org.activiti.cloud.acc.modeling.modeling.ModelIdentifier.identified;
+import static org.activiti.cloud.acc.modeling.modeling.ModelingNamingIdentifier.modelNamed;
 
 /**
  * Modeling models scenarios
