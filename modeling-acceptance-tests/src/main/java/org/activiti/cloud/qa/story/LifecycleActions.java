@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.qa.story;
 
+import org.activiti.cloud.acc.modeling.modeling.ModelingContextHandler;
 import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.activiti.cloud.acc.shared.rest.EnableDirtyContext;
-import org.activiti.cloud.qa.model.modeling.ModelingContextHandler;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeScenario;
 import org.springframework.beans.factory.annotation.Autowired;
