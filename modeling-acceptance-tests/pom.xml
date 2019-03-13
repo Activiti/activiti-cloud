@@ -10,24 +10,8 @@
   <artifactId>modeling-acceptance-tests</artifactId>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
-      <artifactId>activiti-cloud-services-org-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud.modeling</groupId>
-      <artifactId>activiti-cloud-services-org-api-impl</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.activiti.cloud.acc</groupId>
-      <artifactId>activiti-cloud-acceptance-tests-shared</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-aspects</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud.common</groupId>
-      <artifactId>activiti-cloud-services-test</artifactId>
+      <artifactId>activiti-cloud-acceptance-tests-modeling</artifactId>
     </dependency>
   </dependencies>
 </project>
