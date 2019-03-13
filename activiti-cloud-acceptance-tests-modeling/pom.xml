@@ -3,13 +3,27 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>activiti-cloud-acceptance-tests-parent</artifactId>
         <groupId>org.activiti.cloud.acc</groupId>
+        <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
         <version>7.1.0-SNAPSHOT</version>
+        <relativePath>../activiti-cloud-acceptance-tests-dependencies</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>activiti-cloud-acceptance-tests-modeling</artifactId>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>org.activiti.cloud.acc</groupId>
+            <artifactId>activiti-cloud-acceptance-tests-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.activiti.cloud.modeling</groupId>
+            <artifactId>activiti-cloud-services-org-api-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.activiti.cloud.common</groupId>
+            <artifactId>activiti-cloud-services-test</artifactId>
+        </dependency>
+    </dependencies>
 </project>
