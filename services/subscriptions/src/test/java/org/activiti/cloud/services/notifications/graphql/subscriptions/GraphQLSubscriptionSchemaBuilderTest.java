@@ -34,7 +34,7 @@ public class GraphQLSubscriptionSchemaBuilderTest {
 
     @Test
     public void testNotificationsSchemaBuilderParsesSchemaFromHttpUrl() {
-        GraphQLSubscriptionSchemaBuilder schemaBuilder = new GraphQLSubscriptionSchemaBuilder("https://raw.githubusercontent.com/Activiti/activiti-cloud-query-service-graphql/develop/activiti-cloud-services-query-graphql-ws-schema/src/main/resources/activiti.graphqls");
+        GraphQLSubscriptionSchemaBuilder schemaBuilder = new GraphQLSubscriptionSchemaBuilder("classpath:activiti-ws.graphqls");
 
         assertThat(schemaBuilder.getGraphQLSchema()).isNotNull();
         assertThat(schemaBuilder.getGraphQLSchema().getSubscriptionType()).isNotNull();
