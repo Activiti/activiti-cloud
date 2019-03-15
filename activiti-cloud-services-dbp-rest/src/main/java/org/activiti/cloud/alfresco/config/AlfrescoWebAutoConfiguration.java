@@ -78,9 +78,15 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
+    public ExtendedPageMetadataConverter extendedPageMetadataConverter(){
+        return new ExtendedPageMetadataConverter();
+    }
+
+    @Bean
     public <T> AlfrescoPagedResourcesAssembler<T> alfrescoPagedResourcesAssembler(@Autowired(required = false) HateoasPageableHandlerMethodArgumentResolver resolver,
-                                                                                  @Autowired(required = false) UriComponents baseUri){
-        return new AlfrescoPagedResourcesAssembler<>(resolver, baseUri, new ExtendedPageMetadataConverter());
+                                                                                  @Autowired(required = false) UriComponents baseUri,
+                                                                                  ExtendedPageMetadataConverter extendedPageMetadataConverter){
+        return new AlfrescoPagedResourcesAssembler<>(resolver, baseUri, extendedPageMetadataConverter);
     }
 
 }
