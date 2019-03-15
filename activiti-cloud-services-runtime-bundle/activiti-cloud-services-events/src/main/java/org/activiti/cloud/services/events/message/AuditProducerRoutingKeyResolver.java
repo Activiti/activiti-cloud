@@ -21,12 +21,10 @@ import java.util.Map;
 public class AuditProducerRoutingKeyResolver extends AbstractMessageHeadersRoutingKeyResolver {
     
     public final String ROUTING_KEY_PREFIX = "engineEvents";
+
     public final String[] HEADER_KEYS = {RuntimeBundleInfoMessageHeaders.SERVICE_NAME,
-                                     RuntimeBundleInfoMessageHeaders.APP_NAME,
-                                     ExecutionContextMessageHeaders.PROCESS_DEFINITION_KEY,
-                                     ExecutionContextMessageHeaders.PROCESS_INSTANCE_ID,
-                                     ExecutionContextMessageHeaders.BUSINESS_KEY
-                                    };
+                                         RuntimeBundleInfoMessageHeaders.APP_NAME
+                                        };
     
     @Override
     public String resolve(Map<String, Object> headers) {

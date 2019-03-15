@@ -30,67 +30,55 @@ public class AuditProducerRoutingKeyResolverTest {
     public void testResolveRoutingKeyFromValidHeadersInAnyOrder() {
         // given
         Map<String, Object> headers = MapBuilder.<String, Object> map(RuntimeBundleInfoMessageHeaders.APP_NAME, "app-name")
-                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name")
-                                                .with(ExecutionContextMessageHeaders.BUSINESS_KEY, "business-key")
-                                                .with(ExecutionContextMessageHeaders.PROCESS_INSTANCE_ID, "process-instance-id")
-                                                .with(ExecutionContextMessageHeaders.PROCESS_DEFINITION_KEY, "process-definition-key");
+                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
         
         // when
         String routingKey = subject.resolve(headers);
         
         // then
-        assertThat(routingKey).isEqualTo("engineEvents.service-name.app-name.process-definition-key.process-instance-id.business-key");
+        assertThat(routingKey).isEqualTo("engineEvents.service-name.app-name");
                 
     }
 
     @Test
     public void testResolveRoutingKeyFromEmptyHeaders() {
         // given
-        Map<String, Object> headers = MapBuilder.<String, Object> map(RuntimeBundleInfoMessageHeaders.APP_NAME, "app-name")
-                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name")
-                                                .with(ExecutionContextMessageHeaders.PROCESS_DEFINITION_KEY, "process-definition-key")
-                                                .with(ExecutionContextMessageHeaders.PROCESS_INSTANCE_ID, "process-instance-id")
-                                                .with(ExecutionContextMessageHeaders.BUSINESS_KEY, "");
+        Map<String, Object> headers = MapBuilder.<String, Object> map(RuntimeBundleInfoMessageHeaders.APP_NAME, "")
+                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
         
         // when
         String routingKey = subject.resolve(headers);
         
         // then
-        assertThat(routingKey).isEqualTo("engineEvents.service-name.app-name.process-definition-key.process-instance-id._");
+        assertThat(routingKey).isEqualTo("engineEvents.service-name._");
                 
     }
 
     @Test
     public void testResolveRoutingKeyFromNullHeaders() {
         // given
-        Map<String, Object> headers = MapBuilder.<String, Object> map(RuntimeBundleInfoMessageHeaders.APP_NAME, "app-name")
-                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name")
-                                                .with(ExecutionContextMessageHeaders.PROCESS_DEFINITION_KEY, "process-definition-key")
-                                                .with(ExecutionContextMessageHeaders.PROCESS_INSTANCE_ID, "process-instance-id")
-                                                .with(ExecutionContextMessageHeaders.BUSINESS_KEY, null);
+        Map<String, Object> headers = MapBuilder.<String, Object> map(RuntimeBundleInfoMessageHeaders.APP_NAME, null)
+                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
         
         // when
         String routingKey = subject.resolve(headers);
         
         // then
-        assertThat(routingKey).isEqualTo("engineEvents.service-name.app-name.process-definition-key.process-instance-id._");
+        assertThat(routingKey).isEqualTo("engineEvents.service-name._");
                 
     }
 
     @Test
     public void testResolveRoutingKeyWithEscapedValues() {
         // given
-        Map<String, Object> headers = MapBuilder.<String, Object> map(RuntimeBundleInfoMessageHeaders.APP_NAME, "app:name")
-                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service.name")
-                                                .with(ExecutionContextMessageHeaders.PROCESS_DEFINITION_KEY, "process#definition-key")
-                                                .with(ExecutionContextMessageHeaders.PROCESS_INSTANCE_ID, "process*instance*id")
-                                                .with(ExecutionContextMessageHeaders.BUSINESS_KEY, "business key");
+        Map<String, Object> headers = MapBuilder.<String, Object> map(RuntimeBundleInfoMessageHeaders.APP_NAME, "app:na#me")
+                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "ser.vice*na me");
         
         // when
         String routingKey = subject.resolve(headers);
         
         // then
-        assertThat(routingKey).isEqualTo("engineEvents.service-name.app-name.process-definition-key.process-instance-id.business-key");
+        assertThat(routingKey).isEqualTo("engineEvents.ser-vice-na-me.app-na-me");
                 
     }
     
@@ -103,7 +91,7 @@ public class AuditProducerRoutingKeyResolverTest {
         String routingKey = subject.resolve(headers);
         
         // then
-        assertThat(routingKey).isEqualTo("engineEvents._._._._._");
+        assertThat(routingKey).isEqualTo("engineEvents._._");
                 
     }
     
