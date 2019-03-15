@@ -17,25 +17,23 @@
 package org.activiti.cloud.alfresco.converter.json;
 
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadata;
-import org.activiti.cloud.alfresco.rest.model.AlfrescoPageMetadata;
+import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.stereotype.Component;
 
-@Component
 public class PageMetadataConverter {
 
-    public AlfrescoPageMetadata toAlfrescoPageMetadata(PagedResources.PageMetadata basePageMetadata,
-                                                       long count) {
+    public PaginationMetadata toAlfrescoPageMetadata(PagedResources.PageMetadata basePageMetadata,
+                                                     long count) {
         long skipCount = basePageMetadata.getNumber() * basePageMetadata.getSize();
         if (basePageMetadata instanceof ExtendedPageMetadata) {
             skipCount = ((ExtendedPageMetadata) basePageMetadata).getSkipCount();
         }
 
         // the page number starts from zero, so it's necessary to increment by one before comparing with total pages
-        return new AlfrescoPageMetadata(skipCount,
-                                        basePageMetadata.getSize(),
-                                        count,
-                                        basePageMetadata.getTotalPages() > basePageMetadata.getNumber() + 1,
-                                        basePageMetadata.getTotalElements());
+        return new PaginationMetadata(skipCount,
+                                      basePageMetadata.getSize(),
+                                      count,
+                                      basePageMetadata.getTotalPages() > basePageMetadata.getNumber() + 1,
+                                      basePageMetadata.getTotalElements());
     }
 }

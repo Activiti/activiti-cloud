@@ -117,6 +117,11 @@
         <artifactId>activiti-cloud-services-rest-docs</artifactId>
         <version>${activiti-cloud-service-common.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.common</groupId>
+        <artifactId>activiti-cloud-services-swagger</artifactId>
+        <version>${activiti-cloud-service-common.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   

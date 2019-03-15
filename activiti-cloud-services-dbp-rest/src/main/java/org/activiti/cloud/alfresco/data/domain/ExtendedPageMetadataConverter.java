@@ -17,9 +17,7 @@
 package org.activiti.cloud.alfresco.data.domain;
 
 import org.springframework.hateoas.PagedResources;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ExtendedPageMetadataConverter {
 
     public ExtendedPageMetadata toExtendedPageMetadata(long skipCount, PagedResources.PageMetadata basePageMetadata) {

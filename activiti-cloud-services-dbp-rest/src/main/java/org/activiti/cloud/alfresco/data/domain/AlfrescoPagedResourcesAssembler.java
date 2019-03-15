@@ -25,10 +25,8 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
 
-@Component
 public class AlfrescoPagedResourcesAssembler<T> extends PagedResourcesAssembler<T> {
 
     private final ExtendedPageMetadataConverter extendedPageMetadataConverter;

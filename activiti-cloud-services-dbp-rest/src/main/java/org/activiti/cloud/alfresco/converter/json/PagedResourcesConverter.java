@@ -20,15 +20,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.activiti.cloud.alfresco.rest.model.AlfrescoContentEntry;
-import org.activiti.cloud.alfresco.rest.model.AlfrescoPageContentListWrapper;
-import org.activiti.cloud.alfresco.rest.model.AlfrescoPageMetadata;
+import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
+import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
+import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
-import org.springframework.stereotype.Component;
 
-@Component
 public class PagedResourcesConverter {
 
     private PageMetadataConverter pageMetadataConverter;
@@ -37,28 +35,27 @@ public class PagedResourcesConverter {
         this.pageMetadataConverter = pageMetadataConverter;
     }
 
-    public <T> AlfrescoPageContentListWrapper<T> toAlfrescoContentListWrapper(PagedResources<Resource<T>> pagedResources) {
-        List<AlfrescoContentEntry<T>> baseContent = getAlfrescoContentEntries(pagedResources);
+    public <T> ListResponseContent<T> pagedResourcesToListResponseContent(PagedResources<Resource<T>> pagedResources) {
+        List<EntryResponseContent<T>> baseContent = getAlfrescoContentEntries(pagedResources);
 
-        AlfrescoPageMetadata pagination = pageMetadataConverter.toAlfrescoPageMetadata(pagedResources.getMetadata(),
-                baseContent.size());
+        PaginationMetadata pagination = pageMetadataConverter.toAlfrescoPageMetadata(pagedResources.getMetadata(),
+                                                                                     baseContent.size());
 
-        return AlfrescoPageContentListWrapper.wrap(baseContent,
-                pagination);
+        return ListResponseContent.wrap(baseContent,
+                                        pagination);
     }
 
-    public <T> AlfrescoPageContentListWrapper<T> toAlfrescoContentListWrapper(Resources<Resource<T>> pagedResources) {
-        List<AlfrescoContentEntry<T>> baseContent = getAlfrescoContentEntries(pagedResources);
+    public <T> ListResponseContent<T> resourcesToListResponseContent(Resources<Resource<T>> resources) {
 
-        return AlfrescoPageContentListWrapper.wrap(baseContent,
-                null);
+        return ListResponseContent.wrap(getAlfrescoContentEntries(resources),
+                                        null);
     }
 
-    private <T> List<AlfrescoContentEntry<T>> getAlfrescoContentEntries(Resources<Resource<T>> pagedResources) {
+    private <T> List<EntryResponseContent<T>> getAlfrescoContentEntries(Resources<Resource<T>> pagedResources) {
         Collection<Resource<T>> pagedResourceContent = pagedResources.getContent();
         return pagedResourceContent.stream()
                 .map(
-                        resource -> new AlfrescoContentEntry<>(resource.getContent())
+                        resource -> new EntryResponseContent<>(resource.getContent())
                 ).collect(Collectors.toList());
     }
 }

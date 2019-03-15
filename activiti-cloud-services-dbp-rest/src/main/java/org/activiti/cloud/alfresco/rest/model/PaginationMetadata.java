@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.alfresco.rest.model;
 
-public class AlfrescoPageMetadata {
+public class PaginationMetadata {
 
     private long skipCount;
 
@@ -28,14 +28,14 @@ public class AlfrescoPageMetadata {
 
     private long totalItems;
 
-    public AlfrescoPageMetadata() {
+    public PaginationMetadata() {
     }
 
-    public AlfrescoPageMetadata(long skipCount,
-                                long maxItems,
-                                long count,
-                                boolean hasMoreItems,
-                                long totalItems) {
+    public PaginationMetadata(long skipCount,
+                              long maxItems,
+                              long count,
+                              boolean hasMoreItems,
+                              long totalItems) {
         this.skipCount = skipCount;
         this.maxItems = maxItems;
         this.count = count;

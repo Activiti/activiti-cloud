@@ -19,8 +19,8 @@ package org.activiti.cloud.alfresco.converter.json;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import org.activiti.cloud.alfresco.rest.model.AlfrescoContentEntry;
-import org.activiti.cloud.alfresco.rest.model.AlfrescoPageContentListWrapper;
+import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
+import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -52,7 +52,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     private PagedResourcesConverter pagedResourcesConverter;
 
     @Mock
-    private AlfrescoPageContentListWrapper<String> alfrescoPageContentListWrapper;
+    private ListResponseContent<String> alfrescoPageContentListWrapper;
 
     @Mock
     private PagedResources<Resource<String>> basePagedResources;
@@ -67,17 +67,17 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     private HttpOutputMessage outputMessage;
 
     @Captor
-    private ArgumentCaptor<AlfrescoContentEntry<String>> contentEntryArgumentCaptor;
+    private ArgumentCaptor<EntryResponseContent<String>> contentEntryArgumentCaptor;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
     @Test
     public void writeInternalShouldConvertObjectUsingPagedResourcesConverterWhenIsAPagedResources() throws Exception {
         //given
-        given(pagedResourcesConverter.toAlfrescoContentListWrapper(basePagedResources))
+        given(pagedResourcesConverter.pagedResourcesToListResponseContent(basePagedResources))
                 .willReturn(alfrescoPageContentListWrapper);
 
         doNothing().when(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
@@ -99,7 +99,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsAGroupOfResources() throws Exception {
 
         //given
-        given(pagedResourcesConverter.toAlfrescoContentListWrapper(baseResources))
+        given(pagedResourcesConverter.resourcesToListResponseContent(baseResources))
                 .willReturn(alfrescoPageContentListWrapper);
 
         doNothing().when(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
@@ -121,7 +121,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     @Test
     public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsASingleResource() throws Exception {
         //given
-        doNothing().when(httpMessageConverter).defaultWriteInternal(ArgumentMatchers.<AlfrescoContentEntry<?>>any(),
+        doNothing().when(httpMessageConverter).defaultWriteInternal(ArgumentMatchers.<EntryResponseContent<?>>any(),
                                                                     eq(type),
                                                                     eq(outputMessage));
 
@@ -138,7 +138,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     }
 
     @Test
-    public void getSupportedMediaTypesShouldReturnApplicationJson() throws Exception {
+    public void getSupportedMediaTypesShouldReturnApplicationJson() {
         //when
         List<MediaType> supportedMediaTypes = httpMessageConverter.getSupportedMediaTypes();
 
@@ -147,7 +147,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     }
 
     @Test
-    public void canWriteShouldFalseWhenTypeIsString() throws Exception {
+    public void canWriteShouldFalseWhenTypeIsString() {
         //given
         Class<String> clazz = String.class;
 
@@ -159,7 +159,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     }
 
     @Test
-    public void canWriteShouldReturnTrueWhenTypeIsNotStringAndMediaTypeIsApplicationJson() throws Exception {
+    public void canWriteShouldReturnTrueWhenTypeIsNotStringAndMediaTypeIsApplicationJson() {
         //given
         Class<Resource> clazz = Resource.class;
 

@@ -19,9 +19,9 @@ package org.activiti.cloud.alfresco.converter.json;
 import java.util.Collections;
 import java.util.List;
 
-import org.activiti.cloud.alfresco.rest.model.AlfrescoContentEntry;
-import org.activiti.cloud.alfresco.rest.model.AlfrescoPageContentListWrapper;
-import org.activiti.cloud.alfresco.rest.model.AlfrescoPageMetadata;
+import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
+import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
+import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -43,46 +43,46 @@ public class PagedResourcesConverterTest {
     private PageMetadataConverter pageMetadataConverter;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
     @Test
-    public void toAlfrescoContentListWrapperShouldConvertFromPagedResourcesToAlfrescoContentListWrapper() throws Exception {
+    public void toAlfrescoContentListWrapperShouldConvertFromPagedResourcesToAlfrescoContentListWrapper() {
         //given
         List<Resource<String>> elements = Collections.singletonList(new Resource<>("any"));
         PagedResources.PageMetadata basePageMetaData = new PagedResources.PageMetadata(10,
                                                                                1,
                                                                                100);
 
-        AlfrescoPageMetadata alfrescoPageMetadata = new AlfrescoPageMetadata();
+        PaginationMetadata alfrescoPageMetadata = new PaginationMetadata();
         given(pageMetadataConverter.toAlfrescoPageMetadata(basePageMetaData, elements.size())).willReturn(alfrescoPageMetadata);
 
         //when
-        AlfrescoPageContentListWrapper<String> alfrescoPageContentListWrapper = pagedResourcesConverter.toAlfrescoContentListWrapper(new PagedResources<>(elements,
-                                                                                                                                                          basePageMetaData));
+        ListResponseContent<String> alfrescoPageContentListWrapper = pagedResourcesConverter.pagedResourcesToListResponseContent(new PagedResources<>(elements,
+                                                                                                                                                      basePageMetaData));
 
         //then
         assertThat(alfrescoPageContentListWrapper).isNotNull();
         assertThat(alfrescoPageContentListWrapper.getList().getEntries())
-                .extracting(AlfrescoContentEntry::getEntry)
+                .extracting(EntryResponseContent::getEntry)
                 .containsExactly("any");
         assertThat(alfrescoPageContentListWrapper.getList().getPagination()).isEqualTo(alfrescoPageMetadata);
 
     }
 
     @Test
-    public void toAlfrescoContentListWrapperShouldConvertFromResourcesToAlfrescoContentListWrapper() throws Exception {
+    public void toAlfrescoContentListWrapperShouldConvertFromResourcesToAlfrescoContentListWrapper() {
         //given
         List<Resource<String>> elements = Collections.singletonList(new Resource<>("any"));
 
         //when
-        AlfrescoPageContentListWrapper<String> alfrescoPageContentListWrapper = pagedResourcesConverter.toAlfrescoContentListWrapper(new Resources<>(elements));
+        ListResponseContent<String> alfrescoPageContentListWrapper = pagedResourcesConverter.resourcesToListResponseContent(new Resources<>(elements));
 
         //then
         assertThat(alfrescoPageContentListWrapper).isNotNull();
         assertThat(alfrescoPageContentListWrapper.getList().getEntries())
-                .extracting(AlfrescoContentEntry::getEntry)
+                .extracting(EntryResponseContent::getEntry)
                 .containsExactly("any");
     }
 

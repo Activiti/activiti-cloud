@@ -20,29 +20,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
-import org.springframework.context.annotation.ComponentScan;
+import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageParameterParser;
+import org.activiti.cloud.alfresco.converter.json.AlfrescoJackson2HttpMessageConverter;
+import org.activiti.cloud.alfresco.converter.json.PageMetadataConverter;
+import org.activiti.cloud.alfresco.converter.json.PagedResourcesConverter;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.util.UriComponents;
 
 @Configuration
-@ComponentScan(basePackages = "org.activiti.cloud.alfresco")
 @PropertySource("classpath:config/alfresco-rest-config.properties")
 public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
 
-    private final AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver;
+    private final PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
+    private final int defaultPageSize;
 
-    public AlfrescoWebAutoConfiguration(AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver) {
-        this.alfrescoPageArgumentMethodResolver = alfrescoPageArgumentMethodResolver;
+    public AlfrescoWebAutoConfiguration(PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver,
+                                        @Value("${spring.data.rest.default-page-size:100}") int defaultPageSize) {
+        this.pageableHandlerMethodArgumentResolver = pageableHandlerMethodArgumentResolver;
+        this.defaultPageSize = defaultPageSize;
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(0, alfrescoPageArgumentMethodResolver);
+        resolvers.add(0, new AlfrescoPageArgumentMethodResolver(new AlfrescoPageParameterParser(defaultPageSize), pageableHandlerMethodArgumentResolver));
     }
 
     @Override
@@ -58,4 +71,16 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
         }
 
     }
+
+    @Bean
+    public <T> AlfrescoJackson2HttpMessageConverter<T> alfrescoJackson2HttpMessageConverter() {
+        return new AlfrescoJackson2HttpMessageConverter<>(new PagedResourcesConverter(new PageMetadataConverter()));
+    }
+
+    @Bean
+    public <T> AlfrescoPagedResourcesAssembler<T> alfrescoPagedResourcesAssembler(@Autowired(required = false) HateoasPageableHandlerMethodArgumentResolver resolver,
+                                                                                  @Autowired(required = false) UriComponents baseUri){
+        return new AlfrescoPagedResourcesAssembler<>(resolver, baseUri, new ExtendedPageMetadataConverter());
+    }
+
 }

@@ -17,26 +17,26 @@ package org.activiti.cloud.alfresco.rest.model;
 
 import java.util.List;
 
-public class AlfrescoPageContent<T> {
+public class EntriesResponseContent<T> {
 
-    private List<AlfrescoContentEntry<T>> entries;
+    private List<EntryResponseContent<T>> entries;
 
-    private AlfrescoPageMetadata pagination;
+    private PaginationMetadata pagination;
 
-    public AlfrescoPageContent() {
+    public EntriesResponseContent() {
     }
 
-    public AlfrescoPageContent(List<AlfrescoContentEntry<T>> entries, AlfrescoPageMetadata pagination) {
+    public EntriesResponseContent(List<EntryResponseContent<T>> entries, PaginationMetadata pagination) {
         this.entries = entries;
         this.pagination = pagination;
     }
 
-    public List<AlfrescoContentEntry<T>> getEntries()
+    public List<EntryResponseContent<T>> getEntries()
     {
         return entries;
     }
 
-    public AlfrescoPageMetadata getPagination() {
+    public PaginationMetadata getPagination() {
         return pagination;
     }
 }

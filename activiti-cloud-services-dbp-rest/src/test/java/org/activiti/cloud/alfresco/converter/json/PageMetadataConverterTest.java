@@ -17,7 +17,7 @@
 package org.activiti.cloud.alfresco.converter.json;
 
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadata;
-import org.activiti.cloud.alfresco.rest.model.AlfrescoPageMetadata;
+import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
 import org.junit.Test;
 import org.springframework.hateoas.PagedResources;
 
@@ -28,15 +28,15 @@ public class PageMetadataConverterTest {
     private PageMetadataConverter converter = new PageMetadataConverter();
 
     @Test
-    public void toAlfrescoPageMetadataShouldCalculateAlfrescoMetadataFromBaseMetadata() throws Exception {
+    public void toAlfrescoPageMetadataShouldCalculateAlfrescoMetadataFromBaseMetadata() {
         //given
         PagedResources.PageMetadata basePageMetadata = new PagedResources.PageMetadata(10,
                                                                                        2,
                                                                                        100);
 
         //when
-        AlfrescoPageMetadata alfrescoPageMetadata = converter.toAlfrescoPageMetadata(basePageMetadata,
-                                                                                     10);
+        PaginationMetadata alfrescoPageMetadata = converter.toAlfrescoPageMetadata(basePageMetadata,
+                                                                                   10);
 
         //then
         assertThat(alfrescoPageMetadata)
@@ -48,15 +48,15 @@ public class PageMetadataConverterTest {
     }
 
     @Test
-    public void toAlfrescoPageMetadataShouldReturnMetadataWithNoMoreItemsWhenIsInTheLastPage() throws Exception {
+    public void toAlfrescoPageMetadataShouldReturnMetadataWithNoMoreItemsWhenIsInTheLastPage() {
         //given
         PagedResources.PageMetadata basePageMetadata = new PagedResources.PageMetadata(10,
                                                                                        1,
                                                                                        11);
 
         //when
-        AlfrescoPageMetadata alfrescoPageMetadata = converter.toAlfrescoPageMetadata(basePageMetadata,
-                                                                                     10);
+        PaginationMetadata alfrescoPageMetadata = converter.toAlfrescoPageMetadata(basePageMetadata,
+                                                                                   10);
 
         //then
         assertThat(alfrescoPageMetadata)
@@ -64,7 +64,7 @@ public class PageMetadataConverterTest {
     }
 
     @Test
-    public void toAlfrescoPageMetadataShouldUseSkipCountFromExtendedPageMetadataWhenAvailable() throws Exception {
+    public void toAlfrescoPageMetadataShouldUseSkipCountFromExtendedPageMetadataWhenAvailable() {
         //given
         ExtendedPageMetadata baseMetadata = new ExtendedPageMetadata(3,
                                                                      10,
@@ -73,8 +73,8 @@ public class PageMetadataConverterTest {
                                                                      2);
 
         //when
-        AlfrescoPageMetadata alfrescoPageMetadata = converter.toAlfrescoPageMetadata(baseMetadata,
-                                                                                     5);
+        PaginationMetadata alfrescoPageMetadata = converter.toAlfrescoPageMetadata(baseMetadata,
+                                                                                   5);
 
         //then
         assertThat(alfrescoPageMetadata).hasSkipCount(3);

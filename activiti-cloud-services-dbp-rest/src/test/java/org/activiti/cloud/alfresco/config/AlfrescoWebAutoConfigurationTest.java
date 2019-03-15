@@ -24,8 +24,8 @@ import java.util.List;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
@@ -38,19 +38,19 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class AlfrescoWebAutoConfigurationTest {
 
-    @InjectMocks
     private AlfrescoWebAutoConfiguration configurer;
 
     @Mock
-    private AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver;
+    private PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
+        configurer = new AlfrescoWebAutoConfiguration(pageableHandlerMethodArgumentResolver, 100);
     }
 
     @Test
-    public void addArgumentResolversShouldAddAlfrescoPageArgumentMethodResolverAtTheFirstPosition() throws Exception {
+    public void addArgumentResolversShouldAddAlfrescoPageArgumentMethodResolverAtTheFirstPosition() {
         //given
         List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
         resolvers.add(mock(HandlerMethodArgumentResolver.class));
@@ -59,11 +59,11 @@ public class AlfrescoWebAutoConfigurationTest {
         configurer.addArgumentResolvers(resolvers);
 
         //then
-        assertThat(resolvers.get(0)).isEqualTo(alfrescoPageArgumentMethodResolver);
+        assertThat(resolvers.get(0)).isInstanceOf(AlfrescoPageArgumentMethodResolver.class);
     }
 
     @Test
-    public void extendMessageConvertersShouldRemoveApplicationJsonFromHalConverter() throws Exception {
+    public void extendMessageConvertersShouldRemoveApplicationJsonFromHalConverter() {
         //given
 
         //when
