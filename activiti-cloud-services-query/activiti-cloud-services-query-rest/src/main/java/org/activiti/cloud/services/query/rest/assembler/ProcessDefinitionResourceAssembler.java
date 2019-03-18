@@ -16,14 +16,15 @@
 
 package org.activiti.cloud.services.query.rest.assembler;
 
+import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
-import org.activiti.cloud.services.query.resources.ProcessDefinitionResource;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 
-public class ProcessDefinitionResourceAssembler implements ResourceAssembler<ProcessDefinitionEntity, ProcessDefinitionResource> {
+public class ProcessDefinitionResourceAssembler implements ResourceAssembler<ProcessDefinitionEntity, Resource<CloudProcessDefinition>> {
 
     @Override
-    public ProcessDefinitionResource toResource(ProcessDefinitionEntity processDefinitionEntity) {
-        return new ProcessDefinitionResource(processDefinitionEntity);
+    public Resource<CloudProcessDefinition> toResource(ProcessDefinitionEntity processDefinitionEntity) {
+        return new Resource<>(processDefinitionEntity);
     }
 }

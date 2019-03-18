@@ -32,6 +32,10 @@
       <artifactId>activiti-cloud-services-logging</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.activiti.cloud.common</groupId>
+      <artifactId>activiti-cloud-services-swagger</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud.query</groupId>
       <artifactId>activiti-cloud-services-query-rest</artifactId>
     </dependency>

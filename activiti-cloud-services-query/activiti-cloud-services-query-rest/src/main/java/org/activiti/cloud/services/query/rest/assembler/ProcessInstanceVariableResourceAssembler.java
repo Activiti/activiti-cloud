@@ -16,17 +16,18 @@
 
 package org.activiti.cloud.services.query.rest.assembler;
 
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.resources.VariableResource;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProcessInstanceVariableResourceAssembler implements ResourceAssembler<ProcessVariableEntity, VariableResource> {
+public class ProcessInstanceVariableResourceAssembler implements ResourceAssembler<ProcessVariableEntity, Resource<CloudVariableInstance>> {
 
     @Override
-    public VariableResource toResource(ProcessVariableEntity entity) {
-       return new VariableResource(entity);
+    public Resource<CloudVariableInstance> toResource(ProcessVariableEntity entity) {
+       return new Resource<>(entity);
     }
 
 }

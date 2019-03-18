@@ -19,10 +19,10 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.activiti.cloud.services.query.resources.VariableResource;
 import org.activiti.cloud.services.query.rest.assembler.TaskVariableResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,9 +63,9 @@ public class TaskVariableController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<VariableResource> getVariables(@PathVariable String taskId,
-                                                         @QuerydslPredicate(root = TaskVariableEntity.class) Predicate predicate,
-                                                         Pageable pageable) {
+    public PagedResources<Resource<CloudVariableInstance>> getVariables(@PathVariable String taskId,
+                                                                        @QuerydslPredicate(root = TaskVariableEntity.class) Predicate predicate,
+                                                                        Pageable pageable) {
 
         QTaskVariableEntity variable = QTaskVariableEntity.taskVariableEntity;
         BooleanExpression expression = variable.taskId.eq(taskId);

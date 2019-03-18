@@ -16,17 +16,18 @@
 
 package org.activiti.cloud.services.query.rest.assembler;
 
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.activiti.cloud.services.query.resources.VariableResource;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TaskVariableResourceAssembler implements ResourceAssembler<TaskVariableEntity, VariableResource> {
+public class TaskVariableResourceAssembler implements ResourceAssembler<TaskVariableEntity, Resource<CloudVariableInstance>> {
 
     @Override
-    public VariableResource toResource(TaskVariableEntity entity) {
-       return new VariableResource(entity);
+    public Resource<CloudVariableInstance> toResource(TaskVariableEntity entity) {
+       return new Resource<>(entity);
     }
 
 }

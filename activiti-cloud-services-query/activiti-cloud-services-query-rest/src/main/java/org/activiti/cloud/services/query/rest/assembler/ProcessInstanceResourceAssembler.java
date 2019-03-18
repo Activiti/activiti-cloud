@@ -16,12 +16,13 @@
 
 package org.activiti.cloud.services.query.rest.assembler;
 
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.query.rest.ProcessInstanceController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceTasksController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceVariableController;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.stereotype.Component;
 
@@ -29,14 +30,17 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Component
-public class ProcessInstanceResourceAssembler implements ResourceAssembler<ProcessInstanceEntity, ProcessInstanceResource> {
+public class ProcessInstanceResourceAssembler implements ResourceAssembler<ProcessInstanceEntity, Resource<CloudProcessInstance>> {
 
     @Override
-    public ProcessInstanceResource toResource(ProcessInstanceEntity entity) {
+    public Resource<CloudProcessInstance> toResource(ProcessInstanceEntity entity) {
         Link selfRel = linkTo(methodOn(ProcessInstanceController.class).findById(entity.getId())).withSelfRel();
         Link tasksRel = linkTo(methodOn(ProcessInstanceTasksController.class).getTasks(entity.getId(), null)).withRel("tasks");
         Link variablesRel = linkTo(methodOn(ProcessInstanceVariableController.class).getVariables(entity.getId(),null,null)).withRel("variables");
-        return new ProcessInstanceResource(entity, selfRel, tasksRel, variablesRel);
+        return new Resource<>(entity,
+                              selfRel,
+                              tasksRel,
+                              variablesRel);
     }
 
 }

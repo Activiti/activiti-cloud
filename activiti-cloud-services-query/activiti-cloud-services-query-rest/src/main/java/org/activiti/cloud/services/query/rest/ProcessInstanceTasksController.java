@@ -17,16 +17,17 @@
 package org.activiti.cloud.services.query.rest;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.resources.TaskResource;
 import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,8 +59,8 @@ public class ProcessInstanceTasksController {
     }
 
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
-    public PagedResources<TaskResource> getTasks(@PathVariable String processInstanceId,
-                                                 Pageable pageable) {
+    public PagedResources<Resource<CloudTask>> getTasks(@PathVariable String processInstanceId,
+                                                        Pageable pageable) {
         Page<TaskEntity> page = taskRepository.findAll(QTaskEntity.taskEntity.processInstanceId.eq(processInstanceId),
                                                        pageable);
         return pagedResourcesAssembler.toResource(pageable,
