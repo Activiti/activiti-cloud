@@ -26,12 +26,11 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 public class HomeControllerImpl implements HomeController {
 
     @Override
-    public Resource getHomeInfo() {
-        Resource resource = new Resource(new HomeResource(),
-                                         linkTo(ProcessDefinitionControllerImpl.class).withRel("process-definitions"),
-                                         linkTo(ProcessInstanceControllerImpl.class).withRel("process-instances"),
-                                         linkTo(TaskControllerImpl.class).withRel("tasks"));
+    public Resource<HomeResource> getHomeInfo() {
 
-        return resource;
+        return new Resource<>(new HomeResource(),
+                              linkTo(ProcessDefinitionControllerImpl.class).withRel("process-definitions"),
+                              linkTo(ProcessInstanceControllerImpl.class).withRel("process-instances"),
+                              linkTo(TaskControllerImpl.class).withRel("tasks"));
     }
 }

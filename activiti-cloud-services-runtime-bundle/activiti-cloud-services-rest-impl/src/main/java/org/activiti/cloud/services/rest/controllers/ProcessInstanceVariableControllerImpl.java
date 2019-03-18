@@ -18,12 +18,13 @@ package org.activiti.cloud.services.rest.controllers;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessRuntime;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
-import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +63,7 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
     }
 
     @Override
-    public Resources<VariableInstanceResource> getVariables(@PathVariable String processInstanceId) {
+    public Resources<Resource<CloudVariableInstance>> getVariables(@PathVariable String processInstanceId) {
         return resourcesAssembler.toResources(processRuntime.variables(ProcessPayloadBuilder.variables()
                                                                                .withProcessInstanceId(processInstanceId)
                                                                                .build()),

@@ -31,14 +31,15 @@ import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
+import org.activiti.cloud.common.swagger.DocketCustomizer;
 import springfox.documentation.spring.web.plugins.Docket;
 
 /**
  * Swagger Api Models
  */
-public class SwaggerModels {
+public class PayloadsDocketCustomizer implements DocketCustomizer {
 
-    public static Docket applyPayloadModelSubstitutions(final Docket docket) {
+    public Docket customize(final Docket docket) {
         return docket
                 .directModelSubstitute(StartProcessPayload.class,
                                                             StartProcessPayloadApiModel.class)
@@ -65,8 +66,7 @@ public class SwaggerModels {
                 .directModelSubstitute(UpdateTaskVariablePayload.class,
                                        UpdateTaskVariablePayloadApiModel.class)
                 .directModelSubstitute(UpdateTaskPayload.class,
-                                       UpdateTaskPayloadApiModel.class)
-                ;
+                                       UpdateTaskPayloadApiModel.class);
     }
 
     @ApiModel("StartProcessPayload")

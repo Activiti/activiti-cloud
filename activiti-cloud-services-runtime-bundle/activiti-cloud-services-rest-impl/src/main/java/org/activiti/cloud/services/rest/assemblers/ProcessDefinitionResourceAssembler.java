@@ -17,33 +17,31 @@ package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
-import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
 import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessDefinitionControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceAssembler;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-public class ProcessDefinitionResourceAssembler extends ResourceAssemblerSupport<ProcessDefinition, ProcessDefinitionResource> {
+public class ProcessDefinitionResourceAssembler implements ResourceAssembler<ProcessDefinition, Resource<CloudProcessDefinition>> {
 
     private ToCloudProcessDefinitionConverter converter;
 
     public ProcessDefinitionResourceAssembler(ToCloudProcessDefinitionConverter converter) {
-        super(ProcessDefinitionControllerImpl.class,
-              ProcessDefinitionResource.class);
         this.converter = converter;
     }
 
     @Override
-    public ProcessDefinitionResource toResource(ProcessDefinition processDefinition) {
+    public Resource<CloudProcessDefinition> toResource(ProcessDefinition processDefinition) {
         CloudProcessDefinition cloudProcessDefinition = converter.from(processDefinition);
         Link selfRel = linkTo(methodOn(ProcessDefinitionControllerImpl.class).getProcessDefinition(cloudProcessDefinition.getId())).withSelfRel();
         Link startProcessLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).startProcess(null)).withRel("startProcess");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
-        return new ProcessDefinitionResource(cloudProcessDefinition,
+        return new Resource<>(cloudProcessDefinition,
                                              selfRel,
                                              startProcessLink,
                                              homeLink);

@@ -16,11 +16,11 @@ import org.activiti.cloud.services.api.model.ProcessDefinitionServiceTask;
 import org.activiti.cloud.services.api.model.ProcessDefinitionUserTask;
 import org.activiti.cloud.services.api.model.ProcessDefinitionVariable;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionMetaController;
-import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionMetaResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +47,7 @@ public class ProcessDefinitionMetaControllerImpl implements ProcessDefinitionMet
     }
 
     @Override
-    public ProcessDefinitionMetaResource getProcessDefinitionMetadata(@PathVariable String id) {
+    public Resource<ProcessDefinitionMeta> getProcessDefinitionMetadata(@PathVariable String id) {
         org.activiti.engine.repository.ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionId(id)
                 .singleResult();

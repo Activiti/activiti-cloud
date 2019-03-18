@@ -1,12 +1,13 @@
 package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
-import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionMetaResource;
 import org.junit.Test;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ProcessDefinitionMetaResourceAssemblerTest {
 
@@ -17,7 +18,7 @@ public class ProcessDefinitionMetaResourceAssemblerTest {
         ProcessDefinitionMeta model = mock(ProcessDefinitionMeta.class);
         when(model.getId()).thenReturn("my-identifier");
 
-        ProcessDefinitionMetaResource resource = resourceAssembler.toResource(model);
+        Resource<ProcessDefinitionMeta> resource = resourceAssembler.toResource(model);
 
         Link selfResourceLink = resource.getLink("self");
 

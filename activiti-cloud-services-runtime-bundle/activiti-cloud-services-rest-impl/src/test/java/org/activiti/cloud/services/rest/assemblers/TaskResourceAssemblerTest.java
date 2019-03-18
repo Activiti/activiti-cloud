@@ -2,13 +2,14 @@ package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.api.task.model.impl.CloudTaskImpl;
-import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 
 import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
 import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
@@ -35,7 +36,7 @@ public class TaskResourceAssemblerTest {
 
         given(converter.from(model)).willReturn(new CloudTaskImpl(model));
 
-        TaskResource resource = resourceAssembler.toResource(model);
+        Resource<CloudTask> resource = resourceAssembler.toResource(model);
 
         Link selfResourceLink = resource.getLink("self");
 
@@ -49,7 +50,7 @@ public class TaskResourceAssemblerTest {
 
         given(converter.from(model)).willReturn(new CloudTaskImpl(model));
 
-        TaskResource resource = resourceAssembler.toResource(model);
+        Resource<CloudTask> resource = resourceAssembler.toResource(model);
 
         assertThat(resource.getLink("claim")).isNotNull();
         assertThat(resource.getLink("release")).isNull();
@@ -62,7 +63,7 @@ public class TaskResourceAssemblerTest {
 
         given(converter.from(model)).willReturn(new CloudTaskImpl(model));
 
-        TaskResource resource = resourceAssembler.toResource(model);
+        Resource<CloudTask> resource = resourceAssembler.toResource(model);
 
         assertThat(resource.getLink("claim")).isNull();
         assertThat(resource.getLink("release")).isNotNull();
@@ -74,7 +75,7 @@ public class TaskResourceAssemblerTest {
         Task model = new TaskImpl("my-identifier", "myTask", CREATED);
 
         given(converter.from(model)).willReturn(new CloudTaskImpl(model));
-        TaskResource resource = resourceAssembler.toResource(model);
+        Resource<CloudTask> resource = resourceAssembler.toResource(model);
 
         // a new standalone task doesn't have a bond to a process instance
         // and should not return the rel 'processInstance'
@@ -89,7 +90,7 @@ public class TaskResourceAssemblerTest {
 
         given(converter.from(model)).willReturn(new CloudTaskImpl(model));
 
-        TaskResource resource = resourceAssembler.toResource(model);
+        Resource<CloudTask> resource = resourceAssembler.toResource(model);
 
         assertThat(resource.getLink("processInstance")).isNotNull();
     }

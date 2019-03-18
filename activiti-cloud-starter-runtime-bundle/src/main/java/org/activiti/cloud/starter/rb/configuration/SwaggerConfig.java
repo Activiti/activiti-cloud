@@ -16,29 +16,29 @@
 
 package org.activiti.cloud.starter.rb.configuration;
 
+import java.util.function.Predicate;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.RequestHandler;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-import static org.activiti.cloud.starter.rb.configuration.SwaggerModels.applyPayloadModelSubstitutions;
 
 @Configuration
-@EnableSwagger2
 public class SwaggerConfig {
 
     @Bean
-    @ConditionalOnMissingBean(Docket.class)
-    public Docket api() {
-        Docket docket = new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("org.activiti.cloud.services"))
-                .paths(PathSelectors.any())
-                .build();
-        return applyPayloadModelSubstitutions(docket);
+    @ConditionalOnMissingBean
+    public Predicate<RequestHandler> apiSelector() {
+
+        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services")::apply;
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PayloadsDocketCustomizer payloadsDocketCustomizer(){
+        return new PayloadsDocketCustomizer();
+    }
+
+
 }

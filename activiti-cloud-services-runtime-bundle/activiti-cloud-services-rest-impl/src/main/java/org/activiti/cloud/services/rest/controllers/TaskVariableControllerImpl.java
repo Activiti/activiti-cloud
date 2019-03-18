@@ -19,10 +19,11 @@ import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.api.task.runtime.TaskRuntime;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
-import org.activiti.cloud.services.rest.api.resources.VariableInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +50,7 @@ public class TaskVariableControllerImpl implements TaskVariableController {
     }
 
     @Override
-    public Resources<VariableInstanceResource> getVariables(@PathVariable String taskId) {
+    public Resources<Resource<CloudVariableInstance>> getVariables(@PathVariable String taskId) {
         return resourcesAssembler.toResources(taskRuntime.variables(TaskPayloadBuilder.variables()
                                                                             .withTaskId(taskId)
                                                                             .build()),

@@ -25,10 +25,10 @@ import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionController;
-import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;
@@ -39,6 +39,7 @@ import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -88,7 +89,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     }
 
     @Override
-    public PagedResources<ProcessDefinitionResource> getProcessDefinitions(Pageable pageable) {
+    public PagedResources<Resource<CloudProcessDefinition>> getProcessDefinitions(Pageable pageable) {
         Page<ProcessDefinition> page = processRuntime.processDefinitions(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
                                                   pageConverter.toSpringPage(pageable, page),
@@ -96,7 +97,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     }
 
     @Override
-    public ProcessDefinitionResource getProcessDefinition(@PathVariable String id) {
+    public Resource<CloudProcessDefinition> getProcessDefinition(@PathVariable String id) {
         return resourceAssembler.toResource(processRuntime.processDefinition(id));
     }
 

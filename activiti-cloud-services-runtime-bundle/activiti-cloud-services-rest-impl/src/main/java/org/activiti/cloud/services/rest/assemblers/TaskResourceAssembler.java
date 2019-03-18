@@ -20,29 +20,27 @@ import java.util.List;
 
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.CloudTask;
-import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskControllerImpl;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceAssembler;
 
 import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-public class TaskResourceAssembler extends ResourceAssemblerSupport<Task, TaskResource> {
+public class TaskResourceAssembler implements ResourceAssembler<Task, Resource<CloudTask>> {
 
     private ToCloudTaskConverter converter;
 
     public TaskResourceAssembler(ToCloudTaskConverter converter) {
-        super(TaskControllerImpl.class,
-              TaskResource.class);
         this.converter = converter;
     }
 
     @Override
-    public TaskResource toResource(Task task) {
+    public Resource<CloudTask> toResource(Task task) {
         CloudTask cloudTask = converter.from(task);
         List<Link> links = new ArrayList<>();
         links.add(linkTo(methodOn(TaskControllerImpl.class).getTaskById(cloudTask.getId())).withSelfRel());
@@ -61,12 +59,8 @@ public class TaskResourceAssembler extends ResourceAssemblerSupport<Task, TaskRe
             links.add(linkTo(methodOn(TaskControllerImpl.class).getTaskById(cloudTask.getParentTaskId())).withRel("parent"));
         }
         links.add(linkTo(HomeControllerImpl.class).withRel("home"));
-        return new TaskResource(cloudTask,
-                                links);
+        return new Resource<>(cloudTask,
+                              links);
     }
 
-    @Override
-    public List<TaskResource> toResources(Iterable<? extends Task> entities) {
-        return super.toResources(entities);
-    }
 }

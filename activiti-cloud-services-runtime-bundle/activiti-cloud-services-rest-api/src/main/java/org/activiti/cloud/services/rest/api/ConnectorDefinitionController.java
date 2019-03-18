@@ -1,7 +1,8 @@
 package org.activiti.cloud.services.rest.api;
 
-import org.activiti.cloud.services.rest.api.resources.ConnectorDefinitionResource;
+import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface ConnectorDefinitionController {
 
     @RequestMapping(method = RequestMethod.GET)
-    Resources<ConnectorDefinitionResource> getConnectorDefinitions();
+    Resources<Resource<ConnectorDefinition>> getConnectorDefinitions();
 
 
     @RequestMapping(value = "/{id}",
             method = RequestMethod.GET)
-    ConnectorDefinitionResource getConnectorDefinition(@PathVariable String id);
+    Resource<ConnectorDefinition> getConnectorDefinition(@PathVariable String id);
 
 }

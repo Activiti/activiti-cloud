@@ -21,13 +21,14 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceTasksController;
-import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,8 +55,8 @@ public class ProcessInstanceTasksControllerImpl implements ProcessInstanceTasksC
     }
 
     @Override
-    public PagedResources<TaskResource> getTasks(@PathVariable String processInstanceId,
-                                                 Pageable pageable) {
+    public PagedResources<Resource<CloudTask>> getTasks(@PathVariable String processInstanceId,
+                                                        Pageable pageable) {
         Page<Task> page = taskRuntime.tasks(pageConverter.toAPIPageable(pageable),
                                             TaskPayloadBuilder.tasks()
                                                                                                 .withProcessInstanceId(processInstanceId)

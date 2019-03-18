@@ -1,9 +1,10 @@
 package org.activiti.cloud.services.rest.api;
 
-import org.activiti.cloud.services.rest.api.resources.TaskResource;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface ProcessInstanceTasksController {
 
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
-    PagedResources<TaskResource> getTasks(@PathVariable String processInstanceId,
-                                          Pageable pageable);
+    PagedResources<Resource<CloudTask>> getTasks(@PathVariable String processInstanceId,
+                                                 Pageable pageable);
 }

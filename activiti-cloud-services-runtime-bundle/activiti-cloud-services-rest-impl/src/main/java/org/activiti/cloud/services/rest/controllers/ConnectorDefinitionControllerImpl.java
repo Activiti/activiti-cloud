@@ -15,19 +15,19 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.List;
+
 import org.activiti.cloud.services.rest.api.ConnectorDefinitionController;
-import org.activiti.cloud.services.rest.api.resources.ConnectorDefinitionResource;
 import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionResourceAssembler;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.activiti.engine.ActivitiObjectNotFoundException;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 public class ConnectorDefinitionControllerImpl implements ConnectorDefinitionController {
@@ -49,13 +49,13 @@ public class ConnectorDefinitionControllerImpl implements ConnectorDefinitionCon
     }
 
     @Override
-    public Resources<ConnectorDefinitionResource> getConnectorDefinitions() {
+    public Resources<Resource<ConnectorDefinition>> getConnectorDefinitions() {
         return resourcesAssembler.toResources(connectorDefinitions,
                 connectorDefinitionResourceAssembler);
     }
 
     @Override
-    public ConnectorDefinitionResource getConnectorDefinition(@PathVariable String id) {
+    public Resource<ConnectorDefinition> getConnectorDefinition(@PathVariable String id) {
         return connectorDefinitionResourceAssembler.toResource(connectorDefinitions.stream()
                 .filter(connectorDefinition ->
                         connectorDefinition.getId().equals(id)).findAny().orElseThrow(() -> new ActivitiObjectNotFoundException(id + " not found")));

@@ -1,13 +1,14 @@
 package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
+import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
-import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -32,7 +33,7 @@ public class ProcessDefinitionResourceAssemblerTest {
         processDefinition.setId("my-identifier");
         given(converter.from(processDefinition)).willReturn(new CloudProcessDefinitionImpl(processDefinition));
 
-        ProcessDefinitionResource processDefinitionResource = resourceAssembler.toResource(processDefinition);
+        Resource<CloudProcessDefinition> processDefinitionResource = resourceAssembler.toResource(processDefinition);
 
         Link selfResourceLink = processDefinitionResource.getLink("self");
 

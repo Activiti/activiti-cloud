@@ -19,15 +19,16 @@ import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionAdminController;
-import org.activiti.cloud.services.rest.api.resources.ProcessDefinitionResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -69,7 +70,7 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
     }
 
     @Override
-    public PagedResources<ProcessDefinitionResource> getAllProcessDefinitions(Pageable pageable) {
+    public PagedResources<Resource<CloudProcessDefinition>> getAllProcessDefinitions(Pageable pageable) {
         Page<ProcessDefinition> page = processAdminRuntime.processDefinitions(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
                 pageConverter.toSpringPage(pageable, page),

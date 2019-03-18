@@ -15,8 +15,6 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import static java.util.Collections.emptyList;
-
 import java.nio.charset.StandardCharsets;
 
 import org.activiti.api.process.model.ProcessInstance;
@@ -29,11 +27,11 @@ import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
-import org.activiti.cloud.services.rest.api.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
@@ -41,6 +39,7 @@ import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,6 +47,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import static java.util.Collections.emptyList;
 
 @RestController
 public class ProcessInstanceControllerImpl implements ProcessInstanceController {
@@ -98,7 +99,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-    public PagedResources<ProcessInstanceResource> getProcessInstances(Pageable pageable) {
+    public PagedResources<Resource<CloudProcessInstance>> getProcessInstances(Pageable pageable) {
         Page<ProcessInstance> processInstancePage = processRuntime.processInstances(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
                                                   pageConverter.toSpringPage(pageable, processInstancePage),
@@ -106,12 +107,12 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-    public ProcessInstanceResource startProcess(@RequestBody StartProcessPayload startProcessPayload) {
+    public Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
         return resourceAssembler.toResource(processRuntime.start(startProcessPayload));
     }
 
     @Override
-    public ProcessInstanceResource getProcessInstanceById(@PathVariable String processInstanceId) {
+    public Resource<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId) {
         return resourceAssembler.toResource(processRuntime.processInstance(processInstanceId));
     }
 
@@ -135,23 +136,23 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
 
     @Override
-    public ProcessInstanceResource suspend(@PathVariable String processInstanceId) {
+    public Resource<CloudProcessInstance> suspend(@PathVariable String processInstanceId) {
         return resourceAssembler.toResource(processRuntime.suspend(ProcessPayloadBuilder.suspend(processInstanceId)));
 
     }
 
     @Override
-    public ProcessInstanceResource resume(@PathVariable String processInstanceId) {
+    public Resource<CloudProcessInstance> resume(@PathVariable String processInstanceId) {
         return resourceAssembler.toResource(processRuntime.resume(ProcessPayloadBuilder.resume(processInstanceId)));
     }
 
     @Override
-    public ProcessInstanceResource deleteProcessInstance(@PathVariable String processInstanceId) {
+    public Resource<CloudProcessInstance> deleteProcessInstance(@PathVariable String processInstanceId) {
         return resourceAssembler.toResource(processRuntime.delete(ProcessPayloadBuilder.delete(processInstanceId)));
     }
  
     @Override
-    public ProcessInstanceResource updateProcess(@PathVariable String processInstanceId,
+    public Resource<CloudProcessInstance> updateProcess(@PathVariable String processInstanceId,
                                                  @RequestBody UpdateProcessPayload payload) {
         if (payload!=null) {
             payload.setProcessInstanceId(processInstanceId);
@@ -162,7 +163,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     }
     
     @Override
-    public PagedResources<ProcessInstanceResource> subprocesses(@PathVariable String processInstanceId,
+    public PagedResources<Resource<CloudProcessInstance>> subprocesses(@PathVariable String processInstanceId,
                                                                 Pageable pageable) {
         Page<ProcessInstance> processInstancePage = processRuntime.processInstances(pageConverter.toAPIPageable(pageable),
                                                                                     ProcessPayloadBuilder.subprocesses(processInstanceId));

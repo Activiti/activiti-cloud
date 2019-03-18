@@ -27,13 +27,14 @@ import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskAdminController;
-import org.activiti.cloud.services.rest.api.resources.TaskResource;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,7 +62,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     }
 
     @Override
-    public PagedResources<TaskResource> getTasks(Pageable pageable) {
+    public PagedResources<Resource<CloudTask>> getTasks(Pageable pageable) {
         Page<Task> tasksPage = taskAdminRuntime.tasks(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
                                                   pageConverter.toSpringPage(pageable,
@@ -70,14 +71,14 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     }
     
     @Override
-    public TaskResource getTaskById(@PathVariable String taskId) {
+    public Resource<CloudTask> getTaskById(@PathVariable String taskId) {
         Task task = taskAdminRuntime.task(taskId);
         return taskResourceAssembler.toResource(task);
     }
     
     @Override
-    public TaskResource completeTask(@PathVariable String taskId,
-                                     @RequestBody(required = false) CompleteTaskPayload completeTaskPayload) {
+    public Resource<CloudTask> completeTask(@PathVariable String taskId,
+                                            @RequestBody(required = false) CompleteTaskPayload completeTaskPayload) {
         if (completeTaskPayload == null) {
             completeTaskPayload = TaskPayloadBuilder
                     .complete()
@@ -91,7 +92,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     }
 
     @Override
-    public TaskResource deleteTask(@PathVariable String taskId) {
+    public Resource<CloudTask> deleteTask(@PathVariable String taskId) {
         Task task = taskAdminRuntime.delete(TaskPayloadBuilder
                                            .delete()
                                            .withTaskId(taskId)
@@ -100,7 +101,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     }
     
     @Override
-    public TaskResource updateTask(@PathVariable String taskId,
+    public Resource<CloudTask> updateTask(@PathVariable String taskId,
                                    @RequestBody UpdateTaskPayload updateTaskPayload) {
         if (updateTaskPayload != null) {
             updateTaskPayload.setTaskId(taskId);
@@ -108,7 +109,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         return taskResourceAssembler.toResource(taskAdminRuntime.update(updateTaskPayload));
     }
 
-    public TaskResource assign(@PathVariable String taskId,
+    public Resource<CloudTask> assign(@PathVariable String taskId,
                                @RequestBody AssignTaskPayload assignTaskPayload) {
         if (assignTaskPayload!=null)
             assignTaskPayload.setTaskId(taskId);
