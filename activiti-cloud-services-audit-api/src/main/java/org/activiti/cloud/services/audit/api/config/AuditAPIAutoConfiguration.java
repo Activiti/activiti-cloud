@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2019 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.starter.audit.configuration;
+package org.activiti.cloud.services.audit.api.config;
 
-import java.util.function.Predicate;
-
+import org.activiti.cloud.services.audit.api.assembler.EventResourceAssembler;
+import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.RequestHandler;
-import springfox.documentation.builders.RequestHandlerSelectors;
 
 @Configuration
-public class SwaggerConfig {
+public class AuditAPIAutoConfiguration {
 
     @Bean
-    public Predicate<RequestHandler> apiSelector() {
-        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.audit")::apply;
+    public EventResourceAssembler eventResourceAssembler(){
+        return new EventResourceAssembler();
+    }
+
+    @Bean
+    public EventsRelProvider eventsRelProvider() {
+        return new EventsRelProvider();
     }
 
 }

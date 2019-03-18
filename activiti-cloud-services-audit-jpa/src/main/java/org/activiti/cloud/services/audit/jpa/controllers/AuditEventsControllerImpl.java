@@ -30,7 +30,6 @@ import org.activiti.cloud.services.audit.api.assembler.EventResourceAssembler;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
-import org.activiti.cloud.services.audit.api.resources.EventResource;
 import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventSpecificationsBuilder;
@@ -48,6 +47,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -101,7 +101,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     }
 
     @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
-    public EventResource findById(@PathVariable String eventId) {
+    public Resource<CloudRuntimeEvent> findById(@PathVariable String eventId) {
         Optional<AuditEventEntity> findResult = eventsRepository.findByEventId(eventId);
         if (!findResult.isPresent()) {
             throw new NotFoundException("Unable to find event for the given id:'" + eventId + "'");
@@ -117,7 +117,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<EventResource> findAll(@RequestParam(value = "search", required = false) String search,
+    public PagedResources<Resource<CloudRuntimeEvent>> findAll(@RequestParam(value = "search", required = false) String search,
                                                  Pageable pageable) {
 
         Specification<AuditEventEntity> spec = createSearchSpec(search);

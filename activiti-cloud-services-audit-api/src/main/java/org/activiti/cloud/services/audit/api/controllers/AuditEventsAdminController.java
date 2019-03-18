@@ -16,11 +16,12 @@
 
 package org.activiti.cloud.services.audit.api.controllers;
 
-import org.activiti.cloud.services.audit.api.resources.EventResource;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,5 +32,5 @@ import org.springframework.web.bind.annotation.RestController;
 public interface AuditEventsAdminController {
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<EventResource> findAll(Pageable pageable);
+    PagedResources<Resource<CloudRuntimeEvent>> findAll(Pageable pageable);
 }

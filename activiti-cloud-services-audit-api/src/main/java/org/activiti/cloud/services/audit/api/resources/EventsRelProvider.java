@@ -20,9 +20,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.RelProvider;
-import org.springframework.stereotype.Component;
 
-@Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class EventsRelProvider implements RelProvider {
 

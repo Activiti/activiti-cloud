@@ -24,18 +24,16 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.assembler.EventResourceAssembler;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsAdminController;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
-import org.activiti.cloud.services.audit.api.resources.EventResource;
 import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -44,8 +42,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/admin/v1/" + EventsRelProvider.COLLECTION_RESOURCE_REL, produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public class AuditEventsAdminControllerImpl implements AuditEventsAdminController {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(AuditEventsAdminControllerImpl.class);
 
     private final EventsRepository eventsRepository;
 
@@ -67,7 +63,7 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<EventResource> findAll(Pageable pageable) {
+    public PagedResources<Resource<CloudRuntimeEvent>> findAll(Pageable pageable) {
         Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);
 
         List<CloudRuntimeEvent> events = new ArrayList<>();
@@ -77,9 +73,9 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         }
 
         return pagedResourcesAssembler.toResource(pageable,
-                                                  new PageImpl<CloudRuntimeEvent>(events,
-                                                                                  pageable,
-                                                                                  allAuditInPage.getTotalElements()),
+                                                  new PageImpl<>(events,
+                                                                 pageable,
+                                                                 allAuditInPage.getTotalElements()),
                                                   eventResourceAssembler);
     }
 }

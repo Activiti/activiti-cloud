@@ -18,28 +18,19 @@ package org.activiti.cloud.services.audit.api.assembler;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
-import org.activiti.cloud.services.audit.api.resources.EventResource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
-import org.springframework.stereotype.Component;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceAssembler;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-@Component
-public class EventResourceAssembler extends ResourceAssemblerSupport<CloudRuntimeEvent, EventResource> {
-
-    @Autowired
-    public EventResourceAssembler() {
-        super(AuditEventsController.class,
-              EventResource.class);
-    }
+public class EventResourceAssembler implements ResourceAssembler<CloudRuntimeEvent, Resource<CloudRuntimeEvent>> {
 
     @Override
-    public EventResource toResource(CloudRuntimeEvent event) {
+    public Resource<CloudRuntimeEvent> toResource(CloudRuntimeEvent event) {
         Link selfRel = linkTo(methodOn(AuditEventsController.class).findById(event.getId())).withSelfRel();
-        return new EventResource(event,
-                                 selfRel);
+        return new Resource<>(event,
+                              selfRel);
     }
 }

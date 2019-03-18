@@ -28,6 +28,10 @@
       <artifactId>activiti-cloud-services-metadata</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.activiti.cloud.common</groupId>
+      <artifactId>activiti-cloud-services-swagger</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
