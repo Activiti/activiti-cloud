@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.RequestHandler;
+import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -51,35 +52,28 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerAutoConfiguration {
 
-    private Predicate<RequestHandler> apiSelector;
-
-    private List<DocketCustomizer> docketCustomizers;
-
-
-    public SwaggerAutoConfiguration(Predicate<RequestHandler> apiSelector,
-                                    @Autowired(required = false) List<DocketCustomizer> docketCustomizers) {
-        this.apiSelector = apiSelector;
-        this.docketCustomizers = docketCustomizers;
-    }
-
     @Bean
     @ConditionalOnMissingBean
-    public SwaggerDocketBuilder swaggerDocketBuilder(TypeResolver typeResolver){
-        return new SwaggerDocketBuilder(typeResolver,
-                                        docketCustomizers);
+    public SwaggerDocketBuilder swaggerDocketBuilder(Predicate<RequestHandler> apiSelector,
+                                                     TypeResolver typeResolver,
+                                                     @Autowired(required = false) List<DocketCustomizer> docketCustomizers,
+                                                     @Autowired(required = false) ApiInfo apiInfo) {
+        return new SwaggerDocketBuilder(apiSelector,
+                                        typeResolver,
+                                        docketCustomizers,
+                                        apiInfo);
     }
 
     @Bean(name = "halAPIDocket")
     @ConditionalOnMissingBean(name = "halAPIDocket")
     public Docket halAPIDocket(SwaggerDocketBuilder swaggerDocketBuilder) {
-        return swaggerDocketBuilder.buildHalAPIDocket(apiSelector);
+        return swaggerDocketBuilder.buildHalAPIDocket();
     }
 
     @Bean(name = "alfrescoAPIDocket")
     @ConditionalOnMissingBean(name = "alfrescoAPIDocket")
     public Docket alfrescoAPIDocket(SwaggerDocketBuilder swaggerDocketBuilder) {
-        return swaggerDocketBuilder.buildAlfrescoAPIDocket(apiSelector);
+        return swaggerDocketBuilder.buildAlfrescoAPIDocket();
     }
-
 
 }

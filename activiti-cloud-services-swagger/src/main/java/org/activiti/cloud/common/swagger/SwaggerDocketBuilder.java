@@ -35,6 +35,7 @@ import springfox.documentation.builders.AlternateTypeBuilder;
 import springfox.documentation.builders.AlternateTypePropertyBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.schema.WildcardType;
+import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
@@ -42,28 +43,41 @@ import static springfox.documentation.schema.AlternateTypeRules.newRule;
 
 public class SwaggerDocketBuilder {
 
+    private final Predicate<RequestHandler> apiSelector;
     private final TypeResolver typeResolver;
     private final List<DocketCustomizer> docketCustomizers;
+    private final ApiInfo apiInfo;
 
-    public SwaggerDocketBuilder(TypeResolver typeResolver,
-                                List<DocketCustomizer> docketCustomizers) {
+    public SwaggerDocketBuilder(Predicate<RequestHandler> apiSelector,
+                                TypeResolver typeResolver,
+                                List<DocketCustomizer> docketCustomizers,
+                                ApiInfo apiInfo) {
+        this.apiSelector = apiSelector;
         this.typeResolver = typeResolver;
         this.docketCustomizers = docketCustomizers;
+        this.apiInfo = apiInfo;
     }
 
-    public Docket buildHalAPIDocket(Predicate<RequestHandler> apiSelector) {
-        Docket docket = new Docket(DocumentationType.SWAGGER_2)
-                .groupName("hal")
+    public Docket buildHalAPIDocket() {
+        return baseDocket()
+                .groupName("hal");
+    }
+
+    private Docket baseDocket() {
+        Docket baseDocket = new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(apiSelector::test)
                 .paths(PathSelectors.any())
                 .build();
-        return applyCustomizations(docket);
+        if (apiInfo != null) {
+            baseDocket.apiInfo(apiInfo);
+        }
+        return applyCustomizations(baseDocket);
     }
 
     private Docket applyCustomizations(Docket docket) {
         Docket customizedDocket = docket;
-        if (docketCustomizers != null){
+        if (docketCustomizers != null) {
             for (DocketCustomizer docketCustomizer : docketCustomizers) {
                 customizedDocket = docketCustomizer.customize(customizedDocket);
             }
@@ -71,10 +85,10 @@ public class SwaggerDocketBuilder {
         return customizedDocket;
     }
 
-    public Docket buildAlfrescoAPIDocket(Predicate<RequestHandler> apiSelector) {
+    public Docket buildAlfrescoAPIDocket() {
         ResolvedType resourceTypeWithWildCard = typeResolver.resolve(Resource.class,
                                                                      WildcardType.class);
-        Docket docket = new Docket(DocumentationType.SWAGGER_2)
+        return baseDocket()
                 .alternateTypeRules(newRule(typeResolver.resolve(Resources.class,
                                                                  resourceTypeWithWildCard),
                                             typeResolver.resolve(ListResponseContent.class,
@@ -88,12 +102,7 @@ public class SwaggerDocketBuilder {
                                                                  WildcardType.class)))
                 .alternateTypeRules(newRule(typeResolver.resolve(Pageable.class),
                                             pageableMixin(),
-                                            Ordered.HIGHEST_PRECEDENCE))
-                .select()
-                .apis(apiSelector::test)
-                .paths(PathSelectors.any())
-                .build();
-        return applyCustomizations(docket);
+                                            Ordered.HIGHEST_PRECEDENCE));
     }
 
     private Type pageableMixin() {
@@ -113,12 +122,12 @@ public class SwaggerDocketBuilder {
                 .build();
     }
 
-    private AlternateTypePropertyBuilder property(Class<?> type, String name) {
+    private AlternateTypePropertyBuilder property(Class<?> type,
+                                                  String name) {
         return new AlternateTypePropertyBuilder()
                 .withName(name)
                 .withType(type)
                 .withCanRead(true)
                 .withCanWrite(true);
     }
-
 }
