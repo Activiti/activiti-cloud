@@ -24,7 +24,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.services.organization.rest.config.ApiAlfrescoPageableApi;
-import org.activiti.cloud.services.organization.swagger.SwaggerConfiguration.AlfrescoProjectsPage;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
@@ -86,8 +85,7 @@ public interface ProjectRestApi {
             value = "List projects",
             notes = "Get the list of available projects. " +
                     "Minimal information for each project is returned.",
-            produces = APPLICATION_JSON_VALUE,
-            response = AlfrescoProjectsPage.class)
+            produces = APPLICATION_JSON_VALUE)
     @ApiAlfrescoPageableApi
     @GetMapping(path = "/projects")
     PagedResources<Resource<Project>> getProjects(Pageable pageable);
