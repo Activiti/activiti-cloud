@@ -26,6 +26,8 @@ import org.activiti.cloud.acc.modeling.config.ModelingTestsConfigurationProperti
 import org.activiti.cloud.acc.modeling.service.ModelingModelsService;
 import org.activiti.cloud.acc.modeling.service.ModelingProjectsService;
 import org.activiti.cloud.acc.shared.rest.feign.FeignConfiguration;
+import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
+import org.activiti.cloud.acc.shared.service.SwaggerService;
 import org.activiti.cloud.organization.config.ObjectMapperConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -83,5 +85,13 @@ public class ModelingFeignConfiguration {
                 .build(modelingEncoder,
                        modelingDecoder,
                        modelingTestsConfigurationProperties.getModelingUrl());
+    }
+
+    @Bean
+    public SwaggerService modelingSwaggerService(){
+        return FeignRestDataClient
+                .builder(new feign.codec.Encoder.Default(),
+                         new feign.codec.Decoder.Default())
+                .target(SwaggerService.class, modelingTestsConfigurationProperties.getModelingUrl());
     }
 }
