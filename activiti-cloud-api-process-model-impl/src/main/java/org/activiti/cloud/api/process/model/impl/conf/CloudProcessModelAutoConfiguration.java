@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
@@ -39,6 +40,7 @@ import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedImpl;
@@ -68,6 +70,8 @@ public class CloudProcessModelAutoConfiguration {
                                               BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()));
         module.registerSubtypes(new NamedType(CloudBPMNActivityCancelledEventImpl.class,
                                               BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name()));
+        module.registerSubtypes(new NamedType(CloudBPMNSignalReceivedEventImpl.class,
+                                              BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name()));
         module.registerSubtypes(new NamedType(CloudProcessDeployedEventImpl.class,
                                               ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name()));
         module.registerSubtypes(new NamedType(CloudProcessStartedEventImpl.class,
