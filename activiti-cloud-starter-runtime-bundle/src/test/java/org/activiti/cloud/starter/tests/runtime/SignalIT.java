@@ -92,15 +92,15 @@ public class SignalIT {
         //when
         runtimeService.startProcessInstanceByKey("broadcastSignalCatchEventProcess");
         runtimeService.startProcessInstanceByKey("broadcastSignalEventProcess");
-
+        
         await("Broadcast Signals").untilAsserted(() -> {
             List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery().processDefinitionKey("broadcastSignalCatchEventProcess").list();
-            assertThat(processInstances).isEmpty();
+            assertThat(processInstances).isEmpty();    
+            
+            processInstances = runtimeService.createProcessInstanceQuery().processDefinitionKey("broadcastSignalEventProcess").list();
+            assertThat(processInstances).isEmpty();    
         });
-
-        //then
-        List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery().processDefinitionKey("broadcastSignalCatchEventProcess").list();
-        assertThat(processInstances).isEmpty();
+       
     }
 
     @Test

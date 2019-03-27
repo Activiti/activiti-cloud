@@ -634,4 +634,37 @@ public class AuditProducerIT {
                                      null,
                                      responseType);
     }
+    
+    @Test
+    public void testProcessExecutionWithThrowSignal() {
+        //when
+    	org.activiti.engine.runtime.ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("broadcastSignalEventProcess");
+    	String processInstanceId = processInstance.getId();
+    	
+        //then
+        await("Broadcast Signals").untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+
+            assertThat(receivedEvents)
+            		.extracting(CloudRuntimeEvent::getEventType, 
+            		            CloudRuntimeEvent::getProcessInstanceId,
+            		            CloudRuntimeEvent::getEntityId)
+            		.containsExactly(tuple(PROCESS_CREATED,processInstanceId,processInstanceId),
+                                tuple(PROCESS_STARTED,processInstanceId,processInstanceId),
+                                tuple(ACTIVITY_STARTED,processInstanceId,"startevent1"),
+                                tuple(ACTIVITY_COMPLETED,processInstanceId,"startevent1"),
+                                tuple(SEQUENCE_FLOW_TAKEN,processInstanceId,"flow5"),
+                                tuple(ACTIVITY_STARTED,processInstanceId, "signalintermediatethrowevent1"),
+                                tuple(ACTIVITY_COMPLETED,processInstanceId, "signalintermediatethrowevent1"),
+                                tuple(SEQUENCE_FLOW_TAKEN,processInstanceId,"flow4"),
+                                tuple(ACTIVITY_STARTED,processInstanceId, "endevent1"),
+                                tuple(ACTIVITY_COMPLETED,processInstanceId, "endevent1"),
+                                tuple(PROCESS_COMPLETED,processInstanceId,processInstanceId));
+        });
+        
+   	
+    }
+    
 }
