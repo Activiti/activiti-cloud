@@ -29,7 +29,7 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.activiti.cloud.organization.api.Extensions;
+import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.organization.jpa.version.VersionEntity;
 import org.activiti.cloud.services.organization.jpa.version.VersionIdentifier;

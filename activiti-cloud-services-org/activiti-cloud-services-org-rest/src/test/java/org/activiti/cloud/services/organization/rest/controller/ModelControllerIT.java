@@ -20,10 +20,10 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.ConnectorModelType;
-import org.activiti.cloud.organization.api.Extensions;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.organization.repository.ProjectRepository;
@@ -52,11 +52,13 @@ import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModel;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.project;
+import static org.activiti.cloud.services.organization.mock.MockMultipartRequestBuilder.putMultipart;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.*;
@@ -368,11 +370,10 @@ public class ModelControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
                                    RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
-
-        // then
-        resultActions.andExpect(status().isNoContent());
+                                   processModel.getId())
+                                 .file(file))
+                // then
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -389,11 +390,10 @@ public class ModelControllerIT {
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
                                    RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
-
-        // then
-        resultActions.andExpect(status().isBadRequest());
+                                   processModel.getId())
+                                 .file(file))
+                // then
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -410,14 +410,12 @@ public class ModelControllerIT {
                                                                                     new Extensions()));
 
         // when
-        final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
-                .andDo(print());
-
-        // then
-        resultActions.andExpect(status().isNoContent());
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  RepositoryRestConfig.API_VERSION,
+                                  processModel.getId())
+                                .file(file))
+                // then
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -464,14 +462,69 @@ public class ModelControllerIT {
                                                        "text/plain",
                                                        "BPMN diagram".getBytes());
         // when
-        final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
-                                   "model_id").file(file))
-                .andDo(print());
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  RepositoryRestConfig.API_VERSION,
+                                  "model_id")
+                                .file(file))
+                // then
+                .andExpect(status().isNotFound());
+    }
 
-        // then
-        resultActions.andExpect(status().isNotFound());
+    @Test
+    public void validateInvalidProcessModelUsingTextContentType() throws Exception {
+
+        // given
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "diagram.bpmn20.xml",
+                                                       "text/plain",
+                                                       "BPMN diagram".getBytes());
+        Model processModel = modelRepository.createModel(processModel("Process-Model"));
+
+        // when
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  API_VERSION,
+                                  processModel.getId())
+                                .file(file))
+                // then
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void validateConnectorValidContent() throws Exception {
+        // given
+        byte[] validContent = resourceAsByteArray("connector/connector-simple.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "connector-simple.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       validContent);
+        Model connectorModel = modelRepository.createModel(connectorModel("Connector-Model"));
+
+        // when
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  API_VERSION,
+                                  connectorModel.getId())
+                                .file(file))
+                // then
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void validateConnectorValidContentWithTemplate() throws Exception {
+        // given
+        byte[] validContent = resourceAsByteArray("connector/connector-template.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "connector-template.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       validContent);
+        Model connectorModel = modelRepository.createModel(connectorModel("Connector-Model"));
+
+        // when
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  API_VERSION,
+                                  connectorModel.getId())
+                                .file(file))
+                // then
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -595,5 +648,54 @@ public class ModelControllerIT {
                 // THEN
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testUpdateConnectorTemplate() throws Exception {
+        //GIVEN
+        Model connectorModel = modelRepository.createModel(connectorModel("Connector With Template"));
+
+        // WHEN
+        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
+                                     API_VERSION,
+                                     connectorModel.getId())
+                                .file("file",
+                                      "connector-template.json",
+                                      "application/json",
+                                      resourceAsByteArray("connector/connector-template.json")))
+                .andExpect(status().isNoContent());
+
+        // THEN
+        mockMvc.perform(get("{version}/models/{modelId}",
+                            API_VERSION,
+                            connectorModel.getId()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.template",
+                                    is("ConnectorTemplate")));
+    }
+
+    @Test
+    public void testUpdateConnectorCustom() throws Exception {
+        //GIVEN
+        Model connectorModel = modelRepository.createModel(connectorModel("SimpleConnector"));
+
+        // WHEN
+        mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
+                                     API_VERSION,
+                                     connectorModel.getId())
+                                .file("file",
+                                      "connector-simple.json",
+                                      "application/json",
+                                      resourceAsByteArray("connector/connector-simple.json")))
+                .andExpect(status().isNoContent());
+
+        // THEN
+        mockMvc.perform(get("{version}/models/{modelId}",
+                            API_VERSION,
+                            connectorModel.getId()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.template").doesNotExist());
     }
 }

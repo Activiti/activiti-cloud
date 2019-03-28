@@ -69,12 +69,15 @@
       "description": "The connector's description",
       "type": "string"
     },
+    "template": {
+      "description": "The connector's template",
+      "type": "string"
+    },
     "actions" : {
       "type": "object",
       "additionalProperties": { "$ref": "#/definitions/connector-action" },
       "default": {}
     }
-
   },
   "required": [ "name" ]
 }

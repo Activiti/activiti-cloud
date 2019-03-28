@@ -17,15 +17,16 @@
 package org.activiti.cloud.services.organization.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidationError;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.organization.core.error.ImportProjectException;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
@@ -42,7 +43,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.isJsonContentType;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 
@@ -141,10 +141,9 @@ public class ProjectService {
                                     .appendFolder(folderName)
                                     .appendFile(modelService.exportModel(model),
                                                 folderName);
-                            if (!isJsonContentType(model.getContentType())) {
-                                zipBuilder.appendFile(modelService.getModelMetadataFileContent(model),
-                                                      folderName);
-                            }
+                            modelService.getModelMetadataFileContent(model).ifPresent(
+                                    metadataFileContent -> zipBuilder.appendFile(metadataFileContent,
+                                                                                 folderName));
                         }));
         return zipBuilder.toZipFileContent();
     }
@@ -171,13 +170,13 @@ public class ProjectService {
                                         String modelName = removeExtension(fileContent.getFilename(),
                                                                            JSON);
                                         projectHolder.addModelJsonFile(modelName,
-                                                                           modelType,
-                                                                           fileContent);
+                                                                       modelType,
+                                                                       fileContent);
                                     } else {
                                         modelService.contentFilenameToModelName(zipEntry.getFileName(),
                                                                                 modelType)
                                                 .ifPresent(modelName -> projectHolder.addModelContent(modelName,
-                                                                                                          fileContent));
+                                                                                                      fileContent));
                                     }
                                 });
                             } else if (fileContent.isJson()) {
@@ -220,11 +219,21 @@ public class ProjectService {
     }
 
     private Stream<ModelValidationError> getModelValidationErrors(Model model) {
+        List<ModelValidationError> validationErrors = new ArrayList<>();
         try {
             modelService.validateModelContent(model);
-            return Stream.empty();
         } catch (SemanticModelValidationException validationException) {
-            return validationException.getValidationErrors().stream();
+            validationErrors.addAll(validationException.getValidationErrors());
         }
+
+        try {
+            modelService.getModelMetadataFileContent(model).ifPresent(
+                    metadataFileContent -> modelService.validateModelContent(model,
+                                                                             metadataFileContent));
+        } catch (SemanticModelValidationException validationException) {
+            validationErrors.addAll(validationException.getValidationErrors());
+        }
+
+        return validationErrors.stream();
     }
 }

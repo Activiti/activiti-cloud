@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.converter.JsonConverter;
+import org.activiti.cloud.services.organization.converter.ConnectorModelContent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -38,6 +39,12 @@ public class JsonConverterConfiguration {
     @Bean
     public JsonConverter<Model> modelJsonConverter(ObjectMapper objectMapper) {
         return new JsonConverter<>(Model.class,
+                                   objectMapper);
+    }
+
+    @Bean
+    public JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter(ObjectMapper objectMapper) {
+        return new JsonConverter<>(ConnectorModelContent.class,
                                    objectMapper);
     }
 }

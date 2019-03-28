@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2019 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,11 @@
 package org.activiti.cloud.organization.api;
 
 /**
- * Business logic related with validation of a model content
+ * Interface for model content
  */
-public interface ModelValidator {
+public interface ModelContent {
 
-    /**
-     * Validate the given model content.
-     * @param modelContent the model content to validate
-     */
-    void validateModelContent(byte[] modelContent);
+    String getId();
 
-    /**
-     * Get handled model type by this validator.
-     * @return handled model type
-     */
-    ModelType getHandledModelType();
-
-    /**
-     * Get handled content type by this validator.
-     * @return handled content type
-     */
-    String getHandledContentType();
+    String getTemplate();
 }

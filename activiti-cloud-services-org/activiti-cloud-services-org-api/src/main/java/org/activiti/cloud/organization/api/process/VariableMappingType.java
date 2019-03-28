@@ -14,17 +14,30 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.entity;
+package org.activiti.cloud.organization.api.process;
 
-import org.activiti.cloud.organization.api.process.Extensions;
+import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * Jon to model extensions converter
+ * Extensions variable mapping types
  */
-public class ExtensionsJsonConverter extends JpaJsonConverter<Extensions> {
+public enum VariableMappingType {
+    VARIABLE,
+    VALUE;
 
-    @Override
-    protected Class<Extensions> getEntityClass() {
-        return Extensions.class;
+    @JsonCreator
+    public static VariableMappingType fromValue(String value) {
+        return Optional.ofNullable(value)
+                .map(String::toUpperCase)
+                .map(VariableMappingType::valueOf)
+                .orElse(null);
+    }
+
+    @JsonValue
+    public String getValue() {
+        return name().toLowerCase();
     }
 }

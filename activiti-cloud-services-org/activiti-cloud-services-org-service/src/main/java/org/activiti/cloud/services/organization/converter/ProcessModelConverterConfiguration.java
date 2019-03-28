@@ -13,31 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.activiti.cloud.services.organization.converter;
 
-package org.activiti.cloud.organization.api;
-
-import java.util.Optional;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import org.activiti.bpmn.converter.BpmnXMLConverter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * Extensions variable mapping types
+ * Configuration for process model validator
  */
-public enum VariableMappingType {
-    VARIABLE,
-    VALUE;
+@Configuration
+public class ProcessModelConverterConfiguration {
 
-    @JsonCreator
-    public static VariableMappingType fromValue(String value) {
-        return Optional.ofNullable(value)
-                .map(String::toUpperCase)
-                .map(VariableMappingType::valueOf)
-                .orElse(null);
-    }
-
-    @JsonValue
-    public String getValue() {
-        return name().toLowerCase();
+    @Bean
+    public BpmnXMLConverter bpmnXMLConverter() {
+        return new BpmnXMLConverter();
     }
 }

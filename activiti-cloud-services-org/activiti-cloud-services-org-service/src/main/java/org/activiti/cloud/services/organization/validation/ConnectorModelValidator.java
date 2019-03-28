@@ -47,7 +47,7 @@ public class ConnectorModelValidator extends JsonSchemaModelValidator {
     }
 
     @Override
-    public String getContentType() {
+    public String getHandledContentType() {
         return CONTENT_TYPE_JSON;
     }
 

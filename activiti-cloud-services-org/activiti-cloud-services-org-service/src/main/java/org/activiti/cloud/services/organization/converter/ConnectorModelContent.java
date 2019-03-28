@@ -14,37 +14,40 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization.api;
+package org.activiti.cloud.services.organization.converter;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.activiti.cloud.organization.api.ModelContent;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
- * Process variable mapping item
+ * Implementation for the {@link ModelContent} corresponding to connector model type
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ProcessVariableMapping {
+public class ConnectorModelContent implements ModelContent {
 
-    private VariableMappingType type;
+    private String id;
 
-    private String value;
+    private String template;
 
-    public VariableMappingType getType() {
-        return type;
+    @Override
+    public String getId() {
+        return id;
     }
 
-    public void setType(VariableMappingType type) {
-        this.type = type;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getValue() {
-        return value;
+    @Override
+    public String getTemplate() {
+        return template;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setTemplate(String template) {
+        this.template = template;
     }
 }

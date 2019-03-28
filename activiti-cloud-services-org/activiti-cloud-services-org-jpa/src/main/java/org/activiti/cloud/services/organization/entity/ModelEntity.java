@@ -32,8 +32,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.activiti.cloud.organization.api.Extensions;
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.organization.jpa.version.VersionedEntity;
 import org.hibernate.annotations.GenericGenerator;
@@ -69,6 +69,8 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     private String type;
 
     private String name;
+
+    private String template;
 
     public ModelEntity() { // for JPA
     }
@@ -163,6 +165,16 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     @Override
     public void setExtensions(Extensions extensions) {
         latestVersion.setExtensions(extensions);
+    }
+
+    @Override
+    public String getTemplate() {
+        return template;
+    }
+
+    @Override
+    public void setTemplate(String template) {
+        this.template = template;
     }
 
     @Override

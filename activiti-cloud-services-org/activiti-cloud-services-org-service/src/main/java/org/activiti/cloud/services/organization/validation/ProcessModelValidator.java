@@ -15,26 +15,21 @@
  */
 package org.activiti.cloud.services.organization.validation;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
-import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ModelValidator;
 import org.activiti.cloud.organization.api.ProcessModelType;
-import org.activiti.cloud.organization.core.error.ModelingException;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.core.error.SyntacticModelValidationException;
+import org.activiti.cloud.services.organization.converter.ProcessModelContentConverter;
 import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ValidationError;
 import org.slf4j.Logger;
@@ -42,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 
 /**
@@ -57,21 +51,21 @@ public class ProcessModelValidator implements ModelValidator {
 
     private final ProcessValidator processValidator;
 
-    private final BpmnXMLConverter bpmnConverter;
+    private final ProcessModelContentConverter processModelContentConverter;
 
     @Autowired
     public ProcessModelValidator(ProcessModelType processModelType,
                                  ProcessValidator processValidator,
-                                 BpmnXMLConverter bpmnConverter) {
+                                 ProcessModelContentConverter processModelContentConverter) {
         this.processModelType = processModelType;
         this.processValidator = processValidator;
-        this.bpmnConverter = bpmnConverter;
+        this.processModelContentConverter = processModelContentConverter;
     }
 
     @Override
-    public void validateModelContent(byte[] modelContent) {
+    public void validateModelContent(byte[] bytes) {
         try {
-            BpmnModel bpmnModel = convertToBpmnModel(modelContent);
+            BpmnModel bpmnModel = processModelContentConverter.convertToBpmnModel(bytes);
 
             List<ValidationError> validationErrors = processValidator.validate(bpmnModel);
             if (!validationErrors.isEmpty()) {
@@ -90,47 +84,6 @@ public class ProcessModelValidator implements ModelValidator {
         }
     }
 
-    public BpmnModel convertToBpmnModel(byte[] modelContent) throws IOException, XMLStreamException {
-        try (InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(modelContent))) {
-            XMLStreamReader xmlReader = createSafeXmlInputFactory().createXMLStreamReader(reader);
-            return bpmnConverter.convertToBpmnModel(xmlReader);
-        }
-    }
-
-    public String convertAndGetModelId(byte[] modelContent) {
-        try {
-            return convertToBpmnModel(modelContent)
-                    .getProcesses()
-                    .stream()
-                    .findFirst()
-                    .map(Process::getId)
-                    .orElseThrow(() -> new ModelingException("Invalid bpmn model: no process id found"));
-        } catch (IOException | XMLStreamException | XMLException ex) {
-            throw new ModelingException("Invalid bpmn model",
-                                        ex);
-        }
-    }
-
-    public byte[] convertAndFixModelId(byte[] modelContent,
-                                       String correctModelId) {
-        try {
-            BpmnModel bpmnModel = convertToBpmnModel(modelContent);
-            Process process = bpmnModel.getProcesses()
-                    .stream()
-                    .findFirst()
-                    .orElseThrow(() -> new ModelingException("Invalid bpmn model: no process found"));
-            if (!correctModelId.equals(process.getId())) {
-                process.setId(correctModelId);
-                return bpmnConverter.convertToXML(bpmnModel);
-            }
-
-            return modelContent;
-        } catch (IOException | XMLStreamException | XMLException ex) {
-            throw new ModelingException("Invalid bpmn model",
-                                        ex);
-        }
-    }
-
     private ModelValidationError toModelValidationError(ValidationError validationError) {
         ModelValidationError modelValidationError = new ModelValidationError();
         modelValidationError.setWarning(validationError.isWarning());
@@ -146,7 +99,7 @@ public class ProcessModelValidator implements ModelValidator {
     }
 
     @Override
-    public String getContentType() {
+    public String getHandledContentType() {
         return CONTENT_TYPE_XML;
     }
 }

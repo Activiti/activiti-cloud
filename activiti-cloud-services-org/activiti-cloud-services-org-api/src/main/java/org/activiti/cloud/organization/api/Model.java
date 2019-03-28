@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.organization.api;
 
+import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.services.auditable.Auditable;
 
 /**
@@ -52,4 +53,8 @@ public interface Model<A extends Project, U> extends Auditable<U> {
     Extensions getExtensions();
 
     void setExtensions(Extensions extensions);
+
+    String getTemplate();
+
+    void setTemplate(String template);
 }

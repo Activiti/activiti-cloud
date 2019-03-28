@@ -23,17 +23,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
-import org.activiti.cloud.organization.api.Extensions;
-import org.activiti.cloud.organization.api.ProcessVariable;
-import org.activiti.cloud.organization.api.ProcessVariableMapping;
+import org.activiti.cloud.organization.api.ConnectorModelType;
+import org.activiti.cloud.organization.api.process.Extensions;
+import org.activiti.cloud.organization.api.process.ProcessVariable;
+import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.entity.ProjectEntity;
 
 import static java.util.Collections.singletonMap;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
-import static org.activiti.cloud.organization.api.ServiceTaskActionType.INPUTS;
-import static org.activiti.cloud.organization.api.ServiceTaskActionType.OUTPUTS;
-import static org.activiti.cloud.organization.api.VariableMappingType.VALUE;
+import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
+import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.OUTPUTS;
+import static org.activiti.cloud.organization.api.process.VariableMappingType.VALUE;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 
 /**
@@ -154,6 +155,11 @@ public class MockFactory {
         processVariableMapping.setType(VALUE);
         processVariableMapping.setValue(name);
         return processVariableMapping;
+    }
+
+    public static ModelEntity connectorModel(String name) {
+        return new ModelEntity(name,
+                               ConnectorModelType.NAME);
     }
 
     public static String id() {

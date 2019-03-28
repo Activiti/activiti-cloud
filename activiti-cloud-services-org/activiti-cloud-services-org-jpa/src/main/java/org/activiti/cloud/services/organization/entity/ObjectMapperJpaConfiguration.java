@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.cloud.organization.api.Project;
-import org.activiti.cloud.organization.api.Extensions;
+import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.converter.JsonConverter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;

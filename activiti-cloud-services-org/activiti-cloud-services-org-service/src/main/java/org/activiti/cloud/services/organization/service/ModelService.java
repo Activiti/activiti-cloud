@@ -19,22 +19,18 @@ package org.activiti.cloud.services.organization.service;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.api.ModelValidator;
 import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.organization.core.error.ImportModelException;
 import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.activiti.cloud.services.common.util.ContentTypeUtils;
-import org.activiti.cloud.services.organization.validation.ProcessModelValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +39,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.isJsonContentType;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
@@ -63,22 +61,19 @@ public class ModelService {
 
     private final ModelTypeService modelTypeService;
 
-    private final Map<String, List<ModelValidator>> modelValidatorsMapByModelType;
+    private final ModelContentService modelContentService;
 
     private final JsonConverter<Model> jsonConverter;
 
     @Autowired
     public ModelService(ModelRepository modelRepository,
                         ModelTypeService modelTypeService,
-                        Set<ModelValidator> modelValidators,
+                        ModelContentService modelContentService,
                         JsonConverter<Model> jsonConverter) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
+        this.modelContentService = modelContentService;
         this.jsonConverter = jsonConverter;
-
-        this.modelValidatorsMapByModelType = modelValidators
-                .stream()
-                .collect(Collectors.groupingBy(validator -> validator.getHandledModelType().getName()));
     }
 
     public List<Model> getAllModels(Project project) {
@@ -133,20 +128,24 @@ public class ModelService {
         }
     }
 
-    public FileContent getModelMetadataFileContent(Model model) {
+    public Optional<FileContent> getModelMetadataFileContent(Model model) {
+        if (isJsonContentType(model.getContentType())) {
+            return Optional.empty();
+        }
+
         Model modelWithFullMetadata = findModelById(model.getId()).orElse(model);
         byte[] modelContent = modelRepository.getModelContent(model);
-        final String bpmnModelId = findModelValidatorByModelType(model.getType())
-                .filter(ProcessModelValidator.class::isInstance)
-                .map(ProcessModelValidator.class::cast)
-                .filter(validator -> validator.getContentType().equals(model.getContentType()))
-                .map(validator -> validator.convertAndGetModelId(modelContent))
-                .orElseGet(() -> getBpmnModeId(model));
+        final String bpmnModelId = modelContentService
+                .findModelContentConverter(model.getType())
+                .flatMap(converter -> converter.convertToModelContent(modelContent))
+                .map(ModelContent::getId)
+                .orElseGet(() -> modelContentService.getModelContentId(model));
         modelWithFullMetadata.setId(bpmnModelId);
 
-        return new FileContent(getMetadataFilename(model),
-                               ContentTypeUtils.CONTENT_TYPE_JSON,
-                               jsonConverter.convertToJsonBytes(modelWithFullMetadata));
+        FileContent metadataFileContent = new FileContent(getMetadataFilename(model),
+                                                          CONTENT_TYPE_JSON,
+                                                          jsonConverter.convertToJsonBytes(modelWithFullMetadata));
+        return Optional.of(metadataFileContent);
     }
 
     public String getMetadataFilename(Model model) {
@@ -178,33 +177,32 @@ public class ModelService {
 
     public Model updateModelContent(Model modelToBeUpdate,
                                     FileContent fileContent) {
-        FileContent validatedFileContent = validateAndFixModelContent(modelToBeUpdate,
-                                                                      fileContent);
+        FileContent fixedFileContent = checkAndFixModelContent(modelToBeUpdate,
+                                                               fileContent);
 
-        modelToBeUpdate.setContentType(validatedFileContent.getContentType());
-        modelToBeUpdate.setContent(validatedFileContent.toString());
+        modelToBeUpdate.setContentType(fixedFileContent.getContentType());
+        modelToBeUpdate.setContent(fixedFileContent.toString());
+
+        Optional.ofNullable(modelToBeUpdate.getType())
+                .flatMap(modelContentService::findModelContentConverter)
+                .flatMap(validator -> validator.convertToModelContent(fixedFileContent.getFileContent()))
+                .ifPresent(modelContent -> modelToBeUpdate.setTemplate(modelContent.getTemplate()));
+
         return modelRepository.updateModelContent(modelToBeUpdate,
-                                                  validatedFileContent);
+                                                  fixedFileContent);
     }
 
-    public FileContent validateAndFixModelContent(Model model,
-                                                  FileContent fileContent) {
-        return findModelValidatorByModelType(model.getType())
-                .filter(ProcessModelValidator.class::isInstance)
-                .map(ProcessModelValidator.class::cast)
-                .filter(validator -> validator.getContentType().equals(model.getContent()))
-                .map(validator -> validator.convertAndFixModelId(fileContent.getFileContent(),
-                                                                 getBpmnModeId(model)))
+    public FileContent checkAndFixModelContent(Model model,
+                                               FileContent fileContent) {
+        return modelContentService
+                .findModelContentConverter(model.getType())
+                .map(converter -> converter
+                        .convertAndFixModelContentId(fileContent.getFileContent(),
+                                                     modelContentService.getModelContentId(model)))
                 .map(content -> new FileContent(fileContent.getFilename(),
                                                 fileContent.getContentType(),
                                                 content))
                 .orElse(fileContent);
-    }
-
-    public String getBpmnModeId(Model model) {
-        return String.join("-",
-                           model.getType().toLowerCase(),
-                           model.getId());
     }
 
     public Model importModel(Project project,
@@ -262,10 +260,6 @@ public class ModelService {
                                                   extension));
     }
 
-    public Optional<List<ModelValidator>> findModelValidatorByModelType(String modelType) {
-        return Optional.ofNullable(modelValidatorsMapByModelType.get(modelType));
-    }
-
     public void validateModelContent(Model model) {
         validateModelContent(model.getType(),
                              modelRepository.getModelContent(model),
@@ -282,9 +276,9 @@ public class ModelService {
     private void validateModelContent(String modelType,
                                       byte[] modelContent,
                                       String contentType) {
-        findModelValidatorByModelType(modelType)
-                .ifPresent(list -> list.stream().filter(validator -> validator.getContentType().equals(contentType))
-                        .forEach(validator -> validator.validateModelContent(modelContent)));
+        modelContentService.findModelValidator(modelType,
+                                               contentType)
+                .ifPresent(modelValidator -> modelValidator.validateModelContent(modelContent));
     }
 
     private ModelType findModelType(Model model) {

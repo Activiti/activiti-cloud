@@ -33,9 +33,4 @@ public class ProcessModelValidatorConfiguration {
         processValidator.addValidatorSet(new ValidatorSetFactory().createActivitiExecutableProcessValidatorSet());
         return processValidator;
     }
-
-    @Bean
-    public BpmnXMLConverter bpmnXMLConverter() {
-        return new BpmnXMLConverter();
-    }
 }
