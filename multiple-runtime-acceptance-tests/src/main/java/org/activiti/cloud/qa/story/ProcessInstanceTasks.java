@@ -34,18 +34,22 @@ public class ProcessInstanceTasks {
     @Steps
     private ProcessQuerySteps processQuerySteps;
 
-    private CloudProcessInstance processInstance;
+    private CloudProcessInstance processInstanceCatchSignal;
+    private CloudProcessInstance processInstanceThrowSignal;
 
     @When("the user starts signal catch process on primary runtime and starts signal throw process on secondary runtime")
-    public void startSignalCatchProcessInstance() {
-        processInstance = runtimeBundleSteps.startProcess("SignalCatchEventProcess", true);
-        assertThat(processInstance).isNotNull();
-        runtimeBundleSteps.startProcess("SignalThrowEventProcess", false);
+    public void startSignalCatchThrowProcessInstance() {
+    	processInstanceCatchSignal = runtimeBundleSteps.startProcess("SignalCatchEventProcess", true);
+        assertThat(processInstanceCatchSignal).isNotNull();
+        processInstanceThrowSignal = runtimeBundleSteps.startProcess("SignalThrowEventProcess", false);
+        assertThat(processInstanceThrowSignal).isNotNull();
     }
 
-    @Then("a signal was received and the signal catch process was completed")
-    public void startSignalThrowProcessInstance() throws Exception {
-        processQuerySteps.checkProcessInstanceStatus(processInstance.getId(),
+    @Then("a signal was received and the signal catch and throw processes were completed")
+    public void sheckSignalCatchThrowProcessInstances() throws Exception {
+        processQuerySteps.checkProcessInstanceStatus(processInstanceCatchSignal.getId(),
                                               ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        processQuerySteps.checkProcessInstanceStatus(processInstanceThrowSignal.getId(),
+                ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
 }
