@@ -19,18 +19,11 @@ package org.activiti.cloud.services.query.rest;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
-import org.activiti.cloud.services.security.ActivitiForbiddenException;
+import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @ExposesResourceFor(ProcessModelEntity.class)
@@ -50,12 +43,6 @@ public class ProcessModelController {
         this.processModelRepository = processModelRepository;
         this.entityFinder = entityFinder;
         this.securityPoliciesManager = securityPoliciesManager;
-    }
-
-    @ExceptionHandler(ActivitiForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String handleAppException(ActivitiForbiddenException ex) {
-        return ex.getMessage();
     }
 
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
