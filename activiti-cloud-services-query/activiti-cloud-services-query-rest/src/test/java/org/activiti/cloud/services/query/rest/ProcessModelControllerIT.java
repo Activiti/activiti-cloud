@@ -36,11 +36,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -110,7 +112,7 @@ public class ProcessModelControllerIT {
                                 .accept(MediaType.APPLICATION_XML_VALUE))
                 //then
                 .andExpect(status().isForbidden())
-                .andExpect(content().string("Operation not permitted for " + processDefinition.getKey()));
+                .andExpect(jsonPath("entry.message", is("Operation not permitted for " + processDefinition.getKey())));
     }
 
 }
