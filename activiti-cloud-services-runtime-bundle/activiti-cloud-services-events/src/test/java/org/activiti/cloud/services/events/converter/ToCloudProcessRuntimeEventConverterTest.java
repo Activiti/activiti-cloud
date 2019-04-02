@@ -16,7 +16,10 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.api.runtime.event.impl.BPMNSignalReceivedEventImpl;
+import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -65,6 +68,24 @@ public class ToCloudProcessRuntimeEventConverterTest {
         assertThat(processStarted.getNestedProcessDefinitionId()).isEqualTo("myParentProcessDef");
         assertThat(processStarted.getNestedProcessInstanceId()).isEqualTo("2");
 
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
+    }
+
+    @Test
+    public void shouldConvertBPMNSignalReceivedEventToCloudBPMNSignalReceivedEvent() {
+        //given
+        BPMNSignalImpl signal = new BPMNSignalImpl();
+        signal.setProcessDefinitionId("procDefId");
+        signal.setProcessInstanceId("procInstId");
+        BPMNSignalReceivedEventImpl signalReceivedEvent = new BPMNSignalReceivedEventImpl(signal);
+
+        //when
+        CloudBPMNSignalReceivedEvent cloudEvent = converter.from(signalReceivedEvent);
+        assertThat(cloudEvent.getEntity()).isEqualTo(signal);
+        assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
+        assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
+
+        //then
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
     }
 }
