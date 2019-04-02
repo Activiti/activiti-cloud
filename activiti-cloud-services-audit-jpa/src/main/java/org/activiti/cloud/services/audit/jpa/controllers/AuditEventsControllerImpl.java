@@ -73,20 +73,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     private final APIEventToEntityConverters eventConverters;
-    
-    @ExceptionHandler(ActivitiForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String handleAppException(ActivitiForbiddenException ex) {
-        return ex.getMessage();
-    }
-
-    @ExceptionHandler({NotFoundException.class})
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleAppException(RuntimeException ex) {
-        return ex.getMessage();
-    }
-
- 
+     
     @Autowired
     public AuditEventsControllerImpl(EventsRepository eventsRepository,
                                      EventResourceAssembler eventResourceAssembler,
