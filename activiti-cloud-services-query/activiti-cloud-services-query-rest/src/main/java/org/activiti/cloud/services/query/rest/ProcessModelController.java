@@ -16,14 +16,20 @@
 
 package org.activiti.cloud.services.query.rest;
 
+import org.activiti.api.model.shared.model.ActivitiError;
+import org.activiti.api.runtime.model.impl.ActivitiErrorImpl;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @ExposesResourceFor(ProcessModelEntity.class)
@@ -43,6 +49,13 @@ public class ProcessModelController {
         this.processModelRepository = processModelRepository;
         this.entityFinder = entityFinder;
         this.securityPoliciesManager = securityPoliciesManager;
+    }
+
+    @ExceptionHandler(ActivitiForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Resource<ActivitiError> handleAppException(ActivitiForbiddenException ex, HttpServletResponse response) {
+        response.setContentType("application/json");
+        return new Resource<>(new ActivitiErrorImpl(HttpStatus.FORBIDDEN, ex.getMessage()));
     }
 
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
