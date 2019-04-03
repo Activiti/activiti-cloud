@@ -16,19 +16,12 @@
 
 package org.activiti.cloud.starter.tests.services.audit;
 
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.RUNTIME_BUNDLE_INFO_HEADERS;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
-import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -46,6 +39,19 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
+import static org.activiti.api.process.model.events.BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
+import static org.activiti.api.process.model.events.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.RUNTIME_BUNDLE_INFO_HEADERS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
@@ -115,7 +121,7 @@ public class SignalAuditProducerIT {
                     .collect(Collectors.toList());
 
             assertThat(signalReceivedEvents)
-                    .filteredOn(event -> BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name().equals(event.getEventType().name()))
+                    .filteredOn(event -> SIGNAL_RECEIVED.name().equals(event.getEventType().name()))
                     .extracting( CloudRuntimeEvent::getEventType,
                                  CloudRuntimeEvent::getProcessDefinitionId,
                                  CloudRuntimeEvent::getProcessInstanceId,
@@ -128,7 +134,7 @@ public class SignalAuditProducerIT {
                                  event -> event.getEntity().getSignalPayload().getVariables()
                     )
                     .contains(
-                            tuple(BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED,
+                            tuple(SIGNAL_RECEIVED,
                                   processWithSignalStart.getId(),
                                   null, // not available for start catch signal
                                   null, // not available for start catch signal
@@ -139,7 +145,7 @@ public class SignalAuditProducerIT {
                                   "Test",
                                   Collections.singletonMap("signalVar", "timeToGo")
                             ),
-                            tuple(BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED,
+                            tuple(SIGNAL_RECEIVED,
                                   startProcessEntity1.getBody().getProcessDefinitionId(),
                                   startProcessEntity1.getBody().getId(),
                                   startProcessEntity1.getBody().getProcessDefinitionKey(),
@@ -150,7 +156,7 @@ public class SignalAuditProducerIT {
                                   "Test",
                                   Collections.singletonMap("signalVar", "timeToGo")
                             ),
-                            tuple(BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED,
+                            tuple(SIGNAL_RECEIVED,
                                   startProcessEntity2.getBody().getProcessDefinitionId(),
                                   startProcessEntity2.getBody().getId(),
                                   startProcessEntity2.getBody().getProcessDefinitionKey(),
@@ -164,6 +170,69 @@ public class SignalAuditProducerIT {
                     );
 
         });
+
+    }
+
+    @Test
+    public void testProcessExecutionWithThrowSignal() {
+        //when
+        streamHandler.getAllReceivedEvents().clear();
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
+                new StartProcessPayloadBuilder()
+                        .withProcessDefinitionKey("broadcastSignalEventProcess")
+                        .build());
+        String processInstanceId = processInstance.getBody().getId();
+
+
+        //then
+        await("Broadcast Signals").untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+
+            assertThat(receivedEvents)
+                    .extracting(CloudRuntimeEvent::getEventType,
+                                CloudRuntimeEvent::getProcessInstanceId,
+                                CloudRuntimeEvent::getEntityId)
+                    .contains(tuple(PROCESS_CREATED,
+                                    processInstanceId,
+                                    processInstanceId),
+                              tuple(PROCESS_STARTED,
+                                    processInstanceId,
+                                    processInstanceId),
+                              tuple(ACTIVITY_STARTED,
+                                    processInstanceId,
+                                    "startevent1"),
+                              tuple(ACTIVITY_COMPLETED,
+                                    processInstanceId,
+                                    "startevent1"),
+                              tuple(SEQUENCE_FLOW_TAKEN,
+                                    processInstanceId,
+                                    "flow5"),
+                              tuple(ACTIVITY_STARTED,
+                                    processInstanceId,
+                                    "signalintermediatethrowevent1"),
+                              tuple(ACTIVITY_COMPLETED,
+                                    processInstanceId,
+                                    "signalintermediatethrowevent1"),
+                              tuple(SEQUENCE_FLOW_TAKEN,
+                                    processInstanceId,
+                                    "flow4"),
+                              tuple(ACTIVITY_STARTED,
+                                    processInstanceId,
+                                    "endevent1"),
+                              tuple(ACTIVITY_COMPLETED,
+                                    processInstanceId,
+                                    "endevent1"),
+                              tuple(PROCESS_COMPLETED,
+                                    processInstanceId,
+                                    processInstanceId),
+                              tuple(SIGNAL_RECEIVED,
+                                    null,
+                                    "theStart")//signal start event catching signal thrown by broadcastSignalEventProcess
+                    );
+        });
+
 
     }
 
