@@ -24,7 +24,7 @@ Then the project 'Mars Team' is deleted
 
 Scenario: export an project
 Given the user is authenticated as modeler
-And an project 'Mission Europa First' with process model landing-rover and process variables 'age, gender'
+And an project 'Mission Europa' with process model landing-rover and process variables 'age, gender'
 When the user export the project
 Then the exported project contains the process model landing-rover with process variables 'age, gender'
 
