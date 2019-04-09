@@ -94,9 +94,6 @@ public class AuditServiceIT {
     @Autowired
     private MyProducer producer;
     
-    @Autowired
-    private APIEventToEntityConverters eventConverters;
-
     @Before
     public void setUp() {
         repository.deleteAll();
