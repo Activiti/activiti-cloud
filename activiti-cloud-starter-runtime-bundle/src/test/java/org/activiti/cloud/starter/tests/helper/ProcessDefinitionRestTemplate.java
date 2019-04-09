@@ -16,29 +16,30 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 
-@Component
+import static org.assertj.core.api.Assertions.assertThat;
+
+@TestComponent
 public class ProcessDefinitionRestTemplate {
 
     private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
     private static final ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> PAGED_DEFINITIONS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
     };
 
-    @Autowired
     private TestRestTemplate testRestTemplate;
 
- 
+    public ProcessDefinitionRestTemplate(TestRestTemplate testRestTemplate) {
+        this.testRestTemplate = testRestTemplate;
+    }
+
     public ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
         ResponseEntity<PagedResources<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(PROCESS_DEFINITIONS_URL,
                                          HttpMethod.GET,

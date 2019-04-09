@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +30,7 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.engine.impl.util.IoUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedResources;
@@ -43,19 +41,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 
-@Component
+import static org.assertj.core.api.Assertions.assertThat;
+
+@TestComponent
 public class ProcessInstanceRestTemplate {
 
     public static final String PROCESS_INSTANCES_RELATIVE_URL = "/v1/process-instances/";
 
-    public static final String PROCESS_INSTANCES_ADMIN_RELATIVE_URL = "/admin/v1/process-instances/";
+    private static final String PROCESS_INSTANCES_ADMIN_RELATIVE_URL = "/admin/v1/process-instances/";
 
-    @Autowired
     private TestRestTemplate testRestTemplate;
+
+    public ProcessInstanceRestTemplate(TestRestTemplate testRestTemplate) {
+        this.testRestTemplate = testRestTemplate;
+    }
 
     private ResponseEntity<CloudProcessInstance> startProcess(String processDefinitionKey,
                                                               String processDefinitionId,
