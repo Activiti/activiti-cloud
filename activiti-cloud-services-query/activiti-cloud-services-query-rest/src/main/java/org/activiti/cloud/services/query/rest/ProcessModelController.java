@@ -55,7 +55,7 @@ public class ProcessModelController {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Resource<ActivitiError> handleAppException(ActivitiForbiddenException ex, HttpServletResponse response) {
         response.setContentType("application/json");
-        return new Resource<>(new ActivitiErrorImpl(HttpStatus.FORBIDDEN, ex.getMessage()));
+        return new Resource<>(new ActivitiErrorImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
