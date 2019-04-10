@@ -48,13 +48,20 @@
           "minLength": 1
         },
         "type": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "string",
+            "integer",
+            "date",
+            "boolean",
+            "json"
+          ]
         },
         "required": {
           "type": "boolean"
         },
         "value": {
-          "type": "string"
+          "type": ["number", "string", "boolean", "object"]
         }
       },
       "required": [

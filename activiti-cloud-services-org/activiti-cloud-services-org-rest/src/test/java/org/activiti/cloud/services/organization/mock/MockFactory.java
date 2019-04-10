@@ -16,12 +16,16 @@
 
 package org.activiti.cloud.services.organization.mock;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.process.Extensions;
@@ -142,12 +146,44 @@ public class MockFactory {
     }
 
     public static ProcessVariable processVariable(String name) {
+        String type;
+        Object value;
+        if (name.startsWith("int")) {
+            type = "integer";
+            value = name.length();
+        } else if (name.startsWith("boolean")) {
+            type = "boolean";
+            value = true;
+        } else if (name.startsWith("date")) {
+            type = "date";
+            value = new Date(0);
+        } else if (name.startsWith("json")) {
+            type = "json";
+            value = json("json-field-name", name);
+        } else {
+            type = "string";
+            value = name;
+        }
         ProcessVariable processVariable = new ProcessVariable();
         processVariable.setId(name);
         processVariable.setName(name);
-        processVariable.setType("string");
-        processVariable.setValue(name);
+        processVariable.setType(type);
+        processVariable.setValue(value);
         return processVariable;
+    }
+
+    public static JsonNode json(String field,
+                                String value) {
+        return json("{\"" + field + "\": \"" + value + "\"}");
+    }
+
+    public static JsonNode json(String json) {
+        try {
+            return new ObjectMapper().readValue(json,
+                                                JsonNode.class);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     public static ProcessVariableMapping processVariableMapping(String name) {

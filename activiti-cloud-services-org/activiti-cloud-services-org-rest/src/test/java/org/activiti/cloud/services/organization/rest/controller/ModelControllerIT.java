@@ -48,10 +48,15 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.organization.mock.IsObjectEquals.isBooleanEquals;
+import static org.activiti.cloud.services.organization.mock.IsObjectEquals.isDateEquals;
+import static org.activiti.cloud.services.organization.mock.IsObjectEquals.isIntegerEquals;
 import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModel;
@@ -212,8 +217,11 @@ public class ModelControllerIT {
         //given
         Model processModel = modelRepository
                 .createModel(processModelWithExtensions("processModelWithExtensions",
-                                                        extensions("variable1",
-                                                                   "variable2")));
+                                                        extensions("stringVariable",
+                                                                   "integerVariable",
+                                                                   "booleanVariable",
+                                                                   "dateVariable",
+                                                                   "jsonVariable")));
         //when
         mockMvc.perform(get("{version}/models/{modelId}",
                             API_VERSION,
@@ -222,53 +230,116 @@ public class ModelControllerIT {
                 //then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.extensions.properties",
-                                    allOf(hasEntry(equalTo("variable1"),
+                                    allOf(hasEntry(equalTo("stringVariable"),
                                                    allOf(hasEntry(equalTo("id"),
-                                                                  equalTo("variable1")),
+                                                                  equalTo("stringVariable")),
                                                          hasEntry(equalTo("name"),
-                                                                  equalTo("variable1")),
+                                                                  equalTo("stringVariable")),
                                                          hasEntry(equalTo("type"),
                                                                   equalTo("string")),
                                                          hasEntry(equalTo("value"),
-                                                                  equalTo("variable1"))
+                                                                  equalTo("stringVariable"))
                                                    )),
-                                          hasEntry(equalTo("variable2"),
+                                          hasEntry(equalTo("integerVariable"),
                                                    allOf(hasEntry(equalTo("id"),
-                                                                  equalTo("variable2")),
+                                                                  equalTo("integerVariable")),
                                                          hasEntry(equalTo("name"),
-                                                                  equalTo("variable2")),
+                                                                  equalTo("integerVariable")),
                                                          hasEntry(equalTo("type"),
-                                                                  equalTo("string")),
+                                                                  equalTo("integer")),
                                                          hasEntry(equalTo("value"),
-                                                                  equalTo("variable2")))
-                                          ))))
+                                                                  isIntegerEquals(15)))),
+                                          hasEntry(equalTo("booleanVariable"),
+                                                   allOf(hasEntry(equalTo("id"),
+                                                                  equalTo("booleanVariable")),
+                                                         hasEntry(equalTo("name"),
+                                                                  equalTo("booleanVariable")),
+                                                         hasEntry(equalTo("type"),
+                                                                  equalTo("boolean")),
+                                                         hasEntry(equalTo("value"),
+                                                                  isBooleanEquals(true)))),
+                                          hasEntry(equalTo("dateVariable"),
+                                                   allOf(hasEntry(equalTo("id"),
+                                                                  equalTo("dateVariable")),
+                                                         hasEntry(equalTo("name"),
+                                                                  equalTo("dateVariable")),
+                                                         hasEntry(equalTo("type"),
+                                                                  equalTo("date")),
+                                                         hasEntry(equalTo("value"),
+                                                                  isDateEquals(0)))),
+                                          hasEntry(equalTo("jsonVariable"),
+                                                   allOf(hasEntry(equalTo("id"),
+                                                                  equalTo("jsonVariable")),
+                                                         hasEntry(equalTo("name"),
+                                                                  equalTo("jsonVariable")),
+                                                         hasEntry(equalTo("type"),
+                                                                  equalTo("json")),
+                                                         hasEntry(equalTo("value"),
+                                                                  isJson(withJsonPath("json-field-name")))))
+                                    )))
                 .andExpect(jsonPath("$.extensions.mappings",
                                     hasEntry(equalTo("ServiceTask"),
                                              allOf(hasEntry(equalTo("inputs"),
-                                                            allOf(hasEntry(equalTo("variable1"),
+                                                            allOf(hasEntry(equalTo("stringVariable"),
                                                                            allOf(hasEntry(equalTo("type"),
                                                                                           equalTo("value")),
                                                                                  hasEntry(equalTo("value"),
-                                                                                          equalTo("variable1"))
+                                                                                          equalTo("stringVariable"))
                                                                            )),
-                                                                  hasEntry(equalTo("variable2"),
+                                                                  hasEntry(equalTo("integerVariable"),
                                                                            allOf(hasEntry(equalTo("type"),
                                                                                           equalTo("value")),
                                                                                  hasEntry(equalTo("value"),
-                                                                                          equalTo("variable2"))
+                                                                                          equalTo("integerVariable"))
+                                                                           )),
+                                                                  hasEntry(equalTo("booleanVariable"),
+                                                                           allOf(hasEntry(equalTo("type"),
+                                                                                          equalTo("value")),
+                                                                                 hasEntry(equalTo("value"),
+                                                                                          equalTo("booleanVariable"))
+                                                                           )),
+                                                                  hasEntry(equalTo("dateVariable"),
+                                                                           allOf(hasEntry(equalTo("type"),
+                                                                                          equalTo("value")),
+                                                                                 hasEntry(equalTo("value"),
+                                                                                          equalTo("dateVariable"))
+                                                                           )),
+                                                                  hasEntry(equalTo("jsonVariable"),
+                                                                           allOf(hasEntry(equalTo("type"),
+                                                                                          equalTo("value")),
+                                                                                 hasEntry(equalTo("value"),
+                                                                                          equalTo("jsonVariable"))
                                                                            )))),
                                                    hasEntry(equalTo("outputs"),
-                                                            allOf(hasEntry(equalTo("variable1"),
+                                                            allOf(hasEntry(equalTo("stringVariable"),
                                                                            allOf(hasEntry(equalTo("type"),
                                                                                           equalTo("value")),
                                                                                  hasEntry(equalTo("value"),
-                                                                                          equalTo("variable1"))
+                                                                                          equalTo("stringVariable"))
                                                                            )),
-                                                                  hasEntry(equalTo("variable2"),
+                                                                  hasEntry(equalTo("integerVariable"),
                                                                            allOf(hasEntry(equalTo("type"),
                                                                                           equalTo("value")),
                                                                                  hasEntry(equalTo("value"),
-                                                                                          equalTo("variable2"))
+                                                                                          equalTo("integerVariable"))
+                                                                           )),
+                                                                  hasEntry(equalTo("booleanVariable"),
+                                                                           allOf(hasEntry(equalTo("type"),
+                                                                                          equalTo("value")),
+                                                                                 hasEntry(equalTo("value"),
+                                                                                          equalTo("booleanVariable"))
+                                                                           )),
+                                                                  hasEntry(equalTo("dateVariable"),
+                                                                           allOf(hasEntry(equalTo("type"),
+                                                                                          equalTo("value")),
+                                                                                 hasEntry(equalTo("value"),
+                                                                                          equalTo("dateVariable"))
+                                                                           )),
+                                                                  hasEntry(equalTo("jsonVariable"),
+                                                                           allOf(hasEntry(equalTo("type"),
+                                                                                          equalTo("value")),
+                                                                                 hasEntry(equalTo("value"),
+                                                                                          equalTo("jsonVariable"))
                                                                            ))))
                                              ))
                 ));
