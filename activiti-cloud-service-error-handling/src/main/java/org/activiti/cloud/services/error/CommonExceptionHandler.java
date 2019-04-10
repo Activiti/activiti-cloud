@@ -16,19 +16,19 @@ public class CommonExceptionHandler {
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Resource<ActivitiError> handleAppException(ActivitiForbiddenException ex) {
-        return new Resource<>(new ActivitiErrorImpl(HttpStatus.FORBIDDEN, ex.getMessage()));
+        return new Resource<>(new ActivitiErrorImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Resource<ActivitiError> handleAppException(IllegalStateException ex) {
-        return new Resource<>(new ActivitiErrorImpl(HttpStatus.NOT_FOUND, ex.getMessage()));
+        return new Resource<>(new ActivitiErrorImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Resource<ActivitiError> handleAppException(NotFoundException ex) {
-        return new Resource<>(new ActivitiErrorImpl(HttpStatus.NOT_FOUND, ex.getMessage()));
+        return new Resource<>(new ActivitiErrorImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
 
 }
