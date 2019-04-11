@@ -23,11 +23,7 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.*;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import java.util.Date;
 
@@ -103,6 +99,18 @@ public class TaskEventContainedBuilder {
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
                                    new CloudTaskAssignedEventImpl(task),
                                    new CloudTaskCompletedEventImpl(UUID.randomUUID().toString(), new Date().getTime(), task));
+        return task;
+    }
+
+    public Task aReleasedTask (String taskName) {
+        Task task = buildTask(taskName,
+                Task.TaskStatus.ASSIGNED,
+                null);
+        Task releasedTask = task;
+        ((TaskImpl)releasedTask).setStatus(Task.TaskStatus.CREATED);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+                new CloudTaskAssignedEventImpl(task),
+                new CloudTaskUpdatedEventImpl(releasedTask));
         return task;
     }
 
