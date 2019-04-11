@@ -854,6 +854,31 @@ public class QueryTasksIT {
         });
 
     }
+
+    @Test
+    public void shouldHaveCreatedStatusAfterBeingReleased(){
+        Task releasedTask = taskEventContainedBuilder.aReleasedTask("released-task");
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<Task> responseEntity = executeRequestGetTasksById(releasedTask.getId());
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Task task = responseEntity.getBody();
+
+            assertThat(task.getName()).isEqualTo("released-task");
+            assertThat(task.getStatus()).isEqualTo(Task.TaskStatus.CREATED);
+
+        });
+
+    }
     
     @Test
     public void shouldGetAvailableStandaloneTasksFilteredByNameDescription() {
