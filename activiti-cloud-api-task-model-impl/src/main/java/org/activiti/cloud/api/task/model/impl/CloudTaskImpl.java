@@ -40,6 +40,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private TaskStatus status;
     private Date completedDate;
     private Long duration;
+    private Integer processDefinitionVersion;
 
     public CloudTaskImpl() {
     }
@@ -59,6 +60,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         parentTaskId = task.getParentTaskId();
         formKey = task.getFormKey();
         status = task.getStatus();
+        processDefinitionVersion = task.getProcessDefinitionVersion();
     }
 
     @Override
@@ -159,6 +161,16 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
     }
+    
+    @Override
+    public Integer getProcessDefinitionVersion() {
+        return processDefinitionVersion;
+    }
+
+    
+    public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
+        this.processDefinitionVersion = processDefinitionVersion;
+    }
 
     @Override
     public String getParentTaskId() {
@@ -221,6 +233,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
                 ", parentTaskId='" + parentTaskId + '\'' +
                 ", formKey='" + formKey + '\'' +
                 ", status=" + status +
+                ", processDefinitionVersion=" + processDefinitionVersion +
                 '}';
     }
 }
