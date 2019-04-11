@@ -1,7 +1,7 @@
 package org.activiti.cloud.services.error;
 
-import org.activiti.api.model.shared.model.ActivitiError;
-import org.activiti.api.runtime.model.impl.ActivitiErrorImpl;
+import org.activiti.api.model.shared.model.ActivitiErrorMessage;
+import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.springframework.hateoas.Resource;
@@ -15,20 +15,20 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Resource<ActivitiError> handleAppException(ActivitiForbiddenException ex) {
-        return new Resource<>(new ActivitiErrorImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
+    public Resource<ActivitiErrorMessage> handleAppException(ActivitiForbiddenException ex) {
+        return new Resource<>(new ActivitiErrorMessageImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Resource<ActivitiError> handleAppException(IllegalStateException ex) {
-        return new Resource<>(new ActivitiErrorImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+    public Resource<ActivitiErrorMessage> handleAppException(IllegalStateException ex) {
+        return new Resource<>(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Resource<ActivitiError> handleAppException(NotFoundException ex) {
-        return new Resource<>(new ActivitiErrorImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+    public Resource<ActivitiErrorMessage> handleAppException(NotFoundException ex) {
+        return new Resource<>(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
 
 }
