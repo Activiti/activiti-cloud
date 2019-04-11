@@ -16,6 +16,16 @@
 
 package org.activiti.cloud.acc.modeling.steps;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
@@ -24,31 +34,29 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.modeling.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.acc.modeling.modeling.EnableModelingContext;
 import org.activiti.cloud.acc.modeling.service.ModelingModelsService;
-import org.activiti.cloud.organization.api.Extensions;
+import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ProcessVariableMapping;
-import org.activiti.cloud.organization.api.ServiceTaskActionType;
+import org.activiti.cloud.organization.api.process.ProcessVariable;
+import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
+import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.EXTENSIONS_TASK_NAME;
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.HOST_VALUE;
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.extensions;
-import static org.activiti.cloud.organization.api.ServiceTaskActionType.INPUTS;
-import static org.activiti.cloud.organization.api.ServiceTaskActionType.OUTPUTS;
-import static org.activiti.cloud.organization.api.VariableMappingType.VALUE;
-import static org.activiti.cloud.organization.api.VariableMappingType.VARIABLE;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.*;
+import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
+import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.OUTPUTS;
+import static org.activiti.cloud.organization.api.process.VariableMappingType.VALUE;
+import static org.activiti.cloud.organization.api.process.VariableMappingType.VARIABLE;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
 /**
@@ -180,13 +188,14 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     @Step
     public void checkCurrentModelValidationFailureForExtensions(String errorMessage) throws IOException {
-        assertThat(validateCurrentModel()).extracting(Response::status)
-                .contains(HttpStatus.SC_BAD_REQUEST);
-        validateCurrentModel().stream()
-                .filter(response -> response.status() == HttpStatus.SC_BAD_REQUEST)
-                .map(this::convertResponseBodyAsJsonNode)
-                .map(node -> node.get("message").asText())
-                .forEach(message -> assertThat(message).contains(errorMessage));
+        assertThat(validateCurrentModel()
+                           .stream()
+                           .filter(response -> response.status() == HttpStatus.SC_BAD_REQUEST)
+                           .map(this::convertResponseBodyAsJsonNode)
+                           .map(node -> node.get("message"))
+                           .map(JsonNode::asText)
+                           .findFirst())
+                .hasValueSatisfying(message -> assertThat(message).contains(errorMessage));
     }
 
     private JsonNode convertResponseBodyAsJsonNode(Response response) {
@@ -220,6 +229,15 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         Model model = currentContext.getContent();
         assertThat(model.getExtensions()).isNotNull();
         assertThat(model.getExtensions().getProcessVariables()).containsKeys(processVariables);
+        Arrays.stream(processVariables).forEach(processVariableId -> {
+            ProcessVariable processVariable = model.getExtensions().getProcessVariables().get(processVariableId);
+            assertThat(processVariable.getId()).isEqualTo(processVariableId);
+            assertThat(processVariable.getName()).isEqualTo(processVariableId);
+            assertThat(processVariable.isRequired()).isEqualTo(false);
+            assertThat(processVariable.getType()).isEqualTo("boolean");
+            assertThat(processVariable.getValue()).isEqualTo(true);
+        });
+
         assertThat(model.getExtensions().getVariablesMappings()).containsKeys(EXTENSIONS_TASK_NAME);
         assertThat(model.getExtensions().getVariablesMappings().get(EXTENSIONS_TASK_NAME)).containsKeys(INPUTS,
                                                                                                         OUTPUTS);

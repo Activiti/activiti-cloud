@@ -17,10 +17,10 @@
 package org.activiti.cloud.acc.modeling.modeling;
 
 import com.google.common.collect.ImmutableMap;
-import org.activiti.cloud.organization.api.Extensions;
-import org.activiti.cloud.organization.api.ProcessVariable;
-import org.activiti.cloud.organization.api.ProcessVariableMapping;
-import org.activiti.cloud.organization.api.ServiceTaskActionType;
+import org.activiti.cloud.organization.api.process.Extensions;
+import org.activiti.cloud.organization.api.process.ProcessVariable;
+import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
+import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,10 +30,10 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
-import static org.activiti.cloud.organization.api.ServiceTaskActionType.INPUTS;
-import static org.activiti.cloud.organization.api.ServiceTaskActionType.OUTPUTS;
-import static org.activiti.cloud.organization.api.VariableMappingType.VALUE;
-import static org.activiti.cloud.organization.api.VariableMappingType.VARIABLE;
+import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
+import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.OUTPUTS;
+import static org.activiti.cloud.organization.api.process.VariableMappingType.VALUE;
+import static org.activiti.cloud.organization.api.process.VariableMappingType.VARIABLE;
 
 /**
  * Modeling utils
@@ -81,7 +81,7 @@ public class ProcessExtensions {
         processVariable.setName(name);
         processVariable.setId(name);
         processVariable.setType("boolean");
-        processVariable.setValue("true");
+        processVariable.setValue(true);
         return processVariable;
     }
 

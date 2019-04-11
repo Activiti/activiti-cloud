@@ -16,6 +16,12 @@
 
 package org.activiti.cloud.acc.modeling.steps;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Optional;
+
 import feign.Response;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.modeling.config.ModelingTestsConfigurationProperties;
@@ -27,15 +33,10 @@ import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.Matcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
 
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.EXTENSIONS_TASK_NAME;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
@@ -43,13 +44,12 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFil
 import static org.activiti.cloud.services.test.asserts.AssertFileContent.assertThatFileContent;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_OK;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
 /**
@@ -165,7 +165,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
                                                                         hasEntry(equalTo("type"),
                                                                                  equalTo("boolean")),
                                                                         hasEntry(equalTo("value"),
-                                                                                 equalTo("true"))
+                                                                                 is(true))
                                                                   )));
                                         jsonContent.node("extensions.mappings").matches(
                                                 hasEntry(equalTo(EXTENSIONS_TASK_NAME),
@@ -199,5 +199,9 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     @Override
     public ModelingProjectsService service() {
         return modelingProjectService;
+    }
+
+    private Matcher<Object> is(boolean operand) {
+        return equalTo(operand);
     }
 }
