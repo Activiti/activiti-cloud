@@ -20,7 +20,7 @@ public class CommonExceptionHandler {
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Resource<ActivitiError> handleAppException(IllegalStateException ex) {
         return new Resource<>(new ActivitiErrorImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
