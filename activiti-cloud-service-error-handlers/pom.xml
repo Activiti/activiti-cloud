@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>activiti-cloud-service-error-handling</artifactId>
+    <artifactId>activiti-cloud-service-error-handlers</artifactId>
 
     <dependencies>
         <dependency>
