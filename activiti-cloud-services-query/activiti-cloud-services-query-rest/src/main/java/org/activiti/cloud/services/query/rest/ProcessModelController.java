@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import org.activiti.api.model.shared.model.ActivitiError;
-import org.activiti.api.runtime.model.impl.ActivitiErrorImpl;
+import org.activiti.api.model.shared.model.ActivitiErrorMessage;
+import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
@@ -49,13 +49,6 @@ public class ProcessModelController {
         this.processModelRepository = processModelRepository;
         this.entityFinder = entityFinder;
         this.securityPoliciesManager = securityPoliciesManager;
-    }
-
-    @ExceptionHandler(ActivitiForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Resource<ActivitiError> handleAppException(ActivitiForbiddenException ex, HttpServletResponse response) {
-        response.setContentType("application/json");
-        return new Resource<>(new ActivitiErrorImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
