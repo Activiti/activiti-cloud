@@ -10,24 +10,29 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RestControllerAdvice
 public class CommonExceptionHandler {
 
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Resource<ActivitiErrorMessage> handleAppException(ActivitiForbiddenException ex) {
+    public Resource<ActivitiErrorMessage> handleAppException(ActivitiForbiddenException ex, HttpServletResponse response) {
+        response.setContentType("application/json");
         return new Resource<>(new ActivitiErrorMessageImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Resource<ActivitiErrorMessage> handleAppException(IllegalStateException ex) {
+    public Resource<ActivitiErrorMessage> handleAppException(IllegalStateException ex, HttpServletResponse response) {
+        response.setContentType("application/json");
         return new Resource<>(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Resource<ActivitiErrorMessage> handleAppException(NotFoundException ex) {
+    public Resource<ActivitiErrorMessage> handleAppException(NotFoundException ex, HttpServletResponse response) {
+        response.setContentType("application/json");
         return new Resource<>(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
 
