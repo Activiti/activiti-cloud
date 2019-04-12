@@ -97,7 +97,7 @@ Then the task from SUB_PROCESS_INSTANCE_WITH_TASK is CREATED and it is called su
 Scenario: check the presence of formKey field in task
 Given the user is authenticated as testuser
 When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
-Then the tasks has the formKey field
+Then the task has the formKey field and correct processInstance fields
 
 Scenario: tasks have their own copies of variables
 Given the user is authenticated as testuser

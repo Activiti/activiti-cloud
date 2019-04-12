@@ -37,6 +37,7 @@ import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.TaskRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.admin.ProcessRuntimeAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.admin.TaskRuntimeAdminSteps;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.qa.helpers.VariableGenerator;
 import org.jbehave.core.annotations.Given;
@@ -147,14 +148,18 @@ public class Tasks {
         assertThat(subtasks.iterator().next()).extracting("id").containsOnly(subtask.getId());
     }
 
-    @Then("the tasks has the formKey field")
-    public void checkIfFormKeyIsPresent(){
+    @Then("the task has the formKey field and correct processInstance fields")
+    public void checkIfFormKeyAndProcessInstanceFiledsArePresent(){
         newTask = obtainFirstTaskFromProcess();
         assertThat(newTask).extracting("formKey").contains("taskForm");
 
+        CloudProcessInstance processFromQuery = processQuerySteps.getProcessInstance(Serenity.sessionVariableCalled("processInstanceId").toString());
+        assertThat(processFromQuery).isNotNull();
         CloudTask taskFromQuery = taskRuntimeBundleSteps.getTaskById(newTask.getId());
         assertThat(taskFromQuery).isNotNull();
         assertThat(taskFromQuery.getFormKey()).isEqualTo("taskForm");
+        assertThat(taskFromQuery.getProcessDefinitionId()).isEqualTo(processFromQuery.getProcessDefinitionId());
+        assertThat(taskFromQuery.getProcessDefinitionVersion()).isEqualTo(processFromQuery.getProcessDefinitionVersion());
     }
 
     private CloudTask obtainFirstTaskFromProcess() {
