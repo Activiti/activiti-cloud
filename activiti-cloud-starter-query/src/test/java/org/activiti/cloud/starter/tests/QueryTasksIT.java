@@ -940,4 +940,70 @@ public class QueryTasksIT {
         });
         
     }
+    
+    @Test
+    public void shouldSetProcessDefinitionVersionOnTaskWhenThisInformationIsAvailableInTheEvent() {
+      //given
+        //event with process definition version set
+        TaskImpl task1 = new TaskImpl(UUID.randomUUID().toString(),
+                                     "Task1",
+                                     Task.TaskStatus.CREATED);
+
+        CloudTaskCreatedEventImpl task1Created = new CloudTaskCreatedEventImpl(task1);
+        task1Created.setProcessDefinitionVersion(10);
+        eventsAggregator.addEvents(task1Created);
+
+        //event with process definition unset
+        TaskImpl task2 = new TaskImpl(UUID.randomUUID().toString(),
+                                      "Task2",
+                                      Task.TaskStatus.CREATED);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task2));
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId,
+                                Task::getStatus,
+                                Task::getProcessDefinitionVersion)
+                    .contains(tuple(task1.getId(),
+                                    Task.TaskStatus.CREATED,
+                                    10),
+                              tuple(task2.getId(),
+                                    Task.TaskStatus.CREATED,
+                                    null));
+        });
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?processDefinitionVersion={processDefinitionVersion}",
+                                                                                            HttpMethod.GET,
+                                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                            PAGED_TASKS_RESPONSE_TYPE,
+                                                                                            10);
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId)
+                    .containsExactly(task1.getId());
+        });
+        
+    }
 }

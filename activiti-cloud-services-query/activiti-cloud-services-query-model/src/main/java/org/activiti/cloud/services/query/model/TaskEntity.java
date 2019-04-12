@@ -64,6 +64,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     private int priority;
     private String processDefinitionId;
     private String processInstanceId;
+    private Integer processDefinitionVersion;
+    
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
     private String owner;
@@ -154,7 +156,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
                       Date claimedDate,
                       String owner,
                       String parentTaskId,
-                      String formKey) {
+                      String formKey,
+                      Integer processDefinitionVersion) {
         super(serviceName,
               serviceFullName,
               serviceVersion,
@@ -175,6 +178,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.owner = owner;
         this.parentTaskId = parentTaskId;
         this.formKey = formKey;
+        this.processDefinitionVersion = processDefinitionVersion;
     }
 
     @Override
@@ -221,10 +225,10 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public String getProcessInstanceId() {
         return processInstanceId;
     }
-
+    
     @Override
     public Integer getProcessDefinitionVersion() {
-        return null;
+        return processDefinitionVersion;
     }
 
     public boolean isStandAlone() {
@@ -276,6 +280,10 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.processInstanceId = processInstanceId;
     }
 
+    public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
+        this.processDefinitionVersion = processDefinitionVersion;
+    }
+    
     public void setStatus(TaskStatus status) {
         this.status = status;
     }
