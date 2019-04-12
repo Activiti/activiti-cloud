@@ -33,7 +33,21 @@ public class ModelingTestsConfigurationProperties {
     @Value("${modeling.url}")
     private String modelingUrl;
 
+    @Value("${modeling.path}")
+    private String modelingPath;
+
+    @Value("${gateway.protocol:http}")
+    private String gatewayProtocol;
+
     public String getModelingUrl() {
         return modelingUrl;
+    }
+
+    public String getModelingPath() {
+        return modelingPath;
+    }
+
+    public String getGatewayProtocol() {
+        return gatewayProtocol;
     }
 }

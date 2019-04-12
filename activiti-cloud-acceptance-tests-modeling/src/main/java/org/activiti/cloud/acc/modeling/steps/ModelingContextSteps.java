@@ -16,6 +16,12 @@
 
 package org.activiti.cloud.acc.modeling.steps;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import feign.Response;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.modeling.config.ModelingTestsConfigurationProperties;
@@ -33,15 +39,9 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.HttpUtils.HEADER_ATTACHEMNT_FILENAME;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.Link.REL_SELF;
 
 /**
@@ -220,7 +220,9 @@ public abstract class ModelingContextSteps<M> {
     }
 
     protected String modelingUri(String uri) {
-        return uri.replace("http://activiti-cloud-modeling-backend",
+        return uri.replace(String.format("%s://%s",
+                                         config.getGatewayProtocol(),
+                                         config.getModelingPath()),
                            config.getModelingUrl());
     }
 
