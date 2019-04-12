@@ -74,6 +74,18 @@ public class TaskRuntimeBundleSteps {
                 taskRuntimeService.createTask(createTask));
     }
 
+    @Step
+    public CloudTask createNewUnassignedTask() {
+
+        CreateTaskPayload createTask = TaskPayloadBuilder
+                .create()
+                .withName("unassigned-task")
+                .withDescription("unassigned-task-description")
+                .build();
+        return dirtyContextHandler.dirty(
+                taskRuntimeService.createTask(createTask));
+    }
+
     public CloudTask createSubtask(String parentTaskId) {
         CreateTaskPayload subTask = TaskPayloadBuilder
                 .create()
@@ -171,6 +183,11 @@ public class TaskRuntimeBundleSteps {
         return taskRuntimeService.updateTask(
                 taskId,
                 TaskPayloadBuilder.update().withDueDate(dueDate).build());
+    }
+
+    @Step
+    public void releaseTask(String taskId){
+        taskRuntimeService.releaseTask(taskId);
     }
 
 

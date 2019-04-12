@@ -22,6 +22,10 @@ public interface TaskRuntimeService extends BaseService {
     @Headers("Content-Type: application/json")
     void claimTask(@Param("id") String id);
 
+    @RequestLine("POST /v1/tasks/{id}/release")
+    @Headers("Content-Type: application/json")
+    void releaseTask(@Param("id") String id);
+
     @RequestLine("POST /v1/tasks/{id}/complete")
     @Headers("Content-Type: application/json")
     void completeTask(@Param("id") String id,
