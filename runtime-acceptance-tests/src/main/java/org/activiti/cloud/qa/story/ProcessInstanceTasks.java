@@ -16,15 +16,12 @@
 
 package org.activiti.cloud.qa.story;
 
-import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
-import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import net.serenitybdd.core.Serenity;
@@ -54,6 +51,14 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedResources;
+
+import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
+import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 public class ProcessInstanceTasks {
 
@@ -404,8 +409,13 @@ public class ProcessInstanceTasks {
     public void checkProccessInstanceName (String newProcessName){
         assertThat(processRuntimeBundleSteps.getProcessInstanceById(processInstance.getId()).getName())
                 .isEqualTo(newProcessName);
-        assertThat(processQuerySteps.getProcessInstance(processInstance.getId()).getName())
-                .isEqualTo(newProcessName);
+
+        // propagation my take some time to reach query
+        await().untilAsserted(
+                () ->
+                        assertThat(processQuerySteps.getProcessInstance(processInstance.getId()).getName())
+                                .isEqualTo(newProcessName)
+        );
     }
 
 
