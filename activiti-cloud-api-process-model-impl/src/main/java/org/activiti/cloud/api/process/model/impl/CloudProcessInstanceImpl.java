@@ -26,7 +26,6 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
 
     private String id;
     private String name;
-    private String description;
     private Date startDate;
     private String initiator;
     private String businessKey;
@@ -42,7 +41,6 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     public CloudProcessInstanceImpl(ProcessInstance processInstance) {
         id = processInstance.getId();
         name = processInstance.getName();
-        description = processInstance.getDescription();
         startDate = processInstance.getStartDate();
         initiator = processInstance.getInitiator();
         businessKey = processInstance.getBusinessKey();
@@ -69,15 +67,6 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     @Override
