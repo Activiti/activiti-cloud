@@ -149,13 +149,19 @@ public class Tasks {
     }
 
     @Then("the task has the formKey field and correct processInstance fields")
-    public void checkIfFormKeyAndProcessInstanceFiledsArePresent(){
+    public void checkIfFormKeyAndProcessInstanceFieldsArePresent(){
         newTask = obtainFirstTaskFromProcess();
         assertThat(newTask).extracting("formKey").contains("taskForm");
 
         CloudProcessInstance processFromQuery = processQuerySteps.getProcessInstance(Serenity.sessionVariableCalled("processInstanceId").toString());
         assertThat(processFromQuery).isNotNull();
-        CloudTask taskFromQuery = taskRuntimeBundleSteps.getTaskById(newTask.getId());
+      
+        CloudTask taskFromRB = taskRuntimeBundleSteps.getTaskById(newTask.getId());
+        assertThat(taskFromRB).isNotNull();
+        assertThat(taskFromRB.getFormKey()).isEqualTo("taskForm");
+        assertThat(taskFromRB.getProcessDefinitionId()).isEqualTo(processFromQuery.getProcessDefinitionId());
+        
+        CloudTask taskFromQuery = taskQuerySteps.getTaskById(newTask.getId());
         assertThat(taskFromQuery).isNotNull();
         assertThat(taskFromQuery.getFormKey()).isEqualTo("taskForm");
         assertThat(taskFromQuery.getProcessDefinitionId()).isEqualTo(processFromQuery.getProcessDefinitionId());
