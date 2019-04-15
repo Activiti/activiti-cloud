@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.organization;
+package org.activiti.cloud.organization.swagger;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
