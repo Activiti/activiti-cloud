@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.starter.tests;
+package org.activiti.cloud.starter.tests.swagger;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
