@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?> 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -16,9 +16,9 @@
   <url>http://activiti.org</url>
 
   <properties>
-    <activiti-dependencies.version>7.1.14</activiti-dependencies.version>
+    <activiti-dependencies.version>7.1.15</activiti-dependencies.version>
     <activiti-cloud-build.version>7.1.7</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>7.1.26</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.1.29</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>${project.version}</activiti-cloud-runtime-bundle-service.version>
   </properties>
 
