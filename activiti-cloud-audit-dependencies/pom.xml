@@ -42,6 +42,27 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.audit</groupId>
+        <artifactId>activiti-cloud-starter-audit</artifactId>
+        <classifier>api-docs</classifier>
+        <type>json</type>
+        <version>${activiti-cloud-audit-service.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.audit</groupId>
+        <artifactId>activiti-cloud-starter-audit</artifactId>
+        <classifier>api-docs</classifier>
+        <type>yaml</type>
+        <version>${activiti-cloud-audit-service.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.audit</groupId>
+        <artifactId>activiti-cloud-starter-audit</artifactId>
+        <classifier>api-docs-hal</classifier>
+        <type>json</type>
+        <version>${activiti-cloud-audit-service.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.audit</groupId>
         <artifactId>activiti-cloud-starter-audit-mongo</artifactId>
         <version>${activiti-cloud-audit-service.version}</version>
       </dependency>
