@@ -85,7 +85,8 @@ public class TaskEntityUpdatedEventHandlerTest {
         verify(eventTaskEntity).setFormKey(event.getEntity().getFormKey());
         verify(eventTaskEntity).setParentTaskId(event.getEntity().getParentTaskId());
         verify(eventTaskEntity).setLastModified(any(Date.class));
-        
+        verify(eventTaskEntity).setStatus(event.getEntity().getStatus());
+
         verifyNoMoreInteractions(eventTaskEntity);
     }
 

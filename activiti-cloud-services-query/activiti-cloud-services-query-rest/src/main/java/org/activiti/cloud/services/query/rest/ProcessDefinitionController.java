@@ -18,9 +18,9 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
-import org.activiti.cloud.services.query.resources.ProcessDefinitionResource;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionResourceAssembler;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
@@ -29,6 +29,7 @@ import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,8 +64,8 @@ public class ProcessDefinitionController {
     }
 
     @GetMapping
-    public PagedResources<ProcessDefinitionResource> findAll(@QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
-                                                             Pageable pageable) {
+    public PagedResources<Resource<CloudProcessDefinition>> findAll(@QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
+                                                                    Pageable pageable) {
         Predicate extendedPredicate = processDefinitionRestrictionService.restrictProcessDefinitionQuery(predicate,
                                                                                                   SecurityPolicyAccess.READ);
         return pagedResourcesAssembler.toResource(pageable,

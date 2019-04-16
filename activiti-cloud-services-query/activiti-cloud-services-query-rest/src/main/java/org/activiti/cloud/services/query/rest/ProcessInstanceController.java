@@ -20,11 +20,11 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
-import org.activiti.cloud.services.query.resources.ProcessInstanceResource;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
 import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
@@ -37,6 +37,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -101,8 +102,8 @@ public class ProcessInstanceController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<ProcessInstanceResource> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                           Pageable pageable) {
+    public PagedResources<Resource<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
+                                                                  Pageable pageable) {
 
         predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(predicate,
                                                                                     SecurityPolicyAccess.READ);
@@ -114,7 +115,7 @@ public class ProcessInstanceController {
     }
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public ProcessInstanceResource findById(@PathVariable String processInstanceId) {
+    public Resource<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
 
         ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
                                                                             processInstanceId,
@@ -131,7 +132,7 @@ public class ProcessInstanceController {
     
     
     @RequestMapping(value = "/{processInstanceId}/subprocesses", method = RequestMethod.GET)
-    public PagedResources<ProcessInstanceResource> subprocesses(@PathVariable String processInstanceId,
+    public PagedResources<Resource<CloudProcessInstance>> subprocesses(@PathVariable String processInstanceId,
                                                                 @QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                                 Pageable pageable) {
 

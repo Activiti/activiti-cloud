@@ -23,11 +23,13 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
+import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QTaskEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroup;
+import org.activiti.cloud.services.query.model.TaskCandidateUser;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.resources.TaskResource;
 import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
 import org.activiti.cloud.services.security.ActivitiForbiddenException;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
@@ -39,6 +41,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -100,10 +103,10 @@ public class TaskController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<TaskResource> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
-                                                @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
-                                                @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
-                                                Pageable pageable) {
+    public PagedResources<Resource<CloudTask>> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+                                                       @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
+                                                       @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+                                                       Pageable pageable) {
         Predicate extendedPredicate=predicate;
         if (rootTasksOnly) {
             BooleanExpression parentTaskNull = QTaskEntity.taskEntity.parentTaskId.isNull(); 
@@ -124,7 +127,7 @@ public class TaskController {
     }
       
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    public TaskResource findById(@PathVariable String taskId) {
+    public Resource<CloudTask> findById(@PathVariable String taskId) {
 
         TaskEntity taskEntity = entityFinder.findById(taskRepository,
                                                       taskId,
@@ -151,10 +154,9 @@ public class TaskController {
             LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }
-        List<String> candidateUsers = taskEntity.getTaskCandidateUsers()!=null ? 
-                                      taskEntity.getTaskCandidateUsers().stream().map(it -> it.getUserId()).collect(Collectors.toList()) : 
+        return taskEntity.getTaskCandidateUsers()!=null ?
+                                      taskEntity.getTaskCandidateUsers().stream().map(TaskCandidateUser::getUserId).collect(Collectors.toList()) :
                                       null;
-        return candidateUsers;
     }
     
     @RequestMapping(value = "/{taskId}/candidate-groups", method = RequestMethod.GET)
@@ -169,10 +171,9 @@ public class TaskController {
             LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId);
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }
-        List<String> candidateGroups = taskEntity.getTaskCandidateGroups()!=null ? 
-                                       taskEntity.getTaskCandidateGroups().stream().map(it -> it.getGroupId()).collect(Collectors.toList()) : 
+        return taskEntity.getTaskCandidateGroups()!=null ?
+                                       taskEntity.getTaskCandidateGroups().stream().map(TaskCandidateGroup::getGroupId).collect(Collectors.toList()) :
                                        null;
-        return candidateGroups;
     }
      
 }
