@@ -54,7 +54,6 @@ public class RestrictProcessInstanceEntityQueryIT {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("15");
         processInstanceEntity.setName("name");
-        processInstanceEntity.setDescription("desc");
         processInstanceEntity.setInitiator("initiator");
         processInstanceEntity.setProcessDefinitionKey("defKey1");
         processInstanceEntity.setServiceName("test-cmd-endpoint");
@@ -79,7 +78,6 @@ public class RestrictProcessInstanceEntityQueryIT {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("16");
         processInstanceEntity.setName("name");
-        processInstanceEntity.setDescription("desc");
         processInstanceEntity.setInitiator("initiator");
         processInstanceEntity.setProcessDefinitionKey("defKeyWild");
         processInstanceEntity.setServiceName("test-cmd-endpoint-wild");
@@ -98,7 +96,6 @@ public class RestrictProcessInstanceEntityQueryIT {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("17");
         processInstanceEntity.setName("name");
-        processInstanceEntity.setDescription("desc");
         processInstanceEntity.setInitiator("initiator");
         processInstanceEntity.setProcessDefinitionKey("defKeyWild");
         processInstanceEntity.setServiceName("test-cmd-endpoint-wild");
@@ -117,7 +114,6 @@ public class RestrictProcessInstanceEntityQueryIT {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("18");
         processInstanceEntity.setName("name");
-        processInstanceEntity.setDescription("desc");
         processInstanceEntity.setInitiator("initiator");
         processInstanceEntity.setProcessDefinitionKey("defKeyWild");
         processInstanceEntity.setServiceName("test-cmd-endpoint-wild");
@@ -143,7 +139,6 @@ public class RestrictProcessInstanceEntityQueryIT {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("19");
         processInstanceEntity.setName("name");
-        processInstanceEntity.setDescription("desc");
         processInstanceEntity.setInitiator("initiator");
         processInstanceEntity.setProcessDefinitionKey("defKey1");
         processInstanceEntity.setServiceName("Te-St-CmD-EnDpoInT");
@@ -152,7 +147,6 @@ public class RestrictProcessInstanceEntityQueryIT {
         ProcessInstanceEntity processInstanceEntity2 = new ProcessInstanceEntity();
         processInstanceEntity2.setId("20");
         processInstanceEntity2.setName("name");
-        processInstanceEntity2.setDescription("desc");
         processInstanceEntity2.setInitiator("initiator");
         processInstanceEntity2.setProcessDefinitionKey("defKey1");
         processInstanceEntity2.setServiceName("test-cmd-endpoint-dontmatchthisone");
@@ -193,7 +187,6 @@ public class RestrictProcessInstanceEntityQueryIT {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("21");
         processInstanceEntity.setName("name");
-        processInstanceEntity.setDescription("desc");
         processInstanceEntity.setInitiator("initiator");
         processInstanceEntity.setProcessDefinitionKey("defKey2");
         processInstanceEntity.setServiceFullName("test-cmd-endpoint");
