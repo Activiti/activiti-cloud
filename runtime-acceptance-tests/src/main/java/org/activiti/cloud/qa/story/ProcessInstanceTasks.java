@@ -160,6 +160,11 @@ public class ProcessInstanceTasks {
         taskRuntimeBundleSteps.claimTask(currentTask.getId());
     }
 
+    @When("the user releases the task")
+    public void releaseTask() throws Exception {
+        taskRuntimeBundleSteps.releaseTask(currentTask.getId());
+    }
+
     @When("the user completes the task")
     public void completeTask() throws Exception {
         taskRuntimeBundleSteps.completeTask(currentTask.getId(),
@@ -194,12 +199,12 @@ public class ProcessInstanceTasks {
         auditSteps.checkTaskCreatedAndAssignedEventsWhenAlreadyAssinged(currentTask.getId());
     }
 
-    @When("the status of the task is $status")
-    public void checkTaskStatus(Task.TaskStatus status) throws Exception {
-        taskRuntimeBundleSteps.checkTaskStatus(currentTask.getId(), status);
-        taskQuerySteps.checkTaskStatus(currentTask.getId(), status);
+    @When("the status of the task is $taskStatus")
+    public void checkTaskStatus(Task.TaskStatus taskStatus) throws Exception {
+        taskRuntimeBundleSteps.checkTaskStatus(currentTask.getId(), taskStatus);
+        taskQuerySteps.checkTaskStatus(currentTask.getId(), taskStatus);
 
-        switch (status){
+        switch (taskStatus){
             case CREATED:
                 auditSteps.checkTaskCreatedEvent(currentTask.getId());
                 break;

@@ -92,6 +92,13 @@ public class Tasks {
         Serenity.setSessionVariable(STAND_ALONE_TASK_ID).to(newTask.getId());
     }
 
+    @When("the user creates an unassigned standalone task")
+    public void createUnassignedTask() throws Exception {
+        newTask = taskRuntimeBundleSteps.createNewUnassignedTask();
+        assertThat(newTask).isNotNull();
+        Serenity.setSessionVariable(STAND_ALONE_TASK_ID).to(newTask.getId());
+    }
+
     @Then("the task is created and the status is assigned")
     public void taskIsCreatedAndAssigned() throws Exception {
         final CloudTask assignedTask = taskRuntimeBundleSteps.getTaskById(newTask.getId());
@@ -347,5 +354,21 @@ public class Tasks {
 
         assertThat(generatedMapRuntime).isEqualTo(VariableGenerator.variables);
         assertThat(generatedMapQuery).isEqualTo(VariableGenerator.variables);
+    }
+
+    @When("the user claims the standalone task")
+    public void claimTask() throws Exception {
+        taskRuntimeBundleSteps.claimTask(newTask.getId());
+    }
+
+    @When("the user releases the standalone task")
+    public void releaseTask() throws Exception {
+        taskRuntimeBundleSteps.releaseTask(newTask.getId());
+    }
+
+    @Then("the status of the task is $taskStatus in RB and Query")
+    public void checkTaskStatusInRBAndQuery(Task.TaskStatus taskStatus){
+        taskRuntimeBundleSteps.checkTaskStatus(newTask.getId(), taskStatus);
+        taskQuerySteps.checkTaskStatus(newTask.getId(), taskStatus);
     }
 }

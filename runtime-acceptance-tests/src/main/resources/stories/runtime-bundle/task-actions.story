@@ -164,3 +164,10 @@ Scenario: query tasks by name and description using LIKE operator
 Given the user is authenticated as testuser
 When the user creates a standalone task
 Then the standalone task can be queried using LIKE operator
+
+Scenario: release a task
+Given the user is authenticated as testuser
+When the user creates an unassigned standalone task
+And the user claims the standalone task
+And the user releases the standalone task
+Then the status of the task is CREATED in RB and Query
