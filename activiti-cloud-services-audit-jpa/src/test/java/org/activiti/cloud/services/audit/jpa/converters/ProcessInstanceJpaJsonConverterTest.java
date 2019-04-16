@@ -36,7 +36,6 @@ public class ProcessInstanceJpaJsonConverterTest {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("20");
         processInstance.setName("My instance");
-        processInstance.setDescription("This is my process instance");
         processInstance.setProcessDefinitionId("proc-def-id");
         processInstance.setInitiator("initiator");
         processInstance.setStartDate(new Date());
