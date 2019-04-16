@@ -28,7 +28,6 @@ public class ProcessInstanceSamples {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId(UUID.randomUUID().toString());
         processInstance.setName("My process instance");
-        processInstance.setDescription("This is my process instance");
         processInstance.setProcessDefinitionId(UUID.randomUUID().toString());
         processInstance.setInitiator("user");
         processInstance.setStartDate(new Date());
