@@ -49,7 +49,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @Id
     private String id;
     private String name;
-    private String description;
     private String processDefinitionId;
     private String processDefinitionKey;
     private String initiator;
@@ -209,15 +208,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     @Override
