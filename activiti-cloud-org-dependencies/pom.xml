@@ -81,6 +81,27 @@
         <version>${activiti-cloud-org-service.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.activiti.cloud.modeling</groupId>
+        <artifactId>activiti-cloud-starter-org</artifactId>
+        <classifier>api-docs</classifier>
+        <type>json</type>
+        <version>${activiti-cloud-org-service.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.modeling</groupId>
+        <artifactId>activiti-cloud-starter-org</artifactId>
+        <classifier>api-docs</classifier>
+        <type>yaml</type>
+        <version>${activiti-cloud-org-service.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.modeling</groupId>
+        <artifactId>activiti-cloud-starter-org</artifactId>
+        <classifier>api-docs-hal</classifier>
+        <type>json</type>
+        <version>${activiti-cloud-org-service.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.github.erosb</groupId>
         <artifactId>everit-json-schema</artifactId>
         <version>${everit-json-schema.version}</version>
