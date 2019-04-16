@@ -16,17 +16,6 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -44,6 +33,7 @@ import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.junit.Before;
+import org.junit.ComparisonFailure;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +45,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestClientException;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -148,7 +144,7 @@ public class ProcessInstanceIT {
         //testuser does not have access to SIMPLE_PROCESS according to access-control.properties
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
 
-        assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+        assertThatExceptionOfType(ComparisonFailure.class).isThrownBy(() ->
                                                                                 processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS)));
     }
 
@@ -472,7 +468,7 @@ public class ProcessInstanceIT {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         
         
-        assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+        assertThatExceptionOfType(ComparisonFailure.class).isThrownBy(() ->
         processInstanceRestTemplate.getProcessInstance(processEntity));
     }
     
@@ -496,7 +492,7 @@ public class ProcessInstanceIT {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+        assertThatExceptionOfType(ComparisonFailure.class).isThrownBy(() ->
         processInstanceRestTemplate.getProcessInstance(processEntity));
     }
 }

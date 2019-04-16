@@ -19,19 +19,15 @@ import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
-import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
-import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -40,18 +36,6 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
     private final ProcessInstanceVariableResourceAssembler variableResourceAssembler;
     private final ProcessRuntime processRuntime;
     private final ResourcesAssembler resourcesAssembler;
-
-    @ExceptionHandler(ActivitiForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String handleAppException(ActivitiForbiddenException ex) {
-        return ex.getMessage();
-    }
-
-    @ExceptionHandler(ActivitiObjectNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleAppException(ActivitiObjectNotFoundException ex) {
-        return ex.getMessage();
-    }
 
     @Autowired
     public ProcessInstanceVariableControllerImpl(ProcessInstanceVariableResourceAssembler variableResourceAssembler,

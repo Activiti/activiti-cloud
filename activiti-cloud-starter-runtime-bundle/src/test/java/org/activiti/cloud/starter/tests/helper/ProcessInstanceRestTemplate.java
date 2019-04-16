@@ -26,6 +26,7 @@ import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
+import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
@@ -163,11 +164,11 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<String> callGetVariablesWithErrorResponse(String processInstanceId) {
-        ResponseEntity<String> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
+    public ResponseEntity<ActivitiErrorMessageImpl> callGetVariablesWithErrorResponse(String processInstanceId) {
+        ResponseEntity<ActivitiErrorMessageImpl> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
                                                                                                     HttpMethod.GET,
                                                                                                     null,
-                                                                                                    new ParameterizedTypeReference<String>() {
+                                                                                                    new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {
                                                                                                     });
         return responseEntity;
     }

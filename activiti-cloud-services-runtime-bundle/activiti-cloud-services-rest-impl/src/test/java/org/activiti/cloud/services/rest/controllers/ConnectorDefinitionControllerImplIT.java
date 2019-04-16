@@ -72,7 +72,10 @@ public class ConnectorDefinitionControllerImplIT {
         connectorDefinitions.add(connectorDefinition1);
         connectorDefinitions.add(connectorDefinition2);
 
-        this.mockMvc = MockMvcBuilders.standaloneSetup(new ConnectorDefinitionControllerImpl(connectorDefinitions, new ConnectorDefinitionResourceAssembler(), resourceAssembler)).build();
+        this.mockMvc = MockMvcBuilders
+                .standaloneSetup(new ConnectorDefinitionControllerImpl(connectorDefinitions, new ConnectorDefinitionResourceAssembler(), resourceAssembler))
+                .setControllerAdvice(new RuntimeBundleExceptionHandler())
+                .build();
     }
 
     @Test

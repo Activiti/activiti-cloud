@@ -15,34 +15,25 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.List;
-
-import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
-import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
-import org.activiti.api.task.model.payloads.CandidateUsersPayload;
-import org.activiti.api.task.model.payloads.CompleteTaskPayload;
-import org.activiti.api.task.model.payloads.CreateTaskPayload;
-import org.activiti.api.task.model.payloads.UpdateTaskPayload;
+import org.activiti.api.task.model.payloads.*;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskController;
 import org.activiti.cloud.services.rest.assemblers.TaskResourceAssembler;
-import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 public class TaskControllerImpl implements TaskController {
@@ -64,12 +55,6 @@ public class TaskControllerImpl implements TaskController {
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.pageConverter = pageConverter;
         this.taskRuntime = taskRuntime;
-    }
-
-    @ExceptionHandler({ActivitiObjectNotFoundException.class, NotFoundException.class})
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleAppException(Exception ex) {
-        return ex.getMessage();
     }
 
     @Override
@@ -158,52 +143,52 @@ public class TaskControllerImpl implements TaskController {
                                                                              taskPage),
                                                   taskResourceAssembler);
     }
-    
- 
+
+
     @Override
     public void addCandidateUsers(@PathVariable String taskId,
                                   @RequestBody CandidateUsersPayload candidateUsersPayload) {
         if (candidateUsersPayload!=null)
             candidateUsersPayload.setTaskId(taskId);
-        
+
         taskRuntime.addCandidateUsers(candidateUsersPayload);
     }
-    
+
     @Override
     public void deleteCandidateUsers(@PathVariable String taskId,
                               @RequestBody CandidateUsersPayload candidateUsersPayload) {
         if (candidateUsersPayload!=null)
             candidateUsersPayload.setTaskId(taskId);
-        
+
         taskRuntime.deleteCandidateUsers(candidateUsersPayload);
-        
+
     }
-    
+
     @Override
-    public List<String> getUserCandidates(@PathVariable String taskId) {   
+    public List<String> getUserCandidates(@PathVariable String taskId) {
         return taskRuntime.userCandidates(taskId);
     }
-    
+
     @Override
     public void addCandidateGroups(@PathVariable String taskId,
                                    @RequestBody CandidateGroupsPayload candidateGroupsPayload) {
         if (candidateGroupsPayload!=null)
             candidateGroupsPayload.setTaskId(taskId);
-        
+
         taskRuntime.addCandidateGroups(candidateGroupsPayload);
     }
-    
+
     @Override
     public void deleteCandidateGroups(@PathVariable String taskId,
                                       @RequestBody CandidateGroupsPayload candidateGroupsPayload) {
         if (candidateGroupsPayload!=null)
             candidateGroupsPayload.setTaskId(taskId);
-        
+
         taskRuntime.deleteCandidateGroups(candidateGroupsPayload);
     }
-    
+
     @Override
-    public List<String> getGroupCandidates(@PathVariable String taskId) {   
+    public List<String> getGroupCandidates(@PathVariable String taskId) {
         return taskRuntime.groupCandidates(taskId);
     }
 

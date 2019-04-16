@@ -16,24 +16,13 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
-import org.activiti.api.runtime.shared.NotFoundException;
-import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableAdminController;
 import org.activiti.engine.ActivitiException;
-import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.ProcessExtensionModel;
 import org.activiti.spring.process.model.VariableDefinition;
@@ -41,11 +30,13 @@ import org.activiti.spring.process.variable.VariableValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstanceVariableAdminController {
@@ -61,24 +52,6 @@ public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstan
         this.processAdminRuntime = processAdminRuntime;
         this.processExtensionModelMap = processExtensionModelMap;
         this.variableValidationService = variableValidationService;
-    }
-
-    @ExceptionHandler(ActivitiForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String handleAppException(ActivitiForbiddenException ex) {
-        return ex.getMessage();
-    }
-
-    @ExceptionHandler(ActivitiObjectNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleAppException(ActivitiObjectNotFoundException ex) {
-        return ex.getMessage();
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleAppException(NotFoundException ex) {
-        return ex.getMessage();
     }
 
     @Override

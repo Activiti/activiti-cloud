@@ -23,15 +23,10 @@ import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionAdminController;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
-import org.activiti.engine.ActivitiObjectNotFoundException;
-import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -55,18 +50,6 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.pageConverter = pageConverter;
-    }
-
-    @ExceptionHandler(ActivitiInterchangeInfoNotFoundException.class)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String handleDiagramInterchangeInfoNotFoundException(ActivitiInterchangeInfoNotFoundException ex) {
-        return ex.getMessage();
-    }
-
-    @ExceptionHandler(ActivitiObjectNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleAppException(ActivitiObjectNotFoundException ex) {
-        return ex.getMessage();
     }
 
     @Override

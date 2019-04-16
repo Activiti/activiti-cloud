@@ -15,19 +15,16 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.List;
-
 import org.activiti.cloud.services.rest.api.ConnectorDefinitionController;
 import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionResourceAssembler;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 public class ConnectorDefinitionControllerImpl implements ConnectorDefinitionController {
@@ -59,12 +56,6 @@ public class ConnectorDefinitionControllerImpl implements ConnectorDefinitionCon
         return connectorDefinitionResourceAssembler.toResource(connectorDefinitions.stream()
                 .filter(connectorDefinition ->
                         connectorDefinition.getId().equals(id)).findAny().orElseThrow(() -> new ActivitiObjectNotFoundException(id + " not found")));
-    }
-
-    @ExceptionHandler(ActivitiObjectNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleAppException(ActivitiObjectNotFoundException ex) {
-        return ex.getMessage();
     }
 
 }

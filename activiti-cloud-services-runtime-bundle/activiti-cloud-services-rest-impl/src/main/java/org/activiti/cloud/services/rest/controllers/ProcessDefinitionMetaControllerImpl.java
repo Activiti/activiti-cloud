@@ -21,10 +21,7 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,12 +29,6 @@ public class ProcessDefinitionMetaControllerImpl implements ProcessDefinitionMet
 
     private final RepositoryService repositoryService;
     private final ProcessDefinitionMetaResourceAssembler resourceAssembler;
-
-    @ExceptionHandler(ActivitiObjectNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleAppException(ActivitiObjectNotFoundException ex) {
-        return ex.getMessage();
-    }
 
     @Autowired
     public ProcessDefinitionMetaControllerImpl(RepositoryService repositoryService,

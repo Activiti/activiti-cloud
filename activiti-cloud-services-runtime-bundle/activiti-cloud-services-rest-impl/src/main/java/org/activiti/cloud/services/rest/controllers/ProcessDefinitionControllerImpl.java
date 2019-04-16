@@ -15,10 +15,6 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessRuntime;
@@ -32,19 +28,18 @@ import org.activiti.cloud.services.rest.api.ProcessDefinitionController;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;
-import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
-import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 @RestController
 public class ProcessDefinitionControllerImpl implements ProcessDefinitionController {
@@ -60,18 +55,6 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     private final AlfrescoPagedResourcesAssembler<ProcessDefinition> pagedResourcesAssembler;
 
     private final SpringPageConverter pageConverter;
-
-    @ExceptionHandler(ActivitiObjectNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleAppException(ActivitiObjectNotFoundException ex) {
-        return ex.getMessage();
-    }
-
-    @ExceptionHandler(ActivitiInterchangeInfoNotFoundException.class)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String handleDiagramInterchangeInfoNotFoundException(ActivitiInterchangeInfoNotFoundException ex) {
-        return ex.getMessage();
-    }
 
     @Autowired
     public ProcessDefinitionControllerImpl(RepositoryService repositoryService,
