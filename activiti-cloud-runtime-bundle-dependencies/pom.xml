@@ -92,6 +92,27 @@
         <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
         <version>${activiti-cloud-runtime-bundle-service.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.rb</groupId>
+        <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
+        <version>${activiti-cloud-runtime-bundle-service.version}</version>
+        <classifier>api-docs</classifier>
+        <type>json</type>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.rb</groupId>
+        <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
+        <version>${activiti-cloud-runtime-bundle-service.version}</version>
+        <classifier>api-docs</classifier>
+        <type>yaml</type>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.rb</groupId>
+        <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
+        <version>${activiti-cloud-runtime-bundle-service.version}</version>
+        <classifier>api-docs-hal</classifier>
+        <type>json</type>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
