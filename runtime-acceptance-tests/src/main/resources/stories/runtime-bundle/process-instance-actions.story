@@ -96,7 +96,7 @@ When the user starts an instance of the process called SIMPLE_PROCESS_INSTANCE
 Then the generated events have sequence number set
 And the generated events have the same message id
 
-Scenario: query processes by name and description using LIKE operator
+Scenario: query processes by name using LIKE operator
 Given the user is authenticated as testuser
 When the user starts an instance of the process called SIMPLE_PROCESS_INSTANCE
 Then the process instance can be queried using LIKE operator
