@@ -8,6 +8,8 @@ import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,6 +45,11 @@ public class ProcessQueryAdminSteps {
     @Step
     public PagedResources<CloudProcessDefinition> getProcessDefinitions(){
         return processQueryAdminService.getProcessDefinitions();
+    }
+
+    @Step
+    public Resources<Resource<CloudProcessInstance>> deleteProcessInstances(){
+        return processQueryAdminService.deleteProcessInstances();
     }
 
 }

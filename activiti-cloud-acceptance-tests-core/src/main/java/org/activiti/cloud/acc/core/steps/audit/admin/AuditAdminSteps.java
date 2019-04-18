@@ -5,6 +5,8 @@ import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.audit.admin.AuditAdminService;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 
 import java.util.Collection;
 
@@ -25,5 +27,10 @@ public class AuditAdminSteps {
     public Collection<CloudRuntimeEvent> getEventsByEntityIdAdmin(String entityId){
         String filter = "entityId:";
         return auditAdminService.getEvents(filter + entityId).getContent();
+    }
+
+    @Step
+    public Resources<Resource<CloudRuntimeEvent>> deleteEvents(){
+        return auditAdminService.deleteEvents();
     }
 }
