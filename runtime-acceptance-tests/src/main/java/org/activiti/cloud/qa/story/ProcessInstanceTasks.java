@@ -495,8 +495,15 @@ public class ProcessInstanceTasks {
     @Then("the user is able to delete all process instances in query service")
     public void deleteAllProcessInstancesQuery(){
         assertThat(processQuerySteps.getAllProcessInstances()).isNotNull();
-        processQueryAdminSteps.deleteProcessInstancesAdmin();
+        processQueryAdminSteps.deleteProcessInstances();
         assertThat(processQuerySteps.getAllProcessInstances()).isNull();
+    }
+
+    @Then("the user is able to delete all events in audit service")
+    public void deleteAllEventsAudit(){
+        assertThat(auditSteps.getAllEvents()).isNotNull();
+        auditAdminSteps.deleteEvents();
+        assertThat(auditSteps.getAllEvents()).isNull();
     }
 
 
