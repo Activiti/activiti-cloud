@@ -2,10 +2,12 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.common.properties.CommonPropertiesAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
@@ -19,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.Collection;
 
-@ConditionalOnProperty(name = "activiti.rest.enable-deletion", havingValue = "true")
+@ConditionalOnProperty(name = "activiti.rest.enable-deletion", matchIfMissing = true)
+@ConditionalOnBean(CommonPropertiesAutoConfiguration.class)
 @RestController
 @RequestMapping(
         value = "/admin/v1/tasks",
