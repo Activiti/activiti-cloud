@@ -1,6 +1,6 @@
 {
   "id": "variableMappingConnectorId",
-  "name": "Name of the connector",
+  "name": "Variable Mapping Connector",
   "description": "Description of the connector",
   "actions": {
     "variableMappingActionId": {
