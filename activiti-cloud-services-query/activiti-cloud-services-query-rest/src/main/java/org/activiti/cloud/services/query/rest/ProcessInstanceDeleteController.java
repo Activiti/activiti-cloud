@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.Collection;
 
-@ConditionalOnProperty(name = "activiti.rest.enable-deletion", havingValue = "true")
+@ConditionalOnProperty(name = "activiti.rest.enable-deletion", matchIfMissing = true)
 @RestController
 @RequestMapping(
         value = "/admin/v1/process-instances",
