@@ -378,11 +378,9 @@ public class Tasks {
 
     @Then("the user is able to delete all tasks in query service")
     public void deleteAllTasksQuery(){
-        //check embedded tasks have already been deleted along with the processes they belong to
-        assertThat(taskQuerySteps.getStandaloneTasks()).isEqualTo(taskQuerySteps.getAllTasks());
         //check standalone tasks
-        assertThat(taskQuerySteps.getAllTasks()).isNotNull();
+        assertThat(taskQueryAdminSteps.getAllTasks()).isNotEmpty();
         taskQueryAdminSteps.deleteTasks();
-        assertThat(taskQuerySteps.getAllTasks()).isNull();
+        assertThat(taskQueryAdminSteps.getAllTasks()).isEmpty();
     }
 }
