@@ -19,6 +19,6 @@ public interface AuditAdminService extends BaseService {
     @Headers("Content-Type: application/json")
     PagedResources<CloudRuntimeEvent> getEvents();
 
-    @RequestLine("DELETE /admin/v1/process-instances")
+    @RequestLine("DELETE /admin/v1/events")
     Resources<Resource<CloudRuntimeEvent>> deleteEvents();
 }

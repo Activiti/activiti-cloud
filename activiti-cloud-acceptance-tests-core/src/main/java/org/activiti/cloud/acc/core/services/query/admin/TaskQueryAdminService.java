@@ -30,6 +30,10 @@ public interface TaskQueryAdminService extends BaseService {
     @Headers("Accept: application/hal+json;charset=UTF-8")
     PagedResources<CloudTask> getStandaloneTasks();
 
+    @RequestLine("GET /admin/v1/tasks?standalone=false&sort=createdDate,desc&sort=id,desc")
+    @Headers("Accept: application/hal+json;charset=UTF-8")
+    PagedResources<CloudTask> getNonStandaloneTasks();
+
     @RequestLine("DELETE /admin/v1/tasks")
     Resources<Resource<CloudTask>> deleteTasks();
 }

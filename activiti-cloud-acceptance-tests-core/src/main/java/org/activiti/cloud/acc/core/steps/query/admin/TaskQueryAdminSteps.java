@@ -45,6 +45,11 @@ public class TaskQueryAdminSteps {
     }
 
     @Step
+    public PagedResources<CloudTask> getNonStandaloneTasks(){
+        return taskQueryAdminService.getNonStandaloneTasks();
+    }
+
+    @Step
     public Resources<Resource<CloudTask>> deleteTasks(){
         return taskQueryAdminService.deleteTasks();
     }
