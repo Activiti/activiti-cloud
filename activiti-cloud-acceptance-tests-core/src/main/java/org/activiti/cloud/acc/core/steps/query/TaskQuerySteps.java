@@ -104,6 +104,11 @@ public class TaskQuerySteps {
     }
 
     @Step
+    public PagedResources<CloudTask> getNonStandaloneTasks(){
+        return taskQueryService.getNonStandaloneTasks();
+    }
+
+    @Step
     public PagedResources<CloudTask> getTasksByNameAndDescription(String taskName, String taskDescription){
         return taskQueryService.getTasksByNameAndDescription(taskName,
                                                                 taskDescription);
