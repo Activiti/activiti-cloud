@@ -11,6 +11,10 @@
           "aa4a9329-71be-4889-8265-398b68536d4a": {
             "type": "variable",
             "value": "ee9eb6d4-8cd6-4098-8340-13ce2f470faa"
+          },
+          "my-custom-variable": {
+            "type": "static_value",
+            "value": "ee9eb6d4-8cd6-4098-8340-13ce2f470faa"
           }
         },
         "outputs": {
