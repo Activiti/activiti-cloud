@@ -28,18 +28,21 @@
                 "id": "movieToRankId",
                 "name": "movieToRank",
                 "type": "string",
+                "value": "",
                 "required": true
             },
             "movieDescId": {
                 "id": "movieDescId",
                 "name": "movieDesc",
                 "type": "string",
+                "value": "",
                 "required": false
             },
             "ratingId": {
                 "id": "ratingId",
                 "name": "rating",
                 "type": "integer",
+                "value": "",
                 "required": false
             }
 
