@@ -1,5 +1,8 @@
 package org.activiti.cloud.acc.core.steps.runtime;
 
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Date;
 
 import net.thucydides.core.annotations.Step;
@@ -7,6 +10,7 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.TaskRuntimeService;
@@ -15,9 +19,6 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
-
-import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableRuntimeFeignContext
 public class TaskRuntimeBundleSteps {
@@ -49,11 +50,15 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public void completeTask(String id, CompleteTaskPayload completeTaskPayload) {
-
         taskRuntimeService
                 .completeTask(id,completeTaskPayload);
     }
 
+    @Step
+    public void saveTask(String id, SaveTaskPayload saveTaskPayload) {
+        taskRuntimeService
+                .saveTask(id,saveTaskPayload);
+    }    
     @Step
     public void cannotCompleteTask(String id, CompleteTaskPayload createTaskPayload) {
         assertThatRestNotFoundErrorIsThrownBy(

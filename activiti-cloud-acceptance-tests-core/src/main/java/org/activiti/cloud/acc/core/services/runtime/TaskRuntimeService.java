@@ -6,6 +6,7 @@ import feign.RequestLine;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.acc.shared.service.BaseService;
@@ -31,6 +32,11 @@ public interface TaskRuntimeService extends BaseService {
     void completeTask(@Param("id") String id,
                       CompleteTaskPayload createTaskPayload);
 
+    @RequestLine("POST /v1/tasks/{id}/save")
+    @Headers("Content-Type: application/json")
+    void saveTask(@Param("id") String id,
+                      SaveTaskPayload saveTaskPayload);
+    
     @RequestLine("POST /v1/tasks/")
     @Headers("Content-Type: application/json")
     CloudTask createTask(CreateTaskPayload task);
