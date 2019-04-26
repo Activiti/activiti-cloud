@@ -15,10 +15,17 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.List;
+
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
-import org.activiti.api.task.model.payloads.*;
+import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
+import org.activiti.api.task.model.payloads.CandidateUsersPayload;
+import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
+import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
@@ -32,8 +39,6 @@ import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 public class TaskControllerImpl implements TaskController {
@@ -192,4 +197,13 @@ public class TaskControllerImpl implements TaskController {
         return taskRuntime.groupCandidates(taskId);
     }
 
+    @Override
+    public void saveTask(@PathVariable String taskId,
+                         @RequestBody SaveTaskPayload saveTaskPayload) {
+        if (saveTaskPayload != null) {
+            saveTaskPayload.setTaskId(taskId);
+        }
+        
+        taskRuntime.save(saveTaskPayload);
+    }
 }

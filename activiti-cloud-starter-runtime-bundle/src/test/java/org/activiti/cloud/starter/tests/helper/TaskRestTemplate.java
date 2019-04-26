@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 
 import org.activiti.api.task.model.Task;
@@ -26,6 +28,7 @@ import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
@@ -39,8 +42,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @TestComponent
 public class TaskRestTemplate {
@@ -385,6 +386,15 @@ public class TaskRestTemplate {
                                                                                                     new ParameterizedTypeReference<Resources<CloudVariableInstance>>() {
                                                                                                     });
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+
+    public ResponseEntity<Void> save(Task task, SaveTaskPayload saveTaskPayload ) {
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(TASK_VAR_RELATIVE_URL + task.getId() + "/save",
+                                                                             HttpMethod.POST,
+                                                                             saveTaskPayload!=null ?  new HttpEntity<>(saveTaskPayload) : null,
+                                                                             VOID_RESPONSE_TYPE);
+
         return responseEntity;
     }
 

@@ -58,6 +58,7 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
@@ -209,6 +210,20 @@ public class TaskControllerImplIT {
                                 pathParameters(parameterWithName("taskId").description("The task id"))));
     }
 
+    @Test
+    public void saveTask() throws Exception {
+        SaveTaskPayload saveTask = TaskPayloadBuilder.save().withTaskId("1").withVariable("name", "value").build();
+        
+        this.mockMvc.perform(post("/v1/tasks/{taskId}/save", 
+                                  1)
+                             .contentType(MediaType.APPLICATION_JSON)
+                             .content(mapper.writeValueAsString(saveTask)))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andDo(document(DOCUMENTATION_IDENTIFIER + "/save",
+                                pathParameters(parameterWithName("taskId").description("The task id"))));
+    }
+    
     @Test
     public void deleteTask() throws Exception {
         given(taskRuntime.delete(any())).willReturn(buildDefaultAssignedTask());

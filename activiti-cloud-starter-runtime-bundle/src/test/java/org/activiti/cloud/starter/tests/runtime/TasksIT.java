@@ -17,6 +17,7 @@
 package org.activiti.cloud.starter.tests.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -32,7 +33,9 @@ import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
@@ -46,6 +49,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -599,4 +603,53 @@ public class TasksIT {
 
     }
  
+    @Test
+    public void shouldSaveATask() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
+        taskRestTemplate.claim(task);
+
+        SaveTaskPayload saveTaskPayload = TaskPayloadBuilder.save()
+                                                            .withTaskId(task.getId())
+                                                            .withVariables(Collections.singletonMap("myVar", "any"))
+                                                            .build();
+        //when
+        ResponseEntity<Void> responseEntity = taskRestTemplate.save(task, saveTaskPayload);
+
+        //then
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        
+        // when
+        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(task.getId());
+
+        // then
+        assertThat(variablesResponse).isNotNull();
+        assertThat(variablesResponse.getBody().getContent()).extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                                                            .containsExactly(tuple("myVar", "any"));
+        // cleanup
+        processInstanceRestTemplate.delete(processInstanceEntity);
+        
+    }
+    
+    @Test()
+    public void shouldNotSaveATaskWithEmptyPayload() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
+        taskRestTemplate.claim(task);
+
+        SaveTaskPayload saveTaskPayload = null;
+        
+        //when
+        ResponseEntity<Void> responseEntity = taskRestTemplate.save(task, saveTaskPayload);
+
+        //then
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+
+        // cleanup
+        processInstanceRestTemplate.delete(processInstanceEntity);
+    }
+    
+        
 }

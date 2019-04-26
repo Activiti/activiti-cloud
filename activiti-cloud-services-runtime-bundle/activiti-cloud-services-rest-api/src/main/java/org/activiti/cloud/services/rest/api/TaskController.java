@@ -6,6 +6,7 @@ import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,10 @@ public interface TaskController {
     Resource<CloudTask> completeTask(@PathVariable String taskId,
                                       @RequestBody(required = false) CompleteTaskPayload completeTaskPayload);
 
+    @RequestMapping(value = "/{taskId}/save", method = RequestMethod.POST)
+    void saveTask(@PathVariable String taskId,
+                  @RequestBody(required=true) SaveTaskPayload saveTaskPayload);
+    
     @RequestMapping(value = "/{taskId}", method = RequestMethod.DELETE)
     Resource<CloudTask> deleteTask(@PathVariable String taskId);
 
