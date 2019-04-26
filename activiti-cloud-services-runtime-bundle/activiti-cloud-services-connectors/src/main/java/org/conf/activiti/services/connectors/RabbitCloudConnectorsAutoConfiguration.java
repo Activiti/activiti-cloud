@@ -28,7 +28,9 @@ public class RabbitCloudConnectorsAutoConfiguration {
         return (channelName, channel, producerProperties, extendedProducerProperties) -> {
             Expression expression = new SpelExpressionParser().parseExpression(routingKeyExpression);
             
-            extendedProducerProperties.setRoutingKeyExpression(expression);
+            if(extendedProducerProperties != null) {
+                extendedProducerProperties.setRoutingKeyExpression(expression);
+            }
         };
     }
 }
