@@ -171,3 +171,11 @@ When the user creates an unassigned standalone task
 And the user claims the standalone task
 And the user releases the standalone task
 Then the status of the task is CREATED in RB and Query
+
+Scenario: save a task 
+Given the user is authenticated as testuser
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
+And the user claims the task
+And the user saves the task with variable status equal to approved
+Then task variable status has value approved
+

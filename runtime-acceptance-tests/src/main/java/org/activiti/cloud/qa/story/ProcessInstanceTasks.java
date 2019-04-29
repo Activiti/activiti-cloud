@@ -16,6 +16,14 @@
 
 package org.activiti.cloud.qa.story;
 
+import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
+import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,14 +59,6 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedResources;
-
-import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
-import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 public class ProcessInstanceTasks {
 
@@ -199,6 +199,15 @@ public class ProcessInstanceTasks {
         auditSteps.checkTaskCreatedAndAssignedEventsWhenAlreadyAssinged(currentTask.getId());
     }
 
+    @When("the user saves the task with variable $variableName equal to $variableValue")
+    public void saveTask(String variableName, String variableValue) throws Exception {
+        taskRuntimeBundleSteps.saveTask(currentTask.getId(),
+                                        TaskPayloadBuilder.save()
+                                                          .withTaskId(currentTask.getId())
+                                                          .withVariable(variableName, variableValue)
+                                                          .build());
+    }
+    
     @When("the status of the task is $taskStatus")
     public void checkTaskStatus(Task.TaskStatus taskStatus) throws Exception {
         taskRuntimeBundleSteps.checkTaskStatus(currentTask.getId(), taskStatus);
