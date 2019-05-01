@@ -16,6 +16,10 @@
 
 package org.activiti.cloud.qa.story;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import java.util.Collection;
 
 import net.thucydides.core.annotations.Steps;
@@ -30,10 +34,6 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.Resources;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 public class ProcessInstanceConnectors {
 
     @Steps
@@ -47,13 +47,20 @@ public class ProcessInstanceConnectors {
 
     private CloudProcessInstance processInstance;
 
-    @Given("the user provides a variable named $variableName with value $variableValue")
+    @Given("the user provides a variable named $variableName with string value $variableValue")
     public void givenVariable(String variableName,
                               String variableValue) {
         variableBufferSteps.addVariable(variableName,
                                         variableValue);
     }
 
+    @Given("the user provides an variable named $variableName with integer value $variableValue")
+    public void givenVariable(String variableName,
+                              Integer variableValue) {
+        variableBufferSteps.addVariable(variableName,
+                                        variableValue);
+    }
+    
     @When("the user starts an instance of process called $processDefinitionKey with the provided variables")
     public void startProcessWithAvailableVariables(String processDefinitionKey) {
         processInstance = processRuntimeBundleSteps.startProcessWithVariables(processDefinitionKey,
