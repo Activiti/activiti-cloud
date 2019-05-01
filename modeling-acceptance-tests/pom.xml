@@ -10,7 +10,7 @@
   <artifactId>modeling-acceptance-tests</artifactId>
   <dependencies>
     <dependency>
-      <groupId>org.activiti.cloud.acc</groupId>
+      <groupId>org.activiti.cloud.modeling</groupId>
       <artifactId>activiti-cloud-acceptance-tests-modeling</artifactId>
     </dependency>
   </dependencies>
