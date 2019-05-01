@@ -179,3 +179,20 @@ And the user claims the task
 And the user saves the task with variable status equal to approved
 Then task variable status has value approved
 
+Scenario: complete saved task 
+Given the user is authenticated as testuser
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
+And the user claims the task
+And the user saves the task with variable status equal to approved
+And the user completes the task
+Then process instance variable status has value approved
+
+Scenario: complete saved task with outcome
+Given the user is authenticated as testuser
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
+And the user claims the task
+And the user saves the task with variable comments equal to lgtm 
+And the user completes the task with variable outcome set to approved 
+Then process instance variable comments has value lgtm
+And process instance variable outcome has value approved
+

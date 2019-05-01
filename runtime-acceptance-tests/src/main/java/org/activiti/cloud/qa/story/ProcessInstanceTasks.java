@@ -174,6 +174,17 @@ public class ProcessInstanceTasks {
                         .build());
     }
     
+    @When("the user completes the task with $variableName set to $value")
+    public void completeTask(String variableName, String value) throws Exception {
+        taskRuntimeBundleSteps.completeTask(currentTask.getId(),
+                TaskPayloadBuilder
+                        .complete()
+                        .withTaskId(currentTask.getId())
+                        .withVariable(variableName, value)
+                        .build());
+    }
+    
+    
     @When("the admin completes the task")
     public void adminCompleteTask() throws Exception {
         taskRuntimeAdminSteps.completeTask(currentTask.getId(),

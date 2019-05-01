@@ -105,5 +105,27 @@ public class ProcessInstanceVariables {
     public Resources<CloudVariableInstance> getProcessVariables(String processInstanceId) {
         return  processVariablesRuntimeBundleSteps.getVariables(processInstanceId);
     } 
+    
+    @Then("process instance variable $variableName has value $value")
+    public void checkProcessInstanceVariable(String variableName, String value) {
+        
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+        
+        await().untilAsserted(() -> {
+                assertThat(variableName).isNotNull();
+            
+                final Resources<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(processInstanceId);
+                
+                assertThat(cloudVariableInstanceResource).isNotNull();
+                assertThat(cloudVariableInstanceResource).isNotEmpty();
+                
+                assertThat(cloudVariableInstanceResource.getContent()).extracting(VariableInstance::getName, 
+                                                                                  VariableInstance::getValue)
+                                                                        .contains(
+                                                                                  tuple(variableName, value)
+                                                                         );
+        });       
+    }
+    
 
 }
