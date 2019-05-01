@@ -20,20 +20,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
-import java.util.Collection;
-
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
-import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
+import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessVariablesRuntimeBundleSteps;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
 
 public class ProcessInstanceVariables {
@@ -43,8 +40,8 @@ public class ProcessInstanceVariables {
     @Steps
     private ProcessVariablesRuntimeBundleSteps processVariablesRuntimeBundleSteps;
     
-    @Autowired // TODO move into tests later
-    private ProcessQueryService processQueryService;
+    @Steps
+    private ProcessQuerySteps processQuerySteps;
 
     @Then("variable $variableName1 has value $value1 and $variableName2 has value $value2")
     public void checkProcessInstanceVariables(String variableName1, String value1, String variableName2, String value2) {
@@ -114,21 +111,11 @@ public class ProcessInstanceVariables {
     } 
     
     @Then("query process instance variable $variableName has value $value")
-    public void checQuerykProcessInstanceVariable(String variableName, String value) {
+    public void checkQuerykProcessInstanceVariable(String variableName, String value) {
         
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
         
-        await().untilAsserted(() -> {
-                assertThat(variableName).isNotNull();
-            
-                final Collection<CloudVariableInstance> cloudVariableInstanceResource = processQueryService.getProcessInstanceVariables(processInstanceId).getContent();
-                
-                assertThat(cloudVariableInstanceResource).isNotNull();
-                assertThat(cloudVariableInstanceResource).isNotEmpty();
-                
-                assertThat(cloudVariableInstanceResource).extracting(VariableInstance::getName, 
-                                                                     VariableInstance::getValue)
-                                                         .contains(tuple(variableName, value));
-        });       
+        // TODO add variable value check in processQuerySteps
+        processQuerySteps.checkProcessInstanceHasVariable(processInstanceId, variableName);
     }
 }

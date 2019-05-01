@@ -174,7 +174,7 @@ public class ProcessInstanceTasks {
                         .build());
     }
     
-    @When("the user completes the task with $variableName set to $value")
+    @When("the user completes the task with variable $variableName set to $value")
     public void completeTask(String variableName, String value) throws Exception {
         taskRuntimeBundleSteps.completeTask(currentTask.getId(),
                 TaskPayloadBuilder
