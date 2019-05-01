@@ -45,11 +45,7 @@
         <artifactId>activiti-cloud-acceptance-tests-core</artifactId>
         <version>${activiti-cloud-acceptance-tests.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.acc</groupId>
-        <artifactId>activiti-cloud-acceptance-tests-modeling</artifactId>
-        <version>${activiti-cloud-acceptance-tests.version}</version>
-      </dependency>
+
     </dependencies>
   </dependencyManagement>
 </project>
