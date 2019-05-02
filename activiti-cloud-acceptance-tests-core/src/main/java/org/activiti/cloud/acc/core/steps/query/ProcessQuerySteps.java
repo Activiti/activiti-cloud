@@ -1,5 +1,9 @@
 package org.activiti.cloud.acc.core.steps.query;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import java.util.Collection;
 
 import net.thucydides.core.annotations.Step;
@@ -13,9 +17,6 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 @EnableRuntimeFeignContext
 public class ProcessQuerySteps {
@@ -70,6 +71,20 @@ public class ProcessQuerySteps {
         });
     }
 
+    @Step
+    public void checkProcessInstanceHasVariableValue(String processInstanceId, String variableName, Object variableValue) {
+
+        await().untilAsserted(() -> {
+            assertThat(variableName).isNotNull();
+            final Collection<CloudVariableInstance> variableInstances = processQueryService.getProcessInstanceVariables(processInstanceId).getContent();
+            assertThat(variableInstances).isNotNull();
+            assertThat(variableInstances).isNotEmpty();
+            //one of the variables should have name matching variableName and value
+            assertThat(variableInstances).extracting(VariableInstance::getName, VariableInstance::getValue)
+                                         .contains(tuple(variableName, variableValue));
+        });
+    }
+    
     @Step
     public void checkProcessInstanceName(String processInstanceId,
                                          String processInstanceName) {
