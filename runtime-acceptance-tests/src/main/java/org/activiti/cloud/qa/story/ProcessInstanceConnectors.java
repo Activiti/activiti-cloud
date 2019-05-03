@@ -47,19 +47,13 @@ public class ProcessInstanceConnectors {
 
     private CloudProcessInstance processInstance;
 
-    @Given("the user provides a variable named $variableName with string value $variableValue")
+    @Given("the user provides a variable named $variableName with value $variableValue")
     public void givenVariable(String variableName,
                               String variableValue) {
         variableBufferSteps.addVariable(variableName,
                                         variableValue);
     }
 
-    @Given("the user provides a variable named $variableName with integer value $variableValue")
-    public void givenVariable(String variableName,
-                              Integer variableValue) {
-        variableBufferSteps.addVariable(variableName,
-                                        variableValue);
-    }
     
     @When("the user starts an instance of process called $processDefinitionKey with the provided variables")
     public void startProcessWithAvailableVariables(String processDefinitionKey) {
