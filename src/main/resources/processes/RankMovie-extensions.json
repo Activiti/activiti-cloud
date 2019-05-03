@@ -42,7 +42,7 @@
                 "id": "ratingId",
                 "name": "rating",
                 "type": "integer",
-                "value": "",
+                "value": 0,
                 "required": false
             }
 
