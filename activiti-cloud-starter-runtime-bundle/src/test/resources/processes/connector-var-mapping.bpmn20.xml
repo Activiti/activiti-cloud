@@ -14,7 +14,7 @@
 
         <sequenceFlow id="flow2" sourceRef="serviceTask" targetRef="userTask"/>
 
-        <userTask id="userTask"/>
+        <userTask id="userTask" name="My user task" activiti:candidateGroups="hr"/>
 
         <sequenceFlow id="flow3" sourceRef="userTask" targetRef="end"/>
 
