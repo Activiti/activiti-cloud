@@ -4,4 +4,6 @@ github:
     repositories:
     - name: activiti-cloud-application-chart
       useSinglePullRequest: true
+    - name: activiti-cloud-full-chart
+      useSinglePullRequest: true
 
