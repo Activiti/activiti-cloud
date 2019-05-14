@@ -2,4 +2,4 @@
 dependencies:
 - name: "common"
   repository: "https://activiti.github.io/activiti-cloud-helm-charts/"
-  version: "1.1.16"
+  version: "1.1.17"
