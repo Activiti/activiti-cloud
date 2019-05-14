@@ -1,5 +1,5 @@
 CURRENT=$(shell pwd)
-NAME := example-cloud-connector
+NAME := activiti-cloud-connector
 ORG := $(or $(ORG),activiti)
 APP_NAME := $(or $(APP_NAME),$(NAME))
 OS := $(shell uname)
