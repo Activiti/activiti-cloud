@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,13 +37,11 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
 @Component
 @EnableBinding(ConnectorIntegrationChannels.class)
 public class ServiceTaskConsumerHandler {
 
+    private static final String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
     private static final String SERVICE_FULL_NAME = "serviceFullName";
     private static final String SERVICE_VERSION = "serviceVersion";
     private static final String SERVICE_TYPE = "serviceType";
@@ -72,28 +73,10 @@ public class ServiceTaskConsumerHandler {
 
     @StreamListener(value = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER)
     public void receive(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
+        assertIntegrationContextHeaders(integrationRequest, headers);        
         
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
-        
-        Assertions.assertThat(headers)
-            .containsKey(ROUTING_KEY)
-            .containsKey(MESSAGE_PAYLOAD_TYPE)
-            // @TODO fix missing attributes in IntegrationContext 
-            //.containsEntry("parentProcessInstanceId")
-            .containsEntry(PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
-            .containsEntry(PROCESS_DEFINITION_KEY, integrationContext.getProcessDefinitionKey())
-            .containsEntry(BUSINESS_KEY, integrationContext.getBusinessKey())
-            .containsEntry(CONNECTOR_TYPE, integrationContext.getConnectorType())
-            .containsEntry(INTEGRATION_CONTEXT_ID, integrationContext.getId())
-            .containsEntry(PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
-            .containsEntry(PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())
-            .containsEntry(APP_NAME, integrationRequest.getAppName())
-            .containsEntry(APP_VERSION, integrationRequest.getAppVersion())
-            .containsEntry(SERVICE_NAME, integrationRequest.getServiceName())
-            .containsEntry(SERVICE_TYPE, integrationRequest.getServiceType())
-            .containsEntry(SERVICE_VERSION, integrationRequest.getServiceVersion())
-            .containsEntry(SERVICE_FULL_NAME, integrationRequest.getServiceFullName());        
-        
+       
         Map<String, Object> requestVariables = integrationContext.getInBoundVariables();
 
         Object customPojo = requestVariables.get("customPojo");
@@ -119,8 +102,11 @@ public class ServiceTaskConsumerHandler {
     }
 
     @StreamListener(value = ConnectorIntegrationChannels.VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
-    public void receive(IntegrationRequest integrationRequest) {
+    public void receiveVariablesConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
+        assertIntegrationContextHeaders(integrationRequest, headers);        
+
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+        
         Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
         String variableOne = "input-variable-name-1";
         String variableTwo = "input-variable-name-2";
@@ -158,6 +144,51 @@ public class ServiceTaskConsumerHandler {
         IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
         Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
         resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
+    }
+
+    @StreamListener(value = ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER, 
+                    condition = "headers['processDefinitionVersion']!=null")
+    public void receiveRestConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
+        assertIntegrationContextHeaders(integrationRequest, headers);        
+
+        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+        integrationContext.addOutBoundVariable("restResult", "fromConnector");
+
+        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
+        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
+        resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
+    }
+    
+    
+    private void assertIntegrationContextHeaders(IntegrationRequest integrationRequest, Map<String, Object> headers) {
+        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+
+        // Mandatory headers assertions
+        Assertions.assertThat(headers)
+                  .containsKey(ROUTING_KEY)
+                  .containsKey(MESSAGE_PAYLOAD_TYPE)
+                  .containsEntry(PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
+                  .containsEntry(PROCESS_DEFINITION_KEY, integrationContext.getProcessDefinitionKey())
+                  .containsEntry(CONNECTOR_TYPE, integrationContext.getConnectorType())
+                  .containsEntry(INTEGRATION_CONTEXT_ID, integrationContext.getId())
+                  .containsEntry(PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
+                  .containsEntry(PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())
+                  .containsEntry(APP_NAME, integrationRequest.getAppName())
+                  .containsEntry(APP_VERSION, integrationRequest.getAppVersion())
+                  .containsEntry(SERVICE_NAME, integrationRequest.getServiceName())
+                  .containsEntry(SERVICE_TYPE, integrationRequest.getServiceType())
+                  .containsEntry(SERVICE_VERSION, integrationRequest.getServiceVersion())
+                  .containsEntry(SERVICE_FULL_NAME, integrationRequest.getServiceFullName());
+        
+        // conditional on existing businessKey in integration context
+        if(integrationContext.getBusinessKey() != null) 
+            Assertions.assertThat(headers)
+                      .containsEntry(BUSINESS_KEY, integrationContext.getBusinessKey());
+
+        // conditional on existing parentProcessInstanceId in integration context
+        if(integrationContext.getParentProcessInstanceId() != null) 
+            Assertions.assertThat(headers)
+                      .containsEntry(PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId());
     }
 
 }

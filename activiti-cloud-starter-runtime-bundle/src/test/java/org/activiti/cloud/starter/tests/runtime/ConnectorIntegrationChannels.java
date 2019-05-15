@@ -22,6 +22,7 @@ import org.springframework.messaging.SubscribableChannel;
 public interface ConnectorIntegrationChannels {
 
     String INTEGRATION_EVENTS_CONSUMER = "integrationEventsConsumer";
+    String REST_CONNECTOR_CONSUMER = "restConnectorConsumer";
 
     @Input(INTEGRATION_EVENTS_CONSUMER)
     SubscribableChannel integrationEventsConsumer();
@@ -30,5 +31,10 @@ public interface ConnectorIntegrationChannels {
 
     @Input(VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
     SubscribableChannel varMappingIntegrationEventsConsumer();
+
+    @Input(REST_CONNECTOR_CONSUMER)
+    SubscribableChannel restConnectorConsumer();
+
+
 
 }

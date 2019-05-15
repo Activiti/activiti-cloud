@@ -24,7 +24,11 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequeste
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.persistence.deploy.DeploymentManager;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.runtime.api.connector.InboundVariablesProvider;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
@@ -66,6 +70,7 @@ public class IntegrationRequestSenderTest {
     private static final String INTEGRATION_CONTEXT_ID = "intContextId";
     private static final String FLOW_NODE_ID = "myServiceTask";
     private static final String APP_NAME = "appName";
+    private static final int PROC_DEF_VERSION = 1;
 
     private IntegrationRequestSender integrationRequestSender;
 
@@ -117,6 +122,7 @@ public class IntegrationRequestSenderTest {
     public void setUp() {
         initMocks(this);
 
+        configureDeploymentManager();
         messageBuilderFactory = new IntegrationContextMessageBuilderFactory(runtimeBundleProperties);
 
         integrationRequestSender = new IntegrationRequestSender(runtimeBundleProperties,
@@ -141,6 +147,21 @@ public class IntegrationRequestSenderTest {
         integrationRequest.setServiceFullName(APP_NAME);
     }
 
+    private void configureDeploymentManager() {
+        ProcessEngineConfigurationImpl processEngineConfiguration = mock(ProcessEngineConfigurationImpl.class);
+        Context.setProcessEngineConfiguration(processEngineConfiguration);
+
+        DeploymentManager deploymentManager = mock(DeploymentManager.class);
+        ProcessDefinition processDefinition = mock(ProcessDefinition.class);
+
+        given(processEngineConfiguration.getDeploymentManager()).willReturn(deploymentManager);
+        given(deploymentManager.findDeployedProcessDefinitionById(PROC_DEF_ID)).willReturn(processDefinition);
+
+        given(processDefinition.getId()).willReturn(PROC_DEF_ID);
+        given(processDefinition.getKey()).willReturn(MY_PROC_DEF_KEY);
+        given(processDefinition.getVersion()).willReturn(PROC_DEF_VERSION);
+    }
+
     private void configureIntegrationContext() {
         when(integrationContextEntity.getExecutionId()).thenReturn(EXECUTION_ID);
         when(integrationContextEntity.getId()).thenReturn(INTEGRATION_CONTEXT_ID);
@@ -157,7 +178,7 @@ public class IntegrationRequestSenderTest {
                                                     .withProcessInstanceId(PROC_INST_ID)
                                                     .withBusinessKey(BUSINESS_KEY)
                                                     .withProcessDefinitionKey(MY_PROC_DEF_KEY)
-                                                    .withProcessDefinitionVersion(1)
+                                                    .withProcessDefinitionVersion(PROC_DEF_VERSION)
                                                     .withParentProcessInstanceId(MY_PARENT_PROC_ID)
                                                     .build();
     }
@@ -213,7 +234,8 @@ public class IntegrationRequestSenderTest {
             .containsKey("messagePayloadType")
             .containsEntry("parentProcessInstanceId",MY_PARENT_PROC_ID)
             .containsEntry("processDefinitionKey", MY_PROC_DEF_KEY)
-            .containsEntry("processDefinitionVersion", 1)
+            .containsEntry("processDefinitionVersion",
+                           PROC_DEF_VERSION)
             .containsEntry("businessKey", BUSINESS_KEY)
             .containsEntry("connectorType", PAYMENT_CONNECTOR_TYPE)
             .containsEntry("integrationContextId", INTEGRATION_CONTEXT_ID)

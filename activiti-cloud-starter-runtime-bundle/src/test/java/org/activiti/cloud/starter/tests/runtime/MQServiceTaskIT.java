@@ -16,6 +16,10 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,9 +29,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -43,10 +49,6 @@ import org.springframework.hateoas.Resources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:application-test.properties")
@@ -64,6 +66,9 @@ public class MQServiceTaskIT {
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
+
+    @Autowired
+    private TaskRestTemplate taskRestTemplate;
 
     @Value("${activiti.keycloak.test-user:hruser}")
     protected String keycloakTestUser;
@@ -171,6 +176,7 @@ public class MQServiceTaskIT {
         ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
                 ProcessPayloadBuilder.start()
                         .withProcessDefinitionKey("connectorVarMapping")
+                        .withBusinessKey("businessKey")
                         .build());
 
         await().untilAsserted(() -> {
@@ -205,5 +211,50 @@ public class MQServiceTaskIT {
         assertThat(tasks.getBody().getContent())
                 .extracting(CloudTask::getName)
                 .containsExactly("My user task");
+    }
+
+    /**
+     * Covers https://github.com/Activiti/Activiti/issues/2736
+     * @see ServiceTaskConsumerHandler#receiveRestConnector(IntegrationRequest, Map) for headers assertions
+     */
+    @Test
+    public void integrationRequestShouldAlwaysHaveProcessDefinitionVersionSet() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
+                ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey("process-f0d643a4-27d7-474f-b71f-4d7f04989843")
+                        .withBusinessKey("businessKey")
+                        .build());
+
+        CloudTask task = getTaskToExecute(processInstanceResponseEntity);
+        taskRestTemplate.claim(task);
+        taskRestTemplate.complete(task);
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                    .isNotNull()
+                    .extracting(CloudVariableInstance::getName,
+                                CloudVariableInstance::getValue)
+                    .containsOnly(tuple("restResult",
+                                        "fromConnector"));//kept unchanging because no connector output is updating it
+        });
+
+        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
+        assertThat(tasks.getBody()).isNotNull();
+        assertThat(tasks.getBody().getContent())
+                .extracting(CloudTask::getName)
+                .containsExactly("Result Form Task");
+    }
+
+    private CloudTask getTaskToExecute(ResponseEntity<CloudProcessInstance> processInstanceResponseEntity) {
+        ResponseEntity<PagedResources<CloudTask>> availableTasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
+        assertThat(availableTasks).isNotNull();
+        assertThat(availableTasks.getBody()).isNotEmpty();
+        return availableTasks.getBody().getContent().iterator().next();
     }
 }
