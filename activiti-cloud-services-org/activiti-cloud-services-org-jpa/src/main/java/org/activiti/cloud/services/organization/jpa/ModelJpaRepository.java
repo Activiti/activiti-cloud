@@ -78,8 +78,10 @@ public interface ModelJpaRepository extends VersionedJpaRepository<ModelEntity, 
     @Override
     default ModelEntity updateModel(ModelEntity modelToBeUpdated,
                                     ModelEntity newModel) {
-        modelToBeUpdated.setName(newModel.getName());
-        modelToBeUpdated.setExtensions(newModel.getExtensions());
+        Optional.ofNullable(newModel.getName())
+                .ifPresent(modelToBeUpdated::setName);
+        Optional.ofNullable(newModel.getExtensions())
+                .ifPresent(modelToBeUpdated::setExtensions);
         return save(modelToBeUpdated);
     }
 

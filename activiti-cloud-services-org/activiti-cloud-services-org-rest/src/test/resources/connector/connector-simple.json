@@ -1,5 +1,5 @@
 {
-  "name": "Name-of-the-connector",
+  "name": "name-of-the-connector",
   "description": "Description of the connector",
   "actions": {
     "actionId1": {

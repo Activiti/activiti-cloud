@@ -19,6 +19,7 @@ package org.activiti.cloud.services.organization.rest.controller;
 import java.io.IOException;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
@@ -117,7 +118,7 @@ public class ModelController implements ModelRestApi {
             @ApiParam(CREATE_MODEL_PROJECT_ID_PARAM_DESCR)
             @PathVariable String projectId,
             @ApiParam(CREATE_MODEL_PARAM_DESCR)
-            @RequestBody Model model) {
+            @Valid @RequestBody Model model) {
         Project project = projectController.findProjectById(projectId);
         return resourceAssembler.toResource(
                 modelService.createModel(project,
@@ -129,7 +130,7 @@ public class ModelController implements ModelRestApi {
             @ApiParam(UPDATE_MODEL_ID_PARAM_DESCR)
             @PathVariable String modelId,
             @ApiParam(UPDATE_MODEL_PARAM_DESCR)
-            @RequestBody Model model) {
+            @Valid @RequestBody Model model) {
         Model modelToUpdate = findModelById(modelId);
         model.setId(modelId);
         return resourceAssembler.toResource(

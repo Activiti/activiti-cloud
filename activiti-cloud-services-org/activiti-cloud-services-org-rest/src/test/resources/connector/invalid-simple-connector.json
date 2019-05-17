@@ -1,13 +1,14 @@
 {
+  "id": "connector-uuid",
   "name": "name-of-the-connector",
   "description": "Description of the connector",
-  "template": "ConnectorTemplate",
+  "icon": "path to icon",
   "actions": {
     "actionId1": {
       "id": "actionId1",
       "name": "actionName1",
       "description": "description",
-      "inputs": [
+      "input": [
         {
           "id": "input-variable-1",
           "name": "input-variable-name-1",
@@ -23,7 +24,7 @@
           "description": ""
         }
       ],
-      "outputs": [
+      "output": [
         {
           "id": "output-variable-1",
           "name": "output-variable-name-1",
@@ -37,6 +38,7 @@
           "description": ""
         }
       ]
-    }
+    },
+    "actionName2": {}
   }
-}
+} 
