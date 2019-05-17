@@ -29,16 +29,15 @@
       "db995012-b417-4cea-a981-cef287de8e4a": {
         "id": "db995012-b417-4cea-a981-cef287de8e4a",
         "name": "name1",
-        "type": "string",
+        "type": "integer",
         "required": false,
-        "value": ""
+        "value": 1
       },
       "ee9eb6d4-8cd6-4098-8340-13ce2f470faa": {
         "id": "ee9eb6d4-8cd6-4098-8340-13ce2f470faa",
         "name": "name2",
         "type": "string",
-        "required": false,
-        "value": ""
+        "required": false
       }
     }
   }

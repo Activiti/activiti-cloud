@@ -68,8 +68,7 @@
         "id",
         "name",
         "type",
-        "required",
-        "value"
+        "required"
       ]
     },
     "mappings": {
