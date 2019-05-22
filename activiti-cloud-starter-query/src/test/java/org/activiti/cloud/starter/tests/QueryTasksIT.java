@@ -942,7 +942,7 @@ public class QueryTasksIT {
     }
     
     @Test
-    public void shouldSetProcessDefinitionVersionOnTaskWhenThisInformationIsAvailableInTheEvent() {
+    public void shouldSetProcessDefinitionVersionAndBusinessKeyOnTaskWhenThisInformationIsAvailableInTheEvent() {
       //given
         //event with process definition version set
         TaskImpl task1 = new TaskImpl(UUID.randomUUID().toString(),
@@ -951,6 +951,8 @@ public class QueryTasksIT {
 
         CloudTaskCreatedEventImpl task1Created = new CloudTaskCreatedEventImpl(task1);
         task1Created.setProcessDefinitionVersion(10);
+        task1Created.setBusinessKey("businessKey");
+        
         eventsAggregator.addEvents(task1Created);
 
         //event with process definition unset
@@ -976,12 +978,15 @@ public class QueryTasksIT {
             assertThat(tasks)
                     .extracting(Task::getId,
                                 Task::getStatus,
-                                Task::getProcessDefinitionVersion)
+                                Task::getProcessDefinitionVersion,
+                                Task::getBusinessKey)
                     .contains(tuple(task1.getId(),
                                     Task.TaskStatus.CREATED,
-                                    10),
+                                    10,
+                                    "businessKey"),
                               tuple(task2.getId(),
                                     Task.TaskStatus.CREATED,
+                                    null,
                                     null));
         });
 

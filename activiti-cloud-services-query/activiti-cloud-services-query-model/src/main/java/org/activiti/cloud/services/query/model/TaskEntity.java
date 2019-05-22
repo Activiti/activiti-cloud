@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,6 +65,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     private String processDefinitionId;
     private String processInstanceId;
     private Integer processDefinitionVersion;
+    private String businessKey;
     
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
@@ -157,7 +158,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
                       String owner,
                       String parentTaskId,
                       String formKey,
-                      Integer processDefinitionVersion) {
+                      Integer processDefinitionVersion,
+                      String businessKey) {
         super(serviceName,
               serviceFullName,
               serviceVersion,
@@ -179,6 +181,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.parentTaskId = parentTaskId;
         this.formKey = formKey;
         this.processDefinitionVersion = processDefinitionVersion;
+        this.businessKey = businessKey;
     }
 
     @Override
@@ -229,6 +232,10 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @Override
     public Integer getProcessDefinitionVersion() {
         return processDefinitionVersion;
+    }
+    
+    public String getBusinessKey() {
+        return businessKey;
     }
 
     public boolean isStandAlone() {
@@ -282,6 +289,10 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
 
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
+    }
+    
+    public void setBusinessKey(String businessKey) {
+        this.businessKey = businessKey;
     }
     
     public void setStatus(TaskStatus status) {
