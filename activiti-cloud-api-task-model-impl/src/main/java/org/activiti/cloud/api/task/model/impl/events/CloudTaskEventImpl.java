@@ -36,6 +36,7 @@ public abstract class CloudTaskEventImpl extends CloudRuntimeEventImpl<Task, Tas
             setProcessDefinitionId(task.getProcessDefinitionId());
             setProcessInstanceId(task.getProcessInstanceId());
             setProcessDefinitionVersion(task.getProcessDefinitionVersion());
+            setBusinessKey(task.getBusinessKey());
         }
     }
 
