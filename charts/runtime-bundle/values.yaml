@@ -70,6 +70,7 @@ service:
   type: ClusterIP
   externalPort: 80
   internalPort: 8080
+  name: rb
   annotations:
     fabric8.io/expose: "false"
 resources:
