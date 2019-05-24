@@ -16,18 +16,27 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Optional;
+
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupRemovedEvent;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
-import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskCandidateGroup;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TaskCandidateGroupRemovedEventHandler implements QueryEventHandler {
 
+    private static Logger LOGGER = LoggerFactory.getLogger(TaskCandidateGroupRemovedEventHandler.class);
+    private final TaskRepository taskRepository;
     private final TaskCandidateGroupRepository taskCandidateGroupRepository;
 
-    public TaskCandidateGroupRemovedEventHandler(TaskCandidateGroupRepository taskCandidateGroupRepository) {
+    public TaskCandidateGroupRemovedEventHandler(TaskRepository taskRepository,
+                                                 TaskCandidateGroupRepository taskCandidateGroupRepository) {
+        this.taskRepository = taskRepository;
         this.taskCandidateGroupRepository = taskCandidateGroupRepository;
     }
 
@@ -35,18 +44,23 @@ public class TaskCandidateGroupRemovedEventHandler implements QueryEventHandler 
     public void handle(CloudRuntimeEvent<?, ?> event) {
 
         CloudTaskCandidateGroupRemovedEvent taskCandidateGroupRemovedEvent = (CloudTaskCandidateGroupRemovedEvent) event;
-        TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup(taskCandidateGroupRemovedEvent.getEntity().getTaskId(),
-                                                                       taskCandidateGroupRemovedEvent.getEntity().getGroupId());
-
-        // not going to look up task as candidate can be created before task
-
-        // Persist into database
-        try {
-            taskCandidateGroupRepository.delete(taskCandidateGroup);
-        } catch (Exception cause) {
-            throw new QueryException("Error handling TaskCandidateGroupRemovedEvent[" + event + "]",
-                                     cause);
+        String taskId = taskCandidateGroupRemovedEvent.getEntity().getTaskId();
+        Optional<TaskEntity> findResult = taskRepository.findById(taskId);
+        
+        // if a task was cancelled / completed do not handle this event
+        if(findResult.isPresent() && !findResult.get().isInFinalState()) {
+            
+            TaskCandidateGroup taskCandidateGroup = new TaskCandidateGroup(taskId,
+                                                                           taskCandidateGroupRemovedEvent.getEntity().getGroupId());
+            // Persist into database
+            try {
+                taskCandidateGroupRepository.delete(taskCandidateGroup);
+            } catch (Exception cause) {
+                LOGGER.debug("Error handling TaskCandidateGroupRemovedEvent[" + event + "]",
+                             cause);
+            }            
         }
+
     }
 
     @Override

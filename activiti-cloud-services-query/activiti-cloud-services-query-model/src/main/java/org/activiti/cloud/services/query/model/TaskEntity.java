@@ -488,5 +488,12 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public void setCompletedFrom(Date completedFrom) {
         this.completedFrom = completedFrom;
     }
+    
+    public boolean isInFinalState(){
+        return  !(TaskStatus.CREATED.equals(status) || 
+                  TaskStatus.ASSIGNED.equals(status)|| 
+                  TaskStatus.SUSPENDED.equals(status));
+    }
+    
 
 }

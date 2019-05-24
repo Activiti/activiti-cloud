@@ -141,8 +141,9 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCandidateGroupRemovedEventHandler taskCandidateGroupRemovedEventHandler(TaskCandidateGroupRepository taskCandidateGroupRepository) {
-        return new TaskCandidateGroupRemovedEventHandler(taskCandidateGroupRepository);
+    public TaskCandidateGroupRemovedEventHandler taskCandidateGroupRemovedEventHandler(TaskRepository taskRepository,
+                                                                                       TaskCandidateGroupRepository taskCandidateGroupRepository) {
+        return new TaskCandidateGroupRemovedEventHandler(taskRepository, taskCandidateGroupRepository);
     }
 
     @Bean
@@ -153,8 +154,9 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCandidateUserRemovedEventHandler taskCandidateUserRemovedEventHandler(TaskCandidateUserRepository taskCandidateUserRepository) {
-        return new TaskCandidateUserRemovedEventHandler(taskCandidateUserRepository);
+    public TaskCandidateUserRemovedEventHandler taskCandidateUserRemovedEventHandler(TaskRepository taskRepository,
+                                                                                     TaskCandidateUserRepository taskCandidateUserRepository) {
+        return new TaskCandidateUserRemovedEventHandler(taskRepository, taskCandidateUserRepository);
     }
 
     @Bean
