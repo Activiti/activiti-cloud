@@ -68,12 +68,15 @@ public class TaskVariableController {
                                                                         Pageable pageable) {
 
         QTaskVariableEntity variable = QTaskVariableEntity.taskVariableEntity;
-        BooleanExpression expression = variable.taskId.eq(taskId);
+        
+        BooleanExpression expression = variable.taskId.eq(taskId);  
 
-        Predicate extendedPredicated = expression;
         if (predicate != null) {
-            extendedPredicated = expression.and(predicate);
+            expression = expression.and(predicate);
         }
+        
+        Predicate extendedPredicated = expression;  
+        
 
         Page<TaskVariableEntity> variables = variableRepository.findAll(extendedPredicated,
                                                                     pageable);

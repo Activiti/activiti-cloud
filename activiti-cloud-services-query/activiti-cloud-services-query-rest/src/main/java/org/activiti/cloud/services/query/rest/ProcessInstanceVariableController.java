@@ -67,12 +67,16 @@ public class ProcessInstanceVariableController {
                                                                         Pageable pageable) {
 
         QProcessVariableEntity variable = QProcessVariableEntity.processVariableEntity;
-        BooleanExpression expression = variable.processInstanceId.eq(processInstanceId);
+        
+        //We will show only not deleted variables 
+        BooleanExpression expression = variable.processInstanceId.eq(processInstanceId);  
 
-        Predicate extendedPredicate = expression;
         if (predicate != null) {
-            extendedPredicate = expression.and(predicate);
+            expression = expression.and(predicate);
         }
+        
+        Predicate extendedPredicate = expression;  
+        
 
         Page<ProcessVariableEntity> variables = variableRepository.findAll(extendedPredicate,
                                                                     pageable);

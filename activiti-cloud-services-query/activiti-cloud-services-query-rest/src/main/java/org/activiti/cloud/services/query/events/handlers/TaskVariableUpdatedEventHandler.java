@@ -33,7 +33,7 @@ public class TaskVariableUpdatedEventHandler {
         String taskId = updatedVariableEntity.getTaskId();
         BooleanExpression predicate = QTaskVariableEntity.taskVariableEntity.name.eq(variableName)
                 .and(
-                        QTaskVariableEntity.taskVariableEntity.taskId.eq(String.valueOf(taskId))
+                        QTaskVariableEntity.taskVariableEntity.taskId.eq(taskId)
                 );
         variableUpdater.update(updatedVariableEntity,
                                predicate,

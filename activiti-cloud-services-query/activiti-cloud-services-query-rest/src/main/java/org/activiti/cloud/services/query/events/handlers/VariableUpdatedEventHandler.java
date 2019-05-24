@@ -23,9 +23,13 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VariableUpdatedEventHandler implements QueryEventHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(VariableUpdatedEventHandler.class);
+    
     private ProcessVariableUpdateEventHandler processVariableUpdateEventHandler;
 
     private TaskVariableUpdatedEventHandler taskVariableUpdatedEventHandler;
@@ -40,7 +44,8 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudVariableUpdatedEvent variableUpdatedEvent = (CloudVariableUpdatedEvent) event;
         
-        if (variableUpdatedEvent.getEntity().isTaskVariable()) {
+        try {
+            if (variableUpdatedEvent.getEntity().isTaskVariable()) {
                 TaskVariableEntity variableEntity = new TaskVariableEntity(null,
                                                      variableUpdatedEvent.getEntity().getType(),
                                                      variableUpdatedEvent.getEntity().getName(),
@@ -56,7 +61,7 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
                                                      null);
                 variableEntity.setValue(variableUpdatedEvent.getEntity().getValue());
                 taskVariableUpdatedEventHandler.handle(variableEntity);
-        }  else {
+            }  else {
                 ProcessVariableEntity variableEntity = new ProcessVariableEntity(null,
                                                      variableUpdatedEvent.getEntity().getType(),
                                                      variableUpdatedEvent.getEntity().getName(),
@@ -71,7 +76,12 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
                                                      null);
                 variableEntity.setValue(variableUpdatedEvent.getEntity().getValue());
                 processVariableUpdateEventHandler.handle(variableEntity);
+            }
+        } catch (Exception cause) {
+            LOGGER.debug("Error handling VariableUpdatedEvent[" + event + "]",
+                         cause);
         }
+
     }
 
     @Override

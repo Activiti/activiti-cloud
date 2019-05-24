@@ -265,4 +265,12 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     public void setStartTo(Date startTo) {
         this.startTo = startTo;
     }
+    
+    public boolean isInFinalState(){
+        return  !(ProcessInstanceStatus.CREATED.equals(status) || 
+                  ProcessInstanceStatus.RUNNING.equals(status)|| 
+                  ProcessInstanceStatus.SUSPENDED.equals(status));
+    }
+    
+
 }
