@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
@@ -52,6 +53,11 @@ public class AuditSteps {
     @Step
     public void checkServicesHealth() {
         assertThat(auditService.isServiceUp()).isTrue();
+    }
+    
+    @Step
+    public Collection<CloudRuntimeEvent> getEventsByProcessInstanceId(String processInstanceId) throws Exception {
+        return auditService.getEvents("processInstanceId:" + processInstanceId).getContent();
     }
 
     @Step
@@ -407,4 +413,33 @@ public class AuditSteps {
                     .isNotNull();
         });
     }
+    
+    @Step
+    public void checkProcessInstanceSubProcessEvents(String processInstanceId){
+
+        await().untilAsserted(() -> {
+            Collection <CloudRuntimeEvent> receivedEvents = getEventsByProcessInstanceId(processInstanceId);
+            assertThat(receivedEvents)
+                    .filteredOn(event -> (BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.equals(event.getEventType()) || BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.equals(event.getEventType())))
+                    .isNotEmpty()
+                    .extracting("eventType",
+                                "entity.activityType",
+                                "entity.processInstanceId")
+                    .contains(tuple(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
+                                    "subProcess",
+                                    processInstanceId),
+                              tuple(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
+                                    "subProcess",
+                                    processInstanceId));
+
+
+        });
+    }
+    
+
+    
+    
 }
+
+
+
