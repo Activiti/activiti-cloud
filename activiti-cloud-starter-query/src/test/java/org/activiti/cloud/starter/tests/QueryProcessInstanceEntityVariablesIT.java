@@ -135,11 +135,7 @@ public class QueryProcessInstanceEntityVariablesIT {
                             tuple(
                                     "varUpdated",
                                     "v2-up",
-                                    false),
-                            tuple(// Variables deleted should be here, they are soft deleted
-                                  "varDeleted",
-                                  "v1",
-                                  true)
+                                    false)
                     );
         });
     }

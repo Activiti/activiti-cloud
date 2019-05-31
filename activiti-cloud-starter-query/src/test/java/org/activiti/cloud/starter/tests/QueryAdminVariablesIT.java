@@ -144,11 +144,7 @@ public class QueryAdminVariablesIT {
                             tuple(
                                     "varUpdated",
                                     "v2-up",
-                                    false),
-                            tuple(
-                                    "varDeleted",
-                                    "v1",
-                                    true)
+                                    false)
                     );
         });
     }

@@ -37,6 +37,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAdde
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserRemovedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -682,7 +683,7 @@ public class QueryTasksIT {
         });
 
     }
-
+    
     private void assertCannotSeeTask(Task task) {
         await().untilAsserted(() -> {
 
@@ -942,7 +943,7 @@ public class QueryTasksIT {
     }
     
     @Test
-    public void shouldSetProcessDefinitionVersionOnTaskWhenThisInformationIsAvailableInTheEvent() {
+    public void shouldSetProcessDefinitionVersionAndBusinessKeyOnTaskWhenThisInformationIsAvailableInTheEvent() {
       //given
         //event with process definition version set
         TaskImpl task1 = new TaskImpl(UUID.randomUUID().toString(),
@@ -951,6 +952,8 @@ public class QueryTasksIT {
 
         CloudTaskCreatedEventImpl task1Created = new CloudTaskCreatedEventImpl(task1);
         task1Created.setProcessDefinitionVersion(10);
+        task1Created.setBusinessKey("businessKey");
+        
         eventsAggregator.addEvents(task1Created);
 
         //event with process definition unset
@@ -976,12 +979,15 @@ public class QueryTasksIT {
             assertThat(tasks)
                     .extracting(Task::getId,
                                 Task::getStatus,
-                                Task::getProcessDefinitionVersion)
+                                Task::getProcessDefinitionVersion,
+                                Task::getBusinessKey)
                     .contains(tuple(task1.getId(),
                                     Task.TaskStatus.CREATED,
-                                    10),
+                                    10,
+                                    "businessKey"),
                               tuple(task2.getId(),
                                     Task.TaskStatus.CREATED,
+                                    null,
                                     null));
         });
 
@@ -1005,5 +1011,123 @@ public class QueryTasksIT {
                     .containsExactly(task1.getId());
         });
         
+    }
+    
+    @Test
+    public void shouldGetTaskGroupCandidatesAfterTaskCompleted() {
+        //given
+        Task task = taskEventContainedBuilder.aTaskWithGroupCandidate("task with group candidate",
+                                                                      "testgroup",
+                                                                      runningProcessInstance);
+        
+        eventsAggregator.sendAll();
+        
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
+
+            //then
+            assertThat(response).isNotNull();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().size()).isEqualTo(1);
+            assertThat(response.getBody().get(0)).isEqualTo("testgroup");
+        });
+        
+        keycloakTokenProducer.setKeycloakTestUser("testuser");
+        
+        ((TaskImpl)task).setAssignee("testuser");
+        ((TaskImpl)task).setStatus(Task.TaskStatus.ASSIGNED);
+        eventsAggregator.addEvents(new CloudTaskAssignedEventImpl(task));
+        eventsAggregator.sendAll();
+        
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
+
+            //then
+            assertThat(response).isNotNull();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().size()).isEqualTo(1);
+            assertThat(response.getBody().get(0)).isEqualTo("testgroup");
+        });
+
+        ((TaskImpl)task).setStatus(Task.TaskStatus.COMPLETED);
+        eventsAggregator.addEvents(new CloudTaskCompletedEventImpl(UUID.randomUUID().toString(), new Date().getTime(), task));
+        eventsAggregator.sendAll();
+        
+        TaskCandidateGroupImpl candidateGroup = new TaskCandidateGroupImpl("hrgroup",
+                                                                           task.getId());
+        producer.send(new CloudTaskCandidateGroupRemovedEventImpl(candidateGroup));
+        
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
+
+            //then
+            assertThat(response).isNotNull();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().size()).isEqualTo(1);
+            assertThat(response.getBody().get(0)).isEqualTo("testgroup");
+        });
+      
+    }
+    
+    @Test
+    public void shouldGetTaskUserCandidatesAfterTaskCompleted() {
+        //given
+        Task task = taskEventContainedBuilder.aTaskWithUserCandidate("task with user candidate",
+                                                                     "testuser",
+                                                                     runningProcessInstance);
+        eventsAggregator.sendAll();
+
+        keycloakTokenProducer.setKeycloakTestUser("testuser");
+
+        //when
+        ResponseEntity<List<String>> responseEntity = getCandidateUsers(task.getId());
+
+        //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().size()).isEqualTo(1);
+        assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+        
+        //when  
+        ((TaskImpl)task).setAssignee("testuser");
+        ((TaskImpl)task).setStatus(Task.TaskStatus.ASSIGNED);
+        eventsAggregator.addEvents(new CloudTaskAssignedEventImpl(task));
+        eventsAggregator.sendAll();
+        
+        responseEntity = getCandidateUsers(task.getId());
+
+        //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().size()).isEqualTo(1);
+        assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+        
+
+        ((TaskImpl)task).setStatus(Task.TaskStatus.COMPLETED);
+        eventsAggregator.addEvents(new CloudTaskCompletedEventImpl(UUID.randomUUID().toString(), new Date().getTime(), task));
+        eventsAggregator.sendAll();
+   
+        TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl("testuser",
+                                                                        task.getId());
+        producer.send(new CloudTaskCandidateUserRemovedEventImpl(candidateUser));
+
+        //then
+        responseEntity = getCandidateUsers(task.getId());
+
+        //then
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().size()).isEqualTo(1);
+        assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+
     }
 }

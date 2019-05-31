@@ -20,8 +20,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.Date;
+import java.util.UUID;
+
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.impl.TaskImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
@@ -102,6 +110,7 @@ public class QueryTaskEntityVariablesIT {
         task = taskEventContainedBuilder.aCreatedTask("Created task",
                                                       runningProcessInstance);
         standAloneTask = taskEventContainedBuilder.aCreatedStandaloneTaskWithParent("StandAlone task");
+        
     }
 
     @After
@@ -135,11 +144,7 @@ public class QueryTaskEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
-                                                                                                      HttpMethod.GET,
-                                                                                                      keycloakTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                      PAGED_VARIABLE_RESPONSE_TYPE,
-                                                                                                      task.getId());
+            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -156,13 +161,10 @@ public class QueryTaskEntityVariablesIT {
                             tuple(
                                     "varUpdated",
                                     "v2-up",
-                                    false),
-                            tuple(
-                                    "varDeleted",
-                                    "v1",
-                                    true)
+                                    false)
                     );
         });
+        
     }
 
     @Test
@@ -230,11 +232,7 @@ public class QueryTaskEntityVariablesIT {
         await().untilAsserted(() -> {
 
             //when
-            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(VARIABLES_URL,
-                    HttpMethod.GET,
-                    keycloakTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_VARIABLE_RESPONSE_TYPE,
-                    standAloneTask.getId());
+            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(standAloneTask.getId());
 
             //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -252,5 +250,203 @@ public class QueryTaskEntityVariablesIT {
         });
     }
     
+    @Test
+    public void shouldGetTaskVariablesAfterTaskCompleted() {
+        //given
+        VariableInstanceImpl<String> var = new VariableInstanceImpl<>("var",
+                                                              "string",
+                                                              "value",
+                                                              null);
+        var.setTaskId(task.getId());
+        
+        eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(
+                            TaskVariableEntity::getName,
+                            TaskVariableEntity::getValue,
+                            TaskVariableEntity::getMarkedAsDeleted)
+                    .containsExactly(
+                            tuple( "var",
+                                   "value",
+                                   false)
+                    );
+        });
+        
+        ((TaskImpl)task).setStatus(Task.TaskStatus.COMPLETED);
+        eventsAggregator.addEvents(new CloudTaskCompletedEventImpl(UUID.randomUUID().toString(), new Date().getTime(), task));
+        eventsAggregator.sendAll();
+        producer.send(new CloudVariableDeletedEventImpl(var));
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(
+                            TaskVariableEntity::getName,
+                            TaskVariableEntity::getValue,
+                            TaskVariableEntity::getMarkedAsDeleted)
+                    .containsExactly(
+                            tuple( "var",
+                                   "value",
+                                   false)
+                    );
+        });
+        
+    }
+    
+
+    @Test
+    public void shouldNotCreateTaskVariableWithSameName() {
+        //given
+        VariableInstanceImpl<String> var = new VariableInstanceImpl<>("varCreated",
+                                                              "string",
+                                                              "value",
+                                                              null);
+        var.setTaskId(task.getId());
+        eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
+     
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(
+                            TaskVariableEntity::getName,
+                            TaskVariableEntity::getValue,
+                            TaskVariableEntity::getMarkedAsDeleted)
+                    .containsExactly(
+                            tuple( "varCreated",
+                                   "value",
+                                   false)
+                    );
+        });
+
+        var = new VariableInstanceImpl<>("varCreated",
+                "string",
+                "new value",
+                null);
+        var.setTaskId(task.getId());
+        eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
+        
+        eventsAggregator.sendAll();
+        
+        await().untilAsserted(() -> {
+          //when
+          ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity1 = getTaskVariables(task.getId());
+
+          //then
+          assertThat(responseEntity1.getStatusCode()).isEqualTo(HttpStatus.OK);
+          assertThat(responseEntity1.getBody().getContent())
+                  .extracting(
+                          TaskVariableEntity::getName,
+                          TaskVariableEntity::getValue,
+                          TaskVariableEntity::getMarkedAsDeleted)
+                  .containsExactly(
+                          tuple( "varCreated",
+                                 "value",
+                                 false)
+                  );
+        });
+        
+    }
+
+    
+    @Test
+    public void shouldReCreateVariableAfterItWasDeleted() {
+        //given
+        VariableInstanceImpl<String> var = new VariableInstanceImpl<>("var",
+                                                              "string",
+                                                              "value",
+                                                              null);
+        var.setTaskId(task.getId());
+        
+        eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
+     
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(
+                            TaskVariableEntity::getName,
+                            TaskVariableEntity::getValue,
+                            TaskVariableEntity::getMarkedAsDeleted)
+                    .containsExactly(
+                            tuple( "var",
+                                   "value",
+                                   false)
+                    );
+        });
+        
+        producer.send(new CloudVariableDeletedEventImpl(var));
+
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent().size()).isEqualTo(0);
+        });
+
+        //Create a variable with the same name
+        var = new VariableInstanceImpl<>("var",
+                "string",
+                "new value",
+                null);
+        var.setTaskId(task.getId());
+        producer.send(new CloudVariableCreatedEventImpl(var));
+        
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedResources<TaskVariableEntity>> responseEntity = getTaskVariables(task.getId());
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                    .extracting(
+                            TaskVariableEntity::getName,
+                            TaskVariableEntity::getValue,
+                            TaskVariableEntity::getMarkedAsDeleted)
+                    .containsExactly(
+                            tuple( "var",
+                                   "new value",
+                                   false)
+                    );
+        });
+        
+    }
+
+    
+    public  ResponseEntity<PagedResources<TaskVariableEntity>> getTaskVariables(String taskId) {
+        return testRestTemplate.exchange(VARIABLES_URL,
+                                         HttpMethod.GET,
+                                         keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                         PAGED_VARIABLE_RESPONSE_TYPE,
+                                         taskId);
+    }
 
 }

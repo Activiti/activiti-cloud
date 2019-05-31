@@ -33,7 +33,7 @@ public class ProcessVariableUpdateEventHandler {
         String processInstanceId = updatedVariableEntity.getProcessInstanceId();
         BooleanExpression predicate = QProcessVariableEntity.processVariableEntity.name.eq(variableName)
                 .and(
-                        QProcessVariableEntity.processVariableEntity.processInstanceId.eq(String.valueOf(processInstanceId))
+                        QProcessVariableEntity.processVariableEntity.processInstanceId.eq(processInstanceId)
                 );
         variableUpdater.update(updatedVariableEntity,
                                predicate,
