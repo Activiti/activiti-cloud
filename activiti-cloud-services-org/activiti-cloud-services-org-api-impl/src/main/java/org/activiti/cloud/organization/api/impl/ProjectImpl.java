@@ -39,6 +39,12 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
     @ApiModelProperty(value = "The name of the project")
     private String name;
 
+    @ApiModelProperty(value = "The description of the project")
+    private String description;
+
+    @ApiModelProperty(value = "The version of the project")
+    private String version;
+
     public ProjectImpl() {
 
     }
@@ -67,5 +73,25 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

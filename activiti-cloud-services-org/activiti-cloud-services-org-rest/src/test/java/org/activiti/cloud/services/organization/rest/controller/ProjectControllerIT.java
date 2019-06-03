@@ -46,6 +46,7 @@ import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteAr
 import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.project;
+import static org.activiti.cloud.services.organization.mock.MockFactory.projectWithDescription;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.*;
@@ -135,11 +136,29 @@ public class ProjectControllerIT {
         mockMvc.perform(post("{version}/projects",
                              API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(project("New Project"))))
+                                .content(mapper.writeValueAsString(projectWithDescription("New Project",
+                                                                                          "Project description"))))
                 // THEN
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name",
-                                    is("New Project")));
+                                    is("New Project")))
+                .andExpect(jsonPath("$.description",
+                                    is("Project description")));
+    }
+
+
+    @Test
+    public void testCreateProjectExistingName() throws Exception {
+        // GIVEN
+        projectRepository.createProject(project("existing-project"));
+
+        // WHEN
+        mockMvc.perform(post("{version}/projects",
+                             API_VERSION)
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(project("existing-project"))))
+                // THEN
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -162,6 +181,39 @@ public class ProjectControllerIT {
                 .hasValueSatisfying(updatedProject -> {
                     assertThat(updatedProject.getName()).isEqualTo("Updated project name");
                 });
+    }
+
+    @Test
+    public void testUpdateProjectExistingName() throws Exception {
+        // GIVEN
+        projectRepository.createProject(project("existing-project"));
+        Project project = projectRepository.createProject(project("project-to-update"));
+
+        // WHEN
+        mockMvc.perform(put("{version}/projects/{projectId}",
+                            API_VERSION,
+                            project.getId())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(project("existing-project"))))
+                // THEN
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void testUpdateProjectNoName() throws Exception {
+        // GIVEN
+        Project project = projectRepository.createProject(project("project-to-update"));
+
+        // WHEN
+        mockMvc.perform(put("{version}/projects/{projectId}",
+                            API_VERSION,
+                            project.getId())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(project(null))))
+                // THEN
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name",
+                                    is("project-to-update")));
     }
 
     @Test
