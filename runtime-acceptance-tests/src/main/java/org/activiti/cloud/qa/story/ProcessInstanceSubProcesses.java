@@ -80,12 +80,12 @@ public class ProcessInstanceSubProcesses {
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
     
-    @When("the user claims the task")
+    @When("the user claims the task declared in the subprocess")
     public void claimTask() throws Exception {
         taskRuntimeBundleSteps.claimTask(currentTask.getId());
     }
     
-    @When("the user completes the task")
+    @When("the user completes the task declared in the subprocess")
     public void completeTask() throws Exception {
         taskRuntimeBundleSteps.completeTask(currentTask.getId(),
                 TaskPayloadBuilder
@@ -100,7 +100,7 @@ public class ProcessInstanceSubProcesses {
         auditSteps.checkProcessInstanceSubProcessEvents(processId);
     }
 
-    @Then("the process is completed")
+    @Then("the process with embedded subprocess is completed")
     public void verifyProcessCompleted() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
         processQuerySteps.checkProcessInstanceStatus(processId,
