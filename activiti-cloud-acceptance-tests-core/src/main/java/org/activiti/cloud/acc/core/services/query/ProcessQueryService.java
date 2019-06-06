@@ -30,4 +30,7 @@ public interface ProcessQueryService extends BaseService {
     @RequestLine("GET /v1/process-instances?name={processName}")
     PagedResources<CloudProcessInstance> getProcessInstancesByName(@Param("processName") String processName);
 
+    @RequestLine("GET /v1/process-instances?processDefinitionKey={processDefinitionKey}")
+    PagedResources<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(@Param("processDefinitionKey") String processDefinitionKey);
+    
 }
