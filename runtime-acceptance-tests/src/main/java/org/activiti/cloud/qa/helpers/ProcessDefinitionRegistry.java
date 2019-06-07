@@ -29,6 +29,7 @@ public class ProcessDefinitionRegistry {
         put("PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_FOR_TESTGROUP","singletask-b6095889-6177-4b73-b3d9-316e47749a36");
         put("SUB_PROCESS_INSTANCE_WITH_TASK","subprocess-970cb8df-2d4c-482b-a7f8-c19a983c2ef2");
         put("PROCESS_INSTANCE_WITH_EMBEDDED_SUB_PROCESS","startSimpleSubProcess");
+        put("PROCESS_WITH_HEADERS_CONNECTOR","HeadersConnectorProcess");
     }};
 
     private static final HashMap <String, String> processWithNoTasksDefinitionKeys = new HashMap<String, String>(){{

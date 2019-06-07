@@ -100,3 +100,13 @@ Scenario: query processes by name using LIKE operator
 Given the user is authenticated as testuser
 When the user starts an instance of the process called SIMPLE_PROCESS_INSTANCE
 Then the process instance can be queried using LIKE operator
+
+Scenario: process definition headers are set for integration request
+Given the user is authenticated as hruser
+When the user starts an instance of the process called PROCESS_WITH_HEADERS_CONNECTOR
+And the user claims the task
+And the user completes the task
+Then a variable was created with name processDefinitionVersion
+And a variable was created with name processDefinitionKey
+And a variable was created with name processDefinitionId
+
