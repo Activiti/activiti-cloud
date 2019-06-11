@@ -16,10 +16,6 @@
 
 package org.activiti.cloud.acc.core.steps.audit;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +36,9 @@ import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.assertj.core.api.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Audit steps
@@ -132,7 +131,13 @@ public class AuditSteps {
 
             assertThat(events).isNotEmpty();
             assertThat(events).extracting(e -> e.getEventType()).containsOnly(eventType);
-            List<CloudRuntimeEvent> processInstanceTasks = events.stream().filter(e -> variableName.equals(((CloudVariableEvent) e).getEntity().getName()) && processInstanceId.equals(((CloudVariableEvent) e).getEntity().getProcessInstanceId())).collect(Collectors.toList());
+            List<CloudRuntimeEvent> processInstanceTasks = events
+                    .stream()
+                    .filter(e -> variableName.equals(((CloudVariableEvent) e).getEntity().getName())
+                            && processInstanceId.equals(((CloudVariableEvent) e).getEntity().getProcessInstanceId())
+                            && !((CloudVariableEvent) e).getEntity().isTaskVariable()
+                    )
+                    .collect(Collectors.toList());
             assertThat(processInstanceTasks).hasSize(1); //could be more than one if there are multiple vars
             CloudRuntimeEvent resultingEvent = processInstanceTasks.get(0);
             assertThat(resultingEvent).isNotNull();
