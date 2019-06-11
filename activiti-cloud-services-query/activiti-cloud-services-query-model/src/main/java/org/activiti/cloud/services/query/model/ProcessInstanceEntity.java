@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.ConstraintMode;
@@ -270,6 +271,19 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         return  !(ProcessInstanceStatus.CREATED.equals(status) || 
                   ProcessInstanceStatus.RUNNING.equals(status)|| 
                   ProcessInstanceStatus.SUSPENDED.equals(status));
+    }
+    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ProcessInstanceEntity other = (ProcessInstanceEntity) obj;
+        return Objects.equals(id, other.id);
     }
     
 

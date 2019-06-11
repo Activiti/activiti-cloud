@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
@@ -68,6 +69,22 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
     @Override
     public boolean isTaskVariable() {
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        return true;
     }
 
 }

@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
@@ -178,6 +179,26 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     
     public void setProcessInstance(ProcessInstanceEntity processInstance) {
         this.processInstance = processInstance;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(id);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AbstractVariableEntity other = (AbstractVariableEntity) obj;
+        return Objects.equals(id, other.id);
     }
 
  }

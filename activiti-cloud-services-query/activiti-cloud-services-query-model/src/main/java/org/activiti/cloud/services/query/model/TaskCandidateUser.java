@@ -1,5 +1,7 @@
 package org.activiti.cloud.services.query.model;
 
+import java.util.Objects;
+
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -72,5 +74,22 @@ public class TaskCandidateUser {
 
     public void setTask(TaskEntity task) {
         this.task = task;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(taskId, userId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        TaskCandidateUser other = (TaskCandidateUser) obj;
+        return Objects.equals(taskId, other.taskId) && Objects.equals(userId, other.userId);
     }
 }
