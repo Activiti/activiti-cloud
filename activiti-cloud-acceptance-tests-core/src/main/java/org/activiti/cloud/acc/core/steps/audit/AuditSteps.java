@@ -16,6 +16,10 @@
 
 package org.activiti.cloud.acc.core.steps.audit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -36,9 +40,6 @@ import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.assertj.core.api.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.awaitility.Awaitility.await;
 
 /**
  * Audit steps
@@ -441,7 +442,31 @@ public class AuditSteps {
         });
     }
     
+    @Step
+    public void checkProcessInstanceInclusiveGatewayEvents(String processInstanceId, String gatewayId){
+     
+        await().untilAsserted(() -> {
+            Collection <CloudRuntimeEvent> receivedEvents = getEventsByProcessInstanceId(processInstanceId);
+            assertThat(receivedEvents)
+                    .filteredOn(event -> (BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.equals(event.getEventType()) || 
+                                          BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.equals(event.getEventType())))
+                    .isNotEmpty()
+                    .extracting("eventType",
+                                "entityId",
+                                "entity.activityType",
+                                "entity.processInstanceId")
+                    .contains(tuple(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED,
+                                    gatewayId,
+                                    "inclusiveGateway",
+                                    processInstanceId),
+                              tuple(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
+                                    gatewayId,
+                                    "inclusiveGateway",
+                                    processInstanceId));
 
+
+        });
+    }
     
     
 }
