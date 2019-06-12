@@ -98,7 +98,10 @@ public class ProjectService {
      */
     public Project updateProject(Project projectToUpdate,
                                  Project newProject) {
-        projectToUpdate.setName(newProject.getName());
+        Optional.ofNullable(newProject.getDescription())
+                .ifPresent(projectToUpdate::setDescription);
+        Optional.ofNullable(newProject.getName())
+                .ifPresent(projectToUpdate::setName);
         return projectRepository.updateProject(projectToUpdate);
     }
 

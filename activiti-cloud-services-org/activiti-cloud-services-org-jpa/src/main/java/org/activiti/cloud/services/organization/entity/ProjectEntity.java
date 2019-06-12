@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.organization.entity;
 
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -48,7 +49,12 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     private String id;
 
+    @Column(unique = true)
     private String name;
+
+    private String description;
+
+    private String version;
 
     public ProjectEntity() {  // for JPA
     }
@@ -83,5 +89,25 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

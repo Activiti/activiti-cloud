@@ -50,6 +50,13 @@ public class MockFactory {
         return new ProjectEntity(name);
     }
 
+    public static ProjectEntity projectWithDescription(String name,
+                                                       String description) {
+        ProjectEntity project = new ProjectEntity(name);
+        project.setDescription(description);
+        return project;
+    }
+
     public static ModelEntity processModel(String name) {
         return processModelWithExtensions(name,
                                           null);
