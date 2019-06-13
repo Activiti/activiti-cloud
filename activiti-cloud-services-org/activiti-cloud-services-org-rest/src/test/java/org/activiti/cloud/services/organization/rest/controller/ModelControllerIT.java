@@ -71,6 +71,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -145,7 +146,12 @@ public class ModelControllerIT {
                                 .content(mapper.writeValueAsString(processModel("Process Model"))))
                 .andDo(print())
                 // THEN
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.extensions.properties",
+                                    notNullValue()))
+                .andExpect(jsonPath("$.extensions.mappings",
+                                    notNullValue()));
+
     }
 
     @Test

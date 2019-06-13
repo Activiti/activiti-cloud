@@ -26,6 +26,7 @@ import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.organization.core.error.ImportModelException;
 import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
@@ -99,6 +100,9 @@ public class ModelService {
                              Model model) {
         findModelType(model);
         model.setProject(project);
+        if (model.getExtensions() == null) {
+            model.setExtensions(new Extensions());
+        }
         return modelRepository.createModel(model);
     }
 
