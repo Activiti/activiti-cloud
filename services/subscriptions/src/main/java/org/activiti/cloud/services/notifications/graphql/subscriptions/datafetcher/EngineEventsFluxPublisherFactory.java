@@ -16,7 +16,10 @@
 package org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
@@ -44,15 +47,22 @@ public class EngineEventsFluxPublisherFactory implements EngineEventsPublisherFa
     
     @Override
     public Flux<EngineEvent> getPublisher(DataFetchingEnvironment environment) {
+        Set<String> selections = resolveSelections(environment);
+        List<String> destinations = destinationResolver.resolveDestinations(environment);
+        
+        log.info("Resolved selections: {} for destinations: {}", selections, destinations);
 
         return engineEventsFlux.map(Message::getPayload)
                                .filter(engineEvent -> {
-                                   List<String> destinations = destinationResolver.resolveDestinations(environment);
-                                   
+                                   // filter events that do not match subscription arguments
                                    String path = routingKeyResolver.resolveRoutingKey(engineEvent);
-
+                                   
                                    return destinations.stream()
                                                       .anyMatch(pattern -> pathMatcher.match(pattern, path));
+                               })
+                               .filter(engineEvent -> {
+                                   // apply filter to events that do not match selections in the subscription
+                                   return selections.stream().anyMatch(eventType -> engineEvent.containsKey(eventType));
                                });
     }
     
@@ -71,4 +81,17 @@ public class EngineEventsFluxPublisherFactory implements EngineEventsPublisherFa
         
         return this;
     }
+    
+    protected Set<String> resolveSelections(DataFetchingEnvironment environment) {
+        return environment.getField()
+                          .getSelectionSet()
+                          .getSelections()
+                          .stream()
+                          .filter(Field.class::isInstance)
+                          .map(Field.class::cast)
+                          .map(Field::getName)
+                          .collect(Collectors.toSet());
+    }
+    
+    
 }

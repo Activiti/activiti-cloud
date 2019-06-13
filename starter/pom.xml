@@ -32,6 +32,10 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud.notifications.graphql</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.notifications.graphql</groupId>
       <artifactId>activiti-cloud-services-notifications-graphql-schema</artifactId>
     </dependency>
     <dependency>
@@ -138,6 +142,21 @@
       <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency> 
+      <groupId>org.activiti.cloud.api</groupId> 
+      <artifactId>activiti-cloud-api-model-shared-impl</artifactId>     
+      <scope>test</scope>
+    </dependency>     
+    <dependency> 
+      <groupId>org.activiti.cloud.api</groupId> 
+      <artifactId>activiti-cloud-api-process-model-impl</artifactId>     
+      <scope>test</scope>
+    </dependency>   
+    <dependency> 
+      <groupId>org.activiti.cloud.api</groupId> 
+      <artifactId>activiti-cloud-api-task-model-impl</artifactId>     
+      <scope>test</scope>
+    </dependency>      
   </dependencies>
   <profiles>
     <profile>
