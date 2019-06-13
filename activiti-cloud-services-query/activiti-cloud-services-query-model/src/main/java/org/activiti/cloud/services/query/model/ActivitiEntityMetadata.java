@@ -1,5 +1,7 @@
 package org.activiti.cloud.services.query.model;
 
+import java.util.Objects;
+
 import javax.persistence.MappedSuperclass;
 
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
@@ -77,5 +79,27 @@ public abstract class ActivitiEntityMetadata implements CloudRuntimeEntity {
 
     public void setServiceType(String serviceType) {
         this.serviceType = serviceType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(appName, appVersion, serviceFullName, serviceName, serviceType, serviceVersion);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ActivitiEntityMetadata other = (ActivitiEntityMetadata) obj;
+        return Objects.equals(appName, other.appName) && 
+               Objects.equals(appVersion, other.appVersion) && 
+               Objects.equals(serviceFullName, other.serviceFullName) && 
+               Objects.equals(serviceName, other.serviceName) && 
+               Objects.equals(serviceType, other.serviceType) && 
+               Objects.equals(serviceVersion, other.serviceVersion);
     }
 }

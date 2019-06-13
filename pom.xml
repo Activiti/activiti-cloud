@@ -43,6 +43,7 @@
 
   <properties>
     <activiti-cloud-build.version>7.1.7</activiti-cloud-build.version>
+    <activiti-dependencies.version>7.1.29</activiti-dependencies.version>
     <activiti-cloud-service-common.version>7.1.38</activiti-cloud-service-common.version>
     <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
     <json-unit.version>1.24.0</json-unit.version>
@@ -60,6 +61,12 @@
       <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-service-common-dependencies</artifactId>
       <version>${activiti-cloud-service-common.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.dependencies</groupId>
+      <artifactId>activiti-dependencies</artifactId>
+      <version>${activiti-dependencies.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>

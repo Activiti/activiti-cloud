@@ -11,6 +11,18 @@
   <name>Activiti Cloud Query :: Services :: Query REST</name>
   <dependencies>
     <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-image-generator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-bpmn-converter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-bpmn-layout</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-service-common-config</artifactId>
     </dependency>

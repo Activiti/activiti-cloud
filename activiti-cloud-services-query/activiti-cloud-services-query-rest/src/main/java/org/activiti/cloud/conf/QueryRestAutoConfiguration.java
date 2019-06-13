@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.conf;
 
+import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.query.rest.QueryRelProvider;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionResourceAssembler;
 import org.activiti.cloud.services.security.ProcessDefinitionFilter;
@@ -30,6 +31,7 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.cloud.services.security.TaskVariableLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -115,5 +117,12 @@ public class QueryRestAutoConfiguration {
         return new ProcessDefinitionRestrictionService(securityPoliciesManager,
                                                        restrictionBuilder,
                                                        processDefinitionFilter);
+    }
+    
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDiagramGeneratorWrapper processDiagramGeneratorWrapper() {
+        return new ProcessDiagramGeneratorWrapper(new DefaultProcessDiagramGenerator());
     }
 }

@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -90,6 +91,18 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 		, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private Set<ProcessVariableEntity> variables;
 
+    @JsonIgnore
+    @OneToMany(fetch=FetchType.LAZY)
+    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
+        , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private Set<BPMNActivityEntity> activities;
+
+    @JsonIgnore
+    @OneToMany(fetch=FetchType.LAZY)
+    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
+        , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    private List<BPMNSequenceFlowEntity> sequenceFlows;
+    
     private String parentId;
 
     public ProcessInstanceEntity() {
@@ -272,7 +285,48 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
                   ProcessInstanceStatus.RUNNING.equals(status)|| 
                   ProcessInstanceStatus.SUSPENDED.equals(status));
     }
+
     
+    public Set<BPMNActivityEntity> getActivities() {
+        return activities;
+    }
+
+    
+    public void setActivities(Set<BPMNActivityEntity> bpmnActivities) {
+        this.activities = bpmnActivities;
+    }
+
+    
+    public List<BPMNSequenceFlowEntity> getSequenceFlows() {
+        return sequenceFlows;
+    }
+
+    
+    public void setSequenceFlows(List<BPMNSequenceFlowEntity> sequenceFlows) {
+        this.sequenceFlows = sequenceFlows;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(businessKey,
+                                               id,
+                                               initiator,
+                                               lastModified,
+                                               lastModifiedFrom,
+                                               lastModifiedTo,
+                                               name,
+                                               parentId,
+                                               processDefinitionId,
+                                               processDefinitionKey,
+                                               processDefinitionVersion,
+                                               startDate,
+                                               startFrom,
+                                               startTo,
+                                               status);
+        return result;
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -283,8 +337,24 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         if (getClass() != obj.getClass())
             return false;
         ProcessInstanceEntity other = (ProcessInstanceEntity) obj;
-        return Objects.equals(id, other.id);
+        return Objects.equals(businessKey, other.businessKey) && 
+               Objects.equals(id, other.id) && 
+               Objects.equals(initiator, other.initiator) && 
+               Objects.equals(lastModified, other.lastModified) && 
+               Objects.equals(lastModifiedFrom, other.lastModifiedFrom) && 
+               Objects.equals(lastModifiedTo, other.lastModifiedTo) && 
+               Objects.equals(name, other.name) && 
+               Objects.equals(parentId, other.parentId) && 
+               Objects.equals(processDefinitionId, other.processDefinitionId) && 
+               Objects.equals(processDefinitionKey, other.processDefinitionKey) && 
+               Objects.equals(processDefinitionVersion, other.processDefinitionVersion) && 
+               Objects.equals(startDate, other.startDate) && 
+               Objects.equals(startFrom, other.startFrom) && 
+               Objects.equals(startTo, other.startTo) && 
+               status == other.status;
     }
+    
+
     
 
 }
