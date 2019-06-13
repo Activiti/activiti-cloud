@@ -1,5 +1,6 @@
 package org.activiti.cloud.acc.core.steps.query;
 
+import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -12,6 +13,7 @@ import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.ProcessModelQueryService;
+import org.activiti.cloud.acc.core.services.query.ProcessQueryDiagramService;
 import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -27,6 +29,9 @@ public class ProcessQuerySteps {
     @Autowired
     private ProcessModelQueryService processModelQueryService;
 
+    @Autowired
+    private ProcessQueryDiagramService processQueryDiagramService;
+    
     @Step
     public void checkServicesHealth() {
         assertThat(processQueryService.isServiceUp()).isTrue();
@@ -112,5 +117,21 @@ public class ProcessQuerySteps {
     public PagedResources<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(String processDefinitionKey){
         return processQueryService.getProcessInstancesByProcessDefinitionKey(processDefinitionKey);
     }
+    
+    @Step
+    public String getProcessInstanceDiagram(String id) {
+        return processQueryDiagramService.getProcessInstanceDiagram(id);
+    }
+
+    @Step
+    public void checkProcessInstanceDiagram(String diagram) throws Exception {
+        assertThat(diagram).isNotEmpty();
+        assertThat(svgToPng(diagram.getBytes())).isNotEmpty();
+    }
+
+    @Step
+    public void checkProcessInstanceNoDiagram(String diagram) {
+        assertThat(diagram).isEmpty();
+    }    
 
 }

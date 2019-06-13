@@ -27,10 +27,12 @@ import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.acc.core.services.audit.AuditService;
 import org.activiti.cloud.acc.core.services.audit.admin.AuditAdminService;
-import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
 import org.activiti.cloud.acc.core.services.query.ProcessModelQueryService;
+import org.activiti.cloud.acc.core.services.query.ProcessQueryDiagramService;
+import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
 import org.activiti.cloud.acc.core.services.query.TaskQueryService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessModelQueryAdminService;
+import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminDiagramService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminService;
 import org.activiti.cloud.acc.core.services.query.admin.TaskQueryAdminService;
 import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
@@ -247,5 +249,30 @@ public class RuntimeFeignConfiguration {
                          new feign.codec.Decoder.Default())
                 .target(SwaggerService.class, runtimeTestsConfigurationProperties.getAuditEventUrl());
     }
+    
+    @Bean
+    public ProcessQueryDiagramService queryDiagramService() {
+        return Feign.builder()
+                .encoder(new GsonEncoder())
+                .errorDecoder(new FeignErrorDecoder())
+                .logger(new Logger.ErrorLogger())
+                .logLevel(Logger.Level.FULL)
+                .requestInterceptor(new OAuth2FeignRequestInterceptor())
+                .target(ProcessQueryDiagramService.class,
+                        runtimeTestsConfigurationProperties.getQueryUrl());
+    }    
+    
+    @Bean
+    public ProcessQueryAdminDiagramService queryAdminDiagramService() {
+        return Feign.builder()
+                .encoder(new GsonEncoder())
+                .errorDecoder(new FeignErrorDecoder())
+                .logger(new Logger.ErrorLogger())
+                .logLevel(Logger.Level.FULL)
+                .requestInterceptor(new OAuth2FeignRequestInterceptor())
+                .target(ProcessQueryAdminDiagramService.class,
+                        runtimeTestsConfigurationProperties.getQueryUrl());
+    }    
+    
 
 }

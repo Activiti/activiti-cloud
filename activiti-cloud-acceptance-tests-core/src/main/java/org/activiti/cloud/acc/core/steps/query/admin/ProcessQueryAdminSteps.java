@@ -1,8 +1,12 @@
 package org.activiti.cloud.acc.core.steps.query.admin;
 
+import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessModelQueryAdminService;
+import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminDiagramService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminService;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -10,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableRuntimeFeignContext
 public class ProcessQueryAdminSteps {
@@ -22,6 +24,9 @@ public class ProcessQueryAdminSteps {
     @Autowired
     private ProcessModelQueryAdminService processModelQueryAdminService;
 
+    @Autowired
+    private ProcessQueryAdminDiagramService processQueryAdminDiagramService;
+    
     @Step
     public void checkServicesHealth() {
         assertThat(processQueryAdminService.isServiceUp()).isTrue();
@@ -51,5 +56,17 @@ public class ProcessQueryAdminSteps {
     public Resources<Resource<CloudProcessInstance>> deleteProcessInstances(){
         return processQueryAdminService.deleteProcessInstances();
     }
-
+    @Step
+    public String getProcessInstanceDiagram(String id) {
+        return processQueryAdminDiagramService.getProcessInstanceDiagram(id);
+    }
+    @Step
+    public void checkProcessInstanceDiagram(String diagram) throws Exception {
+        assertThat(diagram).isNotEmpty();
+        assertThat(svgToPng(diagram.getBytes())).isNotEmpty();
+    }
+    @Step
+    public void checkProcessInstanceNoDiagram(String diagram) {
+        assertThat(diagram).isEmpty();
+    }
 }
