@@ -3,14 +3,19 @@ package org.activiti.cloud.acc.core.steps.notifications;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
+import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import net.thucydides.core.annotations.Step;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.netty.NettyPipeline;
@@ -34,13 +39,24 @@ public class NotificationsSteps {
     @Autowired
     private ProcessRuntimeService processRuntimeService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+    
     @Step
     public void checkServicesHealth() {
         assertThat(processRuntimeService.isServiceUp()).isTrue();
     }
+    
+    public String getRuntimeBundleServiceName() {
+        return properties.getRuntimeBundleServiceName();
+    }
 
+    @SuppressWarnings({"serial"})
     @Step
-    public ReplayProcessor<String> subscribe(String accessToken) throws InterruptedException {
+    public ReplayProcessor<String> subscribe(String accessToken, 
+                                             String query, 
+                                             Map<String,Object> variables, 
+                                             Consumer<Subscription> action) throws InterruptedException {
         ReplayProcessor<String> data = ReplayProcessor.create();
 
         WebsocketSender client = HttpClient.create()
@@ -48,27 +64,24 @@ public class NotificationsSteps {
                 .headers(h -> h.add(AUTHORIZATION, "Bearer " + accessToken))
                 .websocket(GRAPHQL_WS)
                 .uri(properties.getGraphqlWsUrl());
+        
+        Map<String, Object> json = new LinkedHashMap<String, Object>() {{
+            put("type", "start");
+            put("id", "1");
+            put("payload", new LinkedHashMap<String, Object>() {{
+                put("query", query);
+                put("variables", variables);
+            }});
+        }};
 
-        String startMessage = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"query\":\""
-                + "subscription {" +
-                "  engineEvents(serviceName: \\\"" + properties.getRuntimeBundleServiceName() + "\\\", processDefinitionKey: \\\"ConnectorProcess\\\" ) {" +
-                "    appName" +
-                "    serviceName" +
-                "    processDefinitionKey" +
-                "    PROCESS_STARTED {" +
-                "      entity {" +
-                "        status" +
-                "      }" +
-                "    }" +
-                "    PROCESS_COMPLETED {" +
-                "      entity {" +
-                "        status" +
-                "      }" +
-                "    }" +
-                "  }" +
-                "}"
-                + "\",\"variables\":null}}";
-
+        String startMessage;
+        try {
+            startMessage = objectMapper.writeValueAsString(json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        
+        
         // handle start subscription
         client.handle((i, o) -> {
             o.options(NettyPipeline.SendOptions::flushOnEach)
@@ -80,28 +93,28 @@ public class NotificationsSteps {
             return i.receive()
                     .asString()
                     .log("data")
-                    .take(2) // stop subscription after 2 data messages received
+                    //.take(2) // stop subscription after 2 data messages received
+                    //.takeUntilOther(control)
+                    .doOnSubscribe(action)
+                    //.delaySubscription(Duration.ofSeconds(1))
                     .subscribeWith(data);
         })
-                .collectList()
-                .subscribe();
+        .collectList()
+        .subscribe();
 
         // Let's wait for subscribe 
-        Thread.sleep(1000);
+        Thread.sleep(3000);
 
         return data;
     }
 
     @Step
-    public void verifyData(ReplayProcessor<String> data) {
-
-        String startProcessMessage = "{\"payload\":{\"data\":{\"engineEvents\":{\"appName\":\"default-app\",\"serviceName\":\"" + properties.getRuntimeBundleServiceName() + "\",\"processDefinitionKey\":\"ConnectorProcess\",\"PROCESS_STARTED\":[{\"entity\":{\"status\":\"RUNNING\"}}],\"PROCESS_COMPLETED\":null}}},\"id\":\"1\",\"type\":\"data\"}";
-        String completeProcessMessage = "{\"payload\":{\"data\":{\"engineEvents\":{\"appName\":\"default-app\",\"serviceName\":\"" + properties.getRuntimeBundleServiceName() + "\",\"processDefinitionKey\":\"ConnectorProcess\",\"PROCESS_STARTED\":null,\"PROCESS_COMPLETED\":[{\"entity\":{\"status\":\"COMPLETED\"}}]}}},\"id\":\"1\",\"type\":\"data\"}";
-
+    public void verifyData(ReplayProcessor<String> data, String...messages) {
+        
         StepVerifier.create(data)
-                .expectNext(startProcessMessage)
-                .expectNext(completeProcessMessage)
-                .expectComplete()
-                .verify(TIMEOUT);
+                    .expectNext(messages)
+                    .expectComplete()
+                    .verify(TIMEOUT);
     }
+    
 }
