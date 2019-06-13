@@ -16,11 +16,14 @@
 
 package org.activiti.cloud.services.organization.service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelContent;
@@ -54,6 +57,7 @@ import static org.apache.commons.lang3.StringUtils.removeEnd;
  */
 @Service
 @PreAuthorize("hasRole('ACTIVITI_MODELER')")
+@Transactional
 public class ModelService {
 
     private static final Logger logger = LoggerFactory.getLogger(ModelService.class);
@@ -122,12 +126,19 @@ public class ModelService {
 
     public Model newModelInstance(String type,
                                   String name) {
+        Model model = newModelInstance();
+        model.setType(type);
+        model.setName(name);
+        return model;
+    }
+
+    public Model newModelInstance() {
         try {
-            Model model = (Model) modelRepository.getModelType().newInstance();
-            model.setType(type);
-            model.setName(name);
-            return model;
-        } catch (InstantiationException | IllegalAccessException e) {
+            return (Model) modelRepository.getModelType().getConstructor().newInstance();
+        } catch (InstantiationException |
+                IllegalAccessException |
+                NoSuchMethodException |
+                InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
@@ -137,18 +148,22 @@ public class ModelService {
             return Optional.empty();
         }
 
-        Model modelWithFullMetadata = findModelById(model.getId()).orElse(model);
+        Model fullModel = findModelById(model.getId()).orElse(model);
         byte[] modelContent = modelRepository.getModelContent(model);
         final String bpmnModelId = modelContentService
                 .findModelContentConverter(model.getType())
                 .flatMap(converter -> converter.convertToModelContent(modelContent))
                 .map(ModelContent::getId)
                 .orElseGet(() -> modelContentService.getModelContentId(model));
-        modelWithFullMetadata.setId(bpmnModelId);
+
+        Model modelToFile = newModelInstance(fullModel.getType(),
+                                             fullModel.getName());
+        modelToFile.setId(bpmnModelId);
+        modelToFile.setExtensions(fullModel.getExtensions());
 
         FileContent metadataFileContent = new FileContent(getMetadataFilename(model),
                                                           CONTENT_TYPE_JSON,
-                                                          jsonConverter.convertToJsonBytes(modelWithFullMetadata));
+                                                          jsonConverter.convertToJsonBytes(modelToFile));
         return Optional.of(metadataFileContent);
     }
 
@@ -229,7 +244,7 @@ public class ModelService {
     public Model importJsonModel(Project project,
                                  ModelType modelType,
                                  FileContent fileContent) {
-        Model model = jsonConverter.tryConvertToEntity((fileContent.getFileContent()))
+        Model model = jsonConverter.tryConvertToEntity(fileContent.getFileContent())
                 .orElseThrow(() -> new ImportModelException("Cannot convert json file content to model: " + fileContent));
         model.setName(removeEnd(removeExtension(fileContent.getFilename(),
                                                 JSON),
