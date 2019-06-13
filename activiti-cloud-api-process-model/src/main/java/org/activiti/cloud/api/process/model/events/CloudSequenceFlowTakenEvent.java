@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.api.process.model.events;
 
-public interface CloudSequenceFlowTakenEvent extends CloudSequenceFlowEvent {
+import org.activiti.api.process.model.events.BPMNSequenceFlowTakenEvent;
+
+public interface CloudSequenceFlowTakenEvent extends CloudSequenceFlowEvent,
+                                                     BPMNSequenceFlowTakenEvent {
 
 }

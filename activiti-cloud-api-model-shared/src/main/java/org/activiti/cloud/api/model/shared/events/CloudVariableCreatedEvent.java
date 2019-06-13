@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.api.model.shared.events;
 
-public interface CloudVariableCreatedEvent extends CloudVariableEvent {
+import org.activiti.api.model.shared.event.VariableCreatedEvent;
+
+public interface CloudVariableCreatedEvent extends CloudVariableEvent,
+                                                   VariableCreatedEvent {
 
 }

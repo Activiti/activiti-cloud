@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.api.process.model.events;
 
-public interface CloudBPMNActivityCancelledEvent extends CloudBPMNActivityEvent {
+import org.activiti.api.process.model.events.BPMNActivityCancelledEvent;
+
+public interface CloudBPMNActivityCancelledEvent extends CloudBPMNActivityEvent,
+                                                         BPMNActivityCancelledEvent {
     String getCause();
 }

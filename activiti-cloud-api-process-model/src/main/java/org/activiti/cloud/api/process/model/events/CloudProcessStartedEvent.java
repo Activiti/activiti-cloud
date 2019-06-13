@@ -19,8 +19,10 @@ package org.activiti.cloud.api.process.model.events;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ExtendedProcessRuntimeEvent;
+import org.activiti.api.process.runtime.events.ProcessStartedEvent;
 
 public interface CloudProcessStartedEvent extends CloudProcessRuntimeEvent,
-        ExtendedProcessRuntimeEvent<ProcessInstance> {
+                                                  ExtendedProcessRuntimeEvent<ProcessInstance>,
+                                                  ProcessStartedEvent {
 
 }
