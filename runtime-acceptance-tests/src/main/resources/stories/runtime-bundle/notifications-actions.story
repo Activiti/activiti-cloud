@@ -2,10 +2,16 @@ Meta:
 
 Narrative:
 As a user
-I want to perform operations on process instances
+I want to perform operations on process instances with subscriptions to receive notifications
 
-Scenario: complete a process instance that uses a connector
+Scenario: complete a process instance that uses a connector with subscription
 Given the user is authenticated as testadmin
-When the user starts a process with notifications called CONNECTOR_PROCESS_INSTANCE
+When the user starts a process CONNECTOR_PROCESS_INSTANCE with PROCESS_STARTED and PROCESS_COMPLETED events subscriptions
 Then the status of the process is completed
-Then notifications are received
+Then PROCESS_STARTED and PROCESS_COMPLETED notifications are received
+
+Scenario: complete a process instance that sends a signal with subscription 
+Given the user is authenticated as testadmin
+When the user starts a process SIGNAL_THROW_PROCESS_INSTANCE with SIGNAL_RECEIVED subscription
+Then the status of the process is completed
+And SIGNAL_RECEIVED notification with theStart signal event is received

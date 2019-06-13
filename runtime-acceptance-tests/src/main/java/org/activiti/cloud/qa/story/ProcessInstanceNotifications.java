@@ -20,8 +20,11 @@ import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDef
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
-import net.serenitybdd.core.Serenity;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.acc.core.steps.notifications.NotificationsSteps;
@@ -29,8 +32,11 @@ import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.acc.shared.model.AuthToken;
 import org.activiti.cloud.acc.shared.rest.TokenHolder;
+import org.assertj.core.util.Arrays;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.reactivestreams.Subscription;
+import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.ReplayProcessor;
 
 public class ProcessInstanceNotifications {
@@ -44,8 +50,13 @@ public class ProcessInstanceNotifications {
     @Steps
     private NotificationsSteps notificationsSteps;
     
+    @Autowired
+    private ObjectMapper objectMapper = new ObjectMapper();
+    
     private ProcessInstance processInstance;
     private ReplayProcessor<String> data;
+    private Subscription subscription;
+    private String processInstanceId;
 
     @When("services are started")
     public void checkServicesStatus() {
@@ -53,39 +64,122 @@ public class ProcessInstanceNotifications {
         processQuerySteps.checkServicesHealth();
     }
     
-    @When("the user starts a process with notifications called $processName")
+    @When("the user starts a process $processName with PROCESS_STARTED and PROCESS_COMPLETED events subscriptions")
     public void startProcess(String processName) throws IOException, InterruptedException {
 
         AuthToken authToken = TokenHolder.getAuthToken();
-         
-        data = notificationsSteps.subscribe(authToken.getAccess_token());
-
-        // Let's wait for subscription to initialize from cold start
-        Thread.sleep(2000);
         
-        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),true);
+        String query = "subscription($serviceName: String!, $processDefinitionKey: String!) {" +
+                      "  engineEvents(serviceName: $serviceName, processDefinitionKey: $processDefinitionKey ) {" +
+                      "    PROCESS_STARTED {" +
+                      "      processDefinitionKey " +
+                      "      entity {" +
+                      "        status" +
+                      "      }" +
+                      "    }" +
+                      "    PROCESS_COMPLETED {" +
+                      "      processDefinitionKey " +
+                      "      entity {" +
+                      "        status" +
+                      "      }" +
+                      "    }" +
+                      "  }" +
+                      "}";
+            
+        Map<String, Object> variables = Map.of("serviceName", notificationsSteps.getRuntimeBundleServiceName(),
+                                               "processDefinitionKey",processDefinitionKeyMatcher(processName));
+                                            
 
-        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
-        checkProcessCreated();
+        Consumer<Subscription> action = startProcessAction(processName);
+        
+        data = notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
+
     }
 
+    @When("the user starts a process $processName with SIGNAL_RECEIVED subscription")
+    public void startProcessWithSignalSubscription(String processName) throws IOException, InterruptedException {
+
+        AuthToken authToken = TokenHolder.getAuthToken();
+         
+        String query = "subscription($serviceName: String!) {" +
+                        "  engineEvents(serviceName: $serviceName ) {" +
+                        "    SIGNAL_RECEIVED {" +
+                        "      entity {" +
+                        "        elementId" +
+                        "      }" +
+                        "    }" +
+                        "  }" +
+                        "}";
+
+        Map<String, Object> variables = Map.of("serviceName", notificationsSteps.getRuntimeBundleServiceName());
+
+        Consumer<Subscription> action = startProcessAction(processName);
+        
+        data = notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
+    }    
+    
     private void checkProcessCreated() {
         assertThat(processInstance).isNotNull();
-        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
+        processInstanceId = processInstance.getId();
     }
 
     @Then("the status of the process is completed")
     public void verifyProcessCompleted() throws Exception {
-        String processId = Serenity.sessionVariableCalled("processInstanceId");
-        processQuerySteps.checkProcessInstanceStatus(processId,
-                ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        try {
+            processQuerySteps.checkProcessInstanceStatus(processInstanceId,
+                                                         ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        } finally {
+            // signal to stop receiving notifications 
+            subscription.cancel();
+        }   
     }
     
-    @Then("notifications are received")
+    @Then("PROCESS_STARTED and PROCESS_COMPLETED notifications are received")
     public void verifyNotifications() throws Exception {
-        String processId = Serenity.sessionVariableCalled("processInstanceId");
-        notificationsSteps.verifyData(data);
+        String startProcessMessage = "{\"payload\":{\"data\":{\"engineEvents\":{\"PROCESS_STARTED\":[{\"processDefinitionKey\":\"ConnectorProcess\",\"entity\":{\"status\":\"RUNNING\"}}],\"PROCESS_COMPLETED\":null}}},\"id\":\"1\",\"type\":\"data\"}";
+        String completeProcessMessage = "{\"payload\":{\"data\":{\"engineEvents\":{\"PROCESS_STARTED\":null,\"PROCESS_COMPLETED\":[{\"processDefinitionKey\":\"ConnectorProcess\",\"entity\":{\"status\":\"COMPLETED\"}}]}}},\"id\":\"1\",\"type\":\"data\"}";
+        
+        notificationsSteps.verifyData(data, startProcessMessage, completeProcessMessage);
     }
     
+    @SuppressWarnings("serial")
+    @Then("SIGNAL_RECEIVED notification with $elementId signal event is received")
+    public void verifySignalReceivedEventNotifications(String elementId) throws Exception {
+        
+        Map<String, Object> payload = new ObjectMap() {{
+            put("payload", new ObjectMap() {{
+                put("data", new ObjectMap() {{
+                    put("engineEvents", new ObjectMap() {{
+                        put("SIGNAL_RECEIVED", Arrays.array( new ObjectMap() {{
+                            put("entity", Map.of("elementId", elementId));
+                        }}));
+                    }});
+                }});
+            }});
+            put("id","1");
+            put("type", "data");
+        }};
 
+        String expected =  objectMapper.writeValueAsString(payload);
+        
+        notificationsSteps.verifyData(data, expected);
+    }    
+    
+    private Consumer<Subscription> startProcessAction(String processName) {
+        return (s) -> {
+            try {
+                processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),true);
+            } catch (IOException e) {   
+                s.cancel();
+            }
+    
+            checkProcessCreated();
+            
+            subscription = s;
+        };
+    }
+    
+    @SuppressWarnings("serial")
+    class ObjectMap extends LinkedHashMap<String, Object> {
+    }
 }

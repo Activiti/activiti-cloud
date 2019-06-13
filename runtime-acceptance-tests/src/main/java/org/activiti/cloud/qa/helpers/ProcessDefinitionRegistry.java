@@ -35,6 +35,7 @@ public class ProcessDefinitionRegistry {
     private static final HashMap <String, String> processWithNoTasksDefinitionKeys = new HashMap<String, String>(){{
         put("SIMPLE_PROCESS_INSTANCE","SimpleProcess");
         put("CONNECTOR_PROCESS_INSTANCE","ConnectorProcess");
+        put("SIGNAL_THROW_PROCESS_INSTANCE","SignalThrowEventProcess");
         put("PROCESS_INSTANCE_WITH_CALL_ACTIVITIES","parentproc-8e992556-5785-4ee0-9fe7-354decfea4a8");
         put("Process Information","processinf-4e42752c-cc4d-429b-9528-7d3df24a9537");
         put("Process with Generic BPMN Task","processwit-c6fd1b26-0d64-47f2-8d04-0b70764444a7");
