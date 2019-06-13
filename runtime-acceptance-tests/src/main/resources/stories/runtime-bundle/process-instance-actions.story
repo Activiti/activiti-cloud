@@ -39,6 +39,30 @@ When the user starts an instance of the process called PROCESS_INSTANCE_WITHOUT_
 And open the process diagram
 Then no diagram is shown
 
+Scenario: query a process instance diagram
+Given the user is authenticated as testuser
+When the user starts an instance of the process called CONNECTOR_PROCESS_INSTANCE
+And query the process diagram
+Then the query diagram is shown
+
+Scenario: query diagram for a process instance without graphic info
+Given the user is authenticated as testuser
+When the user starts an instance of the process called PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO
+And query the process diagram
+Then the diagram is shown
+
+Scenario: query a process instance diagram admin endpoint as hradmin user
+Given the user is authenticated as testuser
+When the user starts an instance of the process called CONNECTOR_PROCESS_INSTANCE
+And another user is authenticated as hradmin
+And query the process diagram admin endpoint
+Then the query diagram is shown in admin endpoint
+
+Scenario: query a process instance diagram admin endpoint as testuser
+Given the user is authenticated as hruser
+When the user starts an instance of the process called CONNECTOR_PROCESS_INSTANCE
+Then query the process diagram admin endpoint is unauthorized
+
 Scenario: complete a process instance that uses a connector
 Given the user is authenticated as testuser
 When the user starts a process with variables called CONNECTOR_PROCESS_INSTANCE

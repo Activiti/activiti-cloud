@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import feign.FeignException;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -89,6 +90,7 @@ public class ProcessInstanceTasks {
     private String processInstanceDiagram;
 
     private Task currentTask;
+    private String processInstanceAdminDiagram;
 
     @When("services are started")
     public void checkServicesStatus() {
@@ -326,6 +328,48 @@ public class ProcessInstanceTasks {
         processRuntimeBundleSteps.checkProcessInstanceNoDiagram(processInstanceDiagram);
     }
 
+    @When("query the process diagram")
+    public void queryProcessInstanceDiagram() {
+        processInstanceDiagram = processQuerySteps.getProcessInstanceDiagram(processInstance.getId());
+    }
+
+    @When("query the process diagram admin endpoint")
+    public void queryProcessInstanceDiagramAdmin() {
+        processInstanceAdminDiagram = processQueryAdminSteps.getProcessInstanceDiagram(processInstance.getId());
+    }
+    
+    @When("query the process diagram admin endpoint is unauthorized")
+    public void queryProcessInstanceDiagramAdminUnauthorized() {
+        try {
+            processInstanceAdminDiagram = processQueryAdminSteps.getProcessInstanceDiagram(processInstance.getId());
+        } catch (FeignException expected) {
+            assertThat(expected.status()).isEqualTo(403);
+            return;
+        }
+        
+        throw new AssertionError("fail");
+    }    
+
+    @Then("the query diagram is shown in admin endpoint")
+    public void checkQueryProcessInstanceDiagramAdmin() throws Exception {
+        processQueryAdminSteps.checkProcessInstanceDiagram(processInstanceAdminDiagram);
+    }
+
+    @Then("no query diagram is shown in admin endpoint")
+    public void checkQueryProcessInstanceNoDiagramAdmin() throws Exception {
+        processQueryAdminSteps.checkProcessInstanceNoDiagram(processInstanceAdminDiagram);
+    }
+    
+    @Then("the query diagram is shown")
+    public void checkQueryProcessInstanceDiagram() throws Exception {
+        processQuerySteps.checkProcessInstanceDiagram(processInstanceDiagram);
+    }
+
+    @Then("no query diagram is shown")
+    public void checkQueryProcessInstanceNoDiagram() throws Exception {
+        processQuerySteps.checkProcessInstanceNoDiagram(processInstanceDiagram);
+    }
+    
     @When("activate the process")
     public void activateCurrentProcessInstance() {
         processRuntimeBundleSteps.resumeProcessInstance(processInstance.getId());
