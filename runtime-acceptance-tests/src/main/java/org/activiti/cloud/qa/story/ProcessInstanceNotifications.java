@@ -20,8 +20,12 @@ import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDef
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,6 +41,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 
 public class ProcessInstanceNotifications {
@@ -55,8 +60,8 @@ public class ProcessInstanceNotifications {
     
     private ProcessInstance processInstance;
     private ReplayProcessor<String> data;
-    private Subscription subscription;
     private String processInstanceId;
+    private AtomicReference<Subscription> subscriptionRef = new AtomicReference<>();
 
     @When("services are started")
     public void checkServicesStatus() {
@@ -67,6 +72,7 @@ public class ProcessInstanceNotifications {
     @When("the user starts a process $processName with PROCESS_STARTED and PROCESS_COMPLETED events subscriptions")
     public void startProcess(String processName) throws IOException, InterruptedException {
 
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         AuthToken authToken = TokenHolder.getAuthToken();
         
         String query = "subscription($serviceName: String!, $processDefinitionKey: String!) {" +
@@ -90,15 +96,17 @@ public class ProcessInstanceNotifications {
                                                "processDefinitionKey",processDefinitionKeyMatcher(processName));
                                             
 
-        Consumer<Subscription> action = startProcessAction(processName);
+        Consumer<Subscription> action = startProcessAction(processName, countDownLatch, subscriptionRef);
         
         data = notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
 
+        countDownLatch.await(10, TimeUnit.SECONDS);
     }
 
     @When("the user starts a process $processName with SIGNAL_RECEIVED subscription")
     public void startProcessWithSignalSubscription(String processName) throws IOException, InterruptedException {
 
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         AuthToken authToken = TokenHolder.getAuthToken();
          
         String query = "subscription($serviceName: String!) {" +
@@ -113,9 +121,11 @@ public class ProcessInstanceNotifications {
 
         Map<String, Object> variables = Map.of("serviceName", notificationsSteps.getRuntimeBundleServiceName());
 
-        Consumer<Subscription> action = startProcessAction(processName);
+        Consumer<Subscription> action = startProcessAction(processName, countDownLatch, subscriptionRef);
         
         data = notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
+        
+        countDownLatch.await(10, TimeUnit.SECONDS);
     }    
     
     private void checkProcessCreated() {
@@ -130,7 +140,8 @@ public class ProcessInstanceNotifications {
                                                          ProcessInstance.ProcessInstanceStatus.COMPLETED);
         } finally {
             // signal to stop receiving notifications 
-            subscription.cancel();
+            subscriptionRef.get()
+                           .cancel();
         }   
     }
     
@@ -165,17 +176,25 @@ public class ProcessInstanceNotifications {
         notificationsSteps.verifyData(data, expected);
     }    
     
-    private Consumer<Subscription> startProcessAction(String processName) {
+    private Consumer<Subscription> startProcessAction(String processName, CountDownLatch countDownLatch, AtomicReference<Subscription> subscriptionRef) {
         return (s) -> {
-            try {
-                processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),true);
-            } catch (IOException e) {   
-                s.cancel();
-            }
-    
-            checkProcessCreated();
-            
-            subscription = s;
+            subscriptionRef.set(s);
+
+            Mono.just(s)
+                .delaySubscription(Duration.ofSeconds(1))
+                .doOnSuccess(it -> countDownLatch.countDown())
+                .doOnError(e -> subscriptionRef.get()
+                                               .cancel())
+                .subscribe(it -> { 
+                    try {
+                        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),true);
+                        checkProcessCreated();
+                    } catch (Exception cause) {
+                        // TODO Auto-generated catch block
+                        cause.printStackTrace();
+                        throw new RuntimeException(cause);
+                    }
+                });
         };
     }
     
