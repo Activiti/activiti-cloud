@@ -51,4 +51,4 @@ And an existing project 'Nasa Team'
 When the user opens the project 'Nasa Team'
 And creates the process model spacex-launch with process variables 'age, gender'
 And opens the process model 'spacex-launch'
-Then 2 validation errors are shown for extensions
+Then 8 validation errors are shown for extensions
