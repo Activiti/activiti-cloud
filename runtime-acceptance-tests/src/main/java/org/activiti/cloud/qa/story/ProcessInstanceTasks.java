@@ -338,7 +338,7 @@ public class ProcessInstanceTasks {
         processInstanceAdminDiagram = processQueryAdminSteps.getProcessInstanceDiagram(processInstance.getId());
     }
     
-    @When("query the process diagram admin endpoint is unauthorized")
+    @Then("query the process diagram admin endpoint is unauthorized")
     public void queryProcessInstanceDiagramAdminUnauthorized() {
         try {
             processInstanceAdminDiagram = processQueryAdminSteps.getProcessInstanceDiagram(processInstance.getId());
