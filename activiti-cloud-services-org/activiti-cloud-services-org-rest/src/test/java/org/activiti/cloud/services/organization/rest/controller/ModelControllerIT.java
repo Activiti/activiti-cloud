@@ -581,7 +581,7 @@ public class ModelControllerIT {
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription)
-                .contains(tuple("expected type: String, found: Integer",
+                .containsExactly(tuple("expected type: String, found: Integer",
                                 "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: String, found: Integer"));
     }
 
@@ -613,7 +613,7 @@ public class ModelControllerIT {
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription)
-                .contains(tuple("expected type: Number, found: String",
+                .containsExactly(tuple("expected type: Number, found: String",
                                     "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: Number, found: String"));
     }
 
@@ -645,8 +645,42 @@ public class ModelControllerIT {
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription)
-                .contains(tuple("expected type: Boolean, found: Integer",
+                .containsExactly(tuple("expected type: Boolean, found: Integer",
                         "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: Boolean, found: Integer"));
+
+
+    }
+
+    @Test
+    public void validateProcessExtensionsWithInvalidObjectVariableContent() throws Exception{
+
+        // given
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-object-variable-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                "extensions.json",
+                CONTENT_TYPE_JSON,
+                invalidContent);
+
+        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+                new Extensions()));
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                        RepositoryRestConfig.API_VERSION,
+                        processModel.getId()).file(file))
+                .andDo(print());
+        // then
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription)
+                .containsExactly(tuple("expected type: JSONObject, found: Integer",
+                        "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: JSONObject, found: Integer"));
 
 
     }
@@ -679,10 +713,12 @@ public class ModelControllerIT {
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
                         ModelValidationError::getDescription)
-                .contains(tuple("string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
-                        "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c64/value: string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$"),
+                .containsExactly(
                         tuple("expected type: String, found: Integer",
-                                "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: String, found: Integer"));
+                                "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: String, found: Integer"),
+                        tuple("string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
+                        "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c64/value: string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$")
+                        );
 
 
     }

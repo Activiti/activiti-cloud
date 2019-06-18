@@ -38,7 +38,113 @@
     },
     "properties": {
       "type": "object",
-      "$ref": "#/definitions/variableType"
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name":{
+          "type": "string"
+        },
+        "type":{
+          "type": "string",
+          "enum": [
+            "date", "string", "integer", "boolean", "json"
+          ]
+        },
+        "required":{
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "date"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "integer"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "boolean"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "json"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "object"
+              }
+            }
+          }
+        }
+
+      ],
+      "required": [
+        "id",
+        "name",
+        "type",
+        "required"
+      ]
     },
     "mappings": {
       "type": "object",
@@ -63,131 +169,6 @@
           "type"
         ]
       }
-    },
-    "variableType": {
-      "oneOf":[
-        {"$ref": "#/definitions/dateVariable"},
-        {"$ref": "#/definitions/stringVariable"},
-        {"$ref": "#/definitions/integerVariable"},
-        {"$ref": "#/definitions/booleanVariable"}
-      ]
-    },
-    "dateVariable":{
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name":{
-          "type": "string"
-        },
-        "type":{
-          "type": "string",
-          "enum": [
-            "date"
-          ]
-        },
-        "required":{
-          "type": "boolean"
-        },
-        "value":{
-          "type": "string",
-          "pattern": "^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$"
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "type",
-        "required"
-      ]
-    },
-    "stringVariable":{
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name":{
-          "type": "string"
-        },
-        "type":{
-          "type": "string",
-          "enum": [
-            "string"
-          ]
-        },
-        "required":{
-          "type": "boolean"
-        },
-        "value":{
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "type",
-        "required"
-      ]
-    },
-    "integerVariable":{
-      "type":"object",
-      "properties": {
-        "id":{
-          "type": "string"
-        },
-        "name":{
-          "type": "string"
-        },
-        "type":{
-          "type": "string",
-          "enum": [
-            "integer"
-          ]
-        },
-        "required":{
-          "type": "boolean"
-        },
-        "value":{
-          "type": "integer"
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "type",
-        "required"
-      ]
-    },
-    "booleanVariable":{
-      "type":"object",
-      "properties": {
-        "id":{
-          "type": "string"
-        },
-        "name":{
-          "type": "string"
-        },
-        "type":{
-          "type": "string",
-          "enum": [
-            "boolean"
-          ]
-        },
-        "required":{
-          "type": "boolean"
-        },
-        "value":{
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "type",
-        "required"
-      ]
     }
   },
   "properties": {
