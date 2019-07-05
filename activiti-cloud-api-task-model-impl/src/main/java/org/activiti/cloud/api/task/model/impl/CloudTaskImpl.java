@@ -17,8 +17,10 @@
 package org.activiti.cloud.api.task.model.impl;
 
 import java.util.Date;
+import java.util.Objects;
 
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
 
@@ -179,6 +181,11 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         return businessKey;
     }
 
+    @Override
+    public boolean isStandalone() {
+        return this.getProcessInstanceId() == null;
+    }
+
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
     }
@@ -247,6 +254,47 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
                 ", processDefinitionVersion=" + processDefinitionVersion +
                 ", businessKey=" + businessKey +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CloudTaskImpl task = (CloudTaskImpl) o;
+        return priority == task.priority &&
+                Objects.equals(id,
+                               task.id) &&
+                Objects.equals(owner,
+                               task.owner) &&
+                Objects.equals(assignee,
+                               task.assignee) &&
+                Objects.equals(name,
+                               task.name) &&
+                Objects.equals(description,
+                               task.description) &&
+                Objects.equals(createdDate,
+                               task.createdDate) &&
+                Objects.equals(claimedDate,
+                               task.claimedDate) &&
+                Objects.equals(dueDate,
+                               task.dueDate) &&
+                Objects.equals(processDefinitionId,
+                               task.processDefinitionId) &&
+                Objects.equals(processInstanceId,
+                               task.processInstanceId) &&
+                Objects.equals(parentTaskId,
+                               task.parentTaskId) &&
+                Objects.equals(formKey,
+                               task.formKey) &&
+                Objects.equals(processDefinitionVersion,
+                               task.processDefinitionVersion) &&
+                Objects.equals(businessKey,
+                               task.businessKey) &&
+                status == task.status;
     }
 }
 
