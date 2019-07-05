@@ -1,9 +1,9 @@
 package org.activiti.cloud.acc.core.steps.runtime;
 
-import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
-import static org.assertj.core.api.Assertions.assertThat;
-
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.task.model.Task;
@@ -19,6 +19,9 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
+
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 @EnableRuntimeFeignContext
 public class TaskRuntimeBundleSteps {
@@ -58,7 +61,7 @@ public class TaskRuntimeBundleSteps {
     public void saveTask(String id, SaveTaskPayload saveTaskPayload) {
         taskRuntimeService
                 .saveTask(id,saveTaskPayload);
-    }    
+    }
     @Step
     public void cannotCompleteTask(String id, CompleteTaskPayload createTaskPayload) {
         assertThatRestNotFoundErrorIsThrownBy(
@@ -195,6 +198,10 @@ public class TaskRuntimeBundleSteps {
         taskRuntimeService.releaseTask(taskId);
     }
 
-
-
+    @Step
+    public Collection<CloudTask> getTaskWithStandalone(boolean standalone) {
+        return taskRuntimeService.getTasks().getContent().stream()
+                .filter(cloudTask -> cloudTask.isStandalone() == standalone)
+                .collect(Collectors.toSet());
+    }
 }
