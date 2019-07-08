@@ -65,7 +65,7 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
                                                     event.getProcessDefinitionVersion(),
                                                     event.getBusinessKey());
 
-        if (!queryTaskEntity.isStandAlone()) {
+        if (!queryTaskEntity.isStandalone()) {
             // Get processInstanceEntity reference proxy without database query
             ProcessInstanceEntity processInstanceEntity = entityManager
                     .getReference(ProcessInstanceEntity.class,

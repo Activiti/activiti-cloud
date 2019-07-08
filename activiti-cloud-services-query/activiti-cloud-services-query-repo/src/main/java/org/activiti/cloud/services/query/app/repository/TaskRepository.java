@@ -45,5 +45,6 @@ public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, S
         bindings.bind(root.completedTo).first((path, value) -> root.completedDate.before(value));
         bindings.bind(root.name).first((path, value) -> path.like("%"+value.toString()+"%"));
         bindings.bind(root.description).first((path, value) -> path.like("%"+value.toString()+"%"));
+        bindings.excluding(root.standalone);
     }
 }

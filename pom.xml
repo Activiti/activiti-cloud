@@ -43,8 +43,8 @@
 
   <properties>
     <activiti-cloud-build.version>7.1.7</activiti-cloud-build.version>
-    <activiti-dependencies.version>7.1.32</activiti-dependencies.version>
-    <activiti-cloud-service-common.version>7.1.40</activiti-cloud-service-common.version>
+    <activiti-dependencies.version>7.1.33</activiti-dependencies.version>
+    <activiti-cloud-service-common.version>7.1.41</activiti-cloud-service-common.version>
     <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
     <json-unit.version>1.24.0</json-unit.version>
   </properties>

@@ -239,8 +239,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         return businessKey;
     }
 
-    public boolean isStandAlone() {
-        return processInstanceId == null;
+    public boolean isStandalone() {
+        return getProcessInstanceId() == null;
     }
 
     @Override
