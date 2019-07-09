@@ -279,6 +279,7 @@ public class TaskControllerImplIT {
                                         subsectionWithPath("serviceFullName").description("The full service name"),
                                         subsectionWithPath("serviceType").description("The service type"),
                                         subsectionWithPath("serviceVersion").description("The service version"),
+                                        subsectionWithPath("standalone").description("The task can be standalone or not"),
                                         subsectionWithPath("_links").ignored()
                                 )));
     }
@@ -321,6 +322,7 @@ public class TaskControllerImplIT {
                                         subsectionWithPath("serviceFullName").description("The full service name"),
                                         subsectionWithPath("serviceType").description("The service type"),
                                         subsectionWithPath("serviceVersion").description("The service version"),
+                                        subsectionWithPath("standalone").description("The task can be standalone or not"),
                                         subsectionWithPath("_links").ignored()
                                 )));
     }
