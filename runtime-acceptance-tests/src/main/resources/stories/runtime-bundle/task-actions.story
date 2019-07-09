@@ -198,3 +198,8 @@ Then the status of the process is changed to completed
 And query process instance variable comments has value lgtm
 And query process instance variable outcome has value approved
 
+Scenario: get standalone tasks separately
+Given the user is authenticated as testuser
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
+And the user creates a standalone task
+Then the user retrieves the tasks and the standalone tasks separately

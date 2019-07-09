@@ -46,7 +46,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedResources;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 public class Tasks {
 
@@ -58,7 +58,7 @@ public class Tasks {
     private TaskRuntimeBundleSteps taskRuntimeBundleSteps;
     @Steps
     private TaskRuntimeAdminSteps taskRuntimeAdminSteps;
-    
+
     @Steps
     private ProcessRuntimeAdminSteps processRuntimeAdminSteps;
 
@@ -66,7 +66,7 @@ public class Tasks {
     private ProcessQuerySteps processQuerySteps;
     @Steps
     private TaskQuerySteps taskQuerySteps;
-        
+
     @Steps
     private ProcessQueryAdminSteps processQueryAdminSteps;
 
@@ -117,7 +117,7 @@ public class Tasks {
     public void deleteCurrentTask() {
         taskRuntimeBundleSteps.deleteTask(newTask.getId());
     }
-    
+
     @When("the admin deletes the standalone task")
     public void adminDeleteCurrentTask() {
         taskRuntimeAdminSteps.deleteTask(newTask.getId());
@@ -255,7 +255,7 @@ public class Tasks {
         Date tomorrow = new Date(System.currentTimeMillis() + 86400000);
         Serenity.setSessionVariable("tomorrow").to(tomorrow);
 
-        taskRuntimeAdminSteps.updateTask(newTask.getId(), 
+        taskRuntimeAdminSteps.updateTask(newTask.getId(),
                                          TaskPayloadBuilder
                                          .update()
                                          .withName("new-task-name")
@@ -264,7 +264,7 @@ public class Tasks {
                                          .withFormKey("new-task-form-key")
                                          .build());
     }
-    
+
     @Then("the task has the updated fields")
     public void checkUpdatedTaskFields (){
         Date tomorrow = Serenity.sessionVariableCalled("tomorrow");
@@ -294,7 +294,7 @@ public class Tasks {
     public void checkIfTaskUpdated (){
         auditSteps.checkTaskUpdatedEvent(newTask.getId());
     }
-    
+
     @Then("the user will see only root tasks when quering for root tasks")
     public void checkRootTasks(){
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
@@ -302,12 +302,12 @@ public class Tasks {
 
         assertThat(rootTasksCollection).isNotNull();
         assertThat(rootTasksCollection).isNotEmpty();
-        
+
         rootTasksCollection.forEach(
                 task -> assertThat(task.getParentTaskId()).isNull()
         );
     }
-    
+
     @Then("the user will see only standalone tasks when quering for standalone tasks")
     public void checkStandaloneTasks(){
         Collection <CloudTask> standaloneTasksCollection = taskQuerySteps.getStandaloneTasks().getContent();
@@ -315,7 +315,7 @@ public class Tasks {
         assertThat(standaloneTasksCollection).isNotNull();
         assertThat(standaloneTasksCollection).isNotEmpty();
         standaloneTasksCollection.forEach(
-                task -> assertThat(task.getProcessInstanceId()).isNull()
+                task -> assertThat(task.isStandalone())
         );
     }
 
@@ -382,5 +382,20 @@ public class Tasks {
         assertThat(taskQueryAdminSteps.getAllTasks()).isNotEmpty();
         taskQueryAdminSteps.deleteTasks();
         assertThat(taskQueryAdminSteps.getAllTasks()).isEmpty();
+    }
+
+    @Then("the user retrieves the tasks and the standalone tasks separately")
+    public void getTasksAndStandaloneTasks() {
+        Collection<CloudTask> tasks = taskRuntimeBundleSteps.getAllTasks().getContent();
+        assertThat(tasks).isNotEmpty();
+        assertThat(tasks).isNotNull();
+
+        Collection<CloudTask> standaloneTasks = taskRuntimeBundleSteps.getTaskWithStandalone(true);
+        Collection<CloudTask> normalTasks = taskRuntimeBundleSteps.getTaskWithStandalone(false);
+
+        assertThat(tasks.size()).isEqualTo(standaloneTasks.size() + normalTasks.size());
+
+        normalTasks.forEach(cloudTask -> assertThat(tasks.contains(cloudTask)).isTrue());
+        standaloneTasks.forEach(cloudTask -> assertThat(tasks.contains(cloudTask)).isTrue());
     }
 }
