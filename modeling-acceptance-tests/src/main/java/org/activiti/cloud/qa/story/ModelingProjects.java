@@ -180,4 +180,9 @@ public class ModelingProjects {
     public void checkCurrentProjectExportFailsOnValidation() throws IOException {
         modelingProjectsSteps.checkCurrentProjectExportFails("Validation errors found in project's models");
     }
+
+    @Then("the project cannot be exported due to validation errors with message $errorMessage")
+    public void checkCurrentProjectExportFailsOnValidation(String errorMessage) throws IOException {
+        modelingProjectsSteps.checkCurrentProjectExportFails(errorMessage);
+    }
 }
