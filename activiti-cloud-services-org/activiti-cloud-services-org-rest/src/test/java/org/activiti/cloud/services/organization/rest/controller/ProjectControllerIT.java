@@ -23,6 +23,7 @@ import java.util.Optional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
@@ -145,7 +146,6 @@ public class ProjectControllerIT {
                 .andExpect(jsonPath("$.description",
                                     is("Project description")));
     }
-
 
     @Test
     public void testCreateProjectExistingName() throws Exception {
@@ -303,6 +303,34 @@ public class ProjectControllerIT {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andReturn();
+    }
+
+    @Test
+    public void exportProjectWithNoAssigneeShouldReturnErrors() throws Exception {
+        // GIVEN
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
+        modelRepository.createModel(processModelWithContent(project,
+                                                            "process-model",
+                                                            extensions("var1",
+                                                                       "var2"),
+                                                            resourceAsByteArray("process/no-assignee.bpmn.xml")));
+        // WHEN
+        MvcResult response = mockMvc.perform(
+                get("{version}/projects/{projectId}/export",
+                    API_VERSION,
+                    project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        // THEN
+        assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
+                .hasSize(1)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription,
+                            ModelValidationError::getValidatorSetName)
+                .containsOnly(tuple("No assignee for user task",
+                                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task",
+                                    "BPMN user task validator"));
     }
 
     @Test

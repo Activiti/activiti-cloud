@@ -23,6 +23,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ModelValidator;
@@ -32,12 +33,14 @@ import org.activiti.cloud.organization.core.error.SyntacticModelValidationExcept
 import org.activiti.cloud.services.organization.converter.ProcessModelContentConverter;
 import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ValidationError;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
+import static org.springframework.util.StringUtils.isEmpty;
 
 /**
  * {@link ModelValidator} implementation of process models
@@ -52,6 +55,10 @@ public class ProcessModelValidator implements ModelValidator {
     private final ProcessValidator processValidator;
 
     private final ProcessModelContentConverter processModelContentConverter;
+
+    public final String NO_ASSIGNEE_PROBLEM_TITLE = "No assignee for user task";
+    public final String NO_ASSIGNEE_DESCRIPTION = "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task";
+    public final String USER_TASK_VALIDATOR_NAME = "BPMN user task validator";
 
     @Autowired
     public ProcessModelValidator(ProcessModelType processModelType,
@@ -68,6 +75,9 @@ public class ProcessModelValidator implements ModelValidator {
             BpmnModel bpmnModel = processModelContentConverter.convertToBpmnModel(bytes);
 
             List<ValidationError> validationErrors = processValidator.validate(bpmnModel);
+            List<ValidationError> validationModelAssigneeErrors = validateTasksAssignedUser(bpmnModel);
+            validationErrors.addAll(validationModelAssigneeErrors);
+
             if (!validationErrors.isEmpty()) {
                 log.error("Semantic process model validation errors encountered: " + validationErrors);
                 throw new SemanticModelValidationException(validationErrors
@@ -82,6 +92,32 @@ public class ProcessModelValidator implements ModelValidator {
             log.error("Syntactic process model XML validation errors encountered: " + errorCause);
             throw new SyntacticModelValidationException(errorCause);
         }
+    }
+
+    private List<ValidationError> validateTasksAssignedUser(BpmnModel bpmnModel) {
+        return bpmnModel.getProcesses().stream()
+                .flatMap(process -> process.getFlowElements().stream())
+                .filter(flowElements -> flowElements.getClass().isAssignableFrom(UserTask.class))
+                .map(UserTask.class::cast)
+                .map(this::validateTaskAssignedUser)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
+
+    private Optional<ValidationError> validateTaskAssignedUser(UserTask userTask) {
+
+        if (!(isEmpty(userTask.getAssignee()) && CollectionUtils.isEmpty(userTask.getCandidateUsers()) && CollectionUtils.isEmpty(userTask.getCandidateGroups()))) {
+            return Optional.empty();
+        }
+
+        ValidationError validationError = new ValidationError();
+
+        validationError.setProblem(NO_ASSIGNEE_PROBLEM_TITLE);
+        validationError.setValidatorSetName(USER_TASK_VALIDATOR_NAME);
+        validationError.setDefaultDescription(NO_ASSIGNEE_DESCRIPTION);
+
+        return Optional.of(validationError);
     }
 
     private ModelValidationError toModelValidationError(ValidationError validationError) {
