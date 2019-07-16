@@ -26,7 +26,9 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -43,9 +45,14 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 /**
  * Model model entity
  */
-@Entity(name = "Model")
+@Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
+@Table(name = "Model",
+        uniqueConstraints = @UniqueConstraint(
+                name = "UNQ_PROJECT_ID_TYPE_NAME",
+                columnNames = {"project_id", "type", "name"})
+)
 public class ModelEntity extends AuditableEntity<String> implements Model<ProjectEntity, String>,
                                                                     VersionedEntity<ModelVersionEntity> {
 
