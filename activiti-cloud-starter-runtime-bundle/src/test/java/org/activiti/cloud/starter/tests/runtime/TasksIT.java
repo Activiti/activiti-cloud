@@ -16,9 +16,6 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,6 +52,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -423,18 +422,16 @@ public class TasksIT {
     @Test
     public void adminShouldAssignUser() {
         //given
-        processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
-  
-        //when
-        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = taskRestTemplate.adminGetTasks();
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+
+        ResponseEntity<PagedResources<CloudTask>> responseEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
         assertThat(responseEntity).isNotNull();
-            
-        //then
+
         Task task = responseEntity.getBody().iterator().next();
         assertThat(task.getAssignee()).isNull();
-        
+
         //when
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
         AssignTaskPayload assignTaskPayload = TaskPayloadBuilder
                                               .assign()
                                               .withTaskId(task.getId())
@@ -442,6 +439,7 @@ public class TasksIT {
                                               .build();
                                                                                                                                                 
         ResponseEntity<CloudTask> assignResponseEntity = taskRestTemplate.adminAssignTask(assignTaskPayload);
+
         //then
         assertThat(assignResponseEntity).isNotNull();
         assertThat(assignResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);

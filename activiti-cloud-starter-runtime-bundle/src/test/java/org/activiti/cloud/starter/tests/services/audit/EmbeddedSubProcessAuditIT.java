@@ -1,31 +1,13 @@
 package org.activiti.cloud.starter.tests.services.audit;
 
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
-import static org.activiti.api.process.model.events.BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
-import static org.activiti.api.process.model.events.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
-import static org.activiti.api.task.model.events.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
-import static org.activiti.api.task.model.events.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED;
-import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
-import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
-import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
-import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_UPDATED;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.SignalPayload;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -40,7 +22,6 @@ import org.activiti.cloud.starter.tests.helper.SignalRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.runtime.Execution;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +37,22 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
+import static org.activiti.api.process.model.events.BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
+import static org.activiti.api.process.model.events.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
+import static org.activiti.api.task.model.events.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
+import static org.activiti.api.task.model.events.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_UPDATED;
+import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
@@ -97,28 +94,13 @@ public class EmbeddedSubProcessAuditIT {
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
 
-    private Map<String, String> processDefinitionIds = new HashMap<>();
-
     @Autowired
     private RuntimeService runtimeService;
-
-    @Before
-    public void setUp() {
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
-        assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        assertThat(processDefinitions.getBody()).isNotNull();
-        assertThat(processDefinitions.getBody().getContent()).isNotNull();
-        for (CloudProcessDefinition pd : processDefinitions.getBody().getContent()) {
-            processDefinitionIds.put(pd.getName(),
-                                     pd.getId());
-        }
-    }
 
     @Test
     public void shouldExecuteProcessWithEmbeddedSubProcess() {
         //given
-        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_EMBEDDED_SUB_PROCESS));
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(buildStartProcessPayload(SIMPLE_EMBEDDED_SUB_PROCESS));
 
         String processInstanceId = processInstance.getBody().getId();
         
@@ -239,7 +221,7 @@ public class EmbeddedSubProcessAuditIT {
     @Test
     public void shouldExecuteProcessWithEmbeddedSubProcessContainingCallActivity() {
         //given
-        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY));
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(buildStartProcessPayload(SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY));
 
         String processInstanceId = processInstance.getBody().getId();
         
@@ -364,7 +346,7 @@ public class EmbeddedSubProcessAuditIT {
     @Test
     public void shouldExecuteProcessWithEmbeddedSubProcessContainingSignalIntermediateCatchEvent() {
         //given
-        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT));
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(buildStartProcessPayload(SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT));
 
         String processInstanceId = processInstance.getBody().getId();
         
@@ -425,12 +407,18 @@ public class EmbeddedSubProcessAuditIT {
         
         runtimeService.deleteProcessInstance(processInstanceId, "Clean up");        
     }
-  
-    
+
+    private StartProcessPayload buildStartProcessPayload(String processDefinitionKey) {
+        return ProcessPayloadBuilder
+                                                                                                                .start()
+                                                                                                                .withProcessDefinitionKey(processDefinitionKey)
+                                                                                                                .build();
+    }
+
     @Test
     public void shouldExecuteProcessWithMessageEventSubProcess() {
         //given
-        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT));
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(buildStartProcessPayload(SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT));
 
         String processInstanceId = processInstance.getBody().getId();
         
