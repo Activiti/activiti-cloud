@@ -1,7 +1,6 @@
 {{- template "common.deployment" (list . "activiti.runtime.deployment") -}}
 {{- define "activiti.runtime.deployment" -}}
 spec:
-    {{- if or .Values.postgres.enabled .Values.extraInitContainers }}
       initContainers:
       {{- if .Values.postgres.enabled }}
         - name: wait-for-postgresql
@@ -19,5 +18,4 @@ spec:
       {{- if .Values.extraInitContainers }}
 {{ tpl .Values.extraInitContainers . | indent 8 }}
       {{- end }}
-    {{- end }}
 {{- end -}}
