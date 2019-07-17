@@ -28,7 +28,7 @@ public class NotificationsSteps {
 
     private static final String GRAPHQL_WS = "graphql-ws";
     private static final String AUTHORIZATION = "Authorization";
-    private static final Duration TIMEOUT = Duration.ofMillis(20000);
+    private static final Duration TIMEOUT = Duration.ofMillis(30000);
 
     @Autowired
     private RuntimeDirtyContextHandler dirtyContextHandler;

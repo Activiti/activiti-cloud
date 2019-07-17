@@ -47,6 +47,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @EnableRuntimeFeignContext
 public class AuditSteps {
 
+    private static final int TIMEOUT = 30;
+
     @Autowired
     private AuditService auditService;
 
@@ -69,7 +71,7 @@ public class AuditSteps {
     @Step
     public void checkProcessInstanceEvent(String processInstanceId,
                                           ProcessRuntimeEvent.ProcessEvents eventType) throws Exception{
-        checkProcessInstanceEvent(processInstanceId,eventType,10); //this is awaitility default
+        checkProcessInstanceEvent(processInstanceId,eventType,TIMEOUT); //this is awaitility default
     }
 
     @Step
