@@ -94,6 +94,10 @@ public class CommandEndPointITStreamHandler {
         return claimedTaskAck;
     }
 
+    public void resetClaimedTaskAck() {
+        claimedTaskAck.set(false);
+    }
+
     public AtomicBoolean getReleasedTaskAck() {
         return releasedTaskAck;
     }
