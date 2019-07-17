@@ -226,6 +226,7 @@ public class CommandEndpointIT {
     }
 
     private void claimTask(Task task) {
+        streamHandler.resetClaimedTaskAck();
         ClaimTaskPayload claimTaskPayload = TaskPayloadBuilder.claim().withTaskId(task.getId()).withAssignee("hruser").build();
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(claimTaskPayload).setHeader("cmdId",
                                                                                                  claimTaskPayload.getId()).build());
