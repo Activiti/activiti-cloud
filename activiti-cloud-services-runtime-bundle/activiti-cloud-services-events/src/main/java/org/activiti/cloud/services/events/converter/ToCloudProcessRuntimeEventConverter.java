@@ -21,6 +21,12 @@ import org.activiti.api.process.model.events.BPMNActivityCompletedEvent;
 import org.activiti.api.process.model.events.BPMNActivityStartedEvent;
 import org.activiti.api.process.model.events.BPMNSequenceFlowTakenEvent;
 import org.activiti.api.process.model.events.BPMNSignalReceivedEvent;
+import org.activiti.api.process.model.events.BPMNTimerCancelledEvent;
+import org.activiti.api.process.model.events.BPMNTimerExecutedEvent;
+import org.activiti.api.process.model.events.BPMNTimerFailedEvent;
+import org.activiti.api.process.model.events.BPMNTimerFiredEvent;
+import org.activiti.api.process.model.events.BPMNTimerRetriesDecrementedEvent;
+import org.activiti.api.process.model.events.BPMNTimerScheduledEvent;
 import org.activiti.api.process.model.events.ProcessDeployedEvent;
 import org.activiti.api.process.runtime.events.ProcessCancelledEvent;
 import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
@@ -32,6 +38,12 @@ import org.activiti.api.process.runtime.events.ProcessUpdatedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNTimerCancelledEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNTimerExecutedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNTimerFailedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNTimerFiredEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNTimerRetriesDecrementedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
@@ -45,6 +57,12 @@ import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerCancelledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerExecutedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFailedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
@@ -152,5 +170,52 @@ public class ToCloudProcessRuntimeEventConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
+    
+    public CloudBPMNTimerFiredEvent from(BPMNTimerFiredEvent event) {
+        CloudBPMNTimerFiredEventImpl cloudEvent = new CloudBPMNTimerFiredEventImpl(event.getEntity(),
+                                                                                   event.getEntity().getProcessDefinitionId(),
+                                                                                   event.getEntity().getProcessInstanceId());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+    
+    public CloudBPMNTimerScheduledEvent from(BPMNTimerScheduledEvent event) {
+        CloudBPMNTimerScheduledEventImpl cloudEvent = new CloudBPMNTimerScheduledEventImpl(event.getEntity(),
+                                                                                           event.getEntity().getProcessDefinitionId(),
+                                                                                           event.getEntity().getProcessInstanceId());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+    
+    public CloudBPMNTimerCancelledEvent from(BPMNTimerCancelledEvent event) {
+        CloudBPMNTimerCancelledEventImpl cloudEvent = new CloudBPMNTimerCancelledEventImpl(event.getEntity(),
+                                                                                           event.getEntity().getProcessDefinitionId(),
+                                                                                           event.getEntity().getProcessInstanceId());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+    
+    public CloudBPMNTimerFailedEvent from(BPMNTimerFailedEvent event) {
+        CloudBPMNTimerFailedEventImpl cloudEvent = new CloudBPMNTimerFailedEventImpl(event.getEntity(),
+                                                                                     event.getEntity().getProcessDefinitionId(),
+                                                                                     event.getEntity().getProcessInstanceId());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
 
+    public CloudBPMNTimerExecutedEvent from(BPMNTimerExecutedEvent event) {
+        CloudBPMNTimerExecutedEventImpl cloudEvent = new CloudBPMNTimerExecutedEventImpl(event.getEntity(),
+                                                                                         event.getEntity().getProcessDefinitionId(),
+                                                                                         event.getEntity().getProcessInstanceId());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+
+    public CloudBPMNTimerRetriesDecrementedEvent from(BPMNTimerRetriesDecrementedEvent event) {
+        CloudBPMNTimerRetriesDecrementedEventImpl cloudEvent = new CloudBPMNTimerRetriesDecrementedEventImpl(event.getEntity(),
+                                                                                         event.getEntity().getProcessDefinitionId(),
+                                                                                         event.getEntity().getProcessInstanceId());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
 }
