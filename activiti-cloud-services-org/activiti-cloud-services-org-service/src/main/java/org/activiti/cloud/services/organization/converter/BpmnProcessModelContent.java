@@ -16,8 +16,13 @@
 
 package org.activiti.cloud.services.organization.converter;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
+import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.core.error.ModelingException;
 
@@ -36,7 +41,7 @@ public class BpmnProcessModelContent implements ModelContent {
                 .getProcesses()
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new ModelingException("Invalid bpmn model: no process id found"));
+                .orElseThrow(() -> new ModelingException("Invalid BPMN model: no process found"));
     }
 
     public BpmnModel getBpmnModel() {
@@ -56,5 +61,18 @@ public class BpmnProcessModelContent implements ModelContent {
     @Override
     public String getTemplate() {
         return null;
+    }
+
+    public Set<String> findAllTaskNames() {
+        return findAllTaskNames(Task.class);
+    }
+
+    public <T extends Task> Set<String> findAllTaskNames(Class<T> taskType) {
+        return bpmnModel.getProcesses()
+                .stream()
+                .map(process -> process.findFlowElementsOfType(taskType))
+                .flatMap(List::stream)
+                .map(Task::getId)
+                .collect(Collectors.toSet());
     }
 }

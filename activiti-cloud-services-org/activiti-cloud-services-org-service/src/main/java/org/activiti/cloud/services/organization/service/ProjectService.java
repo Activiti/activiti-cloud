@@ -243,7 +243,8 @@ public class ProjectService {
         try {
             modelService.getModelMetadataFileContent(model).ifPresent(
                     metadataFileContent -> modelService.validateModelContent(model,
-                                                                             metadataFileContent));
+                                                                             metadataFileContent,
+                                                                             validationContext));
         } catch (SemanticModelValidationException validationException) {
             validationErrors.addAll(validationException.getValidationErrors());
         }

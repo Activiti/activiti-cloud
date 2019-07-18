@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelValidationError;
+import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.repository.ModelRepository;
@@ -29,6 +31,7 @@ import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
 import org.activiti.cloud.services.organization.entity.ProjectEntity;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
+import org.activiti.cloud.services.organization.service.ModelService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,7 +49,9 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processFileContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.project;
 import static org.activiti.cloud.services.organization.mock.MockFactory.projectWithDescription;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
@@ -87,6 +92,12 @@ public class ProjectControllerIT {
 
     @Autowired
     private ModelRepository modelRepository;
+
+    @Autowired
+    private ModelService modelService;
+
+    @Autowired
+    private ProcessModelType processModelType;
 
     @Autowired
     private ObjectMapper mapper;
@@ -236,11 +247,15 @@ public class ProjectControllerIT {
     public void testExportProject() throws Exception {
         // GIVEN
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
-        modelRepository.createModel(processModelWithContent(project,
-                                                            "process-model",
-                                                            extensions("var1",
-                                                                       "var2"),
-                                                            resourceAsByteArray("process/x-19022.bpmn20.xml")));
+        Model processModel = modelService.importModel(project,
+                                                      processModelType,
+                                                      processFileContent("process-model",
+                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        modelRepository.updateModel(processModel,
+                                    processModelWithExtensions("process-model",
+                                                               extensions("Task_1spvopd",
+                                                                          "movieToRank",
+                                                                          "movieDesc")));
         // WHEN
         MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/export",
@@ -262,22 +277,20 @@ public class ProjectControllerIT {
                 .hasJsonContentSatisfying("project-with-models.json",
                                           jsonContent -> jsonContent
                                                   .node("name").isEqualTo("project-with-models"))
-                .hasContent("processes/process-model.bpmn20.xml",
-                            resourceAsByteArray("process/x-19022.bpmn20.xml"))
                 .hasJsonContentSatisfying("processes/process-model-extensions.json",
                                           jsonContent -> jsonContent
                                                   .node("name").isEqualTo("process-model")
                                                   .node("type").isEqualTo("PROCESS")
-                                                  .node("extensions.properties").matches(allOf(hasKey("var1"),
-                                                                                               hasKey("var2")))
+                                                  .node("extensions.properties").matches(allOf(hasKey("movieToRank"),
+                                                                                               hasKey("movieDesc")))
                                                   .node("extensions.mappings").matches(
-                                                          hasEntry(equalTo("ServiceTask"),
+                                                          hasEntry(equalTo("Task_1spvopd"),
                                                                    allOf(hasEntry(equalTo("inputs"),
-                                                                                  allOf(hasKey("var1"),
-                                                                                        hasKey("var2"))),
+                                                                                  allOf(hasKey("movieToRank"),
+                                                                                        hasKey("movieDesc"))),
                                                                          hasEntry(equalTo("outputs"),
-                                                                                  allOf(hasKey("var1"),
-                                                                                        hasKey("var2"))))))
+                                                                                  allOf(hasKey("movieToRank"),
+                                                                                        hasKey("movieDesc"))))))
 
                 );
     }
@@ -310,9 +323,11 @@ public class ProjectControllerIT {
     public void exportProjectWithNoAssigneeShouldReturnErrors() throws Exception {
         // GIVEN
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
-        modelRepository.createModel(processModelWithContent(project,
-                                                            "process-model",
-                                                            resourceAsByteArray("process/no-assignee.bpmn20.xml")));
+        modelService.importModel(project,
+                                 processModelType,
+                                 processFileContent("process-model",
+                                                    resourceAsByteArray("process/no-assignee.bpmn20.xml")));
+
         // WHEN
         MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/export",

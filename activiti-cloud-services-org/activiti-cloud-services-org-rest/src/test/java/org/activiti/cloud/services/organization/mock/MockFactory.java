@@ -28,13 +28,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.activiti.cloud.organization.api.ConnectorModelType;
+import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.api.process.ProcessVariable;
 import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
+import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.entity.ProjectEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 import static java.util.Collections.singletonMap;
+import static org.activiti.cloud.organization.api.ProcessModelType.BPMN20_XML;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
 import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.OUTPUTS;
@@ -77,13 +81,33 @@ public class MockFactory {
                                           extensions);
     }
 
+    public static ModelEntity processModelWithExtensions(String name,
+                                                         Extensions extensions,
+                                                         byte[] content) {
+        return processModelWithExtensions(null,
+                                          name,
+                                          extensions,
+                                          new String(content));
+    }
+
     public static ModelEntity processModelWithExtensions(ProjectEntity parentProject,
                                                          String name,
                                                          Extensions extensions) {
+        return processModelWithExtensions(parentProject,
+                                          name,
+                                          extensions,
+                                          null);
+    }
+
+    public static ModelEntity processModelWithExtensions(ProjectEntity parentProject,
+                                                         String name,
+                                                         Extensions extensions,
+                                                         String content) {
         ModelEntity model = new ModelEntity(name,
                                             PROCESS);
         model.setProject(parentProject);
         model.setExtensions(extensions);
+        model.setContent(content);
         return model;
     }
 
@@ -133,7 +157,8 @@ public class MockFactory {
         return processModel;
     }
 
-    public static Extensions extensions(String... processVariables) {
+    public static Extensions extensions(String serviceTask,
+                                        String... processVariables) {
         Extensions extensions = new Extensions();
         extensions.setProcessVariables(
                 Arrays.stream(processVariables)
@@ -144,7 +169,7 @@ public class MockFactory {
                 .collect(Collectors.toMap(Function.identity(),
                                           MockFactory::processVariableMapping));
         extensions.setVariablesMappings(
-                singletonMap("ServiceTask",
+                singletonMap(serviceTask,
                              ImmutableMap.of(INPUTS,
                                              variableMapping,
                                              OUTPUTS,
@@ -167,7 +192,8 @@ public class MockFactory {
             value = new Date(0);
         } else if (name.startsWith("json")) {
             type = "json";
-            value = json("json-field-name", name);
+            value = json("json-field-name",
+                         name);
         } else {
             type = "string";
             value = name;
@@ -218,5 +244,23 @@ public class MockFactory {
 
     public static String id() {
         return UUID.randomUUID().toString();
+    }
+
+    public static FileContent processFileContent(String processName,
+                                                 byte[] content) {
+        return new FileContent(processName + BPMN20_XML,
+                               CONTENT_TYPE_XML,
+                               content);
+    }
+
+    public static MockMultipartFile multipartExtensionsFile(Model model,
+                                                            byte[] content) {
+        return new MockMultipartFile("file",
+                                     model.getName() + "-extensions.json",
+                                     CONTENT_TYPE_JSON,
+                                     new String(content)
+                                             .replaceAll("\"id\": \".*\"",
+                                                         "\"id\": \"process-" + model.getId() + "\"")
+                                             .getBytes());
     }
 }

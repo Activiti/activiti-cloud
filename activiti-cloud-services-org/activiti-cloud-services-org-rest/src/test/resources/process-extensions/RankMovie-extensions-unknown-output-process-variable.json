@@ -1,0 +1,43 @@
+{
+    "id": "process-98ff0720-f94b-40a7-84f6-a9c8fab70568",
+    "type": "PROCESS",
+    "name": "RankMovie",
+    "extensions": {
+        "properties": {
+            "0d9ff66b-4d12-4ec7-b8c6-2082468cd885": {
+                "id": "0d9ff66b-4d12-4ec7-b8c6-2082468cd885",
+                "name": "movieToRank",
+                "type": "string",
+                "required": true
+            },
+            "b6d935ce-6cc8-49f8-8339-8ceece2a48d2": {
+                "id": "b6d935ce-6cc8-49f8-8339-8ceece2a48d2",
+                "name": "movieDesc",
+                "type": "string",
+                "required": false
+            },
+            "fdc1dc9f-9123-4fec-bab7-a938fb01906e": {
+                "id": "fdc1dc9f-9123-4fec-bab7-a938fb01906e",
+                "name": "rating",
+                "type": "integer",
+                "required": false
+            }
+        },
+        "mappings": {
+            "Task_1spvopd": {
+                "inputs": {
+                    "movieName": {
+                        "type": "variable",
+                        "value": "movieToRank"
+                    }
+                },
+                "outputs": {
+                    "unknown-output-variable": {
+                        "type": "variable",
+                        "value": "movieDescription"
+                    }
+                }
+            }
+        }
+    }
+}
