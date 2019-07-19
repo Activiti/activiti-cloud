@@ -58,6 +58,10 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud.rb</groupId>
+      <artifactId>activiti-cloud-services-job-executor</artifactId>    
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.rb</groupId>
       <artifactId>activiti-cloud-services-events</artifactId>
     </dependency>
     <dependency>

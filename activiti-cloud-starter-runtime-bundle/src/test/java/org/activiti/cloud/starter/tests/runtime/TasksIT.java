@@ -422,12 +422,16 @@ public class TasksIT {
     @Test
     public void adminShouldAssignUser() {
         //given
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
+        String taskId = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next().getId();
 
-        ResponseEntity<PagedResources<CloudTask>> responseEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
+        //when
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        ResponseEntity<CloudTask> responseEntity = taskRestTemplate.adminGetTask(taskId);
         assertThat(responseEntity).isNotNull();
-
-        Task task = responseEntity.getBody().iterator().next();
+            
+        //then
+        Task task = responseEntity.getBody();
         assertThat(task.getAssignee()).isNull();
 
         //when

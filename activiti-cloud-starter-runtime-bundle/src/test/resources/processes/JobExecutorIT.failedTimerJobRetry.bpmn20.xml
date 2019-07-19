@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:activiti="http://activiti.org/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0yr08ue" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Activiti Modeler" exporterVersion="3.0.0-beta.3">
+  <bpmn:process id="failedTimerJobRetry" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_00sbjkk</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_00sbjkk" sourceRef="StartEvent_1" targetRef="timerCatchEvent" />
+    <bpmn:sequenceFlow id="SequenceFlow_03shha9" sourceRef="timerCatchEvent" targetRef="errorTask" />
+    <bpmn:endEvent id="EndEvent_1l42hsy">
+      <bpmn:incoming>SequenceFlow_1vmyacv</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1vmyacv" sourceRef="errorTask" targetRef="EndEvent_1l42hsy" />
+    <bpmn:intermediateCatchEvent id="timerCatchEvent" name="PT1S">
+      <bpmn:extensionElements>
+        <activiti:failedJobRetryTimeCycle>R2/PT1S</activiti:failedJobRetryTimeCycle>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_00sbjkk</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_03shha9</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="errorTask" name="Error Task" activiti:class="org.activiti.cloud.starter.tests.runtime.JobExecutorIT$RetryFailingDelegate">
+      <bpmn:incoming>SequenceFlow_03shha9</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1vmyacv</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:textAnnotation id="TextAnnotation_0r43ck4">
+      <bpmn:text>R2/PT5S</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_196yv35" sourceRef="timerCatchEvent" targetRef="TextAnnotation_0r43ck4" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="failedTimerJobRetry">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="161" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_00sbjkk_di" bpmnElement="SequenceFlow_00sbjkk">
+        <di:waypoint x="215" y="179" />
+        <di:waypoint x="265" y="179" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_03shha9_di" bpmnElement="SequenceFlow_03shha9">
+        <di:waypoint x="301" y="179" />
+        <di:waypoint x="351" y="179" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_1l42hsy_di" bpmnElement="EndEvent_1l42hsy">
+        <dc:Bounds x="501" y="161" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vmyacv_di" bpmnElement="SequenceFlow_1vmyacv">
+        <di:waypoint x="451" y="179" />
+        <di:waypoint x="501" y="179" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_1vak5hv_di" bpmnElement="timerCatchEvent">
+        <dc:Bounds x="265" y="161" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="269" y="204" width="29" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_08eg6vd_di" bpmnElement="errorTask">
+        <dc:Bounds x="351" y="139" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0r43ck4_di" bpmnElement="TextAnnotation_0r43ck4">
+        <dc:Bounds x="301" y="81" width="100" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_196yv35_di" bpmnElement="Association_196yv35">
+        <di:waypoint x="294" y="165" />
+        <di:waypoint x="339" y="111" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
