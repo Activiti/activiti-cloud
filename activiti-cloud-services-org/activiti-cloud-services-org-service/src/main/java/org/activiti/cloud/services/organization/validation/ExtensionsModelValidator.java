@@ -40,6 +40,7 @@ import org.activiti.cloud.services.organization.converter.BpmnProcessModelConten
 import org.activiti.cloud.services.organization.converter.ProcessModelContentConverter;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
@@ -48,6 +49,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_T
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
 @Component
+@ConditionalOnMissingBean(name = "ExtensionsModelValidator")
 public class ExtensionsModelValidator extends JsonSchemaModelValidator {
 
     public static final String UNKNOWN_PROCESS_ID_VALIDATION_ERROR_PROBLEM = "Unknown process id in process extensions: %s";
