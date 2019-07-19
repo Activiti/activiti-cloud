@@ -59,6 +59,11 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.rb</groupId>
+        <artifactId>activiti-cloud-services-job-executor</artifactId>
+        <version>${activiti-cloud-runtime-bundle-service.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.rb</groupId>
         <artifactId>activiti-cloud-services-events</artifactId>
         <version>${activiti-cloud-runtime-bundle-service.version}</version>
       </dependency>

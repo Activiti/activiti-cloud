@@ -21,5 +21,6 @@
     <module>activiti-cloud-services-rest-impl</module>
     <module>activiti-cloud-services-identity-basic</module>
     <module>activiti-cloud-services-identity-keycloak</module>
+    <module>activiti-cloud-services-job-executor</module>
   </modules>
 </project>

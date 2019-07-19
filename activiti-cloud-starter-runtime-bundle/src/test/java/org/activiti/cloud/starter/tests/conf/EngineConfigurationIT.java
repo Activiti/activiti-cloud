@@ -16,18 +16,20 @@
 
 package org.activiti.cloud.starter.tests.conf;
 
-import org.activiti.spring.SpringProcessEngineConfiguration;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
+import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class EngineConfigurationIT {
 
     @Autowired

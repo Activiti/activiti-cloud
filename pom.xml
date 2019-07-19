@@ -63,6 +63,7 @@
     <module>activiti-cloud-runtime-bundle-dependencies</module>
     <module>activiti-cloud-services-runtime-bundle</module>
     <module>activiti-cloud-starter-runtime-bundle</module>
+    <module>activiti-cloud-starter-runtime-bundle-it</module>
   </modules>
 
   <scm>
