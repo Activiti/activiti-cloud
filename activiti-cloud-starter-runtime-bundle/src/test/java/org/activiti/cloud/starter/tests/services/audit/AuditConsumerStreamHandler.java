@@ -18,8 +18,8 @@ package org.activiti.cloud.starter.tests.services.audit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -37,14 +37,14 @@ import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.AU
 @EnableBinding(AuditConsumer.class)
 public class AuditConsumerStreamHandler {
 
-    private Map<String, Object> receivedHeaders = Collections.emptyMap();
+    private Map<String, Object> receivedHeaders = new HashMap<>();
 
-    private List<CloudRuntimeEvent<?,?>> latestReceivedEvents = Collections.emptyList();
+    private List<CloudRuntimeEvent<?,?>> latestReceivedEvents = new ArrayList<>();
     private List<CloudRuntimeEvent<?,?>> allReceivedEvents = new ArrayList<>();
 
     @StreamListener(AuditConsumer.AUDIT_CONSUMER)
     public void receive(@Headers Map<String, Object> headers, CloudRuntimeEvent<?,?> ... events) {
-        latestReceivedEvents = Arrays.asList(events);
+        latestReceivedEvents = new ArrayList<>(Arrays.asList(events));
         allReceivedEvents.addAll(latestReceivedEvents);
         receivedHeaders = new LinkedHashMap<>(headers);
     }
@@ -59,6 +59,12 @@ public class AuditConsumerStreamHandler {
 
     public Map<String, Object> getReceivedHeaders() {
         return receivedHeaders;
+    }
+
+    public void clear() {
+        allReceivedEvents.clear();
+        latestReceivedEvents.clear();
+        receivedHeaders.clear();
     }
 
 }
