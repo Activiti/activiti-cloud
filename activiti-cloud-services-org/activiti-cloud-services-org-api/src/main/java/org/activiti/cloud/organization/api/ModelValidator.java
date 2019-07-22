@@ -24,8 +24,10 @@ public interface ModelValidator {
     /**
      * Validate the given model content.
      * @param modelContent the model content to validate
+     * @param validationContext the validation context
      */
-    void validateModelContent(byte[] modelContent);
+    void validateModelContent(byte[] modelContent,
+                              ValidationContext validationContext);
 
     /**
      * Get handled model type by this validator.

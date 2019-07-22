@@ -29,6 +29,7 @@ import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.organization.core.error.ImportProjectException;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
@@ -36,6 +37,7 @@ import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.zip.ZipBuilder;
 import org.activiti.cloud.services.common.zip.ZipStream;
+import org.activiti.cloud.services.organization.validation.ProjectValidationContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -213,9 +215,13 @@ public class ProjectService {
     }
 
     public void validateProject(Project project) {
-        List<ModelValidationError> validationErrors = modelService.getAllModels(project)
+        List<Model> availableModels = modelService.getAllModels(project);
+        ValidationContext validationContext = new ProjectValidationContext(availableModels);
+
+        List<ModelValidationError> validationErrors = availableModels
                 .stream()
-                .flatMap(this::getModelValidationErrors)
+                .flatMap(model -> getModelValidationErrors(model,
+                                                           validationContext))
                 .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
@@ -224,10 +230,12 @@ public class ProjectService {
         }
     }
 
-    private Stream<ModelValidationError> getModelValidationErrors(Model model) {
+    private Stream<ModelValidationError> getModelValidationErrors(Model model,
+                                                                  ValidationContext validationContext) {
         List<ModelValidationError> validationErrors = new ArrayList<>();
         try {
-            modelService.validateModelContent(model);
+            modelService.validateModelContent(model,
+                                              validationContext);
         } catch (SemanticModelValidationException validationException) {
             validationErrors.addAll(validationException.getValidationErrors());
         }

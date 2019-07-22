@@ -16,28 +16,22 @@
 
 package org.activiti.cloud.services.organization.converter;
 
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.activiti.cloud.organization.api.ModelContent;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
- * Implementation for the {@link ModelContent} corresponding to connector model type
+ * Implementation dependency for the {@link ConnectorModelContent}
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ConnectorModelContent implements ModelContent {
+public class ConnectorModelAction {
 
     private String id;
+    private String name;
+    private String description;
 
-    private String template;
-
-    private Map<String, ConnectorModelAction> actions;
-
-    @Override
     public String getId() {
         return id;
     }
@@ -46,20 +40,19 @@ public class ConnectorModelContent implements ModelContent {
         this.id = id;
     }
 
-    @Override
-    public String getTemplate() {
-        return template;
+    public String getName() {
+        return name;
     }
 
-    public void setTemplate(String template) {
-        this.template = template;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Map<String, ConnectorModelAction> getActions() {
-        return actions;
+    public String getDescription() {
+        return description;
     }
 
-    public void setActions(Map<String, ConnectorModelAction> actions) {
-        this.actions = actions;
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

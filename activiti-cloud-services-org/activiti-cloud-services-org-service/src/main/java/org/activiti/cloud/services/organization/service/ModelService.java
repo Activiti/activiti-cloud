@@ -22,13 +22,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.transaction.Transactional;
 
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.organization.core.error.ImportModelException;
@@ -43,6 +43,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import static org.activiti.cloud.organization.api.ValidationContext.EMPTY_CONTEXT;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.isJsonContentType;
@@ -279,25 +280,30 @@ public class ModelService {
                                                   extension));
     }
 
-    public void validateModelContent(Model model) {
+    public void validateModelContent(Model model,
+                                     ValidationContext validationContext) {
         validateModelContent(model.getType(),
                              modelRepository.getModelContent(model),
-                             model.getContentType());
+                             model.getContentType(),
+                             validationContext);
     }
 
     public void validateModelContent(Model model,
                                      FileContent fileContent) {
         validateModelContent(model.getType(),
                              fileContent.getFileContent(),
-                             fileContent.getContentType());
+                             fileContent.getContentType(),
+                             EMPTY_CONTEXT);
     }
 
     private void validateModelContent(String modelType,
                                       byte[] modelContent,
-                                      String contentType) {
+                                      String contentType,
+                                      ValidationContext validationContext) {
         modelContentService.findModelValidator(modelType,
                                                contentType)
-                .ifPresent(modelValidator -> modelValidator.validateModelContent(modelContent));
+                .ifPresent(modelValidator -> modelValidator.validateModelContent(modelContent,
+                                                                                 validationContext));
     }
 
     private ModelType findModelType(Model model) {

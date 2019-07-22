@@ -39,6 +39,7 @@ import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
 import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.OUTPUTS;
 import static org.activiti.cloud.organization.api.process.VariableMappingType.VALUE;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 
 /**
@@ -203,6 +204,16 @@ public class MockFactory {
     public static ModelEntity connectorModel(String name) {
         return new ModelEntity(name,
                                ConnectorModelType.NAME);
+    }
+
+    public static ModelEntity connectorModel(ProjectEntity parentProject,
+                                             String name,
+                                             byte[] content) {
+        ModelEntity modelEntity = connectorModel(name);
+        modelEntity.setProject(parentProject);
+        modelEntity.setContentType(CONTENT_TYPE_JSON);
+        modelEntity.setContent(new String(content));
+        return modelEntity;
     }
 
     public static String id() {

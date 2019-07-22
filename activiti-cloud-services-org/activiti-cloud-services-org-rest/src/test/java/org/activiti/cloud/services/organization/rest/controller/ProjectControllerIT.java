@@ -44,6 +44,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.project;
@@ -311,9 +312,7 @@ public class ProjectControllerIT {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
         modelRepository.createModel(processModelWithContent(project,
                                                             "process-model",
-                                                            extensions("var1",
-                                                                       "var2"),
-                                                            resourceAsByteArray("process/no-assignee.bpmn.xml")));
+                                                            resourceAsByteArray("process/no-assignee.bpmn20.xml")));
         // WHEN
         MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/export",
@@ -331,6 +330,69 @@ public class ProjectControllerIT {
                 .containsOnly(tuple("No assignee for user task",
                                     "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task",
                                     "BPMN user task validator"));
+    }
+
+    @Test
+    public void exportProjectWithInvalidServiceTaskReturnErrors() throws Exception {
+        // GIVEN
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-connector-models"));
+        modelRepository.createModel(processModelWithContent(project,
+                                                            "invalid-service",
+                                                            resourceAsByteArray("process/invalid-service-task.bpmn20.xml")));
+
+        modelRepository.createModel(connectorModel(project,
+                                                   "invalid-connector-action",
+                                                   resourceAsByteArray("connector/invalid-connector-action.json")));
+        // WHEN
+        MvcResult response = mockMvc.perform(
+                get("{version}/projects/{projectId}/export",
+                    API_VERSION,
+                    project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        // THEN
+        assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
+                .hasSize(1)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription,
+                            ModelValidationError::getValidatorSetName)
+                .containsOnly(tuple("Invalid service implementation",
+                                    "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
+                                    "BPMN service task validator"));
+    }
+
+    @Test
+    public void exportProjectWithServiceTaskEmptyImplementationReturnErrors() throws Exception {
+        // GIVEN
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-invalid-service-task"));
+        modelRepository.createModel(processModelWithContent(project,
+                                                            "invalid-connector-action",
+                                                            resourceAsByteArray("process/no-implementation-service-task.bpmn20.xml")));
+
+        modelRepository.createModel(connectorModel(project,
+                                                   "invalid-connector-action",
+                                                   resourceAsByteArray("connector/invalid-connector-action.json")));
+        // WHEN
+        MvcResult response = mockMvc.perform(
+                get("{version}/projects/{projectId}/export",
+                    API_VERSION,
+                    project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        // THEN
+        assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
+                .hasSize(2)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription,
+                            ModelValidationError::getValidatorSetName)
+                .containsOnly(tuple("activiti-servicetask-missing-implementation",
+                                    "One of the attributes 'implementation', 'class', 'delegateExpression', 'type', 'operation', or 'expression' is mandatory on serviceTask.",
+                                    "activiti-executable-process"),
+                              tuple("Invalid service implementation",
+                                    "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
+                                    "BPMN service task validator"));
     }
 
     @Test
