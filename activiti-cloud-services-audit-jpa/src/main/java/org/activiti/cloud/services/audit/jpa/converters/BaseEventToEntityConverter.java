@@ -42,6 +42,14 @@ public abstract class BaseEventToEntityConverter implements EventToEntityConvert
     @Override
     public CloudRuntimeEvent convertToAPI(AuditEventEntity auditEventEntity) {
         CloudRuntimeEventImpl<?, ?> apiEvent = createAPIEvent(auditEventEntity);
+        apiEvent.setAppName(auditEventEntity.getAppName());
+        apiEvent.setAppVersion(auditEventEntity.getAppVersion());
+        apiEvent.setServiceFullName(auditEventEntity.getServiceFullName());
+        apiEvent.setServiceName(auditEventEntity.getServiceName());
+        apiEvent.setServiceType(auditEventEntity.getServiceType());
+        apiEvent.setServiceVersion(auditEventEntity.getServiceVersion());
+        apiEvent.setMessageId(auditEventEntity.getMessageId());
+        apiEvent.setSequenceNumber(auditEventEntity.getSequenceNumber());
         return eventContextInfoAppender.addProcessContextInfoToApiEvent(apiEvent, auditEventEntity);
     }
 

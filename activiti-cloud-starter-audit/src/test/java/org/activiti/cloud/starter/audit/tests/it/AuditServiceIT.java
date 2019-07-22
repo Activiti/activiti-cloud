@@ -16,6 +16,10 @@
 
 package org.activiti.cloud.starter.audit.tests.it;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,9 +30,12 @@ import java.util.UUID;
 
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.api.process.model.payloads.SignalPayload;
+import org.activiti.api.process.model.payloads.TimerPayload;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
+import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.task.model.Task;
@@ -42,10 +49,13 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
@@ -61,7 +71,6 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserRemov
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
-import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.Before;
@@ -74,10 +83,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -569,6 +574,81 @@ public class AuditServiceIT {
     }
 
 
+    @Test
+    public void shouldGetTimerScheduledEvent() {
+        //given
+        List<CloudRuntimeEvent> coveredEvents = new ArrayList<>();
+        
+        BPMNTimerImpl timer1 = new BPMNTimerImpl("timerId1");
+        timer1.setProcessDefinitionId("processDefinitionId");
+        timer1.setProcessInstanceId("processInstanceId");
+        timer1.setTimerPayload(createTimerPayload());
+
+        CloudBPMNTimerFiredEventImpl cloudTimerFiredEvent = new CloudBPMNTimerFiredEventImpl("eventId1",
+                                                                                             System.currentTimeMillis(),
+                                                                                             timer1,
+                                                                                             timer1.getProcessDefinitionId(),
+                                                                                             timer1.getProcessInstanceId());
+        coveredEvents.add(cloudTimerFiredEvent);
+
+        BPMNTimerImpl timer2 = new BPMNTimerImpl("timerId2");
+        timer2.setProcessDefinitionId("processDefinitionId");
+        timer2.setProcessInstanceId("processInstanceId");
+        timer2.setTimerPayload(createTimerPayload());
+
+        CloudBPMNTimerScheduledEventImpl cloudTimerScheduledEvent = new CloudBPMNTimerScheduledEventImpl("eventId2",
+                                                                                                         System.currentTimeMillis(),
+                                                                                                         timer2,
+                                                                                                         timer2.getProcessDefinitionId(),
+                                                                                                         timer2.getProcessInstanceId());
+               
+        coveredEvents.add(cloudTimerScheduledEvent);
+        
+        producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
+
+        await().untilAsserted(() -> {
+
+            //when
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("eventType",
+                        BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED.name());
+
+            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            assertThat(retrievedEvents).hasSize(1);
+            
+            assertThat(retrievedEvents)
+            .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getServiceName,
+                    CloudRuntimeEvent::getServiceVersion,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionId,
+                    CloudRuntimeEvent::getEntityId,
+                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getElementId(),
+                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getProcessInstanceId(),
+                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getProcessDefinitionId(),
+                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getTimerPayload().getId(),
+                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getTimerPayload().getMaxIterations(),
+                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getTimerPayload().getRepeat(),
+                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getTimerPayload().getRetries())                    
+            .contains(tuple(cloudTimerScheduledEvent.getEventType(),
+                            cloudTimerScheduledEvent.getServiceName(),
+                            cloudTimerScheduledEvent.getServiceVersion(),
+                            cloudTimerScheduledEvent.getProcessInstanceId(),
+                            cloudTimerScheduledEvent.getProcessDefinitionId(),
+                            cloudTimerScheduledEvent.getEntityId(),
+                            cloudTimerScheduledEvent.getEntity().getElementId(),
+                            cloudTimerScheduledEvent.getEntity().getProcessInstanceId(),
+                            cloudTimerScheduledEvent.getEntity().getProcessDefinitionId(),
+                            cloudTimerScheduledEvent.getEntity().getTimerPayload().getId(),
+                            cloudTimerScheduledEvent.getEntity().getTimerPayload().getMaxIterations(),
+                            cloudTimerScheduledEvent.getEntity().getTimerPayload().getRepeat(),
+                            cloudTimerScheduledEvent.getEntity().getTimerPayload().getRetries()));
+        });
+    }
     
     
     private List<CloudRuntimeEvent> getTaskCancelledEvents() {
@@ -812,4 +892,13 @@ public class AuditServiceIT {
         return testEvents;
     }
     
+    private TimerPayload createTimerPayload() {
+        TimerPayload timerPayload = new TimerPayload();
+        timerPayload.setRetries(5);
+        timerPayload.setMaxIterations(2);
+        timerPayload.setRepeat("repeat");
+        timerPayload.setExceptionMessage("Any message");
+        
+        return timerPayload;     
+    } 
 }

@@ -23,6 +23,8 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "TYPE")
 @Entity
@@ -63,7 +65,27 @@ public abstract class AuditEventEntity {
         this.timestamp = timestamp;
         this.eventType = eventType;
     }
-    
+
+    public AuditEventEntity(CloudRuntimeEvent<?,?> cloudEvent) {
+        this.eventId = cloudEvent.getId();
+        this.timestamp = cloudEvent.getTimestamp();
+        this.eventType = cloudEvent.getEventType().name();
+        this.appName = cloudEvent.getAppName();
+        this.appVersion = cloudEvent.getAppVersion();
+        this.serviceName = cloudEvent.getServiceName();
+        this.serviceFullName = cloudEvent.getServiceFullName();
+        this.serviceType = cloudEvent.getServiceType();
+        this.serviceVersion = cloudEvent.getServiceVersion();
+        this.messageId = cloudEvent.getMessageId();
+        this.sequenceNumber = cloudEvent.getSequenceNumber();
+        this.entityId = cloudEvent.getEntityId();
+        this.processInstanceId = cloudEvent.getProcessInstanceId();
+        this.processDefinitionId = cloudEvent.getProcessDefinitionId();
+        this.processDefinitionKey = cloudEvent.getProcessDefinitionKey();
+        this.businessKey = cloudEvent.getBusinessKey();
+        this.parentProcessInstanceId = cloudEvent.getParentProcessInstanceId();
+    }
+
     public String getEventId() {
         return eventId;
     }

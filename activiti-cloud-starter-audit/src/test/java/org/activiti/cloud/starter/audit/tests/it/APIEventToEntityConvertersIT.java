@@ -19,6 +19,7 @@ package org.activiti.cloud.starter.audit.tests.it;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
+import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
@@ -50,6 +51,8 @@ import org.activiti.cloud.services.audit.jpa.converters.TaskCompletedEventConver
 import org.activiti.cloud.services.audit.jpa.converters.TaskCreatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TaskSuspendedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TaskUpdatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TimerFiredEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TimerScheduledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableCreatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableDeletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableUpdatedEventConverter;
@@ -155,6 +158,13 @@ public class APIEventToEntityConvertersIT {
         
         converter = eventConverters.getConverterByEventTypeName(VariableEvent.VariableEvents.VARIABLE_UPDATED.name());
         assertThat(converter).isNotNull().isInstanceOf(VariableUpdatedEventConverter.class);
+        
+        converter = eventConverters.getConverterByEventTypeName(BPMNTimerEvent.TimerEvents.TIMER_FIRED.name());
+        assertThat(converter).isNotNull().isInstanceOf(TimerFiredEventConverter.class);
+        
+        converter = eventConverters.getConverterByEventTypeName(BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED.name());
+        assertThat(converter).isNotNull().isInstanceOf(TimerScheduledEventConverter.class);
+        
         
     }
  
