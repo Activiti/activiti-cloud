@@ -247,15 +247,22 @@ public class ProjectControllerIT {
     public void testExportProject() throws Exception {
         // GIVEN
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
+
+        modelRepository.createModel(connectorModel(project,
+                                                   "movies",
+                                                   resourceAsByteArray("connector/movies.json")));
+
         Model processModel = modelService.importModel(project,
                                                       processModelType,
                                                       processFileContent("process-model",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+
         modelRepository.updateModel(processModel,
                                     processModelWithExtensions("process-model",
                                                                extensions("Task_1spvopd",
                                                                           "movieToRank",
                                                                           "movieDesc")));
+
         // WHEN
         MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/export",
@@ -273,7 +280,9 @@ public class ProjectControllerIT {
                         "project-with-models.json",
                         "processes/",
                         "processes/process-model.bpmn20.xml",
-                        "processes/process-model-extensions.json")
+                        "processes/process-model-extensions.json",
+                        "connectors/",
+                        "connectors/movies.json")
                 .hasJsonContentSatisfying("project-with-models.json",
                                           jsonContent -> jsonContent
                                                   .node("name").isEqualTo("project-with-models"))
@@ -368,11 +377,10 @@ public class ProjectControllerIT {
 
         // THEN
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
-                .hasSize(1)
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription,
                             ModelValidationError::getValidatorSetName)
-                .containsOnly(tuple("Invalid service implementation",
+                .contains(tuple("Invalid service implementation",
                                     "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
                                     "BPMN service task validator"));
     }
@@ -398,11 +406,10 @@ public class ProjectControllerIT {
 
         // THEN
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
-                .hasSize(2)
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription,
                             ModelValidationError::getValidatorSetName)
-                .containsOnly(tuple("activiti-servicetask-missing-implementation",
+                .contains(tuple("activiti-servicetask-missing-implementation",
                                     "One of the attributes 'implementation', 'class', 'delegateExpression', 'type', 'operation', or 'expression' is mandatory on serviceTask.",
                                     "activiti-executable-process"),
                               tuple("Invalid service implementation",

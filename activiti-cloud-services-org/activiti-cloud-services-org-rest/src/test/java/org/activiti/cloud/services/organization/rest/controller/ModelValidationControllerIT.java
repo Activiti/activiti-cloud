@@ -25,7 +25,6 @@ import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
 import org.activiti.cloud.services.organization.entity.ProjectEntity;
-import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
 import org.activiti.cloud.services.organization.service.ModelService;
 import org.junit.Before;
 import org.junit.Test;
@@ -103,7 +102,7 @@ public class ModelValidationControllerIT {
         // when
         mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
+                                   API_VERSION,
                                    processModel.getId())
                                  .file(file))
                 // then
@@ -123,7 +122,7 @@ public class ModelValidationControllerIT {
         // when
         mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
+                                   API_VERSION,
                                    processModel.getId())
                                  .file(file))
                 // then
@@ -144,7 +143,7 @@ public class ModelValidationControllerIT {
 
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                  RepositoryRestConfig.API_VERSION,
+                                  API_VERSION,
                                   processModel.getId())
                                 .file(file))
                 // then
@@ -166,7 +165,7 @@ public class ModelValidationControllerIT {
 
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                  RepositoryRestConfig.API_VERSION,
+                                  API_VERSION,
                                   processModel.getId())
                                 .file(file))
                 // then
@@ -257,7 +256,7 @@ public class ModelValidationControllerIT {
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
+                                   API_VERSION,
                                    processModel.getId()).file(file))
                 .andDo(print());
         // then
@@ -289,7 +288,7 @@ public class ModelValidationControllerIT {
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
+                                   API_VERSION,
                                    processModel.getId()).file(file))
                 .andDo(print());
         // then
@@ -321,7 +320,7 @@ public class ModelValidationControllerIT {
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
+                                   API_VERSION,
                                    processModel.getId()).file(file))
                 .andDo(print());
         // then
@@ -353,7 +352,7 @@ public class ModelValidationControllerIT {
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
+                                   API_VERSION,
                                    processModel.getId()).file(file))
                 .andDo(print());
         // then
@@ -383,7 +382,7 @@ public class ModelValidationControllerIT {
                                                        "BPMN diagram".getBytes());
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                  RepositoryRestConfig.API_VERSION,
+                                  API_VERSION,
                                   "model_id")
                                 .file(file))
                 // then
@@ -462,7 +461,7 @@ public class ModelValidationControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                          RepositoryRestConfig.API_VERSION,
+                                          API_VERSION,
                                           processModel.getId())
                                         .file(file))
                         .andExpect(status().isBadRequest())
@@ -487,7 +486,7 @@ public class ModelValidationControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                          RepositoryRestConfig.API_VERSION,
+                                          API_VERSION,
                                           processModel.getId())
                                         .file(file))
                         .andExpect(status().isBadRequest())
@@ -513,7 +512,7 @@ public class ModelValidationControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                          RepositoryRestConfig.API_VERSION,
+                                          API_VERSION,
                                           processModel.getId())
                                         .file(file))
                         .andExpect(status().isBadRequest())
@@ -539,7 +538,7 @@ public class ModelValidationControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                          RepositoryRestConfig.API_VERSION,
+                                          API_VERSION,
                                           processModel.getId())
                                         .file(file))
                         .andExpect(status().isBadRequest())

@@ -1,0 +1,1 @@
+{"id":"MoviesId","name":"movies","description":"","actions":{"getMovieDescId":{"id":"getMovieDescId","name":"getMovieDesc","inputs":[{"id":"movieNameId","name":"movieName","type":"string"}],"outputs":[{"id":"movieDescriptionId","name":"movieDescription","type":"string"}]}}}
