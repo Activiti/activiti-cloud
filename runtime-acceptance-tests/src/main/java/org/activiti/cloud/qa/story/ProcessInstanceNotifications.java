@@ -58,10 +58,9 @@ public class ProcessInstanceNotifications {
     @Autowired
     private ObjectMapper objectMapper = new ObjectMapper();
     
-    private ProcessInstance processInstance;
+    private AtomicReference<ProcessInstance> processInstanceRef;
     private ReplayProcessor<String> data;
-    private String processInstanceId;
-    private AtomicReference<Subscription> subscriptionRef = new AtomicReference<>();
+    private AtomicReference<Subscription> subscriptionRef;
 
     @When("services are started")
     public void checkServicesStatus() {
@@ -72,6 +71,9 @@ public class ProcessInstanceNotifications {
     @When("the user starts a process $processName with PROCESS_STARTED and PROCESS_COMPLETED events subscriptions")
     public void startProcess(String processName) throws IOException, InterruptedException {
 
+        processInstanceRef =  new AtomicReference<>();
+        subscriptionRef = new AtomicReference<>();
+                
         CountDownLatch countDownLatch = new CountDownLatch(1);
         AuthToken authToken = TokenHolder.getAuthToken();
         
@@ -100,17 +102,21 @@ public class ProcessInstanceNotifications {
         
         data = notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
 
-        countDownLatch.await(10, TimeUnit.SECONDS);
+        assertThat(countDownLatch.await(10, TimeUnit.SECONDS)).as("should start a process with events subscription")
+                                                              .isTrue();
     }
 
     @When("the user starts a process $processName with SIGNAL_RECEIVED subscription")
     public void startProcessWithSignalSubscription(String processName) throws IOException, InterruptedException {
 
+        processInstanceRef =  new AtomicReference<>();
+        subscriptionRef = new AtomicReference<>();
+
         CountDownLatch countDownLatch = new CountDownLatch(1);
         AuthToken authToken = TokenHolder.getAuthToken();
          
         String query = "subscription($serviceName: String!) {" +
-                        "  engineEvents(serviceName: $serviceName ) {" +
+                        "  engineEvents(serviceName: $serviceName) {" +
                         "    SIGNAL_RECEIVED {" +
                         "      entity {" +
                         "        elementId" +
@@ -125,18 +131,18 @@ public class ProcessInstanceNotifications {
         
         data = notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
         
-        countDownLatch.await(10, TimeUnit.SECONDS);
+        assertThat(countDownLatch.await(10, TimeUnit.SECONDS)).as("should start a process with subscription")
+                                                              .isTrue();
     }    
     
-    private void checkProcessCreated() {
-        assertThat(processInstance).isNotNull();
-        processInstanceId = processInstance.getId();
-    }
-
     @Then("the status of the process is completed")
     public void verifyProcessCompleted() throws Exception {
+        
+        assertThat(processInstanceRef.get()).isNotNull();
+
         try {
-            processQuerySteps.checkProcessInstanceStatus(processInstanceId,
+            processQuerySteps.checkProcessInstanceStatus(processInstanceRef.get()
+                                                                           .getId(),
                                                          ProcessInstance.ProcessInstanceStatus.COMPLETED);
         } finally {
             // signal to stop receiving notifications 
@@ -181,14 +187,17 @@ public class ProcessInstanceNotifications {
             subscriptionRef.set(s);
 
             Mono.just(s)
-                .delaySubscription(Duration.ofSeconds(1))
-                .doOnSuccess(it -> countDownLatch.countDown())
+                .delaySubscription(Duration.ofSeconds(2))
+                //.doOnSuccess(it ->  countDownLatch.countDown())
                 .doOnError(e -> subscriptionRef.get()
                                                .cancel())
                 .subscribe(it -> { 
                     try {
-                        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),true);
-                        checkProcessCreated();
+                        String processDefinitionKey = processDefinitionKeyMatcher(processName);
+                        
+                        processInstanceRef.set(processRuntimeBundleSteps.startProcess(processDefinitionKey, true));
+                        
+                        countDownLatch.countDown();
                     } catch (Exception cause) {
                         // TODO Auto-generated catch block
                         cause.printStackTrace();
