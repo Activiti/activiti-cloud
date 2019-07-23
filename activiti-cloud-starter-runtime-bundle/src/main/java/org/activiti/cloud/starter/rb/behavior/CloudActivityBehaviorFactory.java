@@ -22,6 +22,7 @@ import org.activiti.bpmn.model.ThrowEvent;
 import org.activiti.engine.impl.bpmn.behavior.IntermediateThrowSignalEventActivityBehavior;
 import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
+import org.activiti.spring.process.ProcessVariablesInitiator;
 import org.springframework.context.ApplicationContext;
 
 import static org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior.DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME;
@@ -31,8 +32,10 @@ public class CloudActivityBehaviorFactory extends MappingAwareActivityBehaviorFa
     private ApplicationContext applicationContext;
 
     public CloudActivityBehaviorFactory(ApplicationContext applicationContext,
-                                        VariablesMappingProvider variablesMappingProvider) {
-        super(variablesMappingProvider);
+                                        VariablesMappingProvider variablesMappingProvider,
+                                        ProcessVariablesInitiator processVariablesInitiator
+                                        ) {
+        super(variablesMappingProvider, processVariablesInitiator);
         this.applicationContext = applicationContext;
     }
 

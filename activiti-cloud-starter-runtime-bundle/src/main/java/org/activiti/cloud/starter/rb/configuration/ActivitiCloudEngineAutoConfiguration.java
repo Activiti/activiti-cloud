@@ -17,6 +17,7 @@
 package org.activiti.cloud.starter.rb.configuration;
 
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
+import org.activiti.spring.process.ProcessVariablesInitiator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,8 +27,11 @@ public class ActivitiCloudEngineAutoConfiguration {
 
     @Bean
     public SignalBehaviourConfigurer signalBehaviourConfigurator(ApplicationContext applicationContext,
-                                                                 VariablesMappingProvider variablesMappingProvider){
-        return new SignalBehaviourConfigurer(applicationContext, variablesMappingProvider);
+                                                                 VariablesMappingProvider variablesMappingProvider,
+                                                                 ProcessVariablesInitiator processVariablesInitiator
+    ) {
+        return new SignalBehaviourConfigurer(applicationContext,
+                                             variablesMappingProvider,
+                                             processVariablesInitiator);
     }
-
 }

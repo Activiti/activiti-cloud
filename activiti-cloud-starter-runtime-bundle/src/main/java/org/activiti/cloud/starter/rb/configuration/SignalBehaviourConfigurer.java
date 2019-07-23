@@ -20,22 +20,29 @@ import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
+import org.activiti.spring.process.ProcessVariablesInitiator;
 import org.springframework.context.ApplicationContext;
 
 public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConfigurer {
 
     private ApplicationContext applicationContext;
     private VariablesMappingProvider variablesMappingProvider;
+    private ProcessVariablesInitiator processVariablesInitiator;
 
     public SignalBehaviourConfigurer(ApplicationContext applicationContext,
-                                     VariablesMappingProvider variablesMappingProvider) {
+                                     VariablesMappingProvider variablesMappingProvider,
+                                     ProcessVariablesInitiator processVariablesInitiator
+    ) {
         this.applicationContext = applicationContext;
         this.variablesMappingProvider = variablesMappingProvider;
+        this.processVariablesInitiator = processVariablesInitiator;
     }
 
     @Override
     public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
         processEngineConfiguration.setActivityBehaviorFactory(new CloudActivityBehaviorFactory(applicationContext,
-                                                                                               variablesMappingProvider));
+                                                                                               variablesMappingProvider,
+                                                                                               processVariablesInitiator
+        ));
     }
 }

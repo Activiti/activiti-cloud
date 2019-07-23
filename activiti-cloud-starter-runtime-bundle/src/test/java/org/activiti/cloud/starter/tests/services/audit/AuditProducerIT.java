@@ -277,10 +277,10 @@ public class AuditProducerIT {
 
             assertThat(streamHandler.getLatestReceivedEvents())
                     .extracting(event -> event.getEventType().name())
-                    .containsExactly(VARIABLE_UPDATED.name(),/*task local var copied back to proc var*/
-                                     TASK_COMPLETED.name(),
+                    .containsExactly(TASK_COMPLETED.name(),
                                      TASK_CANDIDATE_GROUP_REMOVED.name(),
                                      TASK_CANDIDATE_USER_REMOVED.name(),
+                                     VARIABLE_UPDATED.name(),/*task local var copied back to proc var*/
                                      BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*user task*/,
                                      SEQUENCE_FLOW_TAKEN.name(),
                                      ACTIVITY_STARTED.name()/*end event*/,
