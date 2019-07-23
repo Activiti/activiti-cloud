@@ -37,7 +37,7 @@ public class EngineConfigurationIT {
     private SpringProcessEngineConfiguration configuration;
 
     @Test
-    public void shouldUseCloudCloudActivityBehaviorFactory() {
+    public void shouldUseCloudActivityBehaviorFactory() {
         assertThat(configuration.getActivityBehaviorFactory())
                 .isInstanceOf(MappingAwareActivityBehaviorFactory.class)
                 .isInstanceOf(CloudActivityBehaviorFactory.class);
