@@ -43,6 +43,7 @@ public class CloudActivityBehaviorFactory extends MappingAwareActivityBehaviorFa
     public IntermediateThrowSignalEventActivityBehavior createIntermediateThrowSignalEventActivityBehavior(ThrowEvent throwEvent,
                                                                                                            SignalEventDefinition signalEventDefinition,
                                                                                                            Signal signal) {
+        
         return (IntermediateThrowSignalEventActivityBehavior) applicationContext.getBean(DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME, applicationContext, signalEventDefinition, signal);
     }
 }
