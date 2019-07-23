@@ -19,6 +19,7 @@ package org.activiti.cloud.starter.tests.conf;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
+import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,8 +37,13 @@ public class EngineConfigurationIT {
     private SpringProcessEngineConfiguration configuration;
 
     @Test
-    public void shouldUseCloudCloudActivityBehaviorFactory() {
-        assertThat(configuration.getActivityBehaviorFactory()).isInstanceOf(CloudActivityBehaviorFactory.class);
-        assertThat(configuration.getBpmnParser().getActivityBehaviorFactory()).isInstanceOf(CloudActivityBehaviorFactory.class);
+    public void shouldUseCloudActivityBehaviorFactory() {
+        assertThat(configuration.getActivityBehaviorFactory())
+                .isInstanceOf(MappingAwareActivityBehaviorFactory.class)
+                .isInstanceOf(CloudActivityBehaviorFactory.class);
+
+        assertThat(configuration.getBpmnParser().getActivityBehaviorFactory())
+                .isInstanceOf(MappingAwareActivityBehaviorFactory.class)
+                .isInstanceOf(CloudActivityBehaviorFactory.class);
     }
 }
