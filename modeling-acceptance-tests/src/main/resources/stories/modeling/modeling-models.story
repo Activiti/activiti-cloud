@@ -39,10 +39,8 @@ Then the model is saved with the process variables 'gender, experience'
 
 Scenario: validate process model file
 Given the user is authenticated as modeler
-And an existing project 'Mars Team'
-When the user opens the project 'Mars Team'
-And creates the process model landing-rover with process variables 'age, gender'
-And opens the process model 'landing-rover'
+And an project 'Mission Europa' with process model landing-rover and process variables 'age, gender'
+When opens the process model 'landing-rover'
 Then the model is valid
 
 Scenario: validate invalid process model file

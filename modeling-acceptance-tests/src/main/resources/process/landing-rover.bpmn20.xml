@@ -6,16 +6,16 @@
         <modeler:editor-resource-id><![CDATA[startEvent1]]></modeler:editor-resource-id>
       </extensionElements>
     </startEvent>
-    <userTask id="sid-2582C722-01AF-413B-B358-4043E6428B77" name="x" activiti:assignee="$INITIATOR" activiti:formKey="19020">
+    <userTask id="ServiceTask" name="x" activiti:assignee="$INITIATOR" activiti:formKey="19020">
       <extensionElements>
         <modeler:allow-send-email><![CDATA[true]]></modeler:allow-send-email>
         <modeler:form-reference-id><![CDATA[19020]]></modeler:form-reference-id>
         <modeler:form-reference-name><![CDATA[x]]></modeler:form-reference-name>
         <modeler:activiti-idm-initiator><![CDATA[true]]></modeler:activiti-idm-initiator>
-        <modeler:editor-resource-id><![CDATA[sid-2582C722-01AF-413B-B358-4043E6428B77]]></modeler:editor-resource-id>
+        <modeler:editor-resource-id><![CDATA[ServiceTask]]></modeler:editor-resource-id>
       </extensionElements>
     </userTask>
-    <sequenceFlow id="sid-75BFD70C-7949-441E-B85A-11C29A9BA0CD" sourceRef="startEvent1" targetRef="sid-2582C722-01AF-413B-B358-4043E6428B77">
+    <sequenceFlow id="sid-75BFD70C-7949-441E-B85A-11C29A9BA0CD" sourceRef="startEvent1" targetRef="ServiceTask">
       <extensionElements>
         <modeler:editor-resource-id><![CDATA[sid-75BFD70C-7949-441E-B85A-11C29A9BA0CD]]></modeler:editor-resource-id>
       </extensionElements>
@@ -25,7 +25,7 @@
         <modeler:editor-resource-id><![CDATA[sid-15E5CFB4-BD94-4B42-92C5-2F050B180D66]]></modeler:editor-resource-id>
       </extensionElements>
     </endEvent>
-    <sequenceFlow id="sid-99724E18-E855-4D9A-926D-E014F78067CF" sourceRef="sid-2582C722-01AF-413B-B358-4043E6428B77" targetRef="sid-15E5CFB4-BD94-4B42-92C5-2F050B180D66">
+    <sequenceFlow id="sid-99724E18-E855-4D9A-926D-E014F78067CF" sourceRef="ServiceTask" targetRef="sid-15E5CFB4-BD94-4B42-92C5-2F050B180D66">
       <extensionElements>
         <modeler:editor-resource-id><![CDATA[sid-99724E18-E855-4D9A-926D-E014F78067CF]]></modeler:editor-resource-id>
       </extensionElements>
@@ -36,7 +36,7 @@
       <bpmndi:BPMNShape bpmnElement="startEvent1" id="BPMNShape_startEvent1">
         <omgdc:Bounds height="30.0" width="30.0" x="100.0" y="163.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="sid-2582C722-01AF-413B-B358-4043E6428B77" id="BPMNShape_sid-2582C722-01AF-413B-B358-4043E6428B77">
+      <bpmndi:BPMNShape bpmnElement="ServiceTask" id="BPMNShape_ServiceTask">
         <omgdc:Bounds height="80.0" width="100.0" x="175.0" y="138.0"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="sid-15E5CFB4-BD94-4B42-92C5-2F050B180D66" id="BPMNShape_sid-15E5CFB4-BD94-4B42-92C5-2F050B180D66">
