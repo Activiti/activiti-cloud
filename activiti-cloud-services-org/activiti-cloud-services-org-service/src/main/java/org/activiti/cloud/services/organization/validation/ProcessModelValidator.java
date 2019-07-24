@@ -45,6 +45,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -55,6 +56,7 @@ import static org.springframework.util.StringUtils.isEmpty;
  * {@link ModelValidator} implementation of process models
  */
 @Component
+@ConditionalOnMissingBean(name = "ProcessModelValidator")
 public class ProcessModelValidator implements ModelValidator {
 
     private final Logger log = LoggerFactory.getLogger(ProcessModelValidator.class);
@@ -91,13 +93,9 @@ public class ProcessModelValidator implements ModelValidator {
         try {
             BpmnModel bpmnModel = processModelContentConverter.convertToBpmnModel(bytes);
             List<ValidationError> validationErrors = processValidator.validate(bpmnModel);
+            Stream<Optional<ValidationError>> validationErrorsStream = validateModelContentInCurrentContext(bpmnModel,
+                                                                                                            validationContext);
 
-            Stream<Optional<ValidationError>> validationErrorsStream = validateUserTasksAssignee(bpmnModel);
-            if (!validationContext.equals(ValidationContext.EMPTY_CONTEXT)) {
-                validationErrorsStream = Stream.concat(validationErrorsStream,
-                                                       validateServiceTasksImplementation(bpmnModel,
-                                                                                          validationContext));
-            }
             validationErrors.addAll(validationErrorsStream.map(Optional::get).collect(Collectors.toList()));
             if (!validationErrors.isEmpty()) {
                 log.error("Semantic process model validation errors encountered: " + validationErrors);
@@ -115,6 +113,18 @@ public class ProcessModelValidator implements ModelValidator {
         }
     }
 
+    protected Stream<Optional<ValidationError>> validateModelContentInCurrentContext(BpmnModel bpmnModel,
+                                                                                     ValidationContext validationContext) {
+        Stream<Optional<ValidationError>> validationErrorsStream = validateUserTasksAssignee(bpmnModel);
+
+        if (!validationContext.equals(ValidationContext.EMPTY_CONTEXT)) {
+            validationErrorsStream = Stream.concat(validationErrorsStream,
+                                                   validateServiceTasksImplementation(bpmnModel,
+                                                                                      validationContext));
+        }
+        return validationErrorsStream;
+    }
+
     private Stream<Optional<ValidationError>> validateServiceTasksImplementation(BpmnModel bpmnModel,
                                                                                  ValidationContext validationContext) {
         List<String> availableImplementations = getAvailableImplementations(validationContext);
@@ -126,8 +136,8 @@ public class ProcessModelValidator implements ModelValidator {
                 .filter(Optional::isPresent);
     }
 
-    private <T extends Task> Stream<T> getTasksStream(BpmnModel bpmnModel,
-                                                      Class<T> taskType) {
+    protected <T extends Task> Stream<T> getTasksStream(BpmnModel bpmnModel,
+                                                        Class<T> taskType) {
         return bpmnModel.getProcesses()
                 .stream()
                 .flatMap(process -> process.getFlowElements().stream())
@@ -139,12 +149,12 @@ public class ProcessModelValidator implements ModelValidator {
         return validationContext.getAvailableModels()
                 .stream()
                 .filter(model -> ConnectorModelType.NAME.equals(model.getType()))
-                .map(this::concatImplementationsAndActions)
+                .map(this::concatNameAndActions)
                 .flatMap(Stream::sorted)
                 .collect(Collectors.toList());
     }
 
-    private Stream<String> concatImplementationsAndActions(Model model) {
+    private Stream<String> concatNameAndActions(Model model) {
         return Optional.ofNullable(model.getContent())
                 .map(String::getBytes)
                 .flatMap(connectorModelContentConverter::convertToModelContent)
@@ -152,12 +162,12 @@ public class ProcessModelValidator implements ModelValidator {
                 .getActions()
                 .values()
                 .stream()
-                .map(connectorModelAction -> concatImplementationAndAction(connectorModelAction,
-                                                                           model));
+                .map(connectorModelAction -> concatNameAndAction(connectorModelAction,
+                                                                 model));
     }
 
-    private String concatImplementationAndAction(ConnectorModelAction connectorModelAction,
-                                                 Model model) {
+    private String concatNameAndAction(ConnectorModelAction connectorModelAction,
+                                       Model model) {
         return StringUtils.isEmpty(connectorModelAction.getName()) ? model.getName() : model.getName() + "." + connectorModelAction.getName();
     }
 
