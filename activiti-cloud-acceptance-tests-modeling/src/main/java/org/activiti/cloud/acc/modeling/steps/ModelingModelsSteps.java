@@ -34,8 +34,8 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.modeling.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.acc.modeling.modeling.EnableModelingContext;
 import org.activiti.cloud.acc.modeling.service.ModelingModelsService;
-import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.api.process.ProcessVariable;
 import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
 import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
@@ -153,6 +153,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
         assertThat(currentContext.getContent()).isInstanceOf(Model.class);
         final Model model = currentContext.getContent();
+        model.setId(getModelId(currentContext));
         List<Response> responses = new ArrayList<>();
         responses.add(validateModel(currentContext,
                                     getFormData(model)));
@@ -164,14 +165,32 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         return responses;
     }
 
+    private String getModelId(Resource<Model> model) {
+        String href = model.getLink(REL_SELF).getHref();
+        return href.substring(href.lastIndexOf('/') + 1);
+    }
     private FormData getFormData(Model model,
                                  boolean isExtensionType) throws IOException {
         final String fileExtension = isExtensionType ? CONTENT_TYPE_JSON : getModelType(model.getType()).getContentFileExtension();
-        final String fileName = isExtensionType ? toJsonFilename(model.getName() + getModelType(model.getType()).getMetadataFileSuffix()) : setExtension(model.getName(),
-                                                                                                                                                         fileExtension);
+        final String fileName = isExtensionType ?
+                toJsonFilename(model.getName() + getModelType(model.getType()).getMetadataFileSuffix()) :
+                setExtension(model.getName(),
+                             fileExtension);
+        final String resourcePath = model.getType().toLowerCase() + "/" + fileName;
         return new FormData(fileExtension,
                             fileName,
-                            resourceAsByteArray(model.getType().toLowerCase() + "/" + fileName));
+                            isExtensionType ?
+                                    resourceAsModelExtensionsFile(model,
+                                                                  resourcePath) :
+                                    resourceAsByteArray(resourcePath));
+    }
+
+    private byte[] resourceAsModelExtensionsFile(Model model,
+                                                 String resourcePath) throws IOException {
+        return new String(resourceAsByteArray(resourcePath))
+                .replaceFirst("\"id\": \".*\"",
+                              "\"id\": \"process-" + model.getId() + "\"")
+                .getBytes();
     }
 
     private FormData getFormData(Model model) throws IOException {
