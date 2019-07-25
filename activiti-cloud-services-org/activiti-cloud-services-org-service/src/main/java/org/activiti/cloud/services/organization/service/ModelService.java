@@ -44,6 +44,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.isJsonContentType;
@@ -103,9 +104,9 @@ public class ModelService {
 
     public Model createModel(Project project,
                              Model model) {
-        findModelType(model);
+        ModelType modelType = findModelType(model);
         model.setProject(project);
-        if (model.getExtensions() == null) {
+        if (model.getExtensions() == null && PROCESS.equals(modelType.getName())) {
             model.setExtensions(new Extensions());
         }
         return modelRepository.createModel(model);

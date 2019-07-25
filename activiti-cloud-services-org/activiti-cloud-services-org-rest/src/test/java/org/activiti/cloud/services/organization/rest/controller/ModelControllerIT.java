@@ -32,6 +32,7 @@ import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.entity.ProjectEntity;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -48,6 +49,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
@@ -134,7 +136,7 @@ public class ModelControllerIT {
     }
 
     @Test
-    public void testCreateModel() throws Exception {
+    public void testCreateProcessModel() throws Exception {
         // GIVEN
         Project project = projectRepository.createProject(project("Parent Project"));
 
@@ -147,10 +149,36 @@ public class ModelControllerIT {
                 .andDo(print())
                 // THEN
                 .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name",
+                                    equalTo("Process Model")))
+                .andExpect(jsonPath("$.type",
+                                    equalTo(PROCESS)))
                 .andExpect(jsonPath("$.extensions.properties",
                                     notNullValue()))
                 .andExpect(jsonPath("$.extensions.mappings",
                                     notNullValue()));
+    }
+
+    @Test
+    public void testCreateConnectorModel() throws Exception {
+        // GIVEN
+        Project project = projectRepository.createProject(project("Parent Project"));
+
+        // WHEN
+        mockMvc.perform(post("{version}/projects/{projectId}/models",
+                             API_VERSION,
+                             project.getId())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(connectorModel("connector-model"))))
+                // THEN
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name",
+                                    equalTo("connector-model")))
+                .andExpect(jsonPath("$.type",
+                                    equalTo(ConnectorModelType.NAME)))
+                .andExpect(jsonPath("$",
+                                    hasNoJsonPath("extensions")));
+
     }
 
     @Test
@@ -451,6 +479,365 @@ public class ModelControllerIT {
                                     is(PROCESS)))
                 .andExpect(jsonPath("$._embedded.model-types[1].name",
                                     is(ConnectorModelType.NAME)));
+    }
+
+    @Test
+    public void validateProcessModelWithValidContent() throws Exception {
+        // given
+        byte[] validContent = resourceAsByteArray("process/x-19022.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "process.xml",
+                                                       CONTENT_TYPE_XML,
+                                                       validContent);
+        Model processModel = modelRepository.createModel(processModel("Process-Model"));
+
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId())
+                                 .file(file))
+                // then
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void validateProcessModelWithInvalidContent() throws Exception {
+
+        // given
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "diagram.bpm",
+                                                       CONTENT_TYPE_XML,
+                                                       "BPMN diagram".getBytes());
+        Model processModel = modelRepository.createModel(processModel("Process-Model"));
+
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId())
+                                 .file(file))
+                // then
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Ignore
+    public void validateProcessExtensionsWithValidContent() throws Exception {
+
+        // given
+        byte[] validContent = resourceAsByteArray("process-extensions/valid-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       validContent);
+
+        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+                                                                                    new Extensions()));
+
+        // when
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  RepositoryRestConfig.API_VERSION,
+                                  processModel.getId())
+                                .file(file))
+                // then
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @Ignore
+    public void validateProcessExtensionsWithValidContentAndNoValues() throws Exception {
+
+        // given
+        byte[] validContent = resourceAsByteArray("process-extensions/valid-extensions-no-value.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       validContent);
+
+        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+                                                                                    new Extensions()));
+
+        // when
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  RepositoryRestConfig.API_VERSION,
+                                  processModel.getId())
+                                .file(file))
+                // then
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void validateProcessExtensionsWithInvalidMappingContent() throws Exception {
+
+        // given
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-mapping-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       invalidContent);
+
+        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+                                                                                    new Extensions()));
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId()).file(file))
+                .andDo(print());
+        // then
+        resultActions.andExpect(status().isBadRequest());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage()).isEqualTo("#/extensions/mappings/ServiceTask_06crg3b: 2 schema violations found");
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(2)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription)
+                .containsOnly(tuple("inputds is not a valid enum value",
+                                    "#/extensions/mappings/ServiceTask_06crg3b/inputds: inputds is not a valid enum value"),
+                              tuple("outputss is not a valid enum value",
+                                    "#/extensions/mappings/ServiceTask_06crg3b/outputss: outputss is not a valid enum value"));
+    }
+
+    @Test
+    public void validateProcessExtensionsWithInvalidStringVariableContent() throws Exception {
+
+        // given
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-string-variable-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       invalidContent);
+
+        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+                                                                                    new Extensions()));
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId()).file(file))
+                .andDo(print());
+        // then
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription)
+                .containsExactly(tuple("expected type: String, found: Integer",
+                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: String, found: Integer"));
+    }
+
+    @Test
+    public void validateProcessExtensionsWithInvalidIntegerVariableContent() throws Exception {
+
+        // given
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-integer-variable-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       invalidContent);
+
+        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+                                                                                    new Extensions()));
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId()).file(file))
+                .andDo(print());
+        // then
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription)
+                .containsExactly(tuple("expected type: Number, found: String",
+                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: Number, found: String"));
+    }
+
+    @Test
+    public void validateProcessExtensionsWithInvalidBooleanVariableContent() throws Exception {
+
+        // given
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-boolean-variable-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       invalidContent);
+
+        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+                                                                                    new Extensions()));
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId()).file(file))
+                .andDo(print());
+        // then
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription)
+                .containsExactly(tuple("expected type: Boolean, found: Integer",
+                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: Boolean, found: Integer"));
+    }
+
+    @Test
+    public void validateProcessExtensionsWithInvalidObjectVariableContent() throws Exception {
+
+        // given
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-object-variable-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       invalidContent);
+
+        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+                                                                                    new Extensions()));
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId()).file(file))
+                .andDo(print());
+        // then
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription)
+                .containsExactly(tuple("expected type: JSONObject, found: Integer",
+                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: JSONObject, found: Integer"));
+    }
+
+    @Test
+    public void validateProcessExtensionsWithInvalidDateVariableContent() throws Exception {
+
+        // given
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-date-variable-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       invalidContent);
+
+        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+                                                                                    new Extensions()));
+        // when
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId()).file(file))
+                .andDo(print());
+        // then
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription)
+                .containsExactly(
+                        tuple("expected type: String, found: Integer",
+                              "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: String, found: Integer"),
+                        tuple("string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
+                              "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c64/value: string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$")
+                );
+    }
+
+    @Test
+    public void validateModelThatNotExistsShouldThrowException() throws Exception {
+        // given
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "diagram.bpm",
+                                                       "text/plain",
+                                                       "BPMN diagram".getBytes());
+        // when
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  RepositoryRestConfig.API_VERSION,
+                                  "model_id")
+                                .file(file))
+                // then
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void validateInvalidProcessModelUsingTextContentType() throws Exception {
+
+        // given
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "diagram.bpmn20.xml",
+                                                       "text/plain",
+                                                       "BPMN diagram".getBytes());
+        Model processModel = modelRepository.createModel(processModel("Process-Model"));
+
+        // when
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  API_VERSION,
+                                  processModel.getId())
+                                .file(file))
+                // then
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void validateConnectorValidContent() throws Exception {
+        // given
+        byte[] validContent = resourceAsByteArray("connector/connector-simple.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "connector-simple.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       validContent);
+        Model connectorModel = modelRepository.createModel(connectorModel("Connector-Model"));
+
+        // when
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  API_VERSION,
+                                  connectorModel.getId())
+                                .file(file))
+                // then
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void validateConnectorValidContentWithTemplate() throws Exception {
+        // given
+        byte[] validContent = resourceAsByteArray("connector/connector-template.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "connector-template.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       validContent);
+        Model connectorModel = modelRepository.createModel(connectorModel("Connector-Model"));
+
+        // when
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  API_VERSION,
+                                  connectorModel.getId())
+                                .file(file))
+                // then
+                .andExpect(status().isNoContent());
     }
 
     @Test
