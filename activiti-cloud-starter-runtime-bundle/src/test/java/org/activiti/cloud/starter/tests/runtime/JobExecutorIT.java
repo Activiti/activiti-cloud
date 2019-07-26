@@ -16,6 +16,15 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,10 +76,12 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -78,11 +89,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.Mockito.*;
-
 @RunWith(SpringRunner.class)
+@ActiveProfiles(JobExecutorIT.JOB_EXECUTOR_IT)
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "spring.activiti.asyncExecutorActivate=true",
@@ -91,6 +99,7 @@ import static org.mockito.Mockito.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class JobExecutorIT {
     private static final Logger logger = LoggerFactory.getLogger(JobExecutorIT.class);
+    public static final String JOB_EXECUTOR_IT = "JobExecutorIT";
 
     private static final String FAILED_TIMER_JOB_RETRY = "failedTimerJobRetry";
     private static final String FAILED_JOB_RETRY = "failedJobRetry";
@@ -141,6 +150,7 @@ public class JobExecutorIT {
     private SubscribableChannel spyJobMessageChannel;
     
     @TestConfiguration
+    @Profile(JOB_EXECUTOR_IT)
     static class JobExecutorITProcessEngineConfigurer implements ProcessEngineConfigurationConfigurer {
         
         @Override

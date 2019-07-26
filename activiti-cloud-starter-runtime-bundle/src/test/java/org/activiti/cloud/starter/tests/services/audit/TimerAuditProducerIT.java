@@ -16,6 +16,14 @@
 
 package org.activiti.cloud.starter.tests.services.audit;
 
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.RUNTIME_BUNDLE_INFO_HEADERS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -47,26 +55,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.RUNTIME_BUNDLE_INFO_HEADERS;
-import static org.assertj.core.api.Assertions.*;
-import static org.awaitility.Awaitility.await;
-
 @RunWith(SpringRunner.class)
-@ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
+@ActiveProfiles({AuditProducerIT.AUDIT_PRODUCER_IT, TimerAuditProducerIT.TIMER_AUDIT_PRODUCER_IT})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class TimerAuditProducerIT {
 
+    public static final String TIMER_AUDIT_PRODUCER_IT = "TimerAuditProducerIT";
+    
     private static final String PROCESS_INTERMEDIATE_TIMER_EVENT = "intermediateTimerEventExample";
     private static final String FAILED_TIMER_JOB_RETRY = "failedTimerJobRetryExample";
 
@@ -85,6 +89,7 @@ public class TimerAuditProducerIT {
     private Logger logger = LoggerFactory.getLogger(TimerAuditProducerIT.class);
     
     @TestConfiguration
+    @Profile(TIMER_AUDIT_PRODUCER_IT)
     static class JobExecutorITProcessEngineConfigurer implements ProcessEngineConfigurationConfigurer {
         
         @Override
