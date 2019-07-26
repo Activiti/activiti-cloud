@@ -29,8 +29,8 @@ import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.persistence.deploy.DeploymentManager;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.runtime.api.connector.InboundVariablesProvider;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
+import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.activiti.services.test.DelegateExecutionBuilder;
 import org.assertj.core.api.Assertions;
@@ -106,7 +106,7 @@ public class IntegrationRequestSenderTest {
     private IntegrationContextEntity integrationContextEntity;
 
     @Mock
-    private InboundVariablesProvider inboundVariablesProvider;
+    private VariablesMappingProvider inboundVariablesProvider;
 
     private DelegateExecution delegateExecution;
 
@@ -142,7 +142,7 @@ public class IntegrationRequestSenderTest {
         IntegrationContextEntity contextEntity = mock(IntegrationContextEntity.class);
         given(contextEntity.getId()).willReturn(INTEGRATION_CONTEXT_ID);
 
-        IntegrationContext integrationContext = new IntegrationContextBuilder(inboundVariablesProvider).from(contextEntity, delegateExecution, null);
+        IntegrationContext integrationContext = new IntegrationContextBuilder(inboundVariablesProvider).from(contextEntity, delegateExecution);
         integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setServiceFullName(APP_NAME);
     }

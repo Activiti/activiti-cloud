@@ -32,7 +32,7 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
-import org.activiti.runtime.api.connector.OutboundVariablesProvider;
+import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -42,14 +42,12 @@ import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ServiceTaskIntegrationResultEventHandlerTest {
@@ -81,7 +79,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @Mock
-    private OutboundVariablesProvider outboundVariablesProvider;
+    private VariablesMappingProvider outboundVariablesProvider;
 
     @Mock
     private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
@@ -114,12 +112,16 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(ENTITY_ID))
                 .willReturn(integrationContextEntity);
         given(executionQuery.list()).willReturn(Collections.singletonList(mock(Execution.class)));
+        given(executionQuery.list().get(0).getActivityId()).willReturn(CLIENT_ID);
         Map<String, Object> variables = Collections.singletonMap("var1",
                 "v");
 
         IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
 
-        given(outboundVariablesProvider.calculateVariables(integrationContext)).willReturn(variables);
+        given(outboundVariablesProvider.calculateOutPutVariables(buildMappingExecutionContext(PROC_DEF_ID,
+                                                                                              CLIENT_ID),
+                                                                 integrationContext.getOutBoundVariables()))
+                .willReturn(variables);
 
         //when
         handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));

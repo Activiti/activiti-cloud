@@ -202,7 +202,7 @@ public class MQServiceTaskIT {
                                   tuple("nickName",
                                         "testName"),//kept unchanging because no connector output is updating it
                                   tuple("out-unmapped-variable-matching-name",
-                                        "outTest"),//not present in extension mappings, but it's updated because
+                                        "default"),//not present in extension mappings, hence not updated although
                                                     // the process variable have the same name as the connector output
                                   tuple("output-unmapped-variable-with-non-matching-connector-output-name",
                                         "default"));//kept unchanging because no connector output is updating it

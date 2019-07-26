@@ -78,7 +78,7 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
                                       IntegrationContextEntity integrationContext) {
 
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContextBuilder.from(integrationContext,
-                execution, defaultServiceTaskBehavior.findRelatedActionDefinition(execution)));
+                                                                                                              execution));
 
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequest);
 

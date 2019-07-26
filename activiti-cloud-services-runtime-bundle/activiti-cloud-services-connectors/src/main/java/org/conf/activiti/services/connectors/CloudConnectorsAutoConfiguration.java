@@ -20,10 +20,9 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
-import org.activiti.runtime.api.connector.ConnectorActionDefinitionFinder;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
-import org.activiti.runtime.api.connector.OutboundVariablesProvider;
+import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.conf.activiti.runtime.api.ConnectorsAutoConfiguration;
@@ -53,9 +52,8 @@ public class CloudConnectorsAutoConfiguration {
     @Bean(name = LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME)
     @ConditionalOnMissingBean(name = LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME)
     public DefaultServiceTaskBehavior localServiceTaskBehavior(ApplicationContext applicationContext,
-                                                               ConnectorActionDefinitionFinder connectorActionDefinitionFinder,
                                                                IntegrationContextBuilder integrationContextBuilder,
-                                                               OutboundVariablesProvider outboundVariablesProvider) {
+                                                               VariablesMappingProvider outboundVariablesProvider) {
         // this bean is exposed under two different names (LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME and
         // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME) to allow MQServiceTaskBehavior
         // to use composition instead of inheritance, this will make maintenance easier as changes in constructor
@@ -65,7 +63,6 @@ public class CloudConnectorsAutoConfiguration {
         // MQServiceTaskBehavior will replace it for cloud environment.
         return new DefaultServiceTaskBehavior(applicationContext,
                                               integrationContextBuilder,
-                                              connectorActionDefinitionFinder,
                                               outboundVariablesProvider);
     }
     
