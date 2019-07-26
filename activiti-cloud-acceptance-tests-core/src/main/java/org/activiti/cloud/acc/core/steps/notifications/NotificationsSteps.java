@@ -93,17 +93,11 @@ public class NotificationsSteps {
             return i.receive()
                     .asString()
                     .log("data")
-                    //.take(2) // stop subscription after 2 data messages received
-                    //.takeUntilOther(control)
                     .doOnSubscribe(action)
-                    //.delaySubscription(Duration.ofSeconds(1))
                     .subscribeWith(data);
         })
         .collectList()
         .subscribe();
-
-        // Let's wait for subscribe 
-        Thread.sleep(3000);
 
         return data;
     }
