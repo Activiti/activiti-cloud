@@ -37,6 +37,7 @@ import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.services.organization.converter.ConnectorModelAction;
+import org.activiti.cloud.services.organization.converter.ConnectorModelContent;
 import org.activiti.cloud.services.organization.converter.ConnectorModelContentConverter;
 import org.activiti.cloud.services.organization.converter.ProcessModelContentConverter;
 import org.activiti.validation.ProcessValidator;
@@ -47,7 +48,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.springframework.util.StringUtils.isEmpty;
@@ -117,7 +117,7 @@ public class ProcessModelValidator implements ModelValidator {
                                                                                      ValidationContext validationContext) {
         Stream<Optional<ValidationError>> validationErrorsStream = validateUserTasksAssignee(bpmnModel);
 
-        if (!validationContext.equals(ValidationContext.EMPTY_CONTEXT)) {
+        if (!(validationContext instanceof ModelValidationContext)) {
             validationErrorsStream = Stream.concat(validationErrorsStream,
                                                    validateServiceTasksImplementation(bpmnModel,
                                                                                       validationContext));
@@ -155,20 +155,25 @@ public class ProcessModelValidator implements ModelValidator {
     }
 
     private Stream<String> concatNameAndActions(Model model) {
-        return Optional.ofNullable(model.getContent())
-                .map(String::getBytes)
-                .flatMap(connectorModelContentConverter::convertToModelContent)
-                .get()
+        return extractConnectorModelContent(model).map(connectorModelContent -> connectorModelContent
                 .getActions()
                 .values()
                 .stream()
                 .map(connectorModelAction -> concatNameAndAction(connectorModelAction,
-                                                                 model));
+                                                                 model)))
+                .orElse(Stream.of(model.getName()));
+    }
+
+    private Optional<ConnectorModelContent> extractConnectorModelContent(Model model) {
+        return Optional.ofNullable(model.getContent())
+                .map(String::getBytes)
+                .flatMap(connectorModelContentConverter::convertToModelContent)
+                .filter(connectorModelContent -> connectorModelContent.getActions() != null);
     }
 
     private String concatNameAndAction(ConnectorModelAction connectorModelAction,
                                        Model model) {
-        return StringUtils.isEmpty(connectorModelAction.getName()) ? model.getName() : model.getName() + "." + connectorModelAction.getName();
+        return isEmpty(connectorModelAction) && isEmpty(connectorModelAction.getName()) ? model.getName() : model.getName() + "." + connectorModelAction.getName();
     }
 
     private Optional<ValidationError> validateServiceTaskImplementation(ServiceTask serviceTask,
