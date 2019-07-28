@@ -19,7 +19,6 @@ package org.activiti.cloud.services.notifications.graphql.events.consumer;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.activiti.cloud.services.notifications.graphql.events.transformer.Transformer;
 import org.slf4j.Logger;
@@ -34,13 +33,12 @@ import reactor.core.publisher.FluxSink;
 public class EngineEventsConsumerMessageHandler {
 
     private static Logger logger = LoggerFactory.getLogger(EngineEventsConsumerMessageHandler.class);
-    private static ObjectMapper objectMapper = new ObjectMapper();
 
-    private final FluxSink<Message<EngineEvent>> processorSink;
+    private final FluxSink<Message<List<EngineEvent>>> processorSink;
     private final Transformer transformer;
     
     public EngineEventsConsumerMessageHandler(Transformer transformer,
-                                      FluxSink<Message<EngineEvent>> engineEventsSink)
+                                      FluxSink<Message<List<EngineEvent>>> engineEventsSink)
     {
         this.processorSink = engineEventsSink;
         this.transformer = transformer;
@@ -58,8 +56,9 @@ public class EngineEventsConsumerMessageHandler {
             logger.info("Recieved source message with routingKey: {}", routingKey);
 
             return Flux.fromIterable(transformer.transform(events))
-                       .map(engineEvent -> MessageBuilder.<EngineEvent> createMessage(engineEvent,
-                                                                                      message.getHeaders()));
+                       .collectList()
+                       .map(list -> MessageBuilder.<List<EngineEvent>> createMessage(list,
+                                                                                     message.getHeaders()));
         })
         .doOnNext(processorSink::next)
         .doOnError(error -> logger.error("Error handling message ", error))

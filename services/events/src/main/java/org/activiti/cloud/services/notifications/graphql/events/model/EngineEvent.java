@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.activiti.cloud.services.notifications.graphql.events.SpELTemplateRoutingKey;
 
-@SpELTemplateRoutingKey("engineEvents.#{['serviceName']?:'_'}.#{['appName']?:'_'}.#{['processDefinitionKey']?:'_'}.#{['processInstanceId']?:'_'}.#{['businessKey']?:'_'}")
+@SpELTemplateRoutingKey("engineEvents.#{['serviceName']?:'_'}.#{['appName']?:'_'}.#{['eventType']?:'_'}.#{['processDefinitionKey']?:'_'}.#{['processInstanceId']?:'_'}.#{['businessKey']?:'_'}")
 public class EngineEvent extends LinkedHashMap<String, Object>{
 
     /**
@@ -34,6 +34,10 @@ public class EngineEvent extends LinkedHashMap<String, Object>{
 
     public EngineEvent(Map<? extends String, ? extends Object> m) {
         super(m);
+    }
+    
+    public String getEventType() {
+        return get("eventType").toString();
     }
 
 }

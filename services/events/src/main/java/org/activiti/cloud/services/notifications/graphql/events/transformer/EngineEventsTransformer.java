@@ -15,28 +15,22 @@
  */
 package org.activiti.cloud.services.notifications.graphql.events.transformer;
 
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 
 /**
- * Transform flat list of engine events maps into hierarchical structure
- * grouped by supplied common key attributes and event type ->
- * i.e. [{processInstanceId, serviceName, appName, processDefinitionId, eventType:[{attr1, attr2, ...}]}, ... ]
- *
+ * Transform flat list of engine events maps into linear structure with validation of eventType key
  */
 public class EngineEventsTransformer implements Transformer {
 
-    private final String[] attributeKeys;
+    private final List<String> attributeList;
     private final String eventTypeKey;
 
     public EngineEventsTransformer(List<String> attributeList, String eventTypeKey) {
-        this.attributeKeys = attributeList.toArray(new String[] {});
+        this.attributeList = attributeList;
         this.eventTypeKey = eventTypeKey;
     }
 
@@ -44,26 +38,11 @@ public class EngineEventsTransformer implements Transformer {
     public List<EngineEvent> transform(List<Map<String,Object>> events) {
         return events.stream()
                 .filter(this::isValid)
-                .collect(Collectors.groupingBy(this::processEngineEventAttributes, Collectors.groupingBy(this::eventType)))
-                .entrySet()
-                    .stream()
-                    .map(entry -> Stream.of(entry.getKey(), entry.getValue())
-                         .collect(EngineEvent::new, Map::putAll, Map::putAll)
-                    )
-                    .collect(Collectors.toList());
+                .map(it -> new EngineEvent(it))
+                .collect(Collectors.toList());
     }
 
     private boolean isValid(Map<String, Object> event) {
         return event.get(eventTypeKey) != null;
-    }
-
-    private String eventType(Map<String, Object> map) {
-        return map.get(eventTypeKey).toString();
-    }
-
-    private Map<String, Object> processEngineEventAttributes(Map<String, Object> map) {
-        return Stream.of(attributeKeys)
-           .map(key -> new AbstractMap.SimpleEntry<String, Object>(key, map.getOrDefault(key, "")))
-           .collect(Collectors.toMap(e -> e.getKey(), v -> Optional.ofNullable(v.getValue()).orElse("")));
     }
 }

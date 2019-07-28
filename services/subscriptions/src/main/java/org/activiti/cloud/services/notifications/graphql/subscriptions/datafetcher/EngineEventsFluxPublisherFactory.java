@@ -16,82 +16,38 @@
 package org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
+import java.util.logging.Level;
 
-import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
-import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
-import org.springframework.util.AntPathMatcher;
 import reactor.core.publisher.Flux;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 public class EngineEventsFluxPublisherFactory implements EngineEventsPublisherFactory {
 
-    private static Logger log = LoggerFactory.getLogger(EngineEventsFluxPublisherFactory.class);
+    private static Logger logger = Loggers.getLogger(EngineEventsFluxPublisherFactory.class);
 
-    private DataFetcherDestinationResolver destinationResolver = new AntPathDestinationResolver();
-
-    private final Flux<Message<EngineEvent>> engineEventsFlux;
-    private AntPathMatcher pathMatcher = new AntPathMatcher(".");
-    private final RoutingKeyResolver routingKeyResolver;
+    private final Flux<Message<List<EngineEvent>>> engineEventsFlux;
+    private final EngineEventsPredicateFactory predicateFactory;
     
-    public EngineEventsFluxPublisherFactory(Flux<Message<EngineEvent>> engineEventsFlux,
-                                            RoutingKeyResolver routingKeyResolver) {
+    public EngineEventsFluxPublisherFactory(Flux<Message<List<EngineEvent>>> engineEventsFlux,
+                                            EngineEventsPredicateFactory predicateFactory) {
         this.engineEventsFlux = engineEventsFlux;
-        this.routingKeyResolver = routingKeyResolver;
+        this.predicateFactory = predicateFactory;
     }
     
     @Override
-    public Flux<EngineEvent> getPublisher(DataFetchingEnvironment environment) {
-        Set<String> selections = resolveSelections(environment);
-        List<String> destinations = destinationResolver.resolveDestinations(environment);
-        
-        log.info("Resolved selections: {} for destinations: {}", selections, destinations);
+    public Flux<List<EngineEvent>> getPublisher(DataFetchingEnvironment environment) {
+        Predicate<? super EngineEvent> predicate = predicateFactory.getPredicate(environment);
 
-        return engineEventsFlux.map(Message::getPayload)
-                               .filter(engineEvent -> {
-                                   // filter events that do not match subscription arguments
-                                   String path = routingKeyResolver.resolveRoutingKey(engineEvent);
-                                   
-                                   return destinations.stream()
-                                                      .anyMatch(pattern -> pathMatcher.match(pattern, path));
-                               })
-                               .filter(engineEvent -> {
-                                   // apply filter to events that do not match selections in the subscription
-                                   return selections.stream().anyMatch(eventType -> engineEvent.containsKey(eventType));
-                               });
+        return engineEventsFlux.log(logger, Level.CONFIG, true)
+                               .flatMapSequential(message -> Flux.fromIterable(message.getPayload())
+                                                                 .filter(predicate)
+                                                                 .collectList()
+                                                                 .filter(list -> !list.isEmpty())
+                               );
     }
-    
-    /**
-     * @param destinationResolver
-     */
-    public EngineEventsFluxPublisherFactory destinationResolver(DataFetcherDestinationResolver destinationResolver) {
-        this.destinationResolver = destinationResolver;
-
-        return this;
-    }
-
-    
-    public EngineEventsFluxPublisherFactory pathMatcher(AntPathMatcher pathMatcher) {
-        this.pathMatcher = pathMatcher;
-        
-        return this;
-    }
-    
-    protected Set<String> resolveSelections(DataFetchingEnvironment environment) {
-        return environment.getField()
-                          .getSelectionSet()
-                          .getSelections()
-                          .stream()
-                          .filter(Field.class::isInstance)
-                          .map(Field.class::cast)
-                          .map(Field::getName)
-                          .collect(Collectors.toSet());
-    }
-    
-    
 }

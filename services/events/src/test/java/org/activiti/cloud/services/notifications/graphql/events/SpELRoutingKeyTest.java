@@ -17,8 +17,6 @@ package org.activiti.cloud.services.notifications.graphql.events;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
-import org.activiti.cloud.services.notifications.graphql.events.SpELTemplateRoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.junit.Test;
 
@@ -33,13 +31,14 @@ public class SpELRoutingKeyTest {
 
         notification.put("serviceName", "my-rb");
         notification.put("appName","app");
+        notification.put("eventType", "PROCESS_STARTED");
         notification.put("processDefinitionKey", "Simple");
         notification.put("processInstanceId", 12);
         notification.put("businessKey", "");
 
         String routingKey = routingKeyResolver.resolveRoutingKey(notification);
 
-        assertThat(routingKey).isEqualTo("engineEvents.my-rb.app.Simple.12._");
+        assertThat(routingKey).isEqualTo("engineEvents.my-rb.app.PROCESS_STARTED.Simple.12._");
 
     }
 

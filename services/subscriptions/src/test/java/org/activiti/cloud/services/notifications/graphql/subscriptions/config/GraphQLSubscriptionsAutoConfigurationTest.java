@@ -60,6 +60,7 @@ public class GraphQLSubscriptionsAutoConfigurationTest {
         assertThat(properties.getSubscriptionArgumentNames()).isEqualTo(new String[]{
                                                                                 "serviceName", 
                                                                                 "appName", 
+                                                                                "eventType",
                                                                                 "processDefinitionKey",
                                                                                 "processInstanceId",
                                                                                 "businessKey"

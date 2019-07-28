@@ -74,8 +74,7 @@ public class EngineEventsConsumerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public Transformer engineEventsTransformer() {
-            return new EngineEventsTransformer(
-                                               Arrays.asList(properties.getProcessEngineEventAttributeKeys()
+            return new EngineEventsTransformer(Arrays.asList(properties.getProcessEngineEventAttributeKeys()
                                                                        .split(",")),
                                                properties.getProcessEngineEventTypeKey());
         }
@@ -83,7 +82,7 @@ public class EngineEventsConsumerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public EngineEventsConsumerMessageHandler engineEventsMessageHandler(Transformer engineEventsTransformer,
-                                                                             FluxSink<Message<EngineEvent>> engineEventsSink) {
+                                                                             FluxSink<Message<List<EngineEvent>>> engineEventsSink) {
             return new EngineEventsConsumerMessageHandler(engineEventsTransformer, engineEventsSink);
         }
 
@@ -92,10 +91,10 @@ public class EngineEventsConsumerAutoConfiguration {
     @Configuration
     public static class EngineEventsFluxProcessorConfiguration implements SmartLifecycle {
 
-        private final List<Subscriber<Message<EngineEvent>>> subscribers = new ArrayList<>();
+        private final List<Subscriber<Message<List<EngineEvent>>>> subscribers = new ArrayList<>();
         private boolean running;
 
-        private EmitterProcessor<Message<EngineEvent>> engineEventsProcessor = EmitterProcessor.<Message<EngineEvent>> create(1024,
+        private EmitterProcessor<Message<List<EngineEvent>>> engineEventsProcessor = EmitterProcessor.<Message<List<EngineEvent>>>create(1024,
                                                                                                                               false);
 
         @Autowired
@@ -103,19 +102,19 @@ public class EngineEventsConsumerAutoConfiguration {
         }
 
         @Autowired(required = false)
-        public void setSubscribers(List<Subscriber<Message<EngineEvent>>> subscribers) {
+        public void setSubscribers(List<Subscriber<Message<List<EngineEvent>>>> subscribers) {
             this.subscribers.addAll(subscribers);
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public Flux<Message<EngineEvent>> engineEventsFlux() {
+        public Flux<Message<List<EngineEvent>>> engineEventsFlux() {
             return engineEventsProcessor.publish().autoConnect(0);
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public FluxSink<Message<EngineEvent>> engineEventsSink() {
+        public FluxSink<Message<List<EngineEvent>>> engineEventsSink() {
             return engineEventsProcessor.sink();
         }
 

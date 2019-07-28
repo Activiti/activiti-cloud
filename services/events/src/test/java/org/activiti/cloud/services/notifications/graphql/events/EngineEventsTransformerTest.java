@@ -122,18 +122,13 @@ public class EngineEventsTransformerTest {
         LOGGER.info("\n{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(notifications));
 
         // then
-        assertThat(notifications).hasSize(2);
+        assertThat(notifications).hasSize(4);
 
-        assertThat(notifications.get(1).get("serviceName")).isEqualTo("rb");
-        assertThat(notifications.get(1).keySet())
-                .containsOnly("serviceName","appName","businessKey","processDefinitionKey","processInstanceId","type1","type2");
-        assertThat(notifications.get(1).get("type2")).asList().hasSize(2);
-
-
-        assertThat(notifications.get(0).get("serviceName")).isEqualTo("rb1");
-        assertThat(notifications.get(0).keySet())
-                .containsOnly("serviceName","appName","type1","businessKey","processDefinitionKey","processInstanceId");
-        assertThat(notifications.get(0).get("type1")).asList().hasSize(1);
+        assertThat(notifications).extracting(EngineEvent::getEventType)
+                                 .containsExactly("type1",
+                                                  "type2",
+                                                  "type2",
+                                                  "type1");
 
     }
 
@@ -272,9 +267,10 @@ public class EngineEventsTransformerTest {
         LOGGER.info("\n{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(notifications));
 
         // then
-        assertThat(notifications).hasSize(2);
-        assertThat(notifications.get(0).get("serviceName")).isEqualTo("rb");
-        assertThat(notifications.get(1).get("serviceName")).isEqualTo("");
+        assertThat(notifications).hasSize(3);
+        assertThat(notifications.get(0).get("serviceName")).isNull();
+        assertThat(notifications.get(1).get("serviceName")).isEqualTo("rb");
+        assertThat(notifications.get(2).get("serviceName")).isEqualTo("rb");
         
     }
     
@@ -290,20 +286,16 @@ public class EngineEventsTransformerTest {
         LOGGER.info("\n{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(notifications));
 
         // then
-        assertThat(notifications).hasSize(1);
-        assertThat(notifications.get(0)).containsOnlyKeys("PROCESS_CREATED",
-                                                         "VARIABLE_CREATED",
-                                                         "PROCESS_STARTED",
-                                                         "ACTIVITY_COMPLETED",
-                                                         "SEQUENCE_FLOW_TAKEN",
-                                                         "ACTIVITY_STARTED",
-                                                         "TASK_CANDIDATE_GROUP_ADDED",
-                                                         "TASK_CREATED",
-                                                         "serviceName",
-                                                         "appName",
-                                                         "processInstanceId",
-                                                         "processDefinitionKey",
-                                                         "businessKey");
+        assertThat(notifications).hasSize(14);
+        assertThat(notifications).extracting(EngineEvent::getEventType)
+                                 .containsOnly("PROCESS_CREATED",
+                                               "VARIABLE_CREATED",
+                                               "PROCESS_STARTED",
+                                               "ACTIVITY_COMPLETED",
+                                               "SEQUENCE_FLOW_TAKEN",
+                                               "ACTIVITY_STARTED",
+                                               "TASK_CANDIDATE_GROUP_ADDED",
+                                               "TASK_CREATED");
 
     }
     
