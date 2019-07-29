@@ -77,26 +77,16 @@ public class ProcessInstanceNotifications {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         AuthToken authToken = TokenHolder.getAuthToken();
         
-        String query = "subscription($serviceName: String!, $processDefinitionKey: String!) {" +
-                      "  engineEvents(serviceName: $serviceName, processDefinitionKey: $processDefinitionKey ) {" +
-                      "    PROCESS_STARTED {" +
-                      "      processDefinitionKey " +
-                      "      entity {" +
-                      "        status" +
-                      "      }" +
-                      "    }" +
-                      "    PROCESS_COMPLETED {" +
-                      "      processDefinitionKey " +
-                      "      entity {" +
-                      "        status" +
-                      "      }" +
-                      "    }" +
+        String query = "subscription($serviceName: String!, $processDefinitionKey: String!, $eventTypes: [EngineEventType!]) {" +
+                      "  engineEvents(serviceName: [$serviceName], processDefinitionKey: [$processDefinitionKey], eventType: $eventTypes ) {" +
+                      "    processDefinitionKey " +
+                      "    eventType " +
                       "  }" +
                       "}";
             
         Map<String, Object> variables = Map.of("serviceName", notificationsSteps.getRuntimeBundleServiceName(),
-                                               "processDefinitionKey",processDefinitionKeyMatcher(processName));
-                                            
+                                               "processDefinitionKey",processDefinitionKeyMatcher(processName),
+                                               "eventTypes", Arrays.array("PROCESS_STARTED", "PROCESS_COMPLETED"));
 
         Consumer<Subscription> action = startProcessAction(processName, countDownLatch, subscriptionRef);
         
@@ -116,12 +106,9 @@ public class ProcessInstanceNotifications {
         AuthToken authToken = TokenHolder.getAuthToken();
          
         String query = "subscription($serviceName: String!) {" +
-                        "  engineEvents(serviceName: $serviceName) {" +
-                        "    SIGNAL_RECEIVED {" +
-                        "      entity {" +
-                        "        elementId" +
-                        "      }" +
-                        "    }" +
+                        "  engineEvents(serviceName: [$serviceName], eventType: [SIGNAL_RECEIVED]) {" +
+                        "    serviceName " +
+                        "    eventType " +
                         "  }" +
                         "}";
 
@@ -148,13 +135,41 @@ public class ProcessInstanceNotifications {
             // signal to stop receiving notifications 
             subscriptionRef.get()
                            .cancel();
-        }   
+        }
     }
     
+    @SuppressWarnings("serial")
     @Then("PROCESS_STARTED and PROCESS_COMPLETED notifications are received")
     public void verifyNotifications() throws Exception {
-        String startProcessMessage = "{\"payload\":{\"data\":{\"engineEvents\":{\"PROCESS_STARTED\":[{\"processDefinitionKey\":\"ConnectorProcess\",\"entity\":{\"status\":\"RUNNING\"}}],\"PROCESS_COMPLETED\":null}}},\"id\":\"1\",\"type\":\"data\"}";
-        String completeProcessMessage = "{\"payload\":{\"data\":{\"engineEvents\":{\"PROCESS_STARTED\":null,\"PROCESS_COMPLETED\":[{\"processDefinitionKey\":\"ConnectorProcess\",\"entity\":{\"status\":\"COMPLETED\"}}]}}},\"id\":\"1\",\"type\":\"data\"}";
+        Map<String, Object> startProcessMessagePayload = new ObjectMap() {{
+            put("payload", new ObjectMap() {{
+                put("data", new ObjectMap() {{
+                    put("engineEvents", Arrays.array(new ObjectMap() {{
+                        put("processDefinitionKey", "ConnectorProcess");
+                        put("eventType", "PROCESS_STARTED");
+                    }}));
+                }});
+            }});
+            put("id","1");
+            put("type", "data");
+        }};
+        
+        Map<String, Object> completeProcessMessagePayload = new ObjectMap() {{
+            put("payload", new ObjectMap() {{
+                put("data", new ObjectMap() {{
+                    put("engineEvents", Arrays.array(new ObjectMap() {{
+                        put("processDefinitionKey", "ConnectorProcess");
+                        put("eventType", "PROCESS_COMPLETED");
+                    }}));
+                }});
+            }});
+            put("id","1");
+            put("type", "data");
+        }};
+        
+        
+        String startProcessMessage = objectMapper.writeValueAsString(startProcessMessagePayload);
+        String completeProcessMessage = objectMapper.writeValueAsString(completeProcessMessagePayload);
         
         notificationsSteps.verifyData(data, startProcessMessage, completeProcessMessage);
     }
@@ -166,11 +181,10 @@ public class ProcessInstanceNotifications {
         Map<String, Object> payload = new ObjectMap() {{
             put("payload", new ObjectMap() {{
                 put("data", new ObjectMap() {{
-                    put("engineEvents", new ObjectMap() {{
-                        put("SIGNAL_RECEIVED", Arrays.array( new ObjectMap() {{
-                            put("entity", Map.of("elementId", elementId));
-                        }}));
-                    }});
+                    put("engineEvents", Arrays.array(new ObjectMap() {{
+                        put("serviceName", notificationsSteps.getRuntimeBundleServiceName());
+                        put("eventType", "SIGNAL_RECEIVED");
+                    }}));
                 }});
             }});
             put("id","1");
