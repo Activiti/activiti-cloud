@@ -128,6 +128,8 @@ public class ProcessModelValidator implements ModelValidator {
     private Stream<Optional<ValidationError>> validateServiceTasksImplementation(BpmnModel bpmnModel,
                                                                                  ValidationContext validationContext) {
         List<String> availableImplementations = getAvailableImplementations(validationContext);
+        //TODO: hardcoded decision table added -> fix this after implementation for decision table will change
+        availableImplementations.add("dmn-connector.EXECUTE_TABLE");
 
         return getTasksStream(bpmnModel,
                               ServiceTask.class)
