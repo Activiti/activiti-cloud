@@ -127,11 +127,11 @@ public class AuditSteps {
                                                   String variableName,
                                                   VariableEvent.VariableEvents eventType) throws Exception {
 
-        Collection<CloudRuntimeEvent> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
-                eventType.name());
-
 
         await().untilAsserted(() -> {
+
+            Collection<CloudRuntimeEvent> events = getEventsByProcessInstanceIdAndEventType(processInstanceId,
+                                                                                            eventType.name());
 
             assertThat(events).isNotEmpty();
             assertThat(events).extracting(e -> e.getEventType()).containsOnly(eventType);
