@@ -19,8 +19,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.api.model.shared.event.VariableEvent;
-import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 
 @Entity
 @DiscriminatorValue(value = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT)
@@ -31,35 +30,7 @@ public class VariableDeletedEventEntity extends VariableAuditEventEntity {
     public VariableDeletedEventEntity() {
     }
 
-    public VariableDeletedEventEntity(String eventId,
-                                      Long timestamp) {
-        super(eventId,
-              timestamp,
-              VariableEvent.VariableEvents.VARIABLE_DELETED.name());
-    }
-
-    public VariableDeletedEventEntity(String eventId,
-                                      Long timestamp,
-                                      String appName,
-                                      String appVersion,
-                                      String serviceName,
-                                      String serviceFullName,
-                                      String serviceType,
-                                      String serviceVersion,
-                                      String messageId,
-                                      Integer sequenceNumber,
-                                      VariableInstance variableInstance) {
-        super(eventId,
-              timestamp,
-              VariableEvent.VariableEvents.VARIABLE_DELETED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              messageId,
-              sequenceNumber,
-              variableInstance);
+    public VariableDeletedEventEntity(CloudVariableDeletedEvent cloudEvent) {
+        super(cloudEvent);
     }
 }

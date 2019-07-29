@@ -23,8 +23,8 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 
 import org.activiti.api.task.model.TaskCandidateUser;
-import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateUserJpaJsonConverter;
 
 @Entity
@@ -41,30 +41,9 @@ public class TaskCandidateUserRemovedEventEntity extends AuditEventEntity {
     public TaskCandidateUserRemovedEventEntity() {
     }
 
-    public TaskCandidateUserRemovedEventEntity(String eventId,
-                                               Long timestamp,
-                                               String appName,
-                                               String appVersion,
-                                               String serviceName,
-                                               String serviceFullName,
-                                               String serviceType,
-                                               String serviceVersion,
-                                               String messageId,
-                                               Integer sequenceNumber,
-                                               TaskCandidateUser candidateUser) {
-        super(eventId,
-              timestamp,
-              TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name());
-
-        setAppName(appName);
-        setAppVersion(appVersion);
-        setServiceName(serviceName);
-        setServiceFullName(serviceFullName);
-        setServiceType(serviceType);
-        setServiceVersion(serviceVersion);
-        setMessageId(messageId);
-        setSequenceNumber(sequenceNumber);
-        setCandidateUser(candidateUser);
+    public TaskCandidateUserRemovedEventEntity(CloudTaskCandidateUserRemovedEvent cloudEvent) {
+        super(cloudEvent);
+        setCandidateUser(cloudEvent.getEntity());
     }
     
     public TaskCandidateUser getCandidateUser() {

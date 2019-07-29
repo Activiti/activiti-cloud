@@ -33,9 +33,9 @@ public abstract class AuditEventEntity {
     @Id
     @GeneratedValue
     private Long id;
-    protected String eventId;
-    protected Long timestamp;
-    protected String eventType;
+    private String eventId;
+    private Long timestamp;
+    private String eventType;
 
     /* Cloud Data */
     private String appName;
@@ -56,14 +56,6 @@ public abstract class AuditEventEntity {
     private String businessKey;
     
     public AuditEventEntity() {
-    }
-
-    public AuditEventEntity(String eventId,
-                            Long timestamp,
-                            String eventType) {
-        this.eventId = eventId;
-        this.timestamp = timestamp;
-        this.eventType = eventType;
     }
 
     public AuditEventEntity(CloudRuntimeEvent<?,?> cloudEvent) {

@@ -21,36 +21,15 @@ public class TaskSuspendedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected TaskSuspendedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudTaskSuspendedEvent cloudTaskSuspendedEvent = (CloudTaskSuspendedEvent) cloudRuntimeEvent;
-        return new TaskSuspendedEventEntity(cloudTaskSuspendedEvent.getId(),
-                                            cloudTaskSuspendedEvent.getTimestamp(),
-                                            cloudTaskSuspendedEvent.getAppName(),
-                                            cloudTaskSuspendedEvent.getAppVersion(),
-                                            cloudTaskSuspendedEvent.getServiceName(),
-                                            cloudTaskSuspendedEvent.getServiceFullName(),
-                                            cloudTaskSuspendedEvent.getServiceType(),
-                                            cloudTaskSuspendedEvent.getServiceVersion(),
-                                            cloudTaskSuspendedEvent.getMessageId(),
-                                            cloudTaskSuspendedEvent.getSequenceNumber(),
-                                            cloudTaskSuspendedEvent.getEntity());
+        return new TaskSuspendedEventEntity((CloudTaskSuspendedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TaskSuspendedEventEntity taskSuspendedEventEntity = (TaskSuspendedEventEntity) auditEventEntity;
 
-        CloudTaskSuspendedEventImpl cloudTaskSuspendedEvent = new CloudTaskSuspendedEventImpl(taskSuspendedEventEntity.getEventId(),
-                                                                                              taskSuspendedEventEntity.getTimestamp(),
-                                                                                              taskSuspendedEventEntity.getTask());
-        cloudTaskSuspendedEvent.setAppName(taskSuspendedEventEntity.getAppName());
-        cloudTaskSuspendedEvent.setAppVersion(taskSuspendedEventEntity.getAppVersion());
-        cloudTaskSuspendedEvent.setServiceFullName(taskSuspendedEventEntity.getServiceFullName());
-        cloudTaskSuspendedEvent.setServiceName(taskSuspendedEventEntity.getServiceName());
-        cloudTaskSuspendedEvent.setServiceType(taskSuspendedEventEntity.getServiceType());
-        cloudTaskSuspendedEvent.setServiceVersion(taskSuspendedEventEntity.getServiceVersion());
-        cloudTaskSuspendedEvent.setMessageId(taskSuspendedEventEntity.getMessageId());
-        cloudTaskSuspendedEvent.setSequenceNumber(taskSuspendedEventEntity.getSequenceNumber());
-
-        return cloudTaskSuspendedEvent;
+        return new CloudTaskSuspendedEventImpl(taskSuspendedEventEntity.getEventId(),
+                                               taskSuspendedEventEntity.getTimestamp(),
+                                               taskSuspendedEventEntity.getTask());
     }
 }

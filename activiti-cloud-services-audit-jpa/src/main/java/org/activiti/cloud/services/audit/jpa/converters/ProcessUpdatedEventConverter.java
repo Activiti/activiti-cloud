@@ -21,36 +21,15 @@ public class ProcessUpdatedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected ProcessUpdatedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudProcessUpdatedEvent cloudProcessUpdated = (CloudProcessUpdatedEvent) cloudRuntimeEvent;
-         
-        return new ProcessUpdatedAuditEventEntity(cloudProcessUpdated.getId(),
-                                                  cloudProcessUpdated.getTimestamp(),
-                                                  cloudProcessUpdated.getAppName(),
-                                                  cloudProcessUpdated.getAppVersion(),
-                                                  cloudProcessUpdated.getServiceName(),
-                                                  cloudProcessUpdated.getServiceFullName(),
-                                                  cloudProcessUpdated.getServiceType(),
-                                                  cloudProcessUpdated.getServiceVersion(),
-                                                  cloudProcessUpdated.getMessageId(),
-                                                  cloudProcessUpdated.getSequenceNumber(),
-                                                  cloudProcessUpdated.getEntity());
+         return new ProcessUpdatedAuditEventEntity((CloudProcessUpdatedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         ProcessUpdatedAuditEventEntity processUpdatedAuditEventEntity = (ProcessUpdatedAuditEventEntity) auditEventEntity;
-        CloudProcessUpdatedEventImpl cloudProcessUpdatedEvent = new CloudProcessUpdatedEventImpl(processUpdatedAuditEventEntity.getEventId(),
-                                                                                                 processUpdatedAuditEventEntity.getTimestamp(),
-                                                                                                 processUpdatedAuditEventEntity.getProcessInstance());
-        cloudProcessUpdatedEvent.setAppName(processUpdatedAuditEventEntity.getAppName());
-        cloudProcessUpdatedEvent.setAppVersion(processUpdatedAuditEventEntity.getAppVersion());
-        cloudProcessUpdatedEvent.setServiceFullName(processUpdatedAuditEventEntity.getServiceFullName());
-        cloudProcessUpdatedEvent.setServiceName(processUpdatedAuditEventEntity.getServiceName());
-        cloudProcessUpdatedEvent.setServiceType(processUpdatedAuditEventEntity.getServiceType());
-        cloudProcessUpdatedEvent.setServiceVersion(processUpdatedAuditEventEntity.getServiceVersion());
-        cloudProcessUpdatedEvent.setMessageId(processUpdatedAuditEventEntity.getMessageId());
-        cloudProcessUpdatedEvent.setSequenceNumber(processUpdatedAuditEventEntity.getSequenceNumber());
 
-        return cloudProcessUpdatedEvent;
+        return new CloudProcessUpdatedEventImpl(processUpdatedAuditEventEntity.getEventId(),
+                                                processUpdatedAuditEventEntity.getTimestamp(),
+                                                processUpdatedAuditEventEntity.getProcessInstance());
     }
 }

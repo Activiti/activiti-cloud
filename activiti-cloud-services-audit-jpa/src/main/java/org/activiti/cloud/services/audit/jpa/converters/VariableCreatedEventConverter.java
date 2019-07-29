@@ -21,39 +21,15 @@ public class VariableCreatedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected VariableCreatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudVariableCreatedEvent cloudVariableCreatedEvent = (CloudVariableCreatedEvent) cloudRuntimeEvent;
-        
-        return new VariableCreatedEventEntity(cloudVariableCreatedEvent.getId(),
-                                              cloudVariableCreatedEvent.getTimestamp(),
-                                              cloudVariableCreatedEvent.getAppName(),
-                                              cloudVariableCreatedEvent.getAppVersion(),
-                                              cloudVariableCreatedEvent.getServiceFullName(),
-                                              cloudVariableCreatedEvent.getServiceName(),
-                                              cloudVariableCreatedEvent.getServiceType(),
-                                              cloudVariableCreatedEvent.getServiceVersion(),
-                                              cloudVariableCreatedEvent.getMessageId(),
-                                              cloudVariableCreatedEvent.getSequenceNumber(),
-                                              cloudVariableCreatedEvent.getEntity());
+        return new VariableCreatedEventEntity((CloudVariableCreatedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         VariableCreatedEventEntity variableCreatedEventEntity = (VariableCreatedEventEntity) auditEventEntity;
 
-        CloudVariableCreatedEventImpl cloudVariableCreatedEvent = new CloudVariableCreatedEventImpl(variableCreatedEventEntity.getEventId(),
-                                                                                                    variableCreatedEventEntity.getTimestamp(),
-                                                                                                    variableCreatedEventEntity.getVariableInstance());
-        cloudVariableCreatedEvent.setAppName(variableCreatedEventEntity.getAppName());
-        cloudVariableCreatedEvent.setAppVersion(variableCreatedEventEntity.getAppVersion());
-        cloudVariableCreatedEvent.setServiceFullName(variableCreatedEventEntity.getServiceFullName());
-        cloudVariableCreatedEvent.setServiceName(variableCreatedEventEntity.getServiceName());
-        cloudVariableCreatedEvent.setServiceType(variableCreatedEventEntity.getServiceType());
-        cloudVariableCreatedEvent.setServiceVersion(variableCreatedEventEntity.getServiceVersion());
-        cloudVariableCreatedEvent.setMessageId(variableCreatedEventEntity.getMessageId());
-        cloudVariableCreatedEvent.setSequenceNumber(variableCreatedEventEntity.getSequenceNumber());
-        
-        cloudVariableCreatedEvent.setProcessDefinitionId(variableCreatedEventEntity.getProcessDefinitionId());
-
-        return cloudVariableCreatedEvent;
+        return new CloudVariableCreatedEventImpl(variableCreatedEventEntity.getEventId(),
+                                                 variableCreatedEventEntity.getTimestamp(),
+                                                 variableCreatedEventEntity.getVariableInstance());
     }
 }

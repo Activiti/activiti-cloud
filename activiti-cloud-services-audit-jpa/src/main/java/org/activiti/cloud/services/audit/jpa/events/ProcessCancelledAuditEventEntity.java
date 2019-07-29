@@ -19,56 +19,24 @@ package org.activiti.cloud.services.audit.jpa.events;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
 
 @Entity
 @DiscriminatorValue(value = ProcessCancelledAuditEventEntity.PROCESS_CANCELLED_EVENT)
 public class ProcessCancelledAuditEventEntity extends ProcessAuditEventEntity {
 
     protected static final String PROCESS_CANCELLED_EVENT = "ProcessCancelledEvent";
-
+    
+    private String cause;
+    
     public ProcessCancelledAuditEventEntity() {
     }
-
-    public ProcessCancelledAuditEventEntity(String eventId,
-                                            Long timestamp,
-                                            String cause) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name());
-        this.cause = cause;
+    
+    public ProcessCancelledAuditEventEntity(CloudProcessCancelledEvent cloudEvent) {
+        super(cloudEvent);
+        this.cause = cloudEvent.getCause();
     }
-
-    public ProcessCancelledAuditEventEntity(String eventId,
-                                            Long timestamp,
-                                            String appName,
-                                            String appVersion,
-                                            String serviceName,
-                                            String serviceFullName,
-                                            String serviceType,
-                                            String serviceVersion,
-                                            String messageId,
-                                            Integer sequenceNumber,
-                                            ProcessInstance processInstance,
-                                            String cause) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              messageId,
-              sequenceNumber,
-              processInstance);
-        this.cause = cause;
-    }
-
-    private String cause;
-
+    
     public String getCause() {
         return cause;
     }

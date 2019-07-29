@@ -23,7 +23,7 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 
 import org.activiti.api.process.model.ProcessDefinition;
-import org.activiti.api.process.model.events.ProcessDefinitionEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessDefinitionJpaJsonConverter;
 
 @Entity
@@ -40,38 +40,10 @@ public class ProcessDeployedAuditEventEntity extends AuditEventEntity {
     public ProcessDeployedAuditEventEntity() {
     }
 
-    public ProcessDeployedAuditEventEntity(String eventId,
-                                           Long timestamp) {
-        super(eventId,
-              timestamp,
-              ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name());
+    public ProcessDeployedAuditEventEntity(CloudProcessDeployedEvent cloudEvent) {
+        super(cloudEvent);
+        setProcessDefinition(cloudEvent.getEntity());
     }
-    public ProcessDeployedAuditEventEntity(String eventId,
-                                           Long timestamp,
-                                           String appName,
-                                           String appVersion,
-                                           String serviceName,
-                                           String serviceFullName,
-                                           String serviceType,
-                                           String serviceVersion,
-                                           String messageId,
-                                           Integer sequenceNumber,
-                                           ProcessDefinition processDefinition) {
-        this(eventId,
-              timestamp);
-        setAppName(appName);
-        setAppName(appName);
-        setAppVersion(appVersion);
-        setServiceName(serviceName);
-        setServiceFullName(serviceFullName);
-        setServiceType(serviceType);
-        setServiceVersion(serviceVersion);
-        setMessageId(messageId);
-        setSequenceNumber(sequenceNumber);
-        setProcessDefinition(processDefinition);
-    }
-
-
 
     public ProcessDefinition getProcessDefinition() {
         return processDefinition;

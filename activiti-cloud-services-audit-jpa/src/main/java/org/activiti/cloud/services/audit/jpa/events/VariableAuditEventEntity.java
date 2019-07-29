@@ -6,6 +6,7 @@ import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 
 import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 
 @MappedSuperclass
@@ -23,38 +24,9 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
     public VariableAuditEventEntity() {
     }
 
-    public VariableAuditEventEntity(String eventId,
-                                    Long timestamp,
-                                    String eventType) {
-        super(eventId,
-              timestamp,
-              eventType);
-    }
-
-    public VariableAuditEventEntity(String eventId,
-                                    Long timestamp,
-                                    String eventType,
-                                    String appName,
-                                    String appVersion,
-                                    String serviceName,
-                                    String serviceFullName,
-                                    String serviceType,
-                                    String serviceVersion,
-                                    String messageId,
-                                    Integer sequenceNumber,
-                                    VariableInstance variableInstance) {
-        super(eventId,
-              timestamp,
-              eventType);
-        setAppName(appName);
-        setAppVersion(appVersion);
-        setServiceName(serviceName);
-        setServiceFullName(serviceFullName);
-        setServiceType(serviceType);
-        setServiceVersion(serviceVersion);
-        setMessageId(messageId);
-        setSequenceNumber(sequenceNumber);
-        setVariableInstance(variableInstance);
+    public VariableAuditEventEntity(CloudVariableEvent cloudEvent) {
+        super(cloudEvent);
+        setVariableInstance(cloudEvent.getEntity());
     }
 
     public String getVariableName() {

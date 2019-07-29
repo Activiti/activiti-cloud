@@ -20,38 +20,16 @@ public class ProcessSuspendedEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected ProcessSuspendedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudProcessSuspendedEvent cloudProcessSuspended = (CloudProcessSuspendedEvent) cloudRuntimeEvent;
-                 
-        return new ProcessSuspendedAuditEventEntity(cloudProcessSuspended.getId(),
-                                                    cloudProcessSuspended.getTimestamp(),
-                                                    cloudProcessSuspended.getAppName(),
-                                                    cloudProcessSuspended.getAppVersion(),
-                                                    cloudProcessSuspended.getServiceName(),
-                                                    cloudProcessSuspended.getServiceFullName(),
-                                                    cloudProcessSuspended.getServiceType(),
-                                                    cloudProcessSuspended.getServiceVersion(),
-                                                    cloudProcessSuspended.getMessageId(),
-                                                    cloudProcessSuspended.getSequenceNumber(),
-                                                    cloudProcessSuspended.getEntity());
- 
+    protected ProcessSuspendedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {      
+        return new ProcessSuspendedAuditEventEntity((CloudProcessSuspendedEvent) cloudRuntimeEvent); 
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         ProcessSuspendedAuditEventEntity processSuspendedAuditEventEntity = (ProcessSuspendedAuditEventEntity) auditEventEntity;
-        CloudProcessSuspendedEventImpl cloudProcessSuspendedEvent = new CloudProcessSuspendedEventImpl(processSuspendedAuditEventEntity.getEventId(),
-                                                                                                       processSuspendedAuditEventEntity.getTimestamp(),
-                                                                                                       processSuspendedAuditEventEntity.getProcessInstance());
-        cloudProcessSuspendedEvent.setAppName(processSuspendedAuditEventEntity.getAppName());
-        cloudProcessSuspendedEvent.setAppVersion(processSuspendedAuditEventEntity.getAppVersion());
-        cloudProcessSuspendedEvent.setServiceFullName(processSuspendedAuditEventEntity.getServiceFullName());
-        cloudProcessSuspendedEvent.setServiceName(processSuspendedAuditEventEntity.getServiceName());
-        cloudProcessSuspendedEvent.setServiceType(processSuspendedAuditEventEntity.getServiceType());
-        cloudProcessSuspendedEvent.setServiceVersion(processSuspendedAuditEventEntity.getServiceVersion());
-        cloudProcessSuspendedEvent.setMessageId(processSuspendedAuditEventEntity.getMessageId());
-        cloudProcessSuspendedEvent.setSequenceNumber(processSuspendedAuditEventEntity.getSequenceNumber());
 
-        return cloudProcessSuspendedEvent;
+        return new CloudProcessSuspendedEventImpl(processSuspendedAuditEventEntity.getEventId(),
+                                                  processSuspendedAuditEventEntity.getTimestamp(),
+                                                  processSuspendedAuditEventEntity.getProcessInstance());
     }
 }

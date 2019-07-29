@@ -23,8 +23,8 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 
 import org.activiti.api.task.model.TaskCandidateUser;
-import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateUserJpaJsonConverter;
 
 @Entity
@@ -37,35 +37,13 @@ public class TaskCandidateUserAddedEventEntity extends AuditEventEntity {
     @Lob
     @Column
     private TaskCandidateUserImpl candidateUser;
-  
     
     public TaskCandidateUserAddedEventEntity() {
     }
 
-    public TaskCandidateUserAddedEventEntity(String eventId,
-                                             Long timestamp,
-                                             String appName,
-                                             String appVersion,
-                                             String serviceName,
-                                             String serviceFullName,
-                                             String serviceType,
-                                             String serviceVersion,
-                                             String messageId,
-                                             Integer sequenceNumber,
-                                             TaskCandidateUser candidateUser) {
-        super(eventId,
-              timestamp,
-              TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name());
-
-        setAppName(appName);
-        setAppVersion(appVersion);
-        setServiceName(serviceName);
-        setServiceFullName(serviceFullName);
-        setServiceType(serviceType);
-        setServiceVersion(serviceVersion);
-        setMessageId(messageId);
-        setSequenceNumber(sequenceNumber);
-        setCandidateUser(candidateUser);
+    public TaskCandidateUserAddedEventEntity(CloudTaskCandidateUserAddedEvent cloudEvent) {
+        super(cloudEvent);
+        setCandidateUser(cloudEvent.getEntity());
     }
     
     public TaskCandidateUser getCandidateUser() {
@@ -75,7 +53,4 @@ public class TaskCandidateUserAddedEventEntity extends AuditEventEntity {
     public void setCandidateUser(TaskCandidateUser candidateUser) {
         this.candidateUser = new TaskCandidateUserImpl(candidateUser.getUserId(),candidateUser.getTaskId());
     }
-    
-  
-    
 }

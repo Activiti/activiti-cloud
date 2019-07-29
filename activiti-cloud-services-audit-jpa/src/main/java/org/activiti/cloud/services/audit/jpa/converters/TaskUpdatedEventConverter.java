@@ -36,38 +36,16 @@ public class TaskUpdatedEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    public TaskUpdatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudTaskUpdatedEvent cloudTaskUpdatedEvent = (CloudTaskUpdatedEvent) cloudRuntimeEvent;
-                
-        return new TaskUpdatedEventEntity(cloudTaskUpdatedEvent.getId(),
-                                          cloudTaskUpdatedEvent.getTimestamp(),
-                                          cloudTaskUpdatedEvent.getAppName(),
-                                          cloudTaskUpdatedEvent.getAppVersion(),
-                                          cloudTaskUpdatedEvent.getServiceName(),
-                                          cloudTaskUpdatedEvent.getServiceFullName(),
-                                          cloudTaskUpdatedEvent.getServiceType(),
-                                          cloudTaskUpdatedEvent.getServiceVersion(),
-                                          cloudTaskUpdatedEvent.getMessageId(),
-                                          cloudTaskUpdatedEvent.getSequenceNumber(),
-                                          cloudTaskUpdatedEvent.getEntity());
+    public TaskUpdatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {            
+        return new TaskUpdatedEventEntity((CloudTaskUpdatedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TaskUpdatedEventEntity taskUpdatedEventEntity = (TaskUpdatedEventEntity) auditEventEntity;
 
-        CloudTaskUpdatedEventImpl cloudTaskUpdatedEvent = new CloudTaskUpdatedEventImpl(taskUpdatedEventEntity.getEventId(),
-                                                                                         taskUpdatedEventEntity.getTimestamp(),
-                                                                                         taskUpdatedEventEntity.getTask());
-        cloudTaskUpdatedEvent.setAppName(taskUpdatedEventEntity.getAppName());
-        cloudTaskUpdatedEvent.setAppVersion(taskUpdatedEventEntity.getAppVersion());
-        cloudTaskUpdatedEvent.setServiceFullName(taskUpdatedEventEntity.getServiceFullName());
-        cloudTaskUpdatedEvent.setServiceName(taskUpdatedEventEntity.getServiceName());
-        cloudTaskUpdatedEvent.setServiceType(taskUpdatedEventEntity.getServiceType());
-        cloudTaskUpdatedEvent.setServiceVersion(taskUpdatedEventEntity.getServiceVersion());
-        cloudTaskUpdatedEvent.setMessageId(taskUpdatedEventEntity.getMessageId());
-        cloudTaskUpdatedEvent.setSequenceNumber(taskUpdatedEventEntity.getSequenceNumber());
-
-        return cloudTaskUpdatedEvent;
+        return new CloudTaskUpdatedEventImpl(taskUpdatedEventEntity.getEventId(),
+                                             taskUpdatedEventEntity.getTimestamp(),
+                                             taskUpdatedEventEntity.getTask());
     }
 }

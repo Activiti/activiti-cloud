@@ -21,19 +21,7 @@ public class ActivityCompletedEventConverter extends BaseEventToEntityConverter 
 
     @Override
     protected ActivityCompletedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudBPMNActivityCompletedEvent cloudBPMNActivityCompletedEvent = (CloudBPMNActivityCompletedEvent) cloudRuntimeEvent;
-
-        return new ActivityCompletedAuditEventEntity(cloudBPMNActivityCompletedEvent.getId(),
-                                                     cloudBPMNActivityCompletedEvent.getTimestamp(),
-                                                     cloudBPMNActivityCompletedEvent.getAppName(),
-                                                     cloudBPMNActivityCompletedEvent.getAppVersion(),
-                                                     cloudBPMNActivityCompletedEvent.getServiceFullName(),
-                                                     cloudBPMNActivityCompletedEvent.getServiceName(),
-                                                     cloudBPMNActivityCompletedEvent.getServiceType(),
-                                                     cloudBPMNActivityCompletedEvent.getServiceVersion(),
-                                                     cloudBPMNActivityCompletedEvent.getMessageId(),
-                                                     cloudBPMNActivityCompletedEvent.getSequenceNumber(),
-                                                     cloudBPMNActivityCompletedEvent.getEntity());
+        return new ActivityCompletedAuditEventEntity((CloudBPMNActivityCompletedEvent) cloudRuntimeEvent);
     }
 
     @Override
@@ -41,20 +29,10 @@ public class ActivityCompletedEventConverter extends BaseEventToEntityConverter 
   
         ActivityCompletedAuditEventEntity activityCompletedAuditEventEntity = (ActivityCompletedAuditEventEntity) auditEventEntity;
 
-        CloudBPMNActivityCompletedEventImpl bpmnActivityCompletedEvent = new CloudBPMNActivityCompletedEventImpl(activityCompletedAuditEventEntity.getEventId(),
-                                                                                                                 activityCompletedAuditEventEntity.getTimestamp(),
-                                                                                                                 activityCompletedAuditEventEntity.getBpmnActivity(),
-                                                                                                                 activityCompletedAuditEventEntity.getProcessDefinitionId(),
-                                                                                                                 activityCompletedAuditEventEntity.getProcessInstanceId());
-        bpmnActivityCompletedEvent.setAppName(activityCompletedAuditEventEntity.getAppName());
-        bpmnActivityCompletedEvent.setAppVersion(activityCompletedAuditEventEntity.getAppVersion());
-        bpmnActivityCompletedEvent.setServiceFullName(activityCompletedAuditEventEntity.getServiceFullName());
-        bpmnActivityCompletedEvent.setServiceName(activityCompletedAuditEventEntity.getServiceName());
-        bpmnActivityCompletedEvent.setServiceType(activityCompletedAuditEventEntity.getServiceType());
-        bpmnActivityCompletedEvent.setServiceVersion(activityCompletedAuditEventEntity.getServiceVersion());
-        bpmnActivityCompletedEvent.setMessageId(activityCompletedAuditEventEntity.getMessageId());
-        bpmnActivityCompletedEvent.setSequenceNumber(activityCompletedAuditEventEntity.getSequenceNumber());
-        
-        return bpmnActivityCompletedEvent;
+        return new CloudBPMNActivityCompletedEventImpl(activityCompletedAuditEventEntity.getEventId(),
+                                                       activityCompletedAuditEventEntity.getTimestamp(),
+                                                       activityCompletedAuditEventEntity.getBpmnActivity(),
+                                                       activityCompletedAuditEventEntity.getProcessDefinitionId(),
+                                                       activityCompletedAuditEventEntity.getProcessInstanceId());
     }
 }

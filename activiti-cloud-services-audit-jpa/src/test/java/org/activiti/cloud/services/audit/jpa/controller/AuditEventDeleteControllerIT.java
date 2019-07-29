@@ -97,8 +97,9 @@ public class AuditEventDeleteControllerIT {
     }
 
     private AuditEventEntity buildAuditEventEntity(long id) {
-        ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity("id",
-                System.currentTimeMillis());
+        ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
+        eventEntity.setEventId("eventId");
+        eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setId(id);
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("10");
@@ -111,7 +112,4 @@ public class AuditEventDeleteControllerIT {
         eventEntity.setTimestamp(System.currentTimeMillis());
         return eventEntity;
     }
-
-
-
 }

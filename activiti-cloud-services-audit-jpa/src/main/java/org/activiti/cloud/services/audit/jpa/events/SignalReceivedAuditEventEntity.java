@@ -22,7 +22,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 import org.activiti.api.process.model.BPMNSignal;
-import org.activiti.api.process.model.events.BPMNSignalEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SignalJpaJsonConverter;
 
 @Entity
@@ -38,36 +38,9 @@ public class SignalReceivedAuditEventEntity extends AuditEventEntity {
     public SignalReceivedAuditEventEntity() {
     }
 
-    public SignalReceivedAuditEventEntity(String eventId,
-                                          Long timestamp) {
-        super(eventId,
-              timestamp,
-              BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name());
-    }
-
-    public SignalReceivedAuditEventEntity(String eventId,
-                                          Long timestamp,
-                                          String appName,
-                                          String appVersion,
-                                          String serviceName,
-                                          String serviceFullName,
-                                          String serviceType,
-                                          String serviceVersion,
-                                          String messageId,
-                                          Integer sequenceNumber,
-                                          BPMNSignal signal) {
-        super(eventId,
-               timestamp,
-               BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name());
-           setAppName(appName);
-           setAppVersion(appVersion);
-           setServiceName(serviceName);
-           setServiceFullName(serviceFullName);
-           setServiceType(serviceType);
-           setServiceVersion(serviceVersion);
-           setMessageId(messageId);
-           setSequenceNumber(sequenceNumber);
-           setSignal(signal) ;
+    public SignalReceivedAuditEventEntity(CloudBPMNSignalReceivedEvent cloudEvent) {
+        super(cloudEvent);
+        setSignal(cloudEvent.getEntity()) ;
     }
     
     public BPMNSignal getSignal() {

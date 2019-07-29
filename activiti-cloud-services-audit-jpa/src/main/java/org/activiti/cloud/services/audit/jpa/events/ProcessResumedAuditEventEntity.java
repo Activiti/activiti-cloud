@@ -19,8 +19,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
 
 @Entity
 @DiscriminatorValue(value = ProcessResumedAuditEventEntity.PROCESS_RESUMED_EVENT)
@@ -31,36 +30,7 @@ public class ProcessResumedAuditEventEntity extends ProcessAuditEventEntity {
     public ProcessResumedAuditEventEntity() {
     }
 
-    public ProcessResumedAuditEventEntity(String eventId,
-                                            Long timestamp) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name());
-    }
-
-
-    public ProcessResumedAuditEventEntity(String eventId,
-                                            Long timestamp,
-                                            String appName,
-                                            String appVersion,
-                                            String serviceName,
-                                            String serviceFullName,
-                                            String serviceType,
-                                            String serviceVersion,
-                                            String messageId,
-                                            Integer sequenceNumber,
-                                            ProcessInstance processInstance) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              messageId,
-              sequenceNumber,
-              processInstance);
+    public ProcessResumedAuditEventEntity(CloudProcessResumedEvent cloudEvent) {
+        super(cloudEvent);
     }
 }

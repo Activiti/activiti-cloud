@@ -18,10 +18,8 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
 
-import org.activiti.api.process.model.events.BPMNActivityEvent;
-import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
 
 @Entity
 @DiscriminatorValue(value = ActivityStartedAuditEventEntity.ACTIVITY_STARTED_EVENT)
@@ -31,36 +29,8 @@ public class ActivityStartedAuditEventEntity extends BPMNActivityAuditEventEntit
 
     public ActivityStartedAuditEventEntity() {
     }
-
-    public ActivityStartedAuditEventEntity(String eventId,
-                                           Long timestamp) {
-        super(eventId,
-              timestamp,
-              BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name());
-    }
-
-    public ActivityStartedAuditEventEntity(String eventId,
-                                           Long timestamp,
-                                           String appName,
-                                           String appVersion,
-                                           String serviceName,
-                                           String serviceFullName,
-                                           String serviceType,
-                                           String serviceVersion,
-                                           String messageId,
-                                           Integer sequenceNumber,
-                                           BPMNActivity bpmnActivity) {
-        super(eventId,
-              timestamp,
-              BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              messageId,
-              sequenceNumber,
-              bpmnActivity);
+    
+    public ActivityStartedAuditEventEntity(CloudBPMNActivityStartedEvent cloudEvent) {
+        super(cloudEvent);
     }
 }

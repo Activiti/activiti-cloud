@@ -22,6 +22,7 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
 
 @Entity
@@ -35,38 +36,9 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
     public ProcessAuditEventEntity() {
     }
 
-    public ProcessAuditEventEntity(String eventId,
-                                   Long timestamp,
-                                   String eventType) {
-        super(eventId,
-              timestamp,
-              eventType);
-    }
-
-    public ProcessAuditEventEntity(String eventId,
-                                   Long timestamp,
-                                   String eventType,
-                                   String appName,
-                                   String appVersion,
-                                   String serviceName,
-                                   String serviceFullName,
-                                   String serviceType,
-                                   String serviceVersion,
-                                   String messageId,
-                                   Integer sequenceNumber,
-                                   ProcessInstance processInstance) {
-        super(eventId,
-              timestamp,
-              eventType);
-        setAppName(appName);
-        setAppVersion(appVersion);
-        setServiceName(serviceName);
-        setServiceFullName(serviceFullName);
-        setServiceType(serviceType);
-        setServiceVersion(serviceVersion);
-        setMessageId(messageId);
-        setSequenceNumber(sequenceNumber);
-        setProcessInstance(processInstance);
+    public ProcessAuditEventEntity(CloudProcessRuntimeEvent cloudEvent) {
+        super(cloudEvent);
+        setProcessInstance(cloudEvent.getEntity());
     }
 
     public ProcessInstance getProcessInstance() {

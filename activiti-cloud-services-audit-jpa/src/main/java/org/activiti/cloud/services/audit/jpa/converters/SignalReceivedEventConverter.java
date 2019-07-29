@@ -21,39 +21,17 @@ public class SignalReceivedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected SignalReceivedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudBPMNSignalReceivedEvent cloudBPMNSignalReceivedEvent = (CloudBPMNSignalReceivedEvent) cloudRuntimeEvent;
-        return new SignalReceivedAuditEventEntity(cloudBPMNSignalReceivedEvent.getId(),
-                                                  cloudBPMNSignalReceivedEvent.getTimestamp(),
-                                                  cloudBPMNSignalReceivedEvent.getAppName(),
-                                                  cloudBPMNSignalReceivedEvent.getAppVersion(),
-                                                  cloudBPMNSignalReceivedEvent.getServiceFullName(),
-                                                  cloudBPMNSignalReceivedEvent.getServiceName(),
-                                                  cloudBPMNSignalReceivedEvent.getServiceType(),
-                                                  cloudBPMNSignalReceivedEvent.getServiceVersion(),
-                                                  cloudBPMNSignalReceivedEvent.getMessageId(),
-                                                  cloudBPMNSignalReceivedEvent.getSequenceNumber(),
-                                                  cloudBPMNSignalReceivedEvent.getEntity());
+        return new SignalReceivedAuditEventEntity((CloudBPMNSignalReceivedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         SignalReceivedAuditEventEntity signalReceivedAuditEventEntity = (SignalReceivedAuditEventEntity) auditEventEntity;
 
-        CloudBPMNSignalReceivedEventImpl cloudSignalReceivedEvent = new CloudBPMNSignalReceivedEventImpl(signalReceivedAuditEventEntity.getEventId(),
-                                                                                                         signalReceivedAuditEventEntity.getTimestamp(),
-                                                                                                         signalReceivedAuditEventEntity.getSignal(),
-                                                                                                         signalReceivedAuditEventEntity.getProcessDefinitionId(),
-                                                                                                         signalReceivedAuditEventEntity.getProcessInstanceId());
-
-        cloudSignalReceivedEvent.setAppName(signalReceivedAuditEventEntity.getAppName());
-        cloudSignalReceivedEvent.setAppVersion(signalReceivedAuditEventEntity.getAppVersion());
-        cloudSignalReceivedEvent.setServiceFullName(signalReceivedAuditEventEntity.getServiceFullName());
-        cloudSignalReceivedEvent.setServiceName(signalReceivedAuditEventEntity.getServiceName());
-        cloudSignalReceivedEvent.setServiceType(signalReceivedAuditEventEntity.getServiceType());
-        cloudSignalReceivedEvent.setServiceVersion(signalReceivedAuditEventEntity.getServiceVersion());
-        cloudSignalReceivedEvent.setMessageId(signalReceivedAuditEventEntity.getMessageId());
-        cloudSignalReceivedEvent.setSequenceNumber(signalReceivedAuditEventEntity.getSequenceNumber());
-
-        return cloudSignalReceivedEvent;
+        return new CloudBPMNSignalReceivedEventImpl(signalReceivedAuditEventEntity.getEventId(),
+                                                    signalReceivedAuditEventEntity.getTimestamp(),
+                                                    signalReceivedAuditEventEntity.getSignal(),
+                                                    signalReceivedAuditEventEntity.getProcessDefinitionId(),
+                                                    signalReceivedAuditEventEntity.getProcessInstanceId());
     }
 }

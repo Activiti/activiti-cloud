@@ -36,38 +36,16 @@ public class TaskCandidateGroupRemovedEventConverter extends BaseEventToEntityCo
     }
 
     @Override
-    public TaskCandidateGroupRemovedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudTaskCandidateGroupRemovedEvent event = (CloudTaskCandidateGroupRemovedEvent) cloudRuntimeEvent;
-                
-        return new TaskCandidateGroupRemovedEventEntity(event.getId(),
-                                                        event.getTimestamp(),
-                                                        event.getAppName(),
-                                                        event.getAppVersion(),
-                                                        event.getServiceFullName(),
-                                                        event.getServiceName(),
-                                                        event.getServiceType(),
-                                                        event.getServiceVersion(),
-                                                        event.getMessageId(),
-                                                        event.getSequenceNumber(),
-                                                        event.getEntity());
+    public TaskCandidateGroupRemovedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {             
+        return new TaskCandidateGroupRemovedEventEntity((CloudTaskCandidateGroupRemovedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TaskCandidateGroupRemovedEventEntity eventEntity = (TaskCandidateGroupRemovedEventEntity) auditEventEntity;
 
-        CloudTaskCandidateGroupRemovedEventImpl cloudEvent = new CloudTaskCandidateGroupRemovedEventImpl(eventEntity.getEventId(),
-                                                                                                         eventEntity.getTimestamp(),
-                                                                                                         eventEntity.getCandidateGroup());
-        cloudEvent.setAppName(eventEntity.getAppName());
-        cloudEvent.setAppVersion(eventEntity.getAppVersion());
-        cloudEvent.setServiceFullName(eventEntity.getServiceFullName());
-        cloudEvent.setServiceName(eventEntity.getServiceName());
-        cloudEvent.setServiceType(eventEntity.getServiceType());
-        cloudEvent.setServiceVersion(eventEntity.getServiceVersion());
-        cloudEvent.setMessageId(eventEntity.getMessageId());
-        cloudEvent.setSequenceNumber(eventEntity.getSequenceNumber());
-
-        return cloudEvent;
+        return new CloudTaskCandidateGroupRemovedEventImpl(eventEntity.getEventId(),
+                                                           eventEntity.getTimestamp(),
+                                                           eventEntity.getCandidateGroup());
     }
 }

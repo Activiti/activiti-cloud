@@ -21,39 +21,17 @@ public class ActivityStartedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected ActivityStartedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudBPMNActivityStartedEvent cloudActivityStartedEvent = (CloudBPMNActivityStartedEvent) cloudRuntimeEvent;
-        return new ActivityStartedAuditEventEntity(cloudActivityStartedEvent.getId(),
-                                                   cloudActivityStartedEvent.getTimestamp(),
-                                                   cloudActivityStartedEvent.getAppName(),
-                                                   cloudActivityStartedEvent.getAppVersion(),
-                                                   cloudActivityStartedEvent.getServiceFullName(),
-                                                   cloudActivityStartedEvent.getServiceName(),
-                                                   cloudActivityStartedEvent.getServiceType(),
-                                                   cloudActivityStartedEvent.getServiceVersion(),
-                                                   cloudActivityStartedEvent.getMessageId(),
-                                                   cloudActivityStartedEvent.getSequenceNumber(),
-                                                   cloudActivityStartedEvent.getEntity());
-               
+        return new ActivityStartedAuditEventEntity((CloudBPMNActivityStartedEvent) cloudRuntimeEvent);           
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         ActivityStartedAuditEventEntity activityStartedAuditEventEntity = (ActivityStartedAuditEventEntity) auditEventEntity;
 
-        CloudBPMNActivityStartedEventImpl bpmnActivityStartedEvent = new CloudBPMNActivityStartedEventImpl(activityStartedAuditEventEntity.getEventId(),
-                                                                                                           activityStartedAuditEventEntity.getTimestamp(),
-                                                                                                           activityStartedAuditEventEntity.getBpmnActivity(),
-                                                                                                           activityStartedAuditEventEntity.getProcessDefinitionId(),
-                                                                                                           activityStartedAuditEventEntity.getProcessInstanceId());
-        bpmnActivityStartedEvent.setAppName(activityStartedAuditEventEntity.getAppName());
-        bpmnActivityStartedEvent.setAppVersion(activityStartedAuditEventEntity.getAppVersion());
-        bpmnActivityStartedEvent.setServiceFullName(activityStartedAuditEventEntity.getServiceFullName());
-        bpmnActivityStartedEvent.setServiceName(activityStartedAuditEventEntity.getServiceName());
-        bpmnActivityStartedEvent.setServiceType(activityStartedAuditEventEntity.getServiceType());
-        bpmnActivityStartedEvent.setServiceVersion(activityStartedAuditEventEntity.getServiceVersion());
-        bpmnActivityStartedEvent.setMessageId(activityStartedAuditEventEntity.getMessageId());
-        bpmnActivityStartedEvent.setSequenceNumber(activityStartedAuditEventEntity.getSequenceNumber());
-
-        return bpmnActivityStartedEvent;
+        return new CloudBPMNActivityStartedEventImpl(activityStartedAuditEventEntity.getEventId(),
+                                                     activityStartedAuditEventEntity.getTimestamp(),
+                                                     activityStartedAuditEventEntity.getBpmnActivity(),
+                                                     activityStartedAuditEventEntity.getProcessDefinitionId(),
+                                                     activityStartedAuditEventEntity.getProcessInstanceId());
     }
 }

@@ -21,34 +21,15 @@ public class ProcessCompletedEventConverter  extends BaseEventToEntityConverter 
 
     @Override
     protected ProcessCompletedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudProcessCompletedEvent cloudProcessCompletedEvent = (CloudProcessCompletedEvent) cloudRuntimeEvent;
-        return new ProcessCompletedEventEntity(cloudProcessCompletedEvent.getId(),
-                                               cloudProcessCompletedEvent.getTimestamp(),
-                                               cloudProcessCompletedEvent.getAppName(),
-                                               cloudProcessCompletedEvent.getAppVersion(),
-                                               cloudProcessCompletedEvent.getServiceName(),
-                                               cloudProcessCompletedEvent.getServiceFullName(),
-                                               cloudProcessCompletedEvent.getServiceType(),
-                                               cloudProcessCompletedEvent.getServiceVersion(),
-                                               cloudProcessCompletedEvent.getMessageId(),
-                                               cloudProcessCompletedEvent.getSequenceNumber(),
-                                               cloudProcessCompletedEvent.getEntity());
+        return new ProcessCompletedEventEntity((CloudProcessCompletedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         ProcessCompletedEventEntity processCompletedEventEntity = (ProcessCompletedEventEntity) auditEventEntity;
-        CloudProcessCompletedEventImpl cloudProcessCompletedEvent = new CloudProcessCompletedEventImpl(processCompletedEventEntity.getEventId(),
-                                                                                                       processCompletedEventEntity.getTimestamp(),
-                                                                                                       processCompletedEventEntity.getProcessInstance());
-        cloudProcessCompletedEvent.setAppName(processCompletedEventEntity.getAppName());
-        cloudProcessCompletedEvent.setAppVersion(processCompletedEventEntity.getAppVersion());
-        cloudProcessCompletedEvent.setServiceFullName(processCompletedEventEntity.getServiceFullName());
-        cloudProcessCompletedEvent.setServiceName(processCompletedEventEntity.getServiceName());
-        cloudProcessCompletedEvent.setServiceType(processCompletedEventEntity.getServiceType());
-        cloudProcessCompletedEvent.setServiceVersion(processCompletedEventEntity.getServiceVersion());
-        cloudProcessCompletedEvent.setMessageId(processCompletedEventEntity.getMessageId());
-        cloudProcessCompletedEvent.setSequenceNumber(processCompletedEventEntity.getSequenceNumber());
-        return cloudProcessCompletedEvent;
+        
+        return new CloudProcessCompletedEventImpl(processCompletedEventEntity.getEventId(),
+                                                  processCompletedEventEntity.getTimestamp(),
+                                                  processCompletedEventEntity.getProcessInstance());
     }
 }

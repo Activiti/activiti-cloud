@@ -28,12 +28,10 @@ public class TimerScheduledEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TimerScheduledAuditEventEntity timerEventEntity = (TimerScheduledAuditEventEntity) auditEventEntity;
 
-        CloudBPMNTimerScheduledEventImpl cloudEvent = new CloudBPMNTimerScheduledEventImpl(timerEventEntity.getEventId(),
-                                                                                           timerEventEntity.getTimestamp(),
-                                                                                           timerEventEntity.getTimer(),
-                                                                                           timerEventEntity.getProcessDefinitionId(),
-                                                                                           timerEventEntity.getProcessInstanceId());
-
-        return cloudEvent;
+        return new CloudBPMNTimerScheduledEventImpl(timerEventEntity.getEventId(),
+                                                    timerEventEntity.getTimestamp(),
+                                                    timerEventEntity.getTimer(),
+                                                    timerEventEntity.getProcessDefinitionId(),
+                                                    timerEventEntity.getProcessInstanceId());
     }
 }

@@ -18,10 +18,8 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
 
-import org.activiti.api.process.model.events.BPMNActivityEvent;
-import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
 
 @Entity
 @DiscriminatorValue(value = ActivityCancelledAuditEventEntity.ACTIVITY_CANCELLED_EVENT)
@@ -34,42 +32,11 @@ public class ActivityCancelledAuditEventEntity extends BPMNActivityAuditEventEnt
     public ActivityCancelledAuditEventEntity() {
     }
 
-    public ActivityCancelledAuditEventEntity(String eventId,
-                                             Long timestamp,
-                                             String cause) {
-        super(eventId,
-              timestamp,
-              BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name());
-        this.cause = cause;
+    public ActivityCancelledAuditEventEntity(CloudBPMNActivityCancelledEvent cloudEvent) {
+        super(cloudEvent);
+        this.cause = cloudEvent.getCause();
     }
-
-    public ActivityCancelledAuditEventEntity(String eventId,
-                                             Long timestamp,
-                                             String appName,
-                                             String appVersion,
-                                             String serviceName,
-                                             String serviceFullName,
-                                             String serviceType,
-                                             String serviceVersion,
-                                             String messageId,
-                                             Integer sequenceNumber,
-                                             BPMNActivity bpmnActivity,
-                                             String cause) {
-        super(eventId,
-              timestamp,
-              BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              messageId,
-              sequenceNumber,
-              bpmnActivity);
-        this.cause = cause;
-    }
-
+    
     public String getCause() {
         return cause;
     }

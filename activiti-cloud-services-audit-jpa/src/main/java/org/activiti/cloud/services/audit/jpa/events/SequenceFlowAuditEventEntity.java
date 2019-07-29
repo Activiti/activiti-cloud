@@ -23,7 +23,7 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 
 import org.activiti.api.process.model.BPMNSequenceFlow;
-import org.activiti.api.process.model.events.SequenceFlowEvent;
+import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SequenceFlowJpaJsonConverter;
 
 @Entity
@@ -40,36 +40,9 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
     public SequenceFlowAuditEventEntity() {
     }
 
-    public SequenceFlowAuditEventEntity(String eventId,
-                                        Long timestamp) {
-        super(eventId,
-              timestamp,
-              SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name());
-    }
-
-    public SequenceFlowAuditEventEntity(String eventId,
-                                        Long timestamp,
-                                        String appName,
-                                        String appVersion,
-                                        String serviceName,
-                                        String serviceFullName,
-                                        String serviceType,
-                                        String serviceVersion,
-                                        String messageId,
-                                        Integer sequenceNumber,
-                                        BPMNSequenceFlow sequenceFlow) {
-        super(eventId,
-              timestamp,
-              SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name());
-        setAppName(appName);
-        setAppVersion(appVersion);
-        setServiceName(serviceName);
-        setServiceFullName(serviceFullName);
-        setServiceType(serviceType);
-        setServiceVersion(serviceVersion);
-        setMessageId(messageId);
-        setSequenceNumber(sequenceNumber);
-        setSequenceFlow(sequenceFlow) ;
+    public SequenceFlowAuditEventEntity(CloudSequenceFlowTakenEvent cloudEvent) {
+        super(cloudEvent);
+        setSequenceFlow(cloudEvent.getEntity()) ;
     }
 
     public BPMNSequenceFlow getSequenceFlow() {

@@ -20,37 +20,16 @@ public class TaskCreatedEventConverter extends BaseEventToEntityConverter {
     }
 
     @Override
-    protected TaskCreatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudTaskCreatedEvent cloudTaskCreatedEvent = (CloudTaskCreatedEvent) cloudRuntimeEvent;       
-        return new TaskCreatedEventEntity(cloudTaskCreatedEvent.getId(),
-                                          cloudTaskCreatedEvent.getTimestamp(),
-                                          cloudTaskCreatedEvent.getAppName(),
-                                          cloudTaskCreatedEvent.getAppVersion(),
-                                          cloudTaskCreatedEvent.getServiceName(),
-                                          cloudTaskCreatedEvent.getServiceFullName(),
-                                          cloudTaskCreatedEvent.getServiceType(),
-                                          cloudTaskCreatedEvent.getServiceVersion(),
-                                          cloudTaskCreatedEvent.getMessageId(),
-                                          cloudTaskCreatedEvent.getSequenceNumber(),
-                                          cloudTaskCreatedEvent.getEntity());
+    protected TaskCreatedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {      
+        return new TaskCreatedEventEntity((CloudTaskCreatedEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TaskCreatedEventEntity taskCreatedEventEntity = (TaskCreatedEventEntity) auditEventEntity;
 
-        CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl(taskCreatedEventEntity.getEventId(),
-                                                                                        taskCreatedEventEntity.getTimestamp(),
-                                                                                        taskCreatedEventEntity.getTask());
-        cloudTaskCreatedEvent.setAppName(taskCreatedEventEntity.getAppName());
-        cloudTaskCreatedEvent.setAppVersion(taskCreatedEventEntity.getAppVersion());
-        cloudTaskCreatedEvent.setServiceFullName(taskCreatedEventEntity.getServiceFullName());
-        cloudTaskCreatedEvent.setServiceName(taskCreatedEventEntity.getServiceName());
-        cloudTaskCreatedEvent.setServiceType(taskCreatedEventEntity.getServiceType());
-        cloudTaskCreatedEvent.setServiceVersion(taskCreatedEventEntity.getServiceVersion());
-        cloudTaskCreatedEvent.setMessageId(taskCreatedEventEntity.getMessageId());
-        cloudTaskCreatedEvent.setSequenceNumber(taskCreatedEventEntity.getSequenceNumber());
-
-        return cloudTaskCreatedEvent;
+        return new CloudTaskCreatedEventImpl(taskCreatedEventEntity.getEventId(),
+                                             taskCreatedEventEntity.getTimestamp(),
+                                             taskCreatedEventEntity.getTask());
     }
 }

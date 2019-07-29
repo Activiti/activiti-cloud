@@ -19,8 +19,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.api.task.model.Task;
-import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskUpdatedEvent;
 
 @Entity
 @DiscriminatorValue(value = TaskUpdatedEventEntity.TASK_UPDATED_EVENT)
@@ -31,35 +30,7 @@ public class TaskUpdatedEventEntity extends TaskAuditEventEntity {
     public TaskUpdatedEventEntity() {
     }
 
-    public TaskUpdatedEventEntity(String eventId,
-                                  Long timestamp) {
-        super(eventId,
-              timestamp,
-              TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name());
-    }
-
-    public TaskUpdatedEventEntity(String eventId,
-                                  Long timestamp,
-                                  String appName,
-                                  String appVersion,
-                                  String serviceName,
-                                  String serviceFullName,
-                                  String serviceType,
-                                  String serviceVersion,
-                                  String messageId,
-                                  Integer sequenceNumber,
-                                  Task task) {
-        super(eventId,
-              timestamp,
-              TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              messageId,
-              sequenceNumber,
-              task);
+    public TaskUpdatedEventEntity(CloudTaskUpdatedEvent cloudEvent) {
+        super(cloudEvent);
     }
 }

@@ -19,8 +19,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 
 @Entity
 @DiscriminatorValue(value = ProcessStartedAuditEventEntity.PROCESS_STARTED_EVENT)
@@ -31,35 +30,7 @@ public class ProcessStartedAuditEventEntity extends ProcessAuditEventEntity {
     public ProcessStartedAuditEventEntity() {
     }
 
-    public ProcessStartedAuditEventEntity(String eventId,
-                                          Long timestamp) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name());
-    }
-
-    public ProcessStartedAuditEventEntity(String eventId,
-                                          Long timestamp,
-                                          String appName,
-                                          String appVersion,
-                                          String serviceName,
-                                          String serviceFullName,
-                                          String serviceType,
-                                          String serviceVersion,
-                                          String messageId,
-                                          Integer sequenceNumber,
-                                          ProcessInstance processInstance) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              messageId,
-              sequenceNumber,
-              processInstance);
-    }
+    public ProcessStartedAuditEventEntity(CloudProcessStartedEvent cloudEvent) {
+        super(cloudEvent);
+    } 
 }

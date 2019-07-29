@@ -18,10 +18,8 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
 
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
-import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 
 @Entity
 @DiscriminatorValue(value = ProcessCreatedAuditEventEntity.PROCESS_CREATED_EVENT)
@@ -32,35 +30,7 @@ public class ProcessCreatedAuditEventEntity extends ProcessAuditEventEntity {
     public ProcessCreatedAuditEventEntity() {
     }
 
-    public ProcessCreatedAuditEventEntity(String eventId,
-                                          Long timestamp) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name());
-    }
-
-    public ProcessCreatedAuditEventEntity(String eventId,
-                                          Long timestamp,
-                                          String appName,
-                                          String appVersion,
-                                          String serviceName,
-                                          String serviceFullName,
-                                          String serviceType,
-                                          String serviceVersion,
-                                          String messageId,
-                                          Integer sequenceNumber,
-                                          ProcessInstance processInstance) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              messageId,
-              sequenceNumber,
-              processInstance);
-    }
+    public ProcessCreatedAuditEventEntity(CloudProcessCreatedEvent cloudEvent) {
+        super(cloudEvent);
+    }  
 }

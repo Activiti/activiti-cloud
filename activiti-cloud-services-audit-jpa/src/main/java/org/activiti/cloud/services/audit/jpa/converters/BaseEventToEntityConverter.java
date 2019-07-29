@@ -31,9 +31,7 @@ public abstract class BaseEventToEntityConverter implements EventToEntityConvert
 
     @Override
     public AuditEventEntity convertToEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        AuditEventEntity auditEventEntity = createEventEntity(cloudRuntimeEvent);
-        
-        return eventContextInfoAppender.addProcessContextInfoToEntityEvent(auditEventEntity, cloudRuntimeEvent);
+        return createEventEntity(cloudRuntimeEvent);
     }
 
     protected abstract AuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent);

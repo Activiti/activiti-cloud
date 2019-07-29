@@ -19,8 +19,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 
 @Entity
 @DiscriminatorValue(value = ProcessCompletedEventEntity.PROCESS_COMPLETED_EVENT)
@@ -31,35 +30,7 @@ public class ProcessCompletedEventEntity extends ProcessAuditEventEntity {
     public ProcessCompletedEventEntity() {
     }
 
-    public ProcessCompletedEventEntity(String eventId,
-                                       Long timestamp) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name());
-    }
-
-    public ProcessCompletedEventEntity(String eventId,
-                                       Long timestamp,
-                                       String appName,
-                                       String appVersion,
-                                       String serviceName,
-                                       String serviceFullName,
-                                       String serviceType,
-                                       String serviceVersion,
-                                       String messageId,
-                                       Integer sequenceNumber,
-                                       ProcessInstance processInstance) {
-        super(eventId,
-              timestamp,
-              ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              messageId,
-              sequenceNumber,
-              processInstance);
+    public ProcessCompletedEventEntity(CloudProcessCompletedEvent cloudEvent) {
+        super(cloudEvent);
     }
 }

@@ -21,40 +21,15 @@ public class SequenceFlowTakenEventConverter extends BaseEventToEntityConverter 
 
     @Override
     protected SequenceFlowAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudSequenceFlowTakenEvent cloudSequenceFlowTaken = (CloudSequenceFlowTakenEvent) cloudRuntimeEvent;
-
-        return new SequenceFlowAuditEventEntity(cloudSequenceFlowTaken.getId(),
-                                                cloudSequenceFlowTaken.getTimestamp(),
-                                                cloudSequenceFlowTaken.getAppName(),
-                                                cloudSequenceFlowTaken.getAppVersion(),
-                                                cloudSequenceFlowTaken.getServiceName(),
-                                                cloudSequenceFlowTaken.getServiceFullName(),
-                                                cloudSequenceFlowTaken.getServiceType(),
-                                                cloudSequenceFlowTaken.getServiceVersion(),
-                                                cloudSequenceFlowTaken.getMessageId(),
-                                                cloudSequenceFlowTaken.getSequenceNumber(),
-                                                cloudSequenceFlowTaken.getEntity());
+        return new SequenceFlowAuditEventEntity((CloudSequenceFlowTakenEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         SequenceFlowAuditEventEntity sequenceFlowTakenAuditEventEntity = (SequenceFlowAuditEventEntity) auditEventEntity;
-        CloudSequenceFlowTakenImpl cloudSequenceFlowTakenEvent = new CloudSequenceFlowTakenImpl(sequenceFlowTakenAuditEventEntity.getEventId(),
-                                                                                                sequenceFlowTakenAuditEventEntity.getTimestamp(),
-                                                                                                sequenceFlowTakenAuditEventEntity.getSequenceFlow());
-        cloudSequenceFlowTakenEvent.setAppName(sequenceFlowTakenAuditEventEntity.getAppName());
-        cloudSequenceFlowTakenEvent.setAppVersion(sequenceFlowTakenAuditEventEntity.getAppVersion());
-        cloudSequenceFlowTakenEvent.setServiceFullName(sequenceFlowTakenAuditEventEntity.getServiceFullName());
-        cloudSequenceFlowTakenEvent.setServiceName(sequenceFlowTakenAuditEventEntity.getServiceName());
-        cloudSequenceFlowTakenEvent.setServiceType(sequenceFlowTakenAuditEventEntity.getServiceType());
-        cloudSequenceFlowTakenEvent.setServiceVersion(sequenceFlowTakenAuditEventEntity.getServiceVersion());
-        cloudSequenceFlowTakenEvent.setMessageId(sequenceFlowTakenAuditEventEntity.getMessageId());
-        cloudSequenceFlowTakenEvent.setSequenceNumber(sequenceFlowTakenAuditEventEntity.getSequenceNumber());
 
-        cloudSequenceFlowTakenEvent.setEntityId(sequenceFlowTakenAuditEventEntity.getProcessInstanceId());
-        cloudSequenceFlowTakenEvent.setProcessDefinitionId(sequenceFlowTakenAuditEventEntity.getProcessDefinitionId());
-        cloudSequenceFlowTakenEvent.setProcessInstanceId(sequenceFlowTakenAuditEventEntity.getProcessInstanceId());
-
-        return cloudSequenceFlowTakenEvent;
+        return new CloudSequenceFlowTakenImpl(sequenceFlowTakenAuditEventEntity.getEventId(),
+                                              sequenceFlowTakenAuditEventEntity.getTimestamp(),
+                                              sequenceFlowTakenAuditEventEntity.getSequenceFlow());
     }
 }

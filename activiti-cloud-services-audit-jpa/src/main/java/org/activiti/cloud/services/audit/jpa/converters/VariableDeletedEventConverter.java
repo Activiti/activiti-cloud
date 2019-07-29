@@ -21,39 +21,15 @@ public class VariableDeletedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected VariableDeletedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudVariableDeletedEvent cloudVariableDeletedEvent = (CloudVariableDeletedEvent) cloudRuntimeEvent;
-        return new VariableDeletedEventEntity(cloudVariableDeletedEvent.getId(),
-                                              cloudVariableDeletedEvent.getTimestamp(),
-                                              cloudVariableDeletedEvent.getAppName(),
-                                              cloudVariableDeletedEvent.getAppVersion(),
-                                              cloudVariableDeletedEvent.getServiceFullName(),
-                                              cloudVariableDeletedEvent.getServiceName(),
-                                              cloudVariableDeletedEvent.getServiceType(),
-                                              cloudVariableDeletedEvent.getServiceVersion(),
-                                              cloudVariableDeletedEvent.getMessageId(),
-                                              cloudVariableDeletedEvent.getSequenceNumber(),
-                                              cloudVariableDeletedEvent.getEntity());
-        
+        return new VariableDeletedEventEntity((CloudVariableDeletedEvent) cloudRuntimeEvent);       
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         VariableDeletedEventEntity variableDeletedEventEntity = (VariableDeletedEventEntity) auditEventEntity;
 
-        CloudVariableDeletedEventImpl variableDeletedEvent = new CloudVariableDeletedEventImpl(variableDeletedEventEntity.getEventId(),
-                                                                                               variableDeletedEventEntity.getTimestamp(),
-                                                                                               variableDeletedEventEntity.getVariableInstance());
-        variableDeletedEvent.setAppName(variableDeletedEventEntity.getAppName());
-        variableDeletedEvent.setAppVersion(variableDeletedEventEntity.getAppVersion());
-        variableDeletedEvent.setServiceFullName(variableDeletedEventEntity.getServiceFullName());
-        variableDeletedEvent.setServiceName(variableDeletedEventEntity.getServiceName());
-        variableDeletedEvent.setServiceType(variableDeletedEventEntity.getServiceType());
-        variableDeletedEvent.setServiceVersion(variableDeletedEventEntity.getServiceVersion());
-        variableDeletedEvent.setMessageId(variableDeletedEventEntity.getMessageId());
-        variableDeletedEvent.setSequenceNumber(variableDeletedEventEntity.getSequenceNumber());
-        
-        variableDeletedEvent.setProcessDefinitionId(variableDeletedEventEntity.getProcessDefinitionId());
-
-        return variableDeletedEvent;
+        return new CloudVariableDeletedEventImpl(variableDeletedEventEntity.getEventId(),
+                                                 variableDeletedEventEntity.getTimestamp(),
+                                                 variableDeletedEventEntity.getVariableInstance());
     }
 }

@@ -23,8 +23,8 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 
 import org.activiti.api.task.model.TaskCandidateGroup;
-import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateGroupJpaJsonConverter;
 
 @Entity
@@ -41,30 +41,9 @@ public class TaskCandidateGroupAddedEventEntity extends AuditEventEntity {
     public TaskCandidateGroupAddedEventEntity() {
     }
 
-    public TaskCandidateGroupAddedEventEntity(String eventId,
-                                              Long timestamp,
-                                              String appName,
-                                              String appVersion,
-                                              String serviceName,
-                                              String serviceFullName,
-                                              String serviceType,
-                                              String serviceVersion,
-                                              String messageId,
-                                              Integer sequenceNumber,
-                                              TaskCandidateGroup candidateGroup) {
-        super(eventId,
-              timestamp,
-              TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name());
-
-        setAppName(appName);
-        setAppVersion(appVersion);
-        setServiceName(serviceName);
-        setServiceFullName(serviceFullName);
-        setServiceType(serviceType);
-        setServiceVersion(serviceVersion);
-        setMessageId(messageId);
-        setSequenceNumber(sequenceNumber);
-        setCandidateGroup(candidateGroup);
+    public TaskCandidateGroupAddedEventEntity(CloudTaskCandidateGroupAddedEvent cloudEvent) {
+        super(cloudEvent);
+        setCandidateGroup(cloudEvent.getEntity());
     }
     
     public TaskCandidateGroup getCandidateGroup() {

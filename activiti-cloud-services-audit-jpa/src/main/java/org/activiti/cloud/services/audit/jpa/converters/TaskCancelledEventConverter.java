@@ -21,38 +21,15 @@ public class TaskCancelledEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected TaskCancelledEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        CloudTaskCancelledEvent cloudTaskCancelledEvent = (CloudTaskCancelledEvent) cloudRuntimeEvent;
-        return new TaskCancelledEventEntity(cloudTaskCancelledEvent.getId(),
-                                            cloudTaskCancelledEvent.getTimestamp(),
-                                            cloudTaskCancelledEvent.getAppName(),
-                                            cloudTaskCancelledEvent.getAppVersion(),
-                                            cloudTaskCancelledEvent.getServiceName(),
-                                            cloudTaskCancelledEvent.getServiceFullName(),
-                                            cloudTaskCancelledEvent.getServiceType(),
-                                            cloudTaskCancelledEvent.getServiceVersion(),
-                                            cloudTaskCancelledEvent.getMessageId(),
-                                            cloudTaskCancelledEvent.getSequenceNumber(),
-                                            cloudTaskCancelledEvent.getEntity(),
-                                            cloudTaskCancelledEvent.getCause());
+        return new TaskCancelledEventEntity((CloudTaskCancelledEvent) cloudRuntimeEvent);
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TaskCancelledEventEntity taskCancelledEventEntity = (TaskCancelledEventEntity) auditEventEntity;
 
-        CloudTaskCancelledEventImpl cloudTaskCancelledEvent = new CloudTaskCancelledEventImpl(taskCancelledEventEntity.getEventId(),
-                                                                                              taskCancelledEventEntity.getTimestamp(),
-                                                                                              taskCancelledEventEntity.getTask());
-        cloudTaskCancelledEvent.setAppName(taskCancelledEventEntity.getAppName());
-        cloudTaskCancelledEvent.setAppVersion(taskCancelledEventEntity.getAppVersion());
-        cloudTaskCancelledEvent.setServiceFullName(taskCancelledEventEntity.getServiceFullName());
-        cloudTaskCancelledEvent.setServiceName(taskCancelledEventEntity.getServiceName());
-        cloudTaskCancelledEvent.setServiceType(taskCancelledEventEntity.getServiceType());
-        cloudTaskCancelledEvent.setServiceVersion(taskCancelledEventEntity.getServiceVersion());
-        cloudTaskCancelledEvent.setCause(taskCancelledEventEntity.getCause());
-        cloudTaskCancelledEvent.setMessageId(taskCancelledEventEntity.getMessageId());
-        cloudTaskCancelledEvent.setSequenceNumber(taskCancelledEventEntity.getSequenceNumber());
-
-        return cloudTaskCancelledEvent;
+        return new CloudTaskCancelledEventImpl(taskCancelledEventEntity.getEventId(),
+                                               taskCancelledEventEntity.getTimestamp(),
+                                               taskCancelledEventEntity.getTask());
     }
 }

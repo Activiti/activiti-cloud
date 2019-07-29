@@ -19,8 +19,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.api.model.shared.event.VariableEvent;
-import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 
 @Entity
 @DiscriminatorValue(value = VariableCreatedEventEntity.VARIABLE_CREATED_EVENT)
@@ -31,35 +30,7 @@ public class VariableCreatedEventEntity extends VariableAuditEventEntity {
     public VariableCreatedEventEntity() {
     }
 
-    public VariableCreatedEventEntity(String eventId,
-                                      Long timestamp) {
-        super(eventId,
-              timestamp,
-              VariableEvent.VariableEvents.VARIABLE_CREATED.name());
-    }
-
-    public VariableCreatedEventEntity(String eventId,
-                                      Long timestamp,
-                                      String appName,
-                                      String appVersion,
-                                      String serviceName,
-                                      String serviceFullName,
-                                      String serviceType,
-                                      String serviceVersion,
-                                      String messageId,
-                                      Integer sequenceNumber,
-                                      VariableInstance variableInstance) {
-        super(eventId,
-              timestamp,
-              VariableEvent.VariableEvents.VARIABLE_CREATED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              messageId,
-              sequenceNumber,
-              variableInstance);
+    public VariableCreatedEventEntity(CloudVariableCreatedEvent cloudEvent) {
+        super(cloudEvent);
     }
 }

@@ -144,8 +144,10 @@ public class AuditEventsControllerImplIT {
     }
 
     private AuditEventEntity buildAuditEventEntity(long id) {
-        ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity("eventId",
-                                                                                        System.currentTimeMillis());
+        ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
+        
+        eventEntity.setEventId("eventId");
+        eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setId(id);
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("10");
@@ -314,9 +316,10 @@ public class AuditEventsControllerImplIT {
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
-        AuditEventEntity event = new ActivityStartedAuditEventEntity("eventId",
-                                                                     System.currentTimeMillis());
-
+        AuditEventEntity event = new ActivityStartedAuditEventEntity();
+        event.setEventId("eventId");
+        event.setTimestamp(System.currentTimeMillis());
+        
         mockMvc.perform(head("{version}/events/{id}",
                              "/v1",
                              eventEntity.getId()))
@@ -332,8 +335,10 @@ public class AuditEventsControllerImplIT {
         signal.setSignalPayload(new SignalPayload("signal",
                                                   null));
 
-        SignalReceivedAuditEventEntity eventEntity = new SignalReceivedAuditEventEntity("eventId",
-                                                                                        System.currentTimeMillis());
+        SignalReceivedAuditEventEntity eventEntity = new SignalReceivedAuditEventEntity();
+        
+        eventEntity.setEventId("eventId");
+        eventEntity.setTimestamp(System.currentTimeMillis());    
         eventEntity.setId(1L);
         eventEntity.setServiceName("rb-my-app");
         eventEntity.setEventType(BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name());

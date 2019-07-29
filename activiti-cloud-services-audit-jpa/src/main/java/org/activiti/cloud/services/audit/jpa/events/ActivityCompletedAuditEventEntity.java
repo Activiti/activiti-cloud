@@ -18,10 +18,8 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
 
-import org.activiti.api.process.model.events.BPMNActivityEvent;
-import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 
 @Entity
 @DiscriminatorValue(value = ActivityCompletedAuditEventEntity.ACTIVITY_COMPLETED_EVENT)
@@ -32,35 +30,7 @@ public class ActivityCompletedAuditEventEntity extends BPMNActivityAuditEventEnt
     public ActivityCompletedAuditEventEntity() {
     }
 
-    public ActivityCompletedAuditEventEntity(String eventId,
-                                             Long timestamp) {
-        super(eventId,
-              timestamp,
-              BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name());
-    }
-
-    public ActivityCompletedAuditEventEntity(String eventId,
-                                             Long timestamp,
-                                             String appName,
-                                             String appVersion,
-                                             String serviceName,
-                                             String serviceFullName,
-                                             String serviceType,
-                                             String serviceVersion,
-                                             String messageId,
-                                             Integer sequenceNumber,
-                                             BPMNActivity bpmnActivity) {
-        super(eventId,
-              timestamp,
-              BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name(),
-              appName,
-              appVersion,
-              serviceName,
-              serviceFullName,
-              serviceType,
-              serviceVersion,
-              messageId,
-              sequenceNumber,
-              bpmnActivity);
-    }
+    public ActivityCompletedAuditEventEntity(CloudBPMNActivityCompletedEvent cloudEvent) {
+        super(cloudEvent);
+    } 
 }

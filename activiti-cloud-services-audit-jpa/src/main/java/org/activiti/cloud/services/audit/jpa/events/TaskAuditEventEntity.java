@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 
 import org.activiti.api.task.model.Task;
+import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
 
 @Entity
@@ -23,49 +24,9 @@ public abstract class TaskAuditEventEntity extends AuditEventEntity {
     public TaskAuditEventEntity() {
     }
 
-    public TaskAuditEventEntity(String eventId,
-                                Long timestamp,
-                                String eventType) {
-        super(eventId,
-              timestamp,
-              eventType);
-    }
-
-    public TaskAuditEventEntity(String eventId,
-                                Long timestamp,
-                                String eventType,
-                                String appName,
-                                String appVersion,
-                                String serviceName,
-                                String serviceFullName,
-                                String serviceType,
-                                String serviceVersion,
-                                String messageId,
-                                Integer sequenceNumber,
-                                Task task) {
-        super(eventId,
-              timestamp,
-              eventType);
-        setAppName(appName);
-        setAppVersion(appVersion);
-        setServiceName(serviceName);
-        setServiceFullName(serviceFullName);
-        setServiceType(serviceType);
-        setServiceVersion(serviceVersion);
-        setMessageId(messageId);
-        setSequenceNumber(sequenceNumber);
-        if (task != null) {
-            setProcessDefinitionId(task.getProcessDefinitionId());
-            setProcessInstanceId(task.getProcessInstanceId());
-        }
-
-        this.task = task;
-        if (task != null) {
-            this.taskId = task.getId();
-            this.taskName = task.getName();
-            setEntityId(task.getId());
-        }
-
+    public TaskAuditEventEntity(CloudTaskRuntimeEvent cloudEvent) {
+        super(cloudEvent);
+        setTask(cloudEvent.getEntity());
     }
 
     public Task getTask() {
@@ -74,6 +35,10 @@ public abstract class TaskAuditEventEntity extends AuditEventEntity {
 
     public void setTask(Task task) {
         this.task = task;
+        if (task != null) {
+            this.taskId = task.getId();
+            this.taskName = task.getName();
+        }
     }
 
     public String getTaskId() {
