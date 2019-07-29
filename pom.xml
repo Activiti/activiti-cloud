@@ -95,7 +95,7 @@
     <activiti-cloud-service-common.version>7.1.44</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>7.1.74</activiti-cloud-runtime-bundle-service.version>
     <activiti-cloud-query-service.version>7.1.62</activiti-cloud-query-service.version>
-    <activiti-cloud-audit-service.version>7.1.50</activiti-cloud-audit-service.version>
+    <activiti-cloud-audit-service.version>7.1.51</activiti-cloud-audit-service.version>
     <activiti-cloud-connectors.version>7.1.43</activiti-cloud-connectors.version>
     <activiti-cloud-app-service.version>7.1.40</activiti-cloud-app-service.version>
     <activiti-cloud-acceptance-tests.version>7.1.61</activiti-cloud-acceptance-tests.version>
