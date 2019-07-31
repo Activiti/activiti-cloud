@@ -382,30 +382,41 @@ public class ProcessInstanceTasks {
     }
 
     @Then("the user is able to resume the process instance")
-    public void activateProcessInstance(){
+    public void activateProcessInstance() {
         processRuntimeBundleSteps.resumeProcessInstance(processInstance.getId());
     }
 
     @Then("the user can get events for process with variables instances in admin endpoint")
-    public void checkIfEventsFromProcessesWithVariablesArePresentAdmin(){
+    public void checkIfEventsFromProcessesWithVariablesArePresentAdmin() {
         //TODO some refactoring after fixing the behavior of the /admin/v1/events?search=entityId:UUID endpoint
-        Collection<CloudRuntimeEvent> filteredCollection = checkEvents(auditAdminSteps.getEventsByEntityIdAdmin(Serenity.sessionVariableCalled("processInstanceId")), processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
-        assertThat(filteredCollection).isNotEmpty();
-        assertThat(((ProcessInstanceImpl)filteredCollection.iterator().next().getEntity()).getProcessDefinitionKey()).isEqualTo(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
+        Collection<CloudRuntimeEvent> filteredCollection = null;
+        await().untilAsserted(
+                () ->
+                {
+                    checkEvents(auditAdminSteps.getEventsByEntityIdAdmin(Serenity.sessionVariableCalled("processInstanceId")),
+                                processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
+                    assertThat(filteredCollection).isNotEmpty();
+                    assertThat(((ProcessInstanceImpl) filteredCollection.iterator().next().getEntity()).getProcessDefinitionKey()).isEqualTo(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
+                }
+        );
     }
 
     @Then("the user can query process with variables instances in admin endpoints")
-    public void checkIfProcessWithVariablesArePresentQueryAdmin(){
-        assertThat(checkProcessInstances(processQueryAdminSteps.getAllProcessInstancesAdmin(),processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
+    public void checkIfProcessWithVariablesArePresentQueryAdmin() {
+        assertThat(checkProcessInstances(processQueryAdminSteps.getAllProcessInstancesAdmin(),
+                                         processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
     }
 
     @Then("the user can get process with variables instances in admin endpoint")
-    public void checkIfProcessWithVariablesArePresentAdmin(){
-        assertThat(checkProcessInstances(processRuntimeAdminSteps.getProcessInstances(), processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
+    public void checkIfProcessWithVariablesArePresentAdmin() {
+        assertThat(checkProcessInstances(processRuntimeAdminSteps.getProcessInstances(),
+                                         processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"))).isNotEmpty();
     }
 
     @Then("the task from $processName is $status and it is called $taskName")
-    public void checkTaskFromProcessInstance(String processName,Task.TaskStatus status, String taskName){
+    public void checkTaskFromProcessInstance(String processName,
+                                             Task.TaskStatus status,
+                                             String taskName) {
         List<ProcessInstance> processInstancesList = new ArrayList<>(
                 processRuntimeBundleSteps.getAllProcessInstances().getContent());
         assertThat(processInstancesList).extracting("processDefinitionKey")
