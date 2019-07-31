@@ -45,7 +45,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 /**
  * Model model entity
  */
-@Entity
+@Entity(name = "Model")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
 @Table(name = "Model",
