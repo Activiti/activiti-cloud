@@ -120,7 +120,35 @@ public class ProcessInstanceNotifications {
         
         assertThat(countDownLatch.await(10, TimeUnit.SECONDS)).as("should start a process with subscription")
                                                               .isTrue();
-    }    
+    }   
+    
+    @When("the user starts a process $processName with TIMER subscriptions")
+    public void startProcessWithTimerSubscription(String processName) throws IOException, InterruptedException {
+
+        processInstanceRef =  new AtomicReference<>();
+        subscriptionRef = new AtomicReference<>();
+
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        AuthToken authToken = TokenHolder.getAuthToken();
+         
+        String query = "subscription($serviceName: String!, $eventTypes: [EngineEventType!]) {" +
+                        "  engineEvents(serviceName: [$serviceName], eventType: $eventTypes) {" +
+                        "    serviceName " +
+                        "    processDefinitionKey " +
+                        "    eventType " +
+                        "  }" +
+                        "}";
+
+        Map<String, Object> variables = Map.of("serviceName", notificationsSteps.getRuntimeBundleServiceName(),
+                                               "eventTypes", Arrays.array("TIMER_SCHEDULED", "TIMER_FIRED", "TIMER_EXECUTED"));
+        
+        Consumer<Subscription> action = startProcessAction(processName, countDownLatch, subscriptionRef);
+        
+        data = notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
+        
+        assertThat(countDownLatch.await(10, TimeUnit.SECONDS)).as("should start a process with subscription")
+                                                              .isTrue();
+    }       
     
     @Then("the status of the process is completed")
     public void verifyProcessCompleted() throws Exception {
@@ -194,6 +222,51 @@ public class ProcessInstanceNotifications {
         String expected =  objectMapper.writeValueAsString(payload);
         
         notificationsSteps.verifyData(data, expected);
+    }
+    
+    @SuppressWarnings("serial")
+    @Then("TIMER notifications are received")
+    public void verifyTimerNotifications() throws Exception {
+        ProcessInstance processInstnace = processInstanceRef.get();
+        
+        Map<String, Object> timerScheduledMessagePayload = new ObjectMap() {{
+            put("payload", new ObjectMap() {{
+                put("data", new ObjectMap() {{
+                    put("engineEvents", Arrays.array(new ObjectMap() {{
+                        put("serviceName", notificationsSteps.getRuntimeBundleServiceName());
+                        put("processDefinitionKey", processInstnace.getProcessDefinitionKey());
+                        put("eventType", "TIMER_SCHEDULED");
+                    }}));
+                }});
+            }});
+            put("id","1");
+            put("type", "data");
+        }};
+        
+        Map<String, Object> timerFiredMessagePayload = new ObjectMap() {{
+            put("payload", new ObjectMap() {{
+                put("data", new ObjectMap() {{
+                    put("engineEvents", 
+                        Arrays.array(new ObjectMap() {{
+                            put("serviceName", notificationsSteps.getRuntimeBundleServiceName());
+                            put("processDefinitionKey", processInstnace.getProcessDefinitionKey());
+                            put("eventType", "TIMER_FIRED");
+                        }},
+                        new ObjectMap() {{
+                            put("serviceName", notificationsSteps.getRuntimeBundleServiceName());
+                            put("processDefinitionKey", processInstnace.getProcessDefinitionKey());
+                            put("eventType", "TIMER_EXECUTED");
+                        }}));
+                }});
+            }});
+            put("id","1");
+            put("type", "data");
+        }};
+
+        String startProcessMessage = objectMapper.writeValueAsString(timerScheduledMessagePayload);
+        String completeProcessMessage = objectMapper.writeValueAsString(timerFiredMessagePayload);
+        
+        notificationsSteps.verifyData(data, startProcessMessage, completeProcessMessage);
     }    
     
     private Consumer<Subscription> startProcessAction(String processName, CountDownLatch countDownLatch, AtomicReference<Subscription> subscriptionRef) {

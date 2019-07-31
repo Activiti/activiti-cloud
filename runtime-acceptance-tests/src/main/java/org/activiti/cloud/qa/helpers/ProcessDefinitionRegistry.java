@@ -41,9 +41,16 @@ public class ProcessDefinitionRegistry {
         put("Process with Generic BPMN Task","processwit-c6fd1b26-0d64-47f2-8d04-0b70764444a7");
     }};
 
+    private static final HashMap <String, String> processWithTimerEvents = new HashMap<String, String>(){{
+        put("INTERMEDIATE_TIMER_EVENT_PROCESS","intermediateTimerEventExample");
+        put("START_TIMER_EVENT_PROCESS","startTimerEventExample");
+        put("BOUNDARY_TIMER_EVENT_PROCESS","boundaryTimerEventExample");
+    }};    
+
     public static final HashMap <String, String> processDefinitionKeys = new HashMap<String, String>(){{
         putAll(processWithTasksDefinitionKeys);
         putAll(processWithNoTasksDefinitionKeys);
+        putAll(processWithTimerEvents);
     }};
 
     public static String processDefinitionKeyMatcher (String processName){
