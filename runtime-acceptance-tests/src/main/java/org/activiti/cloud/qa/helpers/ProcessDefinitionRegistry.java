@@ -40,6 +40,7 @@ public class ProcessDefinitionRegistry {
             "startSimpleSubProcess");
         put("PROCESS_WITH_HEADERS_CONNECTOR",
             "HeadersConnectorProcess");
+        put("PROCESS_INSTANCE_WITH_INCLUSIVE_GATEWAY","basicInclusiveGateway");
     }};
 
     private static final HashMap <String, String> processWithNoTasksDefinitionKeys = new HashMap<>() {{
@@ -56,7 +57,7 @@ public class ProcessDefinitionRegistry {
         put("Process with Generic BPMN Task",
             "processwit-c6fd1b26-0d64-47f2-8d04-0b70764444a7");
     }};
-    
+
     private static final HashMap <String, String> processWithTimerEvents = new HashMap<>() {{
         put("INTERMEDIATE_TIMER_EVENT_PROCESS",
             "intermediateTimerEventExample");
