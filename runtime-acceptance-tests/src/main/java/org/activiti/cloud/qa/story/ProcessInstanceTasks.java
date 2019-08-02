@@ -389,16 +389,10 @@ public class ProcessInstanceTasks {
     @Then("the user can get events for process with variables instances in admin endpoint")
     public void checkIfEventsFromProcessesWithVariablesArePresentAdmin() {
         //TODO some refactoring after fixing the behavior of the /admin/v1/events?search=entityId:UUID endpoint
-        Collection<CloudRuntimeEvent> filteredCollection = null;
-        await().untilAsserted(
-                () ->
-                {
-                    checkEvents(auditAdminSteps.getEventsByEntityIdAdmin(Serenity.sessionVariableCalled("processInstanceId")),
-                                processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
-                    assertThat(filteredCollection).isNotEmpty();
-                    assertThat(((ProcessInstanceImpl) filteredCollection.iterator().next().getEntity()).getProcessDefinitionKey()).isEqualTo(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
-                }
-        );
+        Collection<CloudRuntimeEvent> filteredCollection = checkEvents(auditAdminSteps.getEventsAdmin().getContent(),
+                                                                       processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
+        assertThat(filteredCollection).isNotEmpty();
+        assertThat(((ProcessInstanceImpl) filteredCollection.iterator().next().getEntity()).getProcessDefinitionKey()).isEqualTo(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
     }
 
     @Then("the user can query process with variables instances in admin endpoints")
