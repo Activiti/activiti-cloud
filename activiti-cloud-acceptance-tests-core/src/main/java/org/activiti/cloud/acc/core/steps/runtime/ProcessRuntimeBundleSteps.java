@@ -109,7 +109,7 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public void checkProcessInstanceNoDiagram(String diagram) {
-        assertThat(diagram).isEmpty();
+        assertThat(diagram).isNullOrEmpty();
     }
 
     @Step
