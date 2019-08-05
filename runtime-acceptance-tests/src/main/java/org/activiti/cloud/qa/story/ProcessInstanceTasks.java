@@ -31,7 +31,6 @@ import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
-import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
@@ -53,7 +52,6 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedResources;
 
-import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
 import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
 import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
 import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
@@ -209,7 +207,7 @@ public class ProcessInstanceTasks {
     public void checkTaskStatusSinceBeginning(Task.TaskStatus status){
         taskRuntimeBundleSteps.checkTaskStatus(currentTask.getId(), status);
         taskQuerySteps.checkTaskStatus(currentTask.getId(), status);
-        auditSteps.checkTaskCreatedAndAssignedEventsWhenAlreadyAssinged(currentTask.getId());
+        auditSteps.checkTaskCreatedAndAssignedEventsWhenAlreadyAssigned(currentTask.getId());
     }
 
     @When("the user saves the task with variable $variableName equal to $variableValue")
@@ -388,11 +386,14 @@ public class ProcessInstanceTasks {
 
     @Then("the user can get events for process with variables instances in admin endpoint")
     public void checkIfEventsFromProcessesWithVariablesArePresentAdmin() {
+        assertThat(processInstance).isNotNull();
         await().untilAsserted(() -> {
-            Collection<CloudRuntimeEvent> filteredCollection = checkEvents(auditAdminSteps.getEventsAdmin().getContent(),
-                                                                           processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
-            assertThat(filteredCollection).isNotEmpty();
-            assertThat(((ProcessInstanceImpl) filteredCollection.iterator().next().getEntity()).getProcessDefinitionKey()).isEqualTo(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
+            Collection<CloudRuntimeEvent> cloudRuntimeEvents = auditAdminSteps.getEventsAdmin().getContent();
+            assertThat(cloudRuntimeEvents)
+                    .extracting(CloudRuntimeEvent::getProcessInstanceId,
+                                                      CloudRuntimeEvent::getProcessDefinitionKey)
+                    .contains(tuple(processInstance.getId(),
+                                    "ProcessWithVariables"));
         });
     }
 
@@ -532,9 +533,12 @@ public class ProcessInstanceTasks {
     public void verifyEventSequenceNumberIsSet(){
         String processId = Serenity.sessionVariableCalled("processInstanceId");
         Collection<CloudRuntimeEvent> generatedEvents = auditSteps.getEventsByEntityId(processId);
-        List <CloudRuntimeEvent> generatedEventList = new ArrayList(generatedEvents);
-        for(int i= 0; i <= generatedEventList.size() - 1; i++){
-            assertThat(generatedEventList.get(i).getSequenceNumber()).isEqualTo(i);
+        List<Integer> sequenceNumbers = generatedEvents
+                .stream()
+                .map(CloudRuntimeEvent::getSequenceNumber)
+                .collect(Collectors.toList());
+        for(int i= 0; i <= generatedEvents.size() - 1; i++){
+            assertThat(sequenceNumbers).contains(i);
         }
     }
 

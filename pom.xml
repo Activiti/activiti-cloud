@@ -38,7 +38,7 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <activiti-cloud-dependencies.version>7.1.106</activiti-cloud-dependencies.version>
+    <activiti-cloud-dependencies.version>7.1.107</activiti-cloud-dependencies.version>
     <activiti-cloud-modeling.version>7.1.120</activiti-cloud-modeling.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <enforcer.skip>true</enforcer.skip>
@@ -52,6 +52,7 @@
     <serenity-jbehave.version>1.44.0</serenity-jbehave.version>
     <awaitility.version>3.1.1</awaitility.version>
     <batik.version>1.10</batik.version>
+    <feign.version>10.2.3</feign.version>
 
     <maven-failsafe-plugin.version>3.0.0-M3</maven-failsafe-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
@@ -59,7 +60,28 @@
   </properties>
   <dependencyManagement>
     <dependencies>
-  	  <dependency>
+      <!--  Override feign version: related to:
+          https://github.com/OpenFeign/feign/issues/942
+          https://github.com/OpenFeign/feign/pull/930
+          sort is not working property in versions previous to 10.2.1
+          sort is mapped to `sort=timestamp&sort=desc` instead of `sort=timestamp,desc`
+          -->
+      <dependency>
+        <groupId>io.github.openfeign</groupId>
+        <artifactId>feign-core</artifactId>
+        <version>${feign.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.openfeign</groupId>
+        <artifactId>feign-gson</artifactId>
+        <version>${feign.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.openfeign</groupId>
+        <artifactId>feign-jackson</artifactId>
+        <version>${feign.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.activiti.cloud.dependencies</groupId>
         <artifactId>activiti-cloud-dependencies</artifactId>
         <version>${activiti-cloud-dependencies.version}</version>
