@@ -16,14 +16,6 @@
 
 package org.activiti.cloud.qa.story;
 
-import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
-import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,6 +52,14 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedResources;
+
+import static org.activiti.cloud.acc.core.helper.Filters.checkEvents;
+import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
+import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.await;
 
 public class ProcessInstanceTasks {
 
@@ -388,11 +388,12 @@ public class ProcessInstanceTasks {
 
     @Then("the user can get events for process with variables instances in admin endpoint")
     public void checkIfEventsFromProcessesWithVariablesArePresentAdmin() {
-        //TODO some refactoring after fixing the behavior of the /admin/v1/events?search=entityId:UUID endpoint
-        Collection<CloudRuntimeEvent> filteredCollection = checkEvents(auditAdminSteps.getEventsAdmin().getContent(),
-                                                                       processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
-        assertThat(filteredCollection).isNotEmpty();
-        assertThat(((ProcessInstanceImpl) filteredCollection.iterator().next().getEntity()).getProcessDefinitionKey()).isEqualTo(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
+        await().untilAsserted(() -> {
+            Collection<CloudRuntimeEvent> filteredCollection = checkEvents(auditAdminSteps.getEventsAdmin().getContent(),
+                                                                           processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
+            assertThat(filteredCollection).isNotEmpty();
+            assertThat(((ProcessInstanceImpl) filteredCollection.iterator().next().getEntity()).getProcessDefinitionKey()).isEqualTo(processDefinitionKeys.get("PROCESS_INSTANCE_WITH_VARIABLES"));
+        });
     }
 
     @Then("the user can query process with variables instances in admin endpoints")
@@ -538,18 +539,22 @@ public class ProcessInstanceTasks {
     }
 
     @Then("the generated events have the same message id")
-    public void verifyEventMessageIdIsSet(){
+    public void verifyEventMessageIdIsSet() {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
-        Collection<CloudRuntimeEvent> generatedEvents = auditSteps.getEventsByEntityId(processId);
+        await().untilAsserted(() -> {
+                                  Collection<CloudRuntimeEvent> generatedEvents = auditSteps.getEventsByProcessInstanceId(processId);
 
-        String messageIdTest = generatedEvents
-                                        .stream()
-                                        .findFirst()
-                                        .get().getMessageId();
-        generatedEvents
-                .forEach(event ->
-                        assertThat(event.getMessageId()).isEqualTo(messageIdTest)
-                );
+            CloudRuntimeEvent cloudRuntimeEvent = generatedEvents
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+            assertThat(cloudRuntimeEvent).isNotNull();
+            generatedEvents
+                                          .forEach(event ->
+                                                           assertThat(event.getMessageId()).isEqualTo(cloudRuntimeEvent.getMessageId())
+                                          );
+                              }
+        );
     }
 
     @Then("the process instance can be queried using LIKE operator")
