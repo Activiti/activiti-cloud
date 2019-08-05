@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
-import java.util.Optional;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.Model;
@@ -49,40 +47,26 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import java.util.Optional;
+
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.activiti.cloud.services.organization.mock.IsObjectEquals.isBooleanEquals;
-import static org.activiti.cloud.services.organization.mock.IsObjectEquals.isDateEquals;
-import static org.activiti.cloud.services.organization.mock.IsObjectEquals.isIntegerEquals;
-import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
-import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
-import static org.activiti.cloud.services.organization.mock.MockFactory.processModel;
-import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
-import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
-import static org.activiti.cloud.services.organization.mock.MockFactory.project;
+import static org.activiti.cloud.services.organization.mock.IsObjectEquals.*;
+import static org.activiti.cloud.services.organization.mock.MockFactory.*;
 import static org.activiti.cloud.services.organization.mock.MockMultipartRequestBuilder.putMultipart;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
-import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -116,23 +100,18 @@ public class ModelControllerIT {
         //given
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("Parent Project"));
 
-        modelRepository.createModel(processModel(project,
-                                                 "Process Model 1"));
-        modelRepository.createModel(processModel(project,
-                                                 "Process Model 2"));
+        modelRepository.createModel(processModel(project, "Process Model 1"));
+        modelRepository.createModel(processModel(project, "Process Model 2"));
 
         //when
         final ResultActions resultActions = mockMvc
                 .perform(get("{version}/projects/{projectId}/models?type=PROCESS",
-                             API_VERSION,
-                             project.getId()))
+                        API_VERSION,
+                        project.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.models",
-                                    hasSize(2)))
-                .andExpect(jsonPath("$._embedded.models[0].name",
-                                    is("Process Model 1")))
-                .andExpect(jsonPath("$._embedded.models[1].name",
-                                    is("Process Model 2")));
+                .andExpect(jsonPath("$._embedded.models", hasSize(2)))
+                .andExpect(jsonPath("$._embedded.models[0].name", is("Process Model 1")))
+                .andExpect(jsonPath("$._embedded.models[1].name", is("Process Model 2")));
     }
 
     @Test
@@ -142,21 +121,17 @@ public class ModelControllerIT {
 
         // WHEN
         mockMvc.perform(post("{version}/projects/{projectId}/models",
-                             API_VERSION,
-                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(processModel("Process Model"))))
+                API_VERSION,
+                project.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(mapper.writeValueAsString(processModel("Process Model"))))
                 .andDo(print())
                 // THEN
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name",
-                                    equalTo("Process Model")))
-                .andExpect(jsonPath("$.type",
-                                    equalTo(PROCESS)))
-                .andExpect(jsonPath("$.extensions.properties",
-                                    notNullValue()))
-                .andExpect(jsonPath("$.extensions.mappings",
-                                    notNullValue()));
+                .andExpect(jsonPath("$.name", equalTo("Process Model")))
+                .andExpect(jsonPath("$.type", equalTo(PROCESS)))
+                .andExpect(jsonPath("$.extensions.properties", notNullValue()))
+                .andExpect(jsonPath("$.extensions.mappings", notNullValue()));
     }
 
     @Test
@@ -166,18 +141,15 @@ public class ModelControllerIT {
 
         // WHEN
         mockMvc.perform(post("{version}/projects/{projectId}/models",
-                             API_VERSION,
-                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(connectorModel("connector-model"))))
+                API_VERSION,
+                project.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(mapper.writeValueAsString(connectorModel("connector-model"))))
                 // THEN
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name",
-                                    equalTo("connector-model")))
-                .andExpect(jsonPath("$.type",
-                                    equalTo(ConnectorModelType.NAME)))
-                .andExpect(jsonPath("$",
-                                    hasNoJsonPath("extensions")));
+                .andExpect(jsonPath("$.name", equalTo("connector-model")))
+                .andExpect(jsonPath("$.type", equalTo(ConnectorModelType.NAME)))
+                .andExpect(jsonPath("$", hasNoJsonPath("extensions")));
 
     }
 
@@ -187,30 +159,28 @@ public class ModelControllerIT {
         Project project = projectRepository.createProject(project("Parent Project"));
 
         ModelEntity processModel = processModelWithExtensions("processModelWithExtensions",
-                                                              extensions("ServiceTask",
-                                                                         "variable1",
-                                                                         "variable2"));
+                extensions("ServiceTask", "variable1", "variable2"));
         // WHEN
         mockMvc.perform(post("{version}/projects/{projectId}/models",
-                             API_VERSION,
-                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(processModel)))
+                API_VERSION,
+                project.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())
                 // THEN
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.extensions.properties",
-                                    allOf(hasKey("variable1"),
-                                          hasKey("variable2"))))
+                        allOf(hasKey("variable1"),
+                                hasKey("variable2"))))
                 .andExpect(jsonPath("$.extensions.mappings",
-                                    hasEntry(equalTo("ServiceTask"),
-                                             allOf(hasEntry(equalTo("inputs"),
-                                                            allOf(hasKey("variable1"),
-                                                                  hasKey("variable2"))),
-                                                   hasEntry(equalTo("outputs"),
-                                                            allOf(hasKey("variable1"),
-                                                                  hasKey("variable2")))
-                                             ))
+                        hasEntry(equalTo("ServiceTask"),
+                                allOf(hasEntry(equalTo("inputs"),
+                                        allOf(hasKey("variable1"),
+                                                hasKey("variable2"))),
+                                        hasEntry(equalTo("outputs"),
+                                                allOf(hasKey("variable1"),
+                                                        hasKey("variable2")))
+                                ))
                 ));
     }
 
@@ -220,14 +190,14 @@ public class ModelControllerIT {
         Project project = projectRepository.createProject(project("Parent Project"));
 
         Model formModel = new ModelEntity("name",
-                                          "FORM");
+                "FORM");
 
         // WHEN
         mockMvc.perform(post("{version}/projects/{projectId}/models",
-                             API_VERSION,
-                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(formModel)))
+                API_VERSION,
+                project.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(mapper.writeValueAsString(formModel)))
                 .andDo(print())
                 // THEN
                 .andExpect(status().isBadRequest());
@@ -238,14 +208,14 @@ public class ModelControllerIT {
         // GIVEN
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("Parent Project"));
         modelRepository.createModel(processModel(project,
-                                                 "Process Model"));
+                "Process Model"));
 
         // WHEN
         mockMvc.perform(post("{version}/projects/{projectId}/models",
-                             API_VERSION,
-                             project.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(processModel("Process Model"))))
+                API_VERSION,
+                project.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(mapper.writeValueAsString(processModel("Process Model"))))
                 .andDo(print())
                 // THEN
                 .andExpect(status().isConflict());
@@ -258,8 +228,8 @@ public class ModelControllerIT {
 
         //then
         mockMvc.perform(get("{version}/models/{modelId}",
-                            API_VERSION,
-                            processModel.getId()))
+                API_VERSION,
+                processModel.getId()))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -269,132 +239,132 @@ public class ModelControllerIT {
         //given
         Model processModel = modelRepository
                 .createModel(processModelWithExtensions("processModelWithExtensions",
-                                                        extensions("ServiceTask",
-                                                                   "stringVariable",
-                                                                   "integerVariable",
-                                                                   "booleanVariable",
-                                                                   "dateVariable",
-                                                                   "jsonVariable")));
+                        extensions("ServiceTask",
+                                "stringVariable",
+                                "integerVariable",
+                                "booleanVariable",
+                                "dateVariable",
+                                "jsonVariable")));
         //when
         mockMvc.perform(get("{version}/models/{modelId}",
-                            API_VERSION,
-                            processModel.getId()))
+                API_VERSION,
+                processModel.getId()))
                 .andDo(print())
                 //then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.extensions.properties",
-                                    allOf(hasEntry(equalTo("stringVariable"),
-                                                   allOf(hasEntry(equalTo("id"),
-                                                                  equalTo("stringVariable")),
-                                                         hasEntry(equalTo("name"),
-                                                                  equalTo("stringVariable")),
-                                                         hasEntry(equalTo("type"),
-                                                                  equalTo("string")),
-                                                         hasEntry(equalTo("value"),
-                                                                  equalTo("stringVariable"))
-                                                   )),
-                                          hasEntry(equalTo("integerVariable"),
-                                                   allOf(hasEntry(equalTo("id"),
-                                                                  equalTo("integerVariable")),
-                                                         hasEntry(equalTo("name"),
-                                                                  equalTo("integerVariable")),
-                                                         hasEntry(equalTo("type"),
-                                                                  equalTo("integer")),
-                                                         hasEntry(equalTo("value"),
-                                                                  isIntegerEquals(15)))),
-                                          hasEntry(equalTo("booleanVariable"),
-                                                   allOf(hasEntry(equalTo("id"),
-                                                                  equalTo("booleanVariable")),
-                                                         hasEntry(equalTo("name"),
-                                                                  equalTo("booleanVariable")),
-                                                         hasEntry(equalTo("type"),
-                                                                  equalTo("boolean")),
-                                                         hasEntry(equalTo("value"),
-                                                                  isBooleanEquals(true)))),
-                                          hasEntry(equalTo("dateVariable"),
-                                                   allOf(hasEntry(equalTo("id"),
-                                                                  equalTo("dateVariable")),
-                                                         hasEntry(equalTo("name"),
-                                                                  equalTo("dateVariable")),
-                                                         hasEntry(equalTo("type"),
-                                                                  equalTo("date")),
-                                                         hasEntry(equalTo("value"),
-                                                                  isDateEquals(0)))),
-                                          hasEntry(equalTo("jsonVariable"),
-                                                   allOf(hasEntry(equalTo("id"),
-                                                                  equalTo("jsonVariable")),
-                                                         hasEntry(equalTo("name"),
-                                                                  equalTo("jsonVariable")),
-                                                         hasEntry(equalTo("type"),
-                                                                  equalTo("json")),
-                                                         hasEntry(equalTo("value"),
-                                                                  isJson(withJsonPath("json-field-name")))))
-                                    )))
+                        allOf(hasEntry(equalTo("stringVariable"),
+                                allOf(hasEntry(equalTo("id"),
+                                        equalTo("stringVariable")),
+                                        hasEntry(equalTo("name"),
+                                                equalTo("stringVariable")),
+                                        hasEntry(equalTo("type"),
+                                                equalTo("string")),
+                                        hasEntry(equalTo("value"),
+                                                equalTo("stringVariable"))
+                                )),
+                                hasEntry(equalTo("integerVariable"),
+                                        allOf(hasEntry(equalTo("id"),
+                                                equalTo("integerVariable")),
+                                                hasEntry(equalTo("name"),
+                                                        equalTo("integerVariable")),
+                                                hasEntry(equalTo("type"),
+                                                        equalTo("integer")),
+                                                hasEntry(equalTo("value"),
+                                                        isIntegerEquals(15)))),
+                                hasEntry(equalTo("booleanVariable"),
+                                        allOf(hasEntry(equalTo("id"),
+                                                equalTo("booleanVariable")),
+                                                hasEntry(equalTo("name"),
+                                                        equalTo("booleanVariable")),
+                                                hasEntry(equalTo("type"),
+                                                        equalTo("boolean")),
+                                                hasEntry(equalTo("value"),
+                                                        isBooleanEquals(true)))),
+                                hasEntry(equalTo("dateVariable"),
+                                        allOf(hasEntry(equalTo("id"),
+                                                equalTo("dateVariable")),
+                                                hasEntry(equalTo("name"),
+                                                        equalTo("dateVariable")),
+                                                hasEntry(equalTo("type"),
+                                                        equalTo("date")),
+                                                hasEntry(equalTo("value"),
+                                                        isDateEquals(0)))),
+                                hasEntry(equalTo("jsonVariable"),
+                                        allOf(hasEntry(equalTo("id"),
+                                                equalTo("jsonVariable")),
+                                                hasEntry(equalTo("name"),
+                                                        equalTo("jsonVariable")),
+                                                hasEntry(equalTo("type"),
+                                                        equalTo("json")),
+                                                hasEntry(equalTo("value"),
+                                                        isJson(withJsonPath("json-field-name")))))
+                        )))
                 .andExpect(jsonPath("$.extensions.mappings",
-                                    hasEntry(equalTo("ServiceTask"),
-                                             allOf(hasEntry(equalTo("inputs"),
-                                                            allOf(hasEntry(equalTo("stringVariable"),
-                                                                           allOf(hasEntry(equalTo("type"),
-                                                                                          equalTo("value")),
-                                                                                 hasEntry(equalTo("value"),
-                                                                                          equalTo("stringVariable"))
-                                                                           )),
-                                                                  hasEntry(equalTo("integerVariable"),
-                                                                           allOf(hasEntry(equalTo("type"),
-                                                                                          equalTo("value")),
-                                                                                 hasEntry(equalTo("value"),
-                                                                                          equalTo("integerVariable"))
-                                                                           )),
-                                                                  hasEntry(equalTo("booleanVariable"),
-                                                                           allOf(hasEntry(equalTo("type"),
-                                                                                          equalTo("value")),
-                                                                                 hasEntry(equalTo("value"),
-                                                                                          equalTo("booleanVariable"))
-                                                                           )),
-                                                                  hasEntry(equalTo("dateVariable"),
-                                                                           allOf(hasEntry(equalTo("type"),
-                                                                                          equalTo("value")),
-                                                                                 hasEntry(equalTo("value"),
-                                                                                          equalTo("dateVariable"))
-                                                                           )),
-                                                                  hasEntry(equalTo("jsonVariable"),
-                                                                           allOf(hasEntry(equalTo("type"),
-                                                                                          equalTo("value")),
-                                                                                 hasEntry(equalTo("value"),
-                                                                                          equalTo("jsonVariable"))
-                                                                           )))),
-                                                   hasEntry(equalTo("outputs"),
-                                                            allOf(hasEntry(equalTo("stringVariable"),
-                                                                           allOf(hasEntry(equalTo("type"),
-                                                                                          equalTo("value")),
-                                                                                 hasEntry(equalTo("value"),
-                                                                                          equalTo("stringVariable"))
-                                                                           )),
-                                                                  hasEntry(equalTo("integerVariable"),
-                                                                           allOf(hasEntry(equalTo("type"),
-                                                                                          equalTo("value")),
-                                                                                 hasEntry(equalTo("value"),
-                                                                                          equalTo("integerVariable"))
-                                                                           )),
-                                                                  hasEntry(equalTo("booleanVariable"),
-                                                                           allOf(hasEntry(equalTo("type"),
-                                                                                          equalTo("value")),
-                                                                                 hasEntry(equalTo("value"),
-                                                                                          equalTo("booleanVariable"))
-                                                                           )),
-                                                                  hasEntry(equalTo("dateVariable"),
-                                                                           allOf(hasEntry(equalTo("type"),
-                                                                                          equalTo("value")),
-                                                                                 hasEntry(equalTo("value"),
-                                                                                          equalTo("dateVariable"))
-                                                                           )),
-                                                                  hasEntry(equalTo("jsonVariable"),
-                                                                           allOf(hasEntry(equalTo("type"),
-                                                                                          equalTo("value")),
-                                                                                 hasEntry(equalTo("value"),
-                                                                                          equalTo("jsonVariable"))
-                                                                           ))))
-                                             ))
+                        hasEntry(equalTo("ServiceTask"),
+                                allOf(hasEntry(equalTo("inputs"),
+                                        allOf(hasEntry(equalTo("stringVariable"),
+                                                allOf(hasEntry(equalTo("type"),
+                                                        equalTo("value")),
+                                                        hasEntry(equalTo("value"),
+                                                                equalTo("stringVariable"))
+                                                )),
+                                                hasEntry(equalTo("integerVariable"),
+                                                        allOf(hasEntry(equalTo("type"),
+                                                                equalTo("value")),
+                                                                hasEntry(equalTo("value"),
+                                                                        equalTo("integerVariable"))
+                                                        )),
+                                                hasEntry(equalTo("booleanVariable"),
+                                                        allOf(hasEntry(equalTo("type"),
+                                                                equalTo("value")),
+                                                                hasEntry(equalTo("value"),
+                                                                        equalTo("booleanVariable"))
+                                                        )),
+                                                hasEntry(equalTo("dateVariable"),
+                                                        allOf(hasEntry(equalTo("type"),
+                                                                equalTo("value")),
+                                                                hasEntry(equalTo("value"),
+                                                                        equalTo("dateVariable"))
+                                                        )),
+                                                hasEntry(equalTo("jsonVariable"),
+                                                        allOf(hasEntry(equalTo("type"),
+                                                                equalTo("value")),
+                                                                hasEntry(equalTo("value"),
+                                                                        equalTo("jsonVariable"))
+                                                        )))),
+                                        hasEntry(equalTo("outputs"),
+                                                allOf(hasEntry(equalTo("stringVariable"),
+                                                        allOf(hasEntry(equalTo("type"),
+                                                                equalTo("value")),
+                                                                hasEntry(equalTo("value"),
+                                                                        equalTo("stringVariable"))
+                                                        )),
+                                                        hasEntry(equalTo("integerVariable"),
+                                                                allOf(hasEntry(equalTo("type"),
+                                                                        equalTo("value")),
+                                                                        hasEntry(equalTo("value"),
+                                                                                equalTo("integerVariable"))
+                                                                )),
+                                                        hasEntry(equalTo("booleanVariable"),
+                                                                allOf(hasEntry(equalTo("type"),
+                                                                        equalTo("value")),
+                                                                        hasEntry(equalTo("value"),
+                                                                                equalTo("booleanVariable"))
+                                                                )),
+                                                        hasEntry(equalTo("dateVariable"),
+                                                                allOf(hasEntry(equalTo("type"),
+                                                                        equalTo("value")),
+                                                                        hasEntry(equalTo("value"),
+                                                                                equalTo("dateVariable"))
+                                                                )),
+                                                        hasEntry(equalTo("jsonVariable"),
+                                                                allOf(hasEntry(equalTo("type"),
+                                                                        equalTo("value")),
+                                                                        hasEntry(equalTo("value"),
+                                                                                equalTo("jsonVariable"))
+                                                                ))))
+                                ))
                 ));
     }
 
@@ -405,10 +375,10 @@ public class ModelControllerIT {
 
         //when
         mockMvc.perform(post("{version}/projects/{projectId}/models",
-                             API_VERSION,
-                             parentProject.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(processModel("Process Model"))))
+                API_VERSION,
+                parentProject.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(mapper.writeValueAsString(processModel("Process Model"))))
                 .andExpect(status().isCreated());
     }
 
@@ -419,10 +389,10 @@ public class ModelControllerIT {
 
         //when
         mockMvc.perform(put("{version}/models/{modelId}",
-                            API_VERSION,
-                            processModel.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(processModel("New Process Model"))))
+                API_VERSION,
+                processModel.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(mapper.writeValueAsString(processModel("New Process Model"))))
                 .andExpect(status().isOk());
 
         //then
@@ -436,19 +406,19 @@ public class ModelControllerIT {
     public void testUpdateModelWithExtensions() throws Exception {
         //given
         ModelEntity processModel = processModelWithExtensions("processModelWithExtensions",
-                                                              extensions("ServiceTask",
-                                                                         "variable1"));
+                extensions("ServiceTask",
+                        "variable1"));
         modelRepository.createModel(processModel);
 
         ModelEntity newModel = processModelWithExtensions("processModelWithExtensions",
-                                                          extensions("variable2",
-                                                                     "variable3"));
+                extensions("variable2",
+                        "variable3"));
         //when
         mockMvc.perform(put("{version}/models/{modelId}",
-                            API_VERSION,
-                            processModel.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(newModel)))
+                API_VERSION,
+                processModel.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(mapper.writeValueAsString(newModel)))
                 .andExpect(status().isOk());
     }
 
@@ -459,8 +429,8 @@ public class ModelControllerIT {
 
         //when
         mockMvc.perform(delete("{version}/models/{modelId}",
-                               API_VERSION,
-                               processModel.getId()))
+                API_VERSION,
+                processModel.getId()))
                 .andExpect(status().isNoContent());
 
         //then
@@ -471,14 +441,14 @@ public class ModelControllerIT {
     public void testGetModelTypes() throws Exception {
 
         mockMvc.perform(get("{version}/model-types",
-                            API_VERSION))
+                API_VERSION))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.model-types",
-                                    hasSize(2)))
+                        hasSize(2)))
                 .andExpect(jsonPath("$._embedded.model-types[0].name",
-                                    is(PROCESS)))
+                        is(PROCESS)))
                 .andExpect(jsonPath("$._embedded.model-types[1].name",
-                                    is(ConnectorModelType.NAME)));
+                        is(ConnectorModelType.NAME)));
     }
 
     @Test
@@ -486,17 +456,17 @@ public class ModelControllerIT {
         // given
         byte[] validContent = resourceAsByteArray("process/x-19022.bpmn20.xml");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "process.xml",
-                                                       CONTENT_TYPE_XML,
-                                                       validContent);
+                "process.xml",
+                CONTENT_TYPE_XML,
+                validContent);
         Model processModel = modelRepository.createModel(processModel("Process-Model"));
 
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
-                                   processModel.getId())
-                                 .file(file))
+                        RepositoryRestConfig.API_VERSION,
+                        processModel.getId())
+                        .file(file))
                 // then
                 .andExpect(status().isNoContent());
     }
@@ -506,17 +476,17 @@ public class ModelControllerIT {
 
         // given
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "diagram.bpm",
-                                                       CONTENT_TYPE_XML,
-                                                       "BPMN diagram".getBytes());
+                "diagram.bpm",
+                CONTENT_TYPE_XML,
+                "BPMN diagram".getBytes());
         Model processModel = modelRepository.createModel(processModel("Process-Model"));
 
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
-                                   processModel.getId())
-                                 .file(file))
+                        RepositoryRestConfig.API_VERSION,
+                        processModel.getId())
+                        .file(file))
                 // then
                 .andExpect(status().isBadRequest());
     }
@@ -528,18 +498,18 @@ public class ModelControllerIT {
         // given
         byte[] validContent = resourceAsByteArray("process-extensions/valid-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "extensions.json",
-                                                       CONTENT_TYPE_JSON,
-                                                       validContent);
+                "extensions.json",
+                CONTENT_TYPE_JSON,
+                validContent);
 
         Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
-                                                                                    new Extensions()));
+                new Extensions()));
 
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                  RepositoryRestConfig.API_VERSION,
-                                  processModel.getId())
-                                .file(file))
+                RepositoryRestConfig.API_VERSION,
+                processModel.getId())
+                .file(file))
                 // then
                 .andExpect(status().isNoContent());
     }
@@ -551,18 +521,18 @@ public class ModelControllerIT {
         // given
         byte[] validContent = resourceAsByteArray("process-extensions/valid-extensions-no-value.json");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "extensions.json",
-                                                       CONTENT_TYPE_JSON,
-                                                       validContent);
+                "extensions.json",
+                CONTENT_TYPE_JSON,
+                validContent);
 
         Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
-                                                                                    new Extensions()));
+                new Extensions()));
 
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                  RepositoryRestConfig.API_VERSION,
-                                  processModel.getId())
-                                .file(file))
+                RepositoryRestConfig.API_VERSION,
+                processModel.getId())
+                .file(file))
                 // then
                 .andExpect(status().isNoContent());
     }
@@ -573,17 +543,17 @@ public class ModelControllerIT {
         // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-mapping-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "extensions.json",
-                                                       CONTENT_TYPE_JSON,
-                                                       invalidContent);
+                "extensions.json",
+                CONTENT_TYPE_JSON,
+                invalidContent);
 
         Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
-                                                                                    new Extensions()));
+                new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
+                        RepositoryRestConfig.API_VERSION,
+                        processModel.getId()).file(file))
                 .andDo(print());
         // then
         resultActions.andExpect(status().isBadRequest());
@@ -596,11 +566,11 @@ public class ModelControllerIT {
         assertThat(semanticModelValidationException.getValidationErrors())
                 .hasSize(2)
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsOnly(tuple("inputds is not a valid enum value",
-                                    "#/extensions/mappings/ServiceTask_06crg3b/inputds: inputds is not a valid enum value"),
-                              tuple("outputss is not a valid enum value",
-                                    "#/extensions/mappings/ServiceTask_06crg3b/outputss: outputss is not a valid enum value"));
+                        "#/extensions/mappings/ServiceTask_06crg3b/inputds: inputds is not a valid enum value"),
+                        tuple("outputss is not a valid enum value",
+                                "#/extensions/mappings/ServiceTask_06crg3b/outputss: outputss is not a valid enum value"));
     }
 
     @Test
@@ -609,17 +579,17 @@ public class ModelControllerIT {
         // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-string-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "extensions.json",
-                                                       CONTENT_TYPE_JSON,
-                                                       invalidContent);
+                "extensions.json",
+                CONTENT_TYPE_JSON,
+                invalidContent);
 
         Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
-                                                                                    new Extensions()));
+                new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
+                        RepositoryRestConfig.API_VERSION,
+                        processModel.getId()).file(file))
                 .andDo(print());
         // then
         resultActions.andExpect(status().isBadRequest());
@@ -630,9 +600,9 @@ public class ModelControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: String, found: Integer",
-                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: String, found: Integer"));
+                        "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: String, found: Integer"));
     }
 
     @Test
@@ -641,17 +611,17 @@ public class ModelControllerIT {
         // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-integer-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "extensions.json",
-                                                       CONTENT_TYPE_JSON,
-                                                       invalidContent);
+                "extensions.json",
+                CONTENT_TYPE_JSON,
+                invalidContent);
 
         Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
-                                                                                    new Extensions()));
+                new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
+                        RepositoryRestConfig.API_VERSION,
+                        processModel.getId()).file(file))
                 .andDo(print());
         // then
         resultActions.andExpect(status().isBadRequest());
@@ -662,9 +632,9 @@ public class ModelControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: Number, found: String",
-                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: Number, found: String"));
+                        "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: Number, found: String"));
     }
 
     @Test
@@ -673,17 +643,17 @@ public class ModelControllerIT {
         // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-boolean-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "extensions.json",
-                                                       CONTENT_TYPE_JSON,
-                                                       invalidContent);
+                "extensions.json",
+                CONTENT_TYPE_JSON,
+                invalidContent);
 
         Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
-                                                                                    new Extensions()));
+                new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
+                        RepositoryRestConfig.API_VERSION,
+                        processModel.getId()).file(file))
                 .andDo(print());
         // then
         resultActions.andExpect(status().isBadRequest());
@@ -694,9 +664,9 @@ public class ModelControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: Boolean, found: Integer",
-                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: Boolean, found: Integer"));
+                        "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: Boolean, found: Integer"));
     }
 
     @Test
@@ -705,17 +675,17 @@ public class ModelControllerIT {
         // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-object-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "extensions.json",
-                                                       CONTENT_TYPE_JSON,
-                                                       invalidContent);
+                "extensions.json",
+                CONTENT_TYPE_JSON,
+                invalidContent);
 
         Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
-                                                                                    new Extensions()));
+                new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
+                        RepositoryRestConfig.API_VERSION,
+                        processModel.getId()).file(file))
                 .andDo(print());
         // then
         resultActions.andExpect(status().isBadRequest());
@@ -726,9 +696,9 @@ public class ModelControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: JSONObject, found: Integer",
-                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: JSONObject, found: Integer"));
+                        "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: JSONObject, found: Integer"));
     }
 
     @Test
@@ -737,17 +707,17 @@ public class ModelControllerIT {
         // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-date-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "extensions.json",
-                                                       CONTENT_TYPE_JSON,
-                                                       invalidContent);
+                "extensions.json",
+                CONTENT_TYPE_JSON,
+                invalidContent);
 
         Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
-                                                                                    new Extensions()));
+                new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
-                                   RepositoryRestConfig.API_VERSION,
-                                   processModel.getId()).file(file))
+                        RepositoryRestConfig.API_VERSION,
+                        processModel.getId()).file(file))
                 .andDo(print());
         // then
         resultActions.andExpect(status().isBadRequest());
@@ -758,12 +728,12 @@ public class ModelControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
+                        ModelValidationError::getDescription)
                 .containsExactly(
                         tuple("expected type: String, found: Integer",
-                              "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: String, found: Integer"),
+                                "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: String, found: Integer"),
                         tuple("string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
-                              "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c64/value: string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$")
+                                "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c64/value: string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$")
                 );
     }
 
@@ -771,14 +741,14 @@ public class ModelControllerIT {
     public void validateModelThatNotExistsShouldThrowException() throws Exception {
         // given
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "diagram.bpm",
-                                                       "text/plain",
-                                                       "BPMN diagram".getBytes());
+                "diagram.bpm",
+                "text/plain",
+                "BPMN diagram".getBytes());
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                  RepositoryRestConfig.API_VERSION,
-                                  "model_id")
-                                .file(file))
+                RepositoryRestConfig.API_VERSION,
+                "model_id")
+                .file(file))
                 // then
                 .andExpect(status().isNotFound());
     }
@@ -788,16 +758,16 @@ public class ModelControllerIT {
 
         // given
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "diagram.bpmn20.xml",
-                                                       "text/plain",
-                                                       "BPMN diagram".getBytes());
+                "diagram.bpmn20.xml",
+                "text/plain",
+                "BPMN diagram".getBytes());
         Model processModel = modelRepository.createModel(processModel("Process-Model"));
 
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                  API_VERSION,
-                                  processModel.getId())
-                                .file(file))
+                API_VERSION,
+                processModel.getId())
+                .file(file))
                 // then
                 .andExpect(status().isBadRequest());
     }
@@ -807,16 +777,16 @@ public class ModelControllerIT {
         // given
         byte[] validContent = resourceAsByteArray("connector/connector-simple.json");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "connector-simple.json",
-                                                       CONTENT_TYPE_JSON,
-                                                       validContent);
+                "connector-simple.json",
+                CONTENT_TYPE_JSON,
+                validContent);
         Model connectorModel = modelRepository.createModel(connectorModel("Connector-Model"));
 
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                  API_VERSION,
-                                  connectorModel.getId())
-                                .file(file))
+                API_VERSION,
+                connectorModel.getId())
+                .file(file))
                 // then
                 .andExpect(status().isNoContent());
     }
@@ -826,16 +796,16 @@ public class ModelControllerIT {
         // given
         byte[] validContent = resourceAsByteArray("connector/connector-template.json");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "connector-template.json",
-                                                       CONTENT_TYPE_JSON,
-                                                       validContent);
+                "connector-template.json",
+                CONTENT_TYPE_JSON,
+                validContent);
         Model connectorModel = modelRepository.createModel(connectorModel("Connector-Model"));
 
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
-                                  API_VERSION,
-                                  connectorModel.getId())
-                                .file(file))
+                API_VERSION,
+                connectorModel.getId())
+                .file(file))
                 // then
                 .andExpect(status().isNoContent());
     }
@@ -844,12 +814,12 @@ public class ModelControllerIT {
     public void testExportModel() throws Exception {
         //GIVEN
         Model processModel = modelRepository.createModel(processModelWithContent("process_model_id",
-                                                                                 "Process Model Content"));
+                "Process Model Content"));
         // WHEN
         MvcResult response = mockMvc.perform(
                 get("{version}/models/{modelId}/export",
-                    API_VERSION,
-                    processModel.getId()))
+                        API_VERSION,
+                        processModel.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -866,7 +836,7 @@ public class ModelControllerIT {
         // WHEN
         mockMvc.perform(
                 get("{version}/models/not_existing_model/export",
-                    API_VERSION))
+                        API_VERSION))
                 // THEN
                 .andExpect(status().isNotFound())
                 .andReturn();
@@ -878,18 +848,18 @@ public class ModelControllerIT {
         Project parentProject = projectRepository.createProject(project("Parent Project"));
 
         MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "x-19022.bpmn20.xml",
-                                                          "project/xml",
-                                                          resourceAsByteArray("process/x-19022.bpmn20.xml"));
+                "x-19022.bpmn20.xml",
+                "project/xml",
+                resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
         // WHEN
         mockMvc.perform(multipart("{version}/projects/{projectId}/models/import",
-                                  API_VERSION,
-                                  parentProject.getId())
-                                .file(zipFile)
-                                .param("type",
-                                       PROCESS)
-                                .accept(APPLICATION_JSON_VALUE))
+                API_VERSION,
+                parentProject.getId())
+                .file(zipFile)
+                .param("type",
+                        PROCESS)
+                .accept(APPLICATION_JSON_VALUE))
                 .andDo(print())
                 // THEN
                 .andExpect(status().isCreated());
@@ -902,18 +872,18 @@ public class ModelControllerIT {
         projectRepository.createProject(parentProject);
 
         MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "x-19022",
-                                                          "project/xml",
-                                                          resourceAsByteArray("process/x-19022.bpmn20.xml"));
+                "x-19022",
+                "project/xml",
+                resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
         // WHEN
         mockMvc.perform(multipart("{version}/projects/{projectId}/models/import",
-                                  API_VERSION,
-                                  parentProject.getId())
-                                .file(zipFile)
-                                .param("type",
-                                       PROCESS)
-                                .accept(APPLICATION_JSON_VALUE))
+                API_VERSION,
+                parentProject.getId())
+                .file(zipFile)
+                .param("type",
+                        PROCESS)
+                .accept(APPLICATION_JSON_VALUE))
                 // THEN
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -927,17 +897,17 @@ public class ModelControllerIT {
         projectRepository.createProject(parentProject);
 
         MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "x-19022.xml",
-                                                          "project/xml",
-                                                          resourceAsByteArray("process/x-19022.bpmn20.xml"));
+                "x-19022.xml",
+                "project/xml",
+                resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
         // WHEN
         mockMvc.perform(multipart("{version}/projects/{projectId}/models/import",
-                                  API_VERSION,
-                                  parentProject.getId())
-                                .file(zipFile)
-                                .param("type",
-                                       "WRONG_TYPE"))
+                API_VERSION,
+                parentProject.getId())
+                .file(zipFile)
+                .param("type",
+                        "WRONG_TYPE"))
                 // THEN
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -948,16 +918,16 @@ public class ModelControllerIT {
     public void testImportModelProjectNotFound() throws Exception {
         //GIVEN
         MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "x-19022.xml",
-                                                          "project/xml",
-                                                          resourceAsByteArray("process/x-19022.bpmn20.xml"));
+                "x-19022.xml",
+                "project/xml",
+                resourceAsByteArray("process/x-19022.bpmn20.xml"));
 
         // WHEN
         mockMvc.perform(multipart("{version}/projects/not_existing_project/models/import",
-                                  API_VERSION)
-                                .file(zipFile)
-                                .param("type",
-                                       PROCESS))
+                API_VERSION)
+                .file(zipFile)
+                .param("type",
+                        PROCESS))
                 // THEN
                 .andDo(print())
                 .andExpect(status().isNotFound());
@@ -970,22 +940,22 @@ public class ModelControllerIT {
 
         // WHEN
         mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
-                                     API_VERSION,
-                                     connectorModel.getId())
-                                .file("file",
-                                      "connector-template.json",
-                                      "application/json",
-                                      resourceAsByteArray("connector/connector-template.json")))
+                API_VERSION,
+                connectorModel.getId())
+                .file("file",
+                        "connector-template.json",
+                        "application/json",
+                        resourceAsByteArray("connector/connector-template.json")))
                 .andExpect(status().isNoContent());
 
         // THEN
         mockMvc.perform(get("{version}/models/{modelId}",
-                            API_VERSION,
-                            connectorModel.getId()))
+                API_VERSION,
+                connectorModel.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.template",
-                                    is("ConnectorTemplate")));
+                        is("ConnectorTemplate")));
     }
 
     @Test
@@ -995,18 +965,18 @@ public class ModelControllerIT {
 
         // WHEN
         mockMvc.perform(putMultipart("{version}/models/{modelId}/content",
-                                     API_VERSION,
-                                     connectorModel.getId())
-                                .file("file",
-                                      "connector-simple.json",
-                                      "application/json",
-                                      resourceAsByteArray("connector/connector-simple.json")))
+                API_VERSION,
+                connectorModel.getId())
+                .file("file",
+                        "connector-simple.json",
+                        "application/json",
+                        resourceAsByteArray("connector/connector-simple.json")))
                 .andExpect(status().isNoContent());
 
         // THEN
         mockMvc.perform(get("{version}/models/{modelId}",
-                            API_VERSION,
-                            connectorModel.getId()))
+                API_VERSION,
+                connectorModel.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.template").doesNotExist());

@@ -33,6 +33,16 @@
               }
             }
           }
+        },
+        "constants": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "$ref": "#/definitions/constants"
+            }
+          }
         }
       }
     },
@@ -42,16 +52,20 @@
         "id": {
           "type": "string"
         },
-        "name":{
+        "name": {
           "type": "string"
         },
-        "type":{
+        "type": {
           "type": "string",
           "enum": [
-            "date", "string", "integer", "boolean", "json"
+            "date",
+            "string",
+            "integer",
+            "boolean",
+            "json"
           ]
         },
-        "required":{
+        "required": {
           "type": "boolean"
         }
       },
@@ -137,7 +151,6 @@
             }
           }
         }
-
       ],
       "required": [
         "id",
@@ -153,8 +166,7 @@
           "type": "string",
           "enum": [
             "variable",
-            "value",
-            "static_value"
+            "value"
           ]
         },
         "value": {
@@ -168,6 +180,14 @@
         "value": [
           "type"
         ]
+      }
+    },
+    "constants": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        }
       }
     }
   },

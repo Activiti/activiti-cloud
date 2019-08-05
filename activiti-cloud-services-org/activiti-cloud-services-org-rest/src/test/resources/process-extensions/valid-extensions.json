@@ -11,10 +11,6 @@
           "aa4a9329-71be-4889-8265-398b68536d4a": {
             "type": "variable",
             "value": "name2"
-          },
-          "my-custom-variable": {
-            "type": "static_value",
-            "value": "name2"
           }
         },
         "outputs": {
@@ -22,6 +18,13 @@
             "type": "value",
             "value": "test"
           }
+        }
+      }
+    },
+    "constants": {
+      "ServiceTask_06crg3b": {
+        "my-custom-variable": {
+          "value": "name2"
         }
       }
     },
@@ -59,7 +62,9 @@
         "name": "jsonVariable",
         "type": "json",
         "required": false,
-        "value": { "foo":"bar" }
+        "value": {
+          "foo": "bar"
+        }
       }
     }
   }
