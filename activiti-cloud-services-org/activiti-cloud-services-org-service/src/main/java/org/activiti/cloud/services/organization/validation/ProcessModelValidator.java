@@ -163,7 +163,7 @@ public class ProcessModelValidator implements ModelValidator {
                 .stream()
                 .map(connectorModelAction -> concatNameAndAction(connectorModelAction,
                                                                  model)))
-                .orElse(Stream.of(model.getName()));
+                .orElse(Stream.empty());
     }
 
     private Optional<ConnectorModelContent> extractConnectorModelContent(Model model) {
