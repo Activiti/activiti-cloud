@@ -37,6 +37,9 @@ public class Extensions {
     @JsonProperty("mappings")
     private Map<String, Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>>> variablesMappings = new HashMap<>();
 
+    @JsonProperty("constants")
+    private Map<String,  Map<String, Constant>> constants = new HashMap<>();
+
     public Map<String, ProcessVariable> getProcessVariables() {
         return processVariables;
     }
@@ -51,5 +54,13 @@ public class Extensions {
 
     public void setVariablesMappings(Map<String, Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>>> variablesMappings) {
         this.variablesMappings = variablesMappings;
+    }
+
+    public Map<String, Map<String, Constant>> getConstants() {
+        return constants;
+    }
+
+    public void setConstants(Map<String, Map<String, Constant>> constants) {
+        this.constants = constants;
     }
 }

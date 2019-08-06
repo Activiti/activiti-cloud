@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.Model;
@@ -47,26 +49,41 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Optional;
-
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.activiti.cloud.services.organization.mock.IsObjectEquals.*;
-import static org.activiti.cloud.services.organization.mock.MockFactory.*;
+import static org.activiti.cloud.services.organization.mock.ConstantsBuilder.constantsFor;
+import static org.activiti.cloud.services.organization.mock.IsObjectEquals.isBooleanEquals;
+import static org.activiti.cloud.services.organization.mock.IsObjectEquals.isDateEquals;
+import static org.activiti.cloud.services.organization.mock.IsObjectEquals.isIntegerEquals;
+import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
+import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processModel;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
+import static org.activiti.cloud.services.organization.mock.MockFactory.project;
 import static org.activiti.cloud.services.organization.mock.MockMultipartRequestBuilder.putMultipart;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -158,30 +175,55 @@ public class ModelControllerIT {
         // GIVEN
         Project project = projectRepository.createProject(project("Parent Project"));
 
+        Extensions extensions = extensions("ServiceTask",
+                                           "variable1",
+                                           "variable2");
+        extensions.setConstants(constantsFor("ServiceTask")
+        .add("myStringConstant", "myStringConstantValue")
+        .add("myIntegerConstant", 10)
+        .build());
         ModelEntity processModel = processModelWithExtensions("processModelWithExtensions",
-                extensions("ServiceTask", "variable1", "variable2"));
+                                                              extensions);
         // WHEN
         mockMvc.perform(post("{version}/projects/{projectId}/models",
-                API_VERSION,
-                project.getId())
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(mapper.writeValueAsString(processModel)))
+                             API_VERSION,
+                             project.getId())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(processModel)))
                 .andDo(print())
                 // THEN
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.extensions.properties",
-                        allOf(hasKey("variable1"),
-                                hasKey("variable2"))))
+                                    allOf(hasKey("variable1"),
+                                          hasKey("variable2"))))
                 .andExpect(jsonPath("$.extensions.mappings",
-                        hasEntry(equalTo("ServiceTask"),
-                                allOf(hasEntry(equalTo("inputs"),
-                                        allOf(hasKey("variable1"),
-                                                hasKey("variable2"))),
-                                        hasEntry(equalTo("outputs"),
-                                                allOf(hasKey("variable1"),
-                                                        hasKey("variable2")))
-                                ))
-                ));
+                                    hasEntry(equalTo("ServiceTask"),
+                                             allOf(hasEntry(equalTo("inputs"),
+                                                            allOf(hasKey("variable1"),
+                                                                  hasKey("variable2"))),
+                                                   hasEntry(equalTo("outputs"),
+                                                            allOf(hasKey("variable1"),
+                                                                  hasKey("variable2")))
+                                             ))
+
+                )).andExpect(jsonPath("$.extensions.constants",
+                                      hasEntry(equalTo("ServiceTask"),
+                                               hasEntry(
+                                                       equalTo("myStringConstant"),
+                                                       hasEntry("value",
+                                                                "myStringConstantValue")
+                                               )
+
+                                      )))
+                .andExpect(jsonPath("$.extensions.constants",
+                             hasEntry(equalTo("ServiceTask"),
+                                      hasEntry(
+                                              equalTo("myIntegerConstant"),
+                                              hasEntry("value",
+                                                       10)
+                                      )
+
+                             )));
     }
 
     @Test
