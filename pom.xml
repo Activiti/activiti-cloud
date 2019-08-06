@@ -18,7 +18,7 @@
   
   <properties>
       <activiti-cloud-build.version>7.1.7</activiti-cloud-build.version>
-      <activiti-cloud-query-service.version>7.1.63</activiti-cloud-query-service.version>
+      <activiti-cloud-query-service.version>7.1.64</activiti-cloud-query-service.version>
       <activiti-cloud-notifications-service-graphql.version>${project.version}</activiti-cloud-notifications-service-graphql.version>
       <graphql-jpa-query.version>0.3.27</graphql-jpa-query.version>
   </properties>
