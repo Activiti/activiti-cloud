@@ -77,6 +77,13 @@
             "value" : "out-variable-name-2"}
         }
       }
+    },
+    "constants" : {
+      "serviceTask": {
+        "_constant_value_" : {
+          "value": "myConstantValue"
+        }
+      }
     }
   }
 }

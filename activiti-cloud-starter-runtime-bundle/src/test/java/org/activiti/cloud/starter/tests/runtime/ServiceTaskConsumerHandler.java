@@ -111,6 +111,7 @@ public class ServiceTaskConsumerHandler {
         String variableOne = "input-variable-name-1";
         String variableTwo = "input-variable-name-2";
         String variableThree = "input-variable-name-3";
+        String constant = "_constant_value_";
 
         Integer currentAge = (Integer) inBoundVariables.get(variableTwo);
         Integer offSet = (Integer) inBoundVariables.get(variableThree);
@@ -124,7 +125,9 @@ public class ServiceTaskConsumerHandler {
                         tuple(variableTwo,
                               20),
                         tuple(variableThree,
-                              5));
+                              5),
+                        tuple(constant,
+                              "myConstantValue"));
 
         integrationContext.addOutBoundVariable("out-variable-name-1",
                                                "outName");
@@ -134,6 +137,34 @@ public class ServiceTaskConsumerHandler {
                                                "outTest");
         integrationContext.addOutBoundVariable("out-unmapped-variable-non-matching-name",
                                                "outTest");
+
+        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
+        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
+        resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
+    }
+
+    @StreamListener(value = ConnectorIntegrationChannels.CONSTANTS_INTEGRATION_EVENTS_CONSUMER)
+    public void receiveConstantsConnector(IntegrationRequest integrationRequest,
+                                          @Headers Map<String, Object> headers){
+        assertIntegrationContextHeaders(integrationRequest, headers);
+        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+        Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
+
+        Object constantValue = inBoundVariables.get("_constant_value_");
+
+        assertThat(inBoundVariables.entrySet())
+                .extracting(Map.Entry::getKey,
+                            Map.Entry::getValue)
+                .containsOnly(tuple("name",
+                                    "inName"),
+                              tuple("age",
+                                    20),
+                              tuple("_constant_value_",
+                                    "myConstantValue"));
+
+        integrationContext.addOutBoundVariable("name", "outName");
+        integrationContext.addOutBoundVariable("age", 25);
+        integrationContext.addOutBoundVariable("_constant_value_", constantValue);
 
         IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
         Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
