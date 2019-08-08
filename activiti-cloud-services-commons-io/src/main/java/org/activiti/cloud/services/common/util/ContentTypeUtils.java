@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.services.common.util;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.io.FilenameUtils;
@@ -31,6 +33,8 @@ public final class ContentTypeUtils {
 
     public static final String JSON = "json";
 
+    public static final String DMN = "dmn";
+
     public static final String CONTENT_TYPE_JSON = DEFAULT.get(JSON);
 
     public static final String CONTENT_TYPE_XML = DEFAULT.get("xml");
@@ -39,13 +43,20 @@ public final class ContentTypeUtils {
 
     public static final String CONTENT_TYPE_ZIP = "application/zip";
 
+    public static final Map<String, String> CONTENT_TYPES = new HashMap<String, String>() {{
+        put(DMN,
+            CONTENT_TYPE_XML);
+    }};
+
     /**
      * Get the content type corresponding to an extension.
      * @param extension the extension to search the content type for
      * @return the content type
      */
     public static Optional<String> getContentTypeByExtension(String extension) {
-        return Optional.ofNullable(DEFAULT.get(extension));
+        return Optional.ofNullable(
+                Optional.ofNullable(DEFAULT.get(extension))
+                        .orElseGet(() -> CONTENT_TYPES.get(extension)));
     }
 
     /**
