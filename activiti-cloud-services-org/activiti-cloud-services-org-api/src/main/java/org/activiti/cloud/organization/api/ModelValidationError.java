@@ -57,4 +57,21 @@ public class ModelValidationError {
     public void setWarning(boolean warning) {
         isWarning = warning;
     }
+
+
+  @Override
+  public boolean equals(Object obj) {
+    boolean isEqual = false;
+    if(obj instanceof ModelValidationError) {
+      ModelValidationError comparisonObj = (ModelValidationError)obj;
+      isEqual = this.getProblem().equalsIgnoreCase(comparisonObj.getProblem()) &&
+                this.getDescription().equalsIgnoreCase(comparisonObj.getDescription());
+    }
+    return isEqual;
+  }
+
+  @Override
+  public int hashCode() {
+    return this.getProblem().hashCode();
+  }
 }
