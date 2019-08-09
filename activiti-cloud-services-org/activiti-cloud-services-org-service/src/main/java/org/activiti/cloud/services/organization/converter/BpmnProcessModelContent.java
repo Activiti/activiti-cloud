@@ -16,11 +16,14 @@
 
 package org.activiti.cloud.services.organization.converter;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.activiti.bpmn.model.Activity;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.CallActivity;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.organization.api.ModelContent;
@@ -63,16 +66,19 @@ public class BpmnProcessModelContent implements ModelContent {
         return null;
     }
 
-    public Set<String> findAllTaskNames() {
-        return findAllTaskNames(Task.class);
+    public Set<String> findAllTaskIds() {
+        return findAllActivityIds(Task.class,
+                                  CallActivity.class);
     }
 
-    public <T extends Task> Set<String> findAllTaskNames(Class<T> taskType) {
+    public Set<String> findAllActivityIds(Class<? extends Activity>... activityTypes) {
         return bpmnModel.getProcesses()
                 .stream()
-                .map(process -> process.findFlowElementsOfType(taskType))
-                .flatMap(List::stream)
-                .map(Task::getId)
+                .flatMap(process -> Arrays.stream(activityTypes)
+                        .map(process::findFlowElementsOfType)
+                        .flatMap(List::stream)
+                )
+                .map(Activity::getId)
                 .collect(Collectors.toSet());
     }
 }

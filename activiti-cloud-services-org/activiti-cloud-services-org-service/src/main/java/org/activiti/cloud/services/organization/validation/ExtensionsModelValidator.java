@@ -124,7 +124,7 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
     }
 
     protected Stream<ModelValidationError> validateModelExtensions(Model model,
-                                                                 BpmnProcessModelContent bpmnModel) {
+                                                                   BpmnProcessModelContent bpmnModel) {
         return Optional.ofNullable(model.getExtensions())
                 .map(extensions -> validateModelExtensions(extensions,
                                                            bpmnModel))
@@ -132,12 +132,12 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
     }
 
     protected Stream<ModelValidationError> validateModelExtensions(Extensions extensions,
-                                                                 BpmnProcessModelContent bpmnModel) {
+                                                                   BpmnProcessModelContent bpmnModel) {
         Set<String> availableProcessVariables = getAvailableProcessVariables(extensions);
         return Stream.concat(
                 validateTaskMappings(extensions,
                                      bpmnModel.getId(),
-                                     bpmnModel.findAllTaskNames()),
+                                     bpmnModel.findAllTaskIds()),
                 validateVariableMappings(extensions,
                                          bpmnModel.getId(),
                                          availableProcessVariables)
@@ -155,12 +155,12 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
 
     private Stream<ModelValidationError> validateTaskMappings(Extensions extensions,
                                                               String modelId,
-                                                              Set<String> availableTasks) {
+                                                              Set<String> availableTaskIds) {
         return extensions.getVariablesMappings().keySet()
                 .stream()
-                .map(taskName -> validateTaskName(taskName,
-                                                  modelId,
-                                                  availableTasks))
+                .map(taskId -> validateTask(taskId,
+                                            modelId,
+                                            availableTaskIds))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
     }
@@ -191,16 +191,16 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
                 .map(Optional::get);
     }
 
-    private Optional<ModelValidationError> validateTaskName(String taskName,
-                                                            String modelId,
-                                                            Set<String> availableTasks) {
-        return !availableTasks.contains(taskName) ?
+    private Optional<ModelValidationError> validateTask(String taskId,
+                                                        String modelId,
+                                                        Set<String> availableTaskIds) {
+        return !availableTaskIds.contains(taskId) ?
                 Optional.of(createModelValidationError(
                         format(UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM,
-                               taskName),
+                               taskId),
                         format(UNKNOWN_TASK_VALIDATION_ERROR_DESCRIPTION,
                                modelId,
-                               taskName))) :
+                               taskId))) :
                 Optional.empty();
     }
 
