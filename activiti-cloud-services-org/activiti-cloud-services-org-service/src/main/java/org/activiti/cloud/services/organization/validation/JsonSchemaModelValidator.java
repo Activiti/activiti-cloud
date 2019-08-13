@@ -68,6 +68,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
     private List<ModelValidationError> getValidationErrors(ValidationException validationException) {
         return getValidationExceptions(validationException)
                 .map(this::toModelValidationError)
+                .distinct()
                 .collect(Collectors.toList());
     }
 
