@@ -15,14 +15,8 @@
  */
 package org.activiti.cloud.services.organization.rest.validation;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
-import org.activiti.cloud.organization.api.Model;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -34,26 +28,10 @@ import org.springframework.web.bind.annotation.InitBinder;
 @ControllerAdvice
 public class ValidationControllerAdvice {
 
-    private final Map<String, ModelPayloadValidator> modelMetadataValidatorsMapByModelType;
-
-    public ValidationControllerAdvice(Set<ModelPayloadValidator> modelMetadataValidators) {
-        this.modelMetadataValidatorsMapByModelType = modelMetadataValidators
-                .stream()
-                .collect(Collectors.toMap(validator -> validator.getHandledModelType().getName(),
-                                          Function.identity()));
-    }
-
     @InitBinder("model")
     public void initModelBinder(final WebDataBinder binder,
                                 final HttpServletRequest request) {
         boolean checkRequiredField = HttpMethod.POST.name().equals(request.getMethod());
         binder.addValidators(new GenericModelPayloadValidator(checkRequiredField));
-
-        Optional.ofNullable(binder.getTarget())
-                .filter(target -> Model.class.isAssignableFrom(target.getClass()))
-                .map(Model.class::cast)
-                .map(Model::getType)
-                .map(modelMetadataValidatorsMapByModelType::get)
-                .ifPresent(binder::addValidators);
     }
 }

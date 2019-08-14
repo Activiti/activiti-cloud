@@ -37,7 +37,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_T
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.organization.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
-import static org.activiti.cloud.services.organization.rest.validation.ConnectorModelPayloadValidator.DNS_LABEL_REGEX;
+import static org.activiti.cloud.organization.validation.ValidationUtil.DNS_LABEL_REGEX;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -191,7 +191,7 @@ public class ConnectorValidationControllerIT {
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
                 .hasValidationErrors("expected maxLength: 26, actual: 27",
-                                     "string [123456789_123456789_1234567] does not match pattern ^" + DNS_LABEL_REGEX + "$");
+                                     "string [123456789_123456789_1234567] does not match pattern " + DNS_LABEL_REGEX);
     }
 
     @Test
@@ -214,7 +214,7 @@ public class ConnectorValidationControllerIT {
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
                 .hasValidationErrors("expected minLength: 1, actual: 0",
-                                     "string [] does not match pattern ^" + DNS_LABEL_REGEX + "$");
+                                     "string [] does not match pattern " + DNS_LABEL_REGEX);
     }
 
     @Test
@@ -236,7 +236,7 @@ public class ConnectorValidationControllerIT {
                         .log().all()
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
-                .hasValidationErrors("string [name_with_underscore] does not match pattern ^" + DNS_LABEL_REGEX + "$");
+                .hasValidationErrors("string [name_with_underscore] does not match pattern " + DNS_LABEL_REGEX);
     }
 
     @Test
@@ -258,6 +258,6 @@ public class ConnectorValidationControllerIT {
                         .log().all()
                         .expect(status().isBadRequest()))
                 .isSemanticValidationException()
-                .hasValidationErrors("string [NameWithUppercase] does not match pattern ^" + DNS_LABEL_REGEX + "$");
+                    .hasValidationErrors("string [NameWithUppercase] does not match pattern " + DNS_LABEL_REGEX);
     }
 }

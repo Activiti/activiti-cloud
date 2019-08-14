@@ -115,7 +115,7 @@ public class ModelControllerIT {
     @Test
     public void testGetModels() throws Exception {
         //given
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("Parent Project"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("parent-project"));
 
         modelRepository.createModel(processModel(project, "Process Model 1"));
         modelRepository.createModel(processModel(project, "Process Model 2"));
@@ -134,18 +134,18 @@ public class ModelControllerIT {
     @Test
     public void testCreateProcessModel() throws Exception {
         // GIVEN
-        Project project = projectRepository.createProject(project("Parent Project"));
+        Project project = projectRepository.createProject(project("parent-project"));
 
         // WHEN
         mockMvc.perform(post("{version}/projects/{projectId}/models",
                 API_VERSION,
                 project.getId())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(mapper.writeValueAsString(processModel("Process Model"))))
+                .content(mapper.writeValueAsString(processModel("process-model"))))
                 .andDo(print())
                 // THEN
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name", equalTo("Process Model")))
+                .andExpect(jsonPath("$.name", equalTo("process-model")))
                 .andExpect(jsonPath("$.type", equalTo(PROCESS)))
                 .andExpect(jsonPath("$.extensions.properties", notNullValue()))
                 .andExpect(jsonPath("$.extensions.mappings", notNullValue()));
@@ -154,7 +154,7 @@ public class ModelControllerIT {
     @Test
     public void testCreateConnectorModel() throws Exception {
         // GIVEN
-        Project project = projectRepository.createProject(project("Parent Project"));
+        Project project = projectRepository.createProject(project("parent-project"));
 
         // WHEN
         mockMvc.perform(post("{version}/projects/{projectId}/models",
@@ -173,7 +173,7 @@ public class ModelControllerIT {
     @Test
     public void testCreateProcessModelWithExtensions() throws Exception {
         // GIVEN
-        Project project = projectRepository.createProject(project("Parent Project"));
+        Project project = projectRepository.createProject(project("parent-project"));
 
         Extensions extensions = extensions("ServiceTask",
                                            "variable1",
@@ -182,7 +182,7 @@ public class ModelControllerIT {
         .add("myStringConstant", "myStringConstantValue")
         .add("myIntegerConstant", 10)
         .build());
-        ModelEntity processModel = processModelWithExtensions("processModelWithExtensions",
+        ModelEntity processModel = processModelWithExtensions("process-model-extensions",
                                                               extensions);
         // WHEN
         mockMvc.perform(post("{version}/projects/{projectId}/models",
@@ -229,7 +229,7 @@ public class ModelControllerIT {
     @Test
     public void testCreateModelOfUnknownType() throws Exception {
         // GIVEN
-        Project project = projectRepository.createProject(project("Parent Project"));
+        Project project = projectRepository.createProject(project("parent-project"));
 
         Model formModel = new ModelEntity("name",
                 "FORM");
@@ -248,16 +248,16 @@ public class ModelControllerIT {
     @Test
     public void testCreateModelWithExistingName() throws Exception {
         // GIVEN
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("Parent Project"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("parent-project"));
         modelRepository.createModel(processModel(project,
-                "Process Model"));
+                "process-model"));
 
         // WHEN
         mockMvc.perform(post("{version}/projects/{projectId}/models",
                 API_VERSION,
                 project.getId())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(mapper.writeValueAsString(processModel("Process Model"))))
+                .content(mapper.writeValueAsString(processModel("process-model"))))
                 .andDo(print())
                 // THEN
                 .andExpect(status().isConflict());
@@ -266,7 +266,7 @@ public class ModelControllerIT {
     @Test
     public void testGetModel() throws Exception {
         //given
-        Model processModel = modelRepository.createModel(processModel("Process Model"));
+        Model processModel = modelRepository.createModel(processModel("process-model"));
 
         //then
         mockMvc.perform(get("{version}/models/{modelId}",
@@ -280,7 +280,7 @@ public class ModelControllerIT {
     public void testGetModelWithExtensions() throws Exception {
         //given
         Model processModel = modelRepository
-                .createModel(processModelWithExtensions("processModelWithExtensions",
+                .createModel(processModelWithExtensions("process-model-with-extensions",
                         extensions("ServiceTask",
                                 "stringVariable",
                                 "integerVariable",
@@ -413,46 +413,46 @@ public class ModelControllerIT {
     @Test
     public void testCreateProcessModelInProject() throws Exception {
         //given
-        Project parentProject = projectRepository.createProject(project("Parent Project"));
+        Project parentProject = projectRepository.createProject(project("parent-project"));
 
         //when
         mockMvc.perform(post("{version}/projects/{projectId}/models",
                 API_VERSION,
                 parentProject.getId())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(mapper.writeValueAsString(processModel("Process Model"))))
+                .content(mapper.writeValueAsString(processModel("process-model"))))
                 .andExpect(status().isCreated());
     }
 
     @Test
     public void testUpdateModel() throws Exception {
         //given
-        Model processModel = modelRepository.createModel(processModel("Process Model"));
+        Model processModel = modelRepository.createModel(processModel("process-model"));
 
         //when
         mockMvc.perform(put("{version}/models/{modelId}",
                 API_VERSION,
                 processModel.getId())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(mapper.writeValueAsString(processModel("New Process Model"))))
+                .content(mapper.writeValueAsString(processModel("new-process-model"))))
                 .andExpect(status().isOk());
 
         //then
         Optional<Model> optionalModel = modelRepository.findModelById(processModel.getId());
         assertThat(optionalModel).hasValueSatisfying(
-                model -> assertThat(model.getName()).isEqualTo("New Process Model")
+                model -> assertThat(model.getName()).isEqualTo("new-process-model")
         );
     }
 
     @Test
     public void testUpdateModelWithExtensions() throws Exception {
         //given
-        ModelEntity processModel = processModelWithExtensions("processModelWithExtensions",
+        ModelEntity processModel = processModelWithExtensions("process-model-extensions",
                 extensions("ServiceTask",
                         "variable1"));
         modelRepository.createModel(processModel);
 
-        ModelEntity newModel = processModelWithExtensions("processModelWithExtensions",
+        ModelEntity newModel = processModelWithExtensions("process-model-extensions",
                 extensions("variable2",
                         "variable3"));
         //when
@@ -467,7 +467,7 @@ public class ModelControllerIT {
     @Test
     public void testDeleteModel() throws Exception {
         //given
-        Model processModel = modelRepository.createModel(processModel("Process Model"));
+        Model processModel = modelRepository.createModel(processModel("process-model"));
 
         //when
         mockMvc.perform(delete("{version}/models/{modelId}",
@@ -887,7 +887,7 @@ public class ModelControllerIT {
     @Test
     public void testImportProcessModel() throws Exception {
         //GIVEN
-        Project parentProject = projectRepository.createProject(project("Parent Project"));
+        Project parentProject = projectRepository.createProject(project("parent-project"));
 
         MockMultipartFile zipFile = new MockMultipartFile("file",
                 "x-19022.bpmn20.xml",
@@ -910,7 +910,7 @@ public class ModelControllerIT {
     @Test
     public void testImportModelWrongFileName() throws Exception {
         //GIVEN
-        Project parentProject = project("Parent Project");
+        Project parentProject = project("parent-project");
         projectRepository.createProject(parentProject);
 
         MockMultipartFile zipFile = new MockMultipartFile("file",
@@ -935,7 +935,7 @@ public class ModelControllerIT {
     @Test
     public void testImportModelWrongModelType() throws Exception {
         //GIVEN
-        Project parentProject = project("Parent Project");
+        Project parentProject = project("parent-project");
         projectRepository.createProject(parentProject);
 
         MockMultipartFile zipFile = new MockMultipartFile("file",
