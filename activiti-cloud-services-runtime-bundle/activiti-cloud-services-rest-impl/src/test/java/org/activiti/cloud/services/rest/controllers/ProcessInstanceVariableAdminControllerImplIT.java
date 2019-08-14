@@ -42,7 +42,7 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
-import org.activiti.spring.process.autoconfigure.ProcessExtensionsAutoConfiguration;
+import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.ProcessExtensionModel;
 import org.activiti.spring.process.model.VariableDefinition;
@@ -256,16 +256,16 @@ public class ProcessInstanceVariableAdminControllerImplIT {
         assertThat(actualResponseBody).contains(expectedNameErrorMessage1);
         assertThat(actualResponseBody).contains(expectedNameErrorMessage2);
     }
-    
+
     @Test
     public void deleteVariables() throws Exception {
         this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/variables",
-                                    "1")
-                                    .accept(MediaTypes.HAL_JSON_VALUE)
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(mapper.writeValueAsString(ProcessPayloadBuilder.removeVariables().withVariableNames(Arrays.asList("varName1",
-                                                                                                                                               "varName2"))
-                                    .build())))
+                "1")
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(ProcessPayloadBuilder.removeVariables().withVariableNames(Arrays.asList("varName1",
+                        "varName2"))
+                        .build())))
                 .andDo(print())
                 .andExpect(status().isOk());
         verify(processAdminRuntime).removeVariables(any());

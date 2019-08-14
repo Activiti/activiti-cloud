@@ -315,8 +315,8 @@ public class AuditProducerIT {
 
             assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
-                    .containsExactly(TASK_CANCELLED.name(),
-                                     ACTIVITY_CANCELLED.name(),
+                    .containsExactly(ACTIVITY_CANCELLED.name(),
+                                     TASK_CANCELLED.name(),
                                      TASK_CANDIDATE_GROUP_REMOVED.name(),
                                      TASK_CANDIDATE_USER_REMOVED.name(),
                                      PROCESS_CANCELLED.name());
