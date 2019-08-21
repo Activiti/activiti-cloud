@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.starter.tests.conf;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
 import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.spring.SpringProcessEngineConfiguration;
@@ -25,8 +23,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -35,6 +36,9 @@ public class EngineConfigurationIT {
 
     @Autowired
     private SpringProcessEngineConfiguration configuration;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Test
     public void shouldUseCloudActivityBehaviorFactory() {
@@ -45,5 +49,13 @@ public class EngineConfigurationIT {
         assertThat(configuration.getBpmnParser().getActivityBehaviorFactory())
                 .isInstanceOf(MappingAwareActivityBehaviorFactory.class)
                 .isInstanceOf(CloudActivityBehaviorFactory.class);
+    }
+
+    @Test
+    public void shouldHaveRequiredGroupsSetForAuditProducer() {
+        //when
+        String requiredGroups = applicationContext.getEnvironment().getProperty("spring.cloud.stream.bindings.auditProducer.producer.required-groups");
+        //then
+        assertThat(requiredGroups).isEqualTo("query,audit");
     }
 }
