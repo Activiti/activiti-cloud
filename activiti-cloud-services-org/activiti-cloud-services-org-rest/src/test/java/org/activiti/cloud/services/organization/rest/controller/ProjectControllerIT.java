@@ -111,8 +111,8 @@ public class ProjectControllerIT {
     public void testGetProjects() throws Exception {
 
         // GIVEN
-        projectRepository.createProject(project("Project1"));
-        projectRepository.createProject(project("Project2"));
+        projectRepository.createProject(project("project1"));
+        projectRepository.createProject(project("project2"));
 
         // WHEN
         mockMvc.perform(get("{version}/projects",
@@ -123,15 +123,15 @@ public class ProjectControllerIT {
                 .andExpect(jsonPath("$._embedded.projects",
                                     hasSize(2)))
                 .andExpect(jsonPath("$._embedded.projects[0].name",
-                                    is("Project1")))
+                                    is("project1")))
                 .andExpect(jsonPath("$._embedded.projects[1].name",
-                                    is("Project2")));
+                                    is("project2")));
     }
 
     @Test
     public void testGetProject() throws Exception {
         // GIVEN
-        Project project = projectRepository.createProject(project("Existing Project"));
+        Project project = projectRepository.createProject(project("existing-project"));
 
         // WHEN
         mockMvc.perform(get("{version}/projects/{projectId}",
@@ -140,7 +140,7 @@ public class ProjectControllerIT {
                 // THEN
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name",
-                                    is("Existing Project")));
+                                    is("existing-project")));
     }
 
     @Test
@@ -149,12 +149,12 @@ public class ProjectControllerIT {
         mockMvc.perform(post("{version}/projects",
                              API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(projectWithDescription("New Project",
+                                .content(mapper.writeValueAsString(projectWithDescription("new-project",
                                                                                           "Project description"))))
                 // THEN
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name",
-                                    is("New Project")))
+                                    is("new-project")))
                 .andExpect(jsonPath("$.description",
                                     is("Project description")));
     }
@@ -176,22 +176,22 @@ public class ProjectControllerIT {
     @Test
     public void testUpdateProject() throws Exception {
         // GIVEN
-        Project project = projectRepository.createProject(project("Project to update"));
+        Project project = projectRepository.createProject(project("project-to-update"));
 
         // WHEN
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(project("Updated project name"))))
+                                .content(mapper.writeValueAsString(project("updated-project-name"))))
                 // THEN
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name",
-                                    is("Updated project name")));
+                                    is("updated-project-name")));
 
         assertThat((Optional<Project>) projectRepository.findProjectById(project.getId()))
                 .hasValueSatisfying(updatedProject -> {
-                    assertThat(updatedProject.getName()).isEqualTo("Updated project name");
+                    assertThat(updatedProject.getName()).isEqualTo("updated-project-name");
                 });
     }
 
@@ -231,7 +231,7 @@ public class ProjectControllerIT {
     @Test
     public void testDeleteProject() throws Exception {
         // GIVEN
-        Project project = projectRepository.createProject(project("Project to delete"));
+        Project project = projectRepository.createProject(project("project-to-delete"));
 
         // WHEN
         mockMvc.perform(delete("{version}/projects/{projectId}",
@@ -359,7 +359,7 @@ public class ProjectControllerIT {
     @Test
     public void exportProjectWithInvalidServiceTaskReturnErrors() throws Exception {
         // GIVEN
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-connector-models"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-connectors"));
         modelRepository.createModel(processModelWithContent(project,
                                                             "invalid-service",
                                                             resourceAsByteArray("process/invalid-service-task.bpmn20.xml")));
@@ -388,7 +388,7 @@ public class ProjectControllerIT {
     @Test
     public void exportProjectWithServiceTaskEmptyImplementationReturnErrors() throws Exception {
         // GIVEN
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-invalid-service-task"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-invalid-stask"));
         modelRepository.createModel(processModelWithContent(project,
                                                             "invalid-connector-action",
                                                             resourceAsByteArray("process/no-implementation-service-task.bpmn20.xml")));

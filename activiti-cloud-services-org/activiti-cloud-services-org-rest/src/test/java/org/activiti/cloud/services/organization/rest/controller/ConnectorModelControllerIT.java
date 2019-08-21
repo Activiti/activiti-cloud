@@ -99,8 +99,8 @@ public class ConnectorModelControllerIT {
                               project.getId())
                         // THEN
                         .then().expect(status().isBadRequest()))
-                .isValidationException()
-                .hasValidationErrorCodes("model.invalid.name.empty");
+                .isSyntacticValidationException()
+                .hasValidationErrorMessages("The model name cannot be null");
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ConnectorModelControllerIT {
                         // THEN
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
-                .hasValidationErrorCodes("model.invalid.name.empty");
+                .hasValidationErrorCodes("model.invalid.name.empty","model.invalid.name");
     }
 
     @Test
@@ -136,8 +136,8 @@ public class ConnectorModelControllerIT {
                         // THEN
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
-                .hasValidationErrorCodes("connector.invalid.name.length",
-                                         "connector.invalid.name");
+                .hasValidationErrorCodes("model.invalid.name.length",
+                                         "model.invalid.name");
     }
 
     @Test
@@ -155,7 +155,7 @@ public class ConnectorModelControllerIT {
                         // THEN
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
-                .hasValidationErrorCodes("connector.invalid.name");
+                .hasValidationErrorCodes("model.invalid.name");
     }
 
     @Test
@@ -173,7 +173,7 @@ public class ConnectorModelControllerIT {
                         // THEN
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
-                .hasValidationErrorCodes("connector.invalid.name");
+                .hasValidationErrorCodes("model.invalid.name");
     }
 
     @Test
@@ -216,7 +216,7 @@ public class ConnectorModelControllerIT {
                              connectorModel.getId())
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
-                .hasValidationErrorCodes("model.invalid.name.empty");
+                .hasValidationErrorCodes("model.invalid.name.empty", "model.invalid.name");
     }
 
     @Test
@@ -231,8 +231,8 @@ public class ConnectorModelControllerIT {
                              connectorModel.getId())
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
-                .hasValidationErrorCodes("connector.invalid.name.length",
-                                         "connector.invalid.name");
+                .hasValidationErrorCodes("model.invalid.name.length",
+                                         "model.invalid.name");
     }
 
     @Test
@@ -247,7 +247,7 @@ public class ConnectorModelControllerIT {
                              connectorModel.getId())
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
-                .hasValidationErrorCodes("connector.invalid.name");
+                .hasValidationErrorCodes("model.invalid.name");
     }
 
     @Test
@@ -262,6 +262,6 @@ public class ConnectorModelControllerIT {
                              connectorModel.getId())
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
-                .hasValidationErrorCodes("connector.invalid.name");
+                .hasValidationErrorCodes("model.invalid.name");
     }
 }
