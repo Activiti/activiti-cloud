@@ -6,11 +6,9 @@
         <modeler:editor-resource-id><![CDATA[startEvent1]]></modeler:editor-resource-id>
       </extensionElements>
     </startEvent>
-    <userTask id="ServiceTask" name="x" activiti:assignee="$INITIATOR" activiti:formKey="19020">
+    <userTask id="ServiceTask" name="x" activiti:assignee="$INITIATOR">
       <extensionElements>
         <modeler:allow-send-email><![CDATA[true]]></modeler:allow-send-email>
-        <modeler:form-reference-id><![CDATA[19020]]></modeler:form-reference-id>
-        <modeler:form-reference-name><![CDATA[x]]></modeler:form-reference-name>
         <modeler:activiti-idm-initiator><![CDATA[true]]></modeler:activiti-idm-initiator>
         <modeler:editor-resource-id><![CDATA[ServiceTask]]></modeler:editor-resource-id>
       </extensionElements>
