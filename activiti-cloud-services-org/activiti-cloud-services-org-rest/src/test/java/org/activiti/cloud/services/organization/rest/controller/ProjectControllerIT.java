@@ -223,9 +223,7 @@ public class ProjectControllerIT {
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(project(null))))
                 // THEN
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name",
-                                    is("project-to-update")));
+                .andExpect(status().isBadRequest());
     }
 
     @Test

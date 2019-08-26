@@ -22,6 +22,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -35,6 +36,7 @@ import org.hibernate.annotations.GenericGenerator;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static org.activiti.cloud.organization.validation.ValidationUtil.DNS_LABEL_REGEX;
 import static org.activiti.cloud.organization.validation.ValidationUtil.NAME_MAX_LENGTH;
+import static org.activiti.cloud.organization.validation.ValidationUtil.PROJECT_INVALID_EMPTY_NAME;
 import static org.activiti.cloud.organization.validation.ValidationUtil.PROJECT_INVALID_NAME_LENGTH_MESSAGE;
 import static org.activiti.cloud.organization.validation.ValidationUtil.PROJECT_INVALID_NAME_MESSAGE;
 
@@ -58,6 +60,7 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @Column(unique = true)
     @Pattern(regexp = DNS_LABEL_REGEX, message = PROJECT_INVALID_NAME_MESSAGE)
     @Size(max = NAME_MAX_LENGTH, message = PROJECT_INVALID_NAME_LENGTH_MESSAGE)
+    @NotEmpty(message = PROJECT_INVALID_EMPTY_NAME)
     private String name;
 
     private String description;
