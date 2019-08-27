@@ -10,6 +10,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import org.activiti.api.model.shared.Result;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.MessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.junit.Before;
@@ -46,7 +47,7 @@ public class StartProcessInstanceCmdExecutorTest {
 
         ProcessInstance fakeProcessInstance = mock(ProcessInstance.class);
 
-        given(processAdminRuntime.start(any())).willReturn(fakeProcessInstance);
+        given(processAdminRuntime.start(startProcessInstanceCmd)).willReturn(fakeProcessInstance);
 
         assertThat(startProcessInstanceCmdExecutor.getHandledType()).isEqualTo(StartProcessPayload.class.getName());
 

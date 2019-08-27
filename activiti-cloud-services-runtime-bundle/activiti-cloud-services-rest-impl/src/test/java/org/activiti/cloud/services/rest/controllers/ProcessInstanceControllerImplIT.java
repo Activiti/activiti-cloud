@@ -165,7 +165,7 @@ public class ProcessInstanceControllerImplIT {
     public void startProcess() throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
-        when(processRuntime.start(any())).thenReturn(defaultProcessInstance());
+        when(processRuntime.start(cmd)).thenReturn(defaultProcessInstance());
 
         this.mockMvc.perform(post("/v1/process-instances")
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -178,7 +178,7 @@ public class ProcessInstanceControllerImplIT {
     public void startProcessForbidden() throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
-        when(processRuntime.start(any())).thenThrow(new ActivitiForbiddenException("Not permitted"));
+        when(processRuntime.start(cmd)).thenThrow(new ActivitiForbiddenException("Not permitted"));
 
         this.mockMvc.perform(post("/v1/process-instances")
                                      .contentType(MediaType.APPLICATION_JSON)
