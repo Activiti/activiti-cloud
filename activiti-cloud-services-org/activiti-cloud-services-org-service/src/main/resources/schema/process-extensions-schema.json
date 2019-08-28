@@ -62,7 +62,8 @@
             "string",
             "integer",
             "boolean",
-            "json"
+            "json",
+            "file"
           ]
         },
         "required": {
@@ -140,6 +141,22 @@
             "properties": {
               "type": {
                 "const": "json"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "file"
               }
             }
           },
