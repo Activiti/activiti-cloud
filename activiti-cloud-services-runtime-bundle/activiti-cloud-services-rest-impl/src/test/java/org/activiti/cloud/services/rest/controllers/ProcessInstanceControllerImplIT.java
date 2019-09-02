@@ -16,30 +16,6 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedProcessInstanceFields;
-import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstanceMeta;
@@ -79,6 +55,25 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
+import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedProcessInstanceFields;
+import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ProcessInstanceControllerImpl.class, secure = false)
@@ -165,7 +160,7 @@ public class ProcessInstanceControllerImplIT {
     public void startProcess() throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
-        when(processRuntime.start(cmd)).thenReturn(defaultProcessInstance());
+        when(processRuntime.start(any(StartProcessPayload.class))).thenReturn(defaultProcessInstance());
 
         this.mockMvc.perform(post("/v1/process-instances")
                                      .contentType(MediaType.APPLICATION_JSON)
@@ -175,10 +170,10 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void startProcessForbidden() throws Exception {
+    public void startProcessShouldReturnForbiddenWhenActivitiForbiddenExceptionIsThrownByTheController() throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
-        when(processRuntime.start(cmd)).thenThrow(new ActivitiForbiddenException("Not permitted"));
+        when(processRuntime.start(any(StartProcessPayload.class))).thenThrow(new ActivitiForbiddenException("Not permitted"));
 
         this.mockMvc.perform(post("/v1/process-instances")
                                      .contentType(MediaType.APPLICATION_JSON)
