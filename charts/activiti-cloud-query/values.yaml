@@ -30,7 +30,11 @@ db:
   platform:
   generateDdl:
   ddlAuto:
-
+init:
+  image:
+    repository: alpine
+    tag: 3.8
+    pullPolicy: IfNotPresent
 postgres:
   enabled: false
   name: postgres
