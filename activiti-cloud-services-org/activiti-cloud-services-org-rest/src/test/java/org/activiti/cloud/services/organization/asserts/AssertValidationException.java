@@ -46,8 +46,7 @@ public class AssertValidationException {
     public AssertValidationException hasValidationErrorCodes(String... errorCodes) {
         assertThat(validationException).isInstanceOf(MethodArgumentNotValidException.class);
         assertThat(((MethodArgumentNotValidException) validationException).getBindingResult().getAllErrors())
-                .hasSize(errorCodes.length)
-                .flatExtracting(ObjectError::getCode)
+                .extracting(ObjectError::getCode)
                 .contains(errorCodes);
         return this;
     }
@@ -55,8 +54,7 @@ public class AssertValidationException {
     public AssertValidationException hasValidationErrors(String... errors) {
         if (validationException instanceof MethodArgumentNotValidException) {
             assertThat(((MethodArgumentNotValidException) validationException).getBindingResult().getAllErrors())
-                    .hasSize(errors.length)
-                    .flatExtracting(ObjectError::getCode)
+                    .extracting(ObjectError::getCodes)
                     .contains(errors);
         } else if (validationException instanceof SemanticModelValidationException) {
             assertThat(((SemanticModelValidationException) validationException).getValidationErrors())
@@ -75,8 +73,7 @@ public class AssertValidationException {
     public AssertValidationException hasValidationErrorMessages(String... errorMessages) {
         if (validationException instanceof MethodArgumentNotValidException) {
             assertThat(((MethodArgumentNotValidException) validationException).getBindingResult().getAllErrors())
-                    .hasSize(errorMessages.length)
-                    .flatExtracting(ObjectError::getDefaultMessage)
+                    .extracting(ObjectError::getDefaultMessage)
                     .contains(errorMessages);
         } else if (validationException instanceof SemanticModelValidationException) {
             assertThat(((SemanticModelValidationException) validationException).getValidationErrors())

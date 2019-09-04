@@ -17,7 +17,6 @@
 package org.activiti.cloud.services.organization.rest.validation;
 
 import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.core.error.SyntacticModelValidationException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -25,6 +24,7 @@ import static org.activiti.cloud.organization.validation.ValidationUtil.DNS_LABE
 import static org.activiti.cloud.organization.validation.ValidationUtil.MODEL_INVALID_NAME_LENGTH_MESSAGE;
 import static org.activiti.cloud.organization.validation.ValidationUtil.MODEL_INVALID_NAME_MESSAGE;
 import static org.activiti.cloud.organization.validation.ValidationUtil.NAME_MAX_LENGTH;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * Abstract model payload validator. It contains the basic validation functionality.
@@ -32,7 +32,7 @@ import static org.activiti.cloud.organization.validation.ValidationUtil.NAME_MAX
 public class GenericModelPayloadValidator implements Validator {
 
     public static final String MODEL_INVALID_NAME_NULL_MESSAGE =
-            "The model name cannot be null";
+            "The model name is required";
 
     public static final String MODEL_INVALID_NAME_EMPTY_MESSAGE =
             "The model name cannot be empty";
@@ -67,25 +67,25 @@ public class GenericModelPayloadValidator implements Validator {
                                   Errors errors) {
 
         if (name == null) {
-            throw new SyntacticModelValidationException(MODEL_INVALID_NAME_NULL_MESSAGE);
-        }
-
-        if (name.length() == 0) {
             errors.rejectValue("name",
-                               "model.invalid.name.empty",
-                               MODEL_INVALID_NAME_EMPTY_MESSAGE);
-        }
-
-        if (name.length() > NAME_MAX_LENGTH) {
-            errors.rejectValue("name",
-                               "model.invalid.name.length",
-                               MODEL_INVALID_NAME_LENGTH_MESSAGE);
-        }
-
-        if (!name.matches(DNS_LABEL_REGEX)) {
-            errors.rejectValue("name",
-                               "model.invalid.name",
-                               MODEL_INVALID_NAME_MESSAGE);
+                               "field.required",
+                               MODEL_INVALID_NAME_NULL_MESSAGE);
+        } else {
+            if (isEmpty(name)) {
+                errors.rejectValue("name",
+                                   "field.empty",
+                                   MODEL_INVALID_NAME_EMPTY_MESSAGE);
+            }
+            if (name.length() > NAME_MAX_LENGTH) {
+                errors.rejectValue("name",
+                                   "length.greater",
+                                   MODEL_INVALID_NAME_LENGTH_MESSAGE);
+            }
+            if (!name.matches(DNS_LABEL_REGEX)) {
+                errors.rejectValue("name",
+                                   "regex.mismatch",
+                                   MODEL_INVALID_NAME_MESSAGE);
+            }
         }
     }
 }

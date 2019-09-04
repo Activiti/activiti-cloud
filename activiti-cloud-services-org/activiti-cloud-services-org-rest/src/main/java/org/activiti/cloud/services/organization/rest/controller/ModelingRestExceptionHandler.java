@@ -18,11 +18,16 @@ package org.activiti.cloud.services.organization.rest.controller;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.core.error.ImportModelException;
 import org.activiti.cloud.organization.core.error.ImportProjectException;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
@@ -37,6 +42,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -68,13 +74,34 @@ public class ModelingRestExceptionHandler {
                                                           boolean includeStackTrace) {
                 Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest,
                                                                                includeStackTrace);
-                Optional.ofNullable(getError(webRequest))
+                Stream<ModelValidationError> bindingErrors = Optional.ofNullable((List<ObjectError>) errorAttributes.get("errors"))
+                        .map(this::transformBindingErrors)
+                        .orElse(Stream.empty());
+                Stream<ModelValidationError> semanticErrors = resolveSemanticErrors(webRequest,
+                                                                                    errorAttributes);
+                Stream<ModelValidationError> modelValidationErrorStream = Stream.concat(bindingErrors,
+                                                                                        semanticErrors);
+                List<ModelValidationError> collectedErrors = modelValidationErrorStream.collect(Collectors.toList());
+                if (!collectedErrors.isEmpty()) {
+                    errorAttributes.put(ERRORS,
+                                        collectedErrors);
+                }
+                return errorAttributes;
+            }
+
+            private Stream<ModelValidationError> resolveSemanticErrors(WebRequest webRequest,
+                                                                       Map<String, Object> errorAttributes) {
+                return Optional.ofNullable(getError(webRequest))
                         .filter(SemanticModelValidationException.class::isInstance)
                         .map(SemanticModelValidationException.class::cast)
                         .map(SemanticModelValidationException::getValidationErrors)
-                        .ifPresent(errors -> errorAttributes.put(ERRORS,
-                                                                 errors));
-                return errorAttributes;
+                        .map(Collection::stream)
+                        .orElse(Stream.empty());
+            }
+
+            private Stream<ModelValidationError> transformBindingErrors(List<ObjectError> errors) {
+                return errors.stream()
+                        .map(error -> createModelValidationError(error));
             }
         };
     }
@@ -114,5 +141,14 @@ public class ModelingRestExceptionHandler {
                      ex);
         response.sendError(INTERNAL_SERVER_ERROR.value(),
                            DATA_ACCESS_EXCEPTION_MESSAGE);
+    }
+
+    private ModelValidationError createModelValidationError(ObjectError objectError) {
+        ModelValidationError modelValidationError = new ModelValidationError();
+        modelValidationError.setWarning(false);
+        modelValidationError.setProblem(objectError.getCode());
+        modelValidationError.setDescription(objectError.getDefaultMessage());
+        modelValidationError.setValidatorSetName(objectError.getObjectName());
+        return modelValidationError;
     }
 }

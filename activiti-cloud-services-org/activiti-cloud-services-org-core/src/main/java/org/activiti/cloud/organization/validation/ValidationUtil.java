@@ -11,11 +11,11 @@ public class ValidationUtil {
     public static final String MODEL_INVALID_NAME_LENGTH_MESSAGE =
             "The model name length cannot be greater than " + NAME_MAX_LENGTH;
     public static final String PROJECT_INVALID_NAME_MESSAGE =
-            "The project name should follow DNS-1123 conventions: " +
+            "The project name should follow DNS-1035 conventions: " +
                     "it must consist of lower case alphanumeric characters or '-', " +
                     "and must start and end with an alphanumeric character";
     public static final String MODEL_INVALID_NAME_MESSAGE =
-            "The model name should follow DNS-1123 conventions: " +
+            "The model name should follow DNS-1035 conventions: " +
                     "it must consist of lower case alphanumeric characters or '-', " +
                     "and must start and end with an alphanumeric character";
 
