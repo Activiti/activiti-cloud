@@ -16,25 +16,18 @@
 
 package org.activiti.cloud.services.organization.converter;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
 /**
- * Implementation dependency for the {@link ConnectorModelContent}
+ * ConnectorActionParameter POJO
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(NON_NULL)
-public class ConnectorModelAction {
+public class ConnectorActionParameter {
 
     private String id;
+
+    private String type;
+
     private String name;
+
     private String description;
-
-    private ConnectorActionParameter[] inputs;
-
-    private ConnectorActionParameter[] outputs;
 
     public String getId() {
         return id;
@@ -42,6 +35,14 @@ public class ConnectorModelAction {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getName() {
@@ -58,21 +59,5 @@ public class ConnectorModelAction {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public ConnectorActionParameter[] getInputs() {
-        return inputs;
-    }
-
-    public void setInputs(ConnectorActionParameter[] inputs) {
-        this.inputs = inputs;
-    }
-
-    public ConnectorActionParameter[] getOutputs() {
-        return outputs;
-    }
-
-    public void setOutputs(ConnectorActionParameter[] outputs) {
-        this.outputs = outputs;
     }
 }

@@ -66,19 +66,18 @@ public class BpmnProcessModelContent implements ModelContent {
         return null;
     }
 
-    public Set<String> findAllTaskIds() {
-        return findAllActivityIds(Task.class,
-                                  CallActivity.class);
+    public Set<Activity> findAllActivities() {
+        return findAllActivities(Task.class,
+                                 CallActivity.class);
     }
 
-    public Set<String> findAllActivityIds(Class<? extends Activity>... activityTypes) {
+    public Set<Activity> findAllActivities(Class<? extends Activity>... activityTypes) {
         return bpmnModel.getProcesses()
                 .stream()
                 .flatMap(process -> Arrays.stream(activityTypes)
                         .map(process::findFlowElementsOfType)
                         .flatMap(List::stream)
                 )
-                .map(Activity::getId)
                 .collect(Collectors.toSet());
     }
 }
