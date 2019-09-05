@@ -21,10 +21,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.activiti.bpmn.model.Activity;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.CallActivity;
+import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.Process;
+import org.activiti.bpmn.model.StartEvent;
 import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.core.error.ModelingException;
@@ -66,12 +67,13 @@ public class BpmnProcessModelContent implements ModelContent {
         return null;
     }
 
-    public Set<Activity> findAllActivities() {
-        return findAllActivities(Task.class,
-                                 CallActivity.class);
+    public Set<FlowNode> findAllNodes() {
+        return findAllNodes(Task.class,
+                            CallActivity.class,
+                            StartEvent.class);
     }
 
-    public Set<Activity> findAllActivities(Class<? extends Activity>... activityTypes) {
+    public Set<FlowNode> findAllNodes(Class<? extends FlowNode>... activityTypes) {
         return bpmnModel.getProcesses()
                 .stream()
                 .flatMap(process -> Arrays.stream(activityTypes)

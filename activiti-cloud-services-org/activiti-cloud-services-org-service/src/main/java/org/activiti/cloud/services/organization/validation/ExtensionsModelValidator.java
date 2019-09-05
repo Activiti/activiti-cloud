@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.activiti.bpmn.model.Activity;
+import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.Model;
@@ -153,12 +153,12 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
                                                                    Map<String, ConnectorModelAction> availableConnectorActions,
                                                                    BpmnProcessModelContent bpmnModel) {
         Set<String> availableProcessVariables = getAvailableProcessVariables(extensions);
-        Set<Activity> availableActivities = bpmnModel.findAllActivities();
+        Set<FlowNode> availableNodes = bpmnModel.findAllNodes();
 
         return Stream.concat(
                 validateTaskMappings(extensions,
                                      bpmnModel.getId(),
-                                     availableActivities,
+                                     availableNodes,
                                      availableConnectorActions),
                 validateVariableMappings(extensions,
                                          bpmnModel.getId(),
@@ -177,14 +177,14 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
 
     private Stream<ModelValidationError> validateTaskMappings(Extensions extensions,
                                                               String modelId,
-                                                              Set<Activity> availableActivities,
+                                                              Set<FlowNode> availableNodes,
                                                               Map<String, ConnectorModelAction> availableConnectorActions) {
         return extensions.getVariablesMappings().entrySet()
                 .stream()
                 .flatMap(taskMapping -> validateTaskMapping(taskMapping.getKey(),
                                                             taskMapping.getValue(),
                                                             modelId,
-                                                            availableActivities,
+                                                            availableNodes,
                                                             availableConnectorActions));
     }
 
@@ -217,12 +217,12 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
     private Stream<ModelValidationError> validateTaskMapping(String taskId,
                                                              Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> extensionMapping,
                                                              String modelId,
-                                                             Set<Activity> availableActivities,
+                                                             Set<FlowNode> availableNodes,
                                                              Map<String, ConnectorModelAction> availableConnectorActions) {
-        return availableActivities
+        return availableNodes
                 .stream()
-                .filter(activity -> Objects.equals(activity.getId(),
-                                                   taskId))
+                .filter(node -> Objects.equals(node.getId(),
+                                               taskId))
                 .findFirst()
                 .map(activity -> validateConnectorParameter(activity,
                                                             extensionMapping,
@@ -237,14 +237,14 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
     }
 
     private Stream<ModelValidationError> validateConnectorParameter(
-            Activity activity,
+            FlowNode node,
             Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> taskMapping,
             String modelId,
             Map<String, ConnectorModelAction> availableConnectorActions) {
-        if (activity instanceof ServiceTask) {
+        if (node instanceof ServiceTask) {
             return taskMapping.entrySet()
                     .stream()
-                    .flatMap(taskMappingEntry -> validateConnectorParameter((ServiceTask) activity,
+                    .flatMap(taskMappingEntry -> validateConnectorParameter((ServiceTask) node,
                                                                             taskMappingEntry.getKey(),
                                                                             taskMappingEntry.getValue(),
                                                                             modelId,
@@ -261,10 +261,10 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
                                                                     Map<String, ConnectorModelAction> availableConnectorActions) {
         return processVariableMappings.entrySet()
                 .stream()
-                .map(valiableMappingEntry -> validateTaskActionMapping(task,
+                .map(variableMappingEntry -> validateTaskActionMapping(task,
                                                                        action,
-                                                                       valiableMappingEntry.getKey(),
-                                                                       valiableMappingEntry.getValue(),
+                                                                       variableMappingEntry.getKey(),
+                                                                       variableMappingEntry.getValue(),
                                                                        modelId,
                                                                        availableConnectorActions))
                 .filter(Optional::isPresent)
