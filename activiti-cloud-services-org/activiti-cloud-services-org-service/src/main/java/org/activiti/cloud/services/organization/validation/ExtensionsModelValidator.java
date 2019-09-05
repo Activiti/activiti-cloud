@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.organization.validation;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +25,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.activiti.bpmn.model.Activity;
+import org.activiti.bpmn.model.ServiceTask;
+import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidationError;
@@ -37,6 +42,9 @@ import org.activiti.cloud.organization.core.error.ModelingException;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.services.organization.converter.BpmnProcessModelContent;
+import org.activiti.cloud.services.organization.converter.ConnectorActionParameter;
+import org.activiti.cloud.services.organization.converter.ConnectorModelAction;
+import org.activiti.cloud.services.organization.converter.ConnectorModelContentConverter;
 import org.activiti.cloud.services.organization.converter.ProcessModelContentConverter;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +52,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
+import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
 import static org.activiti.cloud.organization.api.process.VariableMappingType.VARIABLE;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.apache.commons.lang3.StringUtils.removeStart;
@@ -54,10 +63,12 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
 
     public static final String UNKNOWN_PROCESS_ID_VALIDATION_ERROR_PROBLEM = "Unknown process id in process extensions: %s";
     public static final String UNKNOWN_PROCESS_ID_VALIDATION_ERROR_DESCRIPTION = "The process extensions are bound to an unknown process id '%s'";
-    public static final String UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM = "Unknown task name in process extensions: %s";
+    public static final String UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM = "Unknown task in process extensions: %s";
     public static final String UNKNOWN_TASK_VALIDATION_ERROR_DESCRIPTION = "The extensions for process '%s' contains mappings for an unknown task '%s'";
     public static final String UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_PROBLEM = "Unknown process variable in process extensions: %s";
     public static final String UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_DESCRIPTION = "The extensions for process '%s' contains mappings for an unknown process variable '%s'";
+    public static final String UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_PROBLEM = "Unknown %s connector parameter name in process extensions: %s";
+    public static final String UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_DESCRIPTION = "The extensions for process '%s' contains mappings for an unknown %s connector parameter name '%s'";
 
     private final SchemaLoader processExtensionsSchemaLoader;
 
@@ -67,15 +78,19 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
 
     private final ProcessModelContentConverter processModelContentConverter;
 
+    private final ConnectorModelContentConverter connectorModelContentConverter;
+
     @Autowired
     public ExtensionsModelValidator(SchemaLoader processExtensionsSchemaLoader,
                                     ProcessModelType processModelType,
                                     JsonConverter<Model> extensionsConverter,
-                                    ProcessModelContentConverter processModelContentConverter) {
+                                    ProcessModelContentConverter processModelContentConverter,
+                                    ConnectorModelContentConverter connectorModelContentConverter) {
         this.processExtensionsSchemaLoader = processExtensionsSchemaLoader;
         this.processModelType = processModelType;
         this.extensionsConverter = extensionsConverter;
         this.processModelContentConverter = processModelContentConverter;
+        this.connectorModelContentConverter = connectorModelContentConverter;
     }
 
     @Override
@@ -115,6 +130,7 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
                 .map(String::getBytes)
                 .flatMap(this::convertToBpmnModel)
                 .map(bpmnModel -> validateModelExtensions(model,
+                                                          getAvailableConnectorActions(context),
                                                           bpmnModel))
                 .orElseGet(() -> Stream.of(createModelValidationError(
                         format(UNKNOWN_PROCESS_ID_VALIDATION_ERROR_PROBLEM,
@@ -124,20 +140,26 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
     }
 
     protected Stream<ModelValidationError> validateModelExtensions(Model model,
+                                                                   Map<String, ConnectorModelAction> availableConnectorActions,
                                                                    BpmnProcessModelContent bpmnModel) {
         return Optional.ofNullable(model.getExtensions())
                 .map(extensions -> validateModelExtensions(extensions,
+                                                           availableConnectorActions,
                                                            bpmnModel))
                 .orElseGet(Stream::empty);
     }
 
     protected Stream<ModelValidationError> validateModelExtensions(Extensions extensions,
+                                                                   Map<String, ConnectorModelAction> availableConnectorActions,
                                                                    BpmnProcessModelContent bpmnModel) {
         Set<String> availableProcessVariables = getAvailableProcessVariables(extensions);
+        Set<Activity> availableActivities = bpmnModel.findAllActivities();
+
         return Stream.concat(
                 validateTaskMappings(extensions,
                                      bpmnModel.getId(),
-                                     bpmnModel.findAllTaskIds()),
+                                     availableActivities,
+                                     availableConnectorActions),
                 validateVariableMappings(extensions,
                                          bpmnModel.getId(),
                                          availableProcessVariables)
@@ -155,14 +177,15 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
 
     private Stream<ModelValidationError> validateTaskMappings(Extensions extensions,
                                                               String modelId,
-                                                              Set<String> availableTaskIds) {
-        return extensions.getVariablesMappings().keySet()
+                                                              Set<Activity> availableActivities,
+                                                              Map<String, ConnectorModelAction> availableConnectorActions) {
+        return extensions.getVariablesMappings().entrySet()
                 .stream()
-                .map(taskId -> validateTask(taskId,
-                                            modelId,
-                                            availableTaskIds))
-                .filter(Optional::isPresent)
-                .map(Optional::get);
+                .flatMap(taskMapping -> validateTaskMapping(taskMapping.getKey(),
+                                                            taskMapping.getValue(),
+                                                            modelId,
+                                                            availableActivities,
+                                                            availableConnectorActions));
     }
 
     private Stream<ModelValidationError> validateVariableMappings(Extensions extensions,
@@ -191,17 +214,85 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
                 .map(Optional::get);
     }
 
-    private Optional<ModelValidationError> validateTask(String taskId,
-                                                        String modelId,
-                                                        Set<String> availableTaskIds) {
-        return !availableTaskIds.contains(taskId) ?
-                Optional.of(createModelValidationError(
+    private Stream<ModelValidationError> validateTaskMapping(String taskId,
+                                                             Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> extensionMapping,
+                                                             String modelId,
+                                                             Set<Activity> availableActivities,
+                                                             Map<String, ConnectorModelAction> availableConnectorActions) {
+        return availableActivities
+                .stream()
+                .filter(activity -> Objects.equals(activity.getId(),
+                                                   taskId))
+                .findFirst()
+                .map(activity -> validateConnectorParameter(activity,
+                                                            extensionMapping,
+                                                            modelId,
+                                                            availableConnectorActions))
+                .orElseGet(() -> Stream.of(createModelValidationError(
                         format(UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM,
                                taskId),
                         format(UNKNOWN_TASK_VALIDATION_ERROR_DESCRIPTION,
                                modelId,
-                               taskId))) :
-                Optional.empty();
+                               taskId))));
+    }
+
+    private Stream<ModelValidationError> validateConnectorParameter(
+            Activity activity,
+            Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> taskMapping,
+            String modelId,
+            Map<String, ConnectorModelAction> availableConnectorActions) {
+        if (activity instanceof ServiceTask) {
+            return taskMapping.entrySet()
+                    .stream()
+                    .flatMap(taskMappingEntry -> validateConnectorParameter((ServiceTask) activity,
+                                                                            taskMappingEntry.getKey(),
+                                                                            taskMappingEntry.getValue(),
+                                                                            modelId,
+                                                                            availableConnectorActions));
+        }
+
+        return Stream.empty();
+    }
+
+    private Stream<ModelValidationError> validateConnectorParameter(ServiceTask task,
+                                                                    ServiceTaskActionType action,
+                                                                    Map<String, ProcessVariableMapping> processVariableMappings,
+                                                                    String modelId,
+                                                                    Map<String, ConnectorModelAction> availableConnectorActions) {
+        return processVariableMappings.entrySet()
+                .stream()
+                .map(valiableMappingEntry -> validateTaskActionMapping(task,
+                                                                       action,
+                                                                       valiableMappingEntry.getKey(),
+                                                                       valiableMappingEntry.getValue(),
+                                                                       modelId,
+                                                                       availableConnectorActions))
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+    }
+
+    private Optional<ModelValidationError> validateTaskActionMapping(ServiceTask task,
+                                                                     ServiceTaskActionType actionType,
+                                                                     String processVariableMappingKey,
+                                                                     ProcessVariableMapping processVariableMapping,
+                                                                     String modelId,
+                                                                     Map<String, ConnectorModelAction> availableConnectorActions) {
+
+        String connectorParameterName = actionType == INPUTS ? processVariableMappingKey : processVariableMapping.getValue();
+        return Optional.ofNullable(availableConnectorActions.get(task.getImplementation()))
+                .flatMap(action -> Arrays.stream(actionType == INPUTS ? action.getInputs() : action.getOutputs())
+                        .map(ConnectorActionParameter::getName)
+                        .filter(parameter -> parameter.equals(connectorParameterName))
+                        .findFirst()
+                        .map(parameter -> Optional.<ModelValidationError>empty())
+                        .orElseGet(() -> Optional.of(createModelValidationError(
+                                format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_PROBLEM,
+                                       actionType.name().toLowerCase(),
+                                       connectorParameterName),
+                                format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_DESCRIPTION,
+                                       modelId,
+                                       actionType.name().toLowerCase(),
+                                       connectorParameterName)))));
     }
 
     private Optional<ModelValidationError> validateProcessVariableMapping(ServiceTaskActionType action,
@@ -209,9 +300,7 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
                                                                           ProcessVariableMapping processVariableMapping,
                                                                           String modelId,
                                                                           Set<String> availableProcessVariables) {
-        String variableName = action == ServiceTaskActionType.INPUTS ?
-                processVariableMapping.getValue() :
-                processVariableMappingKey;
+        String variableName = action == INPUTS ? processVariableMapping.getValue() : processVariableMappingKey;
         return processVariableMapping.getType() == VARIABLE &&
                 !availableProcessVariables.contains(variableName) ?
                 Optional.of(createModelValidationError(
@@ -221,6 +310,31 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
                                modelId,
                                variableName))) :
                 Optional.empty();
+    }
+
+    private Map<String, ConnectorModelAction> getAvailableConnectorActions(ValidationContext context) {
+        Map<String, ConnectorModelAction> availableConnectorActions = new HashMap<>();
+        context.getAvailableModels()
+                .stream()
+                .filter(modelInContext -> ConnectorModelType.NAME.equals(modelInContext.getType()))
+                .map(Model::getContent)
+                .map(String::getBytes)
+                .map(connectorModelContentConverter::convertToModelContent)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(connectorModelContent -> connectorModelContent.getActions().values()
+                        .forEach(action -> availableConnectorActions.put(getImplementationKey(connectorModelContent.getName(),
+                                                                                              action.getName()),
+                                                                         action)));
+
+        return availableConnectorActions;
+    }
+
+    private String getImplementationKey(String connectorName,
+                                        String actionName) {
+        return String.join(".",
+                           connectorName,
+                           actionName);
     }
 
     private Optional<Model> findModelInContext(String modelId,

@@ -49,9 +49,12 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
+import static org.activiti.cloud.services.organization.mock.MockFactory.inputsMappings;
+import static org.activiti.cloud.services.organization.mock.MockFactory.outputsMappings;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processFileContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processVariables;
 import static org.activiti.cloud.services.organization.mock.MockFactory.project;
 import static org.activiti.cloud.services.organization.mock.MockFactory.projectWithDescription;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
@@ -258,8 +261,10 @@ public class ProjectControllerIT {
         modelRepository.updateModel(processModel,
                                     processModelWithExtensions("process-model",
                                                                extensions("Task_1spvopd",
-                                                                          "movieToRank",
-                                                                          "movieDesc")));
+                                                                          processVariables("movieName",
+                                                                                           "movieDescription"),
+                                                                          inputsMappings("movieName"),
+                                                                          outputsMappings("movieDescription"))));
 
         // WHEN
         MvcResult response = mockMvc.perform(
@@ -288,16 +293,14 @@ public class ProjectControllerIT {
                                           jsonContent -> jsonContent
                                                   .node("name").isEqualTo("process-model")
                                                   .node("type").isEqualTo("PROCESS")
-                                                  .node("extensions.properties").matches(allOf(hasKey("movieToRank"),
-                                                                                               hasKey("movieDesc")))
+                                                  .node("extensions.properties").matches(allOf(hasKey("movieName"),
+                                                                                               hasKey("movieDescription")))
                                                   .node("extensions.mappings").matches(
                                                           hasEntry(equalTo("Task_1spvopd"),
                                                                    allOf(hasEntry(equalTo("inputs"),
-                                                                                  allOf(hasKey("movieToRank"),
-                                                                                        hasKey("movieDesc"))),
+                                                                                  hasKey("movieName")),
                                                                          hasEntry(equalTo("outputs"),
-                                                                                  allOf(hasKey("movieToRank"),
-                                                                                        hasKey("movieDesc"))))))
+                                                                                  hasKey("movieDescription")))))
 
                 );
     }
@@ -379,8 +382,8 @@ public class ProjectControllerIT {
                             ModelValidationError::getDescription,
                             ModelValidationError::getValidatorSetName)
                 .contains(tuple("Invalid service implementation",
-                                    "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
-                                    "BPMN service task validator"));
+                                "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
+                                "BPMN service task validator"));
     }
 
     @Test
@@ -408,11 +411,11 @@ public class ProjectControllerIT {
                             ModelValidationError::getDescription,
                             ModelValidationError::getValidatorSetName)
                 .contains(tuple("activiti-servicetask-missing-implementation",
-                                    "One of the attributes 'implementation', 'class', 'delegateExpression', 'type', 'operation', or 'expression' is mandatory on serviceTask.",
-                                    "activiti-executable-process"),
-                              tuple("Invalid service implementation",
-                                    "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
-                                    "BPMN service task validator"));
+                                "One of the attributes 'implementation', 'class', 'delegateExpression', 'type', 'operation', or 'expression' is mandatory on serviceTask.",
+                                "activiti-executable-process"),
+                          tuple("Invalid service implementation",
+                                "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
+                                "BPMN service task validator"));
     }
 
     @Test

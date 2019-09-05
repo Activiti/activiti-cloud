@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
+import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ProcessModelType;
@@ -43,6 +44,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_T
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.organization.asserts.AssertResponse.assertThatResponse;
+import static org.activiti.cloud.services.organization.mock.MockFactory.connectorFileContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.organization.mock.MockFactory.multipartExtensionsFile;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processFileContent;
@@ -82,6 +84,9 @@ public class ModelValidationControllerIT {
     @Autowired
     private ProcessModelType processModelType;
 
+    @Autowired
+    private ConnectorModelType connectorModelType;
+
     private MockMvc mockMvc;
 
     @Before
@@ -97,7 +102,9 @@ public class ModelValidationControllerIT {
                                                        "process.xml",
                                                        CONTENT_TYPE_XML,
                                                        validContent);
-        Model processModel = modelRepository.createModel(processModel("Process-Model"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModel(project,
+                                                                      "process-model"));
 
         // when
         mockMvc
@@ -117,7 +124,10 @@ public class ModelValidationControllerIT {
                                                        "diagram.bpm",
                                                        CONTENT_TYPE_XML,
                                                        "BPMN diagram".getBytes());
-        Model processModel = modelRepository.createModel(processModel("Process-Model"));
+
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModel(project,
+                                                                      "process-model"));
 
         // when
         mockMvc
@@ -133,8 +143,10 @@ public class ModelValidationControllerIT {
     public void validateProcessExtensionsWithValidContent() throws Exception {
 
         // given
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
         Model processModel = modelRepository.createModel(
-                processModelWithExtensions("Process-Model",
+                processModelWithExtensions(project,
+                                           "process-model",
                                            new Extensions(),
                                            resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         MockMultipartFile file = multipartExtensionsFile(
@@ -155,8 +167,10 @@ public class ModelValidationControllerIT {
     public void validateProcessExtensionsWithValidContentAndNoDefaultValues() throws Exception {
 
         // given
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
         Model processModel = modelRepository.createModel(
-                processModelWithExtensions("Process-Model",
+                processModelWithExtensions(project,
+                                           "process-model",
                                            new Extensions(),
                                            resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         MockMultipartFile file = multipartExtensionsFile(
@@ -182,7 +196,9 @@ public class ModelValidationControllerIT {
                                                        CONTENT_TYPE_JSON,
                                                        invalidContent);
 
-        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                                                                                    "process-model",
                                                                                     new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
@@ -219,7 +235,9 @@ public class ModelValidationControllerIT {
                                                        CONTENT_TYPE_JSON,
                                                        invalidContent);
 
-        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                                                                                    "process-model",
                                                                                     new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
@@ -251,7 +269,9 @@ public class ModelValidationControllerIT {
                                                        CONTENT_TYPE_JSON,
                                                        invalidContent);
 
-        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                                                                                    "Process-Model",
                                                                                     new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
@@ -283,7 +303,9 @@ public class ModelValidationControllerIT {
                                                        CONTENT_TYPE_JSON,
                                                        invalidContent);
 
-        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                                                                                    "process-model",
                                                                                     new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
@@ -315,7 +337,9 @@ public class ModelValidationControllerIT {
                                                        CONTENT_TYPE_JSON,
                                                        invalidContent);
 
-        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                                                                                    "process-model",
                                                                                     new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
@@ -347,7 +371,9 @@ public class ModelValidationControllerIT {
                                                        CONTENT_TYPE_JSON,
                                                        invalidContent);
 
-        Model processModel = modelRepository.createModel(processModelWithExtensions("Process-Model",
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                                                                                    "process-model",
                                                                                     new Extensions()));
         // when
         final ResultActions resultActions = mockMvc
@@ -397,7 +423,10 @@ public class ModelValidationControllerIT {
                                                        "diagram.bpmn20.xml",
                                                        "text/plain",
                                                        "BPMN diagram".getBytes());
-        Model processModel = modelRepository.createModel(processModel("Process-Model"));
+
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModel(project,
+                                                                      "process-model"));
 
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
@@ -416,7 +445,9 @@ public class ModelValidationControllerIT {
                                                        "connector-simple.json",
                                                        CONTENT_TYPE_JSON,
                                                        validContent);
-        Model connectorModel = modelRepository.createModel(connectorModel("Connector-Model"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model connectorModel = modelRepository.createModel(connectorModel(project,
+                                                                          "connector-model"));
 
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
@@ -435,7 +466,10 @@ public class ModelValidationControllerIT {
                                                        "connector-template.json",
                                                        CONTENT_TYPE_JSON,
                                                        validContent);
-        Model connectorModel = modelRepository.createModel(connectorModel("Connector-Model"));
+
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model connectorModel = modelRepository.createModel(connectorModel(project,
+                                                                          "connector-model"));
 
         // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
@@ -495,6 +529,39 @@ public class ModelValidationControllerIT {
                 .hasValidationErrorMessages(
                         "The extensions for process 'process-" + processModel.getId() +
                                 "' contains mappings for an unknown task 'unknown-task'");
+    }
+
+    @Test
+    public void validateProcessExtensionsWithUnknownConnectorParameterMapping() throws Exception {
+        // given
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("movies"));
+        Model processModel = modelService.importModel(project,
+                                                      processModelType,
+                                                      processFileContent("RankMovie",
+                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        modelService.importModel(project,
+                                 connectorModelType,
+                                 connectorFileContent("movies",
+                                                      resourceAsByteArray("connector/movies.json")));
+
+        MockMultipartFile file = multipartExtensionsFile(
+                processModel,
+                resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-connector-parameter.json"));
+
+        assertThatResponse(
+                mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                          API_VERSION,
+                                          processModel.getId())
+                                        .file(file))
+                        .andExpect(status().isBadRequest())
+                        .andReturn())
+                .isSemanticValidationException()
+                .hasValidationErrorMessages(
+                        "The extensions for process 'process-" + processModel.getId() +
+                                "' contains mappings for an unknown inputs connector parameter name 'unknown-input-parameter'",
+                        "The extensions for process 'process-" + processModel.getId() +
+                                "' contains mappings for an unknown outputs connector parameter name 'unknown-output-parameter'"
+                );
     }
 
     @Test

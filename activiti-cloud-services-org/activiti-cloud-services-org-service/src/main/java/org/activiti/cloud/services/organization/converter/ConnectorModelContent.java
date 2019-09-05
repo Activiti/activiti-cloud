@@ -33,6 +33,8 @@ public class ConnectorModelContent implements ModelContent {
 
     private String id;
 
+    private String name;
+
     private String template;
 
     private Map<String, ConnectorModelAction> actions;
@@ -44,6 +46,14 @@ public class ConnectorModelContent implements ModelContent {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
