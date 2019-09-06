@@ -47,6 +47,7 @@ import static org.activiti.cloud.services.organization.asserts.AssertResponse.as
 import static org.activiti.cloud.services.organization.mock.MockFactory.connectorFileContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.organization.mock.MockFactory.multipartExtensionsFile;
+import static org.activiti.cloud.services.organization.mock.MockFactory.multipartProcessFile;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processFileContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModel;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
@@ -184,6 +185,37 @@ public class ModelValidationControllerIT {
                                 .file(file))
                 // then
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void validateProcessModelWithInvalidName() throws Exception {
+
+        // given
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(
+                processModel(project,
+                             "process-model"));
+        MockMultipartFile file = multipartProcessFile(processModel,
+                                                      resourceAsByteArray("process/invalid-process-name.bpmn20.xml"));
+
+        // when
+        final ResultActions resultActions = mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                                                      API_VERSION,
+                                                                      processModel.getId())
+                                                                    .file(file));
+
+        // then
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(2)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getValidatorSetName)
+                .contains(tuple("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character",
+                                "The process name is invalid"));
     }
 
     @Test

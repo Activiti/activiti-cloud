@@ -14,6 +14,10 @@ public class ValidationUtil {
             "The project name should follow DNS-1035 conventions: " +
                     "it must consist of lower case alphanumeric characters or '-', " +
                     "and must start and end with an alphanumeric character";
+    public static final String MODEL_INVALID_NAME_NULL_MESSAGE =
+            "The model name is required";
+    public static final String MODEL_INVALID_NAME_EMPTY_MESSAGE =
+            "The model name cannot be empty";
     public static final String MODEL_INVALID_NAME_MESSAGE =
             "The model name should follow DNS-1035 conventions: " +
                     "it must consist of lower case alphanumeric characters or '-', " +

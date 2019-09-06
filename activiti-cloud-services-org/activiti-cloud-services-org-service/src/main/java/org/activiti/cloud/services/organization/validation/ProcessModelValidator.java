@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.organization.validation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,6 +50,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
 
+import static java.lang.String.format;
+import static org.activiti.cloud.organization.validation.ValidationUtil.DNS_LABEL_REGEX;
+import static org.activiti.cloud.organization.validation.ValidationUtil.MODEL_INVALID_NAME_EMPTY_MESSAGE;
+import static org.activiti.cloud.organization.validation.ValidationUtil.MODEL_INVALID_NAME_LENGTH_MESSAGE;
+import static org.activiti.cloud.organization.validation.ValidationUtil.MODEL_INVALID_NAME_MESSAGE;
+import static org.activiti.cloud.organization.validation.ValidationUtil.MODEL_INVALID_NAME_NULL_MESSAGE;
+import static org.activiti.cloud.organization.validation.ValidationUtil.NAME_MAX_LENGTH;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.springframework.util.StringUtils.isEmpty;
 
@@ -71,6 +79,8 @@ public class ProcessModelValidator implements ModelValidator {
     public final String NO_ASSIGNEE_PROBLEM_TITLE = "No assignee for user task";
     public final String NO_ASSIGNEE_DESCRIPTION = "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task";
     public final String USER_TASK_VALIDATOR_NAME = "BPMN user task validator";
+    public final String INVALID_NAME = "The process name is invalid";
+    public final String INVALID_NAME_DESCRIPTION = "The process name must follow the constraint: '%s'";
 
     public final String INVALID_SERVICE_IMPLEMENTATION_PROBLEM = "Invalid service implementation";
     public final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "Invalid service implementation on service '%s'";
@@ -95,7 +105,7 @@ public class ProcessModelValidator implements ModelValidator {
             List<ValidationError> validationErrors = processValidator.validate(bpmnModel);
             Stream<Optional<ValidationError>> validationErrorsStream = validateModelContentInCurrentContext(bpmnModel,
                                                                                                             validationContext);
-
+            validationErrors.addAll(validateProcessName(bpmnModel));
             validationErrors.addAll(validationErrorsStream.filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
             if (!validationErrors.isEmpty()) {
                 log.error("Semantic process model validation errors encountered: " + validationErrors);
@@ -181,16 +191,13 @@ public class ProcessModelValidator implements ModelValidator {
     private Optional<ValidationError> validateServiceTaskImplementation(ServiceTask serviceTask,
                                                                         List<String> availableImplementations) {
 
-        ValidationError validationError = new ValidationError();
-        validationError.setProblem(INVALID_SERVICE_IMPLEMENTATION_PROBLEM);
-        validationError.setValidatorSetName(SERVICE_USER_TASK_VALIDATOR_NAME);
-        validationError.setDefaultDescription(String.format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
-                                                            serviceTask.getId()));
-
         return availableImplementations
                 .stream()
                 .anyMatch(implementation -> implementation.equals(serviceTask.getImplementation())) ?
-                Optional.empty() : Optional.of(validationError);
+                Optional.empty() : Optional.of(createValidationError(INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
+                                                                     SERVICE_USER_TASK_VALIDATOR_NAME,
+                                                                     format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
+                                                                            serviceTask.getId())));
     }
 
     private Stream<Optional<ValidationError>> validateUserTasksAssignee(BpmnModel bpmnModel) {
@@ -200,19 +207,57 @@ public class ProcessModelValidator implements ModelValidator {
                 .filter(Optional::isPresent);
     }
 
+    private List<ValidationError> validateProcessName(BpmnModel bpmnModel) {
+        String name = bpmnModel.getMainProcess()
+                .getName();
+        List<ValidationError> validationErrors = new ArrayList<>();
+        if (name == null) {
+            validationErrors.add(createValidationError(MODEL_INVALID_NAME_NULL_MESSAGE,
+                                                       INVALID_NAME,
+                                                       format(INVALID_NAME_DESCRIPTION,
+                                                              MODEL_INVALID_NAME_EMPTY_MESSAGE)));
+        } else {
+            if (isEmpty(name)) {
+                validationErrors.add(createValidationError(MODEL_INVALID_NAME_EMPTY_MESSAGE,
+                                                           INVALID_NAME,
+                                                           format(INVALID_NAME_DESCRIPTION,
+                                                                  MODEL_INVALID_NAME_EMPTY_MESSAGE)));
+            }
+            if (name.length() > NAME_MAX_LENGTH) {
+                validationErrors.add(createValidationError(MODEL_INVALID_NAME_LENGTH_MESSAGE,
+                                                           INVALID_NAME,
+                                                           format(INVALID_NAME_DESCRIPTION,
+                                                                  MODEL_INVALID_NAME_LENGTH_MESSAGE)));
+            }
+            if (!name.matches(DNS_LABEL_REGEX)) {
+                validationErrors.add(createValidationError(MODEL_INVALID_NAME_MESSAGE,
+                                                           INVALID_NAME,
+                                                           format(INVALID_NAME_DESCRIPTION,
+                                                                  MODEL_INVALID_NAME_MESSAGE)));
+            }
+        }
+        return validationErrors;
+    }
+
+    private ValidationError createValidationError(String problem,
+                                                  String validationSetName,
+                                                  String description) {
+        ValidationError validationError = new ValidationError();
+        validationError.setProblem(problem);
+        validationError.setValidatorSetName(validationSetName);
+        validationError.setDefaultDescription(description);
+        return validationError;
+    }
+
     private Optional<ValidationError> validateTaskAssignedUser(UserTask userTask) {
 
         if (!(isEmpty(userTask.getAssignee()) && CollectionUtils.isEmpty(userTask.getCandidateUsers()) && CollectionUtils.isEmpty(userTask.getCandidateGroups()))) {
             return Optional.empty();
         }
 
-        ValidationError validationError = new ValidationError();
-
-        validationError.setProblem(NO_ASSIGNEE_PROBLEM_TITLE);
-        validationError.setValidatorSetName(USER_TASK_VALIDATOR_NAME);
-        validationError.setDefaultDescription(NO_ASSIGNEE_DESCRIPTION);
-
-        return Optional.of(validationError);
+        return Optional.of(createValidationError(NO_ASSIGNEE_PROBLEM_TITLE,
+                                                 USER_TASK_VALIDATOR_NAME,
+                                                 NO_ASSIGNEE_DESCRIPTION));
     }
 
     private ModelValidationError toModelValidationError(ValidationError validationError) {

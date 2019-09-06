@@ -32,7 +32,6 @@ import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.api.process.ProcessVariable;
 import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
-import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.entity.ProjectEntity;
@@ -106,7 +105,7 @@ public class MockFactory {
                                                          Extensions extensions,
                                                          byte[] content) {
         ModelEntity processModel = new ModelEntity(name,
-                                            PROCESS);
+                                                   PROCESS);
         processModel.setProject(parentProject);
         processModel.setExtensions(extensions);
         if (content != null) {
@@ -292,7 +291,7 @@ public class MockFactory {
     }
 
     public static FileContent connectorFileContent(String connectorName,
-                                                 byte[] content) {
+                                                   byte[] content) {
         return new FileContent(connectorName + "." + JSON,
                                CONTENT_TYPE_JSON,
                                content);
@@ -307,5 +306,13 @@ public class MockFactory {
                                              .replaceAll("\"id\": \".*\"",
                                                          "\"id\": \"process-" + model.getId() + "\"")
                                              .getBytes());
+    }
+
+    public static MockMultipartFile multipartProcessFile(Model model,
+                                                         byte[] content) {
+        return new MockMultipartFile("file",
+                                     model.getName() + "." + BPMN20_XML,
+                                     CONTENT_TYPE_XML,
+                                     content);
     }
 }
