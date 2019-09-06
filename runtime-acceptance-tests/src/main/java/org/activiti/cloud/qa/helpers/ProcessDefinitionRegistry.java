@@ -56,6 +56,8 @@ public class ProcessDefinitionRegistry {
             "processinf-4e42752c-cc4d-429b-9528-7d3df24a9537");
         put("Process with Generic BPMN Task",
             "processwit-c6fd1b26-0d64-47f2-8d04-0b70764444a7");
+        put("PARENT_PROCESS",
+            "parentproc-843144bc-3797-40db-8edc-d23190b118e5");
     }};
 
     private static final HashMap <String, String> processWithTimerEvents = new HashMap<>() {{
