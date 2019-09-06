@@ -280,19 +280,21 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
 
         String connectorParameterName = actionType == INPUTS ? processVariableMappingKey : processVariableMapping.getValue();
         return Optional.ofNullable(availableConnectorActions.get(task.getImplementation()))
-                .flatMap(action -> Arrays.stream(actionType == INPUTS ? action.getInputs() : action.getOutputs())
-                        .map(ConnectorActionParameter::getName)
-                        .filter(parameter -> parameter.equals(connectorParameterName))
-                        .findFirst()
-                        .map(parameter -> Optional.<ModelValidationError>empty())
-                        .orElseGet(() -> Optional.of(createModelValidationError(
-                                format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_PROBLEM,
-                                       actionType.name().toLowerCase(),
-                                       connectorParameterName),
-                                format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_DESCRIPTION,
-                                       modelId,
-                                       actionType.name().toLowerCase(),
-                                       connectorParameterName)))));
+                .map(action -> actionType == INPUTS ? action.getInputs() : action.getOutputs())
+                .map(Arrays::stream)
+                .orElseGet(Stream::empty)
+                .map(ConnectorActionParameter::getName)
+                .filter(parameter -> parameter.equals(connectorParameterName))
+                .findFirst()
+                .map(parameter -> Optional.<ModelValidationError>empty())
+                .orElseGet(() -> Optional.of(createModelValidationError(
+                        format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_PROBLEM,
+                               actionType.name().toLowerCase(),
+                               connectorParameterName),
+                        format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_DESCRIPTION,
+                               modelId,
+                               actionType.name().toLowerCase(),
+                               connectorParameterName))));
     }
 
     private Optional<ModelValidationError> validateProcessVariableMapping(ServiceTaskActionType action,

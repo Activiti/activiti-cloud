@@ -144,6 +144,10 @@ public class ModelValidationControllerIT {
 
         // given
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        modelService.importModel(project,
+                                 connectorModelType,
+                                 connectorFileContent("movies",
+                                                      resourceAsByteArray("connector/movies.json")));
         Model processModel = modelRepository.createModel(
                 processModelWithExtensions(project,
                                            "process-model",
@@ -168,6 +172,10 @@ public class ModelValidationControllerIT {
 
         // given
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        modelService.importModel(project,
+                                 connectorModelType,
+                                 connectorFileContent("movies",
+                                                      resourceAsByteArray("connector/movies.json")));
         Model processModel = modelRepository.createModel(
                 processModelWithExtensions(project,
                                            "process-model",
@@ -568,6 +576,10 @@ public class ModelValidationControllerIT {
     public void validateProcessExtensionsWithUnknownInputProcessVariableMapping() throws Exception {
         // given
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("movies"));
+        modelService.importModel(project,
+                                 connectorModelType,
+                                 connectorFileContent("movies",
+                                                      resourceAsByteArray("connector/movies.json")));
         Model processModel = modelService.importModel(project,
                                                       processModelType,
                                                       processFileContent("RankMovie",
@@ -594,6 +606,10 @@ public class ModelValidationControllerIT {
     public void validateProcessExtensionsWithUnknownOutputProcessVariableMapping() throws Exception {
         // given
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("movies"));
+        modelService.importModel(project,
+                                 connectorModelType,
+                                 connectorFileContent("movies",
+                                                      resourceAsByteArray("connector/movies.json")));
         Model processModel = modelService.importModel(project,
                                                       processModelType,
                                                       processFileContent("RankMovie",
@@ -614,5 +630,37 @@ public class ModelValidationControllerIT {
                 .hasValidationErrorMessages(
                         "The extensions for process 'process-" + processModel.getId() +
                                 "' contains mappings for an unknown process variable 'unknown-output-variable'");
+    }
+
+    @Test
+    public void validateProcessExtensionsToConnectorWithoutInputsOutputs() throws Exception {
+        // given
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("movies"));
+        modelService.importModel(project,
+                                 connectorModelType,
+                                 connectorFileContent("movies",
+                                                      resourceAsByteArray("connector/movies-without-inputs-outputs.json")));
+        Model processModel = modelService.importModel(project,
+                                                      processModelType,
+                                                      processFileContent("RankMovie",
+                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+
+        MockMultipartFile file = multipartExtensionsFile(
+                processModel,
+                resourceAsByteArray("process-extensions/RankMovie-extensions.json"));
+
+        assertThatResponse(
+                mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                          API_VERSION,
+                                          processModel.getId())
+                                        .file(file))
+                        .andExpect(status().isBadRequest())
+                        .andReturn())
+                .isSemanticValidationException()
+                .hasValidationErrorMessages(
+                        "The extensions for process 'process-" + processModel.getId() +
+                                "' contains mappings for an unknown inputs connector parameter name 'movieName'",
+                        "The extensions for process 'process-" + processModel.getId() +
+                                "' contains mappings for an unknown outputs connector parameter name 'movieDescription'");
     }
 }
