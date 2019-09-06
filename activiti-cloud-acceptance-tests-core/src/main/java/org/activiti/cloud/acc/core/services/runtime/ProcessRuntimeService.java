@@ -1,9 +1,11 @@
 package org.activiti.cloud.acc.core.services.runtime;
 
+import feign.HeaderMap;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.payloads.GetProcessInstancesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.cloud.acc.shared.service.BaseService;
@@ -37,6 +39,10 @@ public interface ProcessRuntimeService extends BaseService {
     @RequestLine("GET /v1/process-instances/{id}")
     @Headers("Accept: application/hal+json;charset=UTF-8")
     CloudProcessInstance getProcessInstance(@Param("id") String id);
+
+    @RequestLine("GET /v1/process-instances/{id}/subprocesses")
+    @Headers("Content-Type: application/json")
+    PagedResources<CloudProcessInstance> getSubProcesses(@Param("id") String id);
 
     @RequestLine("GET /v1/process-definitions")
     @Headers("Accept: application/hal+json;charset=UTF-8")

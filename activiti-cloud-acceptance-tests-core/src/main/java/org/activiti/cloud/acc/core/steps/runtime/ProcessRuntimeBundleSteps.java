@@ -133,6 +133,11 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
+    public PagedResources<CloudProcessInstance> getSubProcesses(String parentId){
+        return processRuntimeService.getSubProcesses(parentId);
+    }
+
+    @Step
     public PagedResources<ProcessDefinition> getProcessDefinitions(){
         return processRuntimeService.getProcessDefinitions();
     }
