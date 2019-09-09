@@ -27,9 +27,9 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
-    <spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
-    <spring-cloud-k8s.version>1.0.0.RELEASE</spring-cloud-k8s.version>
+    <spring-boot.version>2.1.6.RELEASE</spring-boot.version>
+    <spring-cloud.version>Greenwich.SR2</spring-cloud.version>
+    <spring-cloud-k8s.version>1.0.2.RELEASE</spring-cloud-k8s.version>
   </properties>
   <dependencyManagement>
     <dependencies>
