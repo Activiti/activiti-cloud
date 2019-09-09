@@ -1,9 +1,7 @@
 package org.activiti.cloud.connectors.starter.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
 public class ConnectorProperties {
 
     @Value("${spring.application.name}")

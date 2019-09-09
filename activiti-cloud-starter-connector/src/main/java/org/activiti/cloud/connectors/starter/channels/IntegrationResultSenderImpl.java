@@ -22,9 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
-import org.springframework.stereotype.Component;
 
-@Component
 public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
     @Value("${ACT_INT_RES_CONSUMER:}")
