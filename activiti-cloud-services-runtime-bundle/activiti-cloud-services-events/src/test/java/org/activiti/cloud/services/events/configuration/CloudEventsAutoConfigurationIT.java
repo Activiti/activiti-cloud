@@ -21,6 +21,7 @@ import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.core.common.spring.security.policies.ProcessSecurityPoliciesManager;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -45,6 +46,9 @@ public class CloudEventsAutoConfigurationIT {
         @MockBean
         private RuntimeService runtimeService;
 
+        @MockBean
+        private ManagementService managementService;
+        
         @MockBean
         private TaskService taskService;
 
