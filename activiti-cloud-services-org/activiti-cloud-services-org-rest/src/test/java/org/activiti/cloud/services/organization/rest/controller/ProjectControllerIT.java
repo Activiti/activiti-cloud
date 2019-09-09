@@ -309,24 +309,48 @@ public class ProjectControllerIT {
     public void testExportProjectWithValidationErrors() throws Exception {
         // GIVEN
         ProjectEntity project = (ProjectEntity) projectRepository
-                .createProject(project("project-with-models"));
+            .createProject(project("project-with-models"));
 
         modelRepository.createModel(processModelWithContent(project,
                                                             "process-model",
                                                             "Invalid process xml"));
 
         List<ModelValidationError> expectedValidationErrors =
-                Arrays.asList(new ModelValidationError(),
-                              new ModelValidationError());
+            Arrays.asList(new ModelValidationError(),
+                          new ModelValidationError());
 
         // WHEN
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/export",
-                    API_VERSION,
-                    project.getId()))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andReturn();
+            get("{version}/projects/{projectId}/export",
+                API_VERSION,
+                project.getId()))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andReturn();
+    }
+
+    @Test
+    public void testExportEmptyProjectWithValidationErrors() throws Exception {
+        // GIVEN
+        ProjectEntity project = (ProjectEntity) projectRepository
+            .createProject(project("project-without-process"));
+
+        // WHEN
+        MvcResult response = mockMvc.perform(
+            get("{version}/projects/{projectId}/export",
+                API_VERSION,
+                project.getId()))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        // THEN
+        assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
+            .hasSize(1)
+            .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription)
+            .containsOnly(tuple("Invalid project",
+                                "Project must contain at least one process"));
     }
 
     @Test
