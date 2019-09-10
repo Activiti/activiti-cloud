@@ -16,8 +16,10 @@
 
 package org.activiti.cloud.api.model.shared.impl.events;
 
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import java.util.Objects;
+
 import org.activiti.api.runtime.event.impl.RuntimeEventImpl;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
 public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum<?>> extends RuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE>
         implements CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {
@@ -127,4 +129,72 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
     public void setMessageId(String messageId) {
         this.messageId = messageId;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CloudRuntimeEventImpl [appName=")
+               .append(appName)
+               .append(", serviceFullName=")
+               .append(serviceFullName)
+               .append(", appVersion=")
+               .append(appVersion)
+               .append(", serviceName=")
+               .append(serviceName)
+               .append(", serviceVersion=")
+               .append(serviceVersion)
+               .append(", serviceType=")
+               .append(serviceType)
+               .append(", entityId=")
+               .append(entityId)
+               .append(", sequenceNumber=")
+               .append(sequenceNumber)
+               .append(", messageId=")
+               .append(messageId)
+               .append(", toString()=")
+               .append(super.toString())
+               .append("]");
+        return builder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(appName,
+                            appVersion,
+                            entityId,
+                            messageId,
+                            sequenceNumber,
+                            serviceFullName,
+                            serviceName,
+                            serviceType,
+                            serviceVersion,
+                            super.hashCode());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        CloudRuntimeEventImpl other = (CloudRuntimeEventImpl) obj;
+        return Objects.equals(appName, other.appName) 
+                && Objects.equals(appVersion, other.appVersion) 
+                && Objects.equals(entityId, other.entityId) 
+                && Objects.equals(messageId, other.messageId) 
+                && Objects.equals(sequenceNumber, other.sequenceNumber) 
+                && Objects.equals(serviceFullName, other.serviceFullName) 
+                && Objects.equals(serviceName, other.serviceName) 
+                && Objects.equals(serviceType, other.serviceType) 
+                && Objects.equals(serviceVersion, other.serviceVersion);
+    }
+
 }

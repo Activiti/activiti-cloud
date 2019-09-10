@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.process.model.events.BPMNMessageEvent;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.api.process.model.events.IntegrationEvent;
@@ -49,6 +50,9 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageReceivedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageSentEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageWaitingEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
@@ -102,6 +106,7 @@ public class CloudProcessModelAutoConfiguration {
                                               IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED.name()));
         module.registerSubtypes(new NamedType(CloudIntegrationResultReceivedImpl.class,
                                               IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name()));
+        
         module.registerSubtypes(new NamedType(CloudBPMNTimerFiredEventImpl.class,
                                               BPMNTimerEvent.TimerEvents.TIMER_FIRED.name()));
         module.registerSubtypes(new NamedType(CloudBPMNTimerScheduledEventImpl.class,
@@ -114,6 +119,13 @@ public class CloudProcessModelAutoConfiguration {
                                               BPMNTimerEvent.TimerEvents.TIMER_RETRIES_DECREMENTED.name()));
         module.registerSubtypes(new NamedType(CloudBPMNTimerCancelledEventImpl.class,
                                               BPMNTimerEvent.TimerEvents.TIMER_CANCELLED.name()));
+        
+        module.registerSubtypes(new NamedType(CloudBPMNMessageReceivedEventImpl.class,
+                                              BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED.name()));
+        module.registerSubtypes(new NamedType(CloudBPMNMessageSentEventImpl.class,
+                                              BPMNMessageEvent.MessageEvents.MESSAGE_SENT.name()));
+        module.registerSubtypes(new NamedType(CloudBPMNMessageWaitingEventImpl.class,
+                                              BPMNMessageEvent.MessageEvents.MESSAGE_WAITING.name()));
 
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
             //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
