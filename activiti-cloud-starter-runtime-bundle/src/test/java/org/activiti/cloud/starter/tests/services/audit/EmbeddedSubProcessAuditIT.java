@@ -366,12 +366,12 @@ public class EmbeddedSubProcessAuditIT {
                                      tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
                                      tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
                                      tuple(ACTIVITY_STARTED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                                     tuple(TASK_CREATED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
                                      tuple(ACTIVITY_STARTED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
                                      tuple(ACTIVITY_STARTED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
                                      tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
                                      tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                                     tuple(ACTIVITY_STARTED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT)
+                                     tuple(ACTIVITY_STARTED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                                     tuple(TASK_CREATED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT)
                     );
         });
     

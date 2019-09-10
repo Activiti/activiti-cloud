@@ -56,6 +56,7 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEve
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.engine.RuntimeService;
+import org.awaitility.Duration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -621,20 +622,20 @@ public class AuditProducerIT {
                                      tuple(SEQUENCE_FLOW_TAKEN,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
                                      tuple(ACTIVITY_STARTED,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
                                      tuple(PROCESS_CREATED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
-                                     tuple(PROCESS_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
                                      tuple(ACTIVITY_STARTED,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
                                      tuple(PROCESS_CREATED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
                                      tuple(PROCESS_STARTED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(ACTIVITY_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
                                      tuple(ACTIVITY_STARTED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(ACTIVITY_COMPLETED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
                                      tuple(ACTIVITY_COMPLETED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(SEQUENCE_FLOW_TAKEN,subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
                                      tuple(SEQUENCE_FLOW_TAKEN,subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(ACTIVITY_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
-                                     tuple(TASK_CREATED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
                                      tuple(ACTIVITY_STARTED,subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(TASK_CREATED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2)
+                                     tuple(TASK_CREATED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
+                                     tuple(PROCESS_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
+                                     tuple(ACTIVITY_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
+                                     tuple(ACTIVITY_COMPLETED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
+                                     tuple(SEQUENCE_FLOW_TAKEN,subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
+                                     tuple(ACTIVITY_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
+                                     tuple(TASK_CREATED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1)
                     );
         });
 

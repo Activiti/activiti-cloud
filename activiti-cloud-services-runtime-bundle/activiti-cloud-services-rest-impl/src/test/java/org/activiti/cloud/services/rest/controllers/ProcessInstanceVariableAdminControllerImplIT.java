@@ -32,7 +32,6 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
-import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.conf.impl.ProcessModelAutoConfiguration;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
@@ -42,6 +41,7 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.engine.RepositoryService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.ProcessExtensionModel;
@@ -96,6 +96,9 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     @MockBean
     private ResourcesAssembler resourcesAssembler;
 
+    @MockBean
+    private RepositoryService repositoryService;
+    
     @MockBean
     private ProcessEngineChannels processEngineChannels;
 
