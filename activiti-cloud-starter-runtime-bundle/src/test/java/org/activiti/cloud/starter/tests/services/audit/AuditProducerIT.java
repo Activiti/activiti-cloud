@@ -603,7 +603,7 @@ public class AuditProducerIT {
         String subProcessId1 = subprocessIds.get(0);
         String subProcessId2 = subprocessIds.get(1);
 
-        await().atMost(Duration.FOREVER).untilAsserted(() -> {
+        await().untilAsserted(() -> {
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
             assertThat(streamHandler.getLatestReceivedEvents())
