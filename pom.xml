@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.1.2.RELEASE</version>
+    <version>2.1.6.RELEASE</version>
     <relativePath />
   </parent>       
   <groupId>org.activiti.cloud.acc.scenarios</groupId>
@@ -47,12 +47,10 @@
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
     <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
-    <feign-form.version>3.5.0</feign-form.version>
     <serenity.version>1.9.45</serenity.version>
     <serenity-jbehave.version>1.44.0</serenity-jbehave.version>
     <awaitility.version>3.1.1</awaitility.version>
     <batik.version>1.10</batik.version>
-    <feign.version>10.2.3</feign.version>
 
     <maven-failsafe-plugin.version>3.0.0-M3</maven-failsafe-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
@@ -60,27 +58,6 @@
   </properties>
   <dependencyManagement>
     <dependencies>
-      <!--  Override feign version: related to:
-          https://github.com/OpenFeign/feign/issues/942
-          https://github.com/OpenFeign/feign/pull/930
-          sort is not working property in versions previous to 10.2.1
-          sort is mapped to `sort=timestamp&sort=desc` instead of `sort=timestamp,desc`
-          -->
-      <dependency>
-        <groupId>io.github.openfeign</groupId>
-        <artifactId>feign-core</artifactId>
-        <version>${feign.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.github.openfeign</groupId>
-        <artifactId>feign-gson</artifactId>
-        <version>${feign.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.github.openfeign</groupId>
-        <artifactId>feign-jackson</artifactId>
-        <version>${feign.version}</version>
-      </dependency>
       <dependency>
         <groupId>org.activiti.cloud.dependencies</groupId>
         <artifactId>activiti-cloud-dependencies</artifactId>
@@ -114,11 +91,6 @@
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
         <version>7.0</version>
-      </dependency>
-      <dependency>
-        <groupId>io.github.openfeign.form</groupId>
-        <artifactId>feign-form</artifactId>
-        <version>${feign-form.version}</version>
       </dependency>
       <dependency>
         <groupId>net.serenity-bdd</groupId>
