@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -38,7 +39,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
+import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
@@ -201,5 +205,36 @@ public class ProcessInstanceAdminControllerImplIT {
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/update"));
         
     }
+
+    @Test
+    public void startMessage() throws Exception {
+        StartMessagePayload cmd = MessagePayloadBuilder.start("messageName")
+                                                       .withBusinessKey("buisinessId")
+                                                       .withVariable("name", "value")
+                                                       .build();
+
+        when(processAdminRuntime.start(any(StartMessagePayload.class))).thenReturn(defaultProcessInstance());
+        
+        this.mockMvc.perform(post("/admin/v1/process-instances/message")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(cmd)))
+                    .andExpect(status().isOk())
+                    .andDo(document(DOCUMENTATION_IDENTIFIER + "/message"));
+    }
     
+    @Test
+    public void receiveMessage() throws Exception {
+        ReceiveMessagePayload cmd = MessagePayloadBuilder.receive("messageName")
+                                                         .withCorrelationKey("correlationId")               
+                                                         .withVariable("name", "value")
+                                                         .build();
+
+        this.mockMvc.perform(put("/admin/v1/process-instances/message")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(cmd)))
+                    .andExpect(status().isOk())
+                    .andDo(document(DOCUMENTATION_IDENTIFIER + "/message"));
+    }
+        
+            
 }

@@ -1,5 +1,7 @@
 package org.activiti.cloud.services.rest.api;
 
+import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
+import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -8,6 +10,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,5 +45,12 @@ public interface ProcessInstanceAdminController {
     @RequestMapping(value = "/{processInstanceId}/subprocesses", method = RequestMethod.GET)
     PagedResources<Resource<CloudProcessInstance>> subprocesses(@PathVariable("processInstanceId") String processInstanceId,
                                                          Pageable pageable);
+    
+    @RequestMapping(value = "/message", method = RequestMethod.POST) 
+    Resource<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload);
+
+    @RequestMapping(value = "/message", method = RequestMethod.PUT) 
+    ResponseEntity<Void> receive(@RequestBody ReceiveMessagePayload receiveMessagePayload);
+    
     
 }

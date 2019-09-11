@@ -1,6 +1,8 @@
 package org.activiti.cloud.services.rest.api;
 
+import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
+import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -37,6 +39,12 @@ public interface ProcessInstanceController {
     @RequestMapping(value = "/signal", method = RequestMethod.POST) 
     ResponseEntity<Void> sendSignal(@RequestBody SignalPayload signalPayload);
 
+    @RequestMapping(value = "/message", method = RequestMethod.POST) 
+    Resource<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload);
+
+    @RequestMapping(value = "/message", method = RequestMethod.PUT) 
+    ResponseEntity<Void> receive(@RequestBody ReceiveMessagePayload receiveMessagePayload);
+    
     @RequestMapping(value = "{processInstanceId}/suspend", method = RequestMethod.POST)
     Resource<CloudProcessInstance> suspend(@PathVariable String processInstanceId);
 

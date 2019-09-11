@@ -17,6 +17,8 @@ package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
+import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
@@ -29,6 +31,8 @@ import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssemb
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -107,6 +111,20 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
         return pagedResourcesAssembler.toResource(pageable,
                                                   pageConverter.toSpringPage(pageable, processInstancePage),
                                                   resourceAssembler);
+    }
+
+    @Override
+    public Resource<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload) {
+        ProcessInstance processInstance = processAdminRuntime.start(startMessagePayload);
+        
+        return resourceAssembler.toResource(processInstance);
+    }
+
+    @Override
+    public ResponseEntity<Void> receive(@RequestBody ReceiveMessagePayload receiveMessagePayload) {
+        processAdminRuntime.receive(receiveMessagePayload);
+        
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
