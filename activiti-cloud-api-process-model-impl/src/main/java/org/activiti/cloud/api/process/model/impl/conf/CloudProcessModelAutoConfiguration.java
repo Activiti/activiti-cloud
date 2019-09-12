@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
@@ -50,6 +51,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageSentEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageWaitingEventImpl;
@@ -126,6 +128,9 @@ public class CloudProcessModelAutoConfiguration {
                                               BPMNMessageEvent.MessageEvents.MESSAGE_SENT.name()));
         module.registerSubtypes(new NamedType(CloudBPMNMessageWaitingEventImpl.class,
                                               BPMNMessageEvent.MessageEvents.MESSAGE_WAITING.name()));
+        
+        module.registerSubtypes(new NamedType(CloudBPMNErrorReceivedEventImpl.class,
+                                              BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED.name()));
 
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
             //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
