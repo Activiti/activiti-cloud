@@ -52,7 +52,9 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.query.impl.PageImpl;
+import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,6 +83,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ProcessExtensionsAutoConfiguration.class,
         ServicesRestAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
@@ -99,7 +102,10 @@ public class ProcessInstanceAdminControllerImplIT {
 
     @MockBean
     private ProcessEngineChannels processEngineChannels;
-
+    
+    @MockBean
+    private RepositoryService repositoryService;
+    
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
 

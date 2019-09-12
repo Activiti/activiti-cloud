@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.rest.conf;
 
 import java.util.List;
+import java.util.Map;
 
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
@@ -28,8 +29,12 @@ import org.activiti.cloud.services.rest.assemblers.ToCloudProcessDefinitionConve
 import org.activiti.cloud.services.rest.assemblers.ToCloudProcessInstanceConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCloudTaskConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCloudVariableInstanceConverter;
+import org.activiti.cloud.services.rest.controllers.ProcessVariablesPayloadValidator;
 import org.activiti.cloud.services.rest.controllers.ResourcesAssembler;
 import org.activiti.cloud.services.rest.controllers.RuntimeBundleRelProvider;
+import org.activiti.spring.process.model.ProcessExtensionModel;
+import org.activiti.spring.process.variable.DateFormatterProvider;
+import org.activiti.spring.process.variable.VariableValidationService;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
@@ -84,6 +89,16 @@ public class ServicesRestAutoConfiguration implements WebMvcConfigurer {
     @Bean
     public TaskVariableInstanceResourceAssembler taskVariableInstanceResourceAssembler(ToCloudVariableInstanceConverter converter) {
         return new TaskVariableInstanceResourceAssembler(converter);
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessVariablesPayloadValidator processVariablesPayloadValidator(DateFormatterProvider dateFormatterProvider,
+                                                                             Map<String, ProcessExtensionModel> processExtensionModelMap,
+                                                                             VariableValidationService variableValidationService) {
+        return new ProcessVariablesPayloadValidator(dateFormatterProvider,
+                                                    processExtensionModelMap,
+                                                    variableValidationService);
     }
 
     @Override

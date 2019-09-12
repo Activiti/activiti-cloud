@@ -16,8 +16,6 @@
 
 package org.activiti.cloud.services.rest.api;
 
-import java.util.List;
-
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.springframework.hateoas.MediaTypes;
@@ -39,8 +37,8 @@ public interface ProcessInstanceVariableAdminController {
      * @return list of error messages, empty list if no error message
      */
     @PutMapping
-    ResponseEntity<List<String>> updateVariables(@PathVariable String processInstanceId,
-                                              @RequestBody SetProcessVariablesPayload setProcessVariablesPayload);
+    ResponseEntity<Void> updateVariables(@PathVariable String processInstanceId,
+                                         @RequestBody SetProcessVariablesPayload setProcessVariablesPayload);
     
     /**
      * @param processInstanceId          id of process instance

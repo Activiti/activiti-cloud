@@ -45,4 +45,11 @@ public class RuntimeBundleExceptionHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         return new Resource<>(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
+    
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Resource<ActivitiErrorMessage> handleAppException(IllegalStateException ex, HttpServletResponse response) {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        return new Resource<>(new ActivitiErrorMessageImpl(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
 }

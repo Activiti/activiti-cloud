@@ -67,6 +67,7 @@ import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.query.impl.PageImpl;
+import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,6 +93,7 @@ import org.springframework.test.web.servlet.MockMvc;
         ProcessModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ProcessExtensionsAutoConfiguration.class,
         ServicesRestAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class
 })

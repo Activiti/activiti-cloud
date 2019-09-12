@@ -100,6 +100,10 @@ public class ProcessInstanceRestTemplate {
                             businessKey);
     }
     
+    public ResponseEntity<CloudProcessInstance> startProcessWithoutCheck(StartProcessPayload startProcess) {
+        return startProcessWithoutCheck(PROCESS_INSTANCES_RELATIVE_URL,startProcess);
+    }  
+ 
     public ResponseEntity<CloudProcessInstance> startProcess(StartProcessPayload startProcess) {
         return startProcess(PROCESS_INSTANCES_RELATIVE_URL,startProcess);
     }
@@ -108,12 +112,17 @@ public class ProcessInstanceRestTemplate {
         return startProcess(PROCESS_INSTANCES_ADMIN_RELATIVE_URL,startProcess);
     }
     
-    private ResponseEntity<CloudProcessInstance> startProcess(String baseURL,StartProcessPayload startProcess) {
-        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(baseURL,
-                                                                                        HttpMethod.POST,
-                                                                                        new HttpEntity<>(startProcess),
-                                                                                        new ParameterizedTypeReference<CloudProcessInstance>() {
-                                                                                        });
+    private ResponseEntity<CloudProcessInstance> startProcessWithoutCheck(String baseURL, StartProcessPayload startProcess) {
+        return  testRestTemplate.exchange(baseURL,
+                                          HttpMethod.POST,
+                                          new HttpEntity<>(startProcess),
+                                          new ParameterizedTypeReference<CloudProcessInstance>() {
+                                          });
+    }
+    
+    private ResponseEntity<CloudProcessInstance> startProcess(String baseURL, StartProcessPayload startProcess) {
+        ResponseEntity<CloudProcessInstance> responseEntity = startProcessWithoutCheck(baseURL, startProcess);
+        
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().getId()).isNotNull();
@@ -128,7 +137,25 @@ public class ProcessInstanceRestTemplate {
                             variables,
                             businessKey);
     }
+    
+    public ResponseEntity<ActivitiErrorMessageImpl> startProcessWithErrorResponse(String baseURL, 
+                                                                                  StartProcessPayload startProcess) {
+        return  testRestTemplate.exchange(baseURL,
+                                          HttpMethod.POST,
+                                          new HttpEntity<>(startProcess),
+                                          new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {
+                                          });
+        
+    }
+    
+    public ResponseEntity<ActivitiErrorMessageImpl> startProcessWithErrorResponse(StartProcessPayload startProcess) {
+        return  startProcessWithErrorResponse(PROCESS_INSTANCES_RELATIVE_URL, startProcess);  
+    }
 
+    public ResponseEntity<ActivitiErrorMessageImpl> adminStartProcessWithErrorResponse(StartProcessPayload startProcess) {
+        return  startProcessWithErrorResponse(PROCESS_INSTANCES_ADMIN_RELATIVE_URL, startProcess);  
+    }
+    
     public ResponseEntity<PagedResources<CloudTask>> getTasks(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         return getTasks(processInstanceEntity.getBody().getId());
@@ -264,8 +291,8 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<Void> setVariables(String processInstanceId,
-                                             Map<String, Object> variables) {
+    public ResponseEntity<Void> setVariablesDoNotCheckStatus(String processInstanceId,
+                                                             Map<String, Object> variables) {
         SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder.setVariables()
                 .withVariables(variables).build();
 
@@ -277,12 +304,20 @@ public class ProcessInstanceRestTemplate {
                                                                         requestEntity,
                                                                         new ParameterizedTypeReference<Void>() {
                                                                         });
+        return responseEntity;
+    }
+    
+    public ResponseEntity<Void> setVariables(String processInstanceId,
+                                             Map<String, Object> variables) {
+       
+        ResponseEntity<Void> responseEntity = setVariablesDoNotCheckStatus(processInstanceId,
+                                                                           variables);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<Void> adminSetVariables(String processInstanceId,
-                                                  Map<String, Object> variables) {
+    public ResponseEntity<Void> adminSetVariablesDoNotCheckStatus(String processInstanceId,
+                                                                  Map<String, Object> variables) {
         SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder.setVariables()
                 .withVariables(variables).build();
 
@@ -295,6 +330,13 @@ public class ProcessInstanceRestTemplate {
                 requestEntity,
                 new ParameterizedTypeReference<Void>() {
                 });
+       return responseEntity;
+    }
+    
+    public ResponseEntity<Void> adminSetVariables(String processInstanceId,
+                                                  Map<String, Object> variables) {
+        ResponseEntity<Void> responseEntity = adminSetVariablesDoNotCheckStatus(processInstanceId,
+                                                                                variables);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         return responseEntity;
