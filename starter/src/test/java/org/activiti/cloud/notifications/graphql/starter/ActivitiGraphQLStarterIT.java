@@ -34,8 +34,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.ExecutionResult;
 import graphql.GraphQLError;
+import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
+import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerCancelledEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerExecutedEvent;
@@ -46,6 +48,9 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageReceivedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageSentEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageWaitingEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerExecutedEventImpl;
@@ -798,7 +803,158 @@ public class ActivitiGraphQLStarterIT {
                     .expectNext(dataMessage)
                     .expectComplete()
                     .verify(TIMEOUT);
+    }
+    
+    @Test
+    public void testGraphqlSubscriptionCloudBPMNMessageEvents() throws JsonProcessingException {
+        ReplayProcessor<String> data = ReplayProcessor.create();
+        
+        keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
+        final String auth = keycloakTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        
+        Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app")
+                                                                    .put("eventTypes", Arrays.array("MESSAGE_SENT", 
+                                                                                                    "MESSAGE_WAITING",
+                                                                                                    "MESSAGE_RECEIVED"))
+                                                                    .get();
+         
+        Map<String, Object> payload = new StringObjectMapBuilder().put("query", "subscription($appName: String!, $eventTypes: [EngineEventType!]) { "
+                                                                                + "  engineEvents(appName: [$appName], eventType: $eventTypes) { "
+                                                                                + "    processInstanceId "
+                                                                                + "    processDefinitionId "
+                                                                                + "    entity "
+                                                                                + "    eventType "
+                                                                                + "  } "
+                                                                                + "}")
+                                                                  .put("variables", variables)
+                                                                  .get();        
+        GraphQLMessage start = GraphQLMessage.builder()
+                                             .type(GraphQLMessageType.START)
+                                             .id("1")
+                                             .payload(payload)
+                                             .build();
+        
+        String startMessage = objectMapper.writeValueAsString(start);
+        
+        // given 
+        CloudBPMNMessageEvent event1 = new CloudBPMNMessageSentEventImpl("id",
+                                                                         new Date().getTime(),
+                                                                         new BPMNMessageImpl("messageId"),
+                                                                         "processDefinitionId",
+                                                                         "processInstanceId") {
+            {
+                setAppName("default-app");
+                setServiceName("rb-my-app");
+                setServiceFullName("serviceFullName");
+                setServiceType("runtime-bundle");
+                setServiceVersion("");
+                setProcessDefinitionId("processDefinitionId");
+                setProcessDefinitionKey("processDefinitionKey");
+                setProcessDefinitionVersion(1);
+                setBusinessKey("businessKey");
+            }
+        };
+        
+        // given 
+        CloudBPMNMessageEvent event2 = new CloudBPMNMessageWaitingEventImpl("id",
+                                                                            new Date().getTime(),
+                                                                            new BPMNMessageImpl("messageId"),
+                                                                            "processDefinitionId",
+                                                                            "processInstanceId") {
+            {
+                setAppName("default-app");
+                setServiceName("rb-my-app");
+                setServiceFullName("serviceFullName");
+                setServiceType("runtime-bundle");
+                setServiceVersion("");
+                setProcessDefinitionId("processDefinitionId");
+                setProcessDefinitionKey("processDefinitionKey");
+                setProcessDefinitionVersion(1);
+                setBusinessKey("businessKey");
+            }
+        };
+
+        // given 
+        CloudBPMNMessageEvent event3 = new CloudBPMNMessageReceivedEventImpl("id",
+                                                                            new Date().getTime(),
+                                                                            new BPMNMessageImpl("messageId"),
+                                                                            "processDefinitionId",
+                                                                            "processInstanceId") {
+            {
+                setAppName("default-app");
+                setServiceName("rb-my-app");
+                setServiceFullName("serviceFullName");
+                setServiceType("runtime-bundle");
+                setServiceVersion("");
+                setProcessDefinitionId("processDefinitionId");
+                setProcessDefinitionKey("processDefinitionKey");
+                setProcessDefinitionVersion(1);
+                setBusinessKey("businessKey");
+            }
+        };
+
+        WebsocketSender client = HttpClient.create()
+                                           .baseUrl("ws://localhost:" + port)
+                                           .wiretap(true)
+                                           .headers(h -> h.add(AUTHORIZATION, auth))
+                                           .websocket(GRAPHQL_WS)
+                                           .uri(WS_GRAPHQL_URI);
+        
+        // start subscription
+        client.handle((i, o) -> {
+              o.options(NettyPipeline.SendOptions::flushOnEach)
+               .sendString(Mono.just(startMessage))
+               .then()
+               .log("start")
+               .subscribe();
+             
+            return i.receive()
+                    .asString()
+                    .log("data")
+                    .take(1)
+                    .doOnSubscribe(s -> producerChannel.output()
+                                                       .send(MessageBuilder.withPayload(Arrays.array(event1,event2,event3))
+                                                                           .setHeader("routingKey", "eventProducer")
+                                                                           .build()))
+                    .delaySubscription(Duration.ofSeconds(1))
+                    .subscribeWith(data);
+        }) // stop subscription
+        .collectList()
+        .subscribe();
+        
+        // then        
+        Map<String, Object> message = Maps.of("data",
+                                              Maps.of("engineEvents",
+                                                      Arrays.array(mapBuilder().put("processInstanceId", "processInstanceId")
+                                                                               .put("processDefinitionId", "processDefinitionId")
+                                                                               .put("entity", new BPMNTimerImpl("messageId"))
+                                                                               .put("eventType", "MESSAGE_SENT")
+                                                                               .get(),
+                                                                   mapBuilder().put("processInstanceId", "processInstanceId")
+                                                                               .put("processDefinitionId", "processDefinitionId")
+                                                                               .put("entity", new BPMNTimerImpl("messageId"))
+                                                                               .put("eventType", "MESSAGE_WAITING")
+                                                                               .get(),
+                                                                   mapBuilder().put("processInstanceId", "processInstanceId")
+                                                                               .put("processDefinitionId", "processDefinitionId")
+                                                                               .put("entity", new BPMNTimerImpl("messageId"))
+                                                                               .put("eventType", "MESSAGE_RECEIVED")
+                                                                               .get()
+                                                      )
+                                              )
+                                      );
+        
+        String dataMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
+                                                                           .type(GraphQLMessageType.DATA)
+                                                                           .id("1")
+                                                                           .payload(message)
+                                                                           .build());
+        StepVerifier.create(data)
+                    .expectNext(dataMessage)
+                    .expectComplete()
+                    .verify(TIMEOUT);
     }      
+    
     
     
     @Test
