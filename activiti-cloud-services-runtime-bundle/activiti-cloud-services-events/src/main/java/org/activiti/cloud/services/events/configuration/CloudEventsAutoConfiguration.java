@@ -24,6 +24,9 @@ import org.activiti.cloud.services.events.converter.ToCloudVariableEventConverte
 import org.activiti.cloud.services.events.listeners.CloudActivityCancelledProducer;
 import org.activiti.cloud.services.events.listeners.CloudActivityCompletedProducer;
 import org.activiti.cloud.services.events.listeners.CloudActivityStartedProducer;
+import org.activiti.cloud.services.events.listeners.CloudMessageReceivedProducer;
+import org.activiti.cloud.services.events.listeners.CloudMessageSentProducer;
+import org.activiti.cloud.services.events.listeners.CloudMessageWaitingProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCancelledProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCompletedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCreatedProducer;
@@ -255,6 +258,7 @@ public class CloudEventsAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public CloudProcessUpdatedProducer cloudProcessUpdatedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
                                                                    ProcessEngineEventsAggregator eventsAggregator) {
         return new CloudProcessUpdatedProducer(eventConverter,
@@ -379,6 +383,7 @@ public class CloudEventsAutoConfiguration {
                                                   eventsAggregator);
     }
 
+    @ConditionalOnMissingBean
     @Bean
     public CloudProcessDeployedProducer cloudProcessDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                                      ProcessEngineChannels processEngineChannels,
@@ -389,8 +394,33 @@ public class CloudEventsAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory(RuntimeBundleProperties properties) {
         return new RuntimeBundleMessageBuilderFactory(properties);
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public CloudMessageSentProducer cloudMessageSentProducer(ToCloudProcessRuntimeEventConverter converter,
+                                                             ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudMessageSentProducer(converter,
+                                            eventsAggregator);
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public CloudMessageWaitingProducer cloudMessageWaitingProducer(ToCloudProcessRuntimeEventConverter converter,
+                                                                   ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudMessageWaitingProducer(converter,
+                                               eventsAggregator);
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public CloudMessageReceivedProducer cloudMessageReceivedProducer(ToCloudProcessRuntimeEventConverter converter,
+                                                                     ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudMessageReceivedProducer(converter,
+                                                eventsAggregator);
     }
 
 }

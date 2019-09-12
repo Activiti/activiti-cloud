@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.starter.tests.helper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +46,6 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @TestComponent
 public class ProcessInstanceRestTemplate {
@@ -433,7 +433,7 @@ public class ProcessInstanceRestTemplate {
         return getPagedProcessInstances(PROCESS_INSTANCES_ADMIN_RELATIVE_URL,pages);
     }
     
-    private ResponseEntity<PagedResources<ProcessInstance>> getPagedProcessInstances(String baseURL,String pageFilters) {
+    public ResponseEntity<PagedResources<ProcessInstance>> getPagedProcessInstances(String baseURL,String pageFilters) {
         String pages = pageFilters != null ? pageFilters : "page=0&size=2";
         ResponseEntity<PagedResources<ProcessInstance>> responseEntity = testRestTemplate.exchange(
                                                                                         baseURL + "?" + pages,

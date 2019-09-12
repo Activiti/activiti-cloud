@@ -19,6 +19,9 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.api.process.model.events.BPMNActivityCancelledEvent;
 import org.activiti.api.process.model.events.BPMNActivityCompletedEvent;
 import org.activiti.api.process.model.events.BPMNActivityStartedEvent;
+import org.activiti.api.process.model.events.BPMNMessageReceivedEvent;
+import org.activiti.api.process.model.events.BPMNMessageSentEvent;
+import org.activiti.api.process.model.events.BPMNMessageWaitingEvent;
 import org.activiti.api.process.model.events.BPMNSequenceFlowTakenEvent;
 import org.activiti.api.process.model.events.BPMNSignalReceivedEvent;
 import org.activiti.api.process.model.events.BPMNTimerCancelledEvent;
@@ -45,6 +48,9 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNTimerFiredEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerRetriesDecrementedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNMessageReceivedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNMessageSentEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNMessageWaitingEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
@@ -64,6 +70,9 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageReceivedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageSentEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageWaitingEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
@@ -215,6 +224,30 @@ public class ToCloudProcessRuntimeEventConverter {
         CloudBPMNTimerRetriesDecrementedEventImpl cloudEvent = new CloudBPMNTimerRetriesDecrementedEventImpl(event.getEntity(),
                                                                                          event.getEntity().getProcessDefinitionId(),
                                                                                          event.getEntity().getProcessInstanceId());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+    
+    public CloudBPMNMessageSentEvent from(BPMNMessageSentEvent event) {
+        CloudBPMNMessageSentEventImpl cloudEvent = new CloudBPMNMessageSentEventImpl(event.getEntity(),
+                                                                                     event.getEntity().getProcessDefinitionId(),
+                                                                                     event.getEntity().getProcessInstanceId());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+    
+    public CloudBPMNMessageReceivedEvent from(BPMNMessageReceivedEvent event) {
+        CloudBPMNMessageReceivedEventImpl cloudEvent = new CloudBPMNMessageReceivedEventImpl(event.getEntity(),
+                                                                                             event.getEntity().getProcessDefinitionId(),
+                                                                                             event.getEntity().getProcessInstanceId());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+    
+    public CloudBPMNMessageWaitingEvent from(BPMNMessageWaitingEvent event) {
+        CloudBPMNMessageWaitingEventImpl cloudEvent = new CloudBPMNMessageWaitingEventImpl(event.getEntity(),
+                                                                                           event.getEntity().getProcessDefinitionId(),
+                                                                                           event.getEntity().getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
