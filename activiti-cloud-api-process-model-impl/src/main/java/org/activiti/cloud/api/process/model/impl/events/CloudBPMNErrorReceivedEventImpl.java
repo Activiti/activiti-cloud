@@ -38,6 +38,22 @@ public class CloudBPMNErrorReceivedEventImpl  extends CloudRuntimeEventImpl<BPMN
         }
     }
     
+    public CloudBPMNErrorReceivedEventImpl(String id,
+                                           Long timestamp,
+                                           BPMNError entity,
+                                           String processDefinitionId,
+                                           String processInstanceId) {
+        super(id,
+              timestamp,
+              entity);
+        setProcessDefinitionId(processDefinitionId);
+        setProcessInstanceId(processInstanceId);
+        
+        if (entity!=null) {
+            setEntityId(entity.getElementId());
+        }
+    }
+    
     @Override
     public BPMNErrorReceivedEvent.ErrorEvents getEventType() {
         return BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED;
