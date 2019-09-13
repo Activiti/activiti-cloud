@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.organization.api;
 
+import java.util.Objects;
+
 /**
  * Model validation error
  */
@@ -58,20 +60,30 @@ public class ModelValidationError {
         isWarning = warning;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ModelValidationError)) {
+            return false;
+        }
 
-  @Override
-  public boolean equals(Object obj) {
-    boolean isEqual = false;
-    if(obj instanceof ModelValidationError) {
-      ModelValidationError comparisonObj = (ModelValidationError)obj;
-      isEqual = this.getProblem().equalsIgnoreCase(comparisonObj.getProblem()) &&
-                this.getDescription().equalsIgnoreCase(comparisonObj.getDescription());
+        ModelValidationError error = (ModelValidationError) obj;
+        return Objects.equals(problem,
+                              error.problem) &&
+                Objects.equals(description,
+                               error.description);
     }
-    return isEqual;
-  }
 
-  @Override
-  public int hashCode() {
-    return this.getProblem().hashCode();
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hash(problem,
+                            description);
+    }
+
+    @Override
+    public String toString() {
+        return description;
+    }
 }

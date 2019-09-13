@@ -37,7 +37,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_T
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.organization.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
-import static org.activiti.cloud.organization.validation.ValidationUtil.DNS_LABEL_REGEX;
+import static org.activiti.cloud.organization.api.ModelValidationErrorProducer.DNS_LABEL_REGEX;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

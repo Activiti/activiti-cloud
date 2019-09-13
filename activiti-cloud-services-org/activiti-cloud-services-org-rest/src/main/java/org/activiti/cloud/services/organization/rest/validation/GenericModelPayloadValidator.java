@@ -17,21 +17,17 @@
 package org.activiti.cloud.services.organization.rest.validation;
 
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelValidationErrorProducer;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import static org.activiti.cloud.organization.validation.ValidationUtil.DNS_LABEL_REGEX;
-import static org.activiti.cloud.organization.validation.ValidationUtil.MODEL_INVALID_NAME_EMPTY_MESSAGE;
-import static org.activiti.cloud.organization.validation.ValidationUtil.MODEL_INVALID_NAME_LENGTH_MESSAGE;
-import static org.activiti.cloud.organization.validation.ValidationUtil.MODEL_INVALID_NAME_MESSAGE;
-import static org.activiti.cloud.organization.validation.ValidationUtil.MODEL_INVALID_NAME_NULL_MESSAGE;
-import static org.activiti.cloud.organization.validation.ValidationUtil.NAME_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * Abstract model payload validator. It contains the basic validation functionality.
  */
-public class GenericModelPayloadValidator implements Validator {
+public class GenericModelPayloadValidator implements Validator,
+                                                     ModelValidationErrorProducer {
 
     private boolean checkRequiredFields;
 

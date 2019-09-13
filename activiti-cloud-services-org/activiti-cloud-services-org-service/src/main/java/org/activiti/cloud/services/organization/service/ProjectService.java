@@ -18,15 +18,17 @@ package org.activiti.cloud.services.organization.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.transaction.Transactional;
 
-import org.activiti.cloud.organization.api.*;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.api.ModelValidationError;
+import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.organization.core.error.ImportProjectException;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
@@ -34,6 +36,7 @@ import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.zip.ZipBuilder;
 import org.activiti.cloud.services.common.zip.ZipStream;
+import org.activiti.cloud.services.organization.validation.ProjectConsistencyValidator;
 import org.activiti.cloud.services.organization.validation.ProjectValidationContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -63,18 +66,19 @@ public class ProjectService {
 
     private final JsonConverter<Project> jsonConverter;
 
-    private final String EMPTY_PROJECT_PROBLEM = "Invalid project";
-    private final String EMPTY_PROJECT_DESCRIPTION = "Project must contain at least one process";
+    private final ProjectConsistencyValidator projectConsistencyValidator;
 
     @Autowired
     public ProjectService(ProjectRepository projectRepository,
                           ModelService modelService,
                           ModelTypeService modelTypeService,
-                          JsonConverter<Project> jsonConverter) {
+                          JsonConverter<Project> jsonConverter,
+                          ProjectConsistencyValidator projectConsistencyValidator) {
         this.projectRepository = projectRepository;
         this.modelService = modelService;
         this.modelTypeService = modelTypeService;
         this.jsonConverter = jsonConverter;
+        this.projectConsistencyValidator = projectConsistencyValidator;
     }
 
     /**
@@ -216,32 +220,20 @@ public class ProjectService {
 
     public void validateProject(Project project) {
         List<Model> availableModels = modelService.getAllModels(project);
+        ValidationContext validationContext = new ProjectValidationContext(availableModels);
 
-        List<ModelValidationError> validationErrors = isProjectEmpty(availableModels) ?
-            Collections.singletonList(getEmptyProjectError()) :
-            availableModels
-                .stream()
-                .flatMap(model -> getModelValidationErrors(model,
-                                                           new ProjectValidationContext(availableModels)))
+        List<ModelValidationError> validationErrors = Stream.concat(
+                projectConsistencyValidator.validate(validationContext),
+                availableModels
+                        .stream()
+                        .flatMap(model -> getModelValidationErrors(model,
+                                                                   validationContext)))
                 .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
             throw new SemanticModelValidationException("Validation errors found in project's models",
                                                        validationErrors);
         }
-    }
-
-    private boolean isProjectEmpty(List<Model> availableModels) {
-        return availableModels.stream()
-            .noneMatch(model -> model.getType().equals(ProcessModelType.PROCESS));
-    }
-
-    private ModelValidationError getEmptyProjectError() {
-        ModelValidationError error = new ModelValidationError();
-        error.setWarning(false);
-        error.setProblem(EMPTY_PROJECT_PROBLEM);
-        error.setDescription(EMPTY_PROJECT_DESCRIPTION);
-        return error;
     }
 
     private Stream<ModelValidationError> getModelValidationErrors(Model model,

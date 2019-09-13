@@ -16,9 +16,12 @@
 
 package org.activiti.cloud.services.organization.validation;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ValidationContext;
 
 /**
@@ -32,8 +35,15 @@ public class ProjectValidationContext implements ValidationContext {
         this.availableModels = availableModels;
     }
 
+    public ProjectValidationContext(Model... availableModels) {
+        this.availableModels = Arrays.asList(availableModels);
+    }
+
     @Override
-    public List<Model> getAvailableModels() {
-        return availableModels;
+    public List<Model> getAvailableModels(ModelType modelType) {
+        return availableModels
+                .stream()
+                .filter(model -> modelType.getName().equals(model.getType()))
+                .collect(Collectors.toList());
     }
 }

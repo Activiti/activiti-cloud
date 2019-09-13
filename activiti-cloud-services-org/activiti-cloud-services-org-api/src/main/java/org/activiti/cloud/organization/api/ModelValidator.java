@@ -19,7 +19,7 @@ package org.activiti.cloud.organization.api;
 /**
  * Business logic related with validation of a model content
  */
-public interface ModelValidator {
+public interface ModelValidator extends ModelValidationErrorProducer {
 
     /**
      * Validate the given model content.

@@ -18,14 +18,10 @@ package org.activiti.cloud.organization.api;
 
 import java.util.List;
 
-import static java.util.Collections.emptyList;
-
 /**
  * Generic context for validations
  */
 public interface ValidationContext {
 
-    ValidationContext EMPTY_CONTEXT = () -> emptyList();
-
-    List<Model> getAvailableModels();
+    List<Model> getAvailableModels(ModelType modelType);
 }

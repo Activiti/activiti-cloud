@@ -598,9 +598,9 @@ public class ModelValidationControllerIT {
                 .isSemanticValidationException()
                 .hasValidationErrorMessages(
                         "The extensions for process 'process-" + processModel.getId() +
-                                "' contains mappings for an unknown inputs connector parameter name 'unknown-input-parameter'",
+                                "' contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'unknown-input-parameter'",
                         "The extensions for process 'process-" + processModel.getId() +
-                                "' contains mappings for an unknown outputs connector parameter name 'unknown-output-parameter'"
+                                "' contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'unknown-output-parameter'"
                 );
     }
 
@@ -691,8 +691,8 @@ public class ModelValidationControllerIT {
                 .isSemanticValidationException()
                 .hasValidationErrorMessages(
                         "The extensions for process 'process-" + processModel.getId() +
-                                "' contains mappings for an unknown inputs connector parameter name 'movieName'",
+                                "' contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'movieName'",
                         "The extensions for process 'process-" + processModel.getId() +
-                                "' contains mappings for an unknown outputs connector parameter name 'movieDescription'");
+                                "' contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'movieDescription'");
     }
 }

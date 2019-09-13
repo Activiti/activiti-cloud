@@ -29,16 +29,12 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.activiti.cloud.organization.api.ModelValidationErrorProducer;
 import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.services.organization.jpa.audit.AuditableEntity;
 import org.hibernate.annotations.GenericGenerator;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-import static org.activiti.cloud.organization.validation.ValidationUtil.DNS_LABEL_REGEX;
-import static org.activiti.cloud.organization.validation.ValidationUtil.NAME_MAX_LENGTH;
-import static org.activiti.cloud.organization.validation.ValidationUtil.PROJECT_INVALID_EMPTY_NAME;
-import static org.activiti.cloud.organization.validation.ValidationUtil.PROJECT_INVALID_NAME_LENGTH_MESSAGE;
-import static org.activiti.cloud.organization.validation.ValidationUtil.PROJECT_INVALID_NAME_MESSAGE;
 
 /**
  * Project model entity
@@ -46,7 +42,8 @@ import static org.activiti.cloud.organization.validation.ValidationUtil.PROJECT_
 @Entity(name = "Project")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ProjectEntity extends AuditableEntity<String> implements Project<String> {
+public class ProjectEntity extends AuditableEntity<String> implements Project<String>,
+                                                                      ModelValidationErrorProducer {
 
     @OneToMany
     @JsonIgnore
@@ -58,6 +55,7 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     private String id;
 
     @Column(unique = true)
+    //TODO: the validation logic should be moved in a dedicated bean for clear layers separation
     @Pattern(regexp = DNS_LABEL_REGEX, message = PROJECT_INVALID_NAME_MESSAGE)
     @Size(max = NAME_MAX_LENGTH, message = PROJECT_INVALID_NAME_LENGTH_MESSAGE)
     @NotEmpty(message = PROJECT_INVALID_EMPTY_NAME)

@@ -89,22 +89,4 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
                                           validationException.getMessage(),
                                           schema);
     }
-
-    protected ModelValidationError createModelValidationError(String problem,
-                                                              String description) {
-        return createModelValidationError(problem,
-                                          description,
-                                          null);
-    }
-
-    protected ModelValidationError createModelValidationError(String problem,
-                                                              String description,
-                                                              String schema) {
-        ModelValidationError modelValidationError = new ModelValidationError();
-        modelValidationError.setWarning(false);
-        modelValidationError.setProblem(problem);
-        modelValidationError.setDescription(description);
-        modelValidationError.setValidatorSetName(schema);
-        return modelValidationError;
-    }
 }
