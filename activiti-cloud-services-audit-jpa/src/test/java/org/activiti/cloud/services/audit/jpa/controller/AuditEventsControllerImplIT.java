@@ -16,15 +16,33 @@
 
 package org.activiti.cloud.services.audit.jpa.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.activiti.api.process.model.BPMNMessage;
+import org.activiti.api.process.model.builders.MessagePayloadBuilder;
+import org.activiti.api.process.model.events.BPMNMessageEvent;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.TimerPayload;
+import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -34,6 +52,10 @@ import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.events.ActivityStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageReceivedAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageSentAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageWaitingAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.SignalReceivedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TimerFiredAuditEventEntity;
@@ -55,22 +77,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(AuditEventsControllerImpl.class)
@@ -82,7 +91,7 @@ public class AuditEventsControllerImplIT {
     private static final String DOCUMENTATION_IDENTIFIER = "events";
     private static final String DOCUMENTATION_ALFRESCO_IDENTIFIER = "events-alfresco";
 
-    @MockBean
+    @MockBean 
     private EventsRepository eventsRepository;
 
     @Autowired
@@ -387,6 +396,48 @@ public class AuditEventsControllerImplIT {
                 .andExpect(status().isOk());
     }
     
+    @Test
+    public void shouldGetMessageSentEventById() throws Exception {
+        MessageAuditEventEntity eventEntity = messageAuditEventEntity(MessageSentAuditEventEntity.class,
+                                                                      BPMNMessageEvent.MessageEvents.MESSAGE_SENT);
+        
+        given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
+
+        mockMvc.perform(get("{version}/events/{id}",
+                            "/v1",
+                            eventEntity.getId()))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }    
+
+    @Test
+    public void shouldGetMessageWaitingEventById() throws Exception {
+        MessageAuditEventEntity eventEntity = messageAuditEventEntity(MessageWaitingAuditEventEntity.class,
+                                                                      BPMNMessageEvent.MessageEvents.MESSAGE_WAITING);
+        
+        given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
+
+        mockMvc.perform(get("{version}/events/{id}",
+                            "/v1",
+                            eventEntity.getId()))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }    
+    
+    @Test
+    public void shouldGetMessageReceivedEventById() throws Exception {
+        MessageAuditEventEntity eventEntity = messageAuditEventEntity(MessageReceivedAuditEventEntity.class,
+                                                                      BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED);
+        
+        given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
+
+        mockMvc.perform(get("{version}/events/{id}",
+                            "/v1",
+                            eventEntity.getId()))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }       
+    
     private TimerPayload createTimerPayload() {
         TimerPayload timerPayload = new TimerPayload();
         timerPayload.setRetries(5);
@@ -395,5 +446,48 @@ public class AuditEventsControllerImplIT {
         timerPayload.setExceptionMessage("Any message");
         
         return timerPayload;     
+    }
+    
+    private MessageAuditEventEntity messageAuditEventEntity(Class<? extends MessageAuditEventEntity> clazz,
+                                                            BPMNMessageEvent.MessageEvents eventType) throws Exception {
+        
+        MessageAuditEventEntity eventEntity = clazz.newInstance();
+        
+        eventEntity.setEventId("eventId");
+        eventEntity.setTimestamp(System.currentTimeMillis());
+        eventEntity.setEventType(eventType.name());
+
+        eventEntity.setId(1L);
+        eventEntity.setEntityId("entityId");
+        eventEntity.setProcessInstanceId("processInstanceId");
+        eventEntity.setProcessDefinitionId("processDefinitionId");
+        eventEntity.setProcessDefinitionKey("processDefinitionKey");
+        eventEntity.setBusinessKey("businessKey");
+        eventEntity.setMessageId("message-id");
+        eventEntity.setSequenceNumber(0);
+        eventEntity.setMessage(createBPMNMessage());
+        
+        return eventEntity;
+    }
+    
+    
+    private BPMNMessage createBPMNMessage() {
+        BPMNMessageImpl message = new BPMNMessageImpl("elementId");
+        message.setProcessDefinitionId("processDefinitionId");
+        message.setProcessInstanceId("processInstanceId"); 
+        message.setMessagePayload(createMessagePayload());        
+        
+        return message;
+    }
+    
+    
+    private MessageEventPayload createMessagePayload() {
+        MessageEventPayload messageEventPayload = MessagePayloadBuilder.event("messageName")
+                                                                       .withBusinessKey("businessId")
+                                                                       .withCorrelationKey("correlationId")
+                                                                       .withVariable("name", "value")
+                                                                       .build();
+
+        return messageEventPayload;
     }
 }

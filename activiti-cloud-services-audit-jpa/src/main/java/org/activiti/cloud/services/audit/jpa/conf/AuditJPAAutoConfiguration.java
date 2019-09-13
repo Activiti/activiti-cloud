@@ -16,15 +16,15 @@
 
 package org.activiti.cloud.services.audit.jpa.conf;
 
-import java.util.Set;
-
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCompletedEventConverter;
-import org.activiti.cloud.services.audit.jpa.converters.SignalReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityStartedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender;
+import org.activiti.cloud.services.audit.jpa.converters.MessageReceivedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.MessageSentEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.MessageWaitingEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCreatedEventConverter;
@@ -34,6 +34,7 @@ import org.activiti.cloud.services.audit.jpa.converters.ProcessStartedEventConve
 import org.activiti.cloud.services.audit.jpa.converters.ProcessSuspendedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessUpdatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.SequenceFlowTakenEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.SignalReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TaskAssignedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TaskCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TaskCandidateGroupAddedEventConverter;
@@ -45,8 +46,8 @@ import org.activiti.cloud.services.audit.jpa.converters.TaskCreatedEventConverte
 import org.activiti.cloud.services.audit.jpa.converters.TaskSuspendedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TaskUpdatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TimerCancelledEventConverter;
-import org.activiti.cloud.services.audit.jpa.converters.TimerFailedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TimerExecutedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.TimerFailedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TimerFiredEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TimerRetriesDecrementedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.TimerScheduledEventConverter;
@@ -56,6 +57,8 @@ import org.activiti.cloud.services.audit.jpa.converters.VariableUpdatedEventConv
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Set;
 
 @Configuration
 public class AuditJPAAutoConfiguration {
@@ -259,8 +262,27 @@ public class AuditJPAAutoConfiguration {
     }   
     
     @ConditionalOnMissingBean
-    @Bean
+    @Bean 
     public TimerRetriesDecrementedEventConverter timerRetriesDecrementedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         return new TimerRetriesDecrementedEventConverter(eventContextInfoAppender);
     }   
+    
+    @ConditionalOnMissingBean
+    @Bean
+    public MessageReceivedEventConverter messageReceivedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new MessageReceivedEventConverter(eventContextInfoAppender);
+    }
+    
+    @ConditionalOnMissingBean
+    @Bean
+    public MessageWaitingEventConverter messageWaitingEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new MessageWaitingEventConverter(eventContextInfoAppender);
+    }      
+    
+    @ConditionalOnMissingBean
+    @Bean
+    public MessageSentEventConverter messageSentEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new MessageSentEventConverter(eventContextInfoAppender);
+    }        
+    
 } 
