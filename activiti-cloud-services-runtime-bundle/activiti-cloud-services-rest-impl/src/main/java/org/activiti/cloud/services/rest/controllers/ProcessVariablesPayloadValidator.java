@@ -71,7 +71,7 @@ public class ProcessVariablesPayloadValidator  {
                 boolean found = false;
                 for (Map.Entry<String, VariableDefinition> variableDefinitionEntry : variableDefinitionMap.get().entrySet()) {
                     
-                    if (variableDefinitionEntry.getKey().equals(name)) {
+                    if (variableDefinitionEntry.getValue().getName().equals(name)) {
                         String type = variableDefinitionEntry.getValue().getType();
                         found = true;
                         
