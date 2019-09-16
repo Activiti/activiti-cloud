@@ -16,7 +16,10 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -31,6 +34,7 @@ import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTo
 import org.activiti.cloud.starter.tests.definition.ProcessDefinitionIT;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.cloud.starter.tests.util.VariablesUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,8 +50,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -66,6 +68,9 @@ public class TaskVariablesIT {
     
     @Autowired
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
+    
+    @Autowired
+    private  VariablesUtil variablesUtil;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
@@ -195,19 +200,93 @@ public class TaskVariablesIT {
         assertThat(variablesContainEntry("var1","test1",variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var3","test3-update",variablesResponse.getBody().getContent())).isTrue();
     }
+    
+    @Test
+    public void should_Change_Date_When_CreateUpdateTaskVariables() throws Exception{
+        //given
+        Date date = new Date();
+  
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                                      null);
+        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
+        String taskId = tasks.getBody().getContent().iterator().next().getId();
+      
+        taskRestTemplate.claim(taskId);
+        
+        taskRestTemplate.createVariable(taskId, "variableDateTime", variablesUtil.getDateTimeFormattedString(date));
+        taskRestTemplate.createVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
+
+        //when
+        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(taskId);
+
+        //then
+        assertThat(variablesResponse).isNotNull();
+        assertThat(variablesContainEntry("variableDateTime",variablesUtil.getExpectedDateTimeFormattedString(date),variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("variableDate",variablesUtil.getExpectedDateFormattedString(date),variablesResponse.getBody().getContent())).isTrue();
+
+        // when
+        date = new Date(date.getTime() + 3600000);
+        taskRestTemplate.updateVariable(taskId, "variableDateTime", variablesUtil.getDateTimeFormattedString(date));
+        taskRestTemplate.updateVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
+
+        // when
+        variablesResponse = taskRestTemplate.getVariables(taskId);
+        
+        processInstanceRestTemplate.delete(startResponse); 
+    }
+    
+    @Test
+    public void admin_Should_Change_Date_When_CreateUpdateTaskVariables() throws Exception{
+        //given
+        Date date = new Date();
+  
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+                                                                                                      null);
+        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
+
+        String taskId = tasks.getBody().getContent().iterator().next().getId();
+        
+        keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
+        
+        taskRestTemplate.adminCreateVariable(taskId, "variableDateTime", variablesUtil.getDateTimeFormattedString(date));
+        taskRestTemplate.adminCreateVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
+
+        //when
+        ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.adminGetVariables(taskId);
+
+        //then
+        assertThat(variablesResponse).isNotNull();
+        assertThat(variablesContainEntry("variableDateTime",variablesUtil.getExpectedDateTimeFormattedString(date),variablesResponse.getBody().getContent())).isTrue();
+        assertThat(variablesContainEntry("variableDate",variablesUtil.getExpectedDateFormattedString(date),variablesResponse.getBody().getContent())).isTrue();
+
+        // when
+        date = new Date(date.getTime() + 3600000);
+        taskRestTemplate.adminUpdateVariable(taskId, "variableDateTime", variablesUtil.getDateTimeFormattedString(date));
+        taskRestTemplate.adminUpdateVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
+
+        // when
+        variablesResponse = taskRestTemplate.adminGetVariables(taskId);
+        
+        processInstanceRestTemplate.delete(startResponse); 
+    }
+    
     private boolean variablesContainEntry(String key, Object value, Collection<CloudVariableInstance> variableCollection){
         Iterator<CloudVariableInstance> iterator = variableCollection.iterator();
         while(iterator.hasNext()){
             VariableInstance variable = iterator.next();
             if(variable.getName().equalsIgnoreCase(key) && variable.getValue().equals(value)){
-                assertThat(variable.getType()).isEqualToIgnoringCase(variable.getValue().getClass().getSimpleName());
+                String type = variable.getType();
+                if (type.equalsIgnoreCase("date")) {
+                    assertThat("String").isEqualTo(variable.getValue().getClass().getSimpleName());
+                } else {
+                    assertThat(type).isEqualToIgnoringCase(variable.getValue().getClass().getSimpleName());
+                }                
                 return true;
             }
         }
         return false;
     }
-
 
     private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
         ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {

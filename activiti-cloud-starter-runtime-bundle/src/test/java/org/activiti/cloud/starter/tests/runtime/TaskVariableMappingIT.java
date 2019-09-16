@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,8 +34,7 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
+import org.activiti.cloud.starter.tests.util.VariablesUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,6 +62,9 @@ public class TaskVariableMappingIT {
 
     @Autowired
     private TaskRestTemplate taskRestTemplate;
+    
+    @Autowired
+    private  VariablesUtil variablesUtil;
 
     @Value("${activiti.keycloak.test-user:hruser}")
     protected String keycloakTestUser;
@@ -140,7 +143,109 @@ public class TaskVariableMappingIT {
                                         "outputTaskValue"));       
         });
         
-     // cleanup
+        //cleanup
+        processInstanceRestTemplate.delete(processInstanceResponseEntity);
+    }
+    
+    @Test
+    public void should_Handle_VariableMappingsWithDate() throws Exception {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
+                ProcessPayloadBuilder.start()
+                        .withProcessDefinitionKey("taskDateVarMapping")
+                        .withBusinessKey("businessKey")
+                        .build());
+
+        //Check default process variables
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                    .isNotNull()
+                    .extracting(CloudVariableInstance::getName,
+                                CloudVariableInstance::getType)
+                    .containsOnly(tuple("process-variable-string",
+                                        "string"), 
+                                  tuple("process-variable-integer",
+                                        "integer"),        
+                                  tuple("process-variable-boolean",
+                                        "boolean"),
+                                  tuple("process-variable-date",
+                                        "date"),
+                                  tuple("process-variable-datetime",
+                                        "date")
+                                  );
+        });
+         
+        //Check mapped task variables
+        ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
+        assertThat(tasks.getBody()).isNotNull();
+        
+        String taskId = tasks.getBody().getContent().iterator().next().getId();
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = taskRestTemplate.getVariables(taskId);
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                    .isNotNull()
+                    .extracting(CloudVariableInstance::getName,
+                                CloudVariableInstance::getType)
+                    .containsOnly(tuple("task-variable-string",
+                                        "string"), 
+                                  tuple("task-variable-integer",
+                                        "integer"),        
+                                  tuple("task-variable-boolean",
+                                        "boolean"),
+                                  tuple("task-variable-date",
+                                        "date"),
+                                  tuple("task-variable-datetime",
+                                        "date")
+                                  );
+        });  
+        
+        //Check mapped process variables
+        Date date = new Date();
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("task-variable-string", "new value");
+        variables.put("task-variable-integer", 10);
+        variables.put("task-variable-boolean", false);
+        variables.put("task-variable-date", variablesUtil.getDateFormattedString(date));
+        variables.put("task-variable-datetime", variablesUtil.getDateTimeFormattedString(date));
+                      
+        claimAndCompleteTask(taskId, variables);
+        
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                    .isNotNull()
+                    .extracting(CloudVariableInstance::getName,
+                                CloudVariableInstance::getType,  
+                                CloudVariableInstance::getValue)
+                    .containsOnly(tuple("process-variable-string",
+                                        "string",
+                                        "new value"), 
+                                  tuple("process-variable-integer",
+                                        "integer",
+                                        10),        
+                                  tuple("process-variable-boolean",
+                                        "boolean",
+                                        false),
+                                  tuple("process-variable-date",
+                                        "date",
+                                        variablesUtil.getExpectedDateFormattedString(date)),
+                                  tuple("process-variable-datetime",
+                                        "date",
+                                        variablesUtil.getExpectedDateTimeFormattedString(date))
+                      );    
+        });
+        
+        //cleanup
         processInstanceRestTemplate.delete(processInstanceResponseEntity);
     }
     
