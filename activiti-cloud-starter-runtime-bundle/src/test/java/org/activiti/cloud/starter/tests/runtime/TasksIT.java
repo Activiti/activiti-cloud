@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTo
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.cloud.starter.tests.util.VariablesUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,6 +76,9 @@ public class TasksIT {
 
     @Autowired
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
+    
+    @Autowired
+    private  VariablesUtil variablesUtil;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
@@ -606,15 +611,29 @@ public class TasksIT {
     }
  
     @Test
-    public void shouldSaveATask() {
+    public void shouldSaveATask() throws Exception {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
         taskRestTemplate.claim(task);
+        
+        Map<String, Object> variables = new HashMap<>();   
+        Date date = new Date();
+        
+        variables.put("variableInt",
+                      2);
+        variables.put("variableStr",
+                      "new value");
+        variables.put("variableBool",
+                      false);
+        variables.put("variableDateTime",
+                      variablesUtil.getDateTimeFormattedString(date));
+        variables.put("variableDate",
+                      variablesUtil.getDateFormattedString(date));
 
         SaveTaskPayload saveTaskPayload = TaskPayloadBuilder.save()
                                                             .withTaskId(task.getId())
-                                                            .withVariables(Collections.singletonMap("myVar", "any"))
+                                                            .withVariables(variables)
                                                             .build();
         //when
         ResponseEntity<Void> responseEntity = taskRestTemplate.save(task, saveTaskPayload);
@@ -627,8 +646,26 @@ public class TasksIT {
 
         // then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesResponse.getBody().getContent()).extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
-                                                            .containsExactly(tuple("myVar", "any"));
+        assertThat(variablesResponse.getBody().getContent()).extracting(CloudVariableInstance::getName,
+                                                                        CloudVariableInstance::getType,
+                                                                        CloudVariableInstance::getValue)
+                                                            .containsExactlyInAnyOrder(
+                                                                             tuple("variableInt",
+                                                                                   "integer",
+                                                                                   2), 
+                                                                             tuple("variableStr",
+                                                                                   "string",
+                                                                                   "new value"),        
+                                                                             tuple("variableBool",
+                                                                                   "boolean",
+                                                                                   false),
+                                                                             tuple("variableDateTime",
+                                                                                   "date",
+                                                                                   variablesUtil.getExpectedDateTimeFormattedString(date)),
+                                                                             tuple("variableDate",
+                                                                                   "date",
+                                                                                   variablesUtil.getExpectedDateFormattedString(date))
+                                                                             );
         // cleanup
         processInstanceRestTemplate.delete(processInstanceEntity);
         

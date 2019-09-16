@@ -1,0 +1,91 @@
+{
+  "id":"taskDateVarMapping",
+  "name":"myProcess.bpmn",
+  "extensions": {
+    "properties": {
+     "process-variable-string-id": {
+        "id": "process-variable-string-id",
+        "name": "process-variable-string",
+        "type": "string",
+        "required": true,
+        "value": "stringValue"
+      },
+      "process-variable-integer-id": {
+        "id": "process-variable-integer-id",
+        "name": "process-variable-integer",
+        "type": "integer",
+        "required": true,
+        "value": 1
+      },
+      "process-variable-boolean-id": {
+        "id": "process-variable-boolean-id",
+        "name": "process-variable-boolean",
+        "type": "boolean",
+        "required": true,
+        "value": true
+      },
+      "process-variable-date-id": {
+        "id": "process-variable-date-id",
+        "name": "process-variable-date",
+        "type": "date",
+        "required": true,
+        "value": "2019-09-01"
+      },
+      "process-variable-datetime-id": {
+        "id": "process-variable-datetime-id",
+        "name": "process-variable-datetime",
+        "type": "date",
+        "required": true,
+        "value": "2019-09-01T10:20:30.000Z"
+      }
+    },
+    "mappings": {
+      "task1": {
+        "inputs": {
+          "task-variable-string": {
+            "type": "variable",
+            "value": "process-variable-string"
+          },
+          "task-variable-integer": {
+            "type": "variable",
+            "value": "process-variable-integer"
+          },
+          "task-variable-boolean": {
+            "type": "variable",
+            "value": "process-variable-boolean"
+          },
+          "task-variable-date": {
+            "type": "variable",
+            "value": "process-variable-date"
+          },
+          "task-variable-datetime": {
+            "type": "variable",
+            "value": "process-variable-datetime"
+          }
+        },
+        "outputs": {
+          "process-variable-string": {
+            "type": "variable",
+            "value": "task-variable-string"
+          },
+          "process-variable-integer": {
+            "type": "variable",
+            "value": "task-variable-integer"
+          },
+          "process-variable-boolean": {
+            "type": "variable",
+            "value": "task-variable-boolean"
+          },
+          "process-variable-date": {
+            "type": "variable",
+            "value": "task-variable-date"
+          },
+          "process-variable-datetime": {
+            "type": "variable",
+            "value": "task-variable-datetime"
+          }
+        }
+      }
+    }
+  }
+}
