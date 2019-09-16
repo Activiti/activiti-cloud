@@ -16,9 +16,6 @@
 
 package org.activiti.cloud.services.audit.jpa.converters.json;
 
-import java.io.IOException;
-import javax.persistence.AttributeConverter;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.BeanDescription;
@@ -30,12 +27,14 @@ import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.BPMNSignal;
 import org.activiti.api.process.model.BPMNTimer;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
+import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
@@ -45,6 +44,10 @@ import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.services.audit.api.AuditException;
+
+import java.io.IOException;
+
+import javax.persistence.AttributeConverter;
 
 public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
 
@@ -81,6 +84,8 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
             					BPMNSignalImpl.class);            
             resolver.addMapping(BPMNTimer.class,
                                 BPMNTimerImpl.class);
+            resolver.addMapping(BPMNMessage.class,
+                                BPMNMessageImpl.class);
             
             module.setAbstractTypes(resolver);
 
