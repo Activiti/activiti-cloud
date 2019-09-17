@@ -19,6 +19,7 @@ package org.activiti.cloud.services.events.converter;
 import org.activiti.api.process.model.events.BPMNActivityCancelledEvent;
 import org.activiti.api.process.model.events.BPMNActivityCompletedEvent;
 import org.activiti.api.process.model.events.BPMNActivityStartedEvent;
+import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNMessageReceivedEvent;
 import org.activiti.api.process.model.events.BPMNMessageSentEvent;
 import org.activiti.api.process.model.events.BPMNMessageWaitingEvent;
@@ -48,6 +49,7 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNTimerFiredEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerRetriesDecrementedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageSentEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageWaitingEvent;
@@ -70,6 +72,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageSentEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageWaitingEventImpl;
@@ -248,6 +251,14 @@ public class ToCloudProcessRuntimeEventConverter {
         CloudBPMNMessageWaitingEventImpl cloudEvent = new CloudBPMNMessageWaitingEventImpl(event.getEntity(),
                                                                                            event.getEntity().getProcessDefinitionId(),
                                                                                            event.getEntity().getProcessInstanceId());
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        return cloudEvent;
+    }
+    
+    public CloudBPMNErrorReceivedEvent from(BPMNErrorReceivedEvent event) {
+        CloudBPMNErrorReceivedEventImpl cloudEvent = new CloudBPMNErrorReceivedEventImpl(event.getEntity(),
+                                                                                         event.getEntity().getProcessDefinitionId(),
+                                                                                         event.getEntity().getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }

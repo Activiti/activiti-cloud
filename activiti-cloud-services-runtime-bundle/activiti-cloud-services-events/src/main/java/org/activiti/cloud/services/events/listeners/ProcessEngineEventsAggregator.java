@@ -24,6 +24,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerEvent;
@@ -135,8 +136,9 @@ public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggre
             return ((CloudBPMNTimerEvent) element).getEntity().getProcessInstanceId();
         } else if(element instanceof CloudBPMNMessageEvent) {
             return ((CloudBPMNMessageEvent) element).getEntity().getProcessInstanceId();
-        }
-        
+        } else if(element instanceof CloudBPMNErrorReceivedEvent) {
+            return ((CloudBPMNErrorReceivedEvent) element).getEntity().getProcessInstanceId();
+        }        
         return null;
     }
     
