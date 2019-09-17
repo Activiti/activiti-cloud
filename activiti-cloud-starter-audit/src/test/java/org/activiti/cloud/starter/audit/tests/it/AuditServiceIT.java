@@ -30,10 +30,12 @@ import java.util.UUID;
 
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.TimerPayload;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
+import org.activiti.api.runtime.model.impl.BPMNErrorImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
@@ -48,11 +50,13 @@ import org.activiti.cloud.api.model.shared.impl.conf.IgnoredRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
@@ -573,7 +577,6 @@ public class AuditServiceIT {
         });
     }
 
-
     @Test
     public void shouldGetTimerScheduledEvent() {
         //given
@@ -650,6 +653,65 @@ public class AuditServiceIT {
         });
     }
     
+    @Test
+    public void shouldGetErrorReceivedEvent() {
+        //given
+        List<CloudRuntimeEvent> coveredEvents = new ArrayList<>();
+        
+        BPMNErrorImpl error = new BPMNErrorImpl("elementId");
+        error.setProcessDefinitionId("processDefinitionId");
+        error.setProcessInstanceId("processInstanceId");
+        error.setErrorCode("errorCode");
+        error.setErrorId("errorId");
+
+        CloudBPMNErrorReceivedEventImpl cloudErrorReceivedEvent = new CloudBPMNErrorReceivedEventImpl("eventId",
+                                                                                                       System.currentTimeMillis(),
+                                                                                                       error,
+                                                                                                       error.getProcessDefinitionId(),
+                                                                                                       error.getProcessInstanceId());
+        coveredEvents.add(cloudErrorReceivedEvent);
+        
+        producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
+
+        await().untilAsserted(() -> {
+
+            //when
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("eventType",
+                        BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED.name());
+
+            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            assertThat(retrievedEvents).hasSize(1);
+            
+            assertThat(retrievedEvents)
+            .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getServiceName,
+                    CloudRuntimeEvent::getServiceVersion,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionId,
+                    CloudRuntimeEvent::getEntityId,
+                    event -> ((CloudBPMNErrorReceivedEvent)event).getEntity().getElementId(),
+                    event -> ((CloudBPMNErrorReceivedEvent)event).getEntity().getProcessInstanceId(),
+                    event -> ((CloudBPMNErrorReceivedEvent)event).getEntity().getProcessDefinitionId(),
+                    event -> ((CloudBPMNErrorReceivedEvent)event).getEntity().getErrorCode(),
+                    event -> ((CloudBPMNErrorReceivedEvent)event).getEntity().getErrorId())                    
+            .contains(tuple(cloudErrorReceivedEvent.getEventType(),
+                            cloudErrorReceivedEvent.getServiceName(),
+                            cloudErrorReceivedEvent.getServiceVersion(),
+                            cloudErrorReceivedEvent.getProcessInstanceId(),
+                            cloudErrorReceivedEvent.getProcessDefinitionId(),
+                            cloudErrorReceivedEvent.getEntityId(),
+                            cloudErrorReceivedEvent.getEntity().getElementId(),
+                            cloudErrorReceivedEvent.getEntity().getProcessInstanceId(),
+                            cloudErrorReceivedEvent.getEntity().getProcessDefinitionId(),
+                            cloudErrorReceivedEvent.getEntity().getErrorCode(),
+                            cloudErrorReceivedEvent.getEntity().getErrorId()));
+        });
+    }
     
     private List<CloudRuntimeEvent> getTaskCancelledEvents() {
         List<CloudRuntimeEvent> testEvents = new ArrayList<>();

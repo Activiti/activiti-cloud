@@ -21,6 +21,7 @@ import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityStartedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ErrorReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender;
 import org.activiti.cloud.services.audit.jpa.converters.MessageReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.MessageSentEventConverter;
@@ -285,4 +286,9 @@ public class AuditJPAAutoConfiguration {
         return new MessageSentEventConverter(eventContextInfoAppender);
     }        
     
+    @ConditionalOnMissingBean
+    @Bean
+    public ErrorReceivedEventConverter errorReceivedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new ErrorReceivedEventConverter(eventContextInfoAppender);
+    }   
 } 
