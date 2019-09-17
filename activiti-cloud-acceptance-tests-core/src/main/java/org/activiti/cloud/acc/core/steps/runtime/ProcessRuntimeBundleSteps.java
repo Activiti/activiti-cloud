@@ -1,14 +1,16 @@
 package org.activiti.cloud.acc.core.steps.runtime;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
+import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
+import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
@@ -19,9 +21,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 
-import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
-import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
-import static org.assertj.core.api.Assertions.*;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
 
 @EnableRuntimeFeignContext
 public class ProcessRuntimeBundleSteps {
@@ -177,4 +179,15 @@ public class ProcessRuntimeBundleSteps {
                 ProcessPayloadBuilder.update().withName(processInstanceName).build());
 
     }
+    
+    @Step
+    public CloudProcessInstance message(StartMessagePayload payload) throws IOException {
+        return dirtyContextHandler.dirty(processRuntimeService.message(payload));
+    }
+    
+    @Step
+    public void message(ReceiveMessagePayload payload) throws IOException {
+        processRuntimeService.message(payload);
+    }
+    
 }

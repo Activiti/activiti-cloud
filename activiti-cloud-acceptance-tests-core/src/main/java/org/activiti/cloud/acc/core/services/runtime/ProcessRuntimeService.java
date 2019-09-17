@@ -1,11 +1,11 @@
 package org.activiti.cloud.acc.core.services.runtime;
 
-import feign.HeaderMap;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import org.activiti.api.process.model.ProcessDefinition;
-import org.activiti.api.process.model.payloads.GetProcessInstancesPayload;
+import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
+import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.cloud.acc.shared.service.BaseService;
@@ -60,4 +60,13 @@ public interface ProcessRuntimeService extends BaseService {
     @Headers("Content-Type: application/json")
     CloudProcessInstance updateProcess(@Param("id") String id,
                                        UpdateProcessPayload updateProcessPayload);
+    
+    @RequestLine("POST /v1/process-instances/message")
+    @Headers("Content-Type: application/json")
+    CloudProcessInstance message(StartMessagePayload startProcess);
+
+    @RequestLine("PUT /v1/process-instances/message")
+    @Headers("Content-Type: application/json")
+    void message(ReceiveMessagePayload startProcess);
+    
 }
