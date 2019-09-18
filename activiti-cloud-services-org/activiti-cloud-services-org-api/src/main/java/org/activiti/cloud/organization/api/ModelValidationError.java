@@ -27,6 +27,7 @@ public class ModelValidationError {
     private String problem;
     private String description;
     private boolean isWarning;
+    private String errorCode;
 
     public String getValidatorSetName() {
         return validatorSetName;
@@ -58,6 +59,14 @@ public class ModelValidationError {
 
     public void setWarning(boolean warning) {
         isWarning = warning;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
     }
 
     @Override

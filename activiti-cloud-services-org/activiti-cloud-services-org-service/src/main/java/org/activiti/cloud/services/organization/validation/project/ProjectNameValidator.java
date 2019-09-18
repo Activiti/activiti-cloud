@@ -14,32 +14,27 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.validation.process;
+package org.activiti.cloud.services.organization.validation.project;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.organization.api.ModelValidationError;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.services.organization.validation.DNSNameValidator;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link BpmnModelValidator} for validating process name
+ * Implementation of {@link ProjectValidator} for validating the project name
  */
 @Component
-public class BpmnModelNameValidator implements BpmnModelValidator,
-                                               DNSNameValidator {
+public class ProjectNameValidator implements ProjectValidator,
+                                             DNSNameValidator {
 
     @Override
-    public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
+    public Stream<ModelValidationError> validate(Project project,
                                                  ValidationContext validationContext) {
-        return validateDNSName(Optional.ofNullable(bpmnModel)
-                                       .map(BpmnModel::getMainProcess)
-                                       .map(Process::getName)
-                                       .orElse(null),
-                               "process");
+        return validateDNSName(project.getName(),
+                               "project");
     }
 }

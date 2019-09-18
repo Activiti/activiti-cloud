@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2019 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,26 @@
 
 package org.activiti.cloud.services.organization.rest.validation;
 
-import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.services.organization.validation.DNSNameValidator;
 import org.springframework.validation.Errors;
 
 /**
- * Abstract model payload validator. It contains the basic validation functionality.
+ * Validator fot project payload
  */
-public class ModelPayloadValidator extends GenericPayloadValidator<Model> implements DNSNameValidator {
+public class ProjectPayloadValidator extends GenericPayloadValidator<Project> implements DNSNameValidator {
 
-    public ModelPayloadValidator(boolean validateRequiredFields) {
-        super(Model.class,
+    public ProjectPayloadValidator(boolean validateRequiredFields) {
+        super(Project.class,
               validateRequiredFields);
     }
 
     @Override
-    public void validatePayload(Model model,
+    public void validatePayload(Project project,
                                 Errors errors) {
-        if (validateRequiredFields || model.getName() != null) {
-            validateDNSName(model.getName(),
-                            "model")
+        if (validateRequiredFields || project.getName() != null) {
+            validateDNSName(project.getName(),
+                            "project")
                     .forEach(error -> errors.rejectValue("name",
                                                          error.getErrorCode(),
                                                          error.getDescription()));

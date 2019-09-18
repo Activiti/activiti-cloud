@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.organization.validation;
+package org.activiti.cloud.services.organization.validation.project;
 
 import java.util.stream.Stream;
 
 import org.activiti.cloud.organization.api.ModelValidationError;
-import org.activiti.cloud.organization.api.ModelValidationErrorProducer;
 import org.activiti.cloud.organization.api.ProcessModelType;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.ValidationContext;
 import org.springframework.stereotype.Component;
 
 /**
- * Project consistency validator
+ * Implementation of {@link ProjectValidator} for validating that a project has at least one project.
  */
 @Component
-public class ProjectConsistencyValidator implements ModelValidationErrorProducer {
+public class ProjectConsistencyValidator implements ProjectValidator {
 
     private final String EMPTY_PROJECT_PROBLEM = "Invalid project";
     private final String EMPTY_PROJECT_DESCRIPTION = "Project must contain at least one process";
@@ -39,7 +39,9 @@ public class ProjectConsistencyValidator implements ModelValidationErrorProducer
         this.processModelType = processModelType;
     }
 
-    public Stream<ModelValidationError> validate(ValidationContext validationContext) {
+    @Override
+    public Stream<ModelValidationError> validate(Project project,
+                                                 ValidationContext validationContext) {
         return validationContext.getAvailableModels(processModelType)
                 .stream()
                 .findFirst()
