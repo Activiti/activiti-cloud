@@ -224,7 +224,53 @@ public class ProjectControllerIT {
                             API_VERSION,
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(project(null))))
+                                .content(mapper.writeValueAsString(projectWithDescription(null,
+                                                                                          "New Description"))))
+                // THEN
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testUpdateProjectEmptyName() throws Exception {
+        // GIVEN
+        Project project = projectRepository.createProject(project("project-to-update"));
+
+        // WHEN
+        mockMvc.perform(put("{version}/projects/{projectId}",
+                            API_VERSION,
+                            project.getId())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(project(""))))
+                // THEN
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testUpdateProjectInvalidName() throws Exception {
+        // GIVEN
+        Project project = projectRepository.createProject(project("project-to-update"));
+
+        // WHEN
+        mockMvc.perform(put("{version}/projects/{projectId}",
+                            API_VERSION,
+                            project.getId())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(project("1-invalid-name"))))
+                // THEN
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testUpdateProjectLongName() throws Exception {
+        // GIVEN
+        Project project = projectRepository.createProject(project("project-to-update"));
+
+        // WHEN
+        mockMvc.perform(put("{version}/projects/{projectId}",
+                            API_VERSION,
+                            project.getId())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .content(mapper.writeValueAsString(project("too-long-name-1234567890-1234567890"))))
                 // THEN
                 .andExpect(status().isBadRequest());
     }

@@ -122,7 +122,7 @@ public class ConnectorModelControllerIT {
                 .hasValidationErrorCodes("field.empty",
                                          "regex.mismatch")
                 .hasValidationErrorMessages("The model name cannot be empty",
-                                            "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character");
+                                            "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: ''");
     }
 
     @Test
@@ -142,8 +142,8 @@ public class ConnectorModelControllerIT {
                 .isValidationException()
                 .hasValidationErrorCodes("length.greater",
                                          "regex.mismatch")
-                .hasValidationErrorMessages("The model name length cannot be greater than 26",
-                                            "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character");
+                .hasValidationErrorMessages("The model name length cannot be greater than 26: '123456789_123456789_1234567'",
+                                            "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: '123456789_123456789_1234567'");
     }
 
     @Test
@@ -162,7 +162,7 @@ public class ConnectorModelControllerIT {
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
                 .hasValidationErrorCodes("regex.mismatch")
-                .hasValidationErrorMessages("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character");
+                .hasValidationErrorMessages("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'name_with_underscore'");
     }
 
     @Test
@@ -181,7 +181,7 @@ public class ConnectorModelControllerIT {
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
                 .hasValidationErrorCodes("regex.mismatch")
-                .hasValidationErrorMessages("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character");
+                .hasValidationErrorMessages("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'NameWithUppercase'");
     }
 
     @Test
@@ -227,7 +227,7 @@ public class ConnectorModelControllerIT {
                 .hasValidationErrorCodes("field.empty",
                                          "regex.mismatch")
                 .hasValidationErrorMessages("The model name cannot be empty",
-                                            "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character");
+                                            "The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: ''");
     }
 
     @Test
@@ -243,7 +243,7 @@ public class ConnectorModelControllerIT {
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
                 .hasValidationErrorCodes("regex.mismatch")
-                .hasValidationErrorMessages("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character");
+                .hasValidationErrorMessages("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: '123456789_123456789_1234567'");
     }
 
     @Test
@@ -259,7 +259,7 @@ public class ConnectorModelControllerIT {
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
                 .hasValidationErrorCodes("regex.mismatch")
-                .hasValidationErrorMessages("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character");
+                .hasValidationErrorMessages("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'name_with_underscore'");
     }
 
     @Test
@@ -275,6 +275,6 @@ public class ConnectorModelControllerIT {
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
                 .hasValidationErrorCodes("regex.mismatch")
-                .hasValidationErrorMessages("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character");
+                .hasValidationErrorMessages("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'NameWithUppercase'");
     }
 }

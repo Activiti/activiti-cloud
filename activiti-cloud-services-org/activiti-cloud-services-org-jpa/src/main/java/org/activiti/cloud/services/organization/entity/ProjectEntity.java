@@ -55,10 +55,6 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     private String id;
 
     @Column(unique = true)
-    //TODO: the validation logic should be moved in a dedicated bean for clear layers separation
-    @Pattern(regexp = DNS_LABEL_REGEX, message = PROJECT_INVALID_NAME_MESSAGE)
-    @Size(max = NAME_MAX_LENGTH, message = PROJECT_INVALID_NAME_LENGTH_MESSAGE)
-    @NotEmpty(message = PROJECT_INVALID_EMPTY_NAME)
     private String name;
 
     private String description;

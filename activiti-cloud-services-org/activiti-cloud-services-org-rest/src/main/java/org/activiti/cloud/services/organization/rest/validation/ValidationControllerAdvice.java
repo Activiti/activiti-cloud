@@ -31,7 +31,16 @@ public class ValidationControllerAdvice {
     @InitBinder("model")
     public void initModelBinder(final WebDataBinder binder,
                                 final HttpServletRequest request) {
-        boolean checkRequiredField = HttpMethod.POST.name().equals(request.getMethod());
-        binder.addValidators(new GenericModelPayloadValidator(checkRequiredField));
+        binder.addValidators(new ModelPayloadValidator(isPost(request)));
+    }
+
+    @InitBinder("project")
+    public void initProjectBinder(final WebDataBinder binder,
+                                final HttpServletRequest request) {
+        binder.addValidators(new ProjectPayloadValidator(isPost(request)));
+    }
+
+    private boolean isPost(final HttpServletRequest request) {
+        return HttpMethod.POST.name().equals(request.getMethod());
     }
 }

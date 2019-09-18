@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
@@ -36,8 +37,8 @@ import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.zip.ZipBuilder;
 import org.activiti.cloud.services.common.zip.ZipStream;
-import org.activiti.cloud.services.organization.validation.ProjectConsistencyValidator;
 import org.activiti.cloud.services.organization.validation.ProjectValidationContext;
+import org.activiti.cloud.services.organization.validation.project.ProjectValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -66,19 +67,19 @@ public class ProjectService {
 
     private final JsonConverter<Project> jsonConverter;
 
-    private final ProjectConsistencyValidator projectConsistencyValidator;
+    private final Set<ProjectValidator> projectValidators;
 
     @Autowired
     public ProjectService(ProjectRepository projectRepository,
                           ModelService modelService,
                           ModelTypeService modelTypeService,
                           JsonConverter<Project> jsonConverter,
-                          ProjectConsistencyValidator projectConsistencyValidator) {
+                          Set<ProjectValidator> projectValidators) {
         this.projectRepository = projectRepository;
         this.modelService = modelService;
         this.modelTypeService = modelTypeService;
         this.jsonConverter = jsonConverter;
-        this.projectConsistencyValidator = projectConsistencyValidator;
+        this.projectValidators = projectValidators;
     }
 
     /**
@@ -223,7 +224,10 @@ public class ProjectService {
         ValidationContext validationContext = new ProjectValidationContext(availableModels);
 
         List<ModelValidationError> validationErrors = Stream.concat(
-                projectConsistencyValidator.validate(validationContext),
+                projectValidators
+                        .stream()
+                        .flatMap(validator -> validator.validate(project,
+                                                                 validationContext)),
                 availableModels
                         .stream()
                         .flatMap(model -> getModelValidationErrors(model,

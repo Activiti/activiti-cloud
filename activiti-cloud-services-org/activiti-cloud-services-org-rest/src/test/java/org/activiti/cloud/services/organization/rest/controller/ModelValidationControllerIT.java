@@ -220,10 +220,10 @@ public class ModelValidationControllerIT {
         SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
         assertThat(semanticModelValidationException.getValidationErrors())
                 .hasSize(2)
-                .extracting(ModelValidationError::getProblem,
+                .extracting(ModelValidationError::getDescription,
                             ModelValidationError::getValidatorSetName)
-                .contains(tuple("The model name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character",
-                                "The process name is invalid"));
+                .contains(tuple("The process name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'RankMovie'",
+                                "DNS name validator"));
     }
 
     @Test
