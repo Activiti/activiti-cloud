@@ -82,4 +82,13 @@ public class BpmnProcessModelContent implements ModelContent {
                 )
                 .collect(Collectors.toSet());
     }
+
+    public <T extends FlowNode> Set<T> findAllNodes(Class<T> activityType) {
+        return bpmnModel.getProcesses()
+                .stream()
+                .map(process -> process.findFlowElementsOfType(activityType,
+                                                               true)
+                ).flatMap(List::stream)
+                .collect(Collectors.toSet());
+    }
 }

@@ -75,9 +75,14 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
         return bpmnConverter.convertToXML(modelContent.getBpmnModel());
     }
 
+    public Optional<BpmnProcessModelContent> convertToModelContent(BpmnModel bpmnModel) {
+        return Optional.ofNullable(bpmnModel)
+                .map(BpmnProcessModelContent::new);
+    }
+
     @Override
     public byte[] convertAndFixModelContentId(byte[] bytes,
-                                               String modelContentId) {
+                                              String modelContentId) {
         return convertToModelContent(bytes)
                 .filter(modelContent -> !modelContentId.equals(modelContent.getId()))
                 .map(modelContent -> modelContent.setId(modelContentId))

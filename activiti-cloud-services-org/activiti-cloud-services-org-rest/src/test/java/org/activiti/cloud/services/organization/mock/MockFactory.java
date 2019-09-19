@@ -315,4 +315,16 @@ public class MockFactory {
                                      CONTENT_TYPE_XML,
                                      content);
     }
+
+    public static MockMultipartFile multipartProcessFileWithOneCallActivity(Model mainProcess,
+                                                                            Model callActivity,
+                                                                            byte[] content) {
+        return new MockMultipartFile("file",
+                                     mainProcess.getName() + "." + BPMN20_XML,
+                                     CONTENT_TYPE_XML,
+                                     new String(content)
+                                             .replaceFirst("calledElement=\".*\"",
+                                                           "calledElement= \"process-" + callActivity.getId() + "\"")
+                                             .getBytes());
+    }
 }
