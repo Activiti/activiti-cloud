@@ -16,16 +16,18 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import org.activiti.api.process.model.BPMNSignal;
+import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
+import org.activiti.cloud.services.audit.jpa.converters.json.SignalJpaJsonConverter;
+
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.api.process.model.BPMNSignal;
-import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
-import org.activiti.cloud.services.audit.jpa.converters.json.SignalJpaJsonConverter;
-
-@Entity
+@Entity(name = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
 @DiscriminatorValue(value = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
 public class SignalReceivedAuditEventEntity extends AuditEventEntity {
 
@@ -49,5 +51,39 @@ public class SignalReceivedAuditEventEntity extends AuditEventEntity {
 
     public void setSignal(BPMNSignal signal) {
         this.signal = signal;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(signal);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        SignalReceivedAuditEventEntity other = (SignalReceivedAuditEventEntity) obj;
+        return Objects.equals(signal, other.signal);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("SignalReceivedAuditEventEntity [signal=")
+               .append(signal)
+               .append(", toString()=")
+               .append(super.toString())
+               .append("]");
+        return builder.toString();
     }
 }

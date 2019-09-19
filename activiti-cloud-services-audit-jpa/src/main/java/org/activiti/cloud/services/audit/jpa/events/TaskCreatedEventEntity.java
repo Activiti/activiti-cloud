@@ -16,12 +16,12 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
-
-@Entity
+@Entity(name = TaskCreatedEventEntity.TASK_CREATED_EVENT)
 @DiscriminatorValue(value = TaskCreatedEventEntity.TASK_CREATED_EVENT)
 public class TaskCreatedEventEntity extends TaskAuditEventEntity {
 
@@ -32,5 +32,31 @@ public class TaskCreatedEventEntity extends TaskAuditEventEntity {
 
     public TaskCreatedEventEntity(CloudTaskCreatedEvent cloudEvent) {
         super(cloudEvent);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("TaskCreatedEventEntity [toString()=").append(super.toString()).append("]");
+        return builder.toString();
     }
 }

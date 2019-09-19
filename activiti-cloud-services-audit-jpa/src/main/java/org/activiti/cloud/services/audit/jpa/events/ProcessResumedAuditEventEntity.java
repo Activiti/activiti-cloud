@@ -16,12 +16,12 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
-
-@Entity
+@Entity(name = ProcessResumedAuditEventEntity.PROCESS_RESUMED_EVENT)
 @DiscriminatorValue(value = ProcessResumedAuditEventEntity.PROCESS_RESUMED_EVENT)
 public class ProcessResumedAuditEventEntity extends ProcessAuditEventEntity {
 
@@ -32,5 +32,31 @@ public class ProcessResumedAuditEventEntity extends ProcessAuditEventEntity {
 
     public ProcessResumedAuditEventEntity(CloudProcessResumedEvent cloudEvent) {
         super(cloudEvent);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ProcessResumedAuditEventEntity [toString()=").append(super.toString()).append("]");
+        return builder.toString();
     }
 }

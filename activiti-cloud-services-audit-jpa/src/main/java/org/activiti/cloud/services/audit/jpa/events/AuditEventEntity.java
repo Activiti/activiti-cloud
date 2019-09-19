@@ -16,6 +16,10 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+
+import java.util.Objects;
+
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,11 +27,9 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "TYPE")
-@Entity
+@Entity(name = "AuditEvent")
 public abstract class AuditEventEntity {
 
     @Id
@@ -220,5 +222,102 @@ public abstract class AuditEventEntity {
 
     public void setMessageId(String messageId) {
         this.messageId = messageId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(appName,
+                            appVersion,
+                            businessKey,
+                            entityId,
+                            eventId,
+                            eventType,
+                            id,
+                            messageId,
+                            parentProcessInstanceId,
+                            processDefinitionId,
+                            processDefinitionKey,
+                            processInstanceId,
+                            sequenceNumber,
+                            serviceFullName,
+                            serviceName,
+                            serviceType,
+                            serviceVersion,
+                            timestamp);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AuditEventEntity other = (AuditEventEntity) obj;
+        return Objects.equals(appName, other.appName) 
+                && Objects.equals(appVersion, other.appVersion) 
+                && Objects.equals(businessKey, other.businessKey) 
+                && Objects.equals(entityId, other.entityId) 
+                && Objects.equals(eventId, other.eventId) 
+                && Objects.equals(eventType, other.eventType) 
+                && Objects.equals(id, other.id) 
+                && Objects.equals(messageId, other.messageId) 
+                && Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId) 
+                && Objects.equals(processDefinitionId, other.processDefinitionId) 
+                && Objects.equals(processDefinitionKey, other.processDefinitionKey) 
+                && Objects.equals(processInstanceId, other.processInstanceId) 
+                && sequenceNumber == other.sequenceNumber 
+                && Objects.equals(serviceFullName, other.serviceFullName) 
+                && Objects.equals(serviceName, other.serviceName) 
+                && Objects.equals(serviceType, other.serviceType) 
+                && Objects.equals(serviceVersion, other.serviceVersion) 
+                && Objects.equals(timestamp, other.timestamp);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("AuditEventEntity [id=")
+               .append(id)
+               .append(", eventId=")
+               .append(eventId)
+               .append(", timestamp=")
+               .append(timestamp)
+               .append(", eventType=")
+               .append(eventType)
+               .append(", appName=")
+               .append(appName)
+               .append(", appVersion=")
+               .append(appVersion)
+               .append(", serviceName=")
+               .append(serviceName)
+               .append(", serviceFullName=")
+               .append(serviceFullName)
+               .append(", serviceType=")
+               .append(serviceType)
+               .append(", serviceVersion=")
+               .append(serviceVersion)
+               .append(", sequenceNumber=")
+               .append(sequenceNumber)
+               .append(", messageId=")
+               .append(messageId)
+               .append(", entityId=")
+               .append(entityId)
+               .append(", processDefinitionId=")
+               .append(processDefinitionId)
+               .append(", processInstanceId=")
+               .append(processInstanceId)
+               .append(", processDefinitionKey=")
+               .append(processDefinitionKey)
+               .append(", parentProcessInstanceId=")
+               .append(parentProcessInstanceId)
+               .append(", businessKey=")
+               .append(businessKey)
+               .append("]");
+        return builder.toString();
     }
 }

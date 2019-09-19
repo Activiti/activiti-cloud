@@ -1,13 +1,14 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Lob;
-import javax.persistence.MappedSuperclass;
-
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
+
+import java.util.Objects;
+
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class VariableAuditEventEntity extends AuditEventEntity {
@@ -17,8 +18,7 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
     private String taskId;
 
     @Convert(converter = VariableJpaJsonConverter.class)
-    @Lob
-    @Column
+    @Column(columnDefinition = "text")
     private VariableInstance variableInstance;
 
     public VariableAuditEventEntity() {
@@ -65,5 +65,48 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
             this.taskId = variableInstance.getTaskId();
             setEntityId(variableInstance.getName());
         }
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(taskId, variableInstance, variableName, variableType);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        VariableAuditEventEntity other = (VariableAuditEventEntity) obj;
+        return Objects.equals(taskId, other.taskId) 
+                && Objects.equals(variableInstance, other.variableInstance) 
+                && Objects.equals(variableName, other.variableName) 
+                && Objects.equals(variableType, other.variableType);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("VariableAuditEventEntity [variableName=")
+               .append(variableName)
+               .append(", variableType=")
+               .append(variableType)
+               .append(", taskId=")
+               .append(taskId)
+               .append(", variableInstance=")
+               .append(variableInstance)
+               .append(", toString()=")
+               .append(super.toString())
+               .append("]");
+        return builder.toString();
     }
 }

@@ -16,18 +16,16 @@
 
 package org.activiti.cloud.services.audit.jpa.repository;
 
-import java.util.Optional;
-
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
+import java.util.Optional;
+
 @RepositoryRestResource(exported = false)
-public interface EventsRepository extends PagingAndSortingRepository<AuditEventEntity, Long>,
-                                          JpaSpecificationExecutor<AuditEventEntity> {
+public interface EventsRepository<T extends AuditEventEntity> extends PagingAndSortingRepository<T, Long>,
+                                                            JpaSpecificationExecutor<T> {
 
-    Optional<AuditEventEntity> findByEventId(String eventId);
-
-
+    Optional<T> findByEventId(String eventId);
 }

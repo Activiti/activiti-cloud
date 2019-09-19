@@ -16,12 +16,14 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
+
+import java.util.Objects;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
-
-@Entity
+@Entity(name = ProcessCancelledAuditEventEntity.PROCESS_CANCELLED_EVENT)
 @DiscriminatorValue(value = ProcessCancelledAuditEventEntity.PROCESS_CANCELLED_EVENT)
 public class ProcessCancelledAuditEventEntity extends ProcessAuditEventEntity {
 
@@ -43,5 +45,39 @@ public class ProcessCancelledAuditEventEntity extends ProcessAuditEventEntity {
 
     public void setCause(String cause) {
         this.cause = cause;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(cause);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ProcessCancelledAuditEventEntity other = (ProcessCancelledAuditEventEntity) obj;
+        return Objects.equals(cause, other.cause);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ProcessCancelledAuditEventEntity [cause=")
+               .append(cause)
+               .append(", toString()=")
+               .append(super.toString())
+               .append("]");
+        return builder.toString();
     }
 }
