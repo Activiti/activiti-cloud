@@ -76,6 +76,16 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.liquibase</groupId>
+      <artifactId>liquibase-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>rabbitmq</artifactId>
+      <version>${testcontainers.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
@@ -109,7 +119,7 @@
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-test</artifactId>
@@ -131,6 +141,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <profiles>
     <profile>
       <id>integration-test</id>
@@ -143,55 +154,6 @@
       </activation>
       <build>
         <plugins>
-          <plugin>
-            <groupId>io.fabric8</groupId>
-            <artifactId>docker-maven-plugin</artifactId>
-            <configuration>
-              <images>
-                <image>
-                  <name>activiti/activiti-keycloak</name>
-                  <alias>activiti-keycloak</alias>
-                  <run>
-                    <ports>
-                      <port>8180:8180</port>
-                    </ports>
-                    <wait>
-                      <log>Keycloak .* started in</log>
-                      <time>45000</time>
-                      <shutdown>5000</shutdown>
-                      <kill>1000</kill>
-                    </wait>
-                  </run>
-                </image>
-                <image>
-                  <name>rabbitmq:management</name>
-                  <alias>activiti-rabbitmq</alias>
-                  <run>
-                    <ports>
-                      <port>5672:5672</port>
-                      <port>15672:15672</port>
-                    </ports>
-                    <wait>
-                      <log>Server startup complete</log>
-                      <time>45000</time>
-                      <shutdown>3000</shutdown>
-                      <kill>1000</kill>
-                    </wait>
-                  </run>
-                </image>
-              </images>
-              <skip>${skipTests}</skip>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>start</goal>
-                  <goal>stop</goal>
-                  <goal>remove</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
         </plugins>
       </build>
     </profile>
