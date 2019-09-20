@@ -76,8 +76,10 @@ public class ProcessModelValidator implements ModelValidator {
                         .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
-            log.error("Semantic process model validation errors encountered: " + validationErrors);
-            throw new SemanticModelValidationException(validationErrors);
+            String messageError = "Semantic process model validation errors encountered: " + validationErrors;
+            log.error(messageError);
+            throw new SemanticModelValidationException(messageError,
+                                                       validationErrors);
         }
     }
 
@@ -88,8 +90,10 @@ public class ProcessModelValidator implements ModelValidator {
             Throwable errorCause = Optional.ofNullable(ex.getCause())
                     .filter(XMLStreamException.class::isInstance)
                     .orElse(ex);
-            log.error("Syntactic process model XML validation errors encountered: " + errorCause);
-            throw new SyntacticModelValidationException(errorCause);
+            String messageError = "Syntactic process model XML validation errors encountered: " + errorCause;
+            log.error(messageError);
+            throw new SyntacticModelValidationException(messageError,
+                                                        errorCause);
         }
     }
 

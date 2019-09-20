@@ -80,8 +80,10 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
         super.validateModelContent(bytes,
                                    validationContext);
 
-        validateModelContentInContext(bytes,
-                                      validationContext);
+        if (!validationContext.isEmpty()) {
+            validateModelContentInContext(bytes,
+                                          validationContext);
+        }
     }
 
     protected void validateModelContentInContext(byte[] bytes,

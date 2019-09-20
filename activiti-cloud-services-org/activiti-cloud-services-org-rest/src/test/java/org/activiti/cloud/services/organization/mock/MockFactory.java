@@ -163,6 +163,17 @@ public class MockFactory {
         return processModel;
     }
 
+    public static Extensions extensions(byte[] bytes) {
+        try {
+            return new ObjectMapper()
+                    .readValue(bytes,
+                               ModelEntity.class)
+                    .getExtensions();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     public static Extensions extensions(String serviceTask,
                                         String... processVariables) {
         return extensions(serviceTask,
@@ -297,6 +308,17 @@ public class MockFactory {
                                content);
     }
 
+    public static FileContent processFileContentWithCallActivity(String mainProcessName,
+                                                                 Model callActivity,
+                                                                 byte[] content) {
+        return new FileContent(mainProcessName + "." + BPMN20_XML,
+                               CONTENT_TYPE_XML,
+                               new String(content)
+                                       .replaceFirst("calledElement=\".*\"",
+                                                     "calledElement=\"process-" + callActivity.getId() + "\"")
+                                       .getBytes());
+    }
+
     public static MockMultipartFile multipartExtensionsFile(Model model,
                                                             byte[] content) {
         return new MockMultipartFile("file",
@@ -314,17 +336,5 @@ public class MockFactory {
                                      model.getName() + "." + BPMN20_XML,
                                      CONTENT_TYPE_XML,
                                      content);
-    }
-
-    public static MockMultipartFile multipartProcessFileWithOneCallActivity(Model mainProcess,
-                                                                            Model callActivity,
-                                                                            byte[] content) {
-        return new MockMultipartFile("file",
-                                     mainProcess.getName() + "." + BPMN20_XML,
-                                     CONTENT_TYPE_XML,
-                                     new String(content)
-                                             .replaceFirst("calledElement=\".*\"",
-                                                           "calledElement= \"process-" + callActivity.getId() + "\"")
-                                             .getBytes());
     }
 }

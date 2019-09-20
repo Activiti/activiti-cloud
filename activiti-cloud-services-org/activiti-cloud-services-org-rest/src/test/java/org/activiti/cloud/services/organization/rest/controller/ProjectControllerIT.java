@@ -47,11 +47,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.organization.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.inputsMappings;
 import static org.activiti.cloud.services.organization.mock.MockFactory.outputsMappings;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processFileContent;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processFileContentWithCallActivity;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
 import static org.activiti.cloud.services.organization.mock.MockFactory.processVariables;
@@ -355,48 +357,48 @@ public class ProjectControllerIT {
     public void testExportProjectWithValidationErrors() throws Exception {
         // GIVEN
         ProjectEntity project = (ProjectEntity) projectRepository
-            .createProject(project("project-with-models"));
+                .createProject(project("project-with-models"));
 
         modelRepository.createModel(processModelWithContent(project,
                                                             "process-model",
                                                             "Invalid process xml"));
 
         List<ModelValidationError> expectedValidationErrors =
-            Arrays.asList(new ModelValidationError(),
-                          new ModelValidationError());
+                Arrays.asList(new ModelValidationError(),
+                              new ModelValidationError());
 
         // WHEN
         MvcResult response = mockMvc.perform(
-            get("{version}/projects/{projectId}/export",
-                API_VERSION,
-                project.getId()))
-            .andDo(print())
-            .andExpect(status().isBadRequest())
-            .andReturn();
+                get("{version}/projects/{projectId}/export",
+                    API_VERSION,
+                    project.getId()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
     }
 
     @Test
     public void testExportEmptyProjectWithValidationErrors() throws Exception {
         // GIVEN
         ProjectEntity project = (ProjectEntity) projectRepository
-            .createProject(project("project-without-process"));
+                .createProject(project("project-without-process"));
 
         // WHEN
         MvcResult response = mockMvc.perform(
-            get("{version}/projects/{projectId}/export",
-                API_VERSION,
-                project.getId()))
-            .andDo(print())
-            .andExpect(status().isBadRequest())
-            .andReturn();
+                get("{version}/projects/{projectId}/export",
+                    API_VERSION,
+                    project.getId()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
 
         // THEN
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
-            .hasSize(1)
-            .extracting(ModelValidationError::getProblem,
-                        ModelValidationError::getDescription)
-            .containsOnly(tuple("Invalid project",
-                                "Project must contain at least one process"));
+                .hasSize(1)
+                .extracting(ModelValidationError::getProblem,
+                            ModelValidationError::getDescription)
+                .containsOnly(tuple("Invalid project",
+                                    "Project must contain at least one process"));
     }
 
     @Test
@@ -459,7 +461,7 @@ public class ProjectControllerIT {
     @Test
     public void exportProjectWithServiceTaskEmptyImplementationReturnErrors() throws Exception {
         // GIVEN
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-invalid-stask"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-invalid-task"));
         modelRepository.createModel(processModelWithContent(project,
                                                             "invalid-connector-action",
                                                             resourceAsByteArray("process/no-implementation-service-task.bpmn20.xml")));
@@ -486,6 +488,218 @@ public class ProjectControllerIT {
                           tuple("Invalid service implementation",
                                 "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
                                 "BPMN service task validator"));
+    }
+
+    @Test
+    public void exportProjectWithProcessExtensionsForUnknownTask() throws Exception {
+        // GIVEN
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
+        Model processModel = modelService.importModel(project,
+                                                      processModelType,
+                                                      processFileContent("RankMovie",
+                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        modelRepository.updateModel(processModel,
+                                    processModelWithExtensions("process-model",
+                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-task.json"))));
+        modelRepository.createModel(connectorModel(project,
+                                                   "movies",
+                                                   resourceAsByteArray("connector/movies.json")));
+
+        // WHEN
+        assertThatResponse(
+                mockMvc.perform(
+                        get("{version}/projects/{projectId}/export",
+                            API_VERSION,
+                            project.getId()))
+                        .andExpect(status().isBadRequest())
+                        .andReturn())
+                .isSemanticValidationException()
+                .hasValidationErrorMessages(
+                        "The extensions for process 'process-" + processModel.getId() +
+                                "' contains mappings for an unknown task 'unknown-task'");
+    }
+
+    @Test
+    public void exportProjectWithProcessExtensionsForUnknownOutputProcessVariableMapping() throws Exception {
+        // GIVEN
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
+        Model processModel = modelService.importModel(project,
+                                                      processModelType,
+                                                      processFileContent("RankMovie",
+                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        modelRepository.updateModel(processModel,
+                                    processModelWithExtensions("process-model",
+                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-output-process-variable.json"))));
+        modelRepository.createModel(connectorModel(project,
+                                                   "movies",
+                                                   resourceAsByteArray("connector/movies.json")));
+
+        // WHEN
+        assertThatResponse(
+                mockMvc.perform(
+                        get("{version}/projects/{projectId}/export",
+                            API_VERSION,
+                            project.getId()))
+                        .andExpect(status().isBadRequest())
+                        .andReturn())
+                .isSemanticValidationException()
+                .hasValidationErrorMessages(
+                        "The extensions for process 'process-" + processModel.getId() +
+                                "' contains mappings for an unknown process variable 'unknown-output-variable'");
+    }
+
+    @Test
+    public void exportProjectWithProcessExtensionsForConnectorWithoutInputsOutputs() throws Exception {
+        // GIVEN
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
+        Model processModel = modelService.importModel(project,
+                                                      processModelType,
+                                                      processFileContent("RankMovie",
+                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        modelRepository.updateModel(processModel,
+                                    processModelWithExtensions("process-model",
+                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions.json"))));
+        modelRepository.createModel(connectorModel(project,
+                                                   "movies",
+                                                   resourceAsByteArray("connector/movies-without-inputs-outputs.json")));
+
+        // WHEN
+        assertThatResponse(
+                mockMvc.perform(
+                        get("{version}/projects/{projectId}/export",
+                            API_VERSION,
+                            project.getId()))
+                        .andExpect(status().isBadRequest())
+                        .andReturn())
+                .isSemanticValidationException()
+                .hasValidationErrorMessages(
+                        "The extensions for process 'process-" + processModel.getId() +
+                                "' contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'movieName'",
+                        "The extensions for process 'process-" + processModel.getId() +
+                                "' contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'movieDescription'");
+    }
+
+    @Test
+    public void exportProjectWithProcessExtensionsForUnknownConnectorParameterMapping() throws Exception {
+        // GIVEN
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
+        Model processModel = modelService.importModel(project,
+                                                      processModelType,
+                                                      processFileContent("RankMovie",
+                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        modelRepository.updateModel(processModel,
+                                    processModelWithExtensions("process-model",
+                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-connector-parameter.json"))));
+        modelRepository.createModel(connectorModel(project,
+                                                   "movies",
+                                                   resourceAsByteArray("connector/movies.json")));
+
+        // WHEN
+        assertThatResponse(
+                mockMvc.perform(
+                        get("{version}/projects/{projectId}/export",
+                            API_VERSION,
+                            project.getId()))
+                        .andExpect(status().isBadRequest())
+                        .andReturn())
+                .isSemanticValidationException()
+                .hasValidationErrorMessages(
+                        "The extensions for process 'process-" + processModel.getId() +
+                                "' contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'unknown-input-parameter'",
+                        "The extensions for process 'process-" + processModel.getId() +
+                                "' contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'unknown-output-parameter'");
+    }
+
+    @Test
+    public void exportProjectWithProcessExtensionsForUnknownInputProcessVariableMapping() throws Exception {
+        // GIVEN
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
+        Model processModel = modelService.importModel(project,
+                                                      processModelType,
+                                                      processFileContent("RankMovie",
+                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        modelRepository.updateModel(processModel,
+                                    processModelWithExtensions("process-model",
+                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-input-process-variable.json"))));
+        modelRepository.createModel(connectorModel(project,
+                                                   "movies",
+                                                   resourceAsByteArray("connector/movies.json")));
+
+        // WHEN
+        assertThatResponse(
+                mockMvc.perform(
+                        get("{version}/projects/{projectId}/export",
+                            API_VERSION,
+                            project.getId()))
+                        .andExpect(status().isBadRequest())
+                        .andReturn())
+                .isSemanticValidationException()
+                .hasValidationErrorMessages(
+                        "The extensions for process 'process-" + processModel.getId() +
+                                "' contains mappings for an unknown process variable 'unknown-input-variable'");
+    }
+
+    @Test
+    public void exportProjectWithInvalidCallActivityReference() throws Exception {
+        // GIVEN
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
+        Model processModel = modelService.importModel(project,
+                                                      processModelType,
+                                                      processFileContent("RankMovie",
+                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        modelRepository.updateModel(processModel,
+                                    processModelWithExtensions("process-model",
+                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions.json"))));
+        modelRepository.createModel(connectorModel(project,
+                                                   "movies",
+                                                   resourceAsByteArray("connector/movies.json")));
+
+        Model mainProcessModel = modelService.importModel(project,
+                                                          processModelType,
+                                                          processFileContentWithCallActivity("main-process",
+                                                                                             processModel,
+                                                                                             resourceAsByteArray("process/two-call-activities.bpmn20.xml")));
+
+        assertThatResponse(
+                mockMvc.perform(
+                        get("{version}/projects/{projectId}/export",
+                            API_VERSION,
+                            project.getId()))
+                        .andExpect(status().isBadRequest())
+                        .andReturn())
+                .isSemanticValidationException()
+                .hasValidationErrorMessages(
+                        "Call activity 'Task_1mbp1v0' with call element 'not-present' found in process 'process-" +
+                                mainProcessModel.getId() +
+                                "' references a process id that does not exist in the current project.");
+    }
+
+    @Test
+    public void exportProjectWithValidCallActivity() throws Exception {
+        // GIVEN
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
+        Model processModel = modelService.importModel(project,
+                                                      processModelType,
+                                                      processFileContent("RankMovie",
+                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        modelRepository.updateModel(processModel,
+                                    processModelWithExtensions("process-model",
+                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions.json"))));
+        modelRepository.createModel(connectorModel(project,
+                                                   "movies",
+                                                   resourceAsByteArray("connector/movies.json")));
+
+        modelService.importModel(project,
+                                 processModelType,
+                                 processFileContentWithCallActivity("main-process",
+                                                                    processModel,
+                                                                    resourceAsByteArray("process/call-activity.bpmn20.xml")));
+
+        mockMvc.perform(
+                get("{version}/projects/{projectId}/export",
+                    API_VERSION,
+                    project.getId()))
+                .andExpect(status().isOk());
     }
 
     @Test

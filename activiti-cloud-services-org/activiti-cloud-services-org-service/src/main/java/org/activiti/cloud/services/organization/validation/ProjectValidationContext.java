@@ -46,4 +46,9 @@ public class ProjectValidationContext implements ValidationContext {
                 .filter(model -> modelType.getName().equals(model.getType()))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public boolean isEmpty() {
+        return availableModels.isEmpty();
+    }
 }

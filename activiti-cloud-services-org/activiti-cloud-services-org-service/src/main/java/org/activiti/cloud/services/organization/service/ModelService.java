@@ -35,7 +35,6 @@ import org.activiti.cloud.organization.core.error.ImportModelException;
 import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.activiti.cloud.services.organization.validation.ProjectValidationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +44,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
+import static org.activiti.cloud.organization.api.ValidationContext.EMPTY_CONTEXT;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.isJsonContentType;
@@ -294,9 +294,7 @@ public class ModelService {
         validateModelContent(model.getType(),
                              fileContent.getFileContent(),
                              fileContent.getContentType(),
-                             Optional.ofNullable(model.getProject())
-                                     .map(this::createValidationContext)
-                                     .orElseGet(() -> createValidationContext(model)));
+                             EMPTY_CONTEXT);
     }
 
     public void validateModelContent(Model model,
@@ -316,14 +314,6 @@ public class ModelService {
                                                contentType)
                 .ifPresent(modelValidator -> modelValidator.validateModelContent(modelContent,
                                                                                  validationContext));
-    }
-
-    private ValidationContext createValidationContext(Project project) {
-        return new ProjectValidationContext(getAllModels(project));
-    }
-
-    private ValidationContext createValidationContext(Model model) {
-        return new ProjectValidationContext(model);
     }
 
     private ModelType findModelType(Model model) {
