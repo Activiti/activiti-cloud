@@ -119,6 +119,38 @@ public class ModelValidationControllerIT {
     }
 
     @Test
+    public void validateProcessModelWithNullServiceTaskContent() throws Exception {
+        // given
+        byte[] validContent = resourceAsByteArray("process/null-implementation-service-task.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "process.xml",
+                                                       CONTENT_TYPE_XML,
+                                                       validContent);
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModel(project,
+                                                                      "process-model"));
+
+        // when
+        ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   API_VERSION,
+                                   processModel.getId())
+                                 .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(1)
+                .extracting(ModelValidationError::getDescription,
+                            ModelValidationError::getValidatorSetName)
+                .contains(tuple("One of the attributes 'implementation', 'class', 'delegateExpression', 'type', 'operation', or 'expression' is mandatory on serviceTask.",
+                                "activiti-executable-process"));
+    }
+
+    @Test
     public void validateProcessModelWithInvalidContent() throws Exception {
 
         // given

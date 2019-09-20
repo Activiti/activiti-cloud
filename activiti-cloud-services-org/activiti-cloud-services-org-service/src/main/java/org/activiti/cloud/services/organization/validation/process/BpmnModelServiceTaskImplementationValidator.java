@@ -64,6 +64,7 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
 
         return getTasks(bpmnModel,
                         ServiceTask.class)
+                .filter(serviceTask -> serviceTask.getImplementation() != null)
                 .map(serviceTask -> validateServiceTaskImplementation(serviceTask,
                                                                       availableImplementations))
                 .filter(Optional::isPresent)
