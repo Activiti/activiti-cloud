@@ -56,7 +56,7 @@ public class EventsRestTemplate {
     }
 
     @Bean
-    public RestTemplateBuilder restTemplateBuilder(List<Module> modules) {
+    public RestTemplateBuilder restTemplateBuilder  (List<Module> modules) {
 
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
                          false);
