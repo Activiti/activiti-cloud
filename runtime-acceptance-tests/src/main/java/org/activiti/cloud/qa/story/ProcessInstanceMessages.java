@@ -54,24 +54,24 @@ public class ProcessInstanceMessages {
     private ProcessInstance processInstance;
 
     
-    @Given("generated unique sessionVariable called $variableName")
+    @Given("messages: generated unique sessionVariable called $variableName")
     public void generateUniqueBusinessId(String variableName) {
         Serenity.setSessionVariable(variableName).to(UUID.randomUUID().toString());
     }
 
-    @Given("session timeout of $timeoutSeconds seconds")
+    @Given("messages: session timeout of $timeoutSeconds seconds")
     public void setSessionTimeoutSeconds(long timeoutSeconds) {
         Serenity.setSessionVariable("timeoutSeconds").to(timeoutSeconds);
     }
     
-    @When("services are started")
+    @When("messages: services are started")
     public void checkServicesStatus() {
         processRuntimeBundleSteps.checkServicesHealth();
         processQuerySteps.checkServicesHealth();
         auditSteps.checkServicesHealth();
     }
     
-    @When("the user sends a start message named $messageName with businessKey value of $businessKey")
+    @When("messages: the user sends a start message named $messageName with businessKey value of $businessKey session variable")
     public void startMessage(String messageName, String businessKey) throws IOException, InterruptedException {
         String variableValue = Serenity.sessionVariableCalled(businessKey);
 
@@ -84,7 +84,7 @@ public class ProcessInstanceMessages {
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
 
-    @Then("the user sends a message named $messageName with correlationKey value of $correlationKey")
+    @Then("messages: the user sends a message named $messageName with correlationKey value of $correlationKey")
     public void receiveMessage(String messageName, String correlationKey) throws IOException, InterruptedException {      
         String variableValue = Serenity.sessionVariableCalled(correlationKey);
         ReceiveMessagePayload payload = MessagePayloadBuilder.receive(messageName)
@@ -94,7 +94,7 @@ public class ProcessInstanceMessages {
         processRuntimeBundleSteps.message(payload);
     }
 
-    @Then("$eventType event is emitted for the message '$messageName'")
+    @Then("messages: $eventType event is emitted for the message '$messageName'")
     public void verifyTimerScheduleEventsEmitted(String eventType,
                                                  String messageName) throws Exception {
         long timeoutSeconds = sessionTimeoutSeconds();
@@ -116,7 +116,7 @@ public class ProcessInstanceMessages {
                });
     }
     
-    @Then("the process with message events is completed")
+    @Then("messages: the process with message events is completed")
     public void verifyProcessCompleted() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
         

@@ -39,3 +39,4 @@ hs_err_pid*
 
 *.versionsBackup
 .factorypath
+.sts4-cache

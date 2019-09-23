@@ -19,30 +19,40 @@ package org.activiti.cloud.qa.story;
 import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.builders.MessagePayloadBuilder;
+import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
+import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.cloud.acc.core.steps.notifications.NotificationsSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.acc.shared.model.AuthToken;
 import org.activiti.cloud.acc.shared.rest.TokenHolder;
-import org.assertj.core.util.Arrays;
+import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
+import reactor.test.StepVerifier;
+import reactor.test.StepVerifier.Step;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class ProcessInstanceNotifications {
 
@@ -59,239 +69,272 @@ public class ProcessInstanceNotifications {
     private ObjectMapper objectMapper = new ObjectMapper();
     
     private AtomicReference<ProcessInstance> processInstanceRef;
-    private ReplayProcessor<String> data;
     private AtomicReference<Subscription> subscriptionRef;
+    
+    private Step<String> stepVerifier;
 
-    @When("services are started")
+    @When("notifications: services are started")
     public void checkServicesStatus() {
         processRuntimeBundleSteps.checkServicesHealth();
         processQuerySteps.checkServicesHealth();
+        notificationsSteps.checkServicesHealth();
     }
     
-    @When("the user starts a process $processName with PROCESS_STARTED and PROCESS_COMPLETED events subscriptions")
+    @Given("notifications: session variable called $variableName with value set to $variableValue")
+    public void setSessionVariableTo(String variableName, String variableValue) {
+        Serenity.setSessionVariable(variableName).to(variableValue);
+    }
+    
+    @Given("notifications: generated random value for session variable called $variableName")
+    public void generateUniqueBusinessId(String variableName) {
+        Serenity.setSessionVariable(variableName).to(UUID.randomUUID().toString());
+    }
+
+    @Given("notifications: session timeout of $timeoutSeconds seconds")
+    public void setSessionTimeoutSeconds(long timeoutSeconds) {
+        Serenity.setSessionVariable("sessionTimeoutSeconds").to(timeoutSeconds);
+    }
+
+    @Given("notifications: subscription timeout of $timeoutSeconds seconds")
+    public void setSubscriptionTimeoutSeconds(long timeoutSeconds) {
+        Serenity.setSessionVariable("subscriptionTimeoutSeconds").to(timeoutSeconds);
+    }
+    
+    @When("notifications: the user subscribes to $eventTypesString notifications")
+    public void subscribeToEventTypesNotifications(String eventTypesString) throws IOException, InterruptedException {
+        
+        String businessKey = sessionVariableCalled("businessKey", String.class).orElse("*");
+        String[] eventTypes = eventTypesString.split(",");
+        
+        ReplayProcessor<String> subscription = subscribe(eventTypes, 
+                                                         businessKey);
+        
+        stepVerifier = StepVerifier.create(subscription)
+                                   .expectSubscription();
+    }
+    
+    
+    @When("notifications: the user subscribes to $eventTypesString notifications with businessKey value from session variable called $variableName")
+    public void subscribeToEventTypesNotificationsWithBusinessKeySessionVariable(String eventTypesString,
+                                                                                 String variableName) throws IOException, InterruptedException {
+
+        String businessKey = sessionVariableCalled(variableName, String.class).orElse(null);
+        String[] eventTypes = eventTypesString.split(",");
+        
+        ReplayProcessor<String> subscription = subscribe(eventTypes, 
+                                                         businessKey);
+        
+        stepVerifier = StepVerifier.create(subscription)
+                                   .expectSubscription();
+    }
+    
+    @When("notifications: the user starts a process $processName")
     public void startProcess(String processName) throws IOException, InterruptedException {
-
-        processInstanceRef =  new AtomicReference<>();
-        subscriptionRef = new AtomicReference<>();
-                
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        AuthToken authToken = TokenHolder.getAuthToken();
+        String processDefinitionKey = processDefinitionKeyMatcher(processName);
         
-        String query = "subscription($serviceName: String!, $processDefinitionKey: String!, $eventTypes: [EngineEventType!]) {" +
-                      "  engineEvents(serviceName: [$serviceName], processDefinitionKey: [$processDefinitionKey], eventType: $eventTypes ) {" +
-                      "    processDefinitionKey " +
-                      "    eventType " +
-                      "  }" +
-                      "}";
-            
-        Map<String, Object> variables = Map.of("serviceName", notificationsSteps.getRuntimeBundleServiceName(),
-                                               "processDefinitionKey",processDefinitionKeyMatcher(processName),
-                                               "eventTypes", Arrays.array("PROCESS_STARTED", "PROCESS_COMPLETED"));
-
-        Consumer<Subscription> action = startProcessAction(processName, countDownLatch, subscriptionRef);
-        
-        data = notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
-
-        assertThat(countDownLatch.await(10, TimeUnit.SECONDS)).as("should start a process with events subscription")
-                                                              .isTrue();
+        processInstanceRef =  new AtomicReference<>(processRuntimeBundleSteps.startProcess(processDefinitionKey, true));
     }
 
-    @When("the user starts a process $processName with SIGNAL_RECEIVED subscription")
-    public void startProcessWithSignalSubscription(String processName) throws IOException, InterruptedException {
+    @When("notifications: the user sends a start message named $messageName with businessKey value from session variable called $variableName")
+    public void sendStartMessage(String messageName,
+                                 String variableName) throws IOException, InterruptedException {
 
         processInstanceRef =  new AtomicReference<>();
-        subscriptionRef = new AtomicReference<>();
-
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        AuthToken authToken = TokenHolder.getAuthToken();
+        String businessKey = sessionVariableCalled(variableName, String.class).orElse(null);
+        
+        StartMessagePayload payload = MessagePayloadBuilder.start(messageName)
+                                                           .withBusinessKey(businessKey)
+                                                           .build();
          
-        String query = "subscription($serviceName: String!) {" +
-                        "  engineEvents(serviceName: [$serviceName], eventType: [SIGNAL_RECEIVED]) {" +
-                        "    serviceName " +
-                        "    eventType " +
-                        "  }" +
-                        "}";
+        processInstanceRef.set(processRuntimeBundleSteps.message(payload));
+    }
 
-        Map<String, Object> variables = Map.of("serviceName", notificationsSteps.getRuntimeBundleServiceName());
-
-        Consumer<Subscription> action = startProcessAction(processName, countDownLatch, subscriptionRef);
-        
-        data = notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
-        
-        assertThat(countDownLatch.await(10, TimeUnit.SECONDS)).as("should start a process with subscription")
-                                                              .isTrue();
-    }   
+    @Then("notifications: verify subscription started")
+    public void verifySubscriptionStarted() {
+        assertThat(subscriptionRef.get()).as("should start the subscription")
+                                         .isNotNull();
+    }
     
-    @When("the user starts a process $processName with TIMER subscriptions")
-    public void startProcessWithTimerSubscription(String processName) throws IOException, InterruptedException {
-
-        processInstanceRef =  new AtomicReference<>();
-        subscriptionRef = new AtomicReference<>();
-
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        AuthToken authToken = TokenHolder.getAuthToken();
-         
-        String query = "subscription($serviceName: String!, $eventTypes: [EngineEventType!]) {" +
-                        "  engineEvents(serviceName: [$serviceName], eventType: $eventTypes) {" +
-                        "    serviceName " +
-                        "    processDefinitionKey " +
-                        "    eventType " +
-                        "  }" +
-                        "}";
-
-        Map<String, Object> variables = Map.of("serviceName", notificationsSteps.getRuntimeBundleServiceName(),
-                                               "eventTypes", Arrays.array("TIMER_SCHEDULED", "TIMER_FIRED", "TIMER_EXECUTED"));
-        
-        Consumer<Subscription> action = startProcessAction(processName, countDownLatch, subscriptionRef);
-        
-        data = notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
-        
-        assertThat(countDownLatch.await(10, TimeUnit.SECONDS)).as("should start a process with subscription")
-                                                              .isTrue();
-    }       
+    @Then("notifications: verify process instance started response")
+    public void verifyProcessInstanceStarted() {
+        assertThat(processInstanceRef.get()).as("should receive process instance in the response")
+                                            .isNotNull();
+    }
     
-    @Then("the status of the process is completed")
+    @Then("notifications: the user sends a message named $messageName with correlationKey value of session variable called $variableName")
+    public void sendMessage(String messageName, 
+                            String variableName) throws Exception {
+
+        String variableValue = Serenity.sessionVariableCalled(variableName);
+
+        ReceiveMessagePayload payload = MessagePayloadBuilder.receive(messageName)
+                                                             .withCorrelationKey(variableValue)
+                                                             .build();
+        
+        processRuntimeBundleSteps.message(payload);
+    }    
+    
+    @Then("notifications: verify the status of the process is completed")
     public void verifyProcessCompleted() throws Exception {
-        
         assertThat(processInstanceRef.get()).isNotNull();
 
         try {
             processQuerySteps.checkProcessInstanceStatus(processInstanceRef.get()
                                                                            .getId(),
                                                          ProcessInstance.ProcessInstanceStatus.COMPLETED);
-        } finally {
-            // signal to stop receiving notifications 
-            subscriptionRef.get()
-                           .cancel();
+        } catch(Error cause) {
+            cancelSubscription();
+            
+            throw cause;
         }
     }
     
-    @SuppressWarnings("serial")
-    @Then("PROCESS_STARTED and PROCESS_COMPLETED notifications are received")
-    public void verifyNotifications() throws Exception {
-        Map<String, Object> startProcessMessagePayload = new ObjectMap() {{
-            put("payload", new ObjectMap() {{
-                put("data", new ObjectMap() {{
-                    put("engineEvents", Arrays.array(new ObjectMap() {{
-                        put("processDefinitionKey", "ConnectorProcess");
-                        put("eventType", "PROCESS_STARTED");
-                    }}));
-                }});
-            }});
-            put("id","1");
-            put("type", "data");
-        }};
-        
-        Map<String, Object> completeProcessMessagePayload = new ObjectMap() {{
-            put("payload", new ObjectMap() {{
-                put("data", new ObjectMap() {{
-                    put("engineEvents", Arrays.array(new ObjectMap() {{
-                        put("processDefinitionKey", "ConnectorProcess");
-                        put("eventType", "PROCESS_COMPLETED");
-                    }}));
-                }});
-            }});
-            put("id","1");
-            put("type", "data");
-        }};
-        
-        
-        String startProcessMessage = objectMapper.writeValueAsString(startProcessMessagePayload);
-        String completeProcessMessage = objectMapper.writeValueAsString(completeProcessMessagePayload);
-        
-        notificationsSteps.verifyData(data, startProcessMessage, completeProcessMessage);
+    @Then("notifications: the user completes the subscription")
+    public void completeSubscription() {
+        assertThat(subscriptionRef.get()).isNotNull();
+
+        cancelSubscription();
+    }
+
+    @Then("notifications: verify all expected notifications are received")
+    public void verifyAllNotificationsAreReceived() {
+        long sessionTimeout = sessionTimeoutSeconds(); 
+
+        stepVerifier.expectComplete()
+                    .verify(Duration.ofSeconds(sessionTimeout));
     }
     
-    @SuppressWarnings("serial")
-    @Then("SIGNAL_RECEIVED notification with $elementId signal event is received")
-    public void verifySignalReceivedEventNotifications(String elementId) throws Exception {
+    @Then("notifications: the payload with $eventTypes notifications is expected with process definition key value $processDefinitionKey")
+    public void expectPayloadWithEventTypesNotification(String eventTypes,
+                                                        String processDefinitionKey) throws Exception {
         
-        Map<String, Object> payload = new ObjectMap() {{
-            put("payload", new ObjectMap() {{
-                put("data", new ObjectMap() {{
-                    put("engineEvents", Arrays.array(new ObjectMap() {{
-                        put("serviceName", notificationsSteps.getRuntimeBundleServiceName());
-                        put("eventType", "SIGNAL_RECEIVED");
-                    }}));
-                }});
-            }});
-            put("id","1");
-            put("type", "data");
-        }};
+        String messagePayload = messagePayload(eventTypes, processDefinitionKey);
 
-        String expected =  objectMapper.writeValueAsString(payload);
-        
-        notificationsSteps.verifyData(data, expected);
+        stepVerifier.expectNext(messagePayload);
     }
-    
-    @SuppressWarnings("serial")
-    @Then("TIMER notifications are received")
-    public void verifyTimerNotifications() throws Exception {
-        ProcessInstance processInstnace = processInstanceRef.get();
-        
-        Map<String, Object> timerScheduledMessagePayload = new ObjectMap() {{
-            put("payload", new ObjectMap() {{
-                put("data", new ObjectMap() {{
-                    put("engineEvents", Arrays.array(new ObjectMap() {{
-                        put("serviceName", notificationsSteps.getRuntimeBundleServiceName());
-                        put("processDefinitionKey", processInstnace.getProcessDefinitionKey());
-                        put("eventType", "TIMER_SCHEDULED");
-                    }}));
-                }});
-            }});
-            put("id","1");
-            put("type", "data");
-        }};
-        
-        Map<String, Object> timerFiredMessagePayload = new ObjectMap() {{
-            put("payload", new ObjectMap() {{
-                put("data", new ObjectMap() {{
-                    put("engineEvents", 
-                        Arrays.array(new ObjectMap() {{
-                            put("serviceName", notificationsSteps.getRuntimeBundleServiceName());
-                            put("processDefinitionKey", processInstnace.getProcessDefinitionKey());
-                            put("eventType", "TIMER_FIRED");
-                        }},
-                        new ObjectMap() {{
-                            put("serviceName", notificationsSteps.getRuntimeBundleServiceName());
-                            put("processDefinitionKey", processInstnace.getProcessDefinitionKey());
-                            put("eventType", "TIMER_EXECUTED");
-                        }}));
-                }});
-            }});
-            put("id","1");
-            put("type", "data");
-        }};
 
-        String startProcessMessage = objectMapper.writeValueAsString(timerScheduledMessagePayload);
-        String completeProcessMessage = objectMapper.writeValueAsString(timerFiredMessagePayload);
+    @Then("notifications: the payload with $eventTypes notifications is expected")
+    public void expectPayloadWithEventTypesNotification(String eventTypes) throws Exception {
         
-        notificationsSteps.verifyData(data, startProcessMessage, completeProcessMessage);
+        String processDefinitionKey = processInstanceRef.get()
+                                                        .getProcessDefinitionKey();
+                                                        
+        String messagePayload = messagePayload(eventTypes, processDefinitionKey);
+
+        stepVerifier.expectNext(messagePayload);
     }    
+    private void cancelSubscription() {
+        // signal to stop receiving notifications 
+        subscriptionRef.get()
+                       .cancel();
+        
+    }
     
-    private Consumer<Subscription> startProcessAction(String processName, CountDownLatch countDownLatch, AtomicReference<Subscription> subscriptionRef) {
-        return (s) -> {
-            subscriptionRef.set(s);
+    private Consumer<Subscription> countDownLatchAction(CountDownLatch countDownLatch, 
+                                                        AtomicReference<Subscription> subscriptionRef,
+                                                        Duration duration,
+                                                        Runnable action) {
+        return (subscription) -> {
+            subscriptionRef.set(subscription);
 
-            Mono.just(s)
-                .delaySubscription(Duration.ofSeconds(2))
-                //.doOnSuccess(it ->  countDownLatch.countDown())
-                .doOnError(e -> subscriptionRef.get()
-                                               .cancel())
+            Mono.just(subscription)
+                .delaySubscription(duration)
+                .doOnError(error -> subscriptionRef.get()
+                                                   .cancel())
+                .doOnSubscribe(it -> {
+                    action.run();
+                })
                 .subscribe(it -> { 
-                    try {
-                        String processDefinitionKey = processDefinitionKeyMatcher(processName);
-                        
-                        processInstanceRef.set(processRuntimeBundleSteps.startProcess(processDefinitionKey, true));
-                        
-                        countDownLatch.countDown();
-                    } catch (Exception cause) {
-                        // TODO Auto-generated catch block
-                        cause.printStackTrace();
-                        throw new RuntimeException(cause);
-                    }
+                    countDownLatch.countDown();
                 });
         };
+    }
+
+    private Long sessionTimeoutSeconds() {
+        return sessionVariableCalled("sessionTimeoutSeconds", 
+                                     Long.class).orElse(Long.valueOf(6));
+    }
+    
+    private Long subscriptionTimeoutSeconds() {
+        return sessionVariableCalled("subscriptionTimeoutSeconds", 
+                                     Long.class).orElse(Long.valueOf(3));
+    }
+    
+    private <T> Optional<T> sessionVariableCalled(String key, Class<T> clazz) {
+        return Optional.ofNullable(Serenity.sessionVariableCalled(key));
+    }
+    
+    @SuppressWarnings("serial")
+    private ObjectMap engineEvent(String eventType, String processDefinitionKey) {
+        return new ObjectMap() {{
+                put("serviceName", notificationsSteps.getRuntimeBundleServiceName());
+                put("processDefinitionKey", processDefinitionKey);
+                put("eventType", eventType);
+            }}; 
+    }
+    
+    @SuppressWarnings("serial")
+    private ObjectMap objectMapPayload(ObjectMap[] engineEvents) {
+        return new ObjectMap() {{
+            put("payload", new ObjectMap() {{
+                put("data", new ObjectMap() {{
+                    put("engineEvents", engineEvents);
+                }});
+            }});
+            put("id","1");
+            put("type", "data");
+        }};
+    }
+    
+    private String messagePayload(String eventTypes, String processDefinitionKey) throws JsonProcessingException {
+        ObjectMap[] engineEvents = Stream.of(eventTypes.split(","))
+                .map(eventType -> engineEvent(eventType, processDefinitionKey))
+                .toArray(ObjectMap[]::new);
+        
+        Map<String, Object> objectMapPayload = objectMapPayload(engineEvents);
+        
+        return objectMapper.writeValueAsString(objectMapPayload);        
+    }
+    
+    private ReplayProcessor<String> subscribe(String[] eventTypes, String businessKey) throws InterruptedException {
+        String serviceName = notificationsSteps.getRuntimeBundleServiceName();
+        long subscriptionTimeoutSeconds = subscriptionTimeoutSeconds();
+        long sessionTimeoutSeconds = sessionTimeoutSeconds();
+        
+        subscriptionRef = new AtomicReference<>();
+
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        AuthToken authToken = TokenHolder.getAuthToken();
+
+        // TODO: add processDefinitionKey when signal events are fixed
+        String query = "subscription($serviceName: String!, $eventTypes: [EngineEventType!], $businessKey: String!) {" +
+                        "  engineEvents(serviceName: [$serviceName], eventType: $eventTypes, businessKey: [$businessKey]) {" +
+                        "    serviceName " +
+                        "    processDefinitionKey " +
+                        "    eventType " +
+                        "  }" +
+                        "}";
+
+        Map<String, Object> variables = Map.of("serviceName", serviceName,
+                                               "eventTypes", eventTypes,
+                                               "businessKey", businessKey);
+
+        Consumer<Subscription> action = countDownLatchAction(countDownLatch, 
+                                                             subscriptionRef, 
+                                                             Duration.ofSeconds(subscriptionTimeoutSeconds),
+                                                             () -> {});
+        
+        ReplayProcessor<String> data = notificationsSteps.subscribe(authToken.getAccess_token(), 
+                                            query, 
+                                            variables, 
+                                            action);
+        
+        assertThat(countDownLatch.await(sessionTimeoutSeconds, 
+                                        TimeUnit.SECONDS))
+                                 .as("should subscribe to notifications")
+                                 .isTrue();
+        
+        return data;
     }
     
     @SuppressWarnings("serial")
