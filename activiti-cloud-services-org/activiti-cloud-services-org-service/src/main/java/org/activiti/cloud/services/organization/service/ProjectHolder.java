@@ -17,14 +17,14 @@
 package org.activiti.cloud.services.organization.service;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
-import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
+import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.collections4.map.MultiKeyMap;
 
 /**
  * Builder for projects
@@ -33,9 +33,9 @@ public class ProjectHolder {
 
     private Project project;
 
-    private final Map<String, ModelJsonFile> modelJsonFilesMap = new LinkedHashMap<>();
+    private final MultiKeyMap<String, ModelJsonFile> modelJsonFilesMap = new MultiKeyMap<>();
 
-    private final Map<String, FileContent> modelContentFilesMap = new LinkedHashMap<>();
+    private final MultiKeyMap<String, FileContent> modelContentFilesMap = new MultiKeyMap<>();
 
     public ProjectHolder setProject(Project project) {
         if (this.project == null) {
@@ -47,15 +47,18 @@ public class ProjectHolder {
     public ProjectHolder addModelJsonFile(String modelName,
                                           ModelType modelType,
                                           FileContent fileContent) {
-        modelJsonFilesMap.put(modelName,
+        modelJsonFilesMap.put(key(modelName,
+                                  modelType),
                               new ModelJsonFile(modelType,
                                                 fileContent));
         return this;
     }
 
     public ProjectHolder addModelContent(String modelName,
+                                         ModelType modelType,
                                          FileContent fileContent) {
-        modelContentFilesMap.put(modelName,
+        modelContentFilesMap.put(key(modelName,
+                                     modelType),
                                  fileContent);
         return this;
     }
@@ -70,7 +73,21 @@ public class ProjectHolder {
 
     public Optional<FileContent> getModelContentFile(Model model) {
         return Optional.ofNullable(model.getName())
+                .map(name -> key(name,
+                                 model.getType()))
                 .map(modelContentFilesMap::get);
+    }
+
+    private MultiKey<String> key(String name,
+                                 ModelType type) {
+        return key(name,
+                   type.getName());
+    }
+
+    private MultiKey<String> key(String name,
+                                 String type) {
+        return new MultiKey<>(name,
+                              type);
     }
 
     class ModelJsonFile {

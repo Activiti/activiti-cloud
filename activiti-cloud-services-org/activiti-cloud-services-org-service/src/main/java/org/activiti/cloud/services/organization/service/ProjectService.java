@@ -189,6 +189,7 @@ public class ProjectService {
                                         modelService.contentFilenameToModelName(zipEntry.getFileName(),
                                                                                 modelType)
                                                 .ifPresent(modelName -> projectHolder.addModelContent(modelName,
+                                                                                                      modelType,
                                                                                                       fileContent));
                                     }
                                 });
