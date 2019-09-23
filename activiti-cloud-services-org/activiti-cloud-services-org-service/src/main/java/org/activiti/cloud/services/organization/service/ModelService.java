@@ -35,6 +35,7 @@ import org.activiti.cloud.organization.core.error.ImportModelException;
 import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
+import org.activiti.cloud.services.organization.validation.ProjectValidationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -291,10 +292,24 @@ public class ModelService {
 
     public void validateModelContent(Model model,
                                      FileContent fileContent) {
+        ValidationContext validationContext =
+                !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON) ?
+                        EMPTY_CONTEXT :
+                        Optional.ofNullable(model.getProject())
+                                .map(this::createValidationContext)
+                                .orElseGet(() -> createValidationContext(model));
         validateModelContent(model.getType(),
                              fileContent.getFileContent(),
                              fileContent.getContentType(),
-                             EMPTY_CONTEXT);
+                             validationContext);
+    }
+
+    private ValidationContext createValidationContext(Project project) {
+        return new ProjectValidationContext(getAllModels(project));
+    }
+
+    private ValidationContext createValidationContext(Model model) {
+        return new ProjectValidationContext(model);
     }
 
     public void validateModelContent(Model model,
