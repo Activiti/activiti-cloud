@@ -28,8 +28,8 @@ db:
   password:
   driver:
   platform:
-  generateDdl:
-  ddlAuto:
+  generateDdl: "false"
+  ddlAuto: "none"
 init:
   image:
     repository: alpine
@@ -41,6 +41,8 @@ postgres:
   port: 5432
   username: postgres
   password:
+  generateDdl: "false"
+  ddlAuto: "none"
 
 javaOpts:
   xmx: 2048m
