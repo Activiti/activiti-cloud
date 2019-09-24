@@ -40,9 +40,9 @@ create table audit_event
     variable_type              varchar(255),
     primary key (id)
 ) engine=MyISAM;
-create table hibernate_sequence
+create table audit_sequence
 (
     next_val bigint
 ) engine=MyISAM;
-insert into hibernate_sequence
+insert into audit_sequence
 values (1);

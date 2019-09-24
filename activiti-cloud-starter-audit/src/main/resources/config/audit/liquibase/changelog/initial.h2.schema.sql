@@ -1,4 +1,4 @@
-create sequence hibernate_sequence start with 1 increment by 1;
+create sequence audit_sequence start with 1 increment by 1;
 create table audit_event
 (
     type                       varchar(31) not null,

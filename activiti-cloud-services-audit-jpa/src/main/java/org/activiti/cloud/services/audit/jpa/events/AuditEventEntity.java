@@ -33,7 +33,7 @@ import javax.persistence.InheritanceType;
 public abstract class AuditEventEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "audit_sequence")
     private Long id;
     private String eventId;
     private Long timestamp;
@@ -56,7 +56,7 @@ public abstract class AuditEventEntity {
     private String processDefinitionKey;
     private String parentProcessInstanceId;
     private String businessKey;
-    
+
     public AuditEventEntity() {
     }
 
@@ -183,7 +183,7 @@ public abstract class AuditEventEntity {
     public void setEntityId(String entityId) {
         this.entityId = entityId;
     }
-    
+
     public String getBusinessKey() {
         return businessKey;
     }
@@ -258,23 +258,23 @@ public abstract class AuditEventEntity {
             return false;
         }
         AuditEventEntity other = (AuditEventEntity) obj;
-        return Objects.equals(appName, other.appName) 
-                && Objects.equals(appVersion, other.appVersion) 
-                && Objects.equals(businessKey, other.businessKey) 
-                && Objects.equals(entityId, other.entityId) 
-                && Objects.equals(eventId, other.eventId) 
-                && Objects.equals(eventType, other.eventType) 
-                && Objects.equals(id, other.id) 
-                && Objects.equals(messageId, other.messageId) 
-                && Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId) 
-                && Objects.equals(processDefinitionId, other.processDefinitionId) 
-                && Objects.equals(processDefinitionKey, other.processDefinitionKey) 
-                && Objects.equals(processInstanceId, other.processInstanceId) 
-                && sequenceNumber == other.sequenceNumber 
-                && Objects.equals(serviceFullName, other.serviceFullName) 
-                && Objects.equals(serviceName, other.serviceName) 
-                && Objects.equals(serviceType, other.serviceType) 
-                && Objects.equals(serviceVersion, other.serviceVersion) 
+        return Objects.equals(appName, other.appName)
+                && Objects.equals(appVersion, other.appVersion)
+                && Objects.equals(businessKey, other.businessKey)
+                && Objects.equals(entityId, other.entityId)
+                && Objects.equals(eventId, other.eventId)
+                && Objects.equals(eventType, other.eventType)
+                && Objects.equals(id, other.id)
+                && Objects.equals(messageId, other.messageId)
+                && Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId)
+                && Objects.equals(processDefinitionId, other.processDefinitionId)
+                && Objects.equals(processDefinitionKey, other.processDefinitionKey)
+                && Objects.equals(processInstanceId, other.processInstanceId)
+                && sequenceNumber == other.sequenceNumber
+                && Objects.equals(serviceFullName, other.serviceFullName)
+                && Objects.equals(serviceName, other.serviceName)
+                && Objects.equals(serviceType, other.serviceType)
+                && Objects.equals(serviceVersion, other.serviceVersion)
                 && Objects.equals(timestamp, other.timestamp);
     }
 
