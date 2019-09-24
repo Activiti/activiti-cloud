@@ -68,11 +68,21 @@ public class ProcessDefinitionRegistry {
         put("BOUNDARY_TIMER_EVENT_PROCESS",
             "boundaryTimerEventExample");
     }};
+    
+    private static final HashMap <String, String> processWithErrorEvents = new HashMap<>() {{
+        put("ERROR_BOUNDARY_EVENT_SUBPROCESS",
+            "errorBoundaryEventSubProcess");
+        put("ERROR_START_EVENT_SUBPROCESS",
+            "errorStartEventSubProcess");
+        put("ERROR_BOUNDARY_EVENT_CALLACTIVITY",
+            "catchErrorOnCallActivity");
+    }};
 
     public static final HashMap <String, String> processDefinitionKeys = new HashMap<>() {{
         putAll(processWithTasksDefinitionKeys);
         putAll(processWithNoTasksDefinitionKeys);
         putAll(processWithTimerEvents);
+        putAll(processWithErrorEvents);
     }};
 
     public static String processDefinitionKeyMatcher (String processName){
