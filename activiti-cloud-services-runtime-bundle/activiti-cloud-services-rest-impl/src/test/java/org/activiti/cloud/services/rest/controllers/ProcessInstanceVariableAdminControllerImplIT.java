@@ -19,7 +19,6 @@ package org.activiti.cloud.services.rest.controllers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
@@ -144,35 +143,6 @@ public class ProcessInstanceVariableAdminControllerImplIT {
 
         assertThat(expectedResponseBody).isEqualTo(actualResponseBody);
         verify(processAdminRuntime).setVariables(any());
-    }
-
-    @Test
-    public void shouldReturn400WithErrorListWhenSetVariablesWithWrongNames() throws Exception {
-        //GIVEN
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("name", "Alice");
-        variables.put("age", 24);
-        variables.put("subs", false);
-
-        String expectedResponseBody = "Variable with name subs does not exists.";
-       
-        doThrow(new IllegalStateException(expectedResponseBody))
-        .when(processVariablesValidator).checkPayloadVariables(any(),any());     
-        
-        //WHEN
-        ResultActions resultActions = mockMvc.perform(put("/admin/v1/process-instances/1/variables",
-                1).contentType(MediaType.APPLICATION_JSON)
-                .contentType(MediaTypes.HAL_JSON_VALUE)
-                .content(
-                        mapper.writeValueAsString(ProcessPayloadBuilder.setVariables().withProcessInstanceId("1").
-                                withVariables(variables).build())))
-
-                //THEN
-                .andExpect(status().isBadRequest());
-        MvcResult result = resultActions.andReturn();
-        String actualResponseBody = result.getResponse().getContentAsString();
-
-        assertThat(actualResponseBody).contains(expectedResponseBody);
     }
     
     @Test

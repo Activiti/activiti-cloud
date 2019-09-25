@@ -95,6 +95,9 @@ public class ProcessInstanceVariableControllerImplIT {
     
     @MockBean
     private DateFormatterProvider dateFormatterProvider;
+    
+    @MockBean
+    private ProcessVariablesPayloadValidator processVariablesValidator;
 
     @Autowired
     private ObjectMapper mapper;

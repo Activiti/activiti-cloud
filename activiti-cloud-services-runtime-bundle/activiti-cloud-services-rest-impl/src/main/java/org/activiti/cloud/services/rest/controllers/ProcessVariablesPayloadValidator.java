@@ -54,10 +54,8 @@ public class ProcessVariablesPayloadValidator  {
     }
     
     private void checkPayloadVariables(Map<String, Object> variablePayloadMap,
-                                       String processDefinitionKey,
-                                       boolean validate) {
+                                       String processDefinitionKey) {
         
-        final String errorMessage = "Variable with name {0} does not exists.";
         final String errorDateTimeParse = "Error parsing date/time variable with a name {0}: {1}";
         
         final Optional<Map<String, VariableDefinition>> variableDefinitionMap = getVariableDefinitionMap(processDefinitionKey);
@@ -82,18 +80,25 @@ public class ProcessVariablesPayloadValidator  {
                                 activitiExceptions.add(new ActivitiException(MessageFormat.format(errorDateTimeParse, name, e.getMessage())));
                             }
                         } else {
-                            if (validate) {
-                                activitiExceptions.addAll(variableValidationService.validateWithErrors(value, variableDefinitionEntry.getValue()));
-                            }                            
+                            activitiExceptions.addAll(variableValidationService.validateWithErrors(value, variableDefinitionEntry.getValue()));                          
                         }
                         
                         break;
                     }  
                 }
                 
-                if (!found) {
-                    activitiExceptions.add(new ActivitiException(MessageFormat.format(errorMessage, name)));
+                if (!found) {                   
+                    //Try to parse a new string variable as date
+                    if (value != null && (value instanceof String)) {
+                        try {
+                            payloadVar.setValue(dateFormatterProvider.toDate(value));
+                        } catch (Exception e) {
+                            //Do nothing here, keep value as a string
+                        }
+                    }                 
                 }
+                
+            
             }
         }      
         
@@ -108,8 +113,7 @@ public class ProcessVariablesPayloadValidator  {
                                       String processDefinitionKey) {
         
         checkPayloadVariables(setProcessVariablesPayload.getVariables(),
-                              processDefinitionKey,
-                              true);          
+                              processDefinitionKey);          
     }
     
 
@@ -118,7 +122,6 @@ public class ProcessVariablesPayloadValidator  {
                                                   String processDefinitionKey) {
         
        checkPayloadVariables(startProcessPayload.getVariables(),
-                             processDefinitionKey,
-                             false);
+                             processDefinitionKey);
     }
 }
