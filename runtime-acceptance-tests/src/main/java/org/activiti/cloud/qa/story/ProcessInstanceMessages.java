@@ -84,7 +84,7 @@ public class ProcessInstanceMessages {
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
 
-    @Then("messages: the user sends a message named $messageName with correlationKey value of $correlationKey")
+    @Then("messages: the user sends a message named $messageName with correlationKey value of $correlationKey session variable")
     public void receiveMessage(String messageName, String correlationKey) throws IOException, InterruptedException {      
         String variableValue = Serenity.sessionVariableCalled(correlationKey);
         ReceiveMessagePayload payload = MessagePayloadBuilder.receive(messageName)
