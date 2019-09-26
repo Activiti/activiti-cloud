@@ -31,7 +31,7 @@
       <bpmn:messageEventDefinition messageRef="Message_126jyr2" activiti:correlationKey="${invoiceKey}" />
     </bpmn:endEvent>
     <bpmn:subProcess id="SubProcess_018nkd6" triggeredByEvent="true">
-      <bpmn:startEvent id="startMessageEventSubprocessEvent" activiti:isInterrupting="false">
+      <bpmn:startEvent id="startMessageEventSubprocessEvent" isInterrupting="false">
         <bpmn:outgoing>SequenceFlow_0cyjl7n</bpmn:outgoing>
         <bpmn:messageEventDefinition messageRef="Message_0e6pytx" activiti:correlationKey="${correlationKey}"/>
       </bpmn:startEvent>
