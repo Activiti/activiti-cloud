@@ -23,6 +23,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.lifecycle.Startables;
+
+import java.util.stream.Stream;
 
 @SpringBootApplication
 @EnableActivitiAudit
@@ -38,9 +41,7 @@ public class Application {
     static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
 
     static {
-        keycloakContainer.start();
-
-        rabbitMQContainer.start();
+        Startables.deepStart(Stream.of(keycloakContainer, rabbitMQContainer)).join();
 
         System.setProperty("keycloak.auth-server-url", "http://" + keycloakContainer.getContainerIpAddress() + ":" + keycloakContainer.getFirstMappedPort() + "/auth");
         System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());

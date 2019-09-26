@@ -1,7 +1,8 @@
-create table audit_event
+create sequence if not exists hibernate_sequence start 1 increment 1;
+create table if not exists audit_event_entity
 (
     type                       varchar(31) not null,
-    id                         bigint      not null,
+    id                         int8        not null,
     app_name                   varchar(255),
     app_version                varchar(255),
     business_key               varchar(255),
@@ -13,36 +14,27 @@ create table audit_event
     process_definition_id      varchar(255),
     process_definition_key     varchar(255),
     process_instance_id        varchar(255),
-    sequence_number            integer     not null,
+    sequence_number            int4        not null,
     service_full_name          varchar(255),
     service_name               varchar(255),
     service_type               varchar(255),
     service_version            varchar(255),
-    timestamp                  bigint,
+    timestamp                  int8,
     bpmn_activity              text,
     cause                      varchar(255),
-    error                      text,
-    flow_node_id               varchar(255),
-    integration_context_id     varchar(255),
-    message                    text,
-    process_instance           text,
     process_definition         text,
-    sequence_flow              text,
-    signal                     text,
+    candidate_group            text,
     task                       text,
     task_id                    varchar(255),
     task_name                  varchar(255),
-    candidate_group            text,
+    flow_node_id               varchar(255),
+    integration_context_id     varchar(255),
+    signal                     text,
+    sequence_flow              text,
     candidate_user             text,
-    timer                      text,
+    process_instance           text,
     variable_instance          text,
     variable_name              varchar(255),
     variable_type              varchar(255),
     primary key (id)
-) engine=MyISAM;
-create table audit_sequence
-(
-    next_val bigint
-) engine=MyISAM;
-insert into audit_sequence
-values (1);
+);

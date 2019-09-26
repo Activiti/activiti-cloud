@@ -5,22 +5,43 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-  <changeSet author="activiti-audit" id="audit-sql-creation">
+  <changeSet author="activiti-audit"
+             id="h2-schema-creation" dbms="h2">
     <sqlFile dbms="h2"
              encoding="utf8"
-             path="changelog/initial.h2.schema.sql"
+             path="changelog/h2.schema.sql"
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
+  </changeSet>
+
+
+  <changeSet author="activiti-audit"
+             id="initial-schema-m3" dbms="postgresql">
+    <preConditions onFail="CONTINUE">
+      <not>
+        <tableExists tableName="audit_event_entity"/>
+      </not>
+    </preConditions>
     <sqlFile dbms="postgresql"
              encoding="utf8"
-             path="changelog/initial.postgres.schema.sql"
+             path="changelog/1-initial.pg.schema.m2.sql"
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
-    <sqlFile dbms="mysql"
+  </changeSet>
+
+
+  <changeSet author="activiti-audit" id="alter-schema-m4" dbms="postgresql">
+    <preConditions onFail="CONTINUE">
+      <not>
+        <tableExists tableName="audit_event"/>
+        <sequenceExists sequenceName="audit_sequence"/>
+      </not>
+    </preConditions>
+    <sqlFile dbms="postgresql"
              encoding="utf8"
-             path="changelog/initial.mysql.schema.sql"
+             path="changelog/2-alter.pg.schema.m4.sql"
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
