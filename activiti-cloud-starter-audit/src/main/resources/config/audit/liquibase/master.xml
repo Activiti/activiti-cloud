@@ -25,7 +25,7 @@
     </preConditions>
     <sqlFile dbms="postgresql"
              encoding="utf8"
-             path="changelog/1-initial.pg.schema.m2.sql"
+             path="changelog/01-initial.pg.schema.m2.sql"
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
@@ -41,7 +41,7 @@
     </preConditions>
     <sqlFile dbms="postgresql"
              encoding="utf8"
-             path="changelog/2-alter.pg.schema.m4.sql"
+             path="changelog/02-alter.pg.schema.m4.sql"
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
