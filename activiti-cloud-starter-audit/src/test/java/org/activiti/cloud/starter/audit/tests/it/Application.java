@@ -20,12 +20,6 @@ import org.activiti.cloud.starter.audit.configuration.EnableActivitiAudit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.lifecycle.Startables;
-
-import java.util.stream.Stream;
 
 @SpringBootApplication
 @EnableActivitiAudit
@@ -34,20 +28,6 @@ import java.util.stream.Stream;
         "org.activiti.cloud.services.test.identity.keycloak.interceptor"})
 public class Application {
 
-    static GenericContainer keycloakContainer = new GenericContainer("activiti/activiti-keycloak")
-            .withExposedPorts(8180)
-            .waitingFor(Wait.defaultWaitStrategy());
-
-    static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
-
-    static {
-        Startables.deepStart(Stream.of(keycloakContainer, rabbitMQContainer)).join();
-
-        System.setProperty("keycloak.auth-server-url", "http://" + keycloakContainer.getContainerIpAddress() + ":" + keycloakContainer.getFirstMappedPort() + "/auth");
-        System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getContainerIpAddress());
-        System.setProperty("spring.rabbitmq.port", String.valueOf(rabbitMQContainer.getAmqpPort()));
-
-    }
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class,
