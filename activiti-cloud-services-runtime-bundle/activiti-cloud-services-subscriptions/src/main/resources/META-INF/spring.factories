@@ -1,3 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration,\
-    org.activiti.core.common.spring.connector.autoconfigure.ConnectorAutoConfiguration
+	org.activiti.services.subscription.config.ActivitiCloudSubscriptionsAutoConfiguration

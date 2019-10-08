@@ -36,10 +36,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstanceMeta;
@@ -50,12 +46,15 @@ import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.conf.impl.ProcessModelAutoConfiguration;
 import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.ActivitiForbiddenException;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
@@ -63,7 +62,7 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
-import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.query.impl.PageImpl;
@@ -76,13 +75,17 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ProcessInstanceControllerImpl.class, secure = false)
@@ -94,10 +97,10 @@ import org.springframework.test.web.servlet.MockMvc;
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
-        ServicesRestAutoConfiguration.class,
-        ServicesCoreAutoConfiguration.class
+        ServicesRestWebMvcAutoConfiguration.class,
+        ServicesCoreAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class
 })
-@ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
 public class ProcessInstanceControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "process-instance";
@@ -121,7 +124,16 @@ public class ProcessInstanceControllerImplIT {
 
     @MockBean
     private ProcessRuntime processRuntime;
+    
+    @MockBean
+    private TaskAdminRuntime taskAdminRuntime;
 
+    @MockBean
+    private ProcessAdminRuntime processAdminRuntime;
+    
+    @MockBean
+    private MessageChannel commandResults;
+        
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 

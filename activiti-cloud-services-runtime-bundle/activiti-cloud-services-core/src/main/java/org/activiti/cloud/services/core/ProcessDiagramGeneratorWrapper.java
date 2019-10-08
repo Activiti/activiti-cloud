@@ -16,9 +16,8 @@
 
 package org.activiti.cloud.services.core;
 
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
+import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
+import static java.util.Collections.emptyList;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.ActivitiException;
@@ -27,18 +26,16 @@ import org.activiti.image.exception.ActivitiImageException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
-import static java.util.Collections.emptyList;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Service logic for generating process diagrams
  */
-@Service
 public class ProcessDiagramGeneratorWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessDiagramGeneratorWrapper.class);
@@ -60,7 +57,6 @@ public class ProcessDiagramGeneratorWrapper {
     @Value("${activiti.diagram.generate.default:false}")
     private boolean generateDefaultDiagram;
 
-    @Autowired
     public ProcessDiagramGeneratorWrapper(ProcessDiagramGenerator processDiagramGenerator) {
         this.processDiagramGenerator = processDiagramGenerator;
     }

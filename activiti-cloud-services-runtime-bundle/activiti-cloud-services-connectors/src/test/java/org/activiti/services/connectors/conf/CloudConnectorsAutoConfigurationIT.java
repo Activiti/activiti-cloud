@@ -30,6 +30,7 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
+import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +42,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -56,7 +58,13 @@ public class CloudConnectorsAutoConfigurationIT {
     private IntegrationContextManager integrationContextManager;
 
     @MockBean
+    private IntegrationContextService integrationContextService;
+    
+    @MockBean
     private RuntimeBundleProperties runtimeBundleProperties;
+    
+    @MockBean(name = "auditProducer")
+    private  MessageChannel auditProducer;
 
     @MockBean
     private ApplicationEventPublisher eventPublisher;

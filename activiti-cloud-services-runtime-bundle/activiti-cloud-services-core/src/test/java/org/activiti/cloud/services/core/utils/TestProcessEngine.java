@@ -16,25 +16,21 @@
 
 package org.activiti.cloud.services.core.utils;
 
-import java.io.IOException;
-
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.runtime.ProcessInstance;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 /**
  * Wrapper over ProcessEngine for testing purposes.
  * It helps to unify the calls to process engine services from tests.
  */
-@Component
 public class TestProcessEngine {
 
     private final ProcessEngine processEngine;
 
-    @Autowired
     public TestProcessEngine(final ProcessEngine processEngine) {
         this.processEngine = processEngine;
     }

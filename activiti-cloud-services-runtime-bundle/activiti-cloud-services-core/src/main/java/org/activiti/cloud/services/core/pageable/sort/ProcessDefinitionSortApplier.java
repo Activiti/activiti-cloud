@@ -15,16 +15,14 @@
 
 package org.activiti.cloud.services.core.pageable.sort;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.activiti.engine.impl.ProcessDefinitionQueryProperty;
 import org.activiti.engine.query.QueryProperty;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Component;
 
-@Component
+import java.util.HashMap;
+import java.util.Map;
+
 public class ProcessDefinitionSortApplier extends BaseSortApplier<ProcessDefinitionQuery> {
 
     private Map<String, QueryProperty> orderByProperties = new HashMap<>();

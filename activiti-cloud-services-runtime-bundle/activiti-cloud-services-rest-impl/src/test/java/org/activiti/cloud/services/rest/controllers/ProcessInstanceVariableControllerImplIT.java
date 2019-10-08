@@ -30,23 +30,21 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.conf.impl.ProcessModelAutoConfiguration;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.api.task.runtime.TaskAdminRuntime;
+import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
-import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.spring.process.variable.DateFormatterProvider;
 import org.activiti.spring.process.variable.VariableValidationService;
@@ -59,13 +57,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceVariableControllerImpl.class)
@@ -77,8 +80,8 @@ import org.springframework.test.web.servlet.MockMvc;
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         VariableValidationService.class,
-        ServicesRestAutoConfiguration.class})
-@ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
+        ServicesRestWebMvcAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class})
 public class ProcessInstanceVariableControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "process-instance-variables";
@@ -92,6 +95,15 @@ public class ProcessInstanceVariableControllerImplIT {
     
     @MockBean
     private RepositoryService repositoryService;
+    
+    @MockBean
+    private TaskAdminRuntime taskAdminRuntime;
+
+    @MockBean
+    private ProcessAdminRuntime processAdminRuntime;
+    
+    @MockBean
+    private MessageChannel commandResults;
     
     @MockBean
     private DateFormatterProvider dateFormatterProvider;

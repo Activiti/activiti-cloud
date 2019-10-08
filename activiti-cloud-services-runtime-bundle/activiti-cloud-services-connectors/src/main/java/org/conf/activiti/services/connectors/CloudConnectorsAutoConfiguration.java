@@ -18,30 +18,68 @@ package org.conf.activiti.services.connectors;
 
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
+import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.runtime.api.conf.ConnectorsAutoConfiguration;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
+import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
+import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
+import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.messaging.MessageChannel;
 
 @Configuration
 @AutoConfigureBefore(value = ConnectorsAutoConfiguration.class)
-@ComponentScan("org.activiti.core.common.spring.connector")
 @PropertySource("classpath:config/integration-result-stream.properties")
+@EnableBinding(ProcessEngineIntegrationChannels.class)
 public class CloudConnectorsAutoConfiguration {
 
     private static final String LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME = "localServiceTaskBehaviour";
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
+                                                                                             IntegrationContextService integrationContextService,
+                                                                                             MessageChannel auditProducer,
+                                                                                             RuntimeBundleProperties runtimeBundleProperties,
+                                                                                             RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                                                                             VariablesMappingProvider outboundVariablesProvider) {
+        return new ServiceTaskIntegrationResultEventHandler(runtimeService,
+                                                            integrationContextService,
+                                                            auditProducer,
+                                                            runtimeBundleProperties,
+                                                            runtimeBundleInfoAppender,
+                                                            outboundVariablesProvider);
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public IntegrationRequestSender integrationRequestSender(RuntimeBundleProperties runtimeBundleProperties,
+                                                             MessageChannel auditProducer,
+                                                             BinderAwareChannelResolver resolver,
+                                                             RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                                             IntegrationContextMessageBuilderFactory messageBuilderFactory) {
+        return new IntegrationRequestSender(runtimeBundleProperties, 
+                                            auditProducer, 
+                                            resolver, 
+                                            runtimeBundleInfoAppender, 
+                                            messageBuilderFactory);
+    }
+    
 
     @Bean
     @ConditionalOnMissingBean

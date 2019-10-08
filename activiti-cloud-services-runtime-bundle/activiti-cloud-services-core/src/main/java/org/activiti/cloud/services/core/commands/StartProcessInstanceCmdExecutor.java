@@ -6,9 +6,7 @@ import org.activiti.api.process.model.results.ProcessInstanceResult;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.stereotype.Component;
 
-@Component
 public class StartProcessInstanceCmdExecutor implements CommandExecutor<StartProcessPayload> {
 
     private ProcessAdminRuntime processAdminRuntime;

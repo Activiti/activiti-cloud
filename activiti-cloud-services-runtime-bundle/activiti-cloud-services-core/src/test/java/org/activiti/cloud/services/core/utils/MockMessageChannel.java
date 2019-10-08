@@ -18,9 +18,7 @@ package org.activiti.cloud.services.core.utils;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.stereotype.Component;
 
-@Component
 public class MockMessageChannel implements MessageChannel {
 
     @Override

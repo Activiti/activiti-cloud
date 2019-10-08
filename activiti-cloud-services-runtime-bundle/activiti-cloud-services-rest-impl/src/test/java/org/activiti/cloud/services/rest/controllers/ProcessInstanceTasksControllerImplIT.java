@@ -16,38 +16,6 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.activiti.api.runtime.shared.query.Page;
-import org.activiti.api.task.model.Task;
-import org.activiti.api.task.runtime.TaskRuntime;
-import org.activiti.cloud.services.core.pageable.SpringPageConverter;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
-import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
-import org.activiti.engine.RepositoryService;
-import org.activiti.runtime.api.query.impl.PageImpl;
-import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
@@ -61,6 +29,41 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
+import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.runtime.TaskAdminRuntime;
+import org.activiti.api.task.runtime.TaskRuntime;
+import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.services.core.pageable.SpringPageConverter;
+import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
+import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.engine.RepositoryService;
+import org.activiti.runtime.api.query.impl.PageImpl;
+import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.MediaType;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+import java.util.List;
+
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceTasksControllerImpl.class)
 @EnableSpringDataWebSupport
@@ -69,8 +72,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
-        ServicesRestAutoConfiguration.class})
-@ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
+        ServicesRestWebMvcAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class})
 public class ProcessInstanceTasksControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "process-instance-tasks";
@@ -91,6 +94,15 @@ public class ProcessInstanceTasksControllerImplIT {
 
     @MockBean
     private ProcessEngineChannels processEngineChannels;
+    
+    @MockBean
+    private TaskAdminRuntime taskAdminRuntime;
+
+    @MockBean
+    private ProcessAdminRuntime processAdminRuntime;
+    
+    @MockBean
+    private MessageChannel commandResults;
 
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;

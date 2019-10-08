@@ -21,16 +21,14 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.conf.impl.ProcessModelAutoConfiguration;
+import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.activiti.spring.process.model.Extension;
@@ -46,10 +44,12 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProcessVariablesPayloadValidator.class)
@@ -61,8 +61,8 @@ import org.springframework.test.context.junit4.SpringRunner;
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
-        ServicesRestAutoConfiguration.class})
-@ComponentScan(basePackages = {"org.activiti.cloud.services.rest.assemblers", "org.activiti.cloud.alfresco"})
+        ServicesRestWebMvcAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class})
 public class ProcessVariablesPayloadValidatorIT {
     @MockBean
     private ProcessEngineChannels processEngineChannels;

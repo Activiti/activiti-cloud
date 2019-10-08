@@ -25,12 +25,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.message.RuntimeBundleInfoMessageHeaders;
 import org.activiti.cloud.services.job.executor.JobMessageFailedEvent;
@@ -82,12 +76,19 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles(JobExecutorIT.JOB_EXECUTOR_IT)
@@ -97,6 +98,8 @@ import org.springframework.transaction.support.TransactionTemplate;
         "spring.activiti.cloud.rb.job-executor.message-job-consumer.max-attempts=4" // customized
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ContextConfiguration(classes = {RuntimeITConfiguration.class, 
+                                JobExecutorIT.JobExecutorITProcessEngineConfigurer.class})
 public class JobExecutorIT {
     private static final Logger logger = LoggerFactory.getLogger(JobExecutorIT.class);
     public static final String JOB_EXECUTOR_IT = "JobExecutorIT";

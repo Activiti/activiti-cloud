@@ -19,9 +19,6 @@ package org.activiti.cloud.starter.tests.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -29,15 +26,18 @@ import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.assertj.core.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestComponent;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.stereotype.Component;
 
-@Component
+import java.util.HashMap;
+import java.util.Map;
+
+@TestComponent
 @EnableBinding(ConnectorIntegrationChannels.class)
 public class ServiceTaskConsumerHandler {
 

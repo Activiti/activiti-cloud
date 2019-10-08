@@ -23,11 +23,9 @@ import org.activiti.services.connectors.message.IntegrationContextMessageBuilder
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-@Component
 public class IntegrationRequestSender {
     public static final String CONNECTOR_TYPE = "connectorType";
     

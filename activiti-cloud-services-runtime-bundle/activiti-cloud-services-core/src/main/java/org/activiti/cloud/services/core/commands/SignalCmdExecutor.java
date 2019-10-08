@@ -3,18 +3,14 @@ package org.activiti.cloud.services.core.commands;
 import org.activiti.api.model.shared.EmptyResult;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.stereotype.Component;
 
-@Component
 public class SignalCmdExecutor implements CommandExecutor<SignalPayload> {
 
     private ProcessAdminRuntime processAdminRuntime;
     private MessageChannel commandResults;
 
-    @Autowired
     public SignalCmdExecutor(ProcessAdminRuntime processAdminRuntime,
                              MessageChannel commandResults) {
         this.processAdminRuntime = processAdminRuntime;

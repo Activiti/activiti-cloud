@@ -16,10 +16,9 @@
 
 package org.activiti.cloud.services.rest.conf;
 
-import java.util.List;
-import java.util.Map;
-
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaResourceAssembler;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionResourceAssembler;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceResourceAssembler;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
@@ -47,13 +46,16 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+import java.util.Map;
+
 @Configuration
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
-public class ServicesRestAutoConfiguration implements WebMvcConfigurer {
+public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
 
     private final Jackson2ObjectMapperBuilder objectMapperBuilder;
 
-    public ServicesRestAutoConfiguration(Jackson2ObjectMapperBuilder objectMapperBuilder) {
+    public ServicesRestWebMvcAutoConfiguration(Jackson2ObjectMapperBuilder objectMapperBuilder) {
         this.objectMapperBuilder = objectMapperBuilder;
     }
 
@@ -61,7 +63,17 @@ public class ServicesRestAutoConfiguration implements WebMvcConfigurer {
     public ResourcesAssembler resourcesAssembler() {
         return new ResourcesAssembler();
     }
+    
+    @Bean
+    public ConnectorDefinitionResourceAssembler connectorDefinitionResourceAssembler() {
+        return new ConnectorDefinitionResourceAssembler();
+    }
 
+    @Bean
+    public ProcessDefinitionMetaResourceAssembler processDefinitionMetaResourceAssembler() {
+        return new ProcessDefinitionMetaResourceAssembler();
+    }
+    
     @Bean
     public ProcessInstanceResourceAssembler processInstanceResourceAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
         return new ProcessInstanceResourceAssembler(new ToCloudProcessInstanceConverter(runtimeBundleInfoAppender));

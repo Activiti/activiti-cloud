@@ -27,8 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
-import java.util.List;
-
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -41,14 +39,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ContextConfiguration(classes = ServicesAuditITConfiguration.class)
 public class ParallelGatewayAuditProducerIT {
 
     private static final String PARALLEL_GATEWAY_PROCESS = "basicParallelGateway";

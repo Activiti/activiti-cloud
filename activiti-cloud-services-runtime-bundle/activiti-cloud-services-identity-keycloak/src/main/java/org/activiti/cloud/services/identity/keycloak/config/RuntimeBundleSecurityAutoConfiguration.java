@@ -18,68 +18,18 @@ package org.activiti.cloud.services.identity.keycloak.config;
 
 import org.activiti.cloud.services.common.security.keycloak.config.CommonSecurityAutoConfiguration;
 import org.activiti.cloud.services.identity.keycloak.KeycloakActivitiAuthenticationProvider;
-import org.keycloak.adapters.AdapterDeploymentContext;
-import org.keycloak.adapters.KeycloakConfigResolver;
-import org.keycloak.adapters.springsecurity.AdapterDeploymentContextFactoryBean;
-import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
-import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticatedActionsFilter;
-import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter;
-import org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter;
-import org.keycloak.adapters.springsecurity.filter.KeycloakSecurityContextRequestFilter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.Resource;
+import org.springframework.context.annotation.Configuration;
 
-@KeycloakConfiguration
-public class RuntimeBundleSecurityAutoConfiguration extends CommonSecurityAutoConfiguration {
+@Configuration
+@AutoConfigureBefore(CommonSecurityAutoConfiguration.class)
+public class RuntimeBundleSecurityAutoConfiguration {
 
-    @Value("${keycloak.configurationFile:WEB-INF/keycloak.json}")
-    private Resource keycloakConfigFileResource;
-
-    @Autowired(
-            required = false
-    )
-    private KeycloakConfigResolver keycloakConfigResolver;
-
-    protected KeycloakAuthenticationProvider keycloakAuthenticationProvider() {
+    @Bean
+    public KeycloakAuthenticationProvider keycloakAuthenticationProvider() {
         return new KeycloakActivitiAuthenticationProvider();
-    }
-
-    @Bean
-    protected KeycloakPreAuthActionsFilter keycloakPreAuthActionsFilter() {
-        return new KeycloakPreAuthActionsFilter(this.httpSessionManager());
-    }
-
-    @Bean
-    protected AdapterDeploymentContext adapterDeploymentContext() throws Exception {
-        AdapterDeploymentContextFactoryBean factoryBean;
-        if (this.keycloakConfigResolver != null) {
-            factoryBean = new AdapterDeploymentContextFactoryBean(this.keycloakConfigResolver);
-        } else {
-            factoryBean = new AdapterDeploymentContextFactoryBean(this.keycloakConfigFileResource);
-        }
-
-        factoryBean.afterPropertiesSet();
-        return factoryBean.getObject();
-    }
-
-    @Bean
-    protected KeycloakSecurityContextRequestFilter keycloakSecurityContextRequestFilter() {
-        return new KeycloakSecurityContextRequestFilter();
-    }
-
-    @Bean
-    protected KeycloakAuthenticatedActionsFilter keycloakAuthenticatedActionsRequestFilter() {
-        return new KeycloakAuthenticatedActionsFilter();
-    }
-
-    @Bean
-    protected KeycloakAuthenticationProcessingFilter keycloakAuthenticationProcessingFilter() throws Exception {
-        KeycloakAuthenticationProcessingFilter filter = new KeycloakAuthenticationProcessingFilter(this.authenticationManagerBean());
-        filter.setSessionAuthenticationStrategy(this.sessionAuthenticationStrategy());
-        return filter;
     }
 
 }

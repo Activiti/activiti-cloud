@@ -16,7 +16,7 @@
 
 package org.activiti.services.connectors.channel;
 
-import java.util.List;
+import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -27,21 +27,16 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
-import org.activiti.runtime.api.impl.MappingExecutionContext;
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.stereotype.Component;
 
-import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
+import java.util.List;
 
-@Component
-@EnableBinding(ProcessEngineIntegrationChannels.class)
 public class ServiceTaskIntegrationResultEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskIntegrationResultEventHandler.class);

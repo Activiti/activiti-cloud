@@ -1,27 +1,23 @@
 package org.activiti.cloud.services.core.commands;
 
+import org.activiti.api.model.shared.Payload;
+import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.activiti.api.model.shared.Payload;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.stereotype.Component;
-
-@Component
 public class CommandEndpoint<T extends Payload> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandEndpoint.class);
     private Map<String, CommandExecutor<T>> commandExecutors;
 
-    @Autowired
     public CommandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
         this.commandExecutors = cmdExecutors.stream().collect(Collectors.toMap(CommandExecutor::getHandledType,
                                                                                Function.identity()));

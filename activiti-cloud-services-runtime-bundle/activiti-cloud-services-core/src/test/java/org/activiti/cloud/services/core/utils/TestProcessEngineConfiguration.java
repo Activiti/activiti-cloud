@@ -28,11 +28,8 @@ import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ProcessValidatorImpl;
 import org.activiti.validation.validator.ValidatorSetFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -40,28 +37,24 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 /**
  * Test context configuration for integration tests over Activiti process engine
  */
-@Configuration
-@ComponentScan({
-        "org.activiti.engine",
-        "org.activiti.image",
-        "org.activiti.core.common.spring.security",
-        "org.activiti.core.common.spring.identity",
-        "org.activiti.core.common.spring.connector",
-        "org.activiti.cloud.services.events.listeners",
-        "org.activiti.cloud.services.events.converter",
-        "org.activiti.cloud.services.events.configuration",
-        "org.activiti.cloud.services.core",
-        "org.activiti.cloud.services.core.pageable",
-        "org.activiti.cloud.services.core.utils"
-
-
-})
-@EnableAutoConfiguration
+@TestConfiguration
 public class TestProcessEngineConfiguration {
 
-    @Autowired
-    private ProcessEngine processEngine;
-
+    @Bean
+    public TestProcessEngine testProcessEngine(ProcessEngine processEngine) {
+        return new TestProcessEngine(processEngine);
+    }
+    
+    @Bean
+    public MockMessageChannel mockMessageChannel() {
+        return new MockMessageChannel();
+    }
+    
+    @Bean
+    public MockProcessEngineChannels mockProcessEngineChannels() {
+        return new MockProcessEngineChannels();
+    }
+    
     @Bean
     public ProcessEngine processEngine() {
         return ProcessEngineConfiguration
@@ -71,22 +64,22 @@ public class TestProcessEngineConfiguration {
     }
 
     @Bean
-    public RuntimeService runtimeService() {
+    public RuntimeService runtimeService(ProcessEngine processEngine) {
         return processEngine.getRuntimeService();
     }
 
     @Bean
-    public ManagementService managementService() {
+    public ManagementService managementService(ProcessEngine processEngine) {
         return processEngine.getManagementService();
     }
     
     @Bean
-    public RepositoryService repositoryService() {
+    public RepositoryService repositoryService(ProcessEngine processEngine) {
         return processEngine.getRepositoryService();
     }
 
     @Bean
-    public TaskService taskService() {
+    public TaskService taskService(ProcessEngine processEngine) {
         return processEngine.getTaskService();
     }
 

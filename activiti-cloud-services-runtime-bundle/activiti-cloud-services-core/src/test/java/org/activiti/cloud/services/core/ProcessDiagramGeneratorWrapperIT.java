@@ -27,25 +27,29 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * Integration tests for ProcessDiagramGeneratorWrapper
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = TestProcessEngineConfiguration.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestProcessEngineConfiguration.class)
 @TestPropertySource("classpath:test-process-diagram.properties")
 public class ProcessDiagramGeneratorWrapperIT {
 
     private static final String DEFAULT_DIAGRAM_FONT_NAME = "Arial";
+    
+    @SpringBootApplication
+    static class Application {
+        
+    }
 
     @SpyBean
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;

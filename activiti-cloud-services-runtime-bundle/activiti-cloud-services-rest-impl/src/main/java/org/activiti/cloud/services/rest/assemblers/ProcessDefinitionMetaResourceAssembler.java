@@ -1,5 +1,8 @@
 package org.activiti.cloud.services.rest.assemblers;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
 import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessDefinitionControllerImpl;
@@ -8,12 +11,7 @@ import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImp
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
-import org.springframework.stereotype.Component;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-
-@Component
 public class ProcessDefinitionMetaResourceAssembler implements ResourceAssembler<ProcessDefinitionMeta, Resource<ProcessDefinitionMeta>> {
 
     @Override

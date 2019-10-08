@@ -16,21 +16,35 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.Arrays;
-import java.util.UUID;
+import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.taskIdParameter;
+import static org.activiti.alfresco.rest.docs.HALDocumentation.unpagedVariableFields;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
+import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceResourceAssembler;
-import org.activiti.cloud.services.rest.conf.ServicesRestAutoConfiguration;
+import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.Before;
@@ -49,20 +63,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.taskIdParameter;
-import static org.activiti.alfresco.rest.docs.HALDocumentation.unpagedVariableFields;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.Arrays;
+import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = TaskVariableAdminControllerImpl.class, secure = false)
@@ -74,7 +76,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
-        ServicesRestAutoConfiguration.class})
+        ServicesRestWebMvcAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class})
 public class TaskVariableAdminControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "task-variable";
@@ -91,6 +94,9 @@ public class TaskVariableAdminControllerImplIT {
     @MockBean
     private TaskAdminRuntime taskRuntime;
 
+    @MockBean
+    private ProcessAdminRuntime processAdminRuntime;
+    
     @SpyBean
     private TaskVariableInstanceResourceAssembler variableInstanceResourceAssembler;
 

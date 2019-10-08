@@ -9,6 +9,8 @@ import java.util.Collection;
 
 public class CommandEndpointAdminAuthentication implements Authentication {
 
+    private static final long serialVersionUID = 1L;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Arrays.asList(new SimpleGrantedAuthority("ROLE_ACTIVITI_ADMIN"));
