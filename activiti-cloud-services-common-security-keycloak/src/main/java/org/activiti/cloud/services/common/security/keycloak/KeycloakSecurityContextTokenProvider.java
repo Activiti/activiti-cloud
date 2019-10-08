@@ -16,22 +16,18 @@
 
 package org.activiti.cloud.services.common.security.keycloak;
 
-import java.util.Optional;
-
 import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 /**
  * Keycloak implementation for {@link SecurityContextTokenProvider}
  */
-@Component
-@Primary
 public class KeycloakSecurityContextTokenProvider implements SecurityContextTokenProvider {
 
     @Override

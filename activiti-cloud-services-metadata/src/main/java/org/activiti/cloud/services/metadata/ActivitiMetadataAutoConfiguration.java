@@ -1,6 +1,5 @@
 package org.activiti.cloud.services.metadata;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -14,12 +13,9 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource(value = "classpath:metadata.properties",ignoreResourceNotFound = true)
 public class ActivitiMetadataAutoConfiguration {
 
-    @Autowired
-    private MetadataProperties metadataProperties;
-
     @Bean
     @ConditionalOnMissingBean(MetadataService.class)
-    MetadataService metadataService(){
+    public MetadataService metadataService(MetadataProperties metadataProperties){
         return new MetadataService(metadataProperties);
     }
 }

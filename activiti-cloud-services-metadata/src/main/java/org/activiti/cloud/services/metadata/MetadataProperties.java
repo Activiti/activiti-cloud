@@ -2,13 +2,11 @@ package org.activiti.cloud.services.metadata;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @ConfigurationProperties("activiti.cloud")
-@Component
 public class MetadataProperties implements InitializingBean {
 
     private Map<String, String> application = new HashMap<String, String>();

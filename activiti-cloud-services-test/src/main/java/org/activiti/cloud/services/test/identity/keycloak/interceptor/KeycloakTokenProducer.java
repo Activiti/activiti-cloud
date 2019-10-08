@@ -30,7 +30,6 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 
-@Component
 public class KeycloakTokenProducer implements ClientHttpRequestInterceptor {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";

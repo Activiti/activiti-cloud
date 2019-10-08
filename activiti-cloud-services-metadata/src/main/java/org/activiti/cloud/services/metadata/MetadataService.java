@@ -1,13 +1,11 @@
 package org.activiti.cloud.services.metadata;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-@Component
 public class MetadataService {
 
     private MetadataProperties metadataProperties;
