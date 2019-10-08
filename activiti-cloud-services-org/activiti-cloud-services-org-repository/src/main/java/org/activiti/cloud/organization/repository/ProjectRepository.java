@@ -27,7 +27,8 @@ import org.springframework.data.domain.Pageable;
  */
 public interface ProjectRepository<P extends Project> {
 
-    Page<P> getProjects(Pageable pageable);
+    Page<P> getProjects(Pageable pageable,
+                        String nameToFilter);
 
     Optional<P> findProjectById(String projectId);
 

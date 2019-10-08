@@ -35,9 +35,16 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, String>,
                                               ProjectRepository<ProjectEntity> {
 
+    Page<ProjectEntity> findAllByNameContaining(String name,
+                                                Pageable pageable);
+
     @Override
-    default Page<ProjectEntity> getProjects(Pageable pageable) {
-        return findAll(pageable);
+    default Page<ProjectEntity> getProjects(Pageable pageable,
+                                            String nameToFilter) {
+        return Optional.ofNullable(nameToFilter)
+                .map(name -> findAllByNameContaining(name,
+                                                     pageable))
+                .orElseGet(() -> findAll(pageable));
     }
 
     @Override

@@ -87,8 +87,10 @@ public class ProjectService {
      * @param pageable the pagination information
      * @return the page
      */
-    public Page<Project> getProjects(Pageable pageable) {
-        return projectRepository.getProjects(pageable);
+    public Page<Project> getProjects(Pageable pageable,
+                                     String name) {
+        return projectRepository.getProjects(pageable,
+                                             name);
     }
 
     /**

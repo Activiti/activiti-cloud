@@ -75,9 +75,13 @@ public interface ProjectRestApi {
                     "<b>false</b> means that a web browser may preview the file in a new tab or window, " +
                     "but not download the file.";
 
+    String PROJECT_NAME_PARAM_DESCR = "The name or part of the name to filter projects";
+
     String UPLOAD_FILE_PARAM_NAME = "file";
 
     String EXPORT_AS_ATTACHMENT_PARAM_NAME = "attachment";
+
+    String PROJECT_NAME_PARAM_NAME = "name";
 
     @ApiOperation(
             tags = PROJECTS,
@@ -86,7 +90,11 @@ public interface ProjectRestApi {
                     "Minimal information for each project is returned.",
             produces = APPLICATION_JSON_VALUE)
     @GetMapping(path = "/projects")
-    PagedResources<Resource<Project>> getProjects(Pageable pageable);
+    PagedResources<Resource<Project>> getProjects(Pageable pageable,
+                                                  @ApiParam(PROJECT_NAME_PARAM_DESCR)
+                                                  @RequestParam(
+                                                          name = PROJECT_NAME_PARAM_NAME,
+                                                          required = false) String name);
 
     @ApiOperation(
             tags = PROJECTS,

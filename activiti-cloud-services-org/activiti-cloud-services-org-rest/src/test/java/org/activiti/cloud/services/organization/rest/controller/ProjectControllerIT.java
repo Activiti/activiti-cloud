@@ -134,6 +134,47 @@ public class ProjectControllerIT {
     }
 
     @Test
+    public void testGetProjectsFilteredByName() throws Exception {
+
+        // GIVEN
+        projectRepository.createProject(project("project1"));
+        projectRepository.createProject(project("project2"));
+
+        // WHEN
+        mockMvc.perform(get("{version}/projects?name=project1",
+                            RepositoryRestConfig.API_VERSION))
+                // THEN
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.projects",
+                                    hasSize(1)))
+                .andExpect(jsonPath("$._embedded.projects[0].name",
+                                    is("project1")));
+    }
+
+    @Test
+    public void testGetProjectsFilteredByContainingName() throws Exception {
+
+        // GIVEN
+        projectRepository.createProject(project("project-main-1"));
+        projectRepository.createProject(project("project-main-2"));
+        projectRepository.createProject(project("project-secondary-2"));
+
+        // WHEN
+        mockMvc.perform(get("{version}/projects?name=main",
+                            RepositoryRestConfig.API_VERSION))
+                // THEN
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.projects",
+                                    hasSize(2)))
+                .andExpect(jsonPath("$._embedded.projects[0].name",
+                                    is("project-main-1")))
+                .andExpect(jsonPath("$._embedded.projects[1].name",
+                                    is("project-main-2")));
+    }
+
+    @Test
     public void testGetProject() throws Exception {
         // GIVEN
         Project project = projectRepository.createProject(project("existing-project"));

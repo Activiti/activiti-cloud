@@ -62,10 +62,16 @@ public class ProjectController implements ProjectRestApi {
     }
 
     @Override
-    public PagedResources<Resource<Project>> getProjects(Pageable pageable) {
+    public PagedResources<Resource<Project>> getProjects(
+            Pageable pageable,
+            @ApiParam(PROJECT_NAME_PARAM_DESCR)
+            @RequestParam(
+                    name = PROJECT_NAME_PARAM_NAME,
+                    required = false) String name) {
         return pagedResourcesAssembler.toResource(
                 pageable,
-                projectService.getProjects(pageable),
+                projectService.getProjects(pageable,
+                                           name),
                 resourceAssembler);
     }
 
