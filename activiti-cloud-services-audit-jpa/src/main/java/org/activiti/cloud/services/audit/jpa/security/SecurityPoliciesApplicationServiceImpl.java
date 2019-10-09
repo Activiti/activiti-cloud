@@ -1,8 +1,5 @@
 package org.activiti.cloud.services.audit.jpa.security;
 
-import java.util.Map;
-import java.util.Set;
-
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
@@ -11,12 +8,13 @@ import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Applies security policies (defined into the application.properties file) to event data
  */
-@Component
 public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPoliciesManagerImpl implements SecurityPoliciesManager {
 
     public SecurityPoliciesApplicationServiceImpl(UserGroupManager userGroupManager,

@@ -19,15 +19,10 @@ package org.activiti.cloud.starter.audit.tests.it;
 import org.activiti.cloud.starter.audit.configuration.EnableActivitiAudit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableActivitiAudit
-@ComponentScan({"org.activiti.cloud.starters.test",
-        "org.activiti.cloud.starter.audit.tests.it",
-        "org.activiti.cloud.services.test.identity.keycloak.interceptor"})
 public class Application {
-
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class,

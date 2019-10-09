@@ -26,18 +26,14 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Component
-@EnableBinding(AuditConsumerChannels.class)
+@SuppressWarnings("rawtypes")
 public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(AuditConsumerChannelHandlerImpl.class);
@@ -46,13 +42,13 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
 
     private final APIEventToEntityConverters eventConverters;
 
-    @Autowired
     public AuditConsumerChannelHandlerImpl(EventsRepository eventsRepository,
                                            APIEventToEntityConverters eventConverters) {
         this.eventsRepository = eventsRepository;
         this.eventConverters = eventConverters;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     @StreamListener(AuditConsumerChannels.AUDIT_CONSUMER)
     public void receiveCloudRuntimeEvent(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {

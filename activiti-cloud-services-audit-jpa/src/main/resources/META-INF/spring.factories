@@ -1,2 +1,6 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration
+    org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration,\
+    org.activiti.cloud.services.audit.jpa.controllers.config.AuditJPAControllersAutoConfiguration,\
+    org.activiti.cloud.services.audit.jpa.repository.config.AuditJPARepositoryAutoConfiguration,\
+    org.activiti.cloud.services.audit.jpa.security.config.AuditJPASecurityAutoConfiguration,\
+	org.activiti.cloud.services.audit.jpa.streams.config.AuditJPAStreamsAutoConfiguration

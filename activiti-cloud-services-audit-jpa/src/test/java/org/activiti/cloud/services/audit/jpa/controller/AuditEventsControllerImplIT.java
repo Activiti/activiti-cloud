@@ -49,6 +49,9 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
+import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.services.audit.api.config.AuditAPIAutoConfiguration;
+import org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.events.ActivityStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
@@ -60,6 +63,8 @@ import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEnti
 import org.activiti.cloud.services.audit.jpa.events.SignalReceivedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TimerFiredAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.activiti.cloud.services.audit.jpa.security.config.AuditJPASecurityAutoConfiguration;
+import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,6 +73,7 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -86,6 +92,12 @@ import java.util.Optional;
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc(secure = false)
 @AutoConfigureRestDocs(outputDir = "target/snippets")
+@Import({
+    AuditAPIAutoConfiguration.class,
+    AuditJPAAutoConfiguration.class,
+    AuditJPASecurityAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class
+})
 public class AuditEventsControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "events";
@@ -100,6 +112,9 @@ public class AuditEventsControllerImplIT {
     @MockBean
     private SecurityManager securityManager;
 
+    @MockBean
+    private SecurityPoliciesProperties securityPoliciesProperties;
+    
     @MockBean
     private UserGroupManager userGroupManager;
 
