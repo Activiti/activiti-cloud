@@ -17,17 +17,6 @@ package org.activiti.cloud.notifications.graphql.starter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.Duration;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -80,11 +69,11 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -94,6 +83,17 @@ import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClient.WebsocketSender;
 import reactor.test.StepVerifier;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Duration;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -126,8 +126,6 @@ public class ActivitiGraphQLStarterIT {
     private HttpHeaders authHeaders;
     
     @SpringBootApplication
-    @ComponentScan({"org.activiti.cloud.starters.test",
-                    "org.activiti.cloud.services.test.identity.keycloak.interceptor"})
     @EnableBinding(EngineEventsMessageProducer.EngineEvents.class)
     static class Application {
         // Nothing
@@ -137,6 +135,7 @@ public class ActivitiGraphQLStarterIT {
     public void setUp() {
         keycloakTokenProducer.setKeycloakTestUser(TESTADMIN);
         authHeaders = keycloakTokenProducer.authorizationHeaders();
+        authHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
     }
     
     protected URI getUrl(String path) throws URISyntaxException {
@@ -1044,9 +1043,9 @@ public class ActivitiGraphQLStarterIT {
         
         ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query,authHeaders), Result.class);
 
-        assertThat(HttpStatus.OK)
+        assertThat(entity.getStatusCode())
             .describedAs(entity.toString())
-            .isEqualTo(entity.getStatusCode());
+            .isEqualTo(HttpStatus.OK);
 
         Result result = entity.getBody();
 
@@ -1099,9 +1098,9 @@ public class ActivitiGraphQLStarterIT {
 
         ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
 
-        assertThat(HttpStatus.OK)
+        assertThat(entity.getStatusCode())
             .describedAs(entity.toString())
-            .isEqualTo(entity.getStatusCode());
+            .isEqualTo(HttpStatus.OK);
 
         Result result = entity.getBody();
 
@@ -1147,9 +1146,9 @@ public class ActivitiGraphQLStarterIT {
 
         ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
 
-        assertThat(HttpStatus.OK)
+        assertThat(entity.getStatusCode())
             .describedAs(entity.toString())
-            .isEqualTo(entity.getStatusCode());
+            .isEqualTo(HttpStatus.OK);
 
         Result result = entity.getBody();
 
@@ -1181,9 +1180,9 @@ public class ActivitiGraphQLStarterIT {
 
         ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
 
-        assertThat(HttpStatus.OK)
+        assertThat(entity.getStatusCode())
             .describedAs(entity.toString())
-            .isEqualTo(entity.getStatusCode());
+            .isEqualTo(HttpStatus.OK);
 
         Result result = entity.getBody();
 
@@ -1205,9 +1204,9 @@ public class ActivitiGraphQLStarterIT {
 
         ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
 
-        assertThat(HttpStatus.OK)
+        assertThat(entity.getStatusCode())
             .describedAs(entity.toString())
-            .isEqualTo(entity.getStatusCode());
+            .isEqualTo(HttpStatus.OK);
 
         Result result = entity.getBody();
 
