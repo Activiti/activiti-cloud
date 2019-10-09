@@ -18,18 +18,12 @@ package org.activiti.cloud.services.query.app;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.stereotype.Component;
 
-@Component
-@EnableBinding(QueryConsumerChannels.class)
 public class QueryConsumerChannelHandler {
 
     private QueryEventHandlerContext eventHandlerContext;
 
-    @Autowired
     public QueryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext) {
         this.eventHandlerContext = eventHandlerContext;
     }

@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.services.query.rest.assembler;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.ProcessInstanceController;
@@ -24,12 +27,7 @@ import org.activiti.cloud.services.query.rest.ProcessInstanceVariableController;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
-import org.springframework.stereotype.Component;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-
-@Component
 public class ProcessInstanceResourceAssembler implements ResourceAssembler<ProcessInstanceEntity, Resource<CloudProcessInstance>> {
 
     @Override

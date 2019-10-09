@@ -16,14 +16,12 @@
 
 package org.activiti.cloud.services.query.app.repository;
 
-import java.util.Optional;
-
 import com.querydsl.core.types.Predicate;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Component;
 
-@Component
+import java.util.Optional;
+
 public class EntityFinder {
 
     public <T, ID> T findById(CrudRepository<T, ID> repository,

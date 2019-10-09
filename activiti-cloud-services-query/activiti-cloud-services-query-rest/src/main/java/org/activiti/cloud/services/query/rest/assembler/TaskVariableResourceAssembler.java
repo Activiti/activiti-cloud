@@ -20,9 +20,7 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TaskVariableResourceAssembler implements ResourceAssembler<TaskVariableEntity, Resource<CloudVariableInstance>> {
 
     @Override

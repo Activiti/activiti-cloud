@@ -16,17 +16,22 @@
 
 package org.activiti.cloud.services.query.rest.config;
 
+import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroup;
+import org.activiti.cloud.services.query.model.TaskCandidateUser;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy.RepositoryDetectionStrategies;
-import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
+import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 
 @Configuration
-public class QueryRepositoryConfig extends RepositoryRestConfigurerAdapter {
+public class QueryRepositoryConfig implements RepositoryRestConfigurer {
 
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
@@ -35,10 +40,15 @@ public class QueryRepositoryConfig extends RepositoryRestConfigurerAdapter {
     	config.setRepositoryDetectionStrategy(RepositoryDetectionStrategies.ANNOTATED);
     	
         //by default the ids are not exposed the the REST API
-        config.exposeIdsFor(ProcessInstanceEntity.class);
-        config.exposeIdsFor(TaskEntity.class);
-        config.exposeIdsFor(ProcessVariableEntity.class);
-        config.exposeIdsFor(ProcessDefinitionEntity.class);
+        config.exposeIdsFor(ProcessInstanceEntity.class)
+              .exposeIdsFor(TaskEntity.class)
+              .exposeIdsFor(ProcessVariableEntity.class)
+              .exposeIdsFor(ProcessDefinitionEntity.class)
+              .exposeIdsFor(ProcessModelEntity.class)
+              .exposeIdsFor(BPMNSequenceFlowEntity.class)
+              .exposeIdsFor(BPMNActivityEntity.class)
+              .exposeIdsFor(TaskCandidateGroup.class)
+              .exposeIdsFor(TaskCandidateUser.class);
     }
 
 }

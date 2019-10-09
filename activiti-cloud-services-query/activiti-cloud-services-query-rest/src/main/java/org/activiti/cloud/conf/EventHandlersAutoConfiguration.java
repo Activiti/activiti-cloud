@@ -16,10 +16,8 @@
 
 package org.activiti.cloud.conf;
 
-import java.util.Set;
-
-import javax.persistence.EntityManager;
-
+import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
+import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -66,12 +64,24 @@ import org.activiti.cloud.services.query.events.handlers.VariableCreatedEventHan
 import org.activiti.cloud.services.query.events.handlers.VariableDeletedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.VariableUpdatedEventHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Set;
+
+import javax.persistence.EntityManager;
+
 @Configuration
+@EnableBinding(QueryConsumerChannels.class)
 public class EventHandlersAutoConfiguration {
 
+    @Bean
+    @ConditionalOnMissingBean
+    public QueryConsumerChannelHandler queryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext) {
+        return new QueryConsumerChannelHandler(eventHandlerContext);
+    }
+        
     @Bean
     @ConditionalOnMissingBean
     public ProcessDeployedEventHandler processDeployedEventHandler(ProcessDefinitionRepository processDefinitionRepository,

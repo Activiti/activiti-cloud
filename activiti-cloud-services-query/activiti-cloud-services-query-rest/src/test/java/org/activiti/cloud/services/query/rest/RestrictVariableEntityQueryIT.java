@@ -1,6 +1,8 @@
 package org.activiti.cloud.services.query.rest;
 
-import java.util.Arrays;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
@@ -23,26 +25,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import java.util.Arrays;
 
 /**
  * This is present in case of a future scenario where we need to filter task or process instance variables more generally rather than per task or per proc.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-@EnableConfigurationProperties
-@EnableJpaRepositories(basePackages = "org.activiti")
-@EntityScan("org.activiti")
 @TestPropertySource("classpath:test-application.properties")
 @EnableAutoConfiguration
 public class RestrictVariableEntityQueryIT {

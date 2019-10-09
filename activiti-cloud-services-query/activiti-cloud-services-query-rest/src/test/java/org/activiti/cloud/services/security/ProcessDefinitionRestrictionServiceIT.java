@@ -16,9 +16,10 @@
 
 package org.activiti.cloud.services.security;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.UUID;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
@@ -31,23 +32,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:test-application.properties")
 @SpringBootTest
-@EnableJpaRepositories(basePackages = "org.activiti")
-@EntityScan("org.activiti")
 public class ProcessDefinitionRestrictionServiceIT {
 
     @Autowired

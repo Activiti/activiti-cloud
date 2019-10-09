@@ -20,9 +20,7 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ProcessInstanceVariableResourceAssembler implements ResourceAssembler<ProcessVariableEntity, Resource<CloudVariableInstance>> {
 
     @Override

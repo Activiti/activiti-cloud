@@ -1,22 +1,19 @@
 package org.activiti.cloud.services.security;
 
-import java.util.List;
-
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /*
  * Tested by RestrictTaskQueryIT
  * Applies permissions/restrictions to TaskEntity data (and TaskEntity Variables) based upon Candidate user/group logic
  */
-@Component
 public class TaskLookupRestrictionService {
 
     private final UserGroupManager userGroupManager;
@@ -26,7 +23,6 @@ public class TaskLookupRestrictionService {
     @Value("${activiti.cloud.security.task.restrictions.enabled:true}")
     private boolean restrictionsEnabled;
 
-    @Autowired
     public TaskLookupRestrictionService(UserGroupManager userGroupManager,
                                         SecurityManager securityManager) {
         this.userGroupManager = userGroupManager;

@@ -19,22 +19,14 @@ package org.activiti.cloud.starter.tests;
 import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableActivitiQuery
-@ComponentScan({"org.activiti.cloud.starters.test",
-        "org.activiti.cloud.services.test.identity.keycloak.interceptor"})
 public class Application {
 
-
     public static void main(String[] args) {
-
         SpringApplication.run(Application.class,
-                args);
-
-
+                              args);
     }
-
 
 }
