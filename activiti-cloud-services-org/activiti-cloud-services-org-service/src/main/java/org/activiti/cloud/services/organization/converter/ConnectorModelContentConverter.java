@@ -19,6 +19,7 @@ package org.activiti.cloud.services.organization.converter;
 import java.util.Optional;
 
 import org.activiti.cloud.organization.api.ConnectorModelType;
+import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.api.ModelContentConverter;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.converter.JsonConverter;
@@ -51,7 +52,8 @@ public class ConnectorModelContentConverter implements ModelContentConverter<Con
     }
 
     @Override
-    public byte[] convertToBytes(ConnectorModelContent modelContent) {
-        return connectorModelContentJsonConverter.convertToJsonBytes(modelContent);
+    public byte[] convertToBytes(ModelContent modelContent) {
+        ConnectorModelContent connectorModelContent = (ConnectorModelContent) modelContent;
+        return connectorModelContentJsonConverter.convertToJsonBytes(connectorModelContent);
     }
 }

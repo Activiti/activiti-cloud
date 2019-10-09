@@ -31,6 +31,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.springframework.data.repository.support.PageableExecutionUtils.getPage;
 
@@ -78,5 +79,9 @@ public class ModelTypeService {
 
     public boolean isJson(ModelType modelType) {
         return JSON.equals(modelType.getContentFileExtension());
+    }
+
+    public  boolean isContentXML(ModelType modelType) {
+      return CONTENT_TYPE_XML.equalsIgnoreCase(modelType.getContentFileExtension());
     }
 }

@@ -99,6 +99,7 @@ public class ProjectService {
      * @return the created project
      */
     public Project createProject(Project project) {
+        project.setId(null);
         return projectRepository.createProject(project);
     }
 
@@ -206,19 +207,15 @@ public class ProjectService {
                 .orElseThrow(() -> new ImportProjectException("No valid project entry found to import: " + file.getOriginalFilename()));
 
         projectHolder.getModelJsonFiles().forEach(modelJsonFile -> {
-            if (modelTypeService.isJson(modelJsonFile.getModelType())) {
-                modelService.importModel(createdProject,
-                                         modelJsonFile.getModelType(),
-                                         modelJsonFile.getFileContent());
-            } else {
-                Model createdModel = modelService.importJsonModel(createdProject,
-                                                                  modelJsonFile.getModelType(),
-                                                                  modelJsonFile.getFileContent());
-                projectHolder.getModelContentFile(createdModel)
-                        .ifPresent(fileContent -> modelService.updateModelContent(createdModel,
-                                                                                  fileContent));
+            Model createdModel = modelService.importModel(createdProject, modelJsonFile.getModelType(), modelJsonFile.getFileContent());
+            if(modelTypeService.isJson(modelJsonFile.getModelType())){
+                modelService.updateModelContent(createdModel, modelJsonFile.getFileContent());
+            }else{
+              projectHolder.getModelContentFile(createdModel)
+                .ifPresent(fileContent -> modelService.updateModelContent(createdModel, fileContent));
             }
         });
+        modelService.cleanModelIdList();
         return createdProject;
     }
 

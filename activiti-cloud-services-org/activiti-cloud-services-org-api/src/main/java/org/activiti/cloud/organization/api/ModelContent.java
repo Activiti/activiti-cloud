@@ -21,7 +21,9 @@ package org.activiti.cloud.organization.api;
  */
 public interface ModelContent {
 
-    String getId();
+  String getId();
 
-    String getTemplate();
+  void setId(String id);
+
+  String getTemplate();
 }

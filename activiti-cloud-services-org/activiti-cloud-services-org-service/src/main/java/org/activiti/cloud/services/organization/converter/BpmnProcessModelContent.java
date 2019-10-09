@@ -57,9 +57,8 @@ public class BpmnProcessModelContent implements ModelContent {
         return process.getId();
     }
 
-    public BpmnProcessModelContent setId(String id) {
+    public void setId(String id) {
         process.setId(id);
-        return this;
     }
 
     @Override

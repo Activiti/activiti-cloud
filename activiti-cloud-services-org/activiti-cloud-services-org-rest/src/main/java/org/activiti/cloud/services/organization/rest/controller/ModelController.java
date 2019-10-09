@@ -189,7 +189,7 @@ public class ModelController implements ModelRestApi {
             @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
         Project project = projectController.findProjectById(projectId);
         return resourceAssembler.toResource(
-                modelService.importModel(project,
+                modelService.importSingleModel(project,
                                          findModelType(type),
                                          multipartToFileContent(file)));
     }
