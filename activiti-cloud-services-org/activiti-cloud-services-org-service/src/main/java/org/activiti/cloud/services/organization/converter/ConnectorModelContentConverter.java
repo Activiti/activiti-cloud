@@ -43,7 +43,8 @@ public class ConnectorModelContentConverter implements ModelContentConverter<Con
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   public ConnectorModelContentConverter(ConnectorModelType connectorModelType,
-                                        JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter) {
+                                        JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter,
+                                        ObjectMapper objectMapper) {
     this.connectorModelType = connectorModelType;
     this.connectorModelContentJsonConverter = connectorModelContentJsonConverter;
   }
