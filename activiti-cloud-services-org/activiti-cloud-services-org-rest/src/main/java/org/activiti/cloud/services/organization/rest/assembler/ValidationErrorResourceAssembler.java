@@ -16,16 +16,14 @@
 
 package org.activiti.cloud.services.organization.rest.assembler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.services.organization.rest.controller.ModelController;
 import org.activiti.cloud.services.organization.rest.resource.ValidationErrorResource;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
-import org.springframework.stereotype.Component;
 
-@Component
+import java.util.ArrayList;
+import java.util.List;
+
 public class ValidationErrorResourceAssembler extends ResourceAssemblerSupport<ModelValidationError, ValidationErrorResource> {
 
     public ValidationErrorResourceAssembler() {

@@ -16,18 +16,16 @@
 
 package org.activiti.cloud.services.organization.validation.project;
 
-import java.util.stream.Stream;
-
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.ValidationContext;
-import org.springframework.stereotype.Component;
+
+import java.util.stream.Stream;
 
 /**
  * Implementation of {@link ProjectValidator} for validating that a project has at least one project.
  */
-@Component
 public class ProjectConsistencyValidator implements ProjectValidator {
 
     private final String EMPTY_PROJECT_PROBLEM = "Invalid project";

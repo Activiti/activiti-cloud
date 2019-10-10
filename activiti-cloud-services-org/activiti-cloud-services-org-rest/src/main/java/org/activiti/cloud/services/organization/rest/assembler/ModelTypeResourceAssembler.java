@@ -19,12 +19,10 @@ package org.activiti.cloud.services.organization.rest.assembler;
 import org.activiti.cloud.organization.api.ModelType;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
-import org.springframework.stereotype.Component;
 
 /**
  * Resource assembler for {@link ModelType}
  */
-@Component
 public class ModelTypeResourceAssembler implements ResourceAssembler<ModelType, Resource<ModelType>> {
 
     @Override

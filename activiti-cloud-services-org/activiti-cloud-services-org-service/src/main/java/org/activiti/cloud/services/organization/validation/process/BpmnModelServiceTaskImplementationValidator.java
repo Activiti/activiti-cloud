@@ -16,10 +16,8 @@
 
 package org.activiti.cloud.services.organization.validation.process;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import static java.lang.String.format;
+import static org.springframework.util.StringUtils.isEmpty;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.ServiceTask;
@@ -30,15 +28,15 @@ import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.services.organization.converter.ConnectorModelAction;
 import org.activiti.cloud.services.organization.converter.ConnectorModelContent;
 import org.activiti.cloud.services.organization.converter.ConnectorModelContentConverter;
-import org.springframework.stereotype.Component;
 
-import static java.lang.String.format;
-import static org.springframework.util.StringUtils.isEmpty;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implementation of {@link BpmnModelValidator} vor validating service task implementation
  */
-@Component
 public class BpmnModelServiceTaskImplementationValidator implements BpmnModelValidator {
 
     public final String INVALID_SERVICE_IMPLEMENTATION_PROBLEM = "Invalid service implementation";

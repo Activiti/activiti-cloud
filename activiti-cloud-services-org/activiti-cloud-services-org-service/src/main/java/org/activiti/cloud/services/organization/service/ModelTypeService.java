@@ -16,6 +16,14 @@
 
 package org.activiti.cloud.services.organization.service;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
+import static org.springframework.data.repository.support.PageableExecutionUtils.getPage;
+
+import org.activiti.cloud.organization.api.ModelType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +46,6 @@ import static org.springframework.data.repository.support.PageableExecutionUtils
 /**
  * Handler for model types
  */
-@Service
 public class ModelTypeService {
 
     private Map<String, ModelType> modelTypesMapByName;

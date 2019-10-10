@@ -15,12 +15,9 @@
  */
 package org.activiti.cloud.organization.api;
 
-import org.springframework.stereotype.Component;
-
 /**
  * Connector model type
  */
-@Component
 public class ConnectorModelType extends JsonModelType {
 
     public static final String NAME = "CONNECTOR";

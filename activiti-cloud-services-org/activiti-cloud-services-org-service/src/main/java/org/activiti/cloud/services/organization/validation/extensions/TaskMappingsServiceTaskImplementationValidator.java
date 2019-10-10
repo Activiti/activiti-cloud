@@ -16,12 +16,9 @@
 
 package org.activiti.cloud.services.organization.validation.extensions;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
+import static java.lang.String.format;
+import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
+import static org.springframework.util.StringUtils.isEmpty;
 
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.ServiceTask;
@@ -34,16 +31,17 @@ import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
 import org.activiti.cloud.services.organization.converter.ConnectorActionParameter;
 import org.activiti.cloud.services.organization.converter.ConnectorModelAction;
 import org.activiti.cloud.services.organization.converter.ConnectorModelContentConverter;
-import org.springframework.stereotype.Component;
 
-import static java.lang.String.format;
-import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
-import static org.springframework.util.StringUtils.isEmpty;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Implementation of {@link TaskMappingsValidator} for {@link ServiceTask} implementation
  */
-@Component
 public class TaskMappingsServiceTaskImplementationValidator implements TaskMappingsValidator {
 
     public static final String UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_PROBLEM =

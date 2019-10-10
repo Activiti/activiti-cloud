@@ -15,26 +15,22 @@
  */
 package org.activiti.cloud.services.organization.validation;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
+
 import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidator;
 import org.everit.json.schema.loader.SchemaLoader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 
 /**
  * {@link ModelValidator} implementation of connector models
  */
-@Component
 public class ConnectorModelValidator extends JsonSchemaModelValidator {
 
     private final SchemaLoader connectorSchemaLoader;
 
     private final ConnectorModelType connectorModelType;
 
-    @Autowired
     public ConnectorModelValidator(SchemaLoader connectorSchemaLoader,
                                    ConnectorModelType connectorModelType) {
         this.connectorSchemaLoader = connectorSchemaLoader;

@@ -16,6 +16,9 @@
 package org.activiti.cloud.services.organization.converter;
 
 import org.activiti.bpmn.converter.BpmnXMLConverter;
+import org.activiti.cloud.organization.api.ConnectorModelType;
+import org.activiti.cloud.organization.api.ProcessModelType;
+import org.activiti.cloud.organization.converter.JsonConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,4 +32,18 @@ public class ProcessModelConverterConfiguration {
     public BpmnXMLConverter bpmnXMLConverter() {
         return new BpmnXMLConverter();
     }
+    
+    @Bean
+    public ConnectorModelContentConverter connectorModelContentConverter(ConnectorModelType connectorModelType,
+                                                                         JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter) {
+        return new ConnectorModelContentConverter(connectorModelType,
+                                                  connectorModelContentJsonConverter);
+    }
+
+    @Bean
+    public ProcessModelContentConverter processModelContentConverter(ProcessModelType processModelType,
+                                                                     BpmnXMLConverter bpmnConverter) {
+        return new ProcessModelContentConverter(processModelType,
+                                                bpmnConverter);
+    }    
 }

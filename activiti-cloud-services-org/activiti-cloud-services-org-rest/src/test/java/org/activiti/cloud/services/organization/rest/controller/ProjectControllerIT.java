@@ -16,9 +16,41 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.organization.asserts.AssertResponse.assertThatResponse;
+import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
+import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
+import static org.activiti.cloud.services.organization.mock.MockFactory.inputsMappings;
+import static org.activiti.cloud.services.organization.mock.MockFactory.outputsMappings;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processFileContent;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processFileContentWithCallActivity;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processVariables;
+import static org.activiti.cloud.services.organization.mock.MockFactory.project;
+import static org.activiti.cloud.services.organization.mock.MockFactory.projectWithDescription;
+import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
+import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
+import static org.hamcrest.core.AllOf.allOf;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Model;
@@ -46,40 +78,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.activiti.cloud.services.organization.asserts.AssertResponse.assertThatResponse;
-import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
-import static org.activiti.cloud.services.organization.mock.MockFactory.extensions;
-import static org.activiti.cloud.services.organization.mock.MockFactory.inputsMappings;
-import static org.activiti.cloud.services.organization.mock.MockFactory.outputsMappings;
-import static org.activiti.cloud.services.organization.mock.MockFactory.processFileContent;
-import static org.activiti.cloud.services.organization.mock.MockFactory.processFileContentWithCallActivity;
-import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithContent;
-import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
-import static org.activiti.cloud.services.organization.mock.MockFactory.processVariables;
-import static org.activiti.cloud.services.organization.mock.MockFactory.project;
-import static org.activiti.cloud.services.organization.mock.MockFactory.projectWithDescription;
-import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
-import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
-import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.hamcrest.core.AllOf.allOf;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = OrganizationRestApplication.class)
@@ -759,7 +760,7 @@ public class ProjectControllerIT {
                 // THEN
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name",
+                .andExpect(jsonPath("$.entry.name",
                                     is("application-xy")));
     }
 

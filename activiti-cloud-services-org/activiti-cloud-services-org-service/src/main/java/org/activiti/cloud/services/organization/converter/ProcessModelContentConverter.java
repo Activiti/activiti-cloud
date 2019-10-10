@@ -16,12 +16,7 @@
 
 package org.activiti.cloud.services.organization.converter;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Optional;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
 
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
@@ -31,14 +26,18 @@ import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.organization.core.error.ModelingException;
 import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.stereotype.Component;
 
-import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Optional;
+
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * Implementation of {@link ModelContentConverter} for process models
  */
-@Component
 public class ProcessModelContentConverter implements ModelContentConverter<BpmnProcessModelContent> {
 
     private final ProcessModelType processModelType;

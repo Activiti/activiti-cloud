@@ -18,12 +18,10 @@ package org.activiti.cloud.services.organization.rest.assembler;
 
 import org.activiti.cloud.organization.api.ModelType;
 import org.springframework.hateoas.RelProvider;
-import org.springframework.stereotype.Component;
 
 /**
  * Rel provider for {@link ModelType}
  */
-@Component
 public class ModelTypeRelProvider implements RelProvider {
 
     public static final String COLLECTION_RESOURCE_REL = "model-types";

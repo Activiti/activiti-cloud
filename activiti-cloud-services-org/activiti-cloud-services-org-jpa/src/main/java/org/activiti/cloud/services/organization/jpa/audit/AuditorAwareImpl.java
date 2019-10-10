@@ -16,22 +16,19 @@
 
 package org.activiti.cloud.services.organization.jpa.audit;
 
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.AuditorAware;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.springframework.stereotype.Component;
+import org.springframework.data.domain.AuditorAware;
+
+import java.util.Optional;
 
 /**
  * Auditor implementation.
  */
-@Component("auditorAware")
+
 public class AuditorAwareImpl implements AuditorAware<String> {
 
     private final SecurityManager securityManager;
 
-    @Autowired
     public AuditorAwareImpl(SecurityManager securityManager) {
         this.securityManager = securityManager;
     }

@@ -1,9 +1,7 @@
 package org.activiti.cloud.services.organization.validation.process;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.CallActivity;
@@ -12,12 +10,12 @@ import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.services.organization.converter.ProcessModelContentConverter;
-import org.springframework.stereotype.Component;
 
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@Component
 public class BpmnModelCallActivityValidator implements BpmnModelValidator {
 
     private ProcessModelType processModelType;

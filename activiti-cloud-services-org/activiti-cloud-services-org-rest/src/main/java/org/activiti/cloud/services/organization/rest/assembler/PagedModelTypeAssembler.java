@@ -21,13 +21,11 @@ import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
 import org.activiti.cloud.organization.api.ModelType;
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
 
 /**
  * Paged assembler for {@link ModelType} resources with Alfresco format support
  */
-@Component
 public class PagedModelTypeAssembler extends AlfrescoPagedResourcesAssembler<ModelType> {
 
     public PagedModelTypeAssembler(@Nullable HateoasPageableHandlerMethodArgumentResolver resolver,

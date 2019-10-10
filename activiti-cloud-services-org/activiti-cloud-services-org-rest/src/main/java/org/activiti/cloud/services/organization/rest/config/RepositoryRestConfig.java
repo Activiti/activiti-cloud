@@ -16,14 +16,11 @@
 
 package org.activiti.cloud.services.organization.rest.config;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.Project;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
-import org.springframework.data.rest.webmvc.convert.UriListHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
 
 @Configuration
 public class RepositoryRestConfig extends RepositoryRestConfigurerAdapter {
@@ -33,6 +30,8 @@ public class RepositoryRestConfig extends RepositoryRestConfigurerAdapter {
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
 
-        config.setBasePath(API_VERSION);
+        config.setBasePath(API_VERSION)
+              .exposeIdsFor(Project.class)
+              .exposeIdsFor(Model.class);
     }
 }

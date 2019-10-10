@@ -16,11 +16,9 @@
 
 package org.activiti.cloud.services.organization.validation.extensions;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import static java.lang.String.format;
+import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
+import static org.activiti.cloud.organization.api.process.VariableMappingType.VARIABLE;
 
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ValidationContext;
@@ -29,16 +27,16 @@ import org.activiti.cloud.organization.api.process.ProcessVariable;
 import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
 import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
 import org.activiti.cloud.services.organization.converter.BpmnProcessModelContent;
-import org.springframework.stereotype.Component;
 
-import static java.lang.String.format;
-import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
-import static org.activiti.cloud.organization.api.process.VariableMappingType.VARIABLE;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implementation of {@link ProcessExtensionsValidator} for validating process variables
  */
-@Component
 public class ProcessExtensionsProcessVariablesValidator implements ProcessExtensionsValidator {
 
     public static final String UNKNOWN_PROCESS_VARIABLE_VALIDATION_ERROR_PROBLEM = "Unknown process variable in process extensions: %s";

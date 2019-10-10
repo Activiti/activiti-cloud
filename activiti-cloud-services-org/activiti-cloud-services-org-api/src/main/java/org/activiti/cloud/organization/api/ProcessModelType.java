@@ -16,12 +16,9 @@
 
 package org.activiti.cloud.organization.api;
 
-import org.springframework.stereotype.Component;
-
 /**
  * Process model type
  */
-@Component
 public class ProcessModelType implements ModelType {
 
     public static final String PROCESS = "PROCESS";

@@ -15,12 +15,9 @@
  */
 package org.activiti.cloud.services.organization.validation.extensions;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import static java.lang.String.format;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
+import static org.apache.commons.lang3.StringUtils.removeStart;
 
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
@@ -34,18 +31,15 @@ import org.activiti.cloud.organization.core.error.SyntacticModelValidationExcept
 import org.activiti.cloud.services.organization.converter.BpmnProcessModelContent;
 import org.activiti.cloud.services.organization.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.organization.validation.JsonSchemaModelValidator;
-import org.activiti.cloud.services.organization.validation.extensions.ProcessExtensionsValidator;
 import org.everit.json.schema.loader.SchemaLoader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
 
-import static java.lang.String.format;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
-import static org.apache.commons.lang3.StringUtils.removeStart;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@Component
-@ConditionalOnMissingBean(name = "ExtensionsModelValidator")
 public class ExtensionsModelValidator extends JsonSchemaModelValidator {
 
     public static final String UNKNOWN_PROCESS_ID_VALIDATION_ERROR_PROBLEM = "Unknown process id in process extensions: %s";
@@ -61,7 +55,6 @@ public class ExtensionsModelValidator extends JsonSchemaModelValidator {
 
     private final ProcessModelContentConverter processModelContentConverter;
 
-    @Autowired
     public ExtensionsModelValidator(SchemaLoader processExtensionsSchemaLoader,
                                     Set<ProcessExtensionsValidator> processExtensionsValidators,
                                     ProcessModelType processModelType,

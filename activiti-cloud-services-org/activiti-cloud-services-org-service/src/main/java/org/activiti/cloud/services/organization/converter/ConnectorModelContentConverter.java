@@ -16,19 +16,17 @@
 
 package org.activiti.cloud.services.organization.converter;
 
-import java.util.Optional;
-
 import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.api.ModelContentConverter;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.converter.JsonConverter;
-import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 /**
  * Implementation of {@link ModelContentConverter} for connectors models
  */
-@Component
 public class ConnectorModelContentConverter implements ModelContentConverter<ConnectorModelContent> {
 
     private final ConnectorModelType connectorModelType;

@@ -15,12 +15,7 @@
  */
 package org.activiti.cloud.services.organization.validation.process;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.xml.stream.XMLStreamException;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 
 import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
@@ -34,17 +29,18 @@ import org.activiti.cloud.organization.core.error.SyntacticModelValidationExcept
 import org.activiti.cloud.services.organization.converter.ProcessModelContentConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
 
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.xml.stream.XMLStreamException;
 
 /**
  * {@link ModelValidator} implementation of process models
  */
-@Component
-@ConditionalOnMissingBean(name = "ProcessModelValidator")
 public class ProcessModelValidator implements ModelValidator {
 
     private final Logger log = LoggerFactory.getLogger(ProcessModelValidator.class);
@@ -55,7 +51,6 @@ public class ProcessModelValidator implements ModelValidator {
 
     private final ProcessModelContentConverter processModelContentConverter;
 
-    @Autowired
     public ProcessModelValidator(ProcessModelType processModelType,
                                  Set<BpmnModelValidator> mpmnModelValidators,
                                  ProcessModelContentConverter processModelContentConverter) {

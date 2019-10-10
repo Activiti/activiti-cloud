@@ -16,31 +16,22 @@
 
 package org.activiti.cloud.organization;
 
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.activiti.cloud.services.organization.jpa.version.ExtendedJpaRepositoryFactoryBean;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @EnableAutoConfiguration
-@ComponentScan({"org.activiti.cloud.organization", "org.activiti.cloud.services.organization"})
-@EnableJpaRepositories(
-        basePackages = {"org.activiti.cloud.services.organization.jpa"},
-        repositoryFactoryBeanClass = ExtendedJpaRepositoryFactoryBean.class)
-@EnableJpaAuditing(auditorAwareRef = "auditorAware")
-@EntityScan("org.activiti.cloud.services.organization.entity")
 @Inherited
 @EnableDiscoveryClient
+@ImportAutoConfiguration(OrganizationSwaggerConfiguration.class)
 public @interface EnableActivitiOrganization {
 
 }

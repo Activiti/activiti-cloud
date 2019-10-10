@@ -16,6 +16,16 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
+import static org.activiti.cloud.services.organization.asserts.AssertResponse.assertThatResponse;
+import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
+import static org.activiti.cloud.services.organization.mock.MockFactory.project;
+import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.Project;
@@ -32,16 +42,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
-
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
-import static org.activiti.cloud.services.organization.asserts.AssertResponse.assertThatResponse;
-import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
-import static org.activiti.cloud.services.organization.mock.MockFactory.project;
-import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Integration tests for models rest api dealing with connector models
@@ -80,8 +80,9 @@ public class ConnectorModelControllerIT {
                 .body(objectMapper.writeValueAsString(connectorModel("connector-name")))
                 .post("/v1/projects/{projectId}/models",
                       project.getId())
-                .then().expect(status().isCreated())
-                .body("name",
+                .then()
+                .expect(status().isCreated())
+                .body("entry.name",
                       equalTo("connector-name"));
     }
 

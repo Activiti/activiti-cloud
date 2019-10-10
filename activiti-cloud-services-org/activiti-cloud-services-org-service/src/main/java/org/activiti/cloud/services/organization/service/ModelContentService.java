@@ -16,24 +16,22 @@
 
 package org.activiti.cloud.services.organization.service;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
+
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelContent;
+import org.activiti.cloud.organization.api.ModelContentConverter;
+import org.activiti.cloud.organization.api.ModelValidator;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ModelContent;
-import org.activiti.cloud.organization.api.ModelContentConverter;
-import org.activiti.cloud.organization.api.ModelValidator;
-import org.springframework.stereotype.Service;
-
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
-
 /**
  * Service for managing {@link ModelValidator}
  */
-@Service
 public class ModelContentService {
 
     private final Map<String, ModelValidator> modelContentValidatorsMapByModelType;

@@ -16,12 +16,7 @@
 
 package org.activiti.cloud.services.organization.validation.extensions;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import static java.lang.String.format;
 
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.cloud.organization.api.ModelValidationError;
@@ -30,14 +25,17 @@ import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
 import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
 import org.activiti.cloud.services.organization.converter.BpmnProcessModelContent;
-import org.springframework.stereotype.Component;
 
-import static java.lang.String.format;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implementation of {@link ProcessExtensionsValidator} for validating task mappings
  */
-@Component
 public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensionsValidator {
 
     public static final String UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM = "Unknown task in process extensions: %s";

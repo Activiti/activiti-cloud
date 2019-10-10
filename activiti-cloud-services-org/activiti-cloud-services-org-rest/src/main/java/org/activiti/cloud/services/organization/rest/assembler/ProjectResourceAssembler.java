@@ -16,27 +16,26 @@
 
 package org.activiti.cloud.services.organization.rest.assembler;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-
-import org.activiti.cloud.organization.api.Project;
-import org.activiti.cloud.organization.core.error.ModelingException;
-import org.activiti.cloud.services.organization.rest.controller.ProjectController;
-import org.activiti.cloud.services.organization.rest.controller.ModelController;
-import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceAssembler;
-import org.springframework.stereotype.Component;
-
 import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.organization.core.error.ModelingException;
+import org.activiti.cloud.services.organization.rest.controller.ModelController;
+import org.activiti.cloud.services.organization.rest.controller.ProjectController;
+import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceAssembler;
+
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Assembler for {@link Project} resource
  */
-@Component
 public class ProjectResourceAssembler implements ResourceAssembler<Project, Resource<Project>> {
 
     @Override

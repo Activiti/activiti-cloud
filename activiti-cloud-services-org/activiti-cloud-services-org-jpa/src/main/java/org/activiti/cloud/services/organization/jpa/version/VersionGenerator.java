@@ -18,14 +18,11 @@ package org.activiti.cloud.services.organization.jpa.version;
 
 import java.util.Optional;
 
-import org.springframework.stereotype.Component;
-
 /**
  * Version generator.
  *
  * TODO: To set VersionGenerationStrategy from application properties, if any.
  */
-@Component
 public class VersionGenerator {
 
     private VersionGenerationStrategy versionGenerationStrategy = IncrementPatchVersionGenerationStrategy.INSTANCE;

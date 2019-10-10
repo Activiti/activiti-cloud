@@ -16,20 +16,18 @@
 
 package org.activiti.cloud.services.organization.validation.process;
 
-import java.util.Optional;
-import java.util.stream.Stream;
-
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.services.organization.validation.DNSNameValidator;
-import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Implementation of {@link BpmnModelValidator} for validating process name
  */
-@Component
 public class BpmnModelNameValidator implements BpmnModelValidator,
                                                DNSNameValidator {
 

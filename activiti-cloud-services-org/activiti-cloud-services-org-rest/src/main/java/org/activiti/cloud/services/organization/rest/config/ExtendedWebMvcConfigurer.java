@@ -16,15 +16,26 @@
 
 package org.activiti.cloud.services.organization.rest.config;
 
-import java.util.List;
-
+import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
+import org.activiti.cloud.services.organization.rest.assembler.ModelResourceAssembler;
+import org.activiti.cloud.services.organization.rest.assembler.ModelTypeRelProvider;
+import org.activiti.cloud.services.organization.rest.assembler.ModelTypeResourceAssembler;
+import org.activiti.cloud.services.organization.rest.assembler.PagedModelTypeAssembler;
+import org.activiti.cloud.services.organization.rest.assembler.ProjectResourceAssembler;
+import org.activiti.cloud.services.organization.rest.assembler.ValidationErrorResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.util.UriComponents;
+
+import java.util.List;
 
 /**
  * Extended WebMvcConfigurer
@@ -48,4 +59,38 @@ public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
                 .map(MappingJackson2HttpMessageConverter::getObjectMapper)
                 .forEach(objectMapperBuilder::configure);
     }
+    
+    @Bean
+    public ModelResourceAssembler ModelResourceAssembler() {
+        return new ModelResourceAssembler();
+    }
+    
+    @Bean
+    public ModelTypeRelProvider modelTypeRelProvider() {
+        return new ModelTypeRelProvider();
+    }
+
+    @Bean
+    public ModelTypeResourceAssembler modelTypeResourceAssembler() {
+        return new ModelTypeResourceAssembler();
+    }
+
+    @Bean
+    public PagedModelTypeAssembler pagedModelTypeAssembler(@Nullable HateoasPageableHandlerMethodArgumentResolver resolver,
+                                                           @Nullable UriComponents baseUri,
+                                                           ExtendedPageMetadataConverter extendedPageMetadataConverter) {
+        return new PagedModelTypeAssembler(resolver,
+                                           baseUri,
+                                           extendedPageMetadataConverter);
+    }
+
+    @Bean
+    public ProjectResourceAssembler projectResourceAssembler() {
+        return new ProjectResourceAssembler();
+    }
+    
+    @Bean
+    public ValidationErrorResourceAssembler ValidationErrorResourceAssembler() {
+        return new ValidationErrorResourceAssembler();
+    }    
 }

@@ -16,19 +16,17 @@
 
 package org.activiti.cloud.services.organization.validation.process;
 
-import java.util.stream.Stream;
-
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ValidationError;
-import org.springframework.stereotype.Component;
+
+import java.util.stream.Stream;
 
 /**
  * Implementation of {@link BpmnModelValidator} based on the default BPMN activiti engine validator
  */
-@Component
 public class BpmnModelEngineValidator implements BpmnModelValidator {
 
     private final ProcessValidator processValidator;
