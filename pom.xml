@@ -43,10 +43,10 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
-   <dependency>
-        <groupId>javax.xml.bind</groupId>
-        <artifactId>jaxb-api</artifactId>
-        <version>${javax.xml.bind.version}</version>
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>${javax.xml.bind.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud.rb</groupId>
@@ -80,6 +80,27 @@
       <artifactId>spring-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    
+    <!-- Marker Pom for Dependency Conversion Validation  -->
+    <dependency>
+     <groupId>org.activiti.cloud.rb</groupId>
+     <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
+     <version>${activiti-cloud-runtime-bundle-service.version}</version>
+     <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>${project.parent.version}</version>
+      <type>pom</type>
+    </dependency>
+    <!-- Marker Pom for Dependency Conversion Validation  -->
+        
   </dependencies>
   <build>
     <plugins>
