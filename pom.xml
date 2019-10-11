@@ -72,7 +72,23 @@
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
-    </dependency>    
+    </dependency>
+    <!-- Marker Pom for Dependency Conversion Validation  -->
+    <dependency>
+      <groupId>org.activiti.cloud.query</groupId>
+      <artifactId>activiti-cloud-query-dependencies</artifactId>
+      <version>${activiti-cloud-query-service.version}</version>
+      <type>pom</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>${project.parent.version}</version>
+      <type>pom</type>
+    </dependency>
+    <!-- Marker Pom for Dependency Conversion Validation  -->
+
   </dependencies>
   <build>
     <plugins>
