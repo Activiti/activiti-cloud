@@ -19,7 +19,7 @@
     <example-cloud-connector.version>7.1.0-SNAPSHOT</example-cloud-connector.version>
     <activiti-cloud-audit.version>7.1.0-SNAPSHOT</activiti-cloud-audit.version>
     <activiti-cloud-query.version>7.1.0-SNAPSHOT</activiti-cloud-query.version>
-
+    <activiti-cloud-notifications-graphql>7.1.0-SNAPSHOT</activiti-cloud-notifications-graphql>
 
   </properties>
   
@@ -119,6 +119,37 @@
         </exclusion>
       </exclusions>
     </dependency>
+
+    <dependency>
+      <groupId>org.activiti.cloud.examples</groupId>
+      <artifactId>activiti-cloud-notifications-graphql</artifactId>
+      <version>${activiti-cloud-notifications-service-graphql.version}</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.activiti.cloud.notifications.graphql</groupId>
+          <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.activiti.cloud.common</groupId>
+          <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
 
   </dependencies> 
 
