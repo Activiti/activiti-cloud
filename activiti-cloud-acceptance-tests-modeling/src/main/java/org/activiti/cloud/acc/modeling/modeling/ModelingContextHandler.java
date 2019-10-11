@@ -16,11 +16,13 @@
 
 package org.activiti.cloud.acc.modeling.modeling;
 
+import java.util.Collection;
+import java.util.Optional;
+
 import net.serenitybdd.core.Serenity;
+import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.hateoas.Resource;
-
-import java.util.Optional;
 
 /**
  * ModelingContext handler
@@ -30,6 +32,8 @@ public class ModelingContextHandler {
     private static final String MODELING_CURRENT_CONTEXT = "modelingCurrentContext";
 
     private static final String MODELING_CURRENT_FILE = "modelingCurrentFile";
+
+    private static final String MODELING_CURRENT_PROJECTS = "modelingCurrentProjects";
 
     public Optional<Resource<?>> getCurrentModelingContext() {
         return Optional.ofNullable(Serenity.sessionVariableCalled(MODELING_CURRENT_CONTEXT));
@@ -47,6 +51,14 @@ public class ModelingContextHandler {
     public void setCurrentModelingFile(FileContent fileContent) {
         Serenity.setSessionVariable(MODELING_CURRENT_FILE)
                 .to(fileContent);
+    }
+
+    public void setCurrentProjects(Collection<Resource<Project>> projects) {
+        Serenity.setSessionVariable(MODELING_CURRENT_PROJECTS).to(projects);
+    }
+
+    public Optional<Collection<Resource<Project>>> getCurrentProjects() {
+        return Optional.ofNullable(Serenity.sessionVariableCalled(MODELING_CURRENT_PROJECTS));
     }
 
     public static void resetCurrentModelingObject() {

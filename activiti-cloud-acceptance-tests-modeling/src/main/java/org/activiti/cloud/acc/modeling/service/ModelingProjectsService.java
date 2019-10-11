@@ -27,6 +27,7 @@ import feign.jackson.JacksonEncoder;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.Project;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 
 import java.io.File;
@@ -40,6 +41,10 @@ import static org.activiti.cloud.acc.modeling.rest.ModelingFeignConfiguration.mo
 public interface ModelingProjectsService extends FeignRestDataClient<ModelingProjectsService, Project> {
 
     String PATH = "/v1/projects";
+
+    @RequestLine("GET ?name={name}")
+    @Headers("Content-Type: application/json")
+    PagedResources<Resource<Project>> findAllByName(@Param("name") String name);
 
     @RequestLine("GET")
     @Headers("Content-Type: application/json")

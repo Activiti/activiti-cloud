@@ -21,11 +21,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import feign.Response;
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.acc.modeling.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.acc.modeling.modeling.EnableModelingContext;
+import org.activiti.cloud.acc.modeling.modeling.ModelingContextHandler;
 import org.activiti.cloud.acc.modeling.modeling.ModelingIdentifier;
 import org.activiti.cloud.acc.modeling.service.ModelingProjectsService;
 import org.activiti.cloud.organization.api.Model;
@@ -62,7 +64,23 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     private ModelingProjectsService modelingProjectService;
 
     @Autowired
-    private ModelingTestsConfigurationProperties config;
+    private ModelingContextHandler modelingContextHandler;
+
+    @Step
+    public void findByName(String name) {
+        modelingContextHandler.setCurrentProjects(service().findAllByName(name).getContent());
+    }
+
+    @Step
+    public void checkCurrentProjects(List<String> expectedNames) {
+        assertThat(modelingContextHandler.getCurrentProjects()
+                           .map(resources -> resources.stream()
+                                   .map(Resource::getContent)
+                                   .map(Project::getName))
+                           .orElseGet(Stream::empty)
+                           .collect(Collectors.toList()))
+                .containsExactlyInAnyOrder(expectedNames.toArray(new String[0]));
+    }
 
     @Step
     public Resource<Project> create(String projectName) {
