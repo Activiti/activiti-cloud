@@ -103,7 +103,7 @@ public interface ModelRestApi {
     )
     @GetMapping(path = "/projects/{projectId}/models")
     PagedResources<Resource<Model>> getModels(
-            @ApiParam(GET_MODELS_PROJECT_ID_PARAM_DESCR)
+            @ApiParam(value = GET_MODELS_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
             @ApiParam(GET_MODELS_TYPE_PARAM_DESCR)
             @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
@@ -114,7 +114,7 @@ public interface ModelRestApi {
             value = "Get metadata information for a model")
     @GetMapping(path = "/models/{modelId}")
     Resource<Model> getModel(
-            @ApiParam(GET_MODEL_ID_PARAM_DESCR)
+            @ApiParam(value = GET_MODEL_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId);
 
     @ApiOperation(
@@ -124,7 +124,7 @@ public interface ModelRestApi {
     @PostMapping(path = "/projects/{projectId}/models")
     @ResponseStatus(CREATED)
     Resource<Model> createModel(
-            @ApiParam(CREATE_MODEL_PROJECT_ID_PARAM_DESCR)
+            @ApiParam(value = CREATE_MODEL_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
             @ApiParam(CREATE_MODEL_PARAM_DESCR)
             @RequestBody Model model);
@@ -135,7 +135,7 @@ public interface ModelRestApi {
             notes = "Update the details of a model.")
     @PutMapping(path = "/models/{modelId}")
     Resource<Model> updateModel(
-            @ApiParam(UPDATE_MODEL_ID_PARAM_DESCR)
+            @ApiParam(value = UPDATE_MODEL_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId,
             @ApiParam(UPDATE_MODEL_PARAM_DESCR)
             @RequestBody Model model);
@@ -147,7 +147,7 @@ public interface ModelRestApi {
     @PutMapping(path = "/models/{modelId}/content")
     @ResponseStatus(NO_CONTENT)
     void updateModelContent(
-            @ApiParam(UPDATE_MODEL_ID_PARAM_DESCR)
+            @ApiParam(value = UPDATE_MODEL_ID_PARAM_DESCR,required = true)
             @PathVariable String modelId,
             @ApiParam(UPDATE_MODEL_FILE_PARAM_DESCR)
             @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
@@ -158,7 +158,7 @@ public interface ModelRestApi {
     @DeleteMapping(path = "/models/{modelId}")
     @ResponseStatus(NO_CONTENT)
     void deleteModel(
-            @ApiParam(DELETE_MODEL_ID_PARAM_DESCR)
+            @ApiParam(value = DELETE_MODEL_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId);
 
     @ApiOperation(
@@ -172,13 +172,13 @@ public interface ModelRestApi {
     @GetMapping(path = "/models/{modelId}/content")
     void getModelContent(
             HttpServletResponse response,
-            @ApiParam(GET_MODEL_CONTENT_ID_PARAM_DESCR)
+            @ApiParam(value = GET_MODEL_CONTENT_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId) throws IOException;
 
     @GetMapping(path = "/models/{modelId}/content", produces = CONTENT_TYPE_SVG)
     void getModelDiagram(
             HttpServletResponse response,
-            @ApiParam(GET_MODEL_CONTENT_ID_PARAM_DESCR)
+            @ApiParam(value = GET_MODEL_CONTENT_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId) throws IOException;
 
     @ApiOperation(
@@ -188,7 +188,7 @@ public interface ModelRestApi {
     @PostMapping(path = "/projects/{projectId}/models/import", consumes = MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(CREATED)
     Resource<Model> importModel(
-            @ApiParam(CREATE_MODEL_PROJECT_ID_PARAM_DESCR)
+            @ApiParam(value = CREATE_MODEL_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
             @ApiParam(IMPORT_MODEL_TYPE_PARAM_DESCR)
             @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
@@ -202,7 +202,7 @@ public interface ModelRestApi {
     @GetMapping(path = "/models/{modelId}/export")
     void exportModel(
             HttpServletResponse response,
-            @ApiParam(EXPORT_MODEL_ID_PARAM_DESCR)
+            @ApiParam(value = EXPORT_MODEL_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId,
             @ApiParam(ATTACHMENT_API_PARAM_DESCR)
             @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
@@ -223,7 +223,7 @@ public interface ModelRestApi {
     @PostMapping("/models/{modelId}/validate")
     @ResponseStatus(NO_CONTENT)
     void validateModel(
-            @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
+            @ApiParam(value = VALIDATE_MODEL_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId,
             @ApiParam(VALIDATE_MODEL_FILE_PARAM_DESCR)
             @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;

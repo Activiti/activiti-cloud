@@ -64,7 +64,6 @@ public class ProjectController implements ProjectRestApi {
     @Override
     public PagedResources<Resource<Project>> getProjects(
             Pageable pageable,
-            @ApiParam(PROJECT_NAME_PARAM_DESCR)
             @RequestParam(
                     name = PROJECT_NAME_PARAM_NAME,
                     required = false) String name) {
@@ -77,23 +76,19 @@ public class ProjectController implements ProjectRestApi {
 
     @Override
     public Resource<Project> getProject(
-            @ApiParam(GET_PROJECT_ID_PARAM_DESCR)
             @PathVariable String projectId) {
         return resourceAssembler.toResource(findProjectById(projectId));
     }
 
     @Override
     public Resource<Project> createProject(
-            @ApiParam(CREATE_PROJECT_PARAM_DESCR)
             @RequestBody @Valid Project project) {
         return resourceAssembler.toResource(projectService.createProject(project));
     }
 
     @Override
     public Resource<Project> updateProject(
-            @ApiParam(UPDATE_PROJECT_ID_PARAM_DESCR)
             @PathVariable String projectId,
-            @ApiParam(UPDATE_PROJECT_PARAM_DESCR)
             @RequestBody @Valid Project project) {
         Project projectToUpdate = findProjectById(projectId);
         return resourceAssembler.toResource(projectService.updateProject(projectToUpdate,
@@ -102,14 +97,12 @@ public class ProjectController implements ProjectRestApi {
 
     @Override
     public void deleteProject(
-            @ApiParam(DELETE_PROJECT_ID_PARAM_DESCR)
             @PathVariable String projectId) {
         projectService.deleteProject(findProjectById(projectId));
     }
 
     @Override
     public Resource<Project> importProject(
-            @ApiParam(IMPORT_PROJECT_FILE_PARAM_DESCR)
             @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
         return resourceAssembler.toResource(projectService.importProject(file));
     }
@@ -117,9 +110,7 @@ public class ProjectController implements ProjectRestApi {
     @Override
     public void exportProject(
             HttpServletResponse response,
-            @ApiParam(EXPORT_PROJECT_ID_PARAM_DESCR)
             @PathVariable String projectId,
-            @ApiParam(ATTACHMENT_API_PARAM_DESCR)
             @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException {

@@ -110,7 +110,7 @@ public interface ProjectRestApi {
             value = "Get project")
     @GetMapping(path = "/projects/{projectId}")
     Resource<Project> getProject(
-            @ApiParam(GET_PROJECT_ID_PARAM_DESCR)
+            @ApiParam(value = GET_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId);
 
     @ApiOperation(
@@ -118,7 +118,7 @@ public interface ProjectRestApi {
             value = "Update project details")
     @PutMapping(path = "/projects/{projectId}")
     Resource<Project> updateProject(
-            @ApiParam(UPDATE_PROJECT_ID_PARAM_DESCR)
+            @ApiParam(value = UPDATE_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
             @ApiParam(UPDATE_PROJECT_PARAM_DESCR)
             @RequestBody Project project);
@@ -129,7 +129,7 @@ public interface ProjectRestApi {
     @DeleteMapping(path = "/projects/{projectId}")
     @ResponseStatus(NO_CONTENT)
     void deleteProject(
-            @ApiParam(DELETE_PROJECT_ID_PARAM_DESCR)
+            @ApiParam(value = DELETE_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId);
 
     @ApiOperation(
@@ -150,7 +150,7 @@ public interface ProjectRestApi {
     @GetMapping(path = "/projects/{projectId}/export")
     void exportProject(
             HttpServletResponse response,
-            @ApiParam(EXPORT_PROJECT_ID_PARAM_DESCR)
+            @ApiParam(value = EXPORT_PROJECT_ID_PARAM_DESCR, required = true)
             @PathVariable String projectId,
             @ApiParam(ATTACHMENT_API_PARAM_DESCR)
             @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
