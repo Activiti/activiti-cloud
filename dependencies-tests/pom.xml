@@ -16,6 +16,8 @@
     <maven.deploy.skip>true</maven.deploy.skip>
     <enforceFail>true</enforceFail>
     <example-runtime-bundle.version>7.1.0-SNAPSHOT</example-runtime-bundle.version>
+    <example-cloud-connector.version>7.1.0-SNAPSHOT</example-cloud-connector.version>
+
   </properties>
   
   <dependencies>
@@ -44,6 +46,22 @@
         <exclusion>
           <groupId>com.h2database</groupId>
           <artifactId>h2</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.examples</groupId>
+      <artifactId>example-cloud-connector</artifactId>
+      <version>${example-runtime-bundle.version}</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.activiti.cloud.connector</groupId>
+          <artifactId>activiti-cloud-starter-connector</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
