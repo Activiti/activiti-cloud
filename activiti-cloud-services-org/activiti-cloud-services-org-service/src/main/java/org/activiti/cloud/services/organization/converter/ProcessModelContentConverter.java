@@ -16,24 +16,29 @@
 
 package org.activiti.cloud.services.organization.converter;
 
-import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.CallActivity;
+import org.activiti.bpmn.model.FlowElement;
 import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.api.ModelContentConverter;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.organization.core.error.ModelingException;
+import org.activiti.cloud.services.common.file.FileContent;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Optional;
-
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
 
 /**
  * Implementation of {@link ModelContentConverter} for process models
@@ -71,8 +76,7 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
     }
 
     @Override
-    public byte[] convertToBytes(ModelContent modelContent) {
-        BpmnProcessModelContent bpmnProcessModelContent = (BpmnProcessModelContent) modelContent;
+    public byte[] convertToBytes(BpmnProcessModelContent bpmnProcessModelContent) {
         return bpmnConverter.convertToXML(bpmnProcessModelContent.getBpmnModel());
     }
 
@@ -87,4 +91,39 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
             return bpmnConverter.convertToBpmnModel(xmlReader);
         }
     }
+
+  @Override
+  public FileContent overrideModelId(FileContent fileContent,
+                                     HashMap<String, String> modelIdentifiers,
+                                     String modelContentId) {
+    Optional<BpmnProcessModelContent> modelContent = this.convertToModelContent(fileContent.getFileContent());
+    this.fixProcessModel(modelContent.get(), modelIdentifiers);
+    return new FileContent(fileContent.getFilename(), fileContent.getContentType(),
+      this.convertToBytes(modelContent.get()));
+  }
+
+  private void fixProcessModel(BpmnProcessModelContent processModelContent,
+                               HashMap<String, String> modelIdentifiers){
+    processModelContent.getBpmnModel().getProcesses().forEach(process -> {
+      String validIdentifier = modelIdentifiers.get(process.getId());
+      if(validIdentifier != null && validIdentifier != process.getId()){
+        process.setId(validIdentifier);
+      }
+      process.getFlowElements().stream()
+        .filter(flowElement -> this.isElementToFix(flowElement))
+        .map(flowElement -> {
+          CallActivity callActivity = ((CallActivity) flowElement);
+          String targetProcessId = modelIdentifiers.get(callActivity.getCalledElement());
+          if(targetProcessId != null) {
+            callActivity.setCalledElement(targetProcessId);
+          }
+          return flowElement;
+        })
+        .collect(Collectors.toList());
+    });
+  }
+
+  private boolean isElementToFix(FlowElement flowElement){
+    return flowElement instanceof CallActivity;
+  }
 }

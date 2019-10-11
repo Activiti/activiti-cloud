@@ -16,42 +16,66 @@
 
 package org.activiti.cloud.services.organization.converter;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Optional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.api.ModelContentConverter;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.converter.JsonConverter;
-
-import java.util.Optional;
+import org.activiti.cloud.organization.core.error.ImportModelException;
+import org.activiti.cloud.services.common.file.FileContent;
+import org.springframework.stereotype.Component;
 
 /**
  * Implementation of {@link ModelContentConverter} for connectors models
  */
 public class ConnectorModelContentConverter implements ModelContentConverter<ConnectorModelContent> {
 
-    private final ConnectorModelType connectorModelType;
+  private final ConnectorModelType connectorModelType;
 
-    private final JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter;
+  private final JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter;
 
-    public ConnectorModelContentConverter(ConnectorModelType connectorModelType,
-                                          JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter) {
-        this.connectorModelType = connectorModelType;
-        this.connectorModelContentJsonConverter = connectorModelContentJsonConverter;
+  private static final ObjectMapper objectMapper = new ObjectMapper();
+
+  public ConnectorModelContentConverter(ConnectorModelType connectorModelType,
+                                        JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter) {
+    this.connectorModelType = connectorModelType;
+    this.connectorModelContentJsonConverter = connectorModelContentJsonConverter;
+  }
+
+  @Override
+  public ModelType getHandledModelType() {
+    return connectorModelType;
+  }
+
+  @Override
+  public Optional<ConnectorModelContent> convertToModelContent(byte[] bytes) {
+    return Optional.ofNullable(connectorModelContentJsonConverter.convertToEntity(bytes));
+  }
+
+  @Override
+  public byte[] convertToBytes(ConnectorModelContent connectorModelContent) {
+    return connectorModelContentJsonConverter.convertToJsonBytes(connectorModelContent);
+  }
+
+  @Override
+  public FileContent overrideModelId(FileContent fileContent,
+                                     HashMap<String, String> modelIdentifiers,
+                                     String modelContentId) {
+    try {
+      ObjectNode jsonNode = (ObjectNode) objectMapper.readTree(fileContent.getFileContent());
+      String actualId = modelIdentifiers.get(jsonNode.get("id").asText());
+      if(actualId != null) {
+        jsonNode.put("id", actualId);
+      }
+      return new FileContent(fileContent.getFilename(), fileContent.getContentType(), objectMapper.writeValueAsBytes(jsonNode));
+    } catch (IOException e) {
+      throw new ImportModelException(e);
     }
-
-    @Override
-    public ModelType getHandledModelType() {
-        return connectorModelType;
-    }
-
-    @Override
-    public Optional<ConnectorModelContent> convertToModelContent(byte[] bytes) {
-        return Optional.ofNullable(connectorModelContentJsonConverter.convertToEntity(bytes));
-    }
-
-    @Override
-    public byte[] convertToBytes(ModelContent modelContent) {
-        ConnectorModelContent connectorModelContent = (ConnectorModelContent) modelContent;
-        return connectorModelContentJsonConverter.convertToJsonBytes(connectorModelContent);
-    }
+  }
 }

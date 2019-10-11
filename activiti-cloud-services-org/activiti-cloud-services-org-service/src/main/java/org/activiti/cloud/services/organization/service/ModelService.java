@@ -16,35 +16,7 @@
 
 package org.activiti.cloud.services.organization.service;
 
-import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
-import static org.activiti.cloud.organization.api.ValidationContext.EMPTY_CONTEXT;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.isJsonContentType;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
-import static org.apache.commons.lang3.StringUtils.removeEnd;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.activiti.bpmn.model.CallActivity;
-import org.activiti.bpmn.model.FlowElement;
-import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ModelContent;
-import org.activiti.cloud.organization.api.ModelType;
-import org.activiti.cloud.organization.api.Project;
-import org.activiti.cloud.organization.api.ValidationContext;
+import org.activiti.cloud.organization.api.*;
 import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.organization.core.error.ImportModelException;
@@ -52,7 +24,6 @@ import org.activiti.cloud.organization.core.error.UnknownModelTypeException;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
-import org.activiti.cloud.services.organization.converter.BpmnProcessModelContent;
 import org.activiti.cloud.services.organization.validation.ProjectValidationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import java.io.IOException;
+import javax.transaction.Transactional;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -70,7 +41,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.transaction.Transactional;
+import static org.activiti.cloud.organization.api.ProcessModelType.PROCESS;
+import static org.activiti.cloud.organization.api.ValidationContext.EMPTY_CONTEXT;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.*;
+import static org.apache.commons.lang3.StringUtils.removeEnd;
 
 /**
  * Business logic related to {@link Model} entities
@@ -92,19 +66,15 @@ public class ModelService {
 
   private final HashMap<String, String> modelIdentifiers = new HashMap();
 
-  private ObjectMapper objectMapper;
-
   @Autowired
   public ModelService(ModelRepository modelRepository,
                       ModelTypeService modelTypeService,
                       ModelContentService modelContentService,
-                      JsonConverter<Model> jsonConverter,
-                      ObjectMapper objectMapper) {
+                      JsonConverter<Model> jsonConverter) {
     this.modelRepository = modelRepository;
     this.modelTypeService = modelTypeService;
     this.modelContentService = modelContentService;
     this.jsonConverter = jsonConverter;
-    this.objectMapper = objectMapper;
   }
 
   public List<Model> getAllModels(Project project) {
@@ -230,7 +200,6 @@ public class ModelService {
     FileContent fixedFileContent = this.modelIdentifiers.isEmpty()?
       fileContent:
       overrideModelContentId(modelToBeUpdate, fileContent);
-
     modelToBeUpdate.setContentType(fixedFileContent.getContentType());
     modelToBeUpdate.setContent(fixedFileContent.toString());
 
@@ -242,104 +211,24 @@ public class ModelService {
     return modelRepository.updateModelContent(modelToBeUpdate, fixedFileContent);
   }
 
-
   public FileContent overrideModelContentId(Model model, FileContent fileContent) {
-    FileContent fixedFileContent = null;
-    switch (model.getType()){
-      case "PROCESS": {
-        fixedFileContent = this.overridingProcessContentId(model, fileContent);
-        break;
-      }
-      case "FORM":{
-        fixedFileContent = this.overridingFormModelId(model, fileContent);
-        break;
-      }
-      default:
-        fixedFileContent = this.overridingModelID(model, fileContent);
-    }
-    return fixedFileContent;
-  }
-
-  private FileContent overridingProcessContentId(Model model, FileContent fileContent) {
-    ModelContent modelContent = this.createBpmnModelContentFromModel(model, fileContent);
-    this.fixProcessModel((BpmnProcessModelContent) modelContent);
-    return new FileContent(fileContent.getFilename(), fileContent.getContentType(),
-      this.convertModelContentToFile(modelContent, model));
-  }
-
-  private FileContent overridingModelID(Model model, FileContent fileContent) {
-    try {
-      ObjectNode jsonNode = (ObjectNode) objectMapper.readTree(fileContent.getFileContent());
-      String actualId = this.modelIdentifiers.get(jsonNode.get("id").asText());
-      if(actualId != null) {
-        jsonNode.put("id", actualId);
-      }
-      return new FileContent(fileContent.getFilename(), fileContent.getContentType(), objectMapper.writeValueAsBytes(jsonNode));
-    } catch (IOException e) {
-      throw new ImportModelException(e);
-    }
-  }
-
-  private FileContent overridingFormModelId(Model model, FileContent fileContent) {
-    try {
-      JsonNode jsonNode = objectMapper.readTree(fileContent.getFileContent());
-      ObjectNode jFormRepresentation = (ObjectNode) jsonNode.get("formRepresentation");
-      String actualId = this.modelIdentifiers.get(jFormRepresentation.get("id").asText());
-      if(actualId != null) {
-        jFormRepresentation.put("id", actualId);
-      }
-      return new FileContent(fileContent.getFilename(), fileContent.getContentType(), objectMapper.writeValueAsBytes(jsonNode));
-    } catch (IOException e) {
-      throw new ImportModelException(e);
-    }
-  }
-
-  private void fixProcessModel(BpmnProcessModelContent processModelContent){
-    processModelContent.getBpmnModel().getProcesses().forEach(process -> {
-      String validIdentifier = this.modelIdentifiers.get(process.getId());
-      if(validIdentifier != null && validIdentifier != process.getId()){
-        process.setId(validIdentifier);
-      }
-      process.getFlowElements().stream()
-        .filter(flowElement -> this.isElementToFix(flowElement))
-        .map(flowElement -> {
-          CallActivity callActivity = ((CallActivity) flowElement);
-          String targetProcessId = this.modelIdentifiers.get(callActivity.getCalledElement());
-          callActivity.setCalledElement(targetProcessId);
-          return flowElement;
-        })
-        .collect(Collectors.toList());
-    });
-  }
-
-  private boolean isElementToFix(FlowElement flowElement){
-    return flowElement instanceof CallActivity &&
-      this.modelIdentifiers.get(((CallActivity)flowElement).getCalledElement()) != null;
-  }
-
-  public byte[] convertModelContentToFile(ModelContent modelContent, Model model) {
     return modelContentService.findModelContentConverter(model.getType())
-      .map(modelContentConverter -> modelContentConverter.convertToBytes(modelContent)).get();
-  }
-
-  public BpmnProcessModelContent createBpmnModelContentFromModel(Model model, FileContent fileContent) {
-    Optional bpmnModelContent = modelContentService.findModelContentConverter(model.getType())
-      .map(modelContentConverter -> modelContentConverter.convertToModelContent(fileContent.getFileContent())).get();
-    return (BpmnProcessModelContent) bpmnModelContent.get();
+      .map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent, this.modelIdentifiers, model.getId()))
+      .orElse(fileContent);
   }
 
   public ModelContent createModelContentFromModel(Model model, FileContent fileContent) {
     return (ModelContent) modelContentService.findModelContentConverter(model.getType())
       .map(modelContentConverter -> modelContentConverter.convertToModelContent(fileContent.getFileContent()))
-      .orElse(Optional.empty()).get();
+      .orElse(Optional.ofNullable(null)).get();
   }
 
   public Model importSingleModel(Project project,
                                  ModelType modelType,
                                  FileContent fileContent) {
+    this.cleanModelIdList();
     Model model = this.importModel(project, modelType, fileContent);
     return this.updateModelContent(model, fileContent);
-
   }
   public Model importModel(Project project,
                            ModelType modelType,
@@ -370,15 +259,8 @@ public class ModelService {
   }
 
   private String retrieveModelIdFromModelContent(Model model, FileContent fileContent) {
-    ModelContent modelContent = null;
-    if(this.hasModelConverter(model)) {
-      modelContent = this.createModelContentFromModel(model, fileContent);
-    }
+    ModelContent modelContent = this.createModelContentFromModel(model, fileContent);
     return modelContent != null ? modelContent.getId() : null;
-  }
-
-  private boolean hasModelConverter(Model model) {
-    return model.getType() != "DECISION";
   }
 
   public Model convertContentToModel(ModelType modelType, FileContent fileContent) {

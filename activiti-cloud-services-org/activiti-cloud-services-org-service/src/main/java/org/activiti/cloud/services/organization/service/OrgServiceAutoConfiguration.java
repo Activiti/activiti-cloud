@@ -37,8 +37,7 @@ public class OrgServiceAutoConfiguration {
         return new ModelService(modelRepository,
                                 modelTypeService,
                                 modelContentService,
-                                jsonConverter,
-                                objectMapper);
+                                jsonConverter);
 
     }
 

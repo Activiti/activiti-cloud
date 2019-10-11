@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.organization.api;
 
+import org.activiti.cloud.services.common.file.FileContent;
+
+import java.util.HashMap;
 import java.util.Optional;
 
 /**
@@ -23,23 +26,37 @@ import java.util.Optional;
  */
 public interface ModelContentConverter<T extends ModelContent> {
 
-    /**
-     * Get handled model type by this converter.
-     * @return handled model type
-     */
-    ModelType getHandledModelType();
+  /**
+   * Get handled model type by this converter.
+   * @return handled model type
+   */
+  ModelType getHandledModelType();
 
-    /**
-     * Convert a bytes array to the handled model content entity.
-     * @param bytes the bytes to convert
-     * @return the model content, or {@link Optional#empty()}
-     */
-    Optional<T> convertToModelContent(byte[] bytes);
+  /**
+   * Convert a bytes array to the handled model content entity.
+   * @param bytes the bytes to convert
+   * @return the model content, or {@link Optional#empty()}
+   */
+  Optional<T> convertToModelContent(byte[] bytes);
 
-    /**
-     * Convert an instance of the model content to bytes array
-     * @param modelContent the model content instance to convert
-     * @return the bytes array
-     */
-    byte[] convertToBytes(ModelContent modelContent);
+  /**
+   * Convert an instance of the model content to bytes array
+   * @param modelContent the model content instance to convert
+   * @return the bytes array
+   */
+  byte[] convertToBytes(T modelContent);
+
+  /**
+   * Convert a bytes array to the handled model content entity, set the given id, and convert back to bytes array.
+   * If the id is already the expected one, it returns the given bytes unchanged.
+   * @param bytes the bytes to convert and fix
+   * @param modelIdentifiers the mapping of the old ids to the new ones
+   * @param modelContentId the correct model content id to set
+   * @return the fixed bytes array
+   */
+  default FileContent overrideModelId(FileContent fileContent,
+                                      HashMap<String, String> modelIdentifiers,
+                                      String modelContentId){
+    return fileContent;
+  }
 }
