@@ -14,8 +14,40 @@
 
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
-    <enforceFail>true</enforceFail>    
+    <enforceFail>true</enforceFail>
+    <example-runtime-bundle.version>7.1.0-SNAPSHOT</example-runtime-bundle.version>
   </properties>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.activiti.cloud.examples</groupId>
+      <artifactId>example-runtime-bundle</artifactId>
+      <version>${example-runtime-bundle.version}</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.activiti.cloud.rb</groupId>
+          <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies> 
 
   <build>
     <plugins>
