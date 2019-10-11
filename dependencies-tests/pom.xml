@@ -18,6 +18,7 @@
     <example-runtime-bundle.version>7.1.0-SNAPSHOT</example-runtime-bundle.version>
     <example-cloud-connector.version>7.1.0-SNAPSHOT</example-cloud-connector.version>
     <activiti-cloud-audit.version>7.1.0-SNAPSHOT</activiti-cloud-audit.version>
+    <activiti-cloud-query.version>7.1.0-SNAPSHOT</activiti-cloud-query.version>
 
 
   </properties>
@@ -78,6 +79,31 @@
         <exclusion>
           <groupId>org.activiti.cloud.audit</groupId>
           <artifactId>activiti-cloud-starter-audit</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.activiti.cloud.examples</groupId>
+      <artifactId>activiti-cloud-query</artifactId>
+      <version>${activiti-cloud-query.version}</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.activiti.cloud.query</groupId>
+          <artifactId>activiti-cloud-starter-query</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.postgresql</groupId>
