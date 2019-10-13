@@ -33,18 +33,4 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureBefore(JacksonAutoConfiguration.class)
 public class ObjectMapperConfiguration {
 
-    @Bean
-    public Module jsonOrganizationModuleImpl() {
-        SimpleModule module = new SimpleModule("jsonOrganizationModuleImpl",
-                                               Version.unknownVersion());
-        SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
-
-        resolver.addMapping(Project.class,
-                            ProjectImpl.class);
-        resolver.addMapping(Model.class,
-                            ModelImpl.class);
-
-        module.setAbstractTypes(resolver);
-        return module;
-    }
 }
