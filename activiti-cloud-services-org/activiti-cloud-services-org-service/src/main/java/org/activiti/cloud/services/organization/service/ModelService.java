@@ -217,10 +217,10 @@ public class ModelService {
       .orElse(fileContent);
   }
 
-  public ModelContent createModelContentFromModel(Model model, FileContent fileContent) {
-    return (ModelContent) modelContentService.findModelContentConverter(model.getType())
+  public Optional<ModelContent> createModelContentFromModel(Model model, FileContent fileContent) {
+    return (Optional<ModelContent>)  modelContentService.findModelContentConverter(model.getType())
       .map(modelContentConverter -> modelContentConverter.convertToModelContent(fileContent.getFileContent()))
-      .orElse(Optional.ofNullable(null)).get();
+      .orElse(Optional.empty());
   }
 
   public Model importSingleModel(Project project,
@@ -259,8 +259,8 @@ public class ModelService {
   }
 
   private String retrieveModelIdFromModelContent(Model model, FileContent fileContent) {
-    ModelContent modelContent = this.createModelContentFromModel(model, fileContent);
-    return modelContent != null ? modelContent.getId() : null;
+    Optional<ModelContent> modelContent = this.createModelContentFromModel(model, fileContent);
+    return modelContent.isPresent() ? modelContent.get().getId() : null;
   }
 
   public Model convertContentToModel(ModelType modelType, FileContent fileContent) {
