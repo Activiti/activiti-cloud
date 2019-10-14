@@ -24,7 +24,7 @@ import java.util.Map;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
-import org.activiti.spring.process.variable.DateFormatterProvider;
+import org.activiti.common.util.DateFormatterProvider;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

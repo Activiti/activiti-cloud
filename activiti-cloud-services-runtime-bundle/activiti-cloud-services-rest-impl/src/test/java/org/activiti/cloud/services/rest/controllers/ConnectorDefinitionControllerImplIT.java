@@ -24,11 +24,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionResourceAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.activiti.core.common.spring.connector.autoconfigure.ConnectorAutoConfiguration;
 import org.activiti.engine.RepositoryService;
@@ -47,14 +51,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @RunWith(SpringRunner.class)
 @WebMvcTest(ConnectorDefinitionControllerImpl.class)
 @Import({ConnectorsAutoConfiguration.class,
         ConnectorAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
+        ActivitiCoreCommonUtilAutoConfiguration.class,
         CloudEventsAutoConfiguration.class,
         RuntimeBundleProperties.class,
         ProcessExtensionsAutoConfiguration.class})

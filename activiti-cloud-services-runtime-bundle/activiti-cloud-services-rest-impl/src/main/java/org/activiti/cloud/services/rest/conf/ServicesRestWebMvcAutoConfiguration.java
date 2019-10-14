@@ -32,8 +32,8 @@ import org.activiti.cloud.services.rest.controllers.ProcessVariablesPayloadValid
 import org.activiti.cloud.services.rest.controllers.ResourcesAssembler;
 import org.activiti.cloud.services.rest.controllers.RuntimeBundleRelProvider;
 import org.activiti.cloud.services.rest.controllers.TaskVariablesPayloadDateHandler;
+import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.spring.process.model.ProcessExtensionModel;
-import org.activiti.spring.process.variable.DateFormatterProvider;
 import org.activiti.spring.process.variable.VariableValidationService;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

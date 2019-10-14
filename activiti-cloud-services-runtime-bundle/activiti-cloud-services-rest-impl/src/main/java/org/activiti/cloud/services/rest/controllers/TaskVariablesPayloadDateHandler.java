@@ -22,7 +22,7 @@ import java.util.Optional;
 
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
-import org.activiti.spring.process.variable.DateFormatterProvider;
+import org.activiti.common.util.DateFormatterProvider;
 
 public class TaskVariablesPayloadDateHandler {
    

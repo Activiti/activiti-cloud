@@ -34,6 +34,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
@@ -51,6 +54,7 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
@@ -75,9 +79,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
-import java.util.Collections;
-import java.util.List;
-
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceAdminControllerImpl.class)
 @EnableSpringDataWebSupport
@@ -85,6 +86,7 @@ import java.util.List;
 @AutoConfigureRestDocs(outputDir = "target/snippets")
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class,

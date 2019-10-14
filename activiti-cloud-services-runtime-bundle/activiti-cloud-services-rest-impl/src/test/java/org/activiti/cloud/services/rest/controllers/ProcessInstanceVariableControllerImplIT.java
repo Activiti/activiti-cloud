@@ -45,8 +45,8 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.engine.RepositoryService;
-import org.activiti.spring.process.variable.DateFormatterProvider;
 import org.activiti.spring.process.variable.VariableValidationService;
 import org.junit.Before;
 import org.junit.Test;

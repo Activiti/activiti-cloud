@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.activiti.spring.process.variable.DateFormatterProvider;
+import org.activiti.common.util.DateFormatterProvider;
 import org.springframework.boot.test.context.TestComponent;
 
 @TestComponent

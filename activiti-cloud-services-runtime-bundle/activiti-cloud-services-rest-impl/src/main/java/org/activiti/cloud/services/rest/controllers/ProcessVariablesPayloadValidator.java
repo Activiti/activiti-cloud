@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
 
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.engine.ActivitiException;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.ProcessExtensionModel;
 import org.activiti.spring.process.model.VariableDefinition;
-import org.activiti.spring.process.variable.DateFormatterProvider;
 import org.activiti.spring.process.variable.VariableValidationService;
 
 public class ProcessVariablesPayloadValidator  {
