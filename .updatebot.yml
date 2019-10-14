@@ -5,3 +5,6 @@ github:
     - name: activiti-cloud-dependencies
       branch: develop
       useSinglePullRequest: true      
+    - name: activiti-cloud-org-service
+      branch: develop
+      useSinglePullRequest: true
