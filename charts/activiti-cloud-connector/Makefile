@@ -75,8 +75,8 @@ updatebot/push-version:
 	cd ../../ && updatebot push-version --kind maven activiti-cloud-connectors.version $(ACTIVITI_CLOUD_CONNECTOR_VERSION)
 	cd ../../ && updatebot push-version --kind make  ACTIVITI_CLOUD_CONNECTORS_VERSION $(RELEASE_VERSION)
 	cd ../../ && rm -rf .updatebot-repos/
-  sleep $$[ ( $$RANDOM % 10 )  + 1 ]s
-  cd ../../ && updatebot push-version --kind helm  $(RELEASE_ARTIFACT) $(RELEASE_VERSION)
+	sleep $$[ ( $$RANDOM % 10 )  + 1 ]s
+	cd ../../ && updatebot push-version --kind helm  $(RELEASE_ARTIFACT) $(RELEASE_VERSION)
 	cd ../../ && updatebot push-version --kind maven activiti-cloud-connectors.version $(ACTIVITI_CLOUD_CONNECTOR_VERSION)
 	cd ../../ && updatebot push-version --kind make  ACTIVITI_CLOUD_CONNECTORS_VERSION $(RELEASE_VERSION)
 
