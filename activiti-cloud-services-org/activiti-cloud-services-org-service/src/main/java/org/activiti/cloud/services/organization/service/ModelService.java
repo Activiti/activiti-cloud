@@ -207,7 +207,7 @@ public class ModelService {
                                          fileContent);
 
         modelToBeUpdate.setContentType(fixedFileContent.getContentType());
-        modelToBeUpdate.setContent(fixedFileContent.toString());
+        modelToBeUpdate.setContent(fixedFileContent.getFileContent());
 
         Optional.ofNullable(modelToBeUpdate.getType()).flatMap(modelContentService::findModelContentConverter)
                 .flatMap(validator -> validator.convertToModelContent(fixedFileContent.getFileContent()))

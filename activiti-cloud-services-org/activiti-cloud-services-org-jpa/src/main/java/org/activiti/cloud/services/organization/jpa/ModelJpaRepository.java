@@ -60,7 +60,6 @@ public interface ModelJpaRepository extends VersionedJpaRepository<ModelEntity, 
     @Override
     default byte[] getModelContent(ModelEntity model) {
         return Optional.ofNullable(model.getContent())
-                .map(String::getBytes)
                 .orElse(new byte[0]);
     }
 

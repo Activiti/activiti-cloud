@@ -58,7 +58,7 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
 
     @Lob
     @Column
-    private String content;
+    private byte[] content;
 
     @Lob
     @Column
@@ -101,11 +101,11 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
         this.contentType = contentType;
     }
 
-    public String getContent() {
+    public byte[] getContent() {
         return content;
     }
 
-    public void setContent(String content) {
+    public void setContent(byte[] content) {
         this.content = content;
     }
 

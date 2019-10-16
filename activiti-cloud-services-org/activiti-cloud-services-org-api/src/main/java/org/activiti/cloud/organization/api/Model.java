@@ -47,9 +47,9 @@ public interface Model<A extends Project, U> extends Auditable<U> {
 
     void setContentType(String contentType);
 
-    String getContent();
+    byte[] getContent();
 
-    void setContent(String content);
+    void setContent(byte[] content);
 
     Map<String,Object> getExtensions();
 

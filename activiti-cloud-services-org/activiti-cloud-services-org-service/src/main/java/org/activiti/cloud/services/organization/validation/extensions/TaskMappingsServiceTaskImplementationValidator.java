@@ -125,7 +125,6 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
         validationContext.getAvailableModels(connectorModelType)
                 .stream()
                 .map(Model::getContent)
-                .map(String::getBytes)
                 .map(connectorModelContentConverter::convertToModelContent)
                 .filter(Optional::isPresent)
                 .map(Optional::get)

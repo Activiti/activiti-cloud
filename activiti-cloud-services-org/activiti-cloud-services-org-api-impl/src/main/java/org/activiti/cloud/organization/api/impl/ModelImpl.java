@@ -53,7 +53,7 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     private String contentType;
 
     @ApiModelProperty(value = "The content of the model", readOnly = true, hidden = true)
-    private String content;
+    private byte[] content;
 
     @ApiModelProperty(hidden = true)
     @JsonIgnore
@@ -145,12 +145,12 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     }
 
     @Override
-    public String getContent() {
+    public byte[] getContent() {
         return content;
     }
 
     @Override
-    public void setContent(String content) {
+    public void setContent(byte[] content) {
         this.content = content;
     }
 

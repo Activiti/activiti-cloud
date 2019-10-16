@@ -78,7 +78,6 @@ public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidat
                 .flatMap(modelId -> findProcessModelInContext(modelId,
                                                               context))
                 .map(Model::getContent)
-                .map(String::getBytes)
                 .flatMap(this::convertToBpmnModel)
                 .map(bpmnModel -> validateBpmnModel(model,
                                                           context,

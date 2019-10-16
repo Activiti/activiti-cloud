@@ -156,12 +156,12 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
 
     @Override
     @JsonIgnore
-    public String getContent() {
+    public byte[] getContent() {
         return latestVersion.getContent();
     }
 
     @Override
-    public void setContent(String content) {
+    public void setContent(byte[] content) {
         latestVersion.setContent(content);
     }
     

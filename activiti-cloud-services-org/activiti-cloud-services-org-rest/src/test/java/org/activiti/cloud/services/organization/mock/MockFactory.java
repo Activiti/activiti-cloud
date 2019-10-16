@@ -112,7 +112,7 @@ public class MockFactory {
         processModel.setExtensions(extensions!=null?extensions.getAsMap():null);
         if (content != null) {
             processModel.setContentType(CONTENT_TYPE_XML);
-            processModel.setContent(new String(content));
+            processModel.setContent(content);
         }
         return processModel;
     }
@@ -160,7 +160,7 @@ public class MockFactory {
         processModel.setExtensions(extensions!=null?extensions.getAsMap():null);
         if (content != null) {
             processModel.setContentType(CONTENT_TYPE_XML);
-            processModel.setContent(content);
+            processModel.setContent(content.getBytes());
         }
         return processModel;
     }
@@ -296,7 +296,7 @@ public class MockFactory {
         modelEntity.setProject(parentProject);
         if (content != null) {
             modelEntity.setContentType(CONTENT_TYPE_JSON);
-            modelEntity.setContent(new String(content));
+            modelEntity.setContent(content);
         }
         return modelEntity;
     }

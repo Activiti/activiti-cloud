@@ -89,7 +89,6 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
 
     private Optional<ConnectorModelContent> extractConnectorModelContent(Model model) {
         return Optional.ofNullable(model.getContent())
-                .map(String::getBytes)
                 .flatMap(connectorModelContentConverter::convertToModelContent)
                 .filter(connectorModelContent -> connectorModelContent.getActions() != null);
     }

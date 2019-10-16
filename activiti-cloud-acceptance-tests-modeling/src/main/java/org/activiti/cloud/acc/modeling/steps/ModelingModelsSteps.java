@@ -139,7 +139,8 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
         assertThat(currentContext.getContent()).isInstanceOf(Model.class);
         if (updateContent) {
-            currentContext.getContent().setContent("updated content");
+            String updateMsg = "updated content";
+            currentContext.getContent().setContent(updateMsg.getBytes());
         }
 
         saveModel(currentContext);
