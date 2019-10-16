@@ -2,10 +2,8 @@ github:
   organisations:
   - name: activiti
     repositories:
-    - name: example-cloud-connector
-      branch: master
-    - name: activiti-cloud-audit
-      branch: master
+    - name: activiti-cloud-full-chart
+      useSinglePullRequest: true
     - name: ttc-connectors-reward
       branch: master
     - name: ttc-campaigns-service
@@ -22,14 +20,8 @@ github:
       branch: master
     - name: ttc-connectors-processing
       branch: master
-    - name: example-runtime-bundle
-      branch: master
     - name: activiti-cloud-acceptance-scenarios
       branch: master
       useSinglePullRequest: true
     - name: activiti-cloud-modeling
-      branch: master
-    - name: activiti-cloud-query
-      branch: master
-    - name: activiti-cloud-notifications-graphql
       branch: master
