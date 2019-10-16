@@ -2,6 +2,6 @@ github:
   organisations:
   - name: activiti
     repositories:
-    - name: activiti-cloud-full-chart
+    - name: activiti-cloud-dependencies
+      branch: develop
       useSinglePullRequest: true
-
