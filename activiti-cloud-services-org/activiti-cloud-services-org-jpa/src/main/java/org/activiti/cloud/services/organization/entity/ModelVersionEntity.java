@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.organization.entity;
 
+import java.util.Map;
 import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -62,8 +63,8 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
     @Lob
     @Column
     @Convert(converter = ExtensionsJsonConverter.class)
-    private Extensions extensions;
-
+    private Map<String,Object> extensions;
+    
     public ModelVersionEntity() {
 
     }
@@ -108,11 +109,11 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
         this.content = content;
     }
 
-    public Extensions getExtensions() {
+    public Map<String,Object> getExtensions() {
         return extensions;
     }
 
-    public void setExtensions(Extensions extensions) {
+    public void setExtensions(Map<String,Object> extensions) {
         this.extensions = extensions;
     }
 

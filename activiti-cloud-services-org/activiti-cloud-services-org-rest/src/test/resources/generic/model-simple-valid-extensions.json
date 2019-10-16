@@ -1,0 +1,15 @@
+{
+    "id": "29721122-8ce0-4d60-b324-320c8505d8ee",
+    "type": "FILE",
+    "name": "alfresco-adf-app-deployment-develop",
+    "extensions": {
+        "a": "1",
+        "b": 1,
+        "c": true,
+        "d": {
+        	"d1":"a",
+        	"d2":"b"
+        },
+        "e":[1,2,3,4,5]
+    }
+}

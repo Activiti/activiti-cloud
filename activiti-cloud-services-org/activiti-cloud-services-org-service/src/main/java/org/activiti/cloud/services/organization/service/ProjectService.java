@@ -21,6 +21,17 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.getConten
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.transaction.Transactional;
+
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidationError;
@@ -35,21 +46,12 @@ import org.activiti.cloud.services.common.zip.ZipBuilder;
 import org.activiti.cloud.services.common.zip.ZipStream;
 import org.activiti.cloud.services.organization.validation.ProjectValidationContext;
 import org.activiti.cloud.services.organization.validation.project.ProjectValidator;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.transaction.Transactional;
 
 /**
  * Business logic related to {@link Project} entities
@@ -66,6 +68,8 @@ public class ProjectService {
 
     private final JsonConverter<Project> jsonConverter;
 
+    private final JsonConverter<Map> jsonMetadataConverter;
+
     private final Set<ProjectValidator> projectValidators;
 
     @Autowired
@@ -73,16 +77,19 @@ public class ProjectService {
                           ModelService modelService,
                           ModelTypeService modelTypeService,
                           JsonConverter<Project> jsonConverter,
+                          JsonConverter<Map> jsonMetadataConverter,
                           Set<ProjectValidator> projectValidators) {
         this.projectRepository = projectRepository;
         this.modelService = modelService;
         this.modelTypeService = modelTypeService;
         this.jsonConverter = jsonConverter;
         this.projectValidators = projectValidators;
+        this.jsonMetadataConverter = jsonMetadataConverter;
     }
 
     /**
      * Get a page of projects.
+     * 
      * @param pageable the pagination information
      * @return the page
      */
@@ -94,6 +101,7 @@ public class ProjectService {
 
     /**
      * Create an project.
+     * 
      * @param project the project to create
      * @return the created project
      */
@@ -104,31 +112,31 @@ public class ProjectService {
 
     /**
      * Update an project.
+     * 
      * @param projectToUpdate the project to update
-     * @param newProject the project containing the new values to be used for update
+     * @param newProject      the project containing the new values to be used for update
      * @return the the updated project
      */
     public Project updateProject(Project projectToUpdate,
                                  Project newProject) {
-        Optional.ofNullable(newProject.getDescription())
-                .ifPresent(projectToUpdate::setDescription);
-        Optional.ofNullable(newProject.getName())
-                .ifPresent(projectToUpdate::setName);
+        Optional.ofNullable(newProject.getDescription()).ifPresent(projectToUpdate::setDescription);
+        Optional.ofNullable(newProject.getName()).ifPresent(projectToUpdate::setName);
         return projectRepository.updateProject(projectToUpdate);
     }
 
     /**
      * Delete an project.
+     * 
      * @param project the project to be deleted
      */
     public void deleteProject(Project project) {
-        modelService.getAllModels(project)
-                .forEach(modelService::deleteModel);
+        modelService.getAllModels(project).forEach(modelService::deleteModel);
         projectRepository.deleteProject(project);
     }
 
     /**
      * Find an project by id.
+     * 
      * @param projectId the id to search for
      * @return the found project, or {@literal Optional#empty()}
      */
@@ -138,6 +146,7 @@ public class ProjectService {
 
     /**
      * Export an project to a zip file.
+     * 
      * @param project the project to export
      * @return the {@link FileContent} with zip content
      * @throws IOException in case of I/O error
@@ -145,26 +154,20 @@ public class ProjectService {
     public FileContent exportProject(Project project) throws IOException {
         validateProject(project);
 
-        ZipBuilder zipBuilder = new ZipBuilder(project.getName())
-                .appendFile(jsonConverter.convertToJsonBytes(project),
-                            toJsonFilename(project.getName()));
-        modelService.getAllModels(project)
-                .forEach(model -> modelTypeService.findModelTypeByName(model.getType())
-                        .map(ModelType::getFolderName)
-                        .ifPresent(folderName -> {
-                            zipBuilder
-                                    .appendFolder(folderName)
-                                    .appendFile(modelService.exportModel(model),
-                                                folderName);
-                            modelService.getModelMetadataFileContent(model).ifPresent(
-                                    metadataFileContent -> zipBuilder.appendFile(metadataFileContent,
-                                                                                 folderName));
-                        }));
+        ZipBuilder zipBuilder = new ZipBuilder(project.getName()).appendFile(jsonConverter.convertToJsonBytes(project),
+                                                                             toJsonFilename(project.getName()));
+        modelService.getAllModels(project).forEach(model -> modelTypeService.findModelTypeByName(model.getType()).map(ModelType::getFolderName).ifPresent(folderName -> {
+            zipBuilder.appendFolder(folderName).appendFile(modelService.exportModel(model),
+                                                           folderName);
+            modelService.getModelExtensionsFileContent(model).ifPresent(extensionFileContent -> zipBuilder.appendFile(extensionFileContent,
+                                                                                                                      folderName));
+        }));
         return zipBuilder.toZipFileContent();
     }
 
     /**
      * Import an project form a zip multipart file.
+     * 
      * @param file the multipart zip file to import from
      * @return the imported project
      * @throws IOException in case of multipart file input stream access error
@@ -172,65 +175,99 @@ public class ProjectService {
     public Project importProject(MultipartFile file) throws IOException {
         ProjectHolder projectHolder = new ProjectHolder();
 
-        ZipStream.of(file).forEach(zipEntry -> zipEntry.getContent()
-                .ifPresent(bytes -> getContentTypeByPath(zipEntry.getFileName())
-                        .map(contentType -> new FileContent(zipEntry.getFileName(),
-                                                            contentType,
-                                                            bytes))
-                        .ifPresent(fileContent -> {
-                            Optional<String> folderName = zipEntry.getFolderName(0);
-                            if (folderName.isPresent()) {
-                                folderName.flatMap(modelTypeService::findModelTypeByFolderName).ifPresent(modelType -> {
-                                    if (fileContent.isJson()) {
-                                        String modelName = removeExtension(fileContent.getFilename(),
-                                                                           JSON);
-                                        projectHolder.addModelJsonFile(modelName,
-                                                                       modelType,
-                                                                       fileContent);
-                                    } else {
-                                        modelService.contentFilenameToModelName(zipEntry.getFileName(),
-                                                                                modelType)
-                                                .ifPresent(modelName -> projectHolder.addModelContent(modelName,
-                                                                                                      modelType,
-                                                                                                      fileContent));
+        ZipStream.of(file)
+                .forEach(zipEntry -> zipEntry.getContent()
+                        .ifPresent(bytes -> getContentTypeByPath(zipEntry.getFileName()).map(contentType -> new FileContent(zipEntry.getFileName(),
+                                                                                                                            contentType,
+                                                                                                                            bytes))
+                                .ifPresent(fileContent -> {
+                                    Optional<String> folderName = zipEntry.getFolderName(0);
+                                    if (folderName.isPresent()) {
+                                        folderName.flatMap(modelTypeService::findModelTypeByFolderName).ifPresent(modelType -> processZipEntryFile(projectHolder,
+                                                                                                                                                   fileContent,
+                                                                                                                                                   modelType));
+                                    } else if (fileContent.isJson()) {
+                                        jsonConverter.tryConvertToEntity(bytes).ifPresent(projectHolder::setProject);
                                     }
-                                });
-                            } else if (fileContent.isJson()) {
-                                jsonConverter.tryConvertToEntity(bytes)
-                                        .ifPresent(projectHolder::setProject);
-                            }
-                        })));
+                                })));
 
-        Project createdProject = projectHolder.getProjectMetadata()
-                .map(this::createProject)
+        Project createdProject = projectHolder.getProjectMetadata().map(this::createProject)
                 .orElseThrow(() -> new ImportProjectException("No valid project entry found to import: " + file.getOriginalFilename()));
 
         projectHolder.getModelJsonFiles().forEach(modelJsonFile -> {
-            Model createdModel = modelService.importModel(createdProject, modelJsonFile.getModelType(), modelJsonFile.getFileContent());
-            if(modelTypeService.isJson(modelJsonFile.getModelType())){
-                modelService.updateModelContent(createdModel, modelJsonFile.getFileContent());
-            }else{
-              projectHolder.getModelContentFile(createdModel)
-                .ifPresent(fileContent -> modelService.updateModelContent(createdModel, fileContent));
+            Model createdModel = modelService.importModel(createdProject,
+                                                          modelJsonFile.getModelType(),
+                                                          modelJsonFile.getFileContent());
+            if (modelTypeService.isJson(modelJsonFile.getModelType())) {
+                modelService.updateModelContent(createdModel,
+                                                modelJsonFile.getFileContent());
+            } else {
+                projectHolder.getModelContentFile(createdModel).ifPresent(fileContent -> modelService.updateModelContent(createdModel,
+                                                                                                                         fileContent));
             }
+            //Update model with metadata
+            projectHolder.getModelExtensions(createdModel).ifPresent(fileMetadata -> {
+                jsonMetadataConverter.tryConvertToEntity(fileMetadata.getFileContent()).ifPresent(createdModel::setExtensions);
+                modelService.updateModel(createdModel,
+                                         createdModel);
+            });
         });
         modelService.cleanModelIdList();
         return createdProject;
+    }
+
+    private void processZipEntryFile(ProjectHolder projectHolder,
+                                     FileContent fileContent,
+                                     ModelType modelType) {
+        String modelName = removeExtension(fileContent.getFilename(),
+                                           JSON);
+        if (isProjectExtension(modelName,
+                               modelType,
+                               fileContent)) {
+            modelName = StringUtils.removeEnd(modelName,
+                                              modelType.getExtensionsFileSuffix());
+            projectHolder.addModelExtension(modelName,
+                                            modelType,
+                                            fileContent);
+        } else if (isProjectContent(modelName,
+                                    modelType,
+                                    fileContent)) {
+            modelService.contentFilenameToModelName(modelName,
+                                                    modelType)
+                    .ifPresent(fixedModelName -> projectHolder.addModelContent(fixedModelName,
+                                                                               modelType,
+                                                                               fileContent));
+        } else {
+            if (modelName.endsWith(modelType.getExtensionsFileSuffix())) {
+                modelName = StringUtils.removeEnd(modelName,
+                                                  modelType.getExtensionsFileSuffix());
+            }
+            projectHolder.addModelJsonFile(modelName,
+                                           modelType,
+                                           fileContent);
+        }
+    }
+
+    private boolean isProjectExtension(String modelName,
+                                       ModelType modelType,
+                                       FileContent fileContent) {
+        return fileContent.isJson() && (modelName.endsWith(modelType.getExtensionsFileSuffix()) && modelTypeService.isJson(modelType));
+    }
+
+    private boolean isProjectContent(String modelName,
+                                     ModelType modelType,
+                                     FileContent fileContent) {
+        return !fileContent.isJson() || (!modelName.endsWith(modelType.getExtensionsFileSuffix()) && !modelTypeService.isJson(modelType));
     }
 
     public void validateProject(Project project) {
         List<Model> availableModels = modelService.getAllModels(project);
         ValidationContext validationContext = new ProjectValidationContext(availableModels);
 
-        List<ModelValidationError> validationErrors = Stream.concat(
-                projectValidators
-                        .stream()
-                        .flatMap(validator -> validator.validate(project,
-                                                                 validationContext)),
-                availableModels
-                        .stream()
-                        .flatMap(model -> getModelValidationErrors(model,
-                                                                   validationContext)))
+        List<ModelValidationError> validationErrors = Stream.concat(projectValidators.stream().flatMap(validator -> validator.validate(project,
+                                                                                                                                       validationContext)),
+                                                                    availableModels.stream().flatMap(model -> getModelValidationErrors(model,
+                                                                                                                                       validationContext)))
                 .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
@@ -250,10 +287,9 @@ public class ProjectService {
         }
 
         try {
-            modelService.getModelMetadataFileContent(model).ifPresent(
-                    metadataFileContent -> modelService.validateModelContent(model,
-                                                                             metadataFileContent,
-                                                                             validationContext));
+            modelService.getModelExtensionsFileContent(model).ifPresent(extensionsFileContent -> modelService.validateModelExtensions(model,
+                                                                                                                                      extensionsFileContent,
+                                                                                                                                      validationContext));
         } catch (SemanticModelValidationException validationException) {
             validationErrors.addAll(validationException.getValidationErrors());
         }

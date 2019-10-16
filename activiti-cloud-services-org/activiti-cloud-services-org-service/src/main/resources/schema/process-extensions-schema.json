@@ -208,21 +208,10 @@
       }
     }
   },
+  "allOf": [{"$ref": "classpath://schema/model-extensions-schema.json"}],
   "properties": {
-    "id": {
-      "type": "string"
-    },
-    "type": {
-      "type": "string"
-    },
-    "name": {
-      "type": "string"
-    },
     "extensions": {
       "$ref": "#/definitions/extensions"
     }
-  },
-  "required": [
-    "id"
-  ]
+  }
 }

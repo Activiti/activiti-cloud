@@ -71,7 +71,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testCreateConnectorModel() throws Exception {
+    public void should_returnStatusCreatedAndConnectorName_when_creatingConnectorModel() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
         given()
@@ -87,7 +87,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testCreateConnectorModelInvalidPayloadNameNull() throws Exception {
+    public void should_throwRequiredFieldException_when_creatingConnectorWithNameNull() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
         assertThatResponse(
@@ -95,10 +95,8 @@ public class ConnectorModelControllerIT {
                         .accept(APPLICATION_JSON_VALUE)
                         .contentType(APPLICATION_JSON_VALUE)
                         .body(objectMapper.writeValueAsString(connectorModel(null)))
-                        // WHEN
                         .post("/v1/projects/{projectId}/models",
                               project.getId())
-                        // THEN
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
                 .hasValidationErrorCodes("field.required")
@@ -106,7 +104,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testCreateConnectorModelInvalidPayloadNameEmpty() throws Exception {
+    public void should_throwEmptyFieldException_when_creatingConnectorModelWithNameEmpty() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
         assertThatResponse(
@@ -114,10 +112,8 @@ public class ConnectorModelControllerIT {
                         .accept(APPLICATION_JSON_VALUE)
                         .contentType(APPLICATION_JSON_VALUE)
                         .body(objectMapper.writeValueAsString(connectorModel("")))
-                        // WHEN
                         .post("/v1/projects/{projectId}/models",
                               project.getId())
-                        // THEN
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
                 .hasValidationErrorCodes("field.empty",
@@ -127,7 +123,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testCreateConnectorModelInvalidPayloadNameTooLong() throws Exception {
+    public void should_throwTooLongNameException_when_createConnectorModelWithNameTooLong() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
         assertThatResponse(
@@ -135,10 +131,8 @@ public class ConnectorModelControllerIT {
                         .accept(APPLICATION_JSON_VALUE)
                         .contentType(APPLICATION_JSON_VALUE)
                         .body(objectMapper.writeValueAsString(connectorModel("123456789_123456789_1234567")))
-                        // WHEN
                         .post("/v1/projects/{projectId}/models",
                               project.getId())
-                        // THEN
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
                 .hasValidationErrorCodes("length.greater",
@@ -148,7 +142,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testCreateConnectorModelInvalidPayloadNameWithUnderscore() throws Exception {
+    public void should_throwBadNameException_when_creatingConnectorModelWithNameWithUnderscore() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
         assertThatResponse(
@@ -156,10 +150,8 @@ public class ConnectorModelControllerIT {
                         .accept(APPLICATION_JSON_VALUE)
                         .contentType(APPLICATION_JSON_VALUE)
                         .body(objectMapper.writeValueAsString(connectorModel("name_with_underscore")))
-                        // WHEN
                         .post("/v1/projects/{projectId}/models",
                               project.getId())
-                        // THEN
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
                 .hasValidationErrorCodes("regex.mismatch")
@@ -167,7 +159,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testCreateConnectorModelInvalidPayloadNameWithUppercase() throws Exception {
+    public void should_throwBadNameException_when_creatingConnectorModelWithNameWithUppercase() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
         assertThatResponse(
@@ -175,10 +167,8 @@ public class ConnectorModelControllerIT {
                         .accept(APPLICATION_JSON_VALUE)
                         .contentType(APPLICATION_JSON_VALUE)
                         .body(objectMapper.writeValueAsString(connectorModel("NameWithUppercase")))
-                        // WHEN
                         .post("/v1/projects/{projectId}/models",
                               project.getId())
-                        // THEN
                         .then().expect(status().isBadRequest()))
                 .isValidationException()
                 .hasValidationErrorCodes("regex.mismatch")
@@ -186,7 +176,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testUpdateConnectorModel() throws Exception {
+    public void should_returnStatusOKAndConnectorName_when_updatingConnectorModel() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
@@ -200,7 +190,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testUpdateConnectorModelInvalidPayloadNameNull() throws Exception {
+    public void should_returnStatusOKAndConnectorName_when_updatingConnectorModelWithNameNull() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
@@ -214,7 +204,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testUpdateConnectorModelInvalidPayloadNameEmpty() throws Exception {
+    public void should_throwEmptyNameException_when_updatingConnectorModelWithNameEmpty() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
@@ -232,7 +222,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testUpdateConnectorModelInvalidPayloadNameTooLong() throws Exception {
+    public void should_throwBadNameException_when_updatingConnectorModelWithNameTooLong() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
@@ -248,7 +238,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testUpdateConnectorModelInvalidPayloadNameWithUnderscore() throws Exception {
+    public void should_throwBadNameException_when_updatingConnectorModelWithNameWithUnderscore() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
@@ -264,7 +254,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void testUpdateConnectorModelInvalidPayloadNameWithUppercase() throws Exception {
+    public void should_throwBadNameException_when_updatingConnectorModelWithNameWithUpercase() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(

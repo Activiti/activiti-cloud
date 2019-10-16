@@ -63,4 +63,14 @@ public class Extensions {
     public void setConstants(Map<String, Map<String, Constant>> constants) {
         this.constants = constants;
     }
+    
+    public Map<String,Object> getAsMap(){
+        Map<String,Object> extensions = new HashMap<>();
+        extensions.put("properties",this.processVariables);
+        extensions.put("mappings",this.variablesMappings);
+        extensions.put("constants",this.constants);
+        return extensions;
+    }
+    
+    
 }

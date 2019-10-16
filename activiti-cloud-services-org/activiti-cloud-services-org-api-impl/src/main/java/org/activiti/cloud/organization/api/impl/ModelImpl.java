@@ -27,6 +27,8 @@ import org.activiti.cloud.services.auditable.AbstractAuditable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+import java.util.Map;
+
 /**
  * Implementation for {@link Model}
  */
@@ -61,7 +63,7 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     private String projectId;
 
     @ApiModelProperty(value = "The extensions of the model", readOnly = true)
-    private Extensions extensions;
+    private Map<String,Object> extensions;
 
     @ApiModelProperty(value = "The template of the model", readOnly = true)
     private String template;
@@ -153,12 +155,12 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     }
 
     @Override
-    public Extensions getExtensions() {
+    public Map<String,Object> getExtensions() {
         return extensions;
     }
 
     @Override
-    public void setExtensions(Extensions extensions) {
+    public void setExtensions(Map<String,Object> extensions) {
         this.extensions = extensions;
     }
 

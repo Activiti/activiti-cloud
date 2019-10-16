@@ -16,20 +16,26 @@
 
 package org.activiti.cloud.organization.api;
 
+import org.activiti.cloud.services.common.file.FileContent;
+
 /**
- * Model type interface
+ * Business logic related with actions to be done when the Model Content changes
  */
-public interface ModelType {
+public interface ContentUpdateListener {
 
-    String getName();
+    /**
+     * Perform an action over the model from the file content.
+     *
+     * @param model       the model to act with
+     * @param fileContent the file content that has been updated
+     */
+    void execute(Model model,
+                 FileContent fileContent);
 
-    String getFolderName();
-
-    String getContentFileExtension();
-
-    String[] getAllowedContentFileExtension();
-
-    default String getExtensionsFileSuffix() {
-        return "-extensions";
-    }
+    /**
+     * Get handled model type by this listener.
+     * 
+     * @return handled model type
+     */
+    ModelType getHandledModelType();
 }

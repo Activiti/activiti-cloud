@@ -27,7 +27,7 @@ import org.activiti.cloud.organization.api.ValidationContext;
  * Task mappings validator interface.
  * This implements specific process tasks mapping validations
  * and is related to the more generic process extensions validation logic
- * implemented in {@link ExtensionsModelValidator}
+ * implemented in {@link ModelExtensionsValidator}
  */
 public interface TaskMappingsValidator extends ModelValidationErrorProducer {
 

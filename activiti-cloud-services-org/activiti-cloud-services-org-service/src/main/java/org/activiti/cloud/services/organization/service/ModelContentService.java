@@ -16,61 +16,56 @@
 
 package org.activiti.cloud.services.organization.service;
 
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
-
-import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ModelContent;
-import org.activiti.cloud.organization.api.ModelContentConverter;
-import org.activiti.cloud.organization.api.ModelValidator;
-
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.activiti.cloud.organization.api.ContentUpdateListener;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelContent;
+import org.activiti.cloud.organization.api.ModelContentConverter;
+import org.activiti.cloud.organization.api.ModelContentValidator;
+
 /**
- * Service for managing {@link ModelValidator}
+ * Service for managing {@link ModelContentValidator}
  */
 public class ModelContentService {
 
-    private final Map<String, ModelValidator> modelContentValidatorsMapByModelType;
-
-    private final Map<String, ModelValidator> modelJsonValidatorsMapByModelType;
-
+    private final Map<String, List<ModelContentValidator>> modelContentValidatorsMapByModelType;
+    
     private final Map<String, ModelContentConverter<? extends ModelContent>> modelContentConvertersMapByModelType;
+    
+    private final Map<String, List<ContentUpdateListener>> contentUpdateListenersMapByModelType;
 
-    public ModelContentService(ModelTypeService modelTypeService,
-                               Set<ModelValidator> modelValidators,
-                               Set<ModelContentConverter<? extends ModelContent>> modelConverters) {
+    public ModelContentService(Set<ModelContentValidator> modelValidators,
+                               Set<ModelContentConverter<? extends ModelContent>> modelConverters,
+                               Set<ContentUpdateListener> contentUpdateListeners) {
         this.modelContentValidatorsMapByModelType = modelValidators
                 .stream()
-                .filter(validator -> !CONTENT_TYPE_JSON.equals(validator.getHandledContentType()) ||
-                        modelTypeService.isJson(validator.getHandledModelType()))
-                .collect(Collectors.toMap(validator -> validator.getHandledModelType().getName(),
-                                          Function.identity()));
-
-        this.modelJsonValidatorsMapByModelType = modelValidators
-                .stream()
-                .filter(validator -> CONTENT_TYPE_JSON.equals(validator.getHandledContentType()))
-                .collect(Collectors.toMap(validator -> validator.getHandledModelType().getName(),
-                                          Function.identity()));
+                .collect(Collectors.groupingBy(validator -> validator.getHandledModelType().getName()));
 
         this.modelContentConvertersMapByModelType = modelConverters
                 .stream()
                 .collect(Collectors.toMap(converter -> converter.getHandledModelType().getName(),
                                           Function.identity()));
+        this.contentUpdateListenersMapByModelType = contentUpdateListeners
+                .stream()
+                .collect(Collectors.groupingBy(contentUpdateListener -> contentUpdateListener.getHandledModelType().getName()));
     }
 
-    public Optional<ModelValidator> findModelValidator(String modelType,
-                                                       String contentType) {
-        return Optional.ofNullable(CONTENT_TYPE_JSON.equals(contentType) ?
-                                           modelJsonValidatorsMapByModelType.get(modelType) :
-                                           modelContentValidatorsMapByModelType.get(modelType));
+    public List<ModelContentValidator> findModelValidators(String modelType) {
+        return modelContentValidatorsMapByModelType.get(modelType);
     }
-
+    
     public Optional<ModelContentConverter<? extends ModelContent>> findModelContentConverter(String modelType) {
         return Optional.ofNullable(modelContentConvertersMapByModelType.get(modelType));
+    }
+    
+    public List<ContentUpdateListener> findContentUploadListeners(String modelType) {
+        return contentUpdateListenersMapByModelType.get(modelType);
     }
 
     public String getModelContentId(Model model) {

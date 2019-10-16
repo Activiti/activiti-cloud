@@ -17,6 +17,7 @@
 package org.activiti.cloud.organization.converter;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -158,5 +159,17 @@ public class JsonConverter<T> {
 
     protected Class<T> getEntityClass() {
         return entityClass;
+    }
+    
+    public Optional<T> tryConvertToEntity(Map jsonMap) {
+        if(jsonMap==null || jsonMap.isEmpty()) {
+            return Optional.empty();
+        }
+        try {
+            String json = objectMapper.writeValueAsString(jsonMap);
+            return this.tryConvertToEntity(json);
+        } catch (ModelingException | JsonProcessingException e) {
+            return Optional.empty();
+        }
     }
 }

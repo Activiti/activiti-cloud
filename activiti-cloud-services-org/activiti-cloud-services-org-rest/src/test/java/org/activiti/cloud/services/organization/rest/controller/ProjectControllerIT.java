@@ -114,16 +114,13 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void testGetProjects() throws Exception {
+    public void should_returnExistingProjects_when_gettingProjects() throws Exception {
 
-        // GIVEN
         projectRepository.createProject(project("project1"));
         projectRepository.createProject(project("project2"));
 
-        // WHEN
         mockMvc.perform(get("{version}/projects",
                             RepositoryRestConfig.API_VERSION))
-                // THEN
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
@@ -135,16 +132,13 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void testGetProjectsFilteredByName() throws Exception {
+    public void should_returnProjectsMatchingTheExactName_when_gettingProjectsFilteredByName() throws Exception {
 
-        // GIVEN
         projectRepository.createProject(project("project1"));
         projectRepository.createProject(project("project2"));
 
-        // WHEN
         mockMvc.perform(get("{version}/projects?name=project1",
                             RepositoryRestConfig.API_VERSION))
-                // THEN
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
@@ -154,17 +148,14 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void testGetProjectsFilteredByContainingName() throws Exception {
+    public void should_returnProjectsContainingTheName_when_gettingProjectsFilteredByContainingName() throws Exception {
 
-        // GIVEN
         projectRepository.createProject(project("project-main-1"));
         projectRepository.createProject(project("project-main-2"));
         projectRepository.createProject(project("project-secondary-2"));
 
-        // WHEN
         mockMvc.perform(get("{version}/projects?name=main",
                             RepositoryRestConfig.API_VERSION))
-                // THEN
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.projects",
@@ -176,29 +167,24 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void testGetProject() throws Exception {
-        // GIVEN
+    public void should_returnProject_when_gettingExistingProject() throws Exception {
         Project project = projectRepository.createProject(project("existing-project"));
 
-        // WHEN
         mockMvc.perform(get("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId()))
-                // THEN
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name",
                                     is("existing-project")));
     }
 
     @Test
-    public void testCreateProject() throws Exception {
-        // WHEN
+    public void should_returnStatusCreatedAndProjectDetails_when_creatingProject() throws Exception {
         mockMvc.perform(post("{version}/projects",
                              API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(projectWithDescription("new-project",
                                                                                           "Project description"))))
-                // THEN
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name",
                                     is("new-project")))
@@ -207,31 +193,25 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void testCreateProjectExistingName() throws Exception {
-        // GIVEN
+    public void should_throwConflictException_when_creatingProjectExistingName() throws Exception {
         projectRepository.createProject(project("existing-project"));
 
-        // WHEN
         mockMvc.perform(post("{version}/projects",
                              API_VERSION)
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(project("existing-project"))))
-                // THEN
                 .andExpect(status().isConflict());
     }
 
     @Test
-    public void testUpdateProject() throws Exception {
-        // GIVEN
+    public void should_returnStatusOk_when_updatingExistingProject() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        // WHEN
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(project("updated-project-name"))))
-                // THEN
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name",
                                     is("updated-project-name")));
@@ -243,100 +223,81 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void testUpdateProjectExistingName() throws Exception {
-        // GIVEN
+    public void should_throwConflictException_when_updatingProjectExistingName() throws Exception {
         projectRepository.createProject(project("existing-project"));
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        // WHEN
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(project("existing-project"))))
-                // THEN
                 .andExpect(status().isConflict());
     }
 
     @Test
-    public void testUpdateProjectNoName() throws Exception {
-        // GIVEN
+    public void should_returnStatusOk_when_updatingProjectNoName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        // WHEN
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(projectWithDescription(null,
                                                                                           "New Description"))))
-                // THEN
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void testUpdateProjectEmptyName() throws Exception {
-        // GIVEN
+    public void should_throwBadRequestException_when_updatingProjectEmptyName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        // WHEN
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(project(""))))
-                // THEN
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void testUpdateProjectInvalidName() throws Exception {
-        // GIVEN
+    public void should_throwBadRequestException_when_updatingProjectInvalidName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        // WHEN
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(project("1-invalid-name"))))
-                // THEN
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void testUpdateProjectLongName() throws Exception {
-        // GIVEN
+    public void should_throwBadRequestException_when_updatingProjectLongName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        // WHEN
         mockMvc.perform(put("{version}/projects/{projectId}",
                             API_VERSION,
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                                 .content(mapper.writeValueAsString(project("too-long-name-1234567890-1234567890"))))
-                // THEN
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void testDeleteProject() throws Exception {
-        // GIVEN
+    public void should_returnStatusNoContent_when_deletingProject() throws Exception {
         Project project = projectRepository.createProject(project("project-to-delete"));
 
-        // WHEN
         mockMvc.perform(delete("{version}/projects/{projectId}",
                                API_VERSION,
                                project.getId()))
-                // THEN
                 .andExpect(status().isNoContent());
 
         assertThat(projectRepository.findProjectById(project.getId())).isEmpty();
     }
 
     @Test
-    public void testExportProject() throws Exception {
-        // GIVEN
+    public void should_returnZipFileWithProjectModels_when_exportingProject() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
 
         modelRepository.createModel(connectorModel(project,
@@ -356,15 +317,13 @@ public class ProjectControllerIT {
                                                                           inputsMappings("movieName"),
                                                                           outputsMappings("movieDescription"))));
 
-        // WHEN
-        MvcResult response = mockMvc.perform(
+       MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/export",
                     API_VERSION,
                     project.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        // THEN
         assertThatResponseContent(response)
                 .isFile()
                 .isZip()
@@ -396,8 +355,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void testExportProjectWithValidationErrors() throws Exception {
-        // GIVEN
+    public void should_throwBadRequestException_when_exportingProjectWithValidationErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository
                 .createProject(project("project-with-models"));
 
@@ -409,7 +367,6 @@ public class ProjectControllerIT {
                 Arrays.asList(new ModelValidationError(),
                               new ModelValidationError());
 
-        // WHEN
         MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/export",
                     API_VERSION,
@@ -420,12 +377,10 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void testExportEmptyProjectWithValidationErrors() throws Exception {
-        // GIVEN
+    public void should_throwSemanticModelValidationException_when_exportingEmptyProjectWithValidationErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository
                 .createProject(project("project-without-process"));
 
-        // WHEN
         MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/export",
                     API_VERSION,
@@ -434,7 +389,6 @@ public class ProjectControllerIT {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        // THEN
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
                 .hasSize(1)
                 .extracting(ModelValidationError::getProblem,
@@ -444,15 +398,13 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void exportProjectWithNoAssigneeShouldReturnErrors() throws Exception {
-        // GIVEN
+    public void should_throwSemanticModelValidationException_when_exportingProjectWithNoAssigneeShouldReturnErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
         modelService.importSingleModel(project,
                                  processModelType,
                                  processFileContent("process-model",
                                                     resourceAsByteArray("process/no-assignee.bpmn20.xml")));
 
-        // WHEN
         MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/export",
                     API_VERSION,
@@ -460,7 +412,6 @@ public class ProjectControllerIT {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        // THEN
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
                 .hasSize(1)
                 .extracting(ModelValidationError::getProblem,
@@ -472,8 +423,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void exportProjectWithInvalidServiceTaskReturnErrors() throws Exception {
-        // GIVEN
+    public void should_throwSemanticModelValidationException_when_exportingProjectWithInvalidServiceTaskReturnErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-connectors"));
         modelRepository.createModel(processModelWithContent(project,
                                                             "invalid-service",
@@ -482,7 +432,6 @@ public class ProjectControllerIT {
         modelRepository.createModel(connectorModel(project,
                                                    "invalid-connector-action",
                                                    resourceAsByteArray("connector/invalid-connector-action.json")));
-        // WHEN
         MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/export",
                     API_VERSION,
@@ -490,7 +439,6 @@ public class ProjectControllerIT {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        // THEN
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription,
@@ -501,8 +449,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void exportProjectWithServiceTaskEmptyImplementationReturnErrors() throws Exception {
-        // GIVEN
+    public void should_throwSemanticModelValidationException_when_exportingProjectWithServiceTaskEmptyImplementationReturnErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-invalid-task"));
         modelRepository.createModel(processModelWithContent(project,
                                                             "invalid-connector-action",
@@ -511,7 +458,6 @@ public class ProjectControllerIT {
         modelRepository.createModel(connectorModel(project,
                                                    "invalid-connector-action",
                                                    resourceAsByteArray("connector/invalid-connector-action.json")));
-        // WHEN
         MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/export",
                     API_VERSION,
@@ -519,7 +465,6 @@ public class ProjectControllerIT {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        // THEN
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription,
@@ -533,8 +478,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void exportProjectWithProcessExtensionsForUnknownTask() throws Exception {
-        // GIVEN
+    public void should_throwSemanticModelValidationException_when_exportingProjectWithProcessExtensionsForUnknownTask() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -547,7 +491,6 @@ public class ProjectControllerIT {
                                                    "movies",
                                                    resourceAsByteArray("connector/movies.json")));
 
-        // WHEN
         assertThatResponse(
                 mockMvc.perform(
                         get("{version}/projects/{projectId}/export",
@@ -562,8 +505,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void exportProjectWithProcessExtensionsForUnknownOutputProcessVariableMapping() throws Exception {
-        // GIVEN
+    public void should_throwSemanticModelValidationException_when_exportingProjectWithProcessExtensionsForUnknownOutputProcessVariableMapping() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -576,7 +518,6 @@ public class ProjectControllerIT {
                                                    "movies",
                                                    resourceAsByteArray("connector/movies.json")));
 
-        // WHEN
         assertThatResponse(
                 mockMvc.perform(
                         get("{version}/projects/{projectId}/export",
@@ -591,8 +532,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void exportProjectWithProcessExtensionsForConnectorWithoutInputsOutputs() throws Exception {
-        // GIVEN
+    public void should_throwSemanticModelValidationException_when_exportingProjectWithProcessExtensionsForConnectorWithoutInputsOutputs() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -605,7 +545,6 @@ public class ProjectControllerIT {
                                                    "movies",
                                                    resourceAsByteArray("connector/movies-without-inputs-outputs.json")));
 
-        // WHEN
         assertThatResponse(
                 mockMvc.perform(
                         get("{version}/projects/{projectId}/export",
@@ -622,8 +561,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void exportProjectWithProcessExtensionsForUnknownConnectorParameterMapping() throws Exception {
-        // GIVEN
+    public void should_throwSemanticModelValidationException_when_exportingProjectWithProcessExtensionsForUnknownConnectorParameterMapping() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -636,7 +574,6 @@ public class ProjectControllerIT {
                                                    "movies",
                                                    resourceAsByteArray("connector/movies.json")));
 
-        // WHEN
         assertThatResponse(
                 mockMvc.perform(
                         get("{version}/projects/{projectId}/export",
@@ -653,8 +590,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void exportProjectWithProcessExtensionsForUnknownInputProcessVariableMapping() throws Exception {
-        // GIVEN
+    public void should_throwSemanticModelValidationException_when_exportingProjectWithProcessExtensionsForUnknownInputProcessVariableMapping() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -667,7 +603,6 @@ public class ProjectControllerIT {
                                                    "movies",
                                                    resourceAsByteArray("connector/movies.json")));
 
-        // WHEN
         assertThatResponse(
                 mockMvc.perform(
                         get("{version}/projects/{projectId}/export",
@@ -682,8 +617,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void exportProjectWithInvalidCallActivityReference() throws Exception {
-        // GIVEN
+    public void should_throwSemanticModelValidationException_when_exportingProjectWithInvalidCallActivityReference() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-call-activiti"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -717,8 +651,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void exportProjectWithValidCallActivity() throws Exception {
-        // GIVEN
+    public void should_returnStatusOk_when_exportingProjectWithValidCallActivity() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-call-activity"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -745,19 +678,16 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void testImportProject() throws Exception {
-        //GIVEN
+    public void should_returnStatusCreated_when_importingProject() throws Exception {
         MockMultipartFile zipFile = new MockMultipartFile("file",
                                                           "project-xy.zip",
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy.zip"));
 
-        // WHEN
         mockMvc.perform(multipart("{version}/projects/import",
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
-                // THEN
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.entry.name",
@@ -765,38 +695,32 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void testImportProjectInvalidJsonFile() throws Exception {
-        //GIVEN
+    public void should_throwBadRequestException_when_importingProjectInvalidJsonFile() throws Exception {
         MockMultipartFile zipFile = new MockMultipartFile("file",
                                                           "project-xy-invalid.zip",
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy-invalid.zip"));
 
-        // WHEN
         mockMvc.perform(multipart("{version}/projects/import",
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
-                // THEN
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(is("No valid project entry found to import: project-xy-invalid.zip")));
     }
 
     @Test
-    public void testImportProjectInvalidProcessJsonFile() throws Exception {
-        //GIVEN
+    public void should_throwBadRequestException_when_importingProjectInvalidProcessJsonFile() throws Exception {
         MockMultipartFile zipFile = new MockMultipartFile("file",
                                                           "project-xy.zip",
                                                           "project/zip",
                                                           resourceAsByteArray("project/project-xy-invalid-process-json.zip"));
 
-        // WHEN
         mockMvc.perform(multipart("{version}/projects/import",
                                   API_VERSION)
                                 .file(zipFile)
                                 .accept(APPLICATION_JSON_VALUE))
-                // THEN
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(containsString("Cannot convert json file content to model")));

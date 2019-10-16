@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.services.organization.rest.controller;
 
 import java.io.IOException;
@@ -64,8 +65,7 @@ public class ConnectorValidationControllerIT {
     }
 
     @Test
-    public void testValidateSimpleConnector() throws IOException {
-        //GIVEN
+    public void should_returnStatusNoContent_when_validatingSimpleConnector() throws IOException {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
@@ -73,37 +73,31 @@ public class ConnectorValidationControllerIT {
                            "simple-connector.json",
                            resourceAsByteArray("connector/connector-simple.json"),
                            "application/json")
-                //WHEN
                 .post("/v1/models/{modelId}/validate",
                       connectorModel.getId())
-                //THEN
                 .then()
                 .expect(status().isNoContent())
                 .body(isEmptyString());
     }
 
     @Test
-    public void testValidateConnectorTextContentType() throws IOException {
-        //GIVEN
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+    public void should_returnStatusNoContent_when_validatingConnectorTextContentType() throws IOException {
+       Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
                 .multiPart("file",
                            "simple-connector.json",
                            resourceAsByteArray("connector/connector-simple.json"),
                            "text/plain")
-                //WHEN
                 .post("/v1/models/{modelId}/validate",
                       connectorModel.getId())
-                //THEN
                 .then()
                 .expect(status().isNoContent())
                 .body(isEmptyString());
     }
 
     @Test
-    public void testInvalidSimpleConnector() throws IOException {
-        //GIVEN
+    public void should_throwSemanticValidationException_when_validatingInvalidSimpleConnector() throws IOException {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
@@ -112,10 +106,8 @@ public class ConnectorValidationControllerIT {
                                    "invalid-simple-connector.json",
                                    resourceAsByteArray("connector/invalid-simple-connector.json"),
                                    "application/json")
-                        //WHEN
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
-                        //THEN
                         .then()
                         .log().all()
                         .expect(status().isBadRequest()))
@@ -128,8 +120,7 @@ public class ConnectorValidationControllerIT {
     }
 
     @Test
-    public void testJsonInvalidConnector() throws IOException {
-        //GIVEN
+    public void should_throwSyntacticValidationException_when_validatingJsonInvalidConnector() throws IOException {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
@@ -138,10 +129,8 @@ public class ConnectorValidationControllerIT {
                                    "invalid-json-connector.json",
                                    resourceAsByteArray("connector/invalid-json-connector.json"),
                                    "application/json")
-                        //WHEN
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
-                        //THEN
                         .then()
                         .log().all()
                         .expect(status().isBadRequest()))
@@ -150,9 +139,8 @@ public class ConnectorValidationControllerIT {
     }
 
     @Test
-    public void testInvalidConnectorTextContentType() throws IOException {
-        //GIVEN
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+    public void should_throwSyntacticValidationException_when_validatingInvalidConnectorTextContentType() throws IOException {
+       Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
                 given()
@@ -160,10 +148,8 @@ public class ConnectorValidationControllerIT {
                                    "invalid-json-connector.json",
                                    resourceAsByteArray("connector/invalid-json-connector.json"),
                                    "text/plain")
-                        //WHEN
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
-                        //THEN
                         .then()
                         .log().all()
                         .expect(status().isBadRequest()))
@@ -172,8 +158,7 @@ public class ConnectorValidationControllerIT {
     }
 
     @Test
-    public void testInvalidConnectorNameTooLong() throws IOException {
-        //GIVEN
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameTooLong() throws IOException {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
@@ -182,10 +167,8 @@ public class ConnectorValidationControllerIT {
                                    "invalid-connector-name-too-long.json",
                                    resourceAsByteArray("connector/invalid-connector-name-too-long.json"),
                                    "text/plain")
-                        //WHEN
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
-                        //THEN
                         .then()
                         .log().all()
                         .expect(status().isBadRequest()))
@@ -195,8 +178,7 @@ public class ConnectorValidationControllerIT {
     }
 
     @Test
-    public void testInvalidConnectorNameEmpty() throws IOException {
-        //GIVEN
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameEmpty() throws IOException {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
@@ -205,10 +187,8 @@ public class ConnectorValidationControllerIT {
                                    "invalid-connector-name-empty.json",
                                    resourceAsByteArray("connector/invalid-connector-name-empty.json"),
                                    "text/plain")
-                        //WHEN
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
-                        //THEN
                         .then()
                         .log().all()
                         .expect(status().isBadRequest()))
@@ -218,8 +198,7 @@ public class ConnectorValidationControllerIT {
     }
 
     @Test
-    public void testInvalidConnectorNameWithUnderscore() throws IOException {
-        //GIVEN
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUnderscore() throws IOException {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
@@ -228,10 +207,8 @@ public class ConnectorValidationControllerIT {
                                    "invalid-connector-name-with-underscore.json",
                                    resourceAsByteArray("connector/invalid-connector-name-with-underscore.json"),
                                    "text/plain")
-                        //WHEN
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
-                        //THEN
                         .then()
                         .log().all()
                         .expect(status().isBadRequest()))
@@ -240,8 +217,7 @@ public class ConnectorValidationControllerIT {
     }
 
     @Test
-    public void testInvalidConnectorNameWithUppercase() throws IOException {
-        //GIVEN
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUppercase() throws IOException {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
@@ -250,10 +226,8 @@ public class ConnectorValidationControllerIT {
                                    "invalid-connector-name-with-uppercase.json",
                                    resourceAsByteArray("connector/invalid-connector-name-with-uppercase.json"),
                                    CONTENT_TYPE_JSON)
-                        //WHEN
                         .post("/v1/models/{modelId}/validate",
                               connectorModel.getId())
-                        //THEN
                         .then()
                         .log().all()
                         .expect(status().isBadRequest()))

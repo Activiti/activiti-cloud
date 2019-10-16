@@ -207,6 +207,17 @@ public class ModelController implements ModelRestApi {
         modelService.validateModelContent(findModelById(modelId),
                                           multipartToFileContent(file));
     }
+    
+    @Override
+    public void validateModelExtensions(
+            @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
+            @PathVariable String modelId,
+            @ApiParam(VALIDATE_EXTENSIONS_FILE_PARAM_DESCR)
+            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
+
+        modelService.validateModelExtensions(findModelById(modelId),
+                                          multipartToFileContent(file));
+    }
 
     public Model findModelById(String modelId) {
         Optional<Model> optionalModel = modelService.findModelById(modelId);

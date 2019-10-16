@@ -17,19 +17,18 @@
 package org.activiti.cloud.organization.api;
 
 /**
- * Model type interface
+ * Business logic related with validation of a model content
  */
-public interface ModelType {
+public interface ModelContentValidator extends ModelValidator {
 
-    String getName();
-
-    String getFolderName();
-
-    String getContentFileExtension();
-
-    String[] getAllowedContentFileExtension();
-
-    default String getExtensionsFileSuffix() {
-        return "-extensions";
+   /**
+     * Validate the given model content.
+     * 
+     * @param modelContent      the model content to validate
+     * @param validationContext the validation context
+     */
+    default void validateModelContent(byte[] modelContent,
+                              ValidationContext validationContext) {
+        validate(modelContent,validationContext);
     }
 }

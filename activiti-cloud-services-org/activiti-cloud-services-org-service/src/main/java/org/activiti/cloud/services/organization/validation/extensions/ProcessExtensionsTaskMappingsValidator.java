@@ -25,6 +25,7 @@ import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
 import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
 import org.activiti.cloud.services.organization.converter.BpmnProcessModelContent;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,7 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
     }
 
     @Override
-    public Stream<ModelValidationError> validate(Extensions extensions,
+    public Stream<ModelValidationError> validateExtensions(Extensions extensions,
                                                  BpmnProcessModelContent bpmnModel,
                                                  ValidationContext validationContext) {
         Set<FlowNode> availableTasks = bpmnModel.findAllNodes();

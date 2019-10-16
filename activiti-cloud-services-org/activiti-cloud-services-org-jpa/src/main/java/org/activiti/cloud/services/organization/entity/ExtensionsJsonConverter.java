@@ -16,15 +16,54 @@
 
 package org.activiti.cloud.services.organization.entity;
 
-import org.activiti.cloud.organization.api.process.Extensions;
+import java.io.IOException;
+import java.util.Map;
+
+import javax.persistence.AttributeConverter;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Jon to model extensions converter
+ * Json to model metadata converter
  */
-public class ExtensionsJsonConverter extends JpaJsonConverter<Extensions> {
+@SuppressWarnings({ "rawtypes", "unchecked" })
+public class ExtensionsJsonConverter implements AttributeConverter<Map, String> {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    protected Class<Extensions> getEntityClass() {
-        return Extensions.class;
+    public String convertToDatabaseColumn(Map entity) {
+        try {
+            if (entity == null) {
+                return null;
+            }
+            return getObjectMapper().writeValueAsString(entity);
+        } catch (JsonProcessingException ex) {
+            throw new DataIntegrityViolationException("Cannot convert entity to json data: " + entity,
+                                                      ex);
+        }
+    }
+
+    @Override
+    public Map<String, Object> convertToEntityAttribute(String json) {
+        try {
+            if (StringUtils.isEmpty(json)) {
+                return null;
+            }
+            return getObjectMapper().readValue(json,
+                                               Map.class);
+        } catch (IOException ex) {
+            throw new DataRetrievalFailureException("Cannot convert the json data to entity: " + json,
+                                                    ex);
+        }
+    }
+
+    protected ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 }

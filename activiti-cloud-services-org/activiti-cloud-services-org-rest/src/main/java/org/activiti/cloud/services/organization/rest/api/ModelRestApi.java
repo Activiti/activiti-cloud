@@ -91,6 +91,8 @@ public interface ModelRestApi {
     String VALIDATE_MODEL_ID_PARAM_DESCR = "The id of the model to validate the content for";
 
     String VALIDATE_MODEL_FILE_PARAM_DESCR = "The file containing the model definition to validate";
+    
+    String VALIDATE_EXTENSIONS_FILE_PARAM_DESCR = "The file containing the model extensions to validate";
 
     String MODEL_TYPE_PARAM_NAME = "type";
 
@@ -226,5 +228,17 @@ public interface ModelRestApi {
             @ApiParam(value = VALIDATE_MODEL_ID_PARAM_DESCR, required = true)
             @PathVariable String modelId,
             @ApiParam(VALIDATE_MODEL_FILE_PARAM_DESCR)
+            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
+
+    @ApiOperation(
+            tags = MODELS,
+            value = "Validate a model content",
+            notes = "Allows to the model content without save it.")
+    @PostMapping("/models/{modelId}/validate/extensions")
+    @ResponseStatus(NO_CONTENT)
+    void validateModelExtensions(
+            @ApiParam(VALIDATE_MODEL_ID_PARAM_DESCR)
+            @PathVariable String modelId,
+            @ApiParam(VALIDATE_EXTENSIONS_FILE_PARAM_DESCR)
             @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
 }

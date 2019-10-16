@@ -29,7 +29,7 @@ import org.activiti.cloud.services.organization.converter.BpmnProcessModelConten
  */
 public interface ProcessExtensionsValidator extends ModelValidationErrorProducer {
 
-    Stream<ModelValidationError> validate(Extensions extensions,
+    Stream<ModelValidationError> validateExtensions(Extensions extensions,
                                           BpmnProcessModelContent bpmnModel,
                                           ValidationContext validationContext);
 }

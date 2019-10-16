@@ -18,6 +18,10 @@ package org.activiti.cloud.services.organization.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.organization.api.process.Extensions;
+
+import java.util.Map;
+
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.services.organization.converter.ConnectorModelContent;
@@ -45,6 +49,18 @@ public class JsonConverterConfiguration {
     @Bean
     public JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter(ObjectMapper objectMapper) {
         return new JsonConverter<>(ConnectorModelContent.class,
+                                   objectMapper);
+    }
+
+    @Bean
+    public JsonConverter<Map> jsonMetadataConverter(ObjectMapper objectMapper) {
+        return new JsonConverter<>(Map.class,
+                                   objectMapper);
+    }
+
+    @Bean
+    public JsonConverter<Extensions> jsonExtensionsConverter(ObjectMapper objectMapper) {
+        return new JsonConverter<>(Extensions.class,
                                    objectMapper);
     }
 }

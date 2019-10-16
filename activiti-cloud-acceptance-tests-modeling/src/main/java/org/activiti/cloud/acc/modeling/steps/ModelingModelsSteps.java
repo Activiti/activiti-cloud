@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
@@ -66,6 +67,8 @@ import static org.springframework.hateoas.Link.REL_SELF;
 public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     private static final String PROJECT_MODELS_REL = "models";
+    
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     private ModelingModelsService modelingModelsService;
@@ -91,17 +94,17 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         assertThat(currentContext.getContent()).isInstanceOf(Model.class);
         Model model = currentContext.getContent();
 
-        Optional.ofNullable(model.getExtensions())
+        Optional.ofNullable(this.getExtensionFromMap(model.getExtensions()))
                 .map(Extensions::getProcessVariables)
                 .ifPresent(processVariables -> processVariables.remove(processVariable));
 
-        Optional.ofNullable(model.getExtensions())
+        Optional.ofNullable(this.getExtensionFromMap(model.getExtensions()))
                 .map(Extensions::getVariablesMappings)
                 .map(mappings -> mappings.get(EXTENSIONS_TASK_NAME))
                 .map(mappingsTypes -> mappingsTypes.get(INPUTS))
                 .ifPresent(processVariableMappings -> processVariableMappings.remove(processVariable));
 
-        Optional.ofNullable(model.getExtensions())
+        Optional.ofNullable(this.getExtensionFromMap(model.getExtensions()))
                 .map(Extensions::getVariablesMappings)
                 .map(mappings -> mappings.get(EXTENSIONS_TASK_NAME))
                 .map(mappingsTypes -> mappingsTypes.get(OUTPUTS))
@@ -121,14 +124,14 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     @Step
     public void addProcessVariableToModelModel(Model model,
                                                List<String> processVariable) {
-        Set<String> processVariables = Optional.ofNullable(model.getExtensions())
+        Set<String> processVariables = Optional.ofNullable(this.getExtensionFromMap(model.getExtensions()))
                 .map(Extensions::getProcessVariables)
                 .map(Map::keySet)
                 .map(HashSet::new)
                 .orElseGet(HashSet::new);
         processVariables.addAll(processVariable);
 
-        model.setExtensions(extensions(processVariables));
+        model.setExtensions(extensions(processVariables).getAsMap());
     }
 
     @Step
@@ -173,7 +176,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
                                  boolean isExtensionType) throws IOException {
         final String fileExtension = isExtensionType ? CONTENT_TYPE_JSON : getModelType(model.getType()).getContentFileExtension();
         final String fileName = isExtensionType ?
-                toJsonFilename(model.getName() + getModelType(model.getType()).getMetadataFileSuffix()) :
+                toJsonFilename(model.getName() + getModelType(model.getType()).getExtensionsFileSuffix()) :
                 setExtension(model.getName(),
                              fileExtension);
         final String resourcePath = model.getType().toLowerCase() + "/" + fileName;
@@ -247,9 +250,9 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
         Model model = currentContext.getContent();
         assertThat(model.getExtensions()).isNotNull();
-        assertThat(model.getExtensions().getProcessVariables()).containsKeys(processVariables);
+        assertThat(this.getExtensionFromMap(model.getExtensions()).getProcessVariables()).containsKeys(processVariables);
         Arrays.stream(processVariables).forEach(processVariableId -> {
-            ProcessVariable processVariable = model.getExtensions().getProcessVariables().get(processVariableId);
+            ProcessVariable processVariable = this.getExtensionFromMap(model.getExtensions()).getProcessVariables().get(processVariableId);
             assertThat(processVariable.getId()).isEqualTo(processVariableId);
             assertThat(processVariable.getName()).isEqualTo(processVariableId);
             assertThat(processVariable.isRequired()).isEqualTo(false);
@@ -257,8 +260,8 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
             assertThat(processVariable.getValue()).isEqualTo(true);
         });
 
-        assertThat(model.getExtensions().getVariablesMappings()).containsKeys(EXTENSIONS_TASK_NAME);
-        assertThat(model.getExtensions().getVariablesMappings().get(EXTENSIONS_TASK_NAME)).containsKeys(INPUTS,
+        assertThat(this.getExtensionFromMap(model.getExtensions()).getVariablesMappings()).containsKeys(EXTENSIONS_TASK_NAME);
+        assertThat(this.getExtensionFromMap(model.getExtensions()).getVariablesMappings().get(EXTENSIONS_TASK_NAME)).containsKeys(INPUTS,
                                                                                                         OUTPUTS);
         assertProcessVariableMappings(model,
                                       INPUTS,
@@ -272,8 +275,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     private void assertProcessVariableMappings(Model model,
                                                ServiceTaskActionType serviceTaskActionType,
                                                String... processVariables) {
-        Map<String, ProcessVariableMapping> outputsMappings = model
-                .getExtensions()
+        Map<String, ProcessVariableMapping> outputsMappings = this.getExtensionFromMap(model.getExtensions())
                 .getVariablesMappings()
                 .get(EXTENSIONS_TASK_NAME)
                 .get(serviceTaskActionType);
@@ -298,5 +300,13 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     @Override
     public ModelingModelsService service() {
         return modelingModelsService;
+    }
+    
+    private Extensions getExtensionFromMap(Map<String,Object> map) {
+        try {
+            return objectMapper.readValue(objectMapper.writeValueAsString(map), Extensions.class);
+       } catch (IOException e) {
+            return null;
+        }
     }
 }

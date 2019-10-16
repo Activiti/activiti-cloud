@@ -93,8 +93,7 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void validateProcessModelWithValidContent() throws Exception {
-        // given
+    public void should_returnStatusNoContent_when_validatingProcessModelWithValidContent() throws Exception {
         byte[] validContent = resourceAsByteArray("process/x-19022.bpmn20.xml");
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "process.xml",
@@ -104,19 +103,16 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        // when
         mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
                                    API_VERSION,
                                    processModel.getId())
                                  .file(file))
-                // then
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void validateProcessModelWithNullServiceTaskContent() throws Exception {
-        // given
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithNullServiceTaskContent() throws Exception {
         byte[] validContent = resourceAsByteArray("process/null-implementation-service-task.bpmn20.xml");
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "process.xml",
@@ -126,7 +122,6 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        // when
         ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
                                    API_VERSION,
@@ -147,9 +142,8 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void validateProcessModelWithInvalidContent() throws Exception {
+    public void should_throwBadRequestException_when_validatingProcessModelWithInvalidContent() throws Exception {
 
-        // given
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "diagram.bpm",
                                                        CONTENT_TYPE_XML,
@@ -159,20 +153,17 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        // when
         mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
                                    API_VERSION,
                                    processModel.getId())
                                  .file(file))
-                // then
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void validateProcessExtensionsWithValidContent() throws Exception {
+    public void should_returnStatusNoContent_when_validatingProcessExtensionsWithValidContent() throws Exception {
 
-        // given
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
         modelService.importModel(project,
                                  connectorModelType,
@@ -187,20 +178,17 @@ public class ModelValidationControllerIT {
                 processModel,
                 resourceAsByteArray("process-extensions/RankMovie-extensions.json"));
 
-        // when
-        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate/extensions",
                                   API_VERSION,
                                   processModel.getId())
                                 .file(file))
-                // then
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void validateProcessExtensionsWithValidContentAndNoDefaultValues() throws Exception {
+    public void should_returnStatusNoContent_when_validatingProcessExtensionsWithValidContentAndNoDefaultValues() throws Exception {
 
-        // given
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
         modelService.importModel(project,
                                  connectorModelType,
@@ -215,19 +203,16 @@ public class ModelValidationControllerIT {
                 processModel,
                 resourceAsByteArray("process-extensions/RankMovie-extensions-no-default-values.json"));
 
-        // when
-        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate/extensions",
                                   API_VERSION,
                                   processModel.getId())
                                 .file(file))
-                // then
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void validateProcessModelWithInvalidName() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidName() throws Exception {
 
-        // given
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
         Model processModel = modelRepository.createModel(
                 processModel(project,
@@ -235,13 +220,11 @@ public class ModelValidationControllerIT {
         MockMultipartFile file = multipartProcessFile(processModel,
                                                       resourceAsByteArray("process/invalid-process-name.bpmn20.xml"));
 
-        // when
         final ResultActions resultActions = mockMvc.perform(multipart("{version}/models/{model_id}/validate",
                                                                       API_VERSION,
                                                                       processModel.getId())
                                                                     .file(file));
 
-        // then
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -256,9 +239,8 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void validateProcessExtensionsWithInvalidMappingContent() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidMappingContent() throws Exception {
 
-        // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-mapping-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "extensions.json",
@@ -269,16 +251,14 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModelWithExtensions(project,
                                                                                     "process-model",
                                                                                     new Extensions()));
-        // when
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
+                .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file))
                 .andDo(print());
-        // then
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-                .isEqualTo("#/extensions/mappings/ServiceTask_06crg3b: 2 schema violations found");
+                .isEqualTo("#: #: only 1 subschema matches out of 2");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
@@ -295,9 +275,8 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void validateProcessExtensionsWithInvalidStringVariableContent() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidStringVariableContent() throws Exception {
 
-        // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-string-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "extensions.json",
@@ -308,13 +287,11 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModelWithExtensions(project,
                                                                                     "process-model",
                                                                                     new Extensions()));
-        // when
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
+                .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file))
                 .andDo(print());
-        // then
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -329,9 +306,8 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void validateProcessExtensionsWithInvalidIntegerVariableContent() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidIntegerVariableContent() throws Exception {
 
-        // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-integer-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "extensions.json",
@@ -342,13 +318,11 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModelWithExtensions(project,
                                                                                     "Process-Model",
                                                                                     new Extensions()));
-        // when
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
+                .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file))
                 .andDo(print());
-        // then
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -363,9 +337,8 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void validateProcessExtensionsWithInvalidBooleanVariableContent() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidBooleanVariableContent() throws Exception {
 
-        // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-boolean-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "extensions.json",
@@ -376,13 +349,11 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModelWithExtensions(project,
                                                                                     "process-model",
                                                                                     new Extensions()));
-        // when
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
+                .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file))
                 .andDo(print());
-        // then
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -397,9 +368,8 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void validateProcessExtensionsWithInvalidObjectVariableContent() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidObjectVariableContent() throws Exception {
 
-        // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-object-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "extensions.json",
@@ -410,13 +380,11 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModelWithExtensions(project,
                                                                                     "process-model",
                                                                                     new Extensions()));
-        // when
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
+                .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file))
                 .andDo(print());
-        // then
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -431,9 +399,8 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void validateProcessExtensionsWithInvalidDateVariableContent() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidDateVariableContent() throws Exception {
 
-        // given
         byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-date-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "extensions.json",
@@ -444,13 +411,11 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModelWithExtensions(project,
                                                                                     "process-model",
                                                                                     new Extensions()));
-        // when
         final ResultActions resultActions = mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
+                .perform(multipart("{version}/models/{model_id}/validate/extensions",
                                    API_VERSION,
                                    processModel.getId()).file(file))
                 .andDo(print());
-        // then
         resultActions.andExpect(status().isBadRequest());
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
@@ -469,25 +434,21 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void validateModelThatNotExistsShouldThrowException() throws Exception {
-        // given
+    public void should_throwNotFoundException_when_validatingModelThatNotExists() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "diagram.bpm",
                                                        "text/plain",
                                                        "BPMN diagram".getBytes());
-        // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
                                   API_VERSION,
                                   "model_id")
                                 .file(file))
-                // then
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void validateInvalidProcessModelUsingTextContentType() throws Exception {
+    public void should_throwNotFoundException_when_validatingInvalidProcessModelUsingTextContentType() throws Exception {
 
-        // given
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "diagram.bpmn20.xml",
                                                        "text/plain",
@@ -497,18 +458,15 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
                                   API_VERSION,
                                   processModel.getId())
                                 .file(file))
-                // then
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void validateConnectorValidContent() throws Exception {
-        // given
+    public void should_returnStatusNoContent_when_validatingConnectorValidContent() throws Exception {
         byte[] validContent = resourceAsByteArray("connector/connector-simple.json");
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "connector-simple.json",
@@ -518,18 +476,15 @@ public class ModelValidationControllerIT {
         Model connectorModel = modelRepository.createModel(connectorModel(project,
                                                                           "connector-model"));
 
-        // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
                                   API_VERSION,
                                   connectorModel.getId())
                                 .file(file))
-                // then
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void validateConnectorValidContentWithTemplate() throws Exception {
-        // given
+    public void should_returnStatusNoContent_when_validatingConnectorValidContentWithTemplate() throws Exception {
         byte[] validContent = resourceAsByteArray("connector/connector-template.json");
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "connector-template.json",
@@ -540,12 +495,10 @@ public class ModelValidationControllerIT {
         Model connectorModel = modelRepository.createModel(connectorModel(project,
                                                                           "connector-model"));
 
-        // when
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
                                   API_VERSION,
                                   connectorModel.getId())
                                 .file(file))
-                // then
                 .andExpect(status().isNoContent());
     }
 }

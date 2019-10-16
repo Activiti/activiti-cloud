@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -36,6 +37,7 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
 import org.activiti.cloud.services.organization.entity.ProjectEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.util.StringUtils;
 
 import static java.util.Collections.singletonMap;
 import static org.activiti.cloud.organization.api.ProcessModelType.BPMN20_XML;
@@ -107,7 +109,7 @@ public class MockFactory {
         ModelEntity processModel = new ModelEntity(name,
                                                    PROCESS);
         processModel.setProject(parentProject);
-        processModel.setExtensions(extensions);
+        processModel.setExtensions(extensions!=null?extensions.getAsMap():null);
         if (content != null) {
             processModel.setContentType(CONTENT_TYPE_XML);
             processModel.setContent(new String(content));
@@ -155,7 +157,7 @@ public class MockFactory {
                                                       String content) {
         ModelEntity processModel = processModel(name);
         processModel.setProject(project);
-        processModel.setExtensions(extensions);
+        processModel.setExtensions(extensions!=null?extensions.getAsMap():null);
         if (content != null) {
             processModel.setContentType(CONTENT_TYPE_XML);
             processModel.setContent(content);
@@ -165,13 +167,22 @@ public class MockFactory {
 
     public static Extensions extensions(byte[] bytes) {
         try {
-            return new ObjectMapper()
+            return getFromMap(new ObjectMapper()
                     .readValue(bytes,
                                ModelEntity.class)
-                    .getExtensions();
+                    .getExtensions());
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+    
+    private static Extensions getFromMap(Map<String,Object> map) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String exstensionJson = objectMapper.writeValueAsString(map);
+        if (StringUtils.isEmpty(exstensionJson)) {
+            return null;
+        }
+        return objectMapper.readValue(exstensionJson,Extensions.class);
     }
 
     public static Extensions extensions(String serviceTask,

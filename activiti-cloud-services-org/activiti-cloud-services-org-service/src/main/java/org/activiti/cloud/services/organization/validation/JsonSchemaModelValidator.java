@@ -45,8 +45,8 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
     protected abstract SchemaLoader schemaLoader();
 
     @Override
-    public void validateModelContent(byte[] bytes,
-                                     ValidationContext validationContext) {
+    public void validate(byte[] bytes,
+                         ValidationContext validationContext) {
         try {
             log.debug("Validating json model content: " + new String(bytes));
             schemaLoader()
