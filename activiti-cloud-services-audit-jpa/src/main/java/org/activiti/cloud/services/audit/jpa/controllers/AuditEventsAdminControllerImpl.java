@@ -16,14 +16,12 @@
 
 package org.activiti.cloud.services.audit.jpa.controllers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.assembler.EventResourceAssembler;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsAdminController;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
+import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
@@ -39,6 +37,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping(value = "/admin/v1/" + EventsRelProvider.COLLECTION_RESOURCE_REL, produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public class AuditEventsAdminControllerImpl implements AuditEventsAdminController {
@@ -47,7 +48,7 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
 
     private final EventResourceAssembler eventResourceAssembler;
 
-    private final AlfrescoPagedResourcesAssembler<CloudRuntimeEvent> pagedResourcesAssembler;
+    private final AlfrescoPagedResourcesAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedResourcesAssembler;
 
     private final APIEventToEntityConverters eventConverters;
 
@@ -55,7 +56,7 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
     public AuditEventsAdminControllerImpl(EventsRepository eventsRepository,
                                           EventResourceAssembler eventResourceAssembler,
                                           APIEventToEntityConverters eventConverters,
-                                          AlfrescoPagedResourcesAssembler<CloudRuntimeEvent> pagedResourcesAssembler) {
+                                          AlfrescoPagedResourcesAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedResourcesAssembler) {
         this.eventsRepository = eventsRepository;
         this.eventResourceAssembler = eventResourceAssembler;
         this.eventConverters = eventConverters;
@@ -63,10 +64,10 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<Resource<CloudRuntimeEvent>> findAll(Pageable pageable) {
+    public PagedResources<Resource<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable) {
         Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);
 
-        List<CloudRuntimeEvent> events = new ArrayList<>();
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
 
         for (AuditEventEntity aee : allAuditInPage.getContent()) {
             events.add(eventConverters.getConverterByEventTypeName(aee.getEventType()).convertToAPI(aee));

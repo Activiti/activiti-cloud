@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.starter.audit.tests.it.swagger;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +26,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -45,12 +45,14 @@ public class AuditSwaggerIT {
         assertThat(apiDoc.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(apiDoc.getBody()).isNotNull();
         assertThat(apiDoc.getBody().toString())
-                .contains("ListResponseContent«CloudRuntimeEvent»")
-                .contains("EntriesResponseContent«CloudRuntimeEvent»")
-                .contains("EntryResponseContent«CloudRuntimeEvent»")
+                .contains("ListResponseContentOfCloudRuntimeEventOfobjectAndstring")
+                .contains("EntriesResponseContentOfCloudRuntimeEventOfobjectAndstring")
+                .contains("EntryResponseContentOfCloudRuntimeEventOfobjectAndstring")
+                .contains("CloudRuntimeEventModel")
                 .doesNotContain("PagedResources«")
                 .doesNotContain("Resources«Resource«")
-                .doesNotContain("Resource«");
+                .doesNotContain("Resource«")
+                .doesNotContain("Enum«");
     }
 
 }

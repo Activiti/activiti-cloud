@@ -3,6 +3,7 @@ package org.activiti.cloud.services.audit.jpa.controllers;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.assembler.EventResourceAssembler;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
+import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
@@ -45,9 +46,9 @@ public class AuditEventsDeleteController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE)
-    public Resources<Resource<CloudRuntimeEvent>> deleteEvents (){
+    public Resources<Resource<CloudRuntimeEvent<?, CloudRuntimeEventType>>> deleteEvents (){
 
-        Collection<Resource<CloudRuntimeEvent>> result = new ArrayList<>();
+        Collection<Resource<CloudRuntimeEvent<?, CloudRuntimeEventType>>> result = new ArrayList<>();
         Iterable <AuditEventEntity> iterable = eventsRepository.findAll();
 
         for(AuditEventEntity entity : iterable){

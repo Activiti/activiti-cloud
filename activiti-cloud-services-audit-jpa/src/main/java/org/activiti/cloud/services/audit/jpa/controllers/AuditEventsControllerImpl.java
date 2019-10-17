@@ -23,6 +23,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.assembler.EventResourceAssembler;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
+import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.api.resources.EventsRelProvider;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
@@ -43,7 +44,11 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +66,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
 
     private final EventResourceAssembler eventResourceAssembler;
 
-    private final AlfrescoPagedResourcesAssembler<CloudRuntimeEvent> pagedResourcesAssembler;
+    private final AlfrescoPagedResourcesAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedResourcesAssembler;
 
     private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
@@ -72,7 +77,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
                                      EventResourceAssembler eventResourceAssembler,
                                      APIEventToEntityConverters eventConverters,
                                      SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService,
-                                     AlfrescoPagedResourcesAssembler<CloudRuntimeEvent> pagedResourcesAssembler) {
+                                     AlfrescoPagedResourcesAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedResourcesAssembler) {
         this.eventsRepository = eventsRepository;
         this.eventResourceAssembler = eventResourceAssembler;
         this.eventConverters = eventConverters;
@@ -81,7 +86,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     }
 
     @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
-    public Resource<CloudRuntimeEvent> findById(@PathVariable String eventId) {
+    public Resource<CloudRuntimeEvent<?, CloudRuntimeEventType>> findById(@PathVariable String eventId) {
         Optional<AuditEventEntity> findResult = eventsRepository.findByEventId(eventId);
         if (!findResult.isPresent()) {
             throw new NotFoundException("Unable to find event for the given id:'" + eventId + "'");
@@ -97,7 +102,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<Resource<CloudRuntimeEvent>> findAll(@RequestParam(value = "search", required = false) String search,
+    public PagedResources<Resource<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(@RequestParam(value = "search", required = false) String search,
                                                  Pageable pageable) {
 
         Specification<AuditEventEntity> spec = createSearchSpec(search);
@@ -107,7 +112,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
 
         Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(spec,
                                                                          pageable);
-        List<CloudRuntimeEvent> events = new ArrayList<>();
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
 
         for (AuditEventEntity aee : allAuditInPage.getContent()) {
             EventToEntityConverter converterByEventTypeName = eventConverters.getConverterByEventTypeName(aee.getEventType());
