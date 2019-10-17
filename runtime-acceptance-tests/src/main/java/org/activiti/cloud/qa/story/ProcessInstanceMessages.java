@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.qa.story;
 
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestInternalServerErrorIsThrownBy;
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -92,6 +94,29 @@ public class ProcessInstanceMessages {
                                                              .build();
 
         processRuntimeBundleSteps.message(payload);
+    }
+
+    @Then("messages: the user gets not found error when sends a message named $messageName with nonexisting correlationKey")
+    public void receiveMessageWithNonexisitingCorrelationkey(String messageName) throws IOException, InterruptedException {
+        ReceiveMessagePayload payload = MessagePayloadBuilder.receive(messageName)
+                .withCorrelationKey("nonexistingkey")
+                .build();
+        assertThatRestNotFoundErrorIsThrownBy(
+                () -> processRuntimeBundleSteps.message(payload))
+                .withMessageContaining("Message subscription name '" +  messageName + "' with correlation key 'nonexistingkey' not found.");
+    }
+
+    @Then("messages: the user gets internal server error when starting a process with message named $messageName and duplicate correlationKey $correlationKey")
+    public void startMessageWithDuplicateCorrelationkey(String messageName, String correlationKey) throws IOException, InterruptedException {
+            String variableValue = Serenity.sessionVariableCalled(correlationKey);
+
+            StartMessagePayload payload = MessagePayloadBuilder.start(messageName)
+                    .withBusinessKey(variableValue)
+                    .build();
+
+        assertThatRestInternalServerErrorIsThrownBy(
+                () -> processRuntimeBundleSteps.message(payload))
+                .withMessageContaining("Duplicate message subscription 'boundaryMessage' with correlation key '" + variableValue + "'");
     }
 
     @Then("messages: $eventType event is emitted for the message '$messageName'")
