@@ -83,7 +83,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         doReturn(modelType.toUpperCase()).when(model).getType();
         doReturn(modelName).when(model).getName();
         if (processVariables != null) {
-            doReturn(extensions(processVariables)).when(model).getExtensions();
+            doReturn(extensions(processVariables).getAsMap()).when(model).getExtensions();
         }
         return create(model);
     }
@@ -162,9 +162,9 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         responses.add(validateModel(currentContext,
                                     getFormData(model)));
         if (Optional.ofNullable(model.getExtensions()).isPresent()) {
-            responses.add(validateModel(currentContext,
-                                        getFormData(model,
-                                                    true)));
+            responses.add(validateExtensions(currentContext,
+                                             getFormData(model,
+                                                         true)));
         }
         return responses;
     }
@@ -236,6 +236,15 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         Link validateModelLink = model.getLink("self");
         assertThat(validateModelLink).isNotNull();
         return modelingModelsService.validateModelByUri(modelingUri(validateModelLink.getHref() + "/validate"),
+                                                        file);
+    }
+    
+    @Step
+    public Response validateExtensions(Resource<Model> model,
+                                       FormData file) {
+        Link validateModelLink = model.getLink("self");
+        assertThat(validateModelLink).isNotNull();
+        return modelingModelsService.validateModelByUri(modelingUri(validateModelLink.getHref() + "/validate/extensions"),
                                                         file);
     }
 
