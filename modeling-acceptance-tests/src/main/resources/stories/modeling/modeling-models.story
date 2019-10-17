@@ -49,4 +49,4 @@ And an existing project 'nasa-team'
 When the user opens the project 'nasa-team'
 And creates the process model spacex-launch with process variables 'age, gender'
 And opens the process model 'spacex-launch'
-Then 2 validation errors are shown for extensions
+Then 0 validation schemas are matched for extensions
