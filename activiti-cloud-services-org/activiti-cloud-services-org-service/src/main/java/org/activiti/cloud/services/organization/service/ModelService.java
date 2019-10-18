@@ -237,12 +237,13 @@ public class ModelService {
     public Model importSingleModel(Project project,
                                    ModelType modelType,
                                    FileContent fileContent) {
-        this.cleanModelIdList();
         Model model = this.importModel(project,
                                        modelType,
                                        fileContent);
-        return this.updateModelContent(model,
+        model = this.updateModelContent(model,
                                        fileContent);
+        this.cleanModelIdList();
+        return model;
     }
 
     public Model importModel(Project project,
@@ -271,7 +272,7 @@ public class ModelService {
                                            fileContent);
         }
         String convertedId = model.getId();
-        
+
         if (model.getId() == null && (modelTypeService.isJson(modelType) == ContentTypeUtils.isJsonContentType(fileContent.getContentType()))) {
             convertedId = retrieveModelIdFromModelContent(model,
                                             fileContent);
