@@ -16,8 +16,7 @@
 
 package org.activiti.cloud.qa.story;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.acc.core.steps.audit.SwaggerAuditSteps;
@@ -26,7 +25,8 @@ import org.activiti.cloud.acc.core.steps.runtime.SwaggerRuntimeBundleSteps;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SwaggerActions {
 
@@ -74,12 +74,14 @@ public class SwaggerActions {
                 .doesNotContain("Resource«");
 
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.AUDIT))
-                .contains("ListResponseContent«CloudRuntimeEvent»")
-                .contains("EntriesResponseContent«CloudRuntimeEvent»")
-                .contains("EntryResponseContent«CloudRuntimeEvent»")
+                .contains("ListResponseContentOfCloudRuntimeEventOfobjectAndstring")
+                .contains("EntriesResponseContentOfCloudRuntimeEventOfobjectAndstring")
+                .contains("EntryResponseContentOfCloudRuntimeEventOfobjectAndstring")
+                .contains("CloudRuntimeEventModel")
                 .doesNotContain("PagedResources«")
                 .doesNotContain("Resources«Resource«")
-                .doesNotContain("Resource«");
+                .doesNotContain("Resource«")
+                .doesNotContain("Enum«");
     }
 
 }
