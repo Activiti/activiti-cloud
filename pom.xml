@@ -38,7 +38,6 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <activiti-cloud-dependencies.version>7.1.163</activiti-cloud-dependencies.version>
     <activiti-cloud-modeling.version>7.1.212</activiti-cloud-modeling.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <enforcer.skip>true</enforcer.skip>
@@ -55,16 +54,11 @@
     <maven-failsafe-plugin.version>3.0.0-M3</maven-failsafe-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
+
+    <activiti-cloud-acceptance-tests.version>7.1.89</activiti-cloud-acceptance-tests.version>
   </properties>
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.activiti.cloud.dependencies</groupId>
-        <artifactId>activiti-cloud-dependencies</artifactId>
-        <version>${activiti-cloud-dependencies.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
       <dependency>
         <groupId>org.activiti.cloud.dependencies</groupId>
         <artifactId>activiti-cloud-modeling-dependencies</artifactId>
@@ -111,6 +105,12 @@
         <groupId>org.apache.xmlgraphics</groupId>
         <artifactId>batik-codec</artifactId>
         <version>${batik.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.acc</groupId>
+        <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
+        <version>${activiti-cloud-acceptance-tests.version}</version>
+        <type>pom</type>
       </dependency>
     </dependencies>
   </dependencyManagement>
