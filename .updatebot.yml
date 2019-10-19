@@ -3,7 +3,6 @@ github:
   - name: activiti
     repositories:
     - name: activiti-cloud-acceptance-scenarios
-      branch: develop
       useSinglePullRequest: true      
     - name: activiti-cloud-org-service
       branch: develop
