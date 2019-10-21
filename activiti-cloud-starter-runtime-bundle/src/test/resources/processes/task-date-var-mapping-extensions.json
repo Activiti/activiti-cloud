@@ -5,35 +5,35 @@
     "properties": {
      "process-variable-string-id": {
         "id": "process-variable-string-id",
-        "name": "process-variable-string",
+        "name": "process_variable_string",
         "type": "string",
         "required": true,
         "value": "stringValue"
       },
       "process-variable-integer-id": {
         "id": "process-variable-integer-id",
-        "name": "process-variable-integer",
+        "name": "process_variable_integer",
         "type": "integer",
         "required": true,
         "value": 1
       },
       "process-variable-boolean-id": {
         "id": "process-variable-boolean-id",
-        "name": "process-variable-boolean",
+        "name": "process_variable_boolean",
         "type": "boolean",
         "required": true,
         "value": true
       },
       "process-variable-date-id": {
         "id": "process-variable-date-id",
-        "name": "process-variable-date",
+        "name": "process_variable_date",
         "type": "date",
         "required": true,
         "value": "2019-09-01"
       },
       "process-variable-datetime-id": {
         "id": "process-variable-datetime-id",
-        "name": "process-variable-datetime",
+        "name": "process_variable_datetime",
         "type": "date",
         "required": true,
         "value": "2019-09-01T10:20:30.000Z"
@@ -42,47 +42,47 @@
     "mappings": {
       "task1": {
         "inputs": {
-          "task-variable-string": {
+          "task_variable_string": {
             "type": "variable",
-            "value": "process-variable-string"
+            "value": "process_variable_string"
           },
-          "task-variable-integer": {
+          "task_variable_integer": {
             "type": "variable",
-            "value": "process-variable-integer"
+            "value": "process_variable_integer"
           },
-          "task-variable-boolean": {
+          "task_variable_boolean": {
             "type": "variable",
-            "value": "process-variable-boolean"
+            "value": "process_variable_boolean"
           },
-          "task-variable-date": {
+          "task_variable_date": {
             "type": "variable",
-            "value": "process-variable-date"
+            "value": "process_variable_date"
           },
-          "task-variable-datetime": {
+          "task_variable_datetime": {
             "type": "variable",
-            "value": "process-variable-datetime"
+            "value": "process_variable_datetime"
           }
         },
         "outputs": {
-          "process-variable-string": {
+          "process_variable_string": {
             "type": "variable",
-            "value": "task-variable-string"
+            "value": "task_variable_string"
           },
-          "process-variable-integer": {
+          "process_variable_integer": {
             "type": "variable",
-            "value": "task-variable-integer"
+            "value": "task_variable_integer"
           },
-          "process-variable-boolean": {
+          "process_variable_boolean": {
             "type": "variable",
-            "value": "task-variable-boolean"
+            "value": "task_variable_boolean"
           },
-          "process-variable-date": {
+          "process_variable_date": {
             "type": "variable",
-            "value": "task-variable-date"
+            "value": "task_variable_date"
           },
-          "process-variable-datetime": {
+          "process_variable_datetime": {
             "type": "variable",
-            "value": "task-variable-datetime"
+            "value": "task_variable_datetime"
           }
         }
       }

@@ -20,6 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.task.model.Task.TaskStatus;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -44,10 +48,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:application-test.properties")
@@ -168,15 +168,15 @@ public class TaskVariableMappingIT {
                     .isNotNull()
                     .extracting(CloudVariableInstance::getName,
                                 CloudVariableInstance::getType)
-                    .containsOnly(tuple("process-variable-string",
+                    .containsOnly(tuple("process_variable_string",
                                         "string"), 
-                                  tuple("process-variable-integer",
+                                  tuple("process_variable_integer",
                                         "integer"),        
-                                  tuple("process-variable-boolean",
+                                  tuple("process_variable_boolean",
                                         "boolean"),
-                                  tuple("process-variable-date",
+                                  tuple("process_variable_date",
                                         "date"),
-                                  tuple("process-variable-datetime",
+                                  tuple("process_variable_datetime",
                                         "date")
                                   );
         });
@@ -195,15 +195,15 @@ public class TaskVariableMappingIT {
                     .isNotNull()
                     .extracting(CloudVariableInstance::getName,
                                 CloudVariableInstance::getType)
-                    .containsOnly(tuple("task-variable-string",
+                    .containsOnly(tuple("task_variable_string",
                                         "string"), 
-                                  tuple("task-variable-integer",
+                                  tuple("task_variable_integer",
                                         "integer"),        
-                                  tuple("task-variable-boolean",
+                                  tuple("task_variable_boolean",
                                         "boolean"),
-                                  tuple("task-variable-date",
+                                  tuple("task_variable_date",
                                         "date"),
-                                  tuple("task-variable-datetime",
+                                  tuple("task_variable_datetime",
                                         "date")
                                   );
         });  
@@ -211,11 +211,11 @@ public class TaskVariableMappingIT {
         //Check mapped process variables
         Date date = new Date();
         Map<String, Object> variables = new HashMap<>();
-        variables.put("task-variable-string", "new value");
-        variables.put("task-variable-integer", 10);
-        variables.put("task-variable-boolean", false);
-        variables.put("task-variable-date", variablesUtil.getDateFormattedString(date));
-        variables.put("task-variable-datetime", variablesUtil.getDateTimeFormattedString(date));
+        variables.put("task_variable_string", "new value");
+        variables.put("task_variable_integer", 10);
+        variables.put("task_variable_boolean", false);
+        variables.put("task_variable_date", variablesUtil.getDateFormattedString(date));
+        variables.put("task_variable_datetime", variablesUtil.getDateTimeFormattedString(date));
                       
         claimAndCompleteTask(taskId, variables);
         
@@ -229,19 +229,19 @@ public class TaskVariableMappingIT {
                     .extracting(CloudVariableInstance::getName,
                                 CloudVariableInstance::getType,  
                                 CloudVariableInstance::getValue)
-                    .containsOnly(tuple("process-variable-string",
+                    .containsOnly(tuple("process_variable_string",
                                         "string",
                                         "new value"), 
-                                  tuple("process-variable-integer",
+                                  tuple("process_variable_integer",
                                         "integer",
                                         10),        
-                                  tuple("process-variable-boolean",
+                                  tuple("process_variable_boolean",
                                         "boolean",
                                         false),
-                                  tuple("process-variable-date",
+                                  tuple("process_variable_date",
                                         "date",
                                         variablesUtil.getExpectedDateFormattedString(date)),
-                                  tuple("process-variable-datetime",
+                                  tuple("process_variable_datetime",
                                         "date",
                                         variablesUtil.getExpectedDateTimeFormattedString(date))
                       );    

@@ -20,6 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
@@ -46,11 +51,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:application-test.properties")
@@ -183,7 +183,7 @@ public class MQServiceTaskIT {
                         .withBusinessKey("businessKey")
                         .build());
 
-        await().untilAsserted(() -> {
+        //await().untilAsserted(() -> {
             //when
             ResponseEntity<Resources<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
 
@@ -197,18 +197,18 @@ public class MQServiceTaskIT {
                                         "outName"), //mapped from connector outputs based on extension mappings
                                   tuple("age",
                                         25),        //mapped from connector outputs based on extension mappings
-                                  tuple("input-unmapped-variable-with-matching-name",
+                                  tuple("input_unmapped_variable_with_matching_name",
                                         "inTest"), //kept unchanging because no connector output is updating it
-                                  tuple("input-unmapped-variable-with-non-matching-connector-input-name",
+                                  tuple("input_unmapped_variable_with_non_matching_connector_input_name",
                                         "inTest"), //kept unchanging because no connector output is updating it
                                   tuple("nickName",
                                         "testName"),//kept unchanging because no connector output is updating it
-                                  tuple("out-unmapped-variable-matching-name",
+                                  tuple("out_unmapped_variable_matching_name",
                                         "default"),//not present in extension mappings, hence not updated although
                                                     // the process variable have the same name as the connector output
-                                  tuple("output-unmapped-variable-with-non-matching-connector-output-name",
+                                  tuple("output_unmapped_variable_with_non_matching_connector_output_name",
                                         "default"));//kept unchanging because no connector output is updating it
-        });
+       // });
 
         ResponseEntity<PagedResources<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstanceResponseEntity);
         assertThat(tasks.getBody()).isNotNull();

@@ -19,6 +19,9 @@ package org.activiti.cloud.starter.tests.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -33,9 +36,6 @@ import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.support.MessageBuilder;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @TestComponent
 @EnableBinding(ConnectorIntegrationChannels.class)
@@ -108,9 +108,9 @@ public class ServiceTaskConsumerHandler {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
         
         Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
-        String variableOne = "input-variable-name-1";
-        String variableTwo = "input-variable-name-2";
-        String variableThree = "input-variable-name-3";
+        String variableOne = "input_variable_name_1";
+        String variableTwo = "input_variable_name_2";
+        String variableThree = "input_variable_name_3";
         String constant = "_constant_value_";
 
         Integer currentAge = (Integer) inBoundVariables.get(variableTwo);
@@ -129,13 +129,13 @@ public class ServiceTaskConsumerHandler {
                         tuple(constant,
                               "myConstantValue"));
 
-        integrationContext.addOutBoundVariable("out-variable-name-1",
+        integrationContext.addOutBoundVariable("out_variable_name_1",
                                                "outName");
-        integrationContext.addOutBoundVariable("out-variable-name-2",
+        integrationContext.addOutBoundVariable("out_variable_name_2",
                                                currentAge + offSet);
-        integrationContext.addOutBoundVariable("out-unmapped-variable-matching-name",
+        integrationContext.addOutBoundVariable("out_unmapped_variable_matching_name",
                                                "outTest");
-        integrationContext.addOutBoundVariable("out-unmapped-variable-non-matching-name",
+        integrationContext.addOutBoundVariable("out_unmapped_variable_non_matching_name",
                                                "outTest");
 
         IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);

@@ -10,35 +10,35 @@
       "inputs": [
         {
           "id": "input-variable-1",
-          "name": "input-variable-name-1",
+          "name": "input_variable_name_1",
           "type": "string",
           "required": false,
           "description": ""
         },
         {
           "id": "input-variable-2",
-          "name": "input-variable-name-2",
+          "name": "input_variable_name_2",
           "type": "integer",
           "required": false,
           "description": ""
         },
         {
           "id": "input-variable-3",
-          "name": "input-variable-name-3",
+          "name": "input_variable_name_3",
           "type": "integer",
           "required": false,
           "description": ""
         },
         {
           "id": "input-unmapped-variable-id",
-          "name": "input-unmapped-variable-with-matching-name",
+          "name": "input_unmapped_variable_with_matching_name",
           "type": "string",
           "required": false,
           "description": ""
         },
         {
           "id": "input-unmapped-variable-with-non-matching-process-variable-id",
-          "name": "input-unmapped-variable-with-non-matching-process-name",
+          "name": "input_unmapped_variable_with_non_matching_process_name",
           "type": "string",
           "required": false,
           "description": ""
@@ -47,28 +47,28 @@
       "outputs": [
         {
           "id": "out-variable-1",
-          "name": "out-variable-name-1",
+          "name": "out_variable_name_1",
           "type": "string",
           "description": "",
           "required": "false"
         },
         {
           "id": "out-variable-2",
-          "name": "out-variable-name-2",
+          "name": "out_variable_name_2",
           "type": "integer",
           "description": "",
           "required": "false"
         },
         {
           "id": "out-unmapped-variable-matching",
-          "name": "out-unmapped-variable-matching-name",
+          "name": "out_unmapped_variable_matching_name",
           "type": "string",
           "description": "",
           "required": "false"
         },
         {
           "id": "out-unmapped-variable-non-matching",
-          "name": "out-unmapped-variable-non-matching-name",
+          "name": "out_unmapped_variable_non_matching_name",
           "type": "string",
           "description": "",
           "required": "false"
