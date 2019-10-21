@@ -6,6 +6,11 @@ pipeline {
       ORG               = 'activiti'
       APP_NAME          = 'activiti-cloud-dependencies'
       CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
+      PREVIEW_NAMESPACE = "example-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase()
+      GLOBAL_GATEWAY_DOMAIN="35.228.195.195.nip.io"
+      REALM = "activiti"
+      GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
+      SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
     }
     stages {
       stage('CI Build and push snapshot') {
@@ -21,8 +26,19 @@ pipeline {
           container('maven') {
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
+            sh "make run-full-chart"
+            dir("./activiti-cloud-acceptance-scenarios") {
+               git 'https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git'
+               sh 'sleep 30'
+               sh "mvn clean install -DskipTests && mvn -pl 'runtime-acceptance-tests,modeling-acceptance-tests' clean verify"
+             }
           }
         }
+        post {
+                always {
+                  delete_deployment()
+                }
+              }
       }
       stage('Build Release') {
         when {
@@ -54,13 +70,12 @@ pipeline {
             sh 'export UPDATEBOT_MERGE=false'
 
             sh "jx step git credentials"
-            sh "echo 'not pushing to downstream for now'"
+
             retry(2){
-              sh "updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies \$(cat VERSION) --merge false"
-              sh "rm -rf .updatebot-repos/"
-              sh "sleep \$((RANDOM % 10))"
-              sh "updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies \$(cat VERSION) --merge false"
+                sh "make updatebot/push-version"
+
             }
+
           }
         }
       }
@@ -106,3 +121,11 @@ pipeline {
         }
     }
   }
+def delete_deployment() {
+  container('maven') {
+    dir("./charts/$APP_NAME") {
+      sh "make delete"
+    }
+    sh "kubectl delete namespace $PREVIEW_NAMESPACE"
+  }
+}

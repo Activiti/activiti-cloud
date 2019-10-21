@@ -3,8 +3,11 @@ ACTIVITI_CLOUD_AUDIT_VERSION := 1.1
 ACTIVITI_CLOUD_QUERY_VERSION := 1.1
 ACTIVITI_CLOUD_RB_VERSION := 1.1
 ACTIVITI_CLOUD_NOTIFICATIONS_VERSION := 1.1
+ACTIVITI_CLOUD_MODELING :=1.1
 
 MODELING_DEPENDENCIES_VERSION := 1.1
+
+
 ACTIVITI_CLOUD_VERSION := $(shell cat VERSION)
 get-modeling-dependencies-version:
 	@echo $(MODELING_DEPENDENCIES_VERSION)
@@ -35,9 +38,24 @@ updatebot/push-version:
 	updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(VERSION) --merge false
 	updatebot push-version --kind helm runtime-bundle $(ACTIVITI_CLOUD_RB_VERSION) activiti-cloud-connector $(ACTIVITI_CLOUD_CONNECTORS_VERSION) \
 	 activiti-cloud-query $(ACTIVITI_CLOUD_QUERY_VERSION) activiti-cloud-notifications-graphql $(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)  \
-	 activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION)
+	 activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING)
 
-	#rm -rf .updatebot-repos/
-	#sleep $$[ ( $$RANDOM % 10 )  + 1 ]s
-	
-	#updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies \$(cat VERSION) --merge false
+run-full-chart:
+	updatebot push-version --kind helm runtime-bundle $(ACTIVITI_CLOUD_RB_VERSION) activiti-cloud-connector $(ACTIVITI_CLOUD_CONNECTORS_VERSION) \
+	 activiti-cloud-query $(ACTIVITI_CLOUD_QUERY_VERSION) activiti-cloud-notifications-graphql $(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)  \
+	 activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING) --dry
+
+    cd  activiti-cloud-full-chart && \
+        	helm init --client-only && \
+         	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
+        	helm repo add alfresco https://kubernetes-charts.alfresco.com/stable	&& \
+        	helm repo add alfresco-incubator https://kubernetes-charts.alfresco.com/incubator && \
+        	helm dependency build && \
+        	helm lint && \
+        	helm package . && \
+            	helm upgrade ${HELM_RELEASE_NAME} . \
+            		--install \
+            		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
+            		--namespace ${PREVIEW_NAMESPACE} \
+            		--debug \
+            		--wait
