@@ -51,12 +51,10 @@ public interface ModelContentConverter<T extends ModelContent> {
    * If the id is already the expected one, it returns the given bytes unchanged.
    * @param bytes the bytes to convert and fix
    * @param modelIdentifiers the mapping of the old ids to the new ones
-   * @param modelContentId the correct model content id to set
    * @return the fixed bytes array
    */
   default FileContent overrideModelId(FileContent fileContent,
-                                      HashMap<String, String> modelIdentifiers,
-                                      String modelContentId){
+                                      HashMap<String, String> modelIdentifiers){
     return fileContent;
   }
 }

@@ -723,6 +723,6 @@ public class ProjectControllerIT {
                                 .accept(APPLICATION_JSON_VALUE))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(status().reason(containsString("Cannot convert json file content to model")));
+                .andExpect(status().reason(containsString("Error importing model : Error reading XML")));
     }
 }

@@ -20,6 +20,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.springframework.data.repository.support.PageableExecutionUtils.getPage;
 
 import org.activiti.cloud.organization.api.ModelType;
+import org.activiti.cloud.organization.api.ProcessModelType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -90,5 +91,9 @@ public class ModelTypeService {
 
     public  boolean isContentXML(ModelType modelType) {
       return CONTENT_TYPE_XML.equalsIgnoreCase(modelType.getContentFileExtension());
+    }
+
+    public boolean isProcessContnent(ModelType modelType) {
+      return this.isContentXML(modelType) && ProcessModelType.PROCESS.contains(modelType.getName());
     }
 }

@@ -64,19 +64,18 @@ public class ConnectorModelContentConverter implements ModelContentConverter<Con
 
   @Override
   public FileContent overrideModelId(FileContent fileContent,
-                                     HashMap<String, String> modelIdentifiers,
-                                     String modelContentId) {
+                                     HashMap<String, String> modelIdentifiers) {
     try {
       ObjectNode jsonNode = (ObjectNode) objectMapper.readTree(fileContent.getFileContent());
-      this.updateConnectorIdFromFileContent(jsonNode);
+      this.updateConnectorIdFromFileContent(jsonNode, modelIdentifiers);
       return new FileContent(fileContent.getFilename(), fileContent.getContentType(), objectMapper.writeValueAsBytes(jsonNode));
     } catch (IOException e) {
       throw new ImportModelException(e);
     }
   }
 
-  private void updateConnectorIdFromFileContent(ObjectNode jsonNode) {
-    String actualId = jsonNode.get("id") != null ? jsonNode.get("id").asText() : null;
+  private void updateConnectorIdFromFileContent(ObjectNode jsonNode, HashMap<String, String> modelIdentifiers) {
+    String actualId = jsonNode.get("id") != null ? modelIdentifiers.get(jsonNode.get("id").asText()) : null;
     if(actualId != null) {
       jsonNode.put("id", actualId);
     }

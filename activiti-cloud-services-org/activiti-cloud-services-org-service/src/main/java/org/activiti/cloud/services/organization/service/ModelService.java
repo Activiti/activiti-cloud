@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.api.ModelType;
@@ -209,9 +210,13 @@ public class ModelService {
         modelToBeUpdate.setContentType(fixedFileContent.getContentType());
         modelToBeUpdate.setContent(fixedFileContent.getFileContent());
 
-        Optional.ofNullable(modelToBeUpdate.getType()).flatMap(modelContentService::findModelContentConverter)
-                .flatMap(validator -> validator.convertToModelContent(fixedFileContent.getFileContent()))
-                .ifPresent(modelContent -> modelToBeUpdate.setTemplate(modelContent.getTemplate()));
+        try{
+          Optional.ofNullable(modelToBeUpdate.getType()).flatMap(modelContentService::findModelContentConverter)
+            .flatMap(validator -> validator.convertToModelContent(fixedFileContent.getFileContent()))
+            .ifPresent(modelContent -> modelToBeUpdate.setTemplate(modelContent.getTemplate()));
+        }catch(XMLException e){
+          throw new ImportModelException("Error importing model : "+e.getMessage());
+        }
 
         emptyIfNull(modelContentService.findContentUploadListeners(modelToBeUpdate.getType())).stream().forEach(listener -> listener.execute(modelToBeUpdate,
                                                                                                                                              fixedFileContent));
@@ -223,8 +228,7 @@ public class ModelService {
     public FileContent overrideModelContentId(Model model,
                                               FileContent fileContent) {
         return modelContentService.findModelContentConverter(model.getType()).map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent,
-                                                                                                                                                 this.modelIdentifiers,
-                                                                                                                                                 model.getId()))
+                                                                                                                                                 this.modelIdentifiers))
                 .orElse(fileContent);
     }
 

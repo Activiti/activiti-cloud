@@ -31,101 +31,155 @@ import org.apache.commons.collections4.map.MultiKeyMap;
  */
 public class ProjectHolder {
 
-    private Project project;
+  private Project project;
 
-    private final MultiKeyMap<String, ModelJsonFile> modelJsonFilesMap = new MultiKeyMap<>();
+  private final MultiKeyMap<String, ModelJsonFile> modelJsonFilesMap = new MultiKeyMap<>();
 
-    private final MultiKeyMap<String, FileContent> modelContentFilesMap = new MultiKeyMap<>();
-    
-    private final MultiKeyMap<String, FileContent> extensionFilesMap = new MultiKeyMap<>();
+  private final MultiKeyMap<String, ModelProcessFile> processFileMap = new MultiKeyMap<>();
 
-    public ProjectHolder setProject(Project project) {
-        if (this.project == null) {
-            this.project = project;
-        }
-        return this;
+  private final MultiKeyMap<String, ModelXmlFile> modelContent = new MultiKeyMap<>();
+
+  private final MultiKeyMap<String, FileContent> extensionFilesMap = new MultiKeyMap<>();
+
+  public ProjectHolder setProject(Project project) {
+    if (this.project == null) {
+      this.project = project;
     }
+    return this;
+  }
 
-    public ProjectHolder addModelJsonFile(String modelName,
-                                          ModelType modelType,
-                                          FileContent fileContent) {
-        modelJsonFilesMap.put(key(modelName,
-                                  modelType),
-                              new ModelJsonFile(modelType,
-                                                fileContent));
-        return this;
-    }
+  public ProjectHolder addModelJsonFile(String modelName,
+                                        ModelType modelType,
+                                        FileContent fileContent) {
+    modelJsonFilesMap.put(key(modelName,
+      modelType),
+      new ModelJsonFile(modelType,
+        fileContent));
+    return this;
+  }
 
-    public ProjectHolder addModelContent(String modelName,
+  public ProjectHolder addProcess(String modelName,
+                                       ModelType modelType,
+                                       FileContent fileContent) {
+    processFileMap.put(key(modelName,
+      modelType),
+      new ModelProcessFile(modelType,fileContent));
+    return this;
+  }
+
+  public ProjectHolder addModelContent(String modelName,
+                                       ModelType modelType,
+                                       FileContent fileContent) {
+    modelContent.put(key(modelName,
+      modelType),
+      new ModelXmlFile(modelType, fileContent));
+    return this;
+  }
+
+  public ProjectHolder addModelExtension(String modelName,
                                          ModelType modelType,
                                          FileContent fileContent) {
-        modelContentFilesMap.put(key(modelName,
-                                     modelType),
-                                 fileContent);
-        return this;
+    extensionFilesMap.put(key(modelName,
+      modelType),
+      fileContent);
+    return this;
+  }
+
+  public Optional<Project> getProjectMetadata() {
+    return Optional.ofNullable(project);
+  }
+
+  public Collection<ModelJsonFile> getModelJsonFiles() {
+    return modelJsonFilesMap.values();
+  }
+
+  public Collection<ModelProcessFile> getProcessFiles() {
+    return processFileMap.values();
+  }
+
+  public Collection<ModelXmlFile> getModelContentFiles() {
+    return modelContent.values();
+  }
+
+  public Optional<FileContent> getModelExtension(Model model) {
+    return Optional.ofNullable(model.getName())
+      .map(name -> key(name,
+        model.getType()))
+      .map(extensionFilesMap::get);
+  }
+
+  private MultiKey<String> key(String name,
+                               ModelType type) {
+    return key(name,
+      type.getName());
+  }
+
+  private MultiKey<String> key(String name,
+                               String type) {
+    return new MultiKey<>(name,
+      type);
+  }
+
+  class ModelXmlFile {
+
+    private final ModelType modelType;
+
+    private final FileContent fileContent;
+
+    public ModelXmlFile(ModelType modelType,
+                         FileContent fileContent) {
+      this.modelType = modelType;
+      this.fileContent = fileContent;
     }
-    
-    public ProjectHolder addModelExtension(String modelName,
-                                         ModelType modelType,
-                                         FileContent fileContent) {
-        extensionFilesMap.put(key(modelName,
-                                     modelType),
-                                 fileContent);
-        return this;
+
+    public ModelType getModelType() {
+      return modelType;
     }
 
-    public Optional<Project> getProjectMetadata() {
-        return Optional.ofNullable(project);
+    public FileContent getFileContent() {
+      return fileContent;
+    }
+  }
+
+  class ModelProcessFile {
+
+    private final ModelType modelType;
+
+    private final FileContent fileContent;
+
+    public ModelProcessFile(ModelType modelType,
+                        FileContent fileContent) {
+      this.modelType = modelType;
+      this.fileContent = fileContent;
     }
 
-    public Collection<ModelJsonFile> getModelJsonFiles() {
-        return modelJsonFilesMap.values();
+    public ModelType getModelType() {
+      return modelType;
     }
 
-    public Optional<FileContent> getModelContentFile(Model model) {
-        return Optional.ofNullable(model.getName())
-                .map(name -> key(name,
-                                 model.getType()))
-                .map(modelContentFilesMap::get);
+    public FileContent getFileContent() {
+      return fileContent;
     }
-    
-    public Optional<FileContent> getModelExtensions(Model model) {
-        return Optional.ofNullable(model.getName())
-                .map(name -> key(name,
-                                 model.getType()))
-                .map(extensionFilesMap::get);
-    }
+  }
 
-    private MultiKey<String> key(String name,
-                                 ModelType type) {
-        return key(name,
-                   type.getName());
+  class ModelJsonFile {
+
+    private final ModelType modelType;
+
+    private final FileContent fileContent;
+
+    public ModelJsonFile(ModelType modelType,
+                         FileContent fileContent) {
+      this.modelType = modelType;
+      this.fileContent = fileContent;
     }
 
-    private MultiKey<String> key(String name,
-                                 String type) {
-        return new MultiKey<>(name,
-                              type);
+    public ModelType getModelType() {
+      return modelType;
     }
 
-    class ModelJsonFile {
-
-        private final ModelType modelType;
-
-        private final FileContent fileContent;
-
-        public ModelJsonFile(ModelType modelType,
-                             FileContent fileContent) {
-            this.modelType = modelType;
-            this.fileContent = fileContent;
-        }
-
-        public ModelType getModelType() {
-            return modelType;
-        }
-
-        public FileContent getFileContent() {
-            return fileContent;
-        }
+    public FileContent getFileContent() {
+      return fileContent;
     }
+  }
 }

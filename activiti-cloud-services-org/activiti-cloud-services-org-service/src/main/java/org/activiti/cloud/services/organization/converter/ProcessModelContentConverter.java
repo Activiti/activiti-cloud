@@ -29,6 +29,7 @@ import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.CallActivity;
 import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.api.ModelContentConverter;
 import org.activiti.cloud.organization.api.ModelType;
@@ -77,7 +78,7 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
 
     @Override
     public byte[] convertToBytes(BpmnProcessModelContent bpmnProcessModelContent) {
-        return bpmnConverter.convertToXML(bpmnProcessModelContent.getBpmnModel());
+         return bpmnConverter.convertToXML(bpmnProcessModelContent.getBpmnModel());
     }
 
     public Optional<BpmnProcessModelContent> convertToModelContent(BpmnModel bpmnModel) {
@@ -94,8 +95,7 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
 
   @Override
   public FileContent overrideModelId(FileContent fileContent,
-                                     HashMap<String, String> modelIdentifiers,
-                                     String modelContentId) {
+                                     HashMap<String, String> modelIdentifiers) {
     Optional<BpmnProcessModelContent> modelContent = this.convertToModelContent(fileContent.getFileContent());
     this.fixProcessModel(modelContent.get(), modelIdentifiers);
     return new FileContent(fileContent.getFilename(), fileContent.getContentType(),
@@ -112,18 +112,37 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
       process.getFlowElements().stream()
         .filter(flowElement -> this.isElementToFix(flowElement))
         .map(flowElement -> {
-          CallActivity callActivity = ((CallActivity) flowElement);
-          String targetProcessId = modelIdentifiers.get(callActivity.getCalledElement());
-          if(targetProcessId != null) {
-            callActivity.setCalledElement(targetProcessId);
-          }
-          return flowElement;
+            if(flowElement instanceof CallActivity) {
+              return this.updateIdForCallAcvity(flowElement, modelIdentifiers);
+            }else if(flowElement instanceof UserTask){
+              return this.updateIdForUserTask(flowElement, modelIdentifiers);
+            }else{
+              return flowElement;
+            }
         })
         .collect(Collectors.toList());
     });
   }
 
+  private FlowElement updateIdForUserTask(FlowElement flowElement, HashMap<String, String> modelIdentifiers) {
+      UserTask userTask = (UserTask) flowElement;
+      String targetFormId = modelIdentifiers.get(userTask.getFormKey());
+      if(targetFormId != null) {
+        userTask.setFormKey(targetFormId);
+      }
+      return flowElement;
+  }
+
+  private FlowElement updateIdForCallAcvity(FlowElement flowElement, HashMap<String, String> modelIdentifiers){
+    CallActivity callActivity = ((CallActivity) flowElement);
+    String targetProcessId = modelIdentifiers.get(callActivity.getCalledElement());
+    if(targetProcessId != null) {
+      callActivity.setCalledElement(targetProcessId);
+    }
+    return flowElement;
+  }
+
   private boolean isElementToFix(FlowElement flowElement){
-    return flowElement instanceof CallActivity;
+    return flowElement instanceof CallActivity || flowElement instanceof UserTask;
   }
 }
