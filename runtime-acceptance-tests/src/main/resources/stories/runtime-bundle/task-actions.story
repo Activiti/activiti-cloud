@@ -203,3 +203,14 @@ Given the user is authenticated as testuser
 When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED
 And the user creates a standalone task
 Then the user retrieves the tasks and the standalone tasks separately
+
+Scenario: should not remove candidate groups for a task with group candidates
+Given the user is authenticated as testuser
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES
+And the status of the task is CREATED
+And the task contains candidate groups hr,testgroup in Query
+And the user claims the task
+And the user completes the task
+Then the status of the process and the task is changed to completed
+And the status of the task is COMPLETED in Audit and Query
+And the task contains candidate groups hr,testgroup in Query

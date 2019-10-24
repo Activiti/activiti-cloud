@@ -16,18 +16,14 @@
 
 package org.activiti.cloud.qa.story;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.acc.core.steps.audit.AuditSteps;
 import org.activiti.cloud.acc.core.steps.audit.admin.AuditAdminSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
@@ -46,7 +42,12 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedResources;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Tasks {
 
@@ -398,4 +399,27 @@ public class Tasks {
         normalTasks.forEach(cloudTask -> assertThat(tasks.contains(cloudTask)).isTrue());
         standaloneTasks.forEach(cloudTask -> assertThat(tasks.contains(cloudTask)).isTrue());
     }
+    
+    @Then("the status of the task is $taskStatus in Audit and Query")
+    public void checkTaskStatusInAuditAndQuery(Task.TaskStatus taskStatus) throws Exception{
+        String processInstanceId = Serenity.sessionVariableCalled("processInstanceId").toString();
+        String currentTaskId = Serenity.sessionVariableCalled("currentTaskId").toString();
+        
+        auditSteps.checkProcessInstanceTaskEvent(processInstanceId,
+                                                 currentTaskId,
+                                                 TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
+        
+        taskQuerySteps.checkTaskStatus(currentTaskId, taskStatus);
+    }
+    
+    @When("the task contains candidate groups $candidateGroups in Query")
+    @Then("the task contains candidate groups $candidateGroups in Query")
+    public void checkTaskCandidateGroups(String candidateGroups) throws Exception{
+        String currentTaskId = Serenity.sessionVariableCalled("currentTaskId").toString();
+        
+        List<String> taskCandidateGroups = taskQuerySteps.getCandidateGroups(currentTaskId);
+        
+        assertThat(taskCandidateGroups).contains(candidateGroups.split(","));
+        
+    }    
 }

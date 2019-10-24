@@ -16,13 +16,13 @@
 
 package org.activiti.cloud.qa.story;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 import feign.FeignException;
 import net.serenitybdd.core.Serenity;
@@ -52,12 +52,13 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedResources;
 
-import static org.activiti.cloud.acc.core.helper.Filters.checkProcessInstances;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeys;
-import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
-import static org.assertj.core.api.Assertions.*;
-import static org.awaitility.Awaitility.await;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ProcessInstanceTasks {
 
@@ -144,6 +145,7 @@ public class ProcessInstanceTasks {
         }
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
+        Serenity.setSessionVariable("currentTaskId").to(currentTask.getId());
     }
 
     @Given("any suspended process instance")
