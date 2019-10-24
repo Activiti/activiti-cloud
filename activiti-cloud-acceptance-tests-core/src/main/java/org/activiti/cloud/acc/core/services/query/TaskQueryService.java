@@ -10,6 +10,8 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
 
+import java.util.List;
+
 public interface TaskQueryService extends BaseService {
 
     @RequestLine("GET /v1/tasks?status={status}&id={taskId}")
@@ -51,4 +53,12 @@ public interface TaskQueryService extends BaseService {
     @Headers("Accept: application/hal+json;charset=UTF-8")
     Resources<CloudVariableInstance> getVariables(@Param("id") String id);
 
+    @RequestLine("GET /v1/tasks/{taskId}/candidate-groups")
+    @Headers("Accept: application/hal+json;charset=UTF-8")
+    public List<String> getTaskCandidateGroups(@Param("taskId") String taskId);
+    
+    @RequestLine("GET /v1/tasks/{taskId}/candidate-users")
+    @Headers("Accept: application/hal+json;charset=UTF-8")
+    public List<String> getTaskCandidateUsers(@Param("taskId") String taskId);
+    
 }

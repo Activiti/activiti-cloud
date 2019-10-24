@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
-import java.util.Collection;
-
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.task.model.Task;
@@ -16,6 +14,9 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resources;
+
+import java.util.Collection;
+import java.util.List;
 
 @EnableRuntimeFeignContext
 public class TaskQuerySteps {
@@ -119,5 +120,14 @@ public class TaskQuerySteps {
         return taskQueryService.getVariables(taskId);
     }
     
+    @Step
+    public List<String> getCandidateGroups(String taskId){
+        return taskQueryService.getTaskCandidateGroups(taskId);
+    }
+
+    @Step
+    public List<String> getCandidateUsers(String taskId){
+        return taskQueryService.getTaskCandidateUsers(taskId);
+    }
     
 }
