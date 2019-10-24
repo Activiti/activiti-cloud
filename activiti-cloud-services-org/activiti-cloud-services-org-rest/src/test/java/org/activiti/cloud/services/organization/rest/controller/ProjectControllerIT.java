@@ -725,4 +725,48 @@ public class ProjectControllerIT {
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(containsString("Error importing model : Error reading XML")));
     }
+    
+    @Test
+    public void should_returnStatusCreatedAndGivenName_when_importingProjectWithNameProvided() throws Exception {
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+                                                          "project-xy.zip",
+                                                          "project/zip",
+                                                          resourceAsByteArray("project/project-xy.zip"));
+
+        String overridingName = "overridingName";
+
+        mockMvc.perform(multipart("{version}/projects/import?name=" + overridingName,
+                                  API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
+                .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
+                                                                                   is(overridingName)));
+    }
+    
+    @Test
+    public void should_returnStatusCreatedAndZipName_when_importingProjectWithNullNameProvided() throws Exception {
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+                                                          "project-xy.zip",
+                                                          "project/zip",
+                                                          resourceAsByteArray("project/project-xy.zip"));
+
+        mockMvc.perform(multipart("{version}/projects/import?name=",
+                                  API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
+                .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
+                                                                                   is("application-xy")));
+    }
+    
+    @Test
+    public void should_returnStatusCreatedAndZipName_when_importingProjectWithBlankNameProvided() throws Exception {
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+                                                          "project-xy.zip",
+                                                          "project/zip",
+                                                          resourceAsByteArray("project/project-xy.zip"));
+
+        String overridingName = "      ";
+
+        mockMvc.perform(multipart("{version}/projects/import?name=" + overridingName,
+                                  API_VERSION).file(zipFile).accept(APPLICATION_JSON_VALUE))
+                .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
+                                                                                   is("application-xy")));
+    }
+    
 }

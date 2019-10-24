@@ -76,6 +76,8 @@ public interface ProjectRestApi {
                     "but not download the file.";
 
     String PROJECT_NAME_PARAM_DESCR = "The name or part of the name to filter projects";
+    
+    String PROJECT_NAME_OVERRIDE_DESCR = "The name of the project that will override the current name of the project in the zip file";
 
     String UPLOAD_FILE_PARAM_NAME = "file";
 
@@ -140,7 +142,11 @@ public interface ProjectRestApi {
     @ResponseStatus(CREATED)
     Resource<Project> importProject(
             @ApiParam(IMPORT_PROJECT_FILE_PARAM_DESCR)
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException;
+            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+            @ApiParam(PROJECT_NAME_OVERRIDE_DESCR)
+            @RequestParam(
+                    name = PROJECT_NAME_PARAM_NAME,
+                    required = false) String name) throws IOException;
 
     @ApiOperation(
             tags = PROJECTS,

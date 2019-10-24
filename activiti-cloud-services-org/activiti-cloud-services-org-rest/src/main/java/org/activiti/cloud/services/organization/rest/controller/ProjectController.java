@@ -103,8 +103,10 @@ public class ProjectController implements ProjectRestApi {
 
     @Override
     public Resource<Project> importProject(
-            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file) throws IOException {
-        return resourceAssembler.toResource(projectService.importProject(file));
+            @RequestParam(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+            @RequestParam(name = PROJECT_NAME_PARAM_NAME,
+                          required = false) String name) throws IOException {
+        return resourceAssembler.toResource(projectService.importProject(file, name));
     }
 
     @Override

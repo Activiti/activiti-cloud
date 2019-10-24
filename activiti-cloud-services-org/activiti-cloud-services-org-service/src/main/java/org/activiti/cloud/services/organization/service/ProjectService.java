@@ -51,6 +51,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -173,14 +174,14 @@ public class ProjectService {
   }
 
 
-  private void convertZipElementToModelObject(ZipStream.ZipStreamEntry zipEntry, FileContent fileContent, ProjectHolder projectHolder) {
+  private void convertZipElementToModelObject(ZipStream.ZipStreamEntry zipEntry, @Nullable String name, FileContent fileContent, ProjectHolder projectHolder) {
     Optional<String> folderName = zipEntry.getFolderName(0);
     if (folderName.isPresent()) {
       folderName.flatMap(modelTypeService::findModelTypeByFolderName)
         .ifPresent(modelType -> processZipEntryFile(projectHolder, fileContent, modelType));
     } else if (fileContent.isJson()) {
       zipEntry.getContent().ifPresent(
-        bytes -> jsonConverter.tryConvertToEntity(bytes).ifPresent(projectHolder::setProject)
+        bytes -> jsonConverter.tryConvertToEntity(bytes).ifPresent(project -> projectHolder.setProject(project, name))
       );
     }
   }
@@ -189,15 +190,16 @@ public class ProjectService {
    * Import an project form a zip multipart file.
    *
    * @param file the multipart zip file to import from
+   * @param name the name of the new project that will be set if provided 
    * @return the imported project
    * @throws IOException in case of multipart file input stream access error
    */
-  public Project importProject(MultipartFile file) throws IOException {
-    ProjectHolder projectHolder = new ProjectHolder();
+    public Project importProject(MultipartFile file, @Nullable String name) throws IOException {
+        ProjectHolder projectHolder = new ProjectHolder();
 
     ZipStream.of(file)
       .forEach(zipEntry -> this.createFileContentFromZipEntry(zipEntry)
-        .ifPresent(fileContent -> this.convertZipElementToModelObject(zipEntry, fileContent, projectHolder)));
+        .ifPresent(fileContent -> this.convertZipElementToModelObject(zipEntry, name, fileContent, projectHolder)));
 
     Project createdProject = projectHolder.getProjectMetadata().map(this::createProject)
       .orElseThrow(() -> new ImportProjectException("No valid project entry found to import: " + file.getOriginalFilename()));

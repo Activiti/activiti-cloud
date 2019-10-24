@@ -25,6 +25,8 @@ import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * Builder for projects
@@ -41,12 +43,15 @@ public class ProjectHolder {
 
   private final MultiKeyMap<String, FileContent> extensionFilesMap = new MultiKeyMap<>();
 
-  public ProjectHolder setProject(Project project) {
-    if (this.project == null) {
-      this.project = project;
+  public ProjectHolder setProject(Project project, @Nullable String name) {
+      if (this.project == null) {
+        this.project = project;
+        if (!StringUtils.isBlank(name)) {
+            this.project.setName(name);
+        }
+      }
+      return this;
     }
-    return this;
-  }
 
   public ProjectHolder addModelJsonFile(String modelName,
                                         ModelType modelType,
