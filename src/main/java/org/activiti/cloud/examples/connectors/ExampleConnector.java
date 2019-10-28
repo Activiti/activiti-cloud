@@ -1,5 +1,7 @@
 package org.activiti.cloud.examples.connectors;
 
+import static net.logstash.logback.marker.Markers.append;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -18,8 +20,6 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
-
-import static net.logstash.logback.marker.Markers.append;
 
 @Component
 @EnableBinding(ExampleConnectorChannels.class)
@@ -56,8 +56,8 @@ public class ExampleConnector {
 
         var1Copy = String.valueOf(var1);
 
-        Object jsonVar = event.getIntegrationContext().getInBoundVariables().get("test-json-variable-name");
-        Object longJsonVar = event.getIntegrationContext().getInBoundVariables().get("test-long-json-variable-name");
+        Object jsonVar = event.getIntegrationContext().getInBoundVariables().get("test_json_variable_name");
+        Object longJsonVar = event.getIntegrationContext().getInBoundVariables().get("test_long_json_variable_name");
 
         Map<String, Object> results = new HashMap<>();
 
@@ -66,25 +66,25 @@ public class ExampleConnector {
             logger.info("jsonVar value as string "+jsonVar.toString());
 
             CustomPojo customPojo = objectMapper.convertValue(jsonVar,CustomPojo.class);
-            results.put("test-json-variable-result","able to convert test-json-variable-name to "+CustomPojo.class.getName());
+            results.put("test_json_variable_result","able to convert test_json_variable_name to "+CustomPojo.class.getName());
         }
 
 
         if( longJsonVar != null && longJsonVar instanceof LinkedHashMap){
             if(((LinkedHashMap) longJsonVar).get("verylongjson").toString().length() >= 4000){
-                results.put("test-long-json-variable-result","able to read long json");
+                results.put("test_long_json_variable_result","able to read long json");
             }
 
         }
 
-        Object intVar = event.getIntegrationContext().getInBoundVariables().get("test-int-variable-name");
+        Object intVar = event.getIntegrationContext().getInBoundVariables().get("test_int_variable_name");
         if( intVar != null && intVar instanceof Integer){
-            results.put("test-int-variable-result","able to read integer");
+            results.put("test_int_variable_result","able to read integer");
         }
 
-        Object boolVar = event.getIntegrationContext().getInBoundVariables().get("test-bool-variable-name");
+        Object boolVar = event.getIntegrationContext().getInBoundVariables().get("test_bool_variable_name");
         if( boolVar != null && boolVar instanceof Boolean){
-            results.put("test-bool-variable-result","able to read boolean");
+            results.put("test_bool_variable_result","able to read boolean");
         }
 
         results.put("var1",
