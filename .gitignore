@@ -42,3 +42,5 @@ hs_err_pid*
 *.versionsBackup
 
 .factorypath
+
+classpath-data.json

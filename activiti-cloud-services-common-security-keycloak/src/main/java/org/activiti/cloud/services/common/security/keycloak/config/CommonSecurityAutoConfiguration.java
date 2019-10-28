@@ -15,8 +15,20 @@ package org.activiti.cloud.services.common.security.keycloak.config;/*
  */
 
 
+import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalGroupsProvider;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalRolesProvider;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalIdentityProvider;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRolesProviderChain;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextPrincipalProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextTokenProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityManagerImpl;
 import org.keycloak.adapters.KeycloakConfigResolver;
@@ -30,12 +42,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+
+import java.util.List;
 
 @Configuration
 @KeycloakConfiguration
@@ -59,11 +75,73 @@ public class CommonSecurityAutoConfiguration extends KeycloakWebSecurityConfigur
     public KeycloakAuthenticationProvider keycloakAuthenticationProvider() {
         return new KeycloakAuthenticationProvider();
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SecurityContextPrincipalProvider authenticatedPrincipalProvider() {
+        return new KeycloakSecurityContextPrincipalProvider();
+    }
     
     @Bean
     @ConditionalOnMissingBean
-    public SecurityManager securityManager() {
-        return new KeycloakSecurityManagerImpl();
+    public KeycloakAccessTokenProvider keycloakAccessTokenProvider() {
+        return new KeycloakAccessTokenProvider() { };
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public KeycloakAccessTokenValidator keycloakAccessTokenValidator() {
+        return new KeycloakAccessTokenValidator() { };
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public PrincipalIdentityProvider principalIdentityProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
+                                                               KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+        return new KeycloakPrincipalIdentityProvider(keycloakAccessTokenProvider, 
+                                                     keycloakAccessTokenValidator);
+    }
+    
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    @ConditionalOnMissingBean
+    public KeycloakAccessTokenPrincipalGroupsProvider keycloakAccessTokenPrincipalGroupsProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
+                                                                                                 KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+        return new KeycloakAccessTokenPrincipalGroupsProvider(keycloakAccessTokenProvider,
+                                                              keycloakAccessTokenValidator);
+    }
+
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    @ConditionalOnMissingBean
+    public KeycloakAccessTokenPrincipalRolesProvider keycloakAccessTokenPrincipalRolesProvider(KeycloakAccessTokenProvider keycloakAccessTokenProvider,
+                                                                                               KeycloakAccessTokenValidator keycloakAccessTokenValidator) {
+        return new KeycloakAccessTokenPrincipalRolesProvider(keycloakAccessTokenProvider,
+                                                             keycloakAccessTokenValidator);
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public KeycloakPrincipalGroupsProviderChain principalGroupsProviderChain(List<PrincipalGroupsProvider> principalGroupsProviders) {
+        return new KeycloakPrincipalGroupsProviderChain(principalGroupsProviders);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public KeycloakPrincipalRolesProviderChain principalRolesProviderChain(List<PrincipalRolesProvider> principalRolesProviders) {
+        return new KeycloakPrincipalRolesProviderChain(principalRolesProviders);
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public SecurityManager securityManager(SecurityContextPrincipalProvider authenticatedPrincipalProvider,
+                                           PrincipalIdentityProvider principalIdentityProvider,
+                                           KeycloakPrincipalGroupsProviderChain principalGroupsProvider,
+                                           KeycloakPrincipalRolesProviderChain principalRolesProviderChain) {
+        return new KeycloakSecurityManagerImpl(authenticatedPrincipalProvider,
+                                               principalIdentityProvider,
+                                               principalGroupsProvider,
+                                               principalRolesProviderChain);
     }
     
     @Bean
