@@ -68,10 +68,10 @@ Given the user is authenticated as testuser
 When the user starts a process with variables called CONNECTOR_PROCESS_INSTANCE
 Then the status of the process is changed to completed
 And a variable was created with name var1
-And a variable was created with name test-json-variable-result
-And a variable was created with name test-long-json-variable-result
-And a variable was created with name test-int-variable-result
-And a variable was created with name test-bool-variable-result
+And a variable was created with name test_json_variable_result
+And a variable was created with name test_long_json_variable_result
+And a variable was created with name test_int_variable_result
+And a variable was created with name test_bool_variable_result
 
 Scenario: check all process definitions are present as admin
 Given the user is authenticated as hradmin
