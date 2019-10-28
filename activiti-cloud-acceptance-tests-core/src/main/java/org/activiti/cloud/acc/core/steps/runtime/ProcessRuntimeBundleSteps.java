@@ -4,6 +4,10 @@ import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatR
 import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -20,10 +24,6 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
 
 @EnableRuntimeFeignContext
 public class ProcessRuntimeBundleSteps {
@@ -55,11 +55,11 @@ public class ProcessRuntimeBundleSteps {
                 .withBusinessKey("businessKey");
 
         if(variables){
-            payload.withVariable("test-variable-name", "test-variable-value");
-            payload.withVariable("test-int-variable-name", 7);
-            payload.withVariable("test-bool-variable-name", true);
-            payload.withVariable("test-json-variable-name",objectMapper.readTree("{ \"test-json-variable-element1\":\"test-json-variable-value1\"}"));
-            payload.withVariable("test-long-json-variable-name",objectMapper.readTree("{ \"verylongjson\":\""+ StringUtils.repeat("a", 4000)+"\"}"));
+            payload.withVariable("test_variable_name", "test-variable-value");
+            payload.withVariable("test_int_variable_name", 7);
+            payload.withVariable("test_bool_variable_name", true);
+            payload.withVariable("test_json_variable_name",objectMapper.readTree("{ \"test-json-variable-element1\":\"test-json-variable-value1\"}"));
+            payload.withVariable("test_long_json_variable_name",objectMapper.readTree("{ \"verylongjson\":\""+ StringUtils.repeat("a", 4000)+"\"}"));
         }
 
         return dirtyContextHandler.dirty(processRuntimeService
