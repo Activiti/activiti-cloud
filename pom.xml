@@ -91,15 +91,15 @@
 
   <properties>
     <activiti-cloud-build.version>7.1.11</activiti-cloud-build.version>
-    <activiti-cloud-api.version>7.1.48</activiti-cloud-api.version>
-    <activiti-cloud-service-common.version>7.1.75</activiti-cloud-service-common.version>
-    <activiti-cloud-runtime-bundle-service.version>7.1.133</activiti-cloud-runtime-bundle-service.version>
-    <activiti-cloud-query-service.version>7.1.117</activiti-cloud-query-service.version>
-    <activiti-cloud-audit-service.version>7.1.91</activiti-cloud-audit-service.version>
-    <activiti-cloud-connectors.version>7.1.73</activiti-cloud-connectors.version>
-    <activiti-cloud-app-service.version>7.1.69</activiti-cloud-app-service.version>
-    <activiti-cloud-acceptance-tests.version>7.1.91</activiti-cloud-acceptance-tests.version>
-    <activiti-cloud-notifications-service-graphql.version>7.1.120</activiti-cloud-notifications-service-graphql.version>
+    <activiti-cloud-api.version>7.1.49</activiti-cloud-api.version>
+    <activiti-cloud-service-common.version>7.1.76</activiti-cloud-service-common.version>
+    <activiti-cloud-runtime-bundle-service.version>7.1.134</activiti-cloud-runtime-bundle-service.version>
+    <activiti-cloud-query-service.version>7.1.118</activiti-cloud-query-service.version>
+    <activiti-cloud-audit-service.version>7.1.92</activiti-cloud-audit-service.version>
+    <activiti-cloud-connectors.version>7.1.74</activiti-cloud-connectors.version>
+    <activiti-cloud-app-service.version>7.1.70</activiti-cloud-app-service.version>
+    <activiti-cloud-acceptance-tests.version>7.1.92</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-notifications-service-graphql.version>7.1.121</activiti-cloud-notifications-service-graphql.version>
   </properties>
 
   <dependencyManagement>
