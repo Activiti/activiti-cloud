@@ -142,10 +142,10 @@ public class ProcessInstanceTasks {
             assertThat(tasks).isNotEmpty();
             currentTask = tasks.get(0);
             assertThat(currentTask).isNotNull();
+            Serenity.setSessionVariable("currentTaskId").to(currentTask.getId());
         }
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
-        Serenity.setSessionVariable("currentTaskId").to(currentTask.getId());
     }
 
     @Given("any suspended process instance")
