@@ -1,6 +1,5 @@
 package org.activiti.cloud.services.audit.jpa.security;
 
-import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.core.common.spring.security.policies.BaseSecurityPoliciesManagerImpl;
@@ -17,11 +16,9 @@ import java.util.Set;
  */
 public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPoliciesManagerImpl implements SecurityPoliciesManager {
 
-    public SecurityPoliciesApplicationServiceImpl(UserGroupManager userGroupManager,
-                                                  SecurityManager securityManager,
+    public SecurityPoliciesApplicationServiceImpl(SecurityManager securityManager,
                                                   SecurityPoliciesProperties securityPoliciesProperties) {
-        super(userGroupManager,
-              securityManager,
+        super(securityManager,
               securityPoliciesProperties);
     }
 

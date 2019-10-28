@@ -93,7 +93,7 @@ public class RestrictEventQueryIT {
         eventsRepository.save(eventEntity);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("bobinhr");
-        when(userGroupManager.getUserGroups("bobinhr")).thenReturn(Collections.singletonList("hrgroup"));
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Collections.singletonList("hrgroup"));
 
         Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
                 SecurityPolicyAccess.READ);

@@ -1,6 +1,5 @@
 package org.activiti.cloud.services.audit.jpa.security.config;
 
-import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.audit.jpa.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
@@ -13,11 +12,9 @@ public class AuditJPASecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService(UserGroupManager userGroupManager,
-                                                                                     SecurityManager securityManager,
+    public SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService(SecurityManager securityManager,
                                                                                      SecurityPoliciesProperties securityPoliciesProperties) {
-        return new SecurityPoliciesApplicationServiceImpl(userGroupManager, 
-                                                          securityManager, 
+        return new SecurityPoliciesApplicationServiceImpl(securityManager, 
                                                           securityPoliciesProperties);
     }
     
