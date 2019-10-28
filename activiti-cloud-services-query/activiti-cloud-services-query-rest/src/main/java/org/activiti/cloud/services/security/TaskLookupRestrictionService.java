@@ -2,7 +2,6 @@ package org.activiti.cloud.services.security;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
@@ -16,16 +15,12 @@ import java.util.List;
  */
 public class TaskLookupRestrictionService {
 
-    private final UserGroupManager userGroupManager;
-
     private final SecurityManager securityManager;
 
     @Value("${activiti.cloud.security.task.restrictions.enabled:true}")
     private boolean restrictionsEnabled;
 
-    public TaskLookupRestrictionService(UserGroupManager userGroupManager,
-                                        SecurityManager securityManager) {
-        this.userGroupManager = userGroupManager;
+    public TaskLookupRestrictionService(SecurityManager securityManager) {
         this.securityManager = securityManager;
     }
 
@@ -65,8 +60,8 @@ public class TaskLookupRestrictionService {
 
 
             List<String> groups = null;
-            if (userGroupManager != null) {
-                groups = userGroupManager.getUserGroups(userId);
+            if (securityManager != null) {
+                groups = securityManager.getAuthenticatedUserGroups();
             }
             if(groups!=null && groups.size()>0) {
                 //belongs to candidate group and task is not assigned

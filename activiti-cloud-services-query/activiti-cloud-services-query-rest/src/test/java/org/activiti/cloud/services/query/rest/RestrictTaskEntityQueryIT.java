@@ -70,7 +70,7 @@ public class RestrictTaskEntityQueryIT {
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
-        when(userGroupManager.getUserGroups("testuser")).thenReturn(Arrays.asList("testgroup"));
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("testgroup"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -171,8 +171,8 @@ public class RestrictTaskEntityQueryIT {
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
-        when(userGroupManager.getUserGroups("hruser")).thenReturn(Arrays.asList("hr"));
-
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("hr"));
+        
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
         Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
@@ -190,7 +190,7 @@ public class RestrictTaskEntityQueryIT {
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
-        when(userGroupManager.getUserGroups("hruser")).thenReturn(Arrays.asList("hr"));
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("hr"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -210,7 +210,7 @@ public class RestrictTaskEntityQueryIT {
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
-        when(userGroupManager.getUserGroups("hruser")).thenReturn(Arrays.asList("hr"));
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("hr"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
@@ -306,7 +306,7 @@ public class RestrictTaskEntityQueryIT {
         taskCandidateGroupRepository.save(taskCandidateGroup);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
-        when(userGroupManager.getUserGroups("hruser")).thenReturn(Arrays.asList("hr"));
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("hr"));
 
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(QTaskEntity.taskEntity.id.eq("7"));
 

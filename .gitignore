@@ -41,3 +41,6 @@ hs_err_pid*
 *.versionsBackup
 
 .springBeans
+
+.sts4-cache
+

@@ -136,7 +136,7 @@ public class ProcessDefinitionRestrictionServiceIT {
     public void shouldGetAllProcessDefinitionsAllowedToGroup() {
         //given
         when(securityManager.getAuthenticatedUserId()).thenReturn("bobinhr");
-        when(userGroupManager.getUserGroups("bobinhr")).thenReturn(Collections.singletonList("hrgroup"));
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Collections.singletonList("hrgroup"));
 
         //when
         Predicate predicate = restrictionService.restrictProcessDefinitionQuery(null,

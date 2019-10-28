@@ -96,7 +96,7 @@ public class RestrictProcessInstanceEntityQueryIT {
         processInstanceRepository.save(processInstanceEntity);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("bobinhr");
-        when(userGroupManager.getUserGroups("bobinhr")).thenReturn(Collections.singletonList("hrgroup"));
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Collections.singletonList("hrgroup"));
 
         Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(null, SecurityPolicyAccess.READ);
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);

@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.conf;
 
-import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.rest.QueryRelProvider;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionResourceAssembler;
@@ -81,10 +80,8 @@ public class QueryRestWebMvcAutoConfiguration  {
     
     @Bean
     @ConditionalOnMissingBean
-    public TaskLookupRestrictionService taskLookupRestrictionService(UserGroupManager userGroupManager,
-                                                                     SecurityManager securityManager) {
-        return new TaskLookupRestrictionService(userGroupManager, 
-                                                securityManager);
+    public TaskLookupRestrictionService taskLookupRestrictionService(SecurityManager securityManager) {
+        return new TaskLookupRestrictionService(securityManager);
     }    
 
     @Bean

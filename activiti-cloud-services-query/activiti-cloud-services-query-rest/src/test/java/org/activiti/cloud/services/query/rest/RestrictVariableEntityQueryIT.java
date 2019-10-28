@@ -100,7 +100,7 @@ public class RestrictVariableEntityQueryIT {
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
-        when(userGroupManager.getUserGroups("testuser")).thenReturn(Arrays.asList("testgroup"));
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("testgroup"));
 
         Predicate predicate = taskVariableLookupRestrictionService.restrictTaskVariableQuery(null);
 
