@@ -40,10 +40,9 @@ postgres:
   password:
 
 init:
-  image:
-    repository: alpine
-    tag: 3.8
-    pullPolicy: IfNotPresent
+  container:
+    image: alpine:3.8
+    imagePullPolicy: IfNotPresent
 
 ## Allows the specification of additional environment variables
 extraEnv: |
