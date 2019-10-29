@@ -16,19 +16,18 @@
 
 package org.activiti.cloud.services.organization.jpa.audit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.organization.jpa.config.OrganizationJpaApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.AuditorAware;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static java.util.Collections.emptyList;
-import static org.assertj.core.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = OrganizationJpaApplication.class)
@@ -36,24 +35,15 @@ public class AuditorAwareIT {
 
     @Autowired
     private AuditorAware<String> auditorAware;
+    
+    @MockBean
+    private SecurityManager securityManager;
 
     @Test
     public void testCurrentAuditor() {
 
-        // WHEN
-        assertThat(auditorAware.getCurrentAuditor()).hasValueSatisfying(
-                currentUser ->
-                        // THEN
-                        assertThat(currentUser).isEqualTo("")
-        );
-
         // GIVEN
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(new User("test_user",
-                                                                 "test_password",
-                                                                 emptyList()),
-                                                        null)
-        );
+        when(securityManager.getAuthenticatedUserId()).thenReturn("test_user");
 
         // WHEN
         assertThat(auditorAware.getCurrentAuditor()).hasValueSatisfying(
@@ -62,4 +52,5 @@ public class AuditorAwareIT {
                         assertThat(currentUser).isEqualTo("test_user")
         );
     }
+    
 }
