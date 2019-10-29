@@ -61,12 +61,13 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
     @Override
     public ResponseEntity<Void> setVariables(@PathVariable String processInstanceId,
                                              @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
-        
+
         ProcessInstance processInstance = processRuntime.processInstance(processInstanceId);
+
         setProcessVariablesPayload.setProcessInstanceId(processInstanceId);
-        
+
         processVariablesValidator.checkPayloadVariables(setProcessVariablesPayload,
-                                                        processInstance.getProcessDefinitionKey());
+                                                        processInstance.getProcessDefinitionId());
 
         processRuntime.setVariables(setProcessVariablesPayload);
         return new ResponseEntity<>(HttpStatus.OK);

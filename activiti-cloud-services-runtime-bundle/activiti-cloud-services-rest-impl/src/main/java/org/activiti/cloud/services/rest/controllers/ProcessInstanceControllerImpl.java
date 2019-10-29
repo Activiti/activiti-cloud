@@ -66,7 +66,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     private final ProcessRuntime processRuntime;
 
     private final SpringPageConverter pageConverter;
-    
+
     private final ProcessVariablesPayloadValidator processVariablesValidator;
 
     @Autowired
@@ -90,8 +90,8 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     public PagedResources<Resource<CloudProcessInstance>> getProcessInstances(Pageable pageable) {
         Page<ProcessInstance> processInstancePage = processRuntime.processInstances(pageConverter.toAPIPageable(pageable));
         return pagedResourcesAssembler.toResource(pageable,
-                                                  pageConverter.toSpringPage(pageable, processInstancePage),
-                                                  resourceAssembler);
+                pageConverter.toSpringPage(pageable, processInstancePage),
+                resourceAssembler);
     }
 
     private String getProcessDefinitionKey(StartProcessPayload startProcessPayload) {
@@ -113,14 +113,14 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
-        
-        Map<String, Object> variables = startProcessPayload.getVariables(); 
-        if (variables != null && !variables.isEmpty()) {   
-            
+
+        Map<String, Object> variables = startProcessPayload.getVariables();
+        if (variables != null && !variables.isEmpty()) {
+
             processVariablesValidator.checkStartProcessPayloadVariables(startProcessPayload,
-                                                                        getProcessDefinitionKey(startProcessPayload));
-        }    
-        
+                    startProcessPayload.getProcessDefinitionId());
+        }
+
         return resourceAssembler.toResource(processRuntime.start(startProcessPayload));
     }
 
@@ -135,11 +135,11 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
         return new String(processDiagramGenerator.generateDiagram(bpmnModel,
-                                                                  processRuntime
-                                                                          .processInstanceMeta(processInstance.getId())
-                                                                          .getActiveActivitiesIds(),
-                                                                  emptyList()),
-                          StandardCharsets.UTF_8);
+                processRuntime
+                        .processInstanceMeta(processInstance.getId())
+                        .getActiveActivitiesIds(),
+                emptyList()),
+                StandardCharsets.UTF_8);
     }
 
     @Override
@@ -163,27 +163,27 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     public Resource<CloudProcessInstance> deleteProcessInstance(@PathVariable String processInstanceId) {
         return resourceAssembler.toResource(processRuntime.delete(ProcessPayloadBuilder.delete(processInstanceId)));
     }
- 
+
     @Override
     public Resource<CloudProcessInstance> updateProcess(@PathVariable String processInstanceId,
                                                         @RequestBody UpdateProcessPayload payload) {
-        if (payload!=null) {
+        if (payload != null) {
             payload.setProcessInstanceId(processInstanceId);
-            
+
         }
-        
+
         return resourceAssembler.toResource(processRuntime.update(payload));
     }
-    
+
     @Override
     public PagedResources<Resource<CloudProcessInstance>> subprocesses(@PathVariable String processInstanceId,
                                                                        Pageable pageable) {
         Page<ProcessInstance> processInstancePage = processRuntime.processInstances(pageConverter.toAPIPageable(pageable),
-                                                                                    ProcessPayloadBuilder.subprocesses(processInstanceId));
-                
+                ProcessPayloadBuilder.subprocesses(processInstanceId));
+
         return pagedResourcesAssembler.toResource(pageable,
-                                                  pageConverter.toSpringPage(pageable, processInstancePage),
-                                                  resourceAssembler);
+                pageConverter.toSpringPage(pageable, processInstancePage),
+                resourceAssembler);
     }
 
     @Override

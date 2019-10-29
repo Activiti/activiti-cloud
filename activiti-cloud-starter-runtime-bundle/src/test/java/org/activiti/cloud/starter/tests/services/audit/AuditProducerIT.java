@@ -1,4 +1,4 @@
-package org.activiti.cloud.starter.tests.services.audit; 
+package org.activiti.cloud.starter.tests.services.audit;
 
 import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_CREATED;
 import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.VARIABLE_UPDATED;
@@ -85,7 +85,7 @@ public class AuditProducerIT {
     private static final String SIMPLE_SUB_PROCESS1 = "simpleSubProcess1";
     private static final String SIMPLE_SUB_PROCESS2 = "simpleSubProcess2";
     private static final String CALL_TWO_SUB_PROCESSES = "callTwoSubProcesses";
-       
+
     public static final String ROUTING_KEY_HEADER = "routingKey";
     public static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "appVersion", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
     public static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS)
@@ -104,7 +104,7 @@ public class AuditProducerIT {
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
-    
+
     @Autowired
     private TaskRestTemplate taskRestTemplate;
 
@@ -125,7 +125,7 @@ public class AuditProducerIT {
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (CloudProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(),
-                                     pd.getId());
+                    pd.getId());
         }
     }
 
@@ -158,13 +158,14 @@ public class AuditProducerIT {
 
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(ProcessPayloadBuilder
-                                                                                                                   .start()
-                                                                                                                   .withProcessDefinitionKey(SIMPLE_PROCESS)
-                                                                                                                   .withVariable("name",
-                                                                                                                                 "peter")
-                                                                                                                   .withName("my instance name")
-                                                                                                                   .withBusinessKey("my business key")
-                                                                                                                   .build());
+                .start()
+                .withProcessDefinitionKey(SIMPLE_PROCESS)
+                .withProcessDefinitionId(processDefinitionIds.get(SIMPLE_PROCESS))
+                .withVariable("name",
+                        "peter")
+                .withName("my instance name")
+                .withBusinessKey("my business key")
+                .build());
 
         //then
         await().untilAsserted(() -> {
@@ -175,21 +176,21 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(PROCESS_CREATED.name(),
-                                     VARIABLE_CREATED.name(),
-                                     PROCESS_STARTED.name(),
-                                     ACTIVITY_STARTED.name()/*start event*/,
-                                     BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*start event*/,
-                                     SEQUENCE_FLOW_TAKEN.name(),
-                                     ACTIVITY_STARTED.name()/*user task*/,
-                                     VARIABLE_CREATED.name(), /*task variable copy of proc var*/
-                                     TASK_CANDIDATE_GROUP_ADDED.name(),
-                                     TASK_CANDIDATE_USER_ADDED.name(),
-                                     TASK_CREATED.name());
+                            VARIABLE_CREATED.name(),
+                            PROCESS_STARTED.name(),
+                            ACTIVITY_STARTED.name()/*start event*/,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*start event*/,
+                            SEQUENCE_FLOW_TAKEN.name(),
+                            ACTIVITY_STARTED.name()/*user task*/,
+                            VARIABLE_CREATED.name(), /*task variable copy of proc var*/
+                            TASK_CANDIDATE_GROUP_ADDED.name(),
+                            TASK_CANDIDATE_USER_ADDED.name(),
+                            TASK_CREATED.name());
             assertThat(receivedEvents)
                     .filteredOn(event -> ACTIVITY_STARTED.equals(event.getEventType()))
                     .extracting(event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType())
                     .containsExactly("startEvent",
-                                     "userTask");
+                            "userTask");
             assertThat(receivedEvents).filteredOn(cloudRuntimeEvent -> PROCESS_CREATED.equals(cloudRuntimeEvent.getEventType()))
                     .extracting(cloudRuntimeEvent -> ((ProcessInstance) cloudRuntimeEvent.getEntity()).getBusinessKey())
                     .containsExactly("my business key");
@@ -199,11 +200,11 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .filteredOn(event -> TASK_CREATED.equals(event.getEventType()))
                     .extracting(event -> event.getProcessDefinitionVersion(),
-                                event -> event.getBusinessKey())
+                            event -> event.getBusinessKey())
                     .containsExactly(tuple(startProcessEntity.getBody().getProcessDefinitionVersion(),
-                                           startProcessEntity.getBody().getBusinessKey()));
-            
-            
+                            startProcessEntity.getBody().getBusinessKey()));
+
+
         });
 
         //when
@@ -217,7 +218,7 @@ public class AuditProducerIT {
             assertThat(receivedEvents1)
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(PROCESS_SUSPENDED.name(),
-                                     TASK_SUSPENDED.name());
+                            TASK_SUSPENDED.name());
 
             assertThat(receivedEvents1.get(0).getEntity()).isInstanceOf(ProcessInstance.class);
             assertThat(receivedEvents1.get(0).getProcessDefinitionKey()).isEqualTo(SIMPLE_PROCESS);
@@ -234,7 +235,7 @@ public class AuditProducerIT {
             assertThat(receivedEvents2)
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(PROCESS_RESUMED.name(),
-                                     TASK_ACTIVATED.name());
+                            TASK_ACTIVATED.name());
 
             assertThat(receivedEvents2.get(0).getEntity()).isInstanceOf(ProcessInstance.class);
             assertThat(receivedEvents2.get(0).getProcessDefinitionKey()).isEqualTo(SIMPLE_PROCESS);
@@ -242,8 +243,8 @@ public class AuditProducerIT {
 
         //when
         processInstanceRestTemplate.setVariables(startProcessEntity.getBody().getId(),
-                                                 Collections.singletonMap("name",
-                                                                          "paul"));
+                Collections.singletonMap("name",
+                        "paul"));
 
         //then
         await().untilAsserted(() -> {
@@ -266,7 +267,7 @@ public class AuditProducerIT {
             assertThat(streamHandler.getLatestReceivedEvents())
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(TASK_ASSIGNED.name(),
-                                     TASK_UPDATED.name()
+                            TASK_UPDATED.name()
                     );
         });
 
@@ -280,14 +281,14 @@ public class AuditProducerIT {
             assertThat(streamHandler.getLatestReceivedEvents())
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(TASK_COMPLETED.name(),
-                                     TASK_CANDIDATE_GROUP_REMOVED.name(),
-                                     TASK_CANDIDATE_USER_REMOVED.name(),
-                                     VARIABLE_UPDATED.name(),/*task local var copied back to proc var*/
-                                     BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*user task*/,
-                                     SEQUENCE_FLOW_TAKEN.name(),
-                                     ACTIVITY_STARTED.name()/*end event*/,
-                                     BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*end event*/,
-                                     PROCESS_COMPLETED.name());
+                            TASK_CANDIDATE_GROUP_REMOVED.name(),
+                            TASK_CANDIDATE_USER_REMOVED.name(),
+                            VARIABLE_UPDATED.name(),/*task local var copied back to proc var*/
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*user task*/,
+                            SEQUENCE_FLOW_TAKEN.name(),
+                            ACTIVITY_STARTED.name()/*end event*/,
+                            BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*end event*/,
+                            PROCESS_COMPLETED.name());
         });
 
         assertThat(streamHandler.getLatestReceivedEvents())
@@ -300,11 +301,11 @@ public class AuditProducerIT {
     public void shouldProduceEventsForAProcessDeletion() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(new StartProcessPayloadBuilder()
-                                                                                                                   .withProcessDefinitionId(processDefinitionIds.get(SIMPLE_PROCESS))
-                                                                                                                   .withName("processInstanceName")
-                                                                                                                   .withBusinessKey("businessKey")
-                                                                                                                   .withVariables(Collections.emptyMap())
-                                                                                                                   .build());
+                .withProcessDefinitionId(processDefinitionIds.get(SIMPLE_PROCESS))
+                .withName("processInstanceName")
+                .withBusinessKey("businessKey")
+                .withVariables(Collections.emptyMap())
+                .build());
 
         //when
         processInstanceRestTemplate.delete(startProcessEntity);
@@ -318,10 +319,10 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(ACTIVITY_CANCELLED.name(),
-                                     TASK_CANCELLED.name(),
-                                     TASK_CANDIDATE_GROUP_REMOVED.name(),
-                                     TASK_CANDIDATE_USER_REMOVED.name(),
-                                     PROCESS_CANCELLED.name());
+                            TASK_CANCELLED.name(),
+                            TASK_CANDIDATE_GROUP_REMOVED.name(),
+                            TASK_CANDIDATE_USER_REMOVED.name(),
+                            PROCESS_CANCELLED.name());
         });
     }
 
@@ -332,8 +333,8 @@ public class AuditProducerIT {
 
         //when
         processInstanceRestTemplate.update(startProcessEntity,
-                                           "businessKey",
-                                           "name");
+                "businessKey",
+                "name");
 
         //then
         await().untilAsserted(() -> {
@@ -357,7 +358,7 @@ public class AuditProducerIT {
                     .extracting(entity -> entity.getBusinessKey())
                     .containsExactly("businessKey");
         });
-        
+
         // Clean up
         runtimeService.deleteProcessInstance(startProcessEntity.getBody().getId(), "Clean up");
 
@@ -392,7 +393,7 @@ public class AuditProducerIT {
             CloudRuntimeEvent<?, ?> cloudTaskCandidateUserRemoved = receivedEvents
                     .stream()
                     .filter(cloudRuntimeEvent -> cloudRuntimeEvent instanceof CloudTaskCandidateUserRemovedEvent
-                            && ((TaskCandidateUser)cloudRuntimeEvent.getEntity()).getTaskId().equals(task.getId()))
+                            && ((TaskCandidateUser) cloudRuntimeEvent.getEntity()).getTaskId().equals(task.getId()))
                     .findFirst()
                     .orElse(null);
             assertThat(cloudTaskCandidateUserRemoved).isNotNull();
@@ -422,9 +423,9 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .hasSize(1)
                     .extracting(CloudRuntimeEvent::getEventType,
-                                CloudRuntimeEvent::getEntityId)
+                            CloudRuntimeEvent::getEntityId)
                     .containsExactly(tuple(TASK_UPDATED,
-                                           task.getId())
+                            task.getId())
                     );
 
             assertThat(receivedEvents.get(0).getEntity()).isNotNull();
@@ -454,9 +455,9 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .hasSize(1)
                     .extracting(CloudRuntimeEvent::getEventType,
-                                CloudRuntimeEvent::getEntityId)
+                            CloudRuntimeEvent::getEntityId)
                     .containsExactly(tuple(TASK_CANDIDATE_USER_ADDED,
-                                           "testuser")
+                            "testuser")
                     );
 
             assertThat(receivedEvents.get(0).getEntity()).isNotNull();
@@ -484,9 +485,9 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .hasSize(1)
                     .extracting(CloudRuntimeEvent::getEventType,
-                                CloudRuntimeEvent::getEntityId)
+                            CloudRuntimeEvent::getEntityId)
                     .containsExactly(tuple(TASK_CANDIDATE_USER_REMOVED,
-                                           "testuser")
+                            "testuser")
                     );
 
             assertThat(receivedEvents.get(0).getEntity()).isNotNull();
@@ -531,9 +532,9 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .hasSize(1)
                     .extracting(CloudRuntimeEvent::getEventType,
-                                CloudRuntimeEvent::getEntityId)
+                            CloudRuntimeEvent::getEntityId)
                     .containsExactly(tuple(TASK_CANDIDATE_GROUP_ADDED,
-                                           "hr")
+                            "hr")
                     );
 
             assertThat(receivedEvents.get(0).getEntity()).isNotNull();
@@ -560,9 +561,9 @@ public class AuditProducerIT {
             assertThat(receivedEvents)
                     .hasSize(1)
                     .extracting(CloudRuntimeEvent::getEventType,
-                                CloudRuntimeEvent::getEntityId)
+                            CloudRuntimeEvent::getEntityId)
                     .containsExactly(tuple(TASK_CANDIDATE_GROUP_REMOVED,
-                                           "hr")
+                            "hr")
                     );
 
             assertThat(receivedEvents.get(0).getEntity()).isNotNull();
@@ -593,11 +594,11 @@ public class AuditProducerIT {
 
         // when
         List<String> subprocessIds = runtimeService.createProcessInstanceQuery()
-                                                   .superProcessInstanceId(processInstanceId)
-                                                   .list()
-                                                   .stream()
-                                                   .map(it -> it.getProcessInstanceId())
-                                                   .collect(Collectors.toList());
+                .superProcessInstanceId(processInstanceId)
+                .list()
+                .stream()
+                .map(it -> it.getProcessInstanceId())
+                .collect(Collectors.toList());
         // then
         assertThat(subprocessIds).hasSize(2);
 
@@ -609,34 +610,34 @@ public class AuditProducerIT {
 
             assertThat(streamHandler.getLatestReceivedEvents())
                     .extracting(CloudRuntimeEvent::getEventType,
-                                CloudRuntimeEvent::getProcessInstanceId,
-                                CloudRuntimeEvent::getParentProcessInstanceId,
-                                CloudRuntimeEvent::getProcessDefinitionKey)
-                    .containsExactly(tuple(PROCESS_CREATED,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
-                                     tuple(PROCESS_STARTED,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
-                                     tuple(ACTIVITY_STARTED,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
-                                     tuple(ACTIVITY_COMPLETED,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
-                                     tuple(SEQUENCE_FLOW_TAKEN,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
-                                     tuple(ACTIVITY_STARTED,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
-                                     tuple(ACTIVITY_COMPLETED,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
-                                     tuple(SEQUENCE_FLOW_TAKEN,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
-                                     tuple(SEQUENCE_FLOW_TAKEN,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
-                                     tuple(ACTIVITY_STARTED,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
-                                     tuple(PROCESS_CREATED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
-                                     tuple(ACTIVITY_STARTED,processInstanceId, null, CALL_TWO_SUB_PROCESSES),
-                                     tuple(PROCESS_CREATED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(PROCESS_STARTED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(ACTIVITY_STARTED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(ACTIVITY_COMPLETED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(SEQUENCE_FLOW_TAKEN,subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(ACTIVITY_STARTED,subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(TASK_CREATED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
-                                     tuple(PROCESS_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
-                                     tuple(ACTIVITY_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
-                                     tuple(ACTIVITY_COMPLETED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
-                                     tuple(SEQUENCE_FLOW_TAKEN,subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
-                                     tuple(ACTIVITY_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
-                                     tuple(TASK_CREATED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1)
+                            CloudRuntimeEvent::getProcessInstanceId,
+                            CloudRuntimeEvent::getParentProcessInstanceId,
+                            CloudRuntimeEvent::getProcessDefinitionKey)
+                    .containsExactly(tuple(PROCESS_CREATED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(PROCESS_STARTED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(ACTIVITY_STARTED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(ACTIVITY_COMPLETED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(ACTIVITY_STARTED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(ACTIVITY_COMPLETED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(ACTIVITY_STARTED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(PROCESS_CREATED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
+                            tuple(ACTIVITY_STARTED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
+                            tuple(PROCESS_CREATED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
+                            tuple(PROCESS_STARTED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
+                            tuple(ACTIVITY_STARTED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
+                            tuple(ACTIVITY_COMPLETED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
+                            tuple(SEQUENCE_FLOW_TAKEN, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
+                            tuple(ACTIVITY_STARTED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
+                            tuple(TASK_CREATED, subProcessId2, processInstanceId, SIMPLE_SUB_PROCESS2),
+                            tuple(PROCESS_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
+                            tuple(ACTIVITY_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
+                            tuple(ACTIVITY_COMPLETED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
+                            tuple(SEQUENCE_FLOW_TAKEN, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
+                            tuple(ACTIVITY_STARTED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1),
+                            tuple(TASK_CREATED, subProcessId1, processInstanceId, SIMPLE_SUB_PROCESS1)
                     );
         });
 
@@ -648,16 +649,16 @@ public class AuditProducerIT {
         runtimeService.deleteProcessInstance(processInstanceId, "Clean up");
 
     }
-      
+
     private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
         ParameterizedTypeReference<PagedResources<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedResources<CloudProcessDefinition>>() {
         };
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL,
-                                     HttpMethod.GET,
-                                     null,
-                                     responseType);
+                HttpMethod.GET,
+                null,
+                responseType);
     }
-    
+
 
 }

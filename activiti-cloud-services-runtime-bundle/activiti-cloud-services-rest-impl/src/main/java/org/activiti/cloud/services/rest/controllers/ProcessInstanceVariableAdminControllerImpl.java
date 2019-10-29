@@ -43,23 +43,22 @@ public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstan
     @Override
     public ResponseEntity<Void> updateVariables(@PathVariable String processInstanceId,
                                                 @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
-        
+
         ProcessInstance processInstance = processAdminRuntime.processInstance(processInstanceId);
         setProcessVariablesPayload.setProcessInstanceId(processInstanceId);
-        
-        processVariablesValidator.checkPayloadVariables(setProcessVariablesPayload,
-                                                        processInstance.getProcessDefinitionKey());
-        
+
+        processVariablesValidator.checkPayloadVariables(setProcessVariablesPayload, processInstance.getProcessDefinitionId());
+
         processAdminRuntime.setVariables(setProcessVariablesPayload);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
+
     @Override
     public ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
                                                 @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload) {
         if (removeProcessVariablesPayload!=null) {
             removeProcessVariablesPayload.setProcessInstanceId(processInstanceId);
-            
+
         }
         processAdminRuntime.removeVariables(removeProcessVariablesPayload);
 

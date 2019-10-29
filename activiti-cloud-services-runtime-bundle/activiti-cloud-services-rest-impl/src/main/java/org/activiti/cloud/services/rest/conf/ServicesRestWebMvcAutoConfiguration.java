@@ -33,6 +33,7 @@ import org.activiti.cloud.services.rest.controllers.ResourcesAssembler;
 import org.activiti.cloud.services.rest.controllers.RuntimeBundleRelProvider;
 import org.activiti.cloud.services.rest.controllers.TaskVariablesPayloadDateHandler;
 import org.activiti.common.util.DateFormatterProvider;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.model.ProcessExtensionModel;
 import org.activiti.spring.process.variable.VariableValidationService;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -63,7 +64,7 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
     public ResourcesAssembler resourcesAssembler() {
         return new ResourcesAssembler();
     }
-    
+
     @Bean
     public ConnectorDefinitionResourceAssembler connectorDefinitionResourceAssembler() {
         return new ConnectorDefinitionResourceAssembler();
@@ -73,7 +74,7 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
     public ProcessDefinitionMetaResourceAssembler processDefinitionMetaResourceAssembler() {
         return new ProcessDefinitionMetaResourceAssembler();
     }
-    
+
     @Bean
     public ProcessInstanceResourceAssembler processInstanceResourceAssembler(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
         return new ProcessInstanceResourceAssembler(new ToCloudProcessInstanceConverter(runtimeBundleInfoAppender));
@@ -103,17 +104,17 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
     public TaskVariableInstanceResourceAssembler taskVariableInstanceResourceAssembler(ToCloudVariableInstanceConverter converter) {
         return new TaskVariableInstanceResourceAssembler(converter);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ProcessVariablesPayloadValidator processVariablesPayloadValidator(DateFormatterProvider dateFormatterProvider,
-                                                                             Map<String, ProcessExtensionModel> processExtensionModelMap,
+                                                                             ProcessExtensionService processExtensionService,
                                                                              VariableValidationService variableValidationService) {
         return new ProcessVariablesPayloadValidator(dateFormatterProvider,
-                                                    processExtensionModelMap,
+                                                    processExtensionService,
                                                     variableValidationService);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public TaskVariablesPayloadDateHandler taskVariablesPayloadValidator(DateFormatterProvider dateFormatterProvider) {
@@ -133,7 +134,7 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
         }
 
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public RuntimeBundleRelProvider runtimeBundleRelProvider() {
