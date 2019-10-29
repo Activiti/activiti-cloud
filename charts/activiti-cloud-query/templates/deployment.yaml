@@ -1,6 +1,8 @@
 {{- template "common.deployment" (list . "activiti.query.deployment") -}}
 {{- define "activiti.query.deployment" -}}
 spec:
+  template:
+    spec:
       initContainers:
       {{- if .Values.postgres.enabled }}
         - name: wait-for-postgresql
