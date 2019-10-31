@@ -19,25 +19,20 @@ package org.activiti.cloud.services.organization.converter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.CallActivity;
-import org.activiti.bpmn.model.FlowElement;
-import org.activiti.bpmn.model.UserTask;
-import org.activiti.cloud.organization.api.ModelContent;
+import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.organization.api.ModelContentConverter;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ProcessModelType;
 import org.activiti.cloud.organization.core.error.ModelingException;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.stereotype.Component;
 
 import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
 
@@ -93,56 +88,34 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
         }
     }
 
-  @Override
-  public FileContent overrideModelId(FileContent fileContent,
-                                     HashMap<String, String> modelIdentifiers) {
-    Optional<BpmnProcessModelContent> modelContent = this.convertToModelContent(fileContent.getFileContent());
-    this.fixProcessModel(modelContent.get(), modelIdentifiers);
-    return new FileContent(fileContent.getFilename(), fileContent.getContentType(),
-      this.convertToBytes(modelContent.get()));
-  }
-
-  private void fixProcessModel(BpmnProcessModelContent processModelContent,
-                               HashMap<String, String> modelIdentifiers){
-    processModelContent.getBpmnModel().getProcesses().forEach(process -> {
-      String validIdentifier = modelIdentifiers.get(process.getId());
-      if(validIdentifier != null && validIdentifier != process.getId()){
-        process.setId(validIdentifier);
-      }
-      process.getFlowElements().stream()
-        .filter(flowElement -> this.isElementToFix(flowElement))
-        .map(flowElement -> {
-            if(flowElement instanceof CallActivity) {
-              return this.updateIdForCallAcvity(flowElement, modelIdentifiers);
-            }else if(flowElement instanceof UserTask){
-              return this.updateIdForUserTask(flowElement, modelIdentifiers);
-            }else{
-              return flowElement;
-            }
-        })
-        .collect(Collectors.toList());
-    });
-  }
-
-  private FlowElement updateIdForUserTask(FlowElement flowElement, HashMap<String, String> modelIdentifiers) {
-      UserTask userTask = (UserTask) flowElement;
-      String targetFormId = modelIdentifiers.get(userTask.getFormKey());
-      if(targetFormId != null) {
-        userTask.setFormKey(targetFormId);
-      }
-      return flowElement;
-  }
-
-  private FlowElement updateIdForCallAcvity(FlowElement flowElement, HashMap<String, String> modelIdentifiers){
-    CallActivity callActivity = ((CallActivity) flowElement);
-    String targetProcessId = modelIdentifiers.get(callActivity.getCalledElement());
-    if(targetProcessId != null) {
-      callActivity.setCalledElement(targetProcessId);
+    @Override
+    public FileContent overrideModelId(FileContent fileContent,
+                                       Map<String, String> modelIdentifiers) {
+        FileContent newFileContent;
+        Optional<BpmnProcessModelContent> processModelContent = this.convertToModelContent(fileContent.getFileContent());
+        if (processModelContent.isPresent()) {
+            BpmnProcessModelContent modelContent = processModelContent.get();
+            ReferenceIdOverrider referenceIdOverrider = new ReferenceIdOverrider(modelIdentifiers);
+            this.overrideAllProcessDefinition(modelContent, referenceIdOverrider);
+            byte[] overriddenContent = this.convertToBytes(modelContent);
+            newFileContent = new FileContent(fileContent.getFilename(), fileContent.getContentType(), overriddenContent);
+        } else {
+            newFileContent = fileContent;
+        }
+        return newFileContent;
     }
-    return flowElement;
-  }
 
-  private boolean isElementToFix(FlowElement flowElement){
-    return flowElement instanceof CallActivity || flowElement instanceof UserTask;
-  }
+    public void overrideAllProcessDefinition(BpmnProcessModelContent processModelContent,
+                                             ReferenceIdOverrider referenceIdOverrider) {
+        processModelContent.getBpmnModel().getProcesses().forEach(process -> {
+            referenceIdOverrider.overrideProcessId(process);
+            overrideAllIdReferences(process, referenceIdOverrider);
+        });
+    }
+
+    private void overrideAllIdReferences(Process process,
+                                        ReferenceIdOverrider referenceIdOverrider) {
+        process.getFlowElements().forEach(element -> element.accept(referenceIdOverrider));
+    }
+
 }

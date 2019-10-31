@@ -17,7 +17,7 @@
 package org.activiti.cloud.services.organization.converter;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.activiti.cloud.organization.api.ConnectorModelType;
@@ -64,7 +64,7 @@ public class ConnectorModelContentConverter implements ModelContentConverter<Con
 
   @Override
   public FileContent overrideModelId(FileContent fileContent,
-                                     HashMap<String, String> modelIdentifiers) {
+                                     Map<String, String> modelIdentifiers) {
     try {
       ObjectNode jsonNode = (ObjectNode) objectMapper.readTree(fileContent.getFileContent());
       this.updateConnectorIdFromFileContent(jsonNode, modelIdentifiers);
@@ -74,7 +74,8 @@ public class ConnectorModelContentConverter implements ModelContentConverter<Con
     }
   }
 
-  private void updateConnectorIdFromFileContent(ObjectNode jsonNode, HashMap<String, String> modelIdentifiers) {
+  private void updateConnectorIdFromFileContent(ObjectNode jsonNode,
+                                                Map<String, String> modelIdentifiers) {
     String actualId = jsonNode.get("id") != null ? modelIdentifiers.get(jsonNode.get("id").asText()) : null;
     if(actualId != null) {
       jsonNode.put("id", actualId);

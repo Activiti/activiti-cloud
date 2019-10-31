@@ -18,7 +18,7 @@ package org.activiti.cloud.organization.api;
 
 import org.activiti.cloud.services.common.file.FileContent;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -47,14 +47,14 @@ public interface ModelContentConverter<T extends ModelContent> {
   byte[] convertToBytes(T modelContent);
 
   /**
-   * Convert a bytes array to the handled model content entity, set the given id, and convert back to bytes array.
-   * If the id is already the expected one, it returns the given bytes unchanged.
-   * @param bytes the bytes to convert and fix
+   * Converts the file content to the handled model content entity, sets the given id, and converts back to a FileContent.
+   * If the id is already the expected one, it returns it unchanged.
+   * @param fileContent the FileContent wrapper to convert and fix
    * @param modelIdentifiers the mapping of the old ids to the new ones
-   * @return the fixed bytes array
+   * @return the fixed FileContent
    */
   default FileContent overrideModelId(FileContent fileContent,
-                                      HashMap<String, String> modelIdentifiers){
+                                      Map<String, String> modelIdentifiers){
     return fileContent;
   }
 }
