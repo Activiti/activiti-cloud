@@ -42,3 +42,9 @@ Scenario: export an invalid project containing service task with invalid impleme
 Given the user is authenticated as modeler
 And an project 'mission-europe' with process model 'spacex-service-task-with-invalid-implementation'
 Then the project cannot be exported due to validation errors with message "Invalid service implementation on service 'ServiceTask_1qr4ad0'"
+
+Scenario: get project filtering by name
+Given the user is authenticated as modeler
+And existing projects 'mars-team, mars-terraforming-team, terra-discovery-team'
+When the user gets the projects by name 'terra'
+Then the retrieved projects are 'mars-terraforming-team, terra-discovery-team'
