@@ -18,13 +18,7 @@ package org.activiti.cloud.services.rest.controllers;
 import static java.util.Collections.emptyList;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
-import static java.util.Collections.emptyList;
-
-import java.nio.charset.StandardCharsets;
-
-import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
@@ -66,24 +60,20 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
     private final ProcessRuntime processRuntime;
 
     private final SpringPageConverter pageConverter;
-
-    private final ProcessVariablesPayloadValidator processVariablesValidator;
-
+    
     @Autowired
     public ProcessInstanceControllerImpl(RepositoryService repositoryService,
                                          ProcessDiagramGeneratorWrapper processDiagramGenerator,
                                          ProcessInstanceResourceAssembler resourceAssembler,
                                          AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler,
                                          ProcessRuntime processRuntime,
-                                         SpringPageConverter pageConverter,
-                                         ProcessVariablesPayloadValidator processVariablesValidator) {
+                                         SpringPageConverter pageConverter) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.processRuntime = processRuntime;
         this.pageConverter = pageConverter;
-        this.processVariablesValidator = processVariablesValidator;
     }
 
     @Override
@@ -94,33 +84,8 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
                 resourceAssembler);
     }
 
-    private String getProcessDefinitionKey(StartProcessPayload startProcessPayload) {
-        String processDefinitionKey = startProcessPayload.getProcessDefinitionKey();
-
-        if (processDefinitionKey == null && startProcessPayload.getProcessDefinitionId() != null) {
-            ProcessDefinition processDefinition = processRuntime.processDefinition(startProcessPayload.getProcessDefinitionId());
-            if (processDefinition != null) {
-                processDefinitionKey = processDefinition.getKey();
-            }
-        }
-
-        if (processDefinitionKey == null) {
-            throw new IllegalStateException("At least Process Definition Id or Key needs to be provided to start a process");
-        }
-
-        return processDefinitionKey;
-    }
-
     @Override
     public Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
-
-        Map<String, Object> variables = startProcessPayload.getVariables();
-        if (variables != null && !variables.isEmpty()) {
-
-            processVariablesValidator.checkStartProcessPayloadVariables(startProcessPayload,
-                    startProcessPayload.getProcessDefinitionId());
-        }
-
         return resourceAssembler.toResource(processRuntime.start(startProcessPayload));
     }
 

@@ -87,7 +87,13 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     private ProcessAdminRuntime processAdminRuntime;
 
     @MockBean
-    private ProcessVariablesPayloadValidator processVariablesValidator;
+    private Map<String, ProcessExtensionModel> processExtensionModelMap;
+    
+    @MockBean
+    private TaskAdminRuntime taskAdminRuntime;
+
+    @MockBean
+    private MessageChannel commandResults;
 
     @Autowired
     private ObjectMapper mapper;
@@ -112,7 +118,7 @@ public class ProcessInstanceVariableAdminControllerImplIT {
         processInstance.setProcessDefinitionKey("1");
 
         this.mockMvc = MockMvcBuilders
-                .standaloneSetup(new ProcessInstanceVariableAdminControllerImpl(processAdminRuntime, processVariablesValidator))
+                .standaloneSetup(new ProcessInstanceVariableAdminControllerImpl(processAdminRuntime))
                 .setControllerAdvice(new RuntimeBundleExceptionHandler())
                 .build();
 

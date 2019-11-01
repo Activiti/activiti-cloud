@@ -35,19 +35,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class TaskVariableControllerImpl implements TaskVariableController {
 
     private final TaskVariableInstanceResourceAssembler variableResourceAssembler;
-    private final TaskVariablesPayloadDateHandler taskVariablesPayloadDateHandler;
     private final ResourcesAssembler resourcesAssembler;
     private final TaskRuntime taskRuntime;
 
     @Autowired
     public TaskVariableControllerImpl(TaskVariableInstanceResourceAssembler variableResourceAssembler,
                                       ResourcesAssembler resourcesAssembler,
-                                      TaskRuntime taskRuntime,
-                                      TaskVariablesPayloadDateHandler taskVariablesPayloadDateHandler) {
+                                      TaskRuntime taskRuntime) {
         this.variableResourceAssembler = variableResourceAssembler;
         this.resourcesAssembler = resourcesAssembler;
         this.taskRuntime = taskRuntime;
-        this.taskVariablesPayloadDateHandler = taskVariablesPayloadDateHandler;
     }
 
     @Override
@@ -63,7 +60,7 @@ public class TaskVariableControllerImpl implements TaskVariableController {
                                                @RequestBody CreateTaskVariablePayload createTaskVariablePayload) {
 
         createTaskVariablePayload.setTaskId(taskId);
-        taskRuntime.createVariable(taskVariablesPayloadDateHandler.handleDate(createTaskVariablePayload));
+        taskRuntime.createVariable(createTaskVariablePayload);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -75,7 +72,7 @@ public class TaskVariableControllerImpl implements TaskVariableController {
 
         updateTaskVariablePayload.setTaskId(taskId);
         updateTaskVariablePayload.setName(variableName);
-        taskRuntime.updateVariable(taskVariablesPayloadDateHandler.handleDate(updateTaskVariablePayload));
+        taskRuntime.updateVariable(updateTaskVariablePayload);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

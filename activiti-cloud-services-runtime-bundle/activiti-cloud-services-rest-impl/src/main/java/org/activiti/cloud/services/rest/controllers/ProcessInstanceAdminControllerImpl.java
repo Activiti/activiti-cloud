@@ -15,8 +15,6 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.Map;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
@@ -50,18 +48,14 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     private final SpringPageConverter pageConverter;
 
-    private final ProcessVariablesPayloadValidator processVariablesValidator;
-
     public ProcessInstanceAdminControllerImpl(ProcessInstanceResourceAssembler resourceAssembler,
                                               AlfrescoPagedResourcesAssembler<ProcessInstance> pagedResourcesAssembler,
                                               ProcessAdminRuntime processAdminRuntime,
-                                              SpringPageConverter pageConverter,
-                                              ProcessVariablesPayloadValidator processVariablesValidator) {
+                                              SpringPageConverter pageConverter) {
         this.resourceAssembler = resourceAssembler;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.processAdminRuntime = processAdminRuntime;
         this.pageConverter = pageConverter;
-        this.processVariablesValidator = processVariablesValidator;
     }
 
     @Override
@@ -71,15 +65,9 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
                                                   pageConverter.toSpringPage(pageable, processInstancePage),
                                                   resourceAssembler);
     }
-
+   
     @Override
     public Resource<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
-        Map<String, Object> variables = startProcessPayload.getVariables();
-        if (variables != null && !variables.isEmpty()) {
-
-            processVariablesValidator.checkStartProcessPayloadVariables(startProcessPayload,
-                    startProcessPayload.getProcessDefinitionId());
-        }
         return resourceAssembler.toResource(processAdminRuntime.start(startProcessPayload));
     }
 
@@ -92,7 +80,6 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
     public Resource<CloudProcessInstance> resume(@PathVariable String processInstanceId) {
         return resourceAssembler.toResource(processAdminRuntime.resume(ProcessPayloadBuilder.resume(processInstanceId)));
     }
-
 
 	@Override
 	public Resource<CloudProcessInstance> suspend(@PathVariable String processInstanceId) {

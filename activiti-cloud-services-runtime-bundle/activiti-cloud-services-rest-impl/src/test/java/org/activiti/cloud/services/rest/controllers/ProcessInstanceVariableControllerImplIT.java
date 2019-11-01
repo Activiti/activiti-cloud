@@ -30,6 +30,11 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
@@ -64,11 +69,6 @@ import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceVariableControllerImpl.class)
@@ -107,9 +107,6 @@ public class ProcessInstanceVariableControllerImplIT {
     
     @MockBean
     private DateFormatterProvider dateFormatterProvider;
-    
-    @MockBean
-    private ProcessVariablesPayloadValidator processVariablesValidator;
 
     @Autowired
     private ObjectMapper mapper;
