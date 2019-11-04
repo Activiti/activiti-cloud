@@ -3,5 +3,4 @@ github:
   - name: activiti
     repositories:
     - name: activiti-cloud-audit
-      branch: develop
       useSinglePullRequest: true      
