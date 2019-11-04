@@ -65,6 +65,21 @@ public class ModelingProjects {
         modelingProjectsSteps.checkExists(projectNamed(projectName));
     }
 
+    @When("the user gets the projects by name '$name'")
+    public void findProjectsByName(String name) {
+        modelingProjectsSteps.findByName(name);
+    }
+
+    @Then("the retrieved projects are '$projectNames'")
+    public void checkCurrentProjects(List<String> projectNames) {
+        modelingProjectsSteps.checkCurrentProjects(projectNames);
+    }
+
+    @Given("existing projects '$projectNames'")
+    public void ensureProjectsExist(List<String> projectNames) {
+        projectNames.forEach(this::ensureProjectExists);
+    }
+
     @Then("delete project '$projectName'")
     @When("the user delete the project '$projectName'")
     public void deleteProject(String projectName) {

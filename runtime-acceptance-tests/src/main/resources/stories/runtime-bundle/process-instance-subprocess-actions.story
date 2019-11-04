@@ -17,6 +17,6 @@ Given the user is authenticated as hruser
 When the user starts a process with a subProcess called PARENT_PROCESS
 Then the parent process instance has a variable named name with value inName
 And the subprocess has been created
-And a subprocess variable subprocess-input-var1 is created with value inName
+And a subprocess variable subprocess_input_var1 is created with value inName
 When the user claims and completes the subprocess task my-task-call-activity
 Then the parent process instance has a variable named name with value outValue

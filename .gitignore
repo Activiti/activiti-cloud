@@ -33,6 +33,9 @@ hs_err_pid*
 .classpath
 .settings
 
+# macOS
+*.DS_Store
+
 # Updatebot
 .updatebot-repos
 .updatebot-repos/**
