@@ -2,6 +2,6 @@ github:
   organisations:
   - name: activiti
     repositories:
-    - name: activiti-cloud-dependencies
+    - name: example-runtime-bundle
       branch: develop
       useSinglePullRequest: true      
