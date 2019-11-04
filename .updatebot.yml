@@ -2,6 +2,6 @@ github:
   organisations:
   - name: activiti
     repositories:
-    - name: activiti-cloud-dependencies
+    - name: activiti-cloud-audit
       branch: develop
       useSinglePullRequest: true      
