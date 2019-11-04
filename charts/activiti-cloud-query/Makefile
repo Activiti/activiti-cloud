@@ -74,10 +74,10 @@ updatebot/push-version:
 	@echo Doing updatebot push-version.....
 
 	cd ../../ && updatebot push-version --kind  make  ACTIVITI_CLOUD_QUERY_VERSION $(RELEASE_VERSION)
-	cd ../../ && updatebot push-version --kind maven org.activiti.cloud.query:activiti-cloud-query-dependencies $(ACTIVITI_CLOUD_QUERY_VERSION)
+	cd ../../ && updatebot push-version --kind maven org.activiti.cloud.query:activiti-cloud-query-dependencies $(ACTIVITI_CLOUD_QUERY_VERSION) org.activiti.cloud.examples:activiti-cloud-query $(RELEASE_VERSION)
 
 	cd ../../ && rm -rf .updatebot-repos/
 	sleep $$[ ( $$RANDOM % 10 )  + 1 ]s
 
 	cd ../../ && updatebot push-version --kind  make  ACTIVITI_CLOUD_QUERY_VERSION $(RELEASE_VERSION)
-	cd ../../ && updatebot push-version --kind maven org.activiti.cloud.query:activiti-cloud-query-dependencies $(ACTIVITI_CLOUD_QUERY_VERSION)
+	cd ../../ && updatebot push-version --kind maven org.activiti.cloud.query:activiti-cloud-query-dependencies $(ACTIVITI_CLOUD_QUERY_VERSION) org.activiti.cloud.examples:activiti-cloud-query $(RELEASE_VERSION)
