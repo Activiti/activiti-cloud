@@ -14,8 +14,144 @@
 
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
-    <enforceFail>true</enforceFail>    
+    <enforceFail>true</enforceFail>
+    <example-runtime-bundle.version>7.1.0-SNAPSHOT</example-runtime-bundle.version>
+    <example-cloud-connector.version>7.1.0-SNAPSHOT</example-cloud-connector.version>
+    <activiti-cloud-audit.version>7.1.0-SNAPSHOT</activiti-cloud-audit.version>
+    <activiti-cloud-query.version>7.1.0-SNAPSHOT</activiti-cloud-query.version>
+    <activiti-cloud-notifications-graphql>7.1.0-SNAPSHOT</activiti-cloud-notifications-graphql>
+
   </properties>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.activiti.cloud.examples</groupId>
+      <artifactId>example-runtime-bundle</artifactId>
+      <version>${example-runtime-bundle.version}</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.activiti.cloud.rb</groupId>
+          <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.activiti.cloud.examples</groupId>
+      <artifactId>example-cloud-connector</artifactId>
+      <version>${example-cloud-connector.version}</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.activiti.cloud.connector</groupId>
+          <artifactId>activiti-cloud-starter-connector</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.activiti.cloud.examples</groupId>
+      <artifactId>activiti-cloud-audit</artifactId>
+      <version>${activiti-cloud-audit.version}</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.activiti.cloud.audit</groupId>
+          <artifactId>activiti-cloud-starter-audit</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.activiti.cloud.examples</groupId>
+      <artifactId>activiti-cloud-query</artifactId>
+      <version>${activiti-cloud-query.version}</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.activiti.cloud.query</groupId>
+          <artifactId>activiti-cloud-starter-query</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.activiti.cloud.examples</groupId>
+      <artifactId>activiti-cloud-notifications-graphql</artifactId>
+      <version>${activiti-cloud-notifications-service-graphql.version}</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.activiti.cloud.notifications.graphql</groupId>
+          <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.activiti.cloud.common</groupId>
+          <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+
+  </dependencies> 
 
   <build>
     <plugins>
