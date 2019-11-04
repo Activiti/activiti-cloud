@@ -31,10 +31,9 @@ db:
   generateDdl: "false"
   ddlAuto: "none"
 init:
-  image:
-    repository: alpine
-    tag: 3.8
-    pullPolicy: IfNotPresent
+  container:
+    image: alpine:3.8
+    imagePullPolicy: IfNotPresent
 postgres:
   enabled: false
   name: postgres
