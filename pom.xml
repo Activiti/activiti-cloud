@@ -23,7 +23,7 @@
       <java.version>11</java.version>
       <maven.compiler.source>${java.version}</maven.compiler.source>
       <maven.compiler.target>${java.version}</maven.compiler.target>
-      <activiti-cloud-dependencies.version>7.1.172</activiti-cloud-dependencies.version>
+      <activiti-cloud-runtime-bundle-service.version>7.1.128</activiti-cloud-runtime-bundle-service.version>
       <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
       <maven-failsafe-plugin.version>3.0.0-M3</maven-failsafe-plugin.version>
       <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
@@ -33,20 +33,20 @@
   </properties>
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.activiti.cloud.dependencies</groupId>
-        <artifactId>activiti-cloud-dependencies</artifactId>
-        <version>${activiti-cloud-dependencies.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
+     <dependency>
+       <groupId>org.activiti.cloud.rb</groupId>
+       <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
+       <version>${activiti-cloud-runtime-bundle-service.version}</version>
+       <scope>import</scope> 
+      <type>pom</type>
+     </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
-   <dependency>
-        <groupId>javax.xml.bind</groupId>
-        <artifactId>jaxb-api</artifactId>
-        <version>${javax.xml.bind.version}</version>
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>${javax.xml.bind.version}</version>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud.rb</groupId>
@@ -80,6 +80,27 @@
       <artifactId>spring-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    
+    <!-- Marker Pom for Dependency Conversion Validation  -->
+    <dependency>
+     <groupId>org.activiti.cloud.rb</groupId>
+     <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
+     <version>${activiti-cloud-runtime-bundle-service.version}</version>
+     <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>${project.parent.version}</version>
+      <type>pom</type>
+    </dependency>
+    <!-- Marker Pom for Dependency Conversion Validation  -->
+        
   </dependencies>
   <build>
     <plugins>
