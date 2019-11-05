@@ -41,7 +41,7 @@ updatebot/push-version:
 	 activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING)
 
 run-full-chart:
-    cd  activiti-cloud-full-chart && \
+	cd  activiti-cloud-full-chart && \
         	helm init --client-only && \
          	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
         	helm repo add alfresco https://kubernetes-charts.alfresco.com/stable	&& \
