@@ -55,3 +55,5 @@ run-full-chart:
             		--namespace ${PREVIEW_NAMESPACE} \
             		--debug \
             		--wait
+delete:
+	helm delete --purge ${HELM_RELEASE_NAME} || echo "try to remove helm chart"				
