@@ -3,5 +3,4 @@ github:
   - name: activiti
     repositories:
     - name: example-runtime-bundle
-      branch: develop
       useSinglePullRequest: true      
