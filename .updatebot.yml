@@ -3,7 +3,7 @@ github:
   - name: activiti
     repositories:
     - name: activiti-cloud-full-chart
-      branc: master
+      branch: master
       useSinglePullRequest: true
     # - name: ttc-connectors-reward
     #   branch: master
