@@ -64,7 +64,7 @@ pipeline {
             }
           }
           container('maven') {
-            sh 'mvn clean deploy -DskipTests'
+            sh 'mvn clean deploy'
 
             sh 'export VERSION=`cat VERSION`'
             sh 'export UPDATEBOT_MERGE=false'
@@ -73,8 +73,8 @@ pipeline {
 
             retry(2){
                 sh "make updatebot/push-version"
-
             }
+            sh "make update-ea"  
 
           }
         }
