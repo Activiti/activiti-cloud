@@ -4,6 +4,7 @@ github:
     repositories:
     - name: activiti-cloud-query
       useSinglePullRequest: true
+      branch: master
     - name: activiti-cloud-notifications-service-graphql
       branch: develop
       useSinglePullRequest: true
