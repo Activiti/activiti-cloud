@@ -19,8 +19,7 @@
     <example-cloud-connector.version>7.1.230</example-cloud-connector.version>
     <activiti-cloud-audit.version>7.1.223</activiti-cloud-audit.version>
     <activiti-cloud-query.version>7.1.215</activiti-cloud-query.version>
-    <activiti-cloud-notifications-graphql>7.1.225</activiti-cloud-notifications-graphql>
-
+    <activiti-cloud-notifications-graphql.version>7.1.225</activiti-cloud-notifications-graphql.version>
   </properties>
   
   <dependencies>
@@ -123,7 +122,7 @@
     <dependency>
       <groupId>org.activiti.cloud.examples</groupId>
       <artifactId>activiti-cloud-notifications-graphql</artifactId>
-      <version>${activiti-cloud-notifications-service-graphql.version}</version>
+      <version>${activiti-cloud-notifications-graphql.version}</version>
       <type>pom</type>
       <exclusions>
         <exclusion>
