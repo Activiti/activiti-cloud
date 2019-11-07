@@ -2,8 +2,7 @@ github:
   organisations:
   - name: activiti
     repositories:
-    - name: activiti-cloud-dependencies
-      branch: develop
+    - name: activiti-cloud-acceptance-scenarios
       useSinglePullRequest: true      
     - name: activiti-cloud-org-service
       branch: develop
