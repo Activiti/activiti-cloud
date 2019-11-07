@@ -12,6 +12,9 @@ ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.0
 ACTIVITI_CLOUD_VERSION := $(shell cat VERSION)
 get-modeling-dependencies-version:
 	@echo $(MODELING_DEPENDENCIES_VERSION)
+get-acc-scenarious-version:
+	@echo $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)	
+
 
 update-ea:
 	#$(eval ACTIVITI_CLOUD_VERSION = $(shell cat VERSION)) 
