@@ -63,4 +63,4 @@ run-helm-chart:
             		--debug \
             		--wait
 delete:
-	helm delete --purge ${HELM_RELEASE_NAME} || echo "try to remove helm chart"				
+	helm delete --purge ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"				
