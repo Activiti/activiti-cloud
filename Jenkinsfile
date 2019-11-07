@@ -123,6 +123,6 @@ pipeline {
 def delete_deployment() {
   container('maven') {
    sh "make delete"
-   sh "kubectl delete namespace $PREVIEW_NAMESPACE"
+   sh "kubectl delete namespace $PREVIEW_NAMESPACE|echo 'try to remove namespace'$PREVIEW_NAMESPACE "
   }
 }
