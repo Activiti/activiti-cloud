@@ -16,10 +16,11 @@ get-acc-scenarious-version:
 	@echo $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)	
 
 acc-tests:	
-	git clone 'https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git'               
-	git fetch --all --tags --prune
-	git checkout tags/v$(ACCEPTANCE_VERSION) -b $(ACCEPTANCE_VERSION)
-	sleep 90
+	git clone 'https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git'
+	cd activiti-cloud-acceptance-scenarios && \
+	git fetch --all --tags --prune && \
+	git checkout tags/v$(ACCEPTANCE_VERSION) -b $(ACCEPTANCE_VERSION) && \
+	sleep 90 && \
 	mvn clean install -DskipTests && mvn -pl 'runtime-acceptance-tests,modeling-acceptance-tests' clean verify"
 
 update-ea:
