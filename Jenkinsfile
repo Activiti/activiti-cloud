@@ -7,7 +7,7 @@ pipeline {
       APP_NAME          = 'activiti-cloud-dependencies'
       CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
       PREVIEW_NAMESPACE = "example-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase()
-      GLOBAL_GATEWAY_DOMAIN="35.228.195.195.nip.io"
+      GLOBAL_GATEWAY_DOMAIN="35.242.205.159.nip.io"
       REALM = "activiti"
       GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
