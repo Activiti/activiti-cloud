@@ -27,14 +27,7 @@ pipeline {
             sh "make updatebot/push-version-dry"
             sh "make prepare-helm-chart"
             sh "make run-helm-chart"  
-            dir("./activiti-cloud-acceptance-scenarios") {
-               git 'https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git'
-               
-               sh 'git fetch --all --tags --prune'
-               sh 'git checkout tags/v\$(ACCEPTANCE_VERSION) -b \$(ACCEPTANCE_VERSION)'
-               sh 'sleep 90'
-               sh "mvn clean install -DskipTests && mvn -pl 'runtime-acceptance-tests,modeling-acceptance-tests' clean verify"
-             }
+            sh "make acc-tests"
           }
         }
         post {
