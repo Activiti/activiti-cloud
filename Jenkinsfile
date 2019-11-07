@@ -14,10 +14,12 @@ pipeline {
     SSO_HOST = "activiti-keycloak.jx-staging.35.228.195.195.nip.io"
     REALM = "activiti"
     
-    RELEASE_VERSION := $(shell cat VERSION)
+    RELEASE_VERSION = $(shell cat VERSION)
     PREVIEW_VERSION = "0.0.0-SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER"
     PREVIEW_NAMESPACE = "scenarios-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase()
     HELM_RELEASE = "$PREVIEW_NAMESPACE".toLowerCase()
+    
+    
   }
   stages {
     stage('CI Build and push snapshot') {
@@ -38,12 +40,13 @@ pipeline {
        steps {
          container('maven') {
            // ensure we're not on a detached head
+           sh "echo \$(jx-release-version) > VERSION"
            sh "git checkout master"
            sh "git config --global credential.helper store"
            sh "jx step git credentials"
            sh "mvn clean install -DskipTests"
            sh "make tag"
-           sh "updatebot push-version --kind  make  ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(RELEASE_VERSION)"
+           sh "updatebot push-version --kind  make  ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION \$(cat VERSION)"
           }
       }
      }
