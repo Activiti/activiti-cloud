@@ -1,3 +1,5 @@
+RELEASE_VERSION := $(shell cat VERSION)
+
 tag:
 ifeq ($(OS),Darwin)
 	sed -i "" -e "s/version:.*/version: $(RELEASE_VERSION)/" Chart.yaml
