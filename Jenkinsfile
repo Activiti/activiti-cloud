@@ -26,7 +26,7 @@ pipeline {
           container('maven') {
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
-            sh "make run-full-chart"
+            sh "make updatebot/push-version-dry"
             dir("./activiti-cloud-acceptance-scenarios") {
                git 'https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git'
                sh 'sleep 30'
