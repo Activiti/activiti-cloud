@@ -30,7 +30,8 @@ pipeline {
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
             sh "make updatebot/push-version-dry"
-            sh "make run-full-chart"  
+            sh "make prepare-helm-chart"
+            sh "make run-helm-chart"  
             dir("./activiti-cloud-acceptance-scenarios") {
                git 'https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git'
                sh 'sleep 30'
@@ -127,9 +128,7 @@ pipeline {
   }
 def delete_deployment() {
   container('maven') {
-    dir("./charts/$APP_NAME") {
-      sh "make delete"
-    }
-    sh "kubectl delete namespace $PREVIEW_NAMESPACE"
+   sh "make delete"
+   sh "kubectl delete namespace $PREVIEW_NAMESPACE"
   }
 }
