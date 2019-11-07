@@ -29,6 +29,7 @@ pipeline {
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
             sh "make updatebot/push-version-dry"
+            sh "make run-full-chart"  
             dir("./activiti-cloud-acceptance-scenarios") {
                git 'https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git'
                sh 'sleep 30'
