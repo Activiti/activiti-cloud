@@ -24,7 +24,8 @@ pipeline {
         }
         steps {
           container('maven') {
-            sh "git config --global credential.helper store"  
+            sh "git config --global credential.helper store" 
+            sh "jx step git credentials"
             sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
             sh "make updatebot/push-version-dry"
