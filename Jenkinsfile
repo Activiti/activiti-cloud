@@ -17,16 +17,15 @@ pipeline {
         when {
           branch 'PR-*'
         }
-        environment {
-          PREVIEW_VERSION = "0.0.0-SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER"
-          PREVIEW_NAMESPACE = "$APP_NAME-$BRANCH_NAME".toLowerCase()
-          HELM_RELEASE = "$PREVIEW_NAMESPACE".toLowerCase()
-        }
         steps {
           container('maven') {
-            sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
+            sh "git config --global credential.helper store" 
+            sh "jx step git credentials"
+            sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
             sh "mvn install"
-            sh "make run-full-chart"
+            sh "make updatebot/push-version-dry"
+            sh "make prepare-helm-chart"
+            sh "make run-helm-chart"  
             dir("./activiti-cloud-acceptance-scenarios") {
                git 'https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git'
                sh 'sleep 30'
@@ -123,9 +122,7 @@ pipeline {
   }
 def delete_deployment() {
   container('maven') {
-    dir("./charts/$APP_NAME") {
-      sh "make delete"
-    }
-    sh "kubectl delete namespace $PREVIEW_NAMESPACE"
+   sh "make delete"
+   sh "kubectl delete namespace $PREVIEW_NAMESPACE|echo 'try to remove namespace'$PREVIEW_NAMESPACE "
   }
 }
