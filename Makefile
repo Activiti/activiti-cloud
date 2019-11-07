@@ -47,7 +47,7 @@ updatebot/push-version-dry:
 
 
 run-full-chart:
-	cd  .updatebot-repos/activiti-cloud-full-chart && \
+	cd  .updatebot-repos/.updatebot-repos/github/activiti/activiti-cloud-full-chart && \
         	helm init --client-only && \
          	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
         	helm repo add alfresco https://kubernetes-charts.alfresco.com/stable	&& \
