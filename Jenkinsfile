@@ -14,6 +14,7 @@ pipeline {
     SSO_HOST = "activiti-keycloak.jx-staging.35.228.195.195.nip.io"
     REALM = "activiti"
     
+    RELEASE_VERSION := $(shell cat VERSION)
     PREVIEW_VERSION = "0.0.0-SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER"
     PREVIEW_NAMESPACE = "scenarios-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase()
     HELM_RELEASE = "$PREVIEW_NAMESPACE".toLowerCase()
@@ -41,6 +42,7 @@ pipeline {
            sh "git config --global credential.helper store"
            sh "jx step git credentials"
            sh "mvn clean install -DskipTests"
+           sh "updatebot push-version --kind  make  ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(RELEASE_VERSION)"
           }
       }
      }
