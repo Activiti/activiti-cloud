@@ -11,17 +11,11 @@ pipeline {
       REALM = "activiti"
       GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
-      HELM_RELEASE_NAME = "example-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase()
     }
     stages {
       stage('CI Build and push snapshot') {
         when {
           branch 'PR-*'
-        }
-        environment {
-          PREVIEW_VERSION = "0.0.0-SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER"
-          PREVIEW_NAMESPACE = "$APP_NAME-$BRANCH_NAME".toLowerCase()
-          HELM_RELEASE = "$PREVIEW_NAMESPACE".toLowerCase()
         }
         steps {
           container('maven') {
