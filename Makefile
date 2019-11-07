@@ -56,7 +56,7 @@ prepare-helm-chart:
         	helm lint 
 run-helm-chart:		
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
-            	helm upgrade ${HELM_RELEASE_NAME} . \
+            	helm upgrade ${PREVIEW_NAMESPACE} . \
             		--install \
             		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
             		--namespace ${PREVIEW_NAMESPACE} \
