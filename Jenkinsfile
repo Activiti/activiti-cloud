@@ -11,7 +11,7 @@ pipeline {
       REALM = "activiti"
       GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
-      ACCEPTANCE_VERSION = sh "make get-acc-scenarious-version"   
+  
     }
     stages {
       stage('CI Build and push snapshot') {
