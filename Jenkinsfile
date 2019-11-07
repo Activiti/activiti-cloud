@@ -42,6 +42,7 @@ pipeline {
            sh "git config --global credential.helper store"
            sh "jx step git credentials"
            sh "mvn clean install -DskipTests"
+           sh "make tag"
            sh "updatebot push-version --kind  make  ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(RELEASE_VERSION)"
           }
       }
