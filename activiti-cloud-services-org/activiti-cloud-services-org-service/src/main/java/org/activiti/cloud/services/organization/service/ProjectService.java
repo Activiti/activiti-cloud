@@ -33,12 +33,16 @@ import java.util.stream.Stream;
 import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelType;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.organization.converter.JsonConverter;
+import org.activiti.cloud.organization.core.error.ImportModelException;
 import org.activiti.cloud.organization.core.error.ImportProjectException;
 import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
 import org.activiti.cloud.organization.repository.ProjectRepository;
@@ -73,6 +77,8 @@ public class ProjectService {
   private final JsonConverter<Map> jsonMetadataConverter;
 
   private final Set<ProjectValidator> projectValidators;
+
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired
   public ProjectService(ProjectRepository projectRepository,
@@ -190,7 +196,7 @@ public class ProjectService {
    * Import an project form a zip multipart file.
    *
    * @param file the multipart zip file to import from
-   * @param name the name of the new project that will be set if provided 
+   * @param name the name of the new project that will be set if provided
    * @return the imported project
    * @throws IOException in case of multipart file input stream access error
    */
@@ -209,10 +215,10 @@ public class ProjectService {
     });
 
     projectHolder.getModelContentFiles().forEach(modelXmlFile ->
-      importXMLModelFiles(createdProject, modelXmlFile.getModelType(), modelXmlFile.getFileContent()));
+      importXMLModelFiles(projectHolder, createdProject, modelXmlFile.getModelType(), modelXmlFile.getFileContent()));
 
     projectHolder.getProcessFiles().forEach(modelProcessFile ->
-      importXMLModelFiles(createdProject, modelProcessFile.getModelType(), modelProcessFile.getFileContent()));
+      importXMLModelFiles(projectHolder, createdProject, modelProcessFile.getModelType(), modelProcessFile.getFileContent()));
 
     modelService.cleanModelIdList();
     return createdProject;
@@ -230,18 +236,30 @@ public class ProjectService {
     projectHolder.getModelExtension(createdModel)
       .ifPresent(fileMetadata -> {
         jsonMetadataConverter.tryConvertToEntity(fileMetadata.getFileContent())
-          .ifPresent(createdModel::setExtensions);
+          .ifPresent(extensions -> createdModel.setExtensions(this.getExtensionsValueMapFromJson(extensions)));
         modelService.updateModel(createdModel, createdModel);
       });
   }
 
-  private void importXMLModelFiles(Project createdProject,
+  private void importXMLModelFiles(ProjectHolder projectHolder,
+                                   Project createdProject,
                                    ModelType modelType,
                                    FileContent fileContent) {
     Model createdModel = modelService.importModel(createdProject,
       modelType,
       fileContent);
     modelService.updateModelContent(createdModel, fileContent);
+
+    projectHolder.getModelExtension(createdModel)
+      .ifPresent(fileMetadata -> {
+        jsonMetadataConverter.tryConvertToEntity(fileMetadata.getFileContent())
+          .ifPresent(extensions -> createdModel.setExtensions(this.getExtensionsValueMapFromJson(extensions)));
+        modelService.updateModel(createdModel, createdModel);
+      });
+  }
+
+  private Map<String, Object> getExtensionsValueMapFromJson(Map<String, Object> extensions) {
+    return ((Map<String, Object>) extensions.get("extensions"));
   }
 
   private void processZipEntryFile(ProjectHolder projectHolder,
