@@ -52,6 +52,11 @@ pipeline {
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
             sh "mvn clean verify"
 
+            sh "make updatebot/push-version-dry"
+            sh "make prepare-helm-chart"
+            sh "make run-helm-chart"
+            sh "make acc-tests"
+
             retry(5){
               sh "git add --all"
               sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
