@@ -43,19 +43,18 @@ import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNErrorReceivedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageCancelledEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageReceivedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageSentEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageWaitingEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerCancelledEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerExecutedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFailedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerExecutedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNErrorReceivedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageReceivedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageSentEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageWaitingEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
@@ -129,8 +128,6 @@ public class CloudProcessModelAutoConfiguration {
                                               BPMNMessageEvent.MessageEvents.MESSAGE_SENT.name()));
         module.registerSubtypes(new NamedType(CloudBPMNMessageWaitingEventImpl.class,
                                               BPMNMessageEvent.MessageEvents.MESSAGE_WAITING.name()));
-        module.registerSubtypes(new NamedType(CloudBPMNMessageCancelledEventImpl.class,
-                                              BPMNMessageEvent.MessageEvents.MESSAGE_CANCELLED.name()));
         
         module.registerSubtypes(new NamedType(CloudBPMNErrorReceivedEventImpl.class,
                                               BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED.name()));
