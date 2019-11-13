@@ -41,6 +41,7 @@ public class ProcessDefinitionRegistry {
         put("PROCESS_WITH_HEADERS_CONNECTOR",
             "HeadersConnectorProcess");
         put("PROCESS_INSTANCE_WITH_INCLUSIVE_GATEWAY","basicInclusiveGateway");
+        put("TASK_DATE_VAR_MAPPING","taskDateVarMapping");
     }};
 
     private static final HashMap <String, String> processWithNoTasksDefinitionKeys = new HashMap<>() {{
