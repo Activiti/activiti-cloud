@@ -20,9 +20,9 @@ github:
     # - name: activiti-cloud-process-model-service
     #   branch: develop
     #   useSinglePullRequest: true
-    - name: activiti-cloud-app-service
-      branch: develop
-      useSinglePullRequest: true
+#     - name: activiti-cloud-app-service
+#       branch: develop
+#       useSinglePullRequest: true
     - name: activiti-cloud-connectors
       branch: develop
       useSinglePullRequest: true
