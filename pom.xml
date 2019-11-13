@@ -20,7 +20,7 @@
     <module>activiti-cloud-services-audit-api</module>
     <module>activiti-cloud-services-audit-jpa</module>
     <module>activiti-cloud-starter-audit</module>
-  </modules>
+  </modules> 
   <scm>
     <url>https://github.com/Activiti/activiti-cloud-audit-service</url>
     <connection>scm:git:https://github.com/Activiti/activiti-cloud-audit-service.git</connection>
