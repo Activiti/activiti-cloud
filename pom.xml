@@ -43,9 +43,9 @@
   </repositories>
   <properties>
     <activiti-cloud-modeling-build.version>7.1.4</activiti-cloud-modeling-build.version>
-    <activiti-dependencies.version>7.1.105</activiti-dependencies.version>
-    <activiti-cloud-service-common.version>7.1.78</activiti-cloud-service-common.version>
-    <activiti-cloud-acceptance-tests.version>7.1.98</activiti-cloud-acceptance-tests.version>
+    <activiti-dependencies.version>7.1.106</activiti-dependencies.version>
+    <activiti-cloud-service-common.version>7.1.79</activiti-cloud-service-common.version>
+    <activiti-cloud-acceptance-tests.version>7.1.99</activiti-cloud-acceptance-tests.version>
     <activiti-cloud-org-service.version>${project.version}</activiti-cloud-org-service.version>
     <everit-json-schema.version>1.11.0</everit-json-schema.version>
     <org.json.version>20180813</org.json.version>
