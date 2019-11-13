@@ -19,7 +19,7 @@
     <example-cloud-connector.version>7.1.235</example-cloud-connector.version>
     <activiti-cloud-audit.version>7.1.224</activiti-cloud-audit.version>
     <activiti-cloud-query.version>7.1.224</activiti-cloud-query.version>
-    <activiti-cloud-notifications-graphql.version>7.1.239</activiti-cloud-notifications-graphql.version>
+    <activiti-cloud-notifications-graphql.version>7.1.240</activiti-cloud-notifications-graphql.version>
   </properties>
   
   <dependencies>
