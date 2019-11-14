@@ -87,8 +87,8 @@ pipeline {
                 tag '*M*'
               }
               environment {
-                HELM_ACTIVITI_VERSION = $TAG_NAME
-                APP_ACTIVITI_VERSION = $TAG_NAME
+                HELM_ACTIVITI_VERSION = "$TAG_NAME"
+                APP_ACTIVITI_VERSION = "$TAG_NAME"
               }
               steps {
                 container('maven') {
