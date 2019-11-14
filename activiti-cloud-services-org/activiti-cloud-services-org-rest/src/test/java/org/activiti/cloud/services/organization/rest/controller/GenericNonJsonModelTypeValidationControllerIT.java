@@ -230,7 +230,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
         Mockito.verify(genericNonJsonExtensionsValidator,
                        Mockito.times(1))
                 .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> context.isEmpty()));
+                                         Mockito.argThat(context -> !context.isEmpty()));
     }
 
     @Test
@@ -253,7 +253,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
         Mockito.verify(genericNonJsonExtensionsValidator,
                        Mockito.times(1))
                 .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> context.isEmpty()));
+                                         Mockito.argThat(context -> !context.isEmpty()));
     }
     
     @Test
@@ -276,7 +276,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
         Mockito.verify(genericNonJsonExtensionsValidator,
                        Mockito.times(1))
                 .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> context.isEmpty()));
+                                         Mockito.argThat(context -> !context.isEmpty()));
     }
     
     @Test
@@ -299,7 +299,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
         Mockito.verify(genericNonJsonExtensionsValidator,
                        Mockito.times(1))
                 .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> context.isEmpty()));
+                                         Mockito.argThat(context -> !context.isEmpty()));
     }
     
     @Test
@@ -324,7 +324,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
         Mockito.verify(genericNonJsonExtensionsValidator,
                        Mockito.times(1))
                 .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
-                                         Mockito.argThat(context -> context.isEmpty()));
+                                         Mockito.argThat(context -> !context.isEmpty()));
     }
 
 }
