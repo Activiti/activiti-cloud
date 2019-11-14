@@ -57,19 +57,19 @@ updatebot/push-version-dry:
 	 activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING) --dry
 
 prepare-release-full-chart:
-    cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
-        sed -i -e "s/appVersion: .*/appVersion: $APP_ACTIVITI_VERSION/" Chart.yaml && \
-        sed -i -e "s/#tag: .*/tag: $APP_ACTIVITI_VERSION/" values.yaml
+	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
+		sed -i -e "s/appVersion: .*/appVersion: $APP_ACTIVITI_VERSION/" Chart.yaml && \
+		sed -i -e "s/#tag: .*/tag: $APP_ACTIVITI_VERSION/" values.yaml
 release-full-chart:
-    cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
-        make tag && \
-        make release && \
-        make github
+	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
+ 		make tag && \
+ 		make release && \
+ 		make github
 
 prepare-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
         	helm init --client-only && \
-         	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
+        	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
         	helm repo add alfresco https://kubernetes-charts.alfresco.com/stable	&& \
         	helm repo add alfresco-incubator https://kubernetes-charts.alfresco.com/incubator && \
         	helm dependency build && \
