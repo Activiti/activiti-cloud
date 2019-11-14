@@ -11,6 +11,8 @@ pipeline {
       REALM = "activiti"
       GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
+      GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
+
   
     }
     stages {
@@ -80,6 +82,27 @@ pipeline {
           }
         }
       }
+      stage('Build Release from Tag') {
+              when {
+                tag '*M*'
+              }
+              environment {
+                HELM_ACTIVITI_VERSION = $TAG_NAME
+                APP_ACTIVITI_VERSION = $TAG_NAME
+              }
+              steps {
+                container('maven') {
+                sh "git checkout $TAG_NAME"
+                sh "git config --global credential.helper store"
+                sh "jx step git credentials"
+
+                sh "make updatebot/push-version-dry"
+                sh "make release-full-chart"
+
+                }
+              }
+      }
+
       stage('Build Release from Tag') {
         when {
           tag '*RELEASE'
