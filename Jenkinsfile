@@ -92,9 +92,12 @@ pipeline {
               }
               steps {
                 container('maven') {
+                    echo "$TAGNAME" >VERSION
                     sh "git checkout $TAG_NAME"
                     sh "git config --global credential.helper store"
                     sh "jx step git credentials"
+                    sh "make retag-docker-images"
+                    sh "make push-docker-images"
                     sh "make updatebot/push-version-dry"
                     sh "make prepare-release-full-chart"
                     sh "make run-helm-chart"
