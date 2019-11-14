@@ -102,6 +102,17 @@ public class TaskEventContainedBuilder {
         return task;
     }
 
+    public Task aCancelledTask(String taskName,
+                               ProcessInstance processInstance) {
+        Task task = buildTask(taskName,
+                              Task.TaskStatus.CANCELLED,
+                              processInstance);
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task),
+                                   new CloudTaskAssignedEventImpl(task),
+                                   new CloudTaskCancelledEventImpl(UUID.randomUUID().toString(), new Date().getTime(), task));
+        return task;
+    }
+
     public Task aReleasedTask (String taskName) {
         Task task = buildTask(taskName,
                 Task.TaskStatus.ASSIGNED,
