@@ -253,6 +253,7 @@ public class ProjectService {
     Model createdModel = modelService.importModel(createdProject,
       modelType,
       fileContent);
+    this.updateModelProcessImported(projectHolder, createdModel, fileContent);
   }
 
   private void updateModelProcessImported(ProjectHolder projectHolder, Model createdModel, FileContent fileContent){
