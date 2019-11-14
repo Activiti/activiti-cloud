@@ -82,7 +82,7 @@ pipeline {
           }
         }
       }
-      stage('Build Release from Tag') {
+      stage('helm chart release') {
               when {
                 tag '*M*'
               }
