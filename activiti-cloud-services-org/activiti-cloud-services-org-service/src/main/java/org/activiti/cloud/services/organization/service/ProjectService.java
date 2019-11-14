@@ -22,11 +22,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExt
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -217,8 +213,8 @@ public class ProjectService {
     projectHolder.getModelContentFiles().forEach(modelXmlFile ->
       importXMLModelFiles(projectHolder, createdProject, modelXmlFile.getModelType(), modelXmlFile.getFileContent()));
 
-    projectHolder.getProcessFiles().forEach(modelProcessFile ->
-      importXMLModelFiles(projectHolder, createdProject, modelProcessFile.getModelType(), modelProcessFile.getFileContent()));
+    Map<Model, FileContent> createdProcesses = this.createXMLModelFiles(projectHolder, createdProject);
+    createdProcesses.keySet().forEach(model -> this.updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
 
     modelService.cleanModelIdList();
     return createdProject;
@@ -241,6 +237,15 @@ public class ProjectService {
       });
   }
 
+  private Map<Model, FileContent> createXMLModelFiles(ProjectHolder projectHolder, Project createdProject) {
+    Map<Model, FileContent> createdModels = new HashMap<Model, FileContent>();
+    projectHolder.getProcessFiles().forEach(modelProcessFile ->{
+      Model createdModel = modelService.importModel(createdProject, modelProcessFile.getModelType(), modelProcessFile.getFileContent());
+      createdModels.put(createdModel, modelProcessFile.getFileContent());
+    });
+    return createdModels;
+  }
+
   private void importXMLModelFiles(ProjectHolder projectHolder,
                                    Project createdProject,
                                    ModelType modelType,
@@ -248,6 +253,10 @@ public class ProjectService {
     Model createdModel = modelService.importModel(createdProject,
       modelType,
       fileContent);
+    this.updateModelProcessImported(projectHolder, createdModel, fileContent);
+  }
+
+  private void updateModelProcessImported(ProjectHolder projectHolder, Model createdModel, FileContent fileContent){
     modelService.updateModelContent(createdModel, fileContent);
 
     projectHolder.getModelExtension(createdModel)
