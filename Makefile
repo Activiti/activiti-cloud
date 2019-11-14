@@ -56,11 +56,33 @@ updatebot/push-version-dry:
 	 activiti-cloud-query $(ACTIVITI_CLOUD_QUERY_VERSION) activiti-cloud-notifications-graphql $(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)  \
 	 activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING) --dry
 
+prepare-release-full-chart:
+	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
+		sed -i -e "s/appVersion: .*/appVersion: $APP_ACTIVITI_VERSION/" Chart.yaml && \
+		sed -i -e "s/#tag: .*/tag: $APP_ACTIVITI_VERSION/" values.yaml
+retag-docker-images:
+	docker image tag activiti/activiti-cloud-audit:$ACTIVITI_CLOUD_AUDIT_VERSION activiti/activiti-cloud-audit:$ACTIVITI_CLOUD_VERSION
+	docker image tag activiti/activiti-cloud-query:$ACTIVITI_CLOUD_AUDIT_VERSION activiti/activiti-cloud-query:$ACTIVITI_CLOUD_VERSION
+	docker image tag activiti/activiti-cloud-notifications-graphql:$ACTIVITI_CLOUD_AUDIT_VERSION activiti/activiti-cloud-notifications-graphql:$ACTIVITI_CLOUD_VERSION
+	docker image tag activiti/example-runtime-bundle:$ACTIVITI_CLOUD_AUDIT_VERSION activiti/example-runtime-bundle:$ACTIVITI_CLOUD_VERSION
+	docker image tag activiti/example-cloud-connector:$ACTIVITI_CLOUD_AUDIT_VERSION activiti/example-cloud-connector:$ACTIVITI_CLOUD_VERSION
+push-docker-images:
+	docker push activiti/activiti-cloud-audit:$ACTIVITI_CLOUD_VERSION
+	docker push activiti/activiti-cloud-query:$ACTIVITI_CLOUD_VERSION
+	docker push activiti/activiti-cloud-notifications-graphql:$ACTIVITI_CLOUD_VERSION
+	docker push activiti/example-runtime-bundle:$ACTIVITI_CLOUD_VERSION
+	docker push activiti/example-cloud-connector:$ACTIVITI_CLOUD_VERSION
+	
+release-full-chart:
+	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
+ 		make tag && \
+ 		make release && \
+ 		make github
 
 prepare-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
         	helm init --client-only && \
-         	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
+        	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
         	helm repo add alfresco https://kubernetes-charts.alfresco.com/stable	&& \
         	helm repo add alfresco-incubator https://kubernetes-charts.alfresco.com/incubator && \
         	helm dependency build && \
