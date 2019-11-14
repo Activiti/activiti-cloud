@@ -56,14 +56,15 @@ updatebot/push-version-dry:
 	 activiti-cloud-query $(ACTIVITI_CLOUD_QUERY_VERSION) activiti-cloud-notifications-graphql $(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)  \
 	 activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING) --dry
 
-release-full-chart:
+prepare-release-full-chart:
     cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
         sed -i -e "s/appVersion: .*/appVersion: $APP_ACTIVITI_VERSION/" Chart.yaml && \
-        sed -i -e "s/#tag: .*/tag: $APP_ACTIVITI_VERSION/" values.yaml && \
+        sed -i -e "s/#tag: .*/tag: $APP_ACTIVITI_VERSION/" values.yaml
+release-full-chart:
+    cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
         make tag && \
         make release && \
         make github
-
 
 prepare-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
