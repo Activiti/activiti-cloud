@@ -62,10 +62,10 @@ prepare-release-full-chart:
 		sed -i -e "s/#tag: .*/tag: $(APP_ACTIVITI_VERSION)/" values.yaml
 pull-docker-images:
 	docker pull activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION)
-	docker pull tag activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_AUDIT_VERSION)
-	docker pull tag activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_AUDIT_VERSION)
-	docker pull tag activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_AUDIT_VERSION)
-	docker pull tag activiti/example-cloud-connector:$(ACTIVITI_CLOUD_AUDIT_VERSION)
+	docker pull activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_AUDIT_VERSION)
+	docker pull activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_AUDIT_VERSION)
+	docker pull activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_AUDIT_VERSION)
+	docker pull activiti/example-cloud-connector:$(ACTIVITI_CLOUD_AUDIT_VERSION)
 
 
 retag-docker-images: pull-docker-images
