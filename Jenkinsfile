@@ -17,6 +17,39 @@ pipeline {
   
     }
     stages {
+      stage('helm chart release') {
+              when {
+                branch '*M*'
+              }
+              environment {
+                //TAG_NAME = sh(returnStdout: true, script: 'git describe --always').trim()
+                //HELM_ACTIVITI_VERSION = "$TAG_NAME"
+                //APP_ACTIVITI_VERSION = "$TAG_NAME"
+                HELM_ACTIVITI_VERSION = "$BRANCH_NAME"
+                APP_ACTIVITI_VERSION = "$BRANCH_NAME"
+              }
+              steps {
+                container('maven') {
+                    echo "$TAG_NAME" >VERSION
+                    sh "git checkout $TAG_NAME"
+                    sh "git config --global credential.helper store"
+                    sh "jx step git credentials"
+                    sh "make retag-docker-images"
+                    sh "make push-docker-images"
+                    sh "make updatebot/push-version-dry"
+                    sh "make prepare-release-full-chart"
+                    sh "make run-helm-chart"
+                    sh "make acc-tests"
+                    sh "make release-full-chart"
+                }
+              }
+              post {
+                always {
+                 delete_deployment()
+                }
+              }
+      }
+
       stage('CI Build and push snapshot') {
         when {
           branch 'PR-*'
@@ -88,38 +121,7 @@ pipeline {
               }
         }
       }
-      stage('helm chart release') {
-              when {
-                branch '*M*'
-              }
-              environment {
-                //TAG_NAME = sh(returnStdout: true, script: 'git describe --always').trim()
-                //HELM_ACTIVITI_VERSION = "$TAG_NAME"
-                //APP_ACTIVITI_VERSION = "$TAG_NAME"
-                HELM_ACTIVITI_VERSION = "$BRANCH_NAME"
-                APP_ACTIVITI_VERSION = "$BRANCH_NAME"
-              }
-              steps {
-                container('maven') {
-                    echo "$TAG_NAME" >VERSION
-                    sh "git checkout $TAG_NAME"
-                    sh "git config --global credential.helper store"
-                    sh "jx step git credentials"
-                    sh "make retag-docker-images"
-                    sh "make push-docker-images"
-                    sh "make updatebot/push-version-dry"
-                    sh "make prepare-release-full-chart"
-                    sh "make run-helm-chart"
-                    sh "make acc-tests"
-                    sh "make release-full-chart"
-                }
-              }
-              post {
-                always {
-                 delete_deployment()
-                }
-              }
-      }
+
     }
     post {
         always {
