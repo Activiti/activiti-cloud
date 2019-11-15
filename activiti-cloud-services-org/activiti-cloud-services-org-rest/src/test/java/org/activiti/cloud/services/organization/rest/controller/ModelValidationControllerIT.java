@@ -103,11 +103,10 @@ public class ModelValidationControllerIT {
         Model processModel = modelRepository.createModel(processModel(project,
                                                                       "process-model"));
 
-        mockMvc
-                .perform(multipart("{version}/models/{model_id}/validate",
-                                   API_VERSION,
-                                   processModel.getId())
-                                 .file(file))
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate",
+                                  API_VERSION,
+                                  processModel.getId())
+                                .file(file))
                 .andExpect(status().isNoContent());
     }
 
@@ -207,6 +206,27 @@ public class ModelValidationControllerIT {
                                   API_VERSION,
                                   processModel.getId())
                                 .file(file))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessExtensionsWithValidContentAndMessagePayloadMapping() throws Exception {
+
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(
+                processModelWithExtensions(project,
+                                           "process-model",
+                                           new Extensions(),
+                                           resourceAsByteArray("process/message-payload-mapping.bpmn20.xml")));
+        MockMultipartFile file = multipartExtensionsFile(
+                processModel,
+                resourceAsByteArray("process-extensions/valid-extensions-with-message-payload-mapping.json"));
+
+        mockMvc.perform(multipart("{version}/models/{model_id}/validate/extensions",
+                                  API_VERSION,
+                                  processModel.getId())
+                                .file(file))
+                .andDo(print())
                 .andExpect(status().isNoContent());
     }
 

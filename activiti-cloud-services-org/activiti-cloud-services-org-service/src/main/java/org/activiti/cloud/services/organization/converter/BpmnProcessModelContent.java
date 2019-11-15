@@ -22,11 +22,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.CallActivity;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.Process;
-import org.activiti.bpmn.model.StartEvent;
-import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.core.error.ModelingException;
 
@@ -64,12 +61,6 @@ public class BpmnProcessModelContent implements ModelContent {
     @Override
     public String getTemplate() {
         return null;
-    }
-
-    public Set<FlowNode> findAllNodes() {
-        return findAllNodes(Task.class,
-                            CallActivity.class,
-                            StartEvent.class);
     }
 
     public Set<FlowNode> findAllNodes(Class<? extends FlowNode>... activityTypes) {
