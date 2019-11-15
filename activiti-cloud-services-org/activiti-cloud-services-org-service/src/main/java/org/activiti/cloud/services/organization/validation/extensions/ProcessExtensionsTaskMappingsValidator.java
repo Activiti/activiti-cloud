@@ -69,14 +69,13 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
                 BoundaryEvent.class,
                 ThrowEvent.class);
 
-
         return extensions.getVariablesMappings().entrySet()
                 .stream()
                 .flatMap(taskMapping -> validateTaskMapping(bpmnModel.getId(),
-                        taskMapping.getKey(),
-                        taskMapping.getValue(),
-                        availableTasks,
-                        validationContext));
+                                                            taskMapping.getKey(),
+                                                            taskMapping.getValue(),
+                                                            availableTasks,
+                                                            validationContext));
     }
 
     private Stream<ModelValidationError> validateTaskMapping(String processId,
@@ -87,18 +86,18 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
         return availableTasks
                 .stream()
                 .filter(task -> Objects.equals(task.getId(),
-                        taskId))
+                                               taskId))
                 .findFirst()
                 .map(task -> validateTaskMappings(processId,
-                        task,
-                        extensionMapping,
-                        context))
+                                                  task,
+                                                  extensionMapping,
+                                                  context))
                 .orElseGet(() -> Stream.of(createModelValidationError(
                         format(UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM,
-                                taskId),
+                               taskId),
                         format(UNKNOWN_TASK_VALIDATION_ERROR_DESCRIPTION,
-                                processId,
-                                taskId))));
+                               processId,
+                               taskId))));
     }
 
     private Stream<ModelValidationError> validateTaskMappings(
@@ -108,12 +107,12 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
             ValidationContext validationContext) {
 
         List<TaskMapping> taskMappings = toTaskMappings(processId,
-                task,
-                taskMappingsMap);
+                                                        task,
+                                                        taskMappingsMap);
         return taskMappingsValidators
                 .stream()
                 .flatMap(validator -> validator.validateTaskMappings(taskMappings,
-                        validationContext));
+                                                                     validationContext));
     }
 
     private List<TaskMapping> toTaskMappings(String processId,
@@ -122,9 +121,9 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
         return taskMappingsMap.entrySet()
                 .stream()
                 .map(taskMappingEntry -> new TaskMapping(processId,
-                        task,
-                        taskMappingEntry.getKey(),
-                        taskMappingEntry.getValue()))
+                                                         task,
+                                                         taskMappingEntry.getKey(),
+                                                         taskMappingEntry.getValue()))
                 .collect(Collectors.toList());
     }
 }
