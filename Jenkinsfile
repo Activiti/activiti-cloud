@@ -38,6 +38,8 @@ pipeline {
                     sh "git checkout $APP_ACTIVITI_VERSION"
                     sh "git config --global credential.helper store"
                     sh "jx step git credentials"
+                    sh "git fetch --all --tags --prune"
+                    //sh "git checkout tags/$APP_ACTIVITI_VERSION -b $APP_ACTIVITI_VERSION"
                     sh "make retag-docker-images"
                     sh "make push-docker-images"
                     sh "make updatebot/push-version-dry"
