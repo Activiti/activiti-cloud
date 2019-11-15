@@ -74,6 +74,7 @@ push-docker-images:
 	docker push activiti/example-cloud-connector:$ACTIVITI_CLOUD_VERSION
 	
 release-full-chart:
+	$(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\\./-/'|rev))
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
  		make tag && \
  		make release && \
