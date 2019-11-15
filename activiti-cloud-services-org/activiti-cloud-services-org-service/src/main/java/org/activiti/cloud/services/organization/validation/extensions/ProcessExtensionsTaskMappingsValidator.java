@@ -18,7 +18,7 @@ package org.activiti.cloud.services.organization.validation.extensions;
 
 import static java.lang.String.format;
 
-import org.activiti.bpmn.model.FlowNode;
+import org.activiti.bpmn.model.*;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.organization.api.process.Extensions;
@@ -52,7 +52,15 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
     public Stream<ModelValidationError> validateExtensions(Extensions extensions,
                                                  BpmnProcessModelContent bpmnModel,
                                                  ValidationContext validationContext) {
-        Set<FlowNode> availableTasks = bpmnModel.findAllNodes();
+        Set<FlowNode> availableTasks = bpmnModel.findAllNodes(  Task.class,
+                                                                CallActivity.class,
+                                                                StartEvent.class,
+                                                                IntermediateCatchEvent.class,
+                                                                EndEvent.class,
+                                                                BoundaryEvent.class,
+                                                                ThrowEvent.class);
+
+
         return extensions.getVariablesMappings().entrySet()
                 .stream()
                 .flatMap(taskMapping -> validateTaskMapping(bpmnModel.getId(),
