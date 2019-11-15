@@ -134,6 +134,8 @@ public class QueryTasksIT {
                                                                      runningProcessInstance);
         Task completedTask = taskEventContainedBuilder.aCompletedTask("Completed task",
                                                                       runningProcessInstance);
+        Task cancelledTask = taskEventContainedBuilder.aCancelledTask("Cancelled task",
+                                                                      runningProcessInstance);
 
         eventsAggregator.sendAll();
 
@@ -156,7 +158,9 @@ public class QueryTasksIT {
                               tuple(assignedTask.getId(),
                                     Task.TaskStatus.ASSIGNED),
                               tuple(completedTask.getId(),
-                                    Task.TaskStatus.COMPLETED));
+                                    Task.TaskStatus.COMPLETED),
+                              tuple(cancelledTask.getId(),
+                                    Task.TaskStatus.CANCELLED));
         });
 
         await().untilAsserted(() -> {
@@ -179,6 +183,26 @@ public class QueryTasksIT {
                                 Task::getStatus)
                     .containsExactly(tuple(assignedTask.getId(),
                                            Task.TaskStatus.ASSIGNED));
+
+
+            //when
+            ResponseEntity<PagedResources<Task>> cancelEntity = testRestTemplate.exchange(TASKS_URL + "?status={status}",
+                    HttpMethod.GET,
+                    keycloakTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE,
+                    Task.TaskStatus.CANCELLED);
+
+            //then
+            assertThat(cancelEntity).isNotNull();
+            assertThat(cancelEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(cancelEntity.getBody()).isNotNull();
+            Collection<Task> cancelledTasks = cancelEntity.getBody().getContent();
+            assertThat(cancelledTasks)
+                    .extracting(Task::getId,
+                            Task::getStatus)
+                    .containsExactly(tuple(cancelledTask.getId(),
+                            Task.TaskStatus.CANCELLED));
         });
     }
 
