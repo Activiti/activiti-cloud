@@ -57,6 +57,7 @@ pipeline {
             cleanWs()
         }
     }
+}
 def get_correct_preview_name() {
   container('maven') {
    sh "echo ${PREVIEW_NAMESPACE}| tr -d '[:punct:]'"
