@@ -60,7 +60,15 @@ prepare-release-full-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
 		sed -i -e "s/appVersion: .*/appVersion: $(APP_ACTIVITI_VERSION)/" Chart.yaml && \
 		sed -i -e "s/#tag: .*/tag: $(APP_ACTIVITI_VERSION)/" values.yaml
-retag-docker-images:
+pull-docker-images:
+	docker pull activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION)
+	docker pull tag activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_AUDIT_VERSION)
+	docker pull tag activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_AUDIT_VERSION)
+	docker pull tag activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_AUDIT_VERSION)
+	docker pull tag activiti/example-cloud-connector:$(ACTIVITI_CLOUD_AUDIT_VERSION)
+
+
+retag-docker-images: pull-docker-images
 	docker image tag activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION) activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_VERSION)
 	docker image tag activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_AUDIT_VERSION) activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_VERSION)
 	docker image tag activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_AUDIT_VERSION) activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_VERSION)
