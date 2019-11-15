@@ -12,9 +12,9 @@ pipeline {
       GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
-      //GITLAB_TOKEN = credentials('GITLAB_TOKEN')  
+      //GITLAB_TOKEN = credentials('GITLAB_TOKEN')
 
-  
+
     }
     stages {
       stage('helm chart release') {
@@ -30,8 +30,8 @@ pipeline {
               }
               steps {
                 script {
-                env.HELM_ACTIVITI_VERSION = sh(returnStdout: true, script: "echo '${env.$BRANCH_NAME}'|rev|sed 's/\\./-/'|rev'").trim()
-                }  
+                env.HELM_ACTIVITI_VERSION = sh(returnStdout: true, script: "echo '${env.$BRANCH_NAME}'|rev|sed 's/\\./-/'|rev").trim()
+                }
                 container('maven') {
                     echo "$TAG_NAME" >VERSION
                     sh "git checkout $TAG_NAME"
