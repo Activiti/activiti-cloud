@@ -268,7 +268,7 @@ public class ProjectControllerIT {
                             API_VERSION,
                             project.getId())
                                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                .content(mapper.writeValueAsString(project("1-invalid-name"))))
+                                .content(mapper.writeValueAsString(project("_1-invalid-name"))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -725,7 +725,7 @@ public class ProjectControllerIT {
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(containsString("Error importing model : Error reading XML")));
     }
-    
+
     @Test
     public void should_returnStatusCreatedAndGivenName_when_importingProjectWithNameProvided() throws Exception {
         MockMultipartFile zipFile = new MockMultipartFile("file",
@@ -740,7 +740,7 @@ public class ProjectControllerIT {
                 .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is(overridingName)));
     }
-    
+
     @Test
     public void should_returnStatusCreatedAndZipName_when_importingProjectWithNullNameProvided() throws Exception {
         MockMultipartFile zipFile = new MockMultipartFile("file",
@@ -753,7 +753,7 @@ public class ProjectControllerIT {
                 .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
     }
-    
+
     @Test
     public void should_returnStatusCreatedAndZipName_when_importingProjectWithBlankNameProvided() throws Exception {
         MockMultipartFile zipFile = new MockMultipartFile("file",
@@ -768,5 +768,5 @@ public class ProjectControllerIT {
                 .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
     }
-    
+
 }

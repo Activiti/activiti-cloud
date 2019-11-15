@@ -32,7 +32,7 @@ import static java.lang.String.format;
 public interface DNSNameValidator extends ModelValidationErrorProducer {
 
     int NAME_MAX_LENGTH = 26;
-    String DNS_LABEL_REGEX = "^[a-z]([-a-z0-9]*[a-z0-9])?$";
+    String DNS_LABEL_REGEX = "^[a-z0-9]([-a-z0-9]{0,24}[a-z0-9])?$";
 
     String DNS_NAME_VALIDATOR = "DNS name validator";
     String INVALID_REQUIRED_NAME_PROBLEM = "The name is required";
