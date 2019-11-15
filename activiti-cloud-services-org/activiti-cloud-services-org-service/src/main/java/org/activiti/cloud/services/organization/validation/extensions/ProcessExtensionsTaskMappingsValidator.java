@@ -18,7 +18,14 @@ package org.activiti.cloud.services.organization.validation.extensions;
 
 import static java.lang.String.format;
 
-import org.activiti.bpmn.model.*;
+import org.activiti.bpmn.model.FlowNode;
+import org.activiti.bpmn.model.StartEvent;
+import org.activiti.bpmn.model.EndEvent;
+import org.activiti.bpmn.model.IntermediateCatchEvent;
+import org.activiti.bpmn.model.ThrowEvent;
+import org.activiti.bpmn.model.BoundaryEvent;
+import org.activiti.bpmn.model.CallActivity;
+import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.organization.api.process.Extensions;
