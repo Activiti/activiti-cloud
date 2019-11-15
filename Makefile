@@ -8,7 +8,7 @@ ACTIVITI_CLOUD_MODELING :=7.1.451
 MODELING_DEPENDENCIES_VERSION := 7.1.243
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.23
 
-$(eval RELEASE_ID = $(shell echo ${PREVIEW_NAMESPACE}$| tr -d '[:punct:]'))
+$(eval RELEASE_ID = $(shell echo ${PREVIEW_NAMESPACE}| tr -d '[:punct:]'))
 ACTIVITI_CLOUD_VERSION := $(shell cat VERSION)
 get-modeling-dependencies-version:
 	@echo $(MODELING_DEPENDENCIES_VERSION)
