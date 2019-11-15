@@ -34,7 +34,7 @@ pipeline {
                // }
 
                 container('maven') {
-                    sh "echo "$APP_ACTIVITI_VERSION" >VERSION"
+                    sh "echo $APP_ACTIVITI_VERSION >VERSION"
                     sh "git checkout $TAG_NAME"
                     sh "git config --global credential.helper store"
                     sh "jx step git credentials"
