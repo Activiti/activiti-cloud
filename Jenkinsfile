@@ -6,12 +6,11 @@ pipeline {
       ORG               = 'activiti'
       APP_NAME          = 'activiti-cloud-dependencies'
       CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
-      PREVIEW_NAMESPACE = "example-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase()
-      NAMESPACE_ID = get_correct_preview_name($PREVIEW_NAMESPACE)
+      PREVIEW_NAMESPACE = "example-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase().replaceAll("[\\-\\+\\.\\^:,]","");
       GLOBAL_GATEWAY_DOMAIN="35.242.205.159.nip.io"
       REALM = "activiti"
-      GATEWAY_HOST = "gateway.$NAMESPACE_ID.$GLOBAL_GATEWAY_DOMAIN"
-      SSO_HOST = "identity.$NAMESPACE_ID.$GLOBAL_GATEWAY_DOMAIN"
+      GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
+      SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
       //GITLAB_TOKEN = credentials('GITLAB_TOKEN')
 
@@ -58,9 +57,5 @@ pipeline {
         }
     }
 }
-def get_correct_preview_name(name) {
-  container('maven') {
-   sh "echo name| tr -d '[:punct:]'"
-  }
-}
+
 
