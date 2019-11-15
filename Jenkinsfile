@@ -25,10 +25,13 @@ pipeline {
                 //TAG_NAME = sh(returnStdout: true, script: 'git describe --always').trim()
                 //HELM_ACTIVITI_VERSION = "$TAG_NAME"
                 //APP_ACTIVITI_VERSION = "$TAG_NAME"
-                HELM_ACTIVITI_VERSION = "$BRANCH_NAME"
+                //HELM_ACTIVITI_VERSION = "$BRANCH_NAME" //with dash
                 APP_ACTIVITI_VERSION = "$BRANCH_NAME"
               }
               steps {
+                script {
+                env.HELM_ACTIVITI_VERSION = sh(returnStdout: true, script: "echo '${env.$BRANCH_NAME}' | echo 0.0.1.M4 | rev|sed 's/\./-/'|rev'").trim()
+                }  
                 container('maven') {
                     echo "$TAG_NAME" >VERSION
                     sh "git checkout $TAG_NAME"
