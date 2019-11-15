@@ -81,6 +81,9 @@ release-full-chart:
 
 prepare-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
+		rm -rf requirements.lock && \
+		rm -rf charts && \
+		rm -rf ${NAME}*.tgz && \
         	helm init --client-only && \
         	helm repo add activiti-cloud-helm-charts https://activiti.github.io/activiti-cloud-helm-charts/ && \
         	helm repo add alfresco https://kubernetes-charts.alfresco.com/stable	&& \
