@@ -8,14 +8,14 @@ ACTIVITI_CLOUD_MODELING :=7.1.451
 MODELING_DEPENDENCIES_VERSION := 7.1.243
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.23
 
-
+$(eval RELEASE_ID = $(shell echo ${PREVIEW_NAMESPACE}$| tr -d '[:punct:]'))
 ACTIVITI_CLOUD_VERSION := $(shell cat VERSION)
 get-modeling-dependencies-version:
 	@echo $(MODELING_DEPENDENCIES_VERSION)
 get-acc-scenarious-version:
-	@echo $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)	
+	@echo $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
-acc-tests:	
+acc-tests:
 	git clone https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git
 	cd activiti-cloud-acceptance-scenarios && \
 	git fetch --all --tags --prune && \
@@ -24,12 +24,12 @@ acc-tests:
 	mvn clean install -DskipTests && mvn -pl 'runtime-acceptance-tests,modeling-acceptance-tests' clean verify
 
 update-ea:
-	#$(eval ACTIVITI_CLOUD_VERSION = $(shell cat VERSION)) 
-	@echo "ACTIVITI_CLOUD_VERSION =<$(ACTIVITI_CLOUD_VERSION)>" 
+	#$(eval ACTIVITI_CLOUD_VERSION = $(shell cat VERSION))
+	@echo "ACTIVITI_CLOUD_VERSION =<$(ACTIVITI_CLOUD_VERSION)>"
 
 	$(eval ID = $(shell echo ${ACTIVITI_CLOUD_VERSION}${MODELING_DEPENDENCIES_VERSION}|tr -dc '[:alnum:]\n\r'))
-	@echo ID=${ID}	
-	
+	@echo ID=${ID}
+
 	rm -rf alfresco-process-parent||echo removing alfresco-process-parent
 	git clone https://oauth2:${GITLAB_TOKEN}@git.alfresco.com/process-services/alfresco-process-parent.git
 	@echo "Clone for alfresco-process-parent done"
@@ -41,8 +41,8 @@ update-ea:
 	  mvn versions:set-property -Dproperty=activiti-cloud-modeling.version -DnewVersion=$(MODELING_DEPENDENCIES_VERSION) && \
 	  git diff --word-diff && \
 	  git commit -a -m "AAE-0 update ACTIVITI_CLOUD_VERSION to ${ACTIVITI_CLOUD_VERSION} MODELING_DEPENDENCIES_VERSION to ${MODELING_DEPENDENCIES_VERSION} ACTIVITI-0000" && \
-	  git push  --set-upstream origin update-cloud-to-${ACTIVITI_CLOUD_VERSION}-${MODELING_DEPENDENCIES_VERSION} 
-	@cd alfresco-process-parent && curl --request POST --header "PRIVATE-TOKEN: $(GITLAB_TOKEN)" --header "Content-Type: application/json" -d '{"id": ${ID} ,"source_branch": "update-cloud-to-${ACTIVITI_CLOUD_VERSION}-${MODELING_DEPENDENCIES_VERSION}" ,"target_branch":"develop","title":"community propagation ACTIVITI_CLOUD_VERSION to ${ACTIVITI_CLOUD_VERSION} MODELING_DEPENDENCIES_VERSION to ${MODELING_DEPENDENCIES_VERSION}"}' https://git.alfresco.com/api/v4/projects/1031/merge_requests	
+	  git push  --set-upstream origin update-cloud-to-${ACTIVITI_CLOUD_VERSION}-${MODELING_DEPENDENCIES_VERSION}
+	@cd alfresco-process-parent && curl --request POST --header "PRIVATE-TOKEN: $(GITLAB_TOKEN)" --header "Content-Type: application/json" -d '{"id": ${ID} ,"source_branch": "update-cloud-to-${ACTIVITI_CLOUD_VERSION}-${MODELING_DEPENDENCIES_VERSION}" ,"target_branch":"develop","title":"community propagation ACTIVITI_CLOUD_VERSION to ${ACTIVITI_CLOUD_VERSION} MODELING_DEPENDENCIES_VERSION to ${MODELING_DEPENDENCIES_VERSION}"}' https://git.alfresco.com/api/v4/projects/1031/merge_requests
 
 updatebot/push-version:
 	updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(VERSION) --merge false
@@ -62,25 +62,25 @@ prepare-release-full-chart:
 		sed -i -e "s/#tag: .*/tag: $(APP_ACTIVITI_VERSION)/" values.yaml
 pull-docker-images:
 	docker pull activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION)
-	docker pull activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_AUDIT_VERSION)
-	docker pull activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_AUDIT_VERSION)
-	docker pull activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_AUDIT_VERSION)
-	docker pull activiti/example-cloud-connector:$(ACTIVITI_CLOUD_AUDIT_VERSION)
+	docker pull activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_QUERY_VERSION)
+	docker pull activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)
+	docker pull activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_RB_VERSION)
+	docker pull activiti/example-cloud-connector:$(ACTIVITI_CLOUD_CONNECTORS_VERSION)
 
 
 retag-docker-images: pull-docker-images
 	docker image tag activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION) activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_VERSION)
-	docker image tag activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_AUDIT_VERSION) activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_VERSION)
-	docker image tag activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_AUDIT_VERSION) activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_VERSION)
-	docker image tag activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_AUDIT_VERSION) activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_VERSION)
-	docker image tag activiti/example-cloud-connector:$(ACTIVITI_CLOUD_AUDIT_VERSION) activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
+	docker image tag activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_QUERY_VERSION) activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_VERSION)
+	docker image tag activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION) activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_VERSION)
+	docker image tag activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_RB_VERSION) activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_VERSION)
+	docker image tag activiti/example-cloud-connector:$(ACTIVITI_CLOUD_CONNECTORS_VERSION) activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
 push-docker-images:
 	docker push activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
-	
+
 release-full-chart:
 	$(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\\./-/'|rev))
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
@@ -98,14 +98,15 @@ prepare-helm-chart:
         	helm repo add alfresco https://kubernetes-charts.alfresco.com/stable	&& \
         	helm repo add alfresco-incubator https://kubernetes-charts.alfresco.com/incubator && \
         	helm dependency build && \
-        	helm lint 
-run-helm-chart:		
+        	helm lint
+run-helm-chart:
+
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
-            	helm upgrade ${PREVIEW_NAMESPACE} . \
+            	helm upgrade ${RELEASE_ID} . \
             		--install \
             		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
-            		--namespace ${PREVIEW_NAMESPACE} \
+            		--namespace ${RELEASE_ID} \
             		--debug \
             		--wait
 delete:
-	helm delete --purge ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"				
+	helm delete --purge ${RELEASE_ID} || echo "try to remove helm chart"
