@@ -33,10 +33,10 @@ pipeline {
           }
         }
         post {
-                always {
-                  delete_deployment()
-                }
-              }
+          always {
+            delete_deployment()
+          }
+        }
       }
       stage('Build Release') {
         when {
@@ -81,6 +81,11 @@ pipeline {
 
           }
         }
+        post {
+              always {
+                 delete_deployment()
+              }
+        }
       }
       stage('helm chart release') {
               when {
@@ -92,7 +97,7 @@ pipeline {
               }
               steps {
                 container('maven') {
-                    echo "$TAGNAME" >VERSION
+                    echo "$TAG_NAME" >VERSION
                     sh "git checkout $TAG_NAME"
                     sh "git config --global credential.helper store"
                     sh "jx step git credentials"
@@ -103,6 +108,11 @@ pipeline {
                     sh "make run-helm-chart"
                     sh "make acc-tests"
                     sh "make release-full-chart"
+                }
+              }
+              post {
+                always {
+                 delete_deployment()
                 }
               }
       }
