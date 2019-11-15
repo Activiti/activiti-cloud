@@ -15,11 +15,11 @@
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <enforceFail>true</enforceFail>
-    <example-runtime-bundle.version>7.1.275</example-runtime-bundle.version>
+    <example-runtime-bundle.version>7.1.278</example-runtime-bundle.version>
     <example-cloud-connector.version>7.1.238</example-cloud-connector.version>
     <activiti-cloud-audit.version>7.1.227</activiti-cloud-audit.version>
-    <activiti-cloud-query.version>7.1.228</activiti-cloud-query.version>
-    <activiti-cloud-notifications-graphql.version>7.1.246</activiti-cloud-notifications-graphql.version>
+    <activiti-cloud-query.version>7.1.230</activiti-cloud-query.version>
+    <activiti-cloud-notifications-graphql.version>7.1.248</activiti-cloud-notifications-graphql.version>
   </properties>
   
   <dependencies>
