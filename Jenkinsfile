@@ -43,85 +43,7 @@ pipeline {
                     sh "make release-full-chart"
                 }
               }
-              post {
-                always {
-                 delete_deployment()
-                }
-              }
       }
-
-      stage('CI Build and push snapshot') {
-        when {
-          branch 'PR-*'
-        }
-        steps {
-          container('maven') {
-            sh "git config --global credential.helper store" 
-            sh "jx step git credentials"
-            sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
-            sh "mvn install"
-            sh "make updatebot/push-version-dry"
-            sh "make prepare-helm-chart"
-            sh "make run-helm-chart"  
-            sh "make acc-tests"
-          }
-        }
-        post {
-          always {
-            delete_deployment()
-          }
-        }
-      }
-      stage('Build Release') {
-        when {
-          branch 'develop'
-        }
-        steps {
-          container('maven') {
-            // ensure we're not on a detached head
-            sh "git checkout develop"
-            sh "git config --global credential.helper store"
-
-            sh "jx step git credentials"
-            // so we can retrieve the version in later steps
-            sh "echo \$(jx-release-version) > VERSION"
-            sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
-            sh "mvn clean verify"
-
-            sh "make updatebot/push-version-dry"
-            sh "make prepare-helm-chart"
-            sh "make run-helm-chart"
-            sh "make acc-tests"
-
-            retry(5){
-              sh "git add --all"
-              sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
-              sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
-              sh "git push origin v\$(cat VERSION)"
-            }
-          }
-          container('maven') {
-            sh 'mvn clean deploy'
-
-            sh 'export VERSION=`cat VERSION`'
-            sh 'export UPDATEBOT_MERGE=false'
-
-            sh "jx step git credentials"
-
-            retry(2){
-                sh "make updatebot/push-version"
-            }
-            sh "make update-ea"  
-
-          }
-        }
-        post {
-              always {
-                 delete_deployment()
-              }
-        }
-      }
-
     }
     post {
         always {
@@ -129,9 +51,4 @@ pipeline {
         }
     }
 }
-def delete_deployment() {
-  container('maven') {
-   sh "make delete"
-   sh "kubectl delete namespace $PREVIEW_NAMESPACE|echo 'try to remove namespace'$PREVIEW_NAMESPACE "
-  }
-}
+
