@@ -93,6 +93,7 @@ pipeline {
                 tag '*M*'
               }
               environment {
+                TAG_NAME = sh(returnStdout: true, script: 'git describe --always').trim()
                 HELM_ACTIVITI_VERSION = "$TAG_NAME"
                 APP_ACTIVITI_VERSION = "$TAG_NAME"
               }
