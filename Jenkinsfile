@@ -90,12 +90,14 @@ pipeline {
       }
       stage('helm chart release') {
               when {
-                tag '*M*'
+                branch '*M*'
               }
               environment {
-                TAG_NAME = sh(returnStdout: true, script: 'git describe --always').trim()
-                HELM_ACTIVITI_VERSION = "$TAG_NAME"
-                APP_ACTIVITI_VERSION = "$TAG_NAME"
+                //TAG_NAME = sh(returnStdout: true, script: 'git describe --always').trim()
+                //HELM_ACTIVITI_VERSION = "$TAG_NAME"
+                //APP_ACTIVITI_VERSION = "$TAG_NAME"
+                HELM_ACTIVITI_VERSION = "$BRANCH_NAME"
+                APP_ACTIVITI_VERSION = "$BRANCH_NAME"
               }
               steps {
                 container('maven') {
