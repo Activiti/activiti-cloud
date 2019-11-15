@@ -29,11 +29,11 @@ pipeline {
                 APP_ACTIVITI_VERSION = "$BRANCH_NAME"
               }
               steps {
-                script {
-                env.HELM_ACTIVITI_VERSION = sh(returnStdout: true, script: "echo '${env.$BRANCH_NAME}'|rev|sed 's/\\./-/'|rev").trim()
-                }
+               // script {
+               //     env.HELM_ACTIVITI_VERSION = sh(returnStdout: true, script: "echo '${BRANCH_NAME}'|rev|sed 's/\\./-/'|rev").trim()
+               // }
                 container('maven') {
-                    echo "$TAG_NAME" >VERSION
+                    echo "$APP_ACTIVITI_VERSION" >VERSION
                     sh "git checkout $TAG_NAME"
                     sh "git config --global credential.helper store"
                     sh "jx step git credentials"
