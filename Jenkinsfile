@@ -30,7 +30,7 @@ pipeline {
               }
               steps {
                 script {
-                env.HELM_ACTIVITI_VERSION = sh(returnStdout: true, script: "echo '${env.$BRANCH_NAME}' | echo 0.0.1.M4 | rev|sed 's/\./-/'|rev'").trim()
+                env.HELM_ACTIVITI_VERSION = sh(returnStdout: true, script: "echo '${env.$BRANCH_NAME}'|rev|sed 's/\\./-/'|rev'").trim()
                 }  
                 container('maven') {
                     echo "$TAG_NAME" >VERSION
