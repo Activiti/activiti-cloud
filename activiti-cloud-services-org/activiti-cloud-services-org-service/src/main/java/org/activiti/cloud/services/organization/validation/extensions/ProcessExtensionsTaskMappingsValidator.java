@@ -39,83 +39,85 @@ import java.util.stream.Stream;
  */
 public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensionsValidator {
 
-    public static final String UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM = "Unknown task in process extensions: %s";
-    public static final String UNKNOWN_TASK_VALIDATION_ERROR_DESCRIPTION = "The extensions for process '%s' contains mappings for an unknown task '%s'";
+  public static final String UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM = "Unknown task in process extensions: %s";
+  public static final String UNKNOWN_TASK_VALIDATION_ERROR_DESCRIPTION = "The extensions for process '%s' contains mappings for an unknown task '%s'";
 
-    private final Set<TaskMappingsValidator> taskMappingsValidators;
+  private final Set<TaskMappingsValidator> taskMappingsValidators;
 
-    public ProcessExtensionsTaskMappingsValidator(Set<TaskMappingsValidator> taskMappingsValidators) {
-        this.taskMappingsValidators = taskMappingsValidators;
-    }
+  public ProcessExtensionsTaskMappingsValidator(Set<TaskMappingsValidator> taskMappingsValidators) {
+    this.taskMappingsValidators = taskMappingsValidators;
+  }
 
-    @Override
-    public Stream<ModelValidationError> validateExtensions(Extensions extensions,
-                                                 BpmnProcessModelContent bpmnModel,
-                                                 ValidationContext validationContext) {
-        Set<FlowNode> availableTasks = bpmnModel.findAllNodes(  Task.class,
-                                                                CallActivity.class,
-                                                                StartEvent.class,
-                                                                IntermediateCatchEvent.class,
-                                                                EndEvent.class,
-                                                                BoundaryEvent.class,
-                                                                ThrowEvent.class);
+  @Override
+  public Stream<ModelValidationError> validateExtensions(Extensions extensions,
+                                                         BpmnProcessModelContent bpmnModel,
+                                                         ValidationContext validationContext) {
+
+    Set<FlowNode> availableTasks = bpmnModel.findAllNodes(
+            Task.class,
+            CallActivity.class,
+            StartEvent.class,
+            IntermediateCatchEvent.class,
+            EndEvent.class,
+            BoundaryEvent.class,
+            ThrowEvent.class);
 
 
-        return extensions.getVariablesMappings().entrySet()
-                .stream()
-                .flatMap(taskMapping -> validateTaskMapping(bpmnModel.getId(),
-                                                            taskMapping.getKey(),
-                                                            taskMapping.getValue(),
-                                                            availableTasks,
-                                                            validationContext));
-    }
+    return extensions.getVariablesMappings().entrySet()
+            .stream()
+            .flatMap(taskMapping -> validateTaskMapping(bpmnModel.getId(),
+                    taskMapping.getKey(),
+                    taskMapping.getValue(),
+                    availableTasks,
+                    validationContext));
+  }
 
-    private Stream<ModelValidationError> validateTaskMapping(String processId,
-                                                             String taskId,
-                                                             Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> extensionMapping,
-                                                             Set<FlowNode> availableTasks,
-                                                             ValidationContext context) {
-        return availableTasks
-                .stream()
-                .filter(task -> Objects.equals(task.getId(),
-                                               taskId))
-                .findFirst()
-                .map(task -> validateTaskMappings(processId,
-                                                  task,
-                                                  extensionMapping,
-                                                  context))
-                .orElseGet(() -> Stream.of(createModelValidationError(
-                        format(UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM,
-                               taskId),
-                        format(UNKNOWN_TASK_VALIDATION_ERROR_DESCRIPTION,
-                               processId,
-                               taskId))));
-    }
+  private Stream<ModelValidationError> validateTaskMapping(String processId,
+                                                           String taskId,
+                                                           Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> extensionMapping,
+                                                           Set<FlowNode> availableTasks,
+                                                           ValidationContext context) {
+    return availableTasks
+            .stream()
+            .filter(task -> Objects.equals(task.getId(),
+                    taskId))
+            .findFirst()
+            .map(task -> validateTaskMappings(processId,
+                    task,
+                    extensionMapping,
+                    context))
+            .orElseGet(() -> Stream.of(createModelValidationError(
+                    format(UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM,
+                            taskId),
+                    format(UNKNOWN_TASK_VALIDATION_ERROR_DESCRIPTION,
+                            processId,
+                            taskId))));
+  }
 
-    private Stream<ModelValidationError> validateTaskMappings(
-            String processId,
-            FlowNode task,
-            Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> taskMappingsMap,
-            ValidationContext validationContext) {
+  private Stream<ModelValidationError> validateTaskMappings(
+          String processId,
+          FlowNode task,
+          Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> taskMappingsMap,
+          ValidationContext validationContext) {
 
-        List<TaskMapping> taskMappings = toTaskMappings(processId,
-                                                        task,
-                                                        taskMappingsMap);
-        return taskMappingsValidators
-                .stream()
-                .flatMap(validator -> validator.validateTaskMappings(taskMappings,
-                                                                     validationContext));
-    }
+    List<TaskMapping> taskMappings = toTaskMappings(processId,
+            task,
+            taskMappingsMap);
+    return taskMappingsValidators
+            .stream()
+            .flatMap(validator -> validator.validateTaskMappings(taskMappings,
+                    validationContext));
+  }
 
-    private List<TaskMapping> toTaskMappings(String processId,
-                                              FlowNode task,
-                                              Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> taskMappingsMap) {
-        return taskMappingsMap.entrySet()
-                .stream()
-                .map(taskMappingEntry -> new TaskMapping(processId,
-                                                         task,
-                                                         taskMappingEntry.getKey(),
-                                                         taskMappingEntry.getValue()))
-                .collect(Collectors.toList());
-    }
+  private List<TaskMapping> toTaskMappings(String processId,
+                                           FlowNode task,
+                                           Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> taskMappingsMap) {
+    return taskMappingsMap.entrySet()
+            .stream()
+            .map(taskMappingEntry -> new TaskMapping(processId,
+                    task,
+                    taskMappingEntry.getKey(),
+                    taskMappingEntry.getValue()))
+            .collect(Collectors.toList());
+  }
 }

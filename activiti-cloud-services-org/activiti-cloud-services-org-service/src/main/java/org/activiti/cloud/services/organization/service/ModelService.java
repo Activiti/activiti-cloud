@@ -381,8 +381,8 @@ public class ModelService {
                                         FileContent fileContent) {
         ValidationContext validationContext = Optional.ofNullable(model.getProject()).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
         validateModelExtensions(model.getType(),
-                fileContent.getFileContent(),
-                validationContext);
+                                fileContent.getFileContent(),
+                                validationContext);
     }
 
     public void validateModelExtensions(Model model,

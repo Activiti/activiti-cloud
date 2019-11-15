@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.activiti.bpmn.model.*;
+import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.organization.api.ModelContent;
 import org.activiti.cloud.organization.core.error.ModelingException;
