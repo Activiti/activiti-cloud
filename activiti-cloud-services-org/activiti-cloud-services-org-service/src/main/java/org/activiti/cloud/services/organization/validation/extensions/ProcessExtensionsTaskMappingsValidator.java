@@ -28,6 +28,7 @@ import org.activiti.bpmn.model.CallActivity;
 import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ValidationContext;
+import org.activiti.cloud.organization.api.process.Constant;
 import org.activiti.cloud.organization.api.process.Extensions;
 import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
 import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
@@ -74,13 +75,21 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
                 .flatMap(taskMapping -> validateTaskMapping(bpmnModel.getId(),
                                                             taskMapping.getKey(),
                                                             taskMapping.getValue(),
+                                                            getTaskConstants(extensions,taskMapping.getKey()),
                                                             availableTasks,
                                                             validationContext));
+    }
+    
+    
+    private Map<String, Constant> getTaskConstants(Extensions extensions,
+                                                   String taskKey) {
+        return extensions.getConstants() != null ? extensions.getConstants().get(taskKey) : null;
     }
 
     private Stream<ModelValidationError> validateTaskMapping(String processId,
                                                              String taskId,
                                                              Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> extensionMapping,
+                                                             Map<String, Constant> taskConstants,
                                                              Set<FlowNode> availableTasks,
                                                              ValidationContext context) {
         return availableTasks
@@ -91,6 +100,7 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
                 .map(task -> validateTaskMappings(processId,
                                                   task,
                                                   extensionMapping,
+                                                  taskConstants,
                                                   context))
                 .orElseGet(() -> Stream.of(createModelValidationError(
                         format(UNKNOWN_TASK_VALIDATION_ERROR_PROBLEM,
@@ -104,6 +114,7 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
             String processId,
             FlowNode task,
             Map<ServiceTaskActionType, Map<String, ProcessVariableMapping>> taskMappingsMap,
+            Map<String, Constant> taskConstants,
             ValidationContext validationContext) {
 
         List<TaskMapping> taskMappings = toTaskMappings(processId,
@@ -112,6 +123,7 @@ public class ProcessExtensionsTaskMappingsValidator implements ProcessExtensions
         return taskMappingsValidators
                 .stream()
                 .flatMap(validator -> validator.validateTaskMappings(taskMappings,
+                                                                     taskConstants,
                                                                      validationContext));
     }
 

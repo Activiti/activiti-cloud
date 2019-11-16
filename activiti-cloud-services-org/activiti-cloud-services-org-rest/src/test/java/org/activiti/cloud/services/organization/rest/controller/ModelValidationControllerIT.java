@@ -521,4 +521,77 @@ public class ModelValidationControllerIT {
                                 .file(file))
                 .andExpect(status().isNoContent());
     }
+    
+    @Test
+    public void should_throwExceptiojn_when_validatingProcessWithServiceTaskImplementationSetToUnknownConnectorAction() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/unknown-implementation-service-task.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "process.xml",
+                                                       CONTENT_TYPE_XML,
+                                                       validContent);
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModel(project,
+                                                                      "process-model"));
+
+        ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   API_VERSION,
+                                   processModel.getId())
+                                 .file(file));
+
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+                .hasSize(1)
+                .extracting(ModelValidationError::getDescription,
+                            ModelValidationError::getValidatorSetName)
+                .contains(tuple("Invalid service implementation on service 'ServiceTask_1qr4ad0'","BPMN service task validator"));    
+    }
+    
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToDMNAction() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/dmn-implementation-service-task.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "process.xml",
+                                                       CONTENT_TYPE_XML,
+                                                       validContent);
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModel(project,
+                                                                      "process-model"));
+
+        ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   API_VERSION,
+                                   processModel.getId())
+                                 .file(file));
+
+        resultActions.andExpect(status().isNoContent());
+    }
+    
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToScriptAction() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/script-implementation-service-task.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "process.xml",
+                                                       CONTENT_TYPE_XML,
+                                                       validContent);
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModel(project,
+                                                                      "process-model"));
+
+        ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate",
+                                   API_VERSION,
+                                   processModel.getId())
+                                 .file(file));
+
+        resultActions.andExpect(status().isNoContent());
+    }
+    
+    
+    
+    
 }

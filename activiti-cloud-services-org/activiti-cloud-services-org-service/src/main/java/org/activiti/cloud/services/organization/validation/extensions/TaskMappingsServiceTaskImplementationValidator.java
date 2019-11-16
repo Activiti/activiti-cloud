@@ -26,6 +26,7 @@ import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelValidationError;
 import org.activiti.cloud.organization.api.ValidationContext;
+import org.activiti.cloud.organization.api.process.Constant;
 import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
 import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
 import org.activiti.cloud.services.organization.converter.ConnectorActionParameter;
@@ -61,6 +62,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
 
     @Override
     public Stream<ModelValidationError> validateTaskMappings(List<TaskMapping> taskMappings,
+                                                             Map<String, Constant> taskConstants,
                                                              ValidationContext validationContext) {
         Map<String, ConnectorModelAction> availableConnectorActions = getAvailableConnectorActions(validationContext);
         return taskMappings
