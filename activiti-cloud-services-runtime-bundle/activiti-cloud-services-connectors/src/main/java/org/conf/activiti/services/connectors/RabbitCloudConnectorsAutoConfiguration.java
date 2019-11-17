@@ -23,7 +23,7 @@ public class RabbitCloudConnectorsAutoConfiguration {
     private String routingKeyExpression;
     
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = "dynamicConnectorDestinationsBindingCallback")
     public NewDestinationBindingCallback<RabbitProducerProperties> dynamicConnectorDestinationsBindingCallback() {
         return (channelName, channel, producerProperties, extendedProducerProperties) -> {
             Expression expression = new SpelExpressionParser().parseExpression(routingKeyExpression);

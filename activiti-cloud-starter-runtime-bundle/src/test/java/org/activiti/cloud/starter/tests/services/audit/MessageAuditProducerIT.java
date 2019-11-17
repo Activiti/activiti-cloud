@@ -27,11 +27,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.activiti.api.process.model.BPMNMessage;
+import org.activiti.api.process.model.MessageSubscription;
+import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
+import org.activiti.api.process.model.events.MessageSubscriptionEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
+import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 import org.activiti.cloud.starter.tests.helper.MessageRestTemplate;
+import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.apache.groovy.util.Maps;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,9 +54,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Collections;
-import java.util.List;
-
 @RunWith(SpringRunner.class)
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -56,9 +61,14 @@ import java.util.List;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ContextConfiguration(classes = ServicesAuditITConfiguration.class)
 public class MessageAuditProducerIT {
+    private static final String CATCH_MESSAGE = "catchMessage";
+    
 
     @Autowired
     private MessageRestTemplate messageRestTemplate;
+    
+    @Autowired
+    private ProcessInstanceRestTemplate processInstanceRestTemplate;
 
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
@@ -254,7 +264,104 @@ public class MessageAuditProducerIT {
 
     }
     
+    @Test
+    public void should_produceCloudMessageSubscriptionCancelledEvent_when_processIsDeleted() {
+        //when
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
+                                                                           new StartProcessPayloadBuilder()
+                                                                                   .withProcessDefinitionKey(CATCH_MESSAGE)
+                                                                                   .withVariable("correlationKey", "foo")
+                                                                                   .withName("processInstanceName")
+                                                                                   .withBusinessKey("businessKey")
+                                                                                   .build());
+
+        assertThat(startProcessEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        
+        CloudProcessInstance processInstance = startProcessEntity.getBody();
+        
+
+        await("Audit BPMNMessage Events").untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+
+            assertThat(receivedEvents)
+                    .filteredOn(CloudBPMNMessageEvent.class::isInstance)
+                    .extracting(CloudRuntimeEvent::getEventType,
+                                CloudRuntimeEvent::getProcessDefinitionId,
+                                CloudRuntimeEvent::getProcessInstanceId,
+                                CloudRuntimeEvent::getProcessDefinitionKey,
+                                CloudRuntimeEvent::getProcessDefinitionVersion,
+                                CloudRuntimeEvent::getBusinessKey,
+                                event -> bpmnMessage(event).getProcessDefinitionId(),
+                                event -> bpmnMessage(event).getProcessInstanceId(),
+                                event -> bpmnMessage(event).getMessagePayload().getName(),
+                                event -> bpmnMessage(event).getMessagePayload().getCorrelationKey(),
+                                event -> bpmnMessage(event).getMessagePayload().getBusinessKey()
+                    )
+                    .contains(
+                            tuple(MESSAGE_WAITING,
+                                  processInstance.getProcessDefinitionId(), 
+                                  processInstance.getId(),
+                                  processInstance.getProcessDefinitionKey(),
+                                  1, // version
+                                  processInstance.getBusinessKey(),
+                                  processInstance.getProcessDefinitionId(), 
+                                  processInstance.getId(),
+                                  "testMessage",
+                                  "foo",
+                                  processInstance.getBusinessKey())
+                    );
+
+            });
+        
+        
+            ResponseEntity<CloudProcessInstance> deleteProcessEntity = processInstanceRestTemplate.delete(startProcessEntity);
+            assertThat(deleteProcessEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            await().untilAsserted(() -> {
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+    
+                assertThat(receivedEvents)
+                        .filteredOn(CloudMessageSubscriptionCancelledEvent.class::isInstance)
+                        .extracting(CloudRuntimeEvent::getEventType,
+                                    CloudRuntimeEvent::getProcessDefinitionId,
+                                    CloudRuntimeEvent::getProcessInstanceId,
+                                    CloudRuntimeEvent::getProcessDefinitionKey,
+                                    CloudRuntimeEvent::getProcessDefinitionVersion,
+                                    CloudRuntimeEvent::getBusinessKey,
+                                    event -> messageSubscription(event).getProcessDefinitionId(),
+                                    event -> messageSubscription(event).getProcessInstanceId(),
+                                    event -> messageSubscription(event).getEventName(),
+                                    event -> messageSubscription(event).getConfiguration(),
+                                    event -> messageSubscription(event).getBusinessKey()
+                        )
+                        .contains(
+                                tuple(MessageSubscriptionEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED,
+                                      processInstance.getProcessDefinitionId(), 
+                                      processInstance.getId(),
+                                      processInstance.getProcessDefinitionKey(),
+                                      1, // version
+                                      processInstance.getBusinessKey(),
+                                      processInstance.getProcessDefinitionId(), 
+                                      processInstance.getId(),
+                                      "testMessage",
+                                      "foo",
+                                      processInstance.getBusinessKey())
+                        );
+    
+            });
+        
+    }
+    
+    
     private BPMNMessage bpmnMessage(CloudRuntimeEvent<?,?> event) {
         return CloudBPMNMessageEvent.class.cast(event).getEntity();
+    }
+    
+    private MessageSubscription messageSubscription(CloudRuntimeEvent<?,?> event) {
+        return CloudMessageSubscriptionCancelledEvent.class.cast(event).getEntity();
     }
 }

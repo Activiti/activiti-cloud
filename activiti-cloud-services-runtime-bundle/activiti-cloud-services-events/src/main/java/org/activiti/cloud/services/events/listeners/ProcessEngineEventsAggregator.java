@@ -29,6 +29,7 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
+import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudSequenceFlowEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupEvent;
@@ -138,6 +139,8 @@ public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggre
             return ((CloudBPMNMessageEvent) element).getEntity().getProcessInstanceId();
         } else if(element instanceof CloudBPMNErrorReceivedEvent) {
             return ((CloudBPMNErrorReceivedEvent) element).getEntity().getProcessInstanceId();
+        } else if(element instanceof CloudMessageSubscriptionCancelledEvent) {
+            return ((CloudMessageSubscriptionCancelledEvent) element).getEntity().getProcessInstanceId();
         }        
         return null;
     }

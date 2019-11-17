@@ -27,6 +27,7 @@ import org.activiti.cloud.services.events.listeners.CloudActivityStartedProducer
 import org.activiti.cloud.services.events.listeners.CloudErrorReceivedProducer;
 import org.activiti.cloud.services.events.listeners.CloudMessageReceivedProducer;
 import org.activiti.cloud.services.events.listeners.CloudMessageSentProducer;
+import org.activiti.cloud.services.events.listeners.CloudMessageSubscriptionCancelledProducer;
 import org.activiti.cloud.services.events.listeners.CloudMessageWaitingProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCancelledProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCompletedProducer;
@@ -430,6 +431,14 @@ public class CloudEventsAutoConfiguration {
                                                                  ProcessEngineEventsAggregator eventsAggregator) {
         return new CloudErrorReceivedProducer(converter,
                                               eventsAggregator);
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public CloudMessageSubscriptionCancelledProducer cloudMessageSubscriptionCancelledProducer(ToCloudProcessRuntimeEventConverter converter,
+                                                                                               ProcessEngineEventsAggregator eventsAggregator) {
+        return new CloudMessageSubscriptionCancelledProducer(converter,
+                                                             eventsAggregator);
     }
 
 }

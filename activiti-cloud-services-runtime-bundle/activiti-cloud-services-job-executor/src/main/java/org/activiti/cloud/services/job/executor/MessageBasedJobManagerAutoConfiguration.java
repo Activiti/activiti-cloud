@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Configuration;
 public class MessageBasedJobManagerAutoConfiguration {
     
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = "messageJobConsumerProperties")
     @ConfigurationProperties(prefix = "spring.activiti.cloud.rb.job-executor.message-job-consumer")
     public ConsumerProperties messageJobConsumerProperties() {
         return new ConsumerProperties();
