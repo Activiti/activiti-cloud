@@ -67,7 +67,7 @@ replace-release-full-chart-names:
 	echo APP_ACTIVITI_VERSION = $(APP_ACTIVITI_VERSION)
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
 	 sed -i -e "s/appVersion: .*/appVersion: $(HELM_ACTIVITI_VERSION)/" Chart.yaml && \
-	 sed -i -e "s/version: .*/appVersion: $(HELM_ACTIVITI_VERSION)/" Chart.yaml && \
+	 sed -i -e "s/version: .*/version: $(HELM_ACTIVITI_VERSION)/" Chart.yaml && \
 	 sed -i -e "s/#tag: .*/tag: $(APP_ACTIVITI_VERSION)/" values.yaml
 	 
 pull-docker-images:
