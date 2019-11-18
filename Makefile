@@ -8,7 +8,6 @@ ACTIVITI_CLOUD_MODELING :=7.1.451
 MODELING_DEPENDENCIES_VERSION := 7.1.243
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.23
 
-$(eval RELEASE_ID = $(shell echo ${PREVIEW_NAMESPACE}| tr -d '[:punct:]'))
 ACTIVITI_CLOUD_VERSION := $(shell cat VERSION)
 get-modeling-dependencies-version:
 	@echo $(MODELING_DEPENDENCIES_VERSION)
@@ -85,6 +84,8 @@ push-docker-images:
 	docker push activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_VERSION)
 release-full-chart:
 	$(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\\./-/'|rev))
+	echo HELM_ACTIVITI_VERSION = $(HELM_ACTIVITI_VERSION)
+	
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
  		make tag && \
  		make release && \
@@ -104,11 +105,11 @@ prepare-helm-chart:
 run-helm-chart:
 
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
-            	helm upgrade ${RELEASE_ID} . \
+            	helm upgrade ${PREVIEW_NAMESPACE} . \
             		--install \
             		--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
-            		--namespace ${RELEASE_ID} \
+            		--namespace ${PREVIEW_NAMESPACE} \
             		--debug \
             		--wait
 delete:
-	helm delete --purge ${RELEASE_ID} || echo "try to remove helm chart"
+	helm delete --purge ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
