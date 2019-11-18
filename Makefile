@@ -106,8 +106,8 @@ github:
 	   git commit -m "fix:(version) release activiti-cloud-full-example-$(HELM_ACTIVITI_VERSION).tgz" && \
 	   git pull && \
 	   git push --force origin "$(GITHUB_CHARTS_BRANCH)"
-	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \   
-	 rm -rf $(GITHUB_CHARTS_DIR)
+	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
+     rm -rf $(GITHUB_CHARTS_DIR)
 tag:
 	#sed -i -e "s/version:.*/version: $(HELM_ACTIVITI_VERSION)/" Chart.yaml
 	#sed -i -e "s/tag: .*/tag: $(RELEASE_VERSION)/" values.yaml
