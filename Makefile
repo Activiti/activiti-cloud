@@ -66,7 +66,7 @@ pull-docker-images:
 	docker pull activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)
 	docker pull activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_RB_VERSION)
 	docker pull activiti/example-cloud-connector:$(ACTIVITI_CLOUD_CONNECTORS_VERSION)
-
+	docker pull activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_MODELING)
 
 retag-docker-images: pull-docker-images
 	docker image tag activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION) activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_VERSION)
@@ -74,13 +74,15 @@ retag-docker-images: pull-docker-images
 	docker image tag activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION) activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_VERSION)
 	docker image tag activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_RB_VERSION) activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_VERSION)
 	docker image tag activiti/example-cloud-connector:$(ACTIVITI_CLOUD_CONNECTORS_VERSION) activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
+	docker image tag activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_MODELING) activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_VERSION)
+	
 push-docker-images:
 	docker push activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
-
+	docker push activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_VERSION)
 release-full-chart:
 	$(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\\./-/'|rev))
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
