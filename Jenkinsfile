@@ -101,7 +101,8 @@ pipeline {
                     //sh "make retag-docker-images"
                     //sh "make push-docker-images"
                     sh "make updatebot/push-version-dry"
-                    sh "make prepare-release-full-chart"
+                    sh "make replace-release-full-chart-names"
+                    sh "make prepare-helm-chart"
                     sh "make run-helm-chart"
                                         
                     //sh "make acc-tests"
