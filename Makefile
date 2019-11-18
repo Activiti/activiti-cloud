@@ -89,9 +89,9 @@ push-docker-images:
 	docker push activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_VERSION)
 release-full-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \ 		 
- 		make release && \
- 		make github && \
-		make tag
+	 make release && \
+	 make github && \
+	 make tag
 
 prepare-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
