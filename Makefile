@@ -8,6 +8,10 @@ ACTIVITI_CLOUD_MODELING :=7.1.451
 MODELING_DEPENDENCIES_VERSION := 7.1.243
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.23
 
+$(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\\./-/'|rev))
+echo HELM_ACTIVITI_VERSION = $(HELM_ACTIVITI_VERSION)
+	
+
 ACTIVITI_CLOUD_VERSION := $(shell cat VERSION)
 get-modeling-dependencies-version:
 	@echo $(MODELING_DEPENDENCIES_VERSION)
@@ -57,7 +61,7 @@ updatebot/push-version-dry:
 
 prepare-release-full-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
-		sed -i -e "s/appVersion: .*/appVersion: $(APP_ACTIVITI_VERSION)/" Chart.yaml && \
+		sed -i -e "s/appVersion: .*/appVersion: $(HELM_ACTIVITI_VERSION)/" Chart.yaml && \
 		sed -i -e "s/#tag: .*/tag: $(APP_ACTIVITI_VERSION)/" values.yaml
 pull-docker-images:
 	docker pull activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION)
@@ -83,9 +87,7 @@ push-docker-images:
 	docker push activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_VERSION)
 release-full-chart:
-	$(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\\./-/'|rev))
-	echo HELM_ACTIVITI_VERSION = $(HELM_ACTIVITI_VERSION)
-	
+
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
  		make tag && \
  		make release && \
@@ -103,7 +105,6 @@ prepare-helm-chart:
         	helm dependency build && \
         	helm lint
 run-helm-chart:
-
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
             	helm upgrade ${PREVIEW_NAMESPACE} . \
             		--install \
