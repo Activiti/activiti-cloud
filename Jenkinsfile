@@ -6,15 +6,15 @@ pipeline {
       ORG               = 'activiti'
       APP_NAME          = 'activiti-cloud-dependencies'
       CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
-      PREVIEW_NAMESPACE = "example-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase()
+      PREVIEW_NAMESPACE = "example-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase().replaceAll("[\\-\\+\\.\\^:,]","");
       GLOBAL_GATEWAY_DOMAIN="35.242.205.159.nip.io"
       REALM = "activiti"
       GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
-      //GITLAB_TOKEN = credentials('GITLAB_TOKEN')  
+      //GITLAB_TOKEN = credentials('GITLAB_TOKEN')
 
-  
+
     }
     stages {
       stage('CI Build and push snapshot') {
@@ -31,11 +31,6 @@ pipeline {
             sh "make prepare-helm-chart"
             sh "make run-helm-chart"  
             sh "make acc-tests"
-          }
-        }
-        post {
-          always {
-            delete_deployment()
           }
         }
       }
@@ -82,45 +77,43 @@ pipeline {
 
           }
         }
-        post {
-              always {
-                 delete_deployment()
-              }
-        }
-      }
+      }        
+        
       stage('helm chart release') {
               when {
                 tag '*M*'
               }
               environment {
-                TAG_NAME = sh(returnStdout: true, script: 'git describe --always').trim()
-                HELM_ACTIVITI_VERSION = "$TAG_NAME"
+                //TAG_NAME = sh(returnStdout: true, script: 'git describe --always').trim()
+                //HELM_ACTIVITI_VERSION = "$TAG_NAME"
                 APP_ACTIVITI_VERSION = "$TAG_NAME"
+                //APP_ACTIVITI_VERSION = "$BRANCH_NAME"
               }
               steps {
                 container('maven') {
-                    echo "$TAG_NAME" >VERSION
-                    sh "git checkout $TAG_NAME"
+                    sh "echo $APP_ACTIVITI_VERSION >VERSION"
+                    sh "git checkout $APP_ACTIVITI_VERSION"
                     sh "git config --global credential.helper store"
                     sh "jx step git credentials"
-                    sh "make retag-docker-images"
-                    sh "make push-docker-images"
+                    sh "git fetch --all --tags --prune"
+                    sh "git checkout tags/$APP_ACTIVITI_VERSION -b $APP_ACTIVITI_VERSION"
+                    //sh "make retag-docker-images"
+                    //sh "make push-docker-images"
                     sh "make updatebot/push-version-dry"
-                    sh "make prepare-release-full-chart"
+                    sh "make replace-release-full-chart-names"
+                    sh "make prepare-helm-chart"
                     sh "make run-helm-chart"
+                                        
                     sh "make acc-tests"
-                    sh "make release-full-chart"
+                    sh "make github"
+                    sh "make tag"
                 }
               }
-              post {
-                always {
-                 delete_deployment()
-                }
-              }
-      }
+      }                      
     }
     post {
         always {
+            delete_deployment()
             cleanWs()
         }
     }
@@ -128,6 +121,8 @@ pipeline {
 def delete_deployment() {
   container('maven') {
    sh "make delete"
-   sh "kubectl delete namespace $PREVIEW_NAMESPACE|echo 'try to remove namespace'$PREVIEW_NAMESPACE "
+   sh "kubectl delete namespace $PREVIEW_NAMESPACE|echo 'try to remove namespace '$PREVIEW_NAMESPACE "
   }
 }
+
+
