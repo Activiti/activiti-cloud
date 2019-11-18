@@ -8,7 +8,7 @@ ACTIVITI_CLOUD_MODELING :=7.1.451
 MODELING_DEPENDENCIES_VERSION := 7.1.243
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.23
 
-$(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\\./-/'|rev))
+$(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\./-/'|rev))
 	
 
 ACTIVITI_CLOUD_VERSION := $(shell cat VERSION)
@@ -88,11 +88,10 @@ push-docker-images:
 	docker push activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_VERSION)
 release-full-chart:
-
-	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
- 		make tag && \
+	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \ 		 
  		make release && \
- 		make github
+ 		make github && \
+		make tag
 
 prepare-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
