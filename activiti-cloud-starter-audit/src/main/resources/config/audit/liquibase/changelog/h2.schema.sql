@@ -39,5 +39,6 @@ create table audit_event
     variable_instance          text,
     variable_name              varchar(255),
     variable_type              varchar(255),
+    message_subscription	   text,
     primary key (id)
 );

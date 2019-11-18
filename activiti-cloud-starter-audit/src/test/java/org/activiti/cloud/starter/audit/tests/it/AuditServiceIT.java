@@ -20,16 +20,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
+import org.activiti.api.process.model.events.MessageSubscriptionCancelledEvent;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.TimerPayload;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
 import org.activiti.api.runtime.model.impl.BPMNErrorImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
+import org.activiti.api.runtime.model.impl.MessageSubscriptionImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.task.model.Task;
@@ -45,6 +55,7 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
+import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
@@ -52,6 +63,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNErrorReceivedEv
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
@@ -80,14 +92,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -712,6 +716,69 @@ public class AuditServiceIT {
                             cloudErrorReceivedEvent.getEntity().getProcessDefinitionId(),
                             cloudErrorReceivedEvent.getEntity().getErrorCode(),
                             cloudErrorReceivedEvent.getEntity().getErrorId()));
+        });
+    }
+    
+    @Test
+    public void shouldGetMessageSubscriptionCancelledEvent() {
+        //given
+        List<CloudRuntimeEvent> coveredEvents = new ArrayList<>();
+        
+        MessageSubscriptionImpl messageSubscription = MessageSubscriptionImpl.builder()
+                .withId("entityId")
+                .withEventName("messageName")
+                .withConfiguration("correlationKey")
+                .withProcessDefinitionId("processDefinitionId")
+                .withProcessInstanceId("processInstanceId")
+                .withBusinessKey("businessKey")
+                .build();
+                
+        CloudMessageSubscriptionCancelledEventImpl cloudEvent = CloudMessageSubscriptionCancelledEventImpl.builder()
+                                                                                .withEntity(messageSubscription)
+                                                                                .build();
+        coveredEvents.add(cloudEvent);
+        
+        producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
+
+        await().untilAsserted(() -> {
+
+            //when
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("eventType",
+                        MessageSubscriptionCancelledEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name());
+            
+            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+
+            //then
+            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedResources.getBody().getContent();
+            assertThat(retrievedEvents).hasSize(1);
+            
+            assertThat(retrievedEvents)
+            .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getServiceName,
+                    CloudRuntimeEvent::getServiceVersion,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionId,
+                    CloudRuntimeEvent::getEntityId,
+                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getId(),
+                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getProcessInstanceId(),
+                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getProcessDefinitionId(),
+                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getEventName(),
+                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getConfiguration(),
+                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getBusinessKey())                    
+            .contains(tuple(cloudEvent.getEventType(),
+                            cloudEvent.getServiceName(),
+                            cloudEvent.getServiceVersion(),
+                            cloudEvent.getProcessInstanceId(),
+                            cloudEvent.getProcessDefinitionId(),
+                            cloudEvent.getEntityId(),
+                            cloudEvent.getEntity().getId(),
+                            cloudEvent.getEntity().getProcessInstanceId(),
+                            cloudEvent.getEntity().getProcessDefinitionId(),
+                            cloudEvent.getEntity().getEventName(),
+                            cloudEvent.getEntity().getConfiguration(),
+                            cloudEvent.getEntity().getBusinessKey()));
         });
     }
     

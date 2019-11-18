@@ -46,4 +46,13 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
+  
+  <changeSet author="activiti-audit" id="alter-schema-m5" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/03-alter.pg.schema.m5.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
 </databaseChangeLog>
