@@ -103,7 +103,10 @@ pipeline {
                     sh "make updatebot/push-version-dry"
                     sh "make prepare-release-full-chart"
                     sh "make run-helm-chart"
+                                        
                     //sh "make acc-tests"
+                    sh "make github"
+                    sh "make tag"
                     sh "make release-full-chart"
                 }
               }
