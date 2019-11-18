@@ -66,9 +66,9 @@ replace-release-full-chart-names:
 	echo HELM_ACTIVITI_VERSION = $(HELM_ACTIVITI_VERSION)
 	echo APP_ACTIVITI_VERSION = $(APP_ACTIVITI_VERSION)
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
-		sed -i -e "s/appVersion: .*/appVersion: $(HELM_ACTIVITI_VERSION)/" Chart.yaml && \	
-		sed -i -e "s/version: .*/appVersion: $(HELM_ACTIVITI_VERSION)/" Chart.yaml && \
-		sed -i -e "s/#tag: .*/tag: $(APP_ACTIVITI_VERSION)/" values.yaml
+	 sed -i -e "s/appVersion: .*/appVersion: $(HELM_ACTIVITI_VERSION)/" Chart.yaml && \
+	 sed -i -e "s/version: .*/appVersion: $(HELM_ACTIVITI_VERSION)/" Chart.yaml && \
+	 sed -i -e "s/#tag: .*/tag: $(APP_ACTIVITI_VERSION)/" values.yaml
 pull-docker-images:
 	docker pull activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION)
 	docker pull activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_QUERY_VERSION)
