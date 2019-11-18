@@ -81,14 +81,13 @@ pipeline {
         
       stage('helm chart release') {
               when {
-                branch '*M*'
+                tag '*M*'
               }
               environment {
                 //TAG_NAME = sh(returnStdout: true, script: 'git describe --always').trim()
                 //HELM_ACTIVITI_VERSION = "$TAG_NAME"
-                //APP_ACTIVITI_VERSION = "$TAG_NAME"
-                //HELM_ACTIVITI_VERSION = "$BRANCH_NAME" //with dash
-                APP_ACTIVITI_VERSION = "$BRANCH_NAME"
+                APP_ACTIVITI_VERSION = "$TAG_NAME"
+                //APP_ACTIVITI_VERSION = "$BRANCH_NAME"
               }
               steps {
                 container('maven') {
@@ -97,7 +96,7 @@ pipeline {
                     sh "git config --global credential.helper store"
                     sh "jx step git credentials"
                     sh "git fetch --all --tags --prune"
-                    //sh "git checkout tags/$APP_ACTIVITI_VERSION -b $APP_ACTIVITI_VERSION"
+                    sh "git checkout tags/$APP_ACTIVITI_VERSION -b $APP_ACTIVITI_VERSION"
                     //sh "make retag-docker-images"
                     //sh "make push-docker-images"
                     sh "make updatebot/push-version-dry"
@@ -105,7 +104,7 @@ pipeline {
                     sh "make prepare-helm-chart"
                     sh "make run-helm-chart"
                                         
-                    //sh "make acc-tests"
+                    sh "make acc-tests"
                     sh "make github"
                     sh "make tag"
                 }
