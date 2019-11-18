@@ -108,7 +108,6 @@ pipeline {
                     //sh "make acc-tests"
                     sh "make github"
                     sh "make tag"
-                    sh "make release-full-chart"
                 }
               }
       }                      
