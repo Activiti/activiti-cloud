@@ -98,12 +98,12 @@ pipeline {
                     sh "jx step git credentials"
                     sh "git fetch --all --tags --prune"
                     //sh "git checkout tags/$APP_ACTIVITI_VERSION -b $APP_ACTIVITI_VERSION"
-                    sh "make retag-docker-images"
-                    sh "make push-docker-images"
+                    //sh "make retag-docker-images"
+                    //sh "make push-docker-images"
                     sh "make updatebot/push-version-dry"
                     sh "make prepare-release-full-chart"
                     sh "make run-helm-chart"
-                    sh "make acc-tests"
+                    //sh "make acc-tests"
                     sh "make release-full-chart"
                 }
               }
