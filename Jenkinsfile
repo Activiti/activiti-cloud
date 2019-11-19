@@ -5,7 +5,6 @@ pipeline {
     environment {
       ORG               = 'activiti'
       APP_NAME          = 'activiti-cloud-service-common'
-      CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
     }
     stages {
       stage('CI Build and push snapshot') {
