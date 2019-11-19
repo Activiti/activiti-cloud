@@ -73,7 +73,8 @@ pipeline {
             retry(2){
                 sh "make updatebot/push-version"
             }
-            sh "make update-ea"  
+            sh "make update-ea"
+            slackSend(channel: "@Alex Merkulov", message: "New build propogated to AE https://git.alfresco.com/process-services/alfresco-process-parent/merge_requests", sendAsText: true)  
 
           }
         }
