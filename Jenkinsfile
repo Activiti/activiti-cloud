@@ -104,6 +104,13 @@ pipeline {
       }
     }
     post {
+        failure {
+           slackSend(
+             channel: "#activiti-community-builds",
+             color: "danger",
+             message: "activiti-cloud-acceptance-tests branch=$BRANCH_NAME is failed http://jenkins.jx.35.242.205.159.nip.io/job/Activiti/job/activiti-cloud-acceptance-tests/"
+           )
+        } 
         always {
             cleanWs()
         }
