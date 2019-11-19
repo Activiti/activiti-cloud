@@ -40,6 +40,8 @@ pipeline {
         }
         steps {
           container('maven') {
+            slackSend(channel: "#feature-teams-exp", message: "New build propogated to AE https://git.alfresco.com/process-services/alfresco-process-parent/merge_requests", sendAsText: true)  
+  
             // ensure we're not on a detached head
             sh "git checkout develop"
             sh "git config --global credential.helper store"
@@ -74,7 +76,7 @@ pipeline {
                 sh "make updatebot/push-version"
             }
             sh "make update-ea"
-            slackSend(channel: "@Alex Merkulov", message: "New build propogated to AE https://git.alfresco.com/process-services/alfresco-process-parent/merge_requests", sendAsText: true)  
+            slackSend(channel: "#feature-teams-exp", message: "New build propogated to AE https://git.alfresco.com/process-services/alfresco-process-parent/merge_requests", sendAsText: true)  
 
           }
         }
