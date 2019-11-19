@@ -78,23 +78,23 @@ pipeline {
 
           }
         }
-				post {
-						success {
-								slackSend(
-												channel: "#activiti-community-builds",
-												color: "good",
-												message: "Activiti cloud dependencies successfully propagated to AE https://git.alfresco.com/process-services/alfresco-process-parent/merge_requests"
-								)
-						}
+        post {
+            success {
+              slackSend(
+                channel: "#activiti-community-builds",
+                color: "good",
+                message: "Activiti cloud dependencies successfully propagated to AE https://git.alfresco.com/process-services/alfresco-process-parent/merge_requests"
+              )
+            }
 
-						failure {
-								slackSend(
-												channel: "#activiti-community-builds",
-												color: "danger",
-												message: "Develop is failed http://jenkins.jx.35.242.205.159.nip.io/job/Activiti/job/activiti-cloud-dependencies/job/develop/"
-								)
-						}
-				}
+            failure {
+              slackSend(
+                channel: "#activiti-community-builds",
+                  color: "danger",
+                  message: "Develop is failed http://jenkins.jx.35.242.205.159.nip.io/job/Activiti/job/activiti-cloud-dependencies/job/develop/"
+              )
+            }
+        }
       }
       stage('helm chart release') {
               when {
