@@ -6,7 +6,6 @@ pipeline {
       ORG               = "activiti"
       APP_NAME          = "activiti-cloud-notifications-service-graphql"
       RELEASE_ARTIFACT  = "org.activiti.cloud.notifications.graphql:activiti-cloud-notifications-graphql-dependencies"
-      CHARTMUSEUM_CREDS = credentials("jenkins-x-chartmuseum")
       RELEASE_BRANCH    = "develop"
     }
     stages {
@@ -93,6 +92,13 @@ pipeline {
       }
     }
     post {
+        failure {
+           slackSend(
+             channel: "#activiti-community-builds",
+             color: "danger",
+             message: "activiti-cloud-notifications-service-graphql branch=$BRANCH_NAME is failed http://jenkins.jx.35.242.205.159.nip.io/job/Activiti/job/activiti-cloud-notifications-service-graphql"
+           )
+        } 
         always {
             cleanWs()
         }
