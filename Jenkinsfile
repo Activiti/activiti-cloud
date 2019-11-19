@@ -23,13 +23,13 @@ pipeline {
         }
         steps {
           container('maven') {
-            sh "git config --global credential.helper store" 
+            sh "git config --global credential.helper store"
             sh "jx step git credentials"
             sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
             sh "mvn install"
             sh "make updatebot/push-version-dry"
             sh "make prepare-helm-chart"
-            sh "make run-helm-chart"  
+            sh "make run-helm-chart"
             sh "make acc-tests"
           }
         }
@@ -74,12 +74,28 @@ pipeline {
                 sh "make updatebot/push-version"
             }
             sh "make update-ea"
-            slackSend(channel: "#feature-teams-exp", message: "New build propogated to AE https://git.alfresco.com/process-services/alfresco-process-parent/merge_requests", sendAsText: true)  
+            slackSend(channel: "#feature-teams-exp", message: "New build propogated to AE https://git.alfresco.com/process-services/alfresco-process-parent/merge_requests", sendAsText: true)
 
           }
         }
-      }        
-        
+				post {
+						success {
+								slackSend(
+												channel: "#activiti-community-builds",
+												color: "good",
+												message: "Activiti cloud dependencies successfully propagated to AE https://git.alfresco.com/process-services/alfresco-process-parent/merge_requests"
+								)
+						}
+
+						failure {
+								slackSend(
+												channel: "#activiti-community-builds",
+												color: "danger",
+												message: "Develop is failed http://jenkins.jx.35.242.205.159.nip.io/job/Activiti/job/activiti-cloud-dependencies/job/develop/"
+								)
+						}
+				}
+      }
       stage('helm chart release') {
               when {
                 tag '*M*'
@@ -104,13 +120,13 @@ pipeline {
                     sh "make replace-release-full-chart-names"
                     sh "make prepare-helm-chart"
                     sh "make run-helm-chart"
-                                        
+
                     sh "make acc-tests"
                     sh "make github"
                     sh "make tag"
                 }
               }
-      }                      
+      }
     }
     post {
         always {
