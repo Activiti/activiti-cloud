@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.starter.rb.behavior;
 
+import static org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior.DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME;
+
 import org.activiti.bpmn.model.Signal;
 import org.activiti.bpmn.model.SignalEventDefinition;
 import org.activiti.bpmn.model.ThrowEvent;
@@ -24,8 +26,6 @@ import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.spring.process.ProcessVariablesInitiator;
 import org.springframework.context.ApplicationContext;
-
-import static org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior.DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME;
 
 public class CloudActivityBehaviorFactory extends MappingAwareActivityBehaviorFactory {
 

@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.starter.rb.configuration;
 
+import static org.activiti.spring.boot.ProcessEngineAutoConfiguration.BEHAVIOR_FACTORY_MAPPING_CONFIGURER;
+
+import org.activiti.engine.impl.event.EventSubscriptionPayloadMappingProvider;
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.spring.boot.ProcessEngineAutoConfiguration;
 import org.activiti.spring.process.ProcessVariablesInitiator;
@@ -25,8 +28,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.activiti.spring.boot.ProcessEngineAutoConfiguration.BEHAVIOR_FACTORY_MAPPING_CONFIGURER;
-
 @AutoConfigureBefore(ProcessEngineAutoConfiguration.class)
 @Configuration
 public class ActivitiCloudEngineAutoConfiguration {
@@ -35,10 +36,12 @@ public class ActivitiCloudEngineAutoConfiguration {
     @ConditionalOnMissingBean(name = BEHAVIOR_FACTORY_MAPPING_CONFIGURER)
     public SignalBehaviourConfigurer signalBehaviourConfigurator(ApplicationContext applicationContext,
                                                                  VariablesMappingProvider variablesMappingProvider,
-                                                                 ProcessVariablesInitiator processVariablesInitiator
+                                                                 ProcessVariablesInitiator processVariablesInitiator,
+                                                                 EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider
     ) {
         return new SignalBehaviourConfigurer(applicationContext,
                                              variablesMappingProvider,
-                                             processVariablesInitiator);
+                                             processVariablesInitiator,
+                                             eventSubscriptionPayloadMappingProvider);
     }
 }

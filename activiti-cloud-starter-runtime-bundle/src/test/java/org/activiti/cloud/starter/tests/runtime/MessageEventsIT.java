@@ -17,6 +17,7 @@
 package org.activiti.cloud.starter.tests.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.StartMessageDeploymentDefinition;
 import org.activiti.api.process.model.StartMessageSubscription;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -37,6 +39,7 @@ import org.activiti.api.process.model.events.StartMessageDeployedEvent;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageWaitingEvent;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
@@ -59,6 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
@@ -601,4 +605,39 @@ public class MessageEventsIT {
                    times(processInstances)).handleCloudMessageSubscriptionCancelledEvent(ArgumentMatchers.<Message<CloudMessageSubscriptionCancelledEvent>>any());
         });
     }
+    
+    @Test
+    public void shouldThrowCatchMessageWithCorrelationKeyAndMappedPayloads() {
+        // given
+        StartProcessPayload throwMsg = ProcessPayloadBuilder.start()
+                                                            .withProcessDefinitionKey("process-be954b8b-b412-4fcb-9fc5-bf1d096d249f")
+                                                            .build();
+        
+        // when
+        ResponseEntity<CloudProcessInstance> throwMsgInstance = processInstanceRestTemplate.startProcess(throwMsg);
+ 
+        // then
+        assertThat(throwMsgInstance.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(throwMsgInstance.getBody()).isNotNull();
+        assertThat(runtimeService.createProcessInstanceQuery()
+                                 .processDefinitionKey("process-be954b8b-b412-4fcb-9fc5-bf1d096d249f")
+                                 .list()).isEmpty();
+        
+        // and then 
+        StartProcessPayload catchMsg = ProcessPayloadBuilder.start()
+                                                            .withProcessDefinitionKey("process-bf064b4f-5cf7-440c-b6b1-e55ac532e56c")
+                                                            .build();
+
+        // when
+        ResponseEntity<CloudProcessInstance> catchMsgInstance = processInstanceRestTemplate.startProcess(catchMsg);
+
+        // then
+        ResponseEntity<Resources<CloudVariableInstance>> variables = processInstanceRestTemplate.getVariables(catchMsgInstance);
+        
+        assertThat(variables.getBody().getContent()).extracting(VariableInstance::getName,
+                                                                VariableInstance::getValue)
+                                                    .contains(tuple("string", "string"),
+                                                              tuple("variable", "default"));
+    }
+    
 }

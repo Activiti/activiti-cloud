@@ -17,6 +17,7 @@
 package org.activiti.cloud.starter.rb.configuration;
 
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
+import org.activiti.engine.impl.event.EventSubscriptionPayloadMappingProvider;
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
@@ -28,18 +29,23 @@ public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConf
     private ApplicationContext applicationContext;
     private VariablesMappingProvider variablesMappingProvider;
     private ProcessVariablesInitiator processVariablesInitiator;
+    private EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider;
 
     public SignalBehaviourConfigurer(ApplicationContext applicationContext,
                                      VariablesMappingProvider variablesMappingProvider,
-                                     ProcessVariablesInitiator processVariablesInitiator
+                                     ProcessVariablesInitiator processVariablesInitiator,
+                                     EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider
     ) {
         this.applicationContext = applicationContext;
         this.variablesMappingProvider = variablesMappingProvider;
         this.processVariablesInitiator = processVariablesInitiator;
+        this.eventSubscriptionPayloadMappingProvider = eventSubscriptionPayloadMappingProvider;
     }
 
     @Override
     public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
+        processEngineConfiguration.setEventSubscriptionPayloadMappingProvider(eventSubscriptionPayloadMappingProvider);
+        
         processEngineConfiguration.setActivityBehaviorFactory(new CloudActivityBehaviorFactory(applicationContext,
                                                                                                variablesMappingProvider,
                                                                                                processVariablesInitiator
