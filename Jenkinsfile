@@ -132,7 +132,7 @@ pipeline {
     post {
         always {
             delete_deployment()
-            cleanWs()|echo "trying to clean Workspace"
+            cleanWs()
         }
     }
 }
