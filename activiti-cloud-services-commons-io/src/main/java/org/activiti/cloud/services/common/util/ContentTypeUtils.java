@@ -35,6 +35,8 @@ public final class ContentTypeUtils {
 
     public static final String DMN = "dmn";
 
+    public static final String XML = "xml";
+
     public static final String CONTENT_TYPE_JSON = DEFAULT.get(JSON);
 
     public static final String CONTENT_TYPE_XML = DEFAULT.get("xml");
