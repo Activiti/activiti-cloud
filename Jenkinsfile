@@ -40,6 +40,7 @@ pipeline {
         }
         steps {
           container('maven') {
+              
             // ensure we're not on a detached head
             sh "git checkout develop"
             sh "git config --global credential.helper store"
@@ -131,7 +132,7 @@ pipeline {
     post {
         always {
             delete_deployment()
-            cleanWs()
+            cleanWs()|echo "trying to clean Workspace"
         }
     }
 }
