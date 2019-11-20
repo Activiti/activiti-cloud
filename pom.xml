@@ -38,7 +38,7 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <activiti-cloud-modeling.version>7.1.258</activiti-cloud-modeling.version>
+    <activiti-cloud-modeling.version>7.1.259</activiti-cloud-modeling.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <enforcer.skip>true</enforcer.skip>
     <java.version>11</java.version>
