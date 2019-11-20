@@ -1,7 +1,8 @@
 package org.activiti.cloud.starter.tests.services.audit;
 
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
 import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED;
 import static org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED;
 import static org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents.MESSAGE_WAITING;
 import static org.activiti.api.process.model.events.BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED;
@@ -12,14 +13,16 @@ import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessE
 import static org.activiti.api.process.model.events.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
 import static org.activiti.api.task.model.events.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED;
 import static org.activiti.api.task.model.events.TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED;
-import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
-import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CANCELLED;
+import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_UPDATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -71,8 +74,9 @@ public class EmbeddedSubProcessAuditIT {
     private static final String SIMPLE_EMBEDDED_SUB_PROCESS = "startSimpleSubProcess";
     private static final String SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY = "startSimpleSubProcessWithCallActivity";
     private static final String SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT = "signalSubProcess";
-    private static final String SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT = "messageSubProcess";
-       
+    private static final String INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS = "messageInterruptingSubProcess";
+    private static final String NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS = "messageNonInterruptingSubProcess";
+
     private static final String ROUTING_KEY_HEADER = "routingKey";
     private static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "appVersion", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
     private static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS)
@@ -414,22 +418,15 @@ public class EmbeddedSubProcessAuditIT {
         runtimeService.deleteProcessInstance(processInstanceId, "Clean up");        
     }
 
-    private StartProcessPayload buildStartProcessPayload(String processDefinitionKey) {
-        return ProcessPayloadBuilder
-                                                                                                                .start()
-                                                                                                                .withProcessDefinitionKey(processDefinitionKey)
-                                                                                                                .build();
-    }
-
     @Test
-    public void shouldExecuteProcessWithMessageEventSubProcess() {
+    public void shouldExecuteProcessWithMessageInterruptedEventSubProcess() {
         //given
-        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(buildStartProcessPayload(SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT));
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(buildStartProcessPayload(INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS));
 
         String processInstanceId = processInstance.getBody().getId();
-        
+
         await().untilAsserted(() -> {
-            
+
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
             assertThat(receivedEvents)
@@ -437,43 +434,172 @@ public class EmbeddedSubProcessAuditIT {
                                 CloudRuntimeEvent::getProcessInstanceId,
                                 CloudRuntimeEvent::getParentProcessInstanceId,
                                 CloudRuntimeEvent::getProcessDefinitionKey)
-                    .containsExactly(tuple(PROCESS_CREATED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                                     tuple(PROCESS_STARTED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                                     tuple(MESSAGE_WAITING,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                                     tuple(ACTIVITY_STARTED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                                     tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                                     tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                                     tuple(ACTIVITY_STARTED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                                     tuple(TASK_CREATED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT)
+                    .containsExactly(tuple(PROCESS_CREATED, processInstanceId, null,
+                                           INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(PROCESS_STARTED, processInstanceId, null,
+                                           INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(MESSAGE_WAITING, processInstanceId, null,
+                                           INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(ACTIVITY_STARTED, processInstanceId, null,
+                                           INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(ACTIVITY_COMPLETED, processInstanceId, null,
+                                           INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null,
+                                           INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(ACTIVITY_STARTED, processInstanceId, null,
+                                           INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(TASK_CREATED, processInstanceId, null,
+                                           INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(TASK_ASSIGNED, processInstanceId, null,
+                                           INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
                     );
         });
 
         Execution executionWithMessage = runtimeService.createExecutionQuery().messageEventSubscriptionName("messageName").singleResult();
         assertThat(executionWithMessage).isNotNull();
 
+        // event-subprocess received interrupted message event
         runtimeService.messageEventReceived("messageName", executionWithMessage.getId());
-        
+
         await().untilAsserted(() -> {
-            
+
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
-              
+
             assertThat(receivedEvents)
             .extracting(CloudRuntimeEvent::getEventType,
                         CloudRuntimeEvent::getProcessInstanceId,
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey)
             .containsExactly(
-                             tuple(MESSAGE_RECEIVED,processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                             tuple(MESSAGE_SUBSCRIPTION_CANCELLED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                             tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                             tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                             tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                             tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                             tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT),
-                             tuple(PROCESS_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_MESSAGE_EVENT)
+                             tuple(MESSAGE_RECEIVED, processInstanceId, null,
+                                   INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(ACTIVITY_CANCELLED, processInstanceId, null,
+                                   INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(TASK_CANCELLED, processInstanceId, null,
+                                   INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(MESSAGE_SUBSCRIPTION_CANCELLED, processInstanceId, null,
+                                   INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(ACTIVITY_COMPLETED, processInstanceId, null,
+                                   INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null,
+                                   INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(ACTIVITY_STARTED, processInstanceId, null,
+                                   INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(ACTIVITY_COMPLETED, processInstanceId, null,
+                                   INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(ACTIVITY_COMPLETED, processInstanceId, null,
+                                   INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(PROCESS_COMPLETED, processInstanceId, null,
+                                   INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
             );
         });
+
+
+    }
+
+    @Test
+    public void shouldExecuteProcessWithMessageNonInterruptedEventSubProcess() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(buildStartProcessPayload(NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS));
+
+        String processInstanceId = processInstance.getBody().getId();
+
+        await().untilAsserted(() -> {
+
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+            assertThat(receivedEvents)
+                    .extracting(CloudRuntimeEvent::getEventType,
+                                CloudRuntimeEvent::getProcessInstanceId,
+                                CloudRuntimeEvent::getParentProcessInstanceId,
+                                CloudRuntimeEvent::getProcessDefinitionKey)
+                    .containsExactly(tuple(PROCESS_CREATED, processInstanceId, null,
+                                           NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(PROCESS_STARTED, processInstanceId, null,
+                                           NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(MESSAGE_WAITING, processInstanceId, null,
+                                           NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(ACTIVITY_STARTED, processInstanceId, null,
+                                           NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(ACTIVITY_COMPLETED, processInstanceId, null,
+                                           NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null,
+                                           NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(ACTIVITY_STARTED, processInstanceId, null,
+                                           NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(TASK_CREATED, processInstanceId, null,
+                                           NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                                     tuple(TASK_ASSIGNED, processInstanceId, null,
+                                           NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
+                    );
+        });
+
+        Execution executionWithMessage = runtimeService.createExecutionQuery().messageEventSubscriptionName("messageName").singleResult();
+        assertThat(executionWithMessage).isNotNull();
+
+        // event-subprocess received non interrupted message event
+        runtimeService.messageEventReceived("messageName", executionWithMessage.getId());
+
+        await().untilAsserted(() -> {
+
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+
+            assertThat(receivedEvents)
+            .extracting(CloudRuntimeEvent::getEventType,
+                        CloudRuntimeEvent::getProcessInstanceId,
+                        CloudRuntimeEvent::getParentProcessInstanceId,
+                        CloudRuntimeEvent::getProcessDefinitionKey)
+            .containsExactly(
+                             tuple(MESSAGE_RECEIVED, processInstanceId, null,
+                                   NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(MESSAGE_SUBSCRIPTION_CANCELLED, processInstanceId, null,
+                                   NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(ACTIVITY_COMPLETED, processInstanceId, null,
+                                   NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null,
+                                   NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(ACTIVITY_STARTED, processInstanceId, null,
+                                   NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(ACTIVITY_COMPLETED, processInstanceId, null,
+                                   NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                             tuple(ACTIVITY_COMPLETED, processInstanceId, null,
+                                   NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
+            );
+        });
+
+        Collection<CloudTask> tasks = processInstanceRestTemplate.getTasks(processInstance).getBody().getContent();
+        assertThat(tasks.size()).isEqualTo(1);
+
+        taskRestTemplate.complete((Task) tasks.toArray()[0]);
+
+        await().untilAsserted(() -> {
+
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+
+            assertThat(receivedEvents)
+                    .extracting(CloudRuntimeEvent::getEventType,
+                            CloudRuntimeEvent::getProcessInstanceId,
+                            CloudRuntimeEvent::getParentProcessInstanceId,
+                            CloudRuntimeEvent::getProcessDefinitionKey)
+                    .containsExactly(
+                            tuple(TASK_COMPLETED, processInstanceId, null,
+                                  NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                            tuple(ACTIVITY_COMPLETED, processInstanceId, null,
+                                  NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                            tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null,
+                                  NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                            tuple(ACTIVITY_STARTED, processInstanceId, null,
+                                  NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                            tuple(ACTIVITY_COMPLETED, processInstanceId, null,
+                                  NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                            tuple(PROCESS_COMPLETED, processInstanceId, null,
+                                  NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
+                    );
+        });
+
     }
 
     private ResponseEntity<PagedResources<CloudProcessDefinition>> getProcessDefinitions() {
@@ -485,6 +611,12 @@ public class EmbeddedSubProcessAuditIT {
                                      null,
                                      responseType);
     }
-    
+
+    private StartProcessPayload buildStartProcessPayload(String processDefinitionKey) {
+        return ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(processDefinitionKey)
+                .build();
+    }
 
 }
