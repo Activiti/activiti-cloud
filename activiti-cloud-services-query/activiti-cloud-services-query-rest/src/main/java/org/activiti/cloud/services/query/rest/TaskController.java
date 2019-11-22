@@ -17,10 +17,9 @@
 package org.activiti.cloud.services.query.rest;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
@@ -48,6 +47,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 
 @RestController
 @RequestMapping(
@@ -92,7 +95,8 @@ public class TaskController {
                                                        @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
                                                        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
                                                        Pageable pageable) {
-        Predicate extendedPredicate=predicate;
+        Predicate extendedPredicate = Optional.ofNullable(predicate)
+                                              .orElseGet(BooleanBuilder::new);
         if (rootTasksOnly) {
             BooleanExpression parentTaskNull = QTaskEntity.taskEntity.parentTaskId.isNull(); 
             extendedPredicate= extendedPredicate !=null ? parentTaskNull.and(extendedPredicate) : parentTaskNull;

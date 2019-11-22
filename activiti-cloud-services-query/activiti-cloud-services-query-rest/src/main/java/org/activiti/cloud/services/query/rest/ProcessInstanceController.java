@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.Optional;
+
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -43,6 +43,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 
 @RestController
 @RequestMapping(
@@ -90,7 +94,8 @@ public class ProcessInstanceController {
     public PagedResources<Resource<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                                   Pageable pageable) {
 
-        predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(predicate,
+        predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(Optional.ofNullable(predicate)
+                                                                                           .orElseGet(BooleanBuilder::new),
                                                                                     SecurityPolicyAccess.READ);
 
         return pagedResourcesAssembler.toResource(pageable,
@@ -120,6 +125,8 @@ public class ProcessInstanceController {
     public PagedResources<Resource<CloudProcessInstance>> subprocesses(@PathVariable String processInstanceId,
                                                                 @QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                                 Pageable pageable) {
+
+        predicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
 
         ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
                                                                             processInstanceId,

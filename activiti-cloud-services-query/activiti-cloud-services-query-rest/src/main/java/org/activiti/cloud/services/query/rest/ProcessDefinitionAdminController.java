@@ -16,7 +16,8 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import com.querydsl.core.types.Predicate;
+import java.util.Optional;
+
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
@@ -32,6 +33,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 
 @RestController
 @ExposesResourceFor(ProcessDefinitionEntity.class)
@@ -60,6 +64,10 @@ public class ProcessDefinitionAdminController {
     @GetMapping
     public PagedResources<Resource<CloudProcessDefinition>> findAll(@QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
                                                                     Pageable pageable) {
+        
+        predicate = Optional.ofNullable(predicate)
+                            .orElseGet(BooleanBuilder::new);
+        
         return pagedResourcesAssembler.toResource(pageable,
                                                   repository.findAll(predicate,
                                                                      pageable),

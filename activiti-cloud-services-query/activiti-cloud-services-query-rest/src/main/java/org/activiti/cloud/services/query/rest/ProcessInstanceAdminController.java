@@ -16,7 +16,8 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import com.querydsl.core.types.Predicate;
+import java.util.Optional;
+
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -34,6 +35,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 
 @RestController
 @RequestMapping(
@@ -67,14 +71,15 @@ public class ProcessInstanceAdminController {
     public PagedResources<Resource<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                                   Pageable pageable) {
 
-
+        predicate = Optional.ofNullable(predicate)
+                            .orElseGet(BooleanBuilder::new);
+        
         return pagedResourcesAssembler.toResource(pageable,
                                                   processInstanceRepository.findAll(predicate,
                                                                                     pageable),
                                                   processInstanceResourceAssembler);
     }
     
-
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     public Resource<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
 

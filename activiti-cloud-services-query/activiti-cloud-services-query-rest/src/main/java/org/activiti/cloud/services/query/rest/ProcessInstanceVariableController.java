@@ -16,8 +16,8 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.Optional;
+
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -36,6 +36,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 
 @RestController
 @RequestMapping(
@@ -66,6 +70,9 @@ public class ProcessInstanceVariableController {
                                                                         @QuerydslPredicate(root = ProcessVariableEntity.class) Predicate predicate,
                                                                         Pageable pageable) {
 
+        predicate = Optional.ofNullable(predicate)
+                            .orElseGet(BooleanBuilder::new);
+        
         QProcessVariableEntity variable = QProcessVariableEntity.processVariableEntity;
         
         //We will show only not deleted variables 

@@ -25,6 +25,7 @@ import java.util.Collection;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -367,6 +368,40 @@ public class QueryProcessInstancesEntityIT {
                     .contains(tuple(completedProcess.getId(),
                                     completedProcess.getName(),
                                     ProcessInstance.ProcessInstanceStatus.COMPLETED));
+        });
+    }
+
+    @Test
+    public void shouldGetProcessInstancesAsAdmin() {
+        //given
+        ProcessInstance completedProcess = processInstanceBuilder.aCompletedProcessInstance("Process for filter");
+        ProcessInstance runningProcess = processInstanceBuilder.aRunningProcessInstance("Process");
+
+        eventsAggregator.sendAll();
+
+        keycloakTokenProducer.setKeycloakTestUser("hradmin");
+        await().untilAsserted(() -> {
+
+            ResponseEntity<PagedResources<CloudProcessInstance>> responseEntity = testRestTemplate.exchange(ADMIN_PROC_URL + "?page=0&size=10",
+                                                                                       HttpMethod.GET,
+                                                                                       keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                       new ParameterizedTypeReference<PagedResources<CloudProcessInstance>>() {
+                                                                                       });
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody())
+                    .extracting(
+                    CloudProcessInstance::getId,
+                    CloudProcessInstance::getName,
+                    CloudProcessInstance::getStatus)
+                    .containsExactly(
+                            tuple(completedProcess.getId(),
+                                  completedProcess.getName(),
+                                  ProcessInstanceStatus.COMPLETED),
+                            tuple(runningProcess.getId(),
+                                  runningProcess.getName(),
+                                  ProcessInstanceStatus.RUNNING)
+                    );
         });
     }
 
