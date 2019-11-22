@@ -113,7 +113,7 @@
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-stream-test-support</artifactId>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -157,6 +157,7 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
+      <version>1.4.199</version>
       <scope>test</scope>
     </dependency>
     <dependency>
