@@ -10,6 +10,10 @@ ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.37
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
 
+ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(ACTIVITI_CLOUD_RB_VERSION) activiti-cloud-connector $(ACTIVITI_CLOUD_CONNECTORS_VERSION) \
+    activiti-cloud-query $(ACTIVITI_CLOUD_QUERY_VERSION) activiti-cloud-notifications-graphql $(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)  \
+    activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING)
+
 $(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\./-/'|rev))
 
 GITHUB_CHARTS_BRANCH := "gh-pages"
@@ -52,15 +56,10 @@ update-ea:
 
 updatebot/push-version:
 	updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(VERSION) --merge false
-	 export UPDATEBOT_DRY_RUN=false&&updatebot push-version --kind helm runtime-bundle $(ACTIVITI_CLOUD_RB_VERSION) activiti-cloud-connector $(ACTIVITI_CLOUD_CONNECTORS_VERSION) \
-	 activiti-cloud-query $(ACTIVITI_CLOUD_QUERY_VERSION) activiti-cloud-notifications-graphql $(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)  \
-	 activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING)
-
+	updatebot push-version --kind helm $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
 
 updatebot/push-version-dry:
-	 export UPDATEBOT_DRY_RUN=true&&updatebot push-version --dry --kind helm runtime-bundle $(ACTIVITI_CLOUD_RB_VERSION) activiti-cloud-connector $(ACTIVITI_CLOUD_CONNECTORS_VERSION) \
-	 activiti-cloud-query $(ACTIVITI_CLOUD_QUERY_VERSION) activiti-cloud-notifications-graphql $(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)  \
-	 activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING)
+	updatebot --dry push-version --kind helm $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
 
 replace-release-full-chart-names:
 	echo HELM_ACTIVITI_VERSION = $(HELM_ACTIVITI_VERSION)
