@@ -57,12 +57,14 @@ public class JsonSchemaModelValidatorConfiguration {
     private SchemaLoader buildSchemaLoaderFromClasspath(String schemaFileName) throws IOException {
         try (InputStream schemaInputStream = new ClassPathResource(schemaFileName).getInputStream()) {
             JSONObject jsonSchema = new JSONObject(new JSONTokener(schemaInputStream));
+            
             return SchemaLoader
                     .builder()
                     .schemaClient(SchemaClient.classPathAwareClient())
-                    .schemaJson(jsonSchema)
+                    .schemaJson(new JsonSchemaFlattener().flatten(jsonSchema))
                     .draftV7Support()
                     .build();
         }
     }
+    
 }
