@@ -28,8 +28,8 @@
     <commons-lang.version>2.6</commons-lang.version>
     <commons-io.version>2.6</commons-io.version>
     <java-semver.version>0.9.0</java-semver.version>
-    <keycloak.version>4.6.0.Final</keycloak.version>
-    <keycloak-spring-boot.version>4.6.0.Final</keycloak-spring-boot.version>
+    <keycloak.version>4.8.3.Final</keycloak.version>
+    <keycloak-spring-boot.version>4.8.3.Final</keycloak-spring-boot.version>
     <logstash.version>4.11</logstash.version>
     <querydsl.version>4.1.4</querydsl.version>
     <resteasy.version>3.0.21.Final</resteasy.version>
