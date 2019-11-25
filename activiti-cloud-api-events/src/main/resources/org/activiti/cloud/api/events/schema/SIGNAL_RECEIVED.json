@@ -1,0 +1,94 @@
+{
+  "type" : "object",
+  "id" : "urn:jsonschema:org:activiti:cloud:api:process:model:events:CloudBPMNSignalReceivedEvent",
+  "properties" : {
+    "messageId" : {
+      "type" : "string"
+    },
+    "entityId" : {
+      "type" : "string"
+    },
+    "sequenceNumber" : {
+      "type" : "integer"
+    },
+    "appName" : {
+      "type" : "string"
+    },
+    "appVersion" : {
+      "type" : "string"
+    },
+    "serviceName" : {
+      "type" : "string"
+    },
+    "serviceFullName" : {
+      "type" : "string"
+    },
+    "serviceType" : {
+      "type" : "string"
+    },
+    "serviceVersion" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "entity" : {
+      "type" : "object",
+      "id" : "urn:jsonschema:org:activiti:api:process:model:BPMNSignal",
+      "properties" : {
+        "signalPayload" : {
+          "type" : "object",
+          "id" : "urn:jsonschema:org:activiti:api:process:model:payloads:SignalPayload",
+          "properties" : {
+            "id" : {
+              "type" : "string"
+            },
+            "name" : {
+              "type" : "string"
+            },
+            "variables" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "type" : "any"
+              }
+            }
+          }
+        },
+        "elementId" : {
+          "type" : "string"
+        },
+        "processDefinitionId" : {
+          "type" : "string"
+        },
+        "processInstanceId" : {
+          "type" : "string"
+        }
+      }
+    },
+    "processDefinitionId" : {
+      "type" : "string"
+    },
+    "processInstanceId" : {
+      "type" : "string"
+    },
+    "timestamp" : {
+      "type" : "integer"
+    },
+    "eventType" : {
+      "type" : "string",
+      "enum" : [ "SIGNAL_RECEIVED" ]
+    },
+    "parentProcessInstanceId" : {
+      "type" : "string"
+    },
+    "processDefinitionKey" : {
+      "type" : "string"
+    },
+    "processDefinitionVersion" : {
+      "type" : "integer"
+    },
+    "businessKey" : {
+      "type" : "string"
+    }
+  }
+}

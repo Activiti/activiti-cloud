@@ -21,16 +21,17 @@ import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
 
-public class CloudIntegrationResultReceivedImpl extends CloudRuntimeEventImpl<IntegrationContext, IntegrationEvent.IntegrationEvents>
+public class CloudIntegrationResultReceivedEventImpl extends CloudRuntimeEventImpl<IntegrationContext, IntegrationEvent.IntegrationEvents>
         implements CloudIntegrationResultReceivedEvent {
 
-    public CloudIntegrationResultReceivedImpl() {
+    public CloudIntegrationResultReceivedEventImpl() {
     }
 
-    public CloudIntegrationResultReceivedImpl(IntegrationContext integrationContext) {
+    public CloudIntegrationResultReceivedEventImpl(IntegrationContext integrationContext) {
         super(integrationContext);
-        if (getEntity()!=null)
+        if (getEntity() != null) {
             setEntityId(getEntity().getClientId());
+        }
     }
 
     @Override

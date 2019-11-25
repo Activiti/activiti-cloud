@@ -1,0 +1,119 @@
+{
+  "type" : "object",
+  "id" : "urn:jsonschema:org:activiti:cloud:api:process:model:events:CloudStartMessageDeployedEvent",
+  "properties" : {
+    "eventType" : {
+      "type" : "string",
+      "enum" : [ "START_MESSAGE_DEPLOYED" ]
+    },
+    "messageId" : {
+      "type" : "string"
+    },
+    "entityId" : {
+      "type" : "string"
+    },
+    "sequenceNumber" : {
+      "type" : "integer"
+    },
+    "appName" : {
+      "type" : "string"
+    },
+    "appVersion" : {
+      "type" : "string"
+    },
+    "serviceName" : {
+      "type" : "string"
+    },
+    "serviceFullName" : {
+      "type" : "string"
+    },
+    "serviceType" : {
+      "type" : "string"
+    },
+    "serviceVersion" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "entity" : {
+      "type" : "object",
+      "id" : "urn:jsonschema:org:activiti:api:process:model:StartMessageDeploymentDefinition",
+      "properties" : {
+        "messageSubscription" : {
+          "type" : "object",
+          "id" : "urn:jsonschema:org:activiti:api:process:model:StartMessageSubscription",
+          "properties" : {
+            "id" : {
+              "type" : "string"
+            },
+            "processDefinitionId" : {
+              "type" : "string"
+            },
+            "eventName" : {
+              "type" : "string"
+            },
+            "configuration" : {
+              "type" : "string"
+            },
+            "activityId" : {
+              "type" : "string"
+            },
+            "created" : {
+              "type" : "integer",
+              "format" : "utc-millisec"
+            }
+          }
+        },
+        "processDefinition" : {
+          "type" : "object",
+          "id" : "urn:jsonschema:org:activiti:api:process:model:ProcessDefinition",
+          "properties" : {
+            "name" : {
+              "type" : "string"
+            },
+            "key" : {
+              "type" : "string"
+            },
+            "id" : {
+              "type" : "string"
+            },
+            "formKey" : {
+              "type" : "string"
+            },
+            "description" : {
+              "type" : "string"
+            },
+            "version" : {
+              "type" : "integer"
+            },
+            "appVersion" : {
+              "type" : "string"
+            }
+          }
+        }
+      }
+    },
+    "processDefinitionId" : {
+      "type" : "string"
+    },
+    "processInstanceId" : {
+      "type" : "string"
+    },
+    "timestamp" : {
+      "type" : "integer"
+    },
+    "parentProcessInstanceId" : {
+      "type" : "string"
+    },
+    "processDefinitionKey" : {
+      "type" : "string"
+    },
+    "processDefinitionVersion" : {
+      "type" : "integer"
+    },
+    "businessKey" : {
+      "type" : "string"
+    }
+  }
+}

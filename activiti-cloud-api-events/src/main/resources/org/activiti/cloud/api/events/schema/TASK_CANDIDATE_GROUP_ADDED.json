@@ -1,0 +1,73 @@
+{
+  "type" : "object",
+  "id" : "urn:jsonschema:org:activiti:cloud:api:task:model:events:CloudTaskCandidateGroupAddedEvent",
+  "properties" : {
+    "messageId" : {
+      "type" : "string"
+    },
+    "entityId" : {
+      "type" : "string"
+    },
+    "sequenceNumber" : {
+      "type" : "integer"
+    },
+    "appName" : {
+      "type" : "string"
+    },
+    "appVersion" : {
+      "type" : "string"
+    },
+    "serviceName" : {
+      "type" : "string"
+    },
+    "serviceFullName" : {
+      "type" : "string"
+    },
+    "serviceType" : {
+      "type" : "string"
+    },
+    "serviceVersion" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "entity" : {
+      "type" : "object",
+      "id" : "urn:jsonschema:org:activiti:api:task:model:TaskCandidateGroup",
+      "properties" : {
+        "groupId" : {
+          "type" : "string"
+        },
+        "taskId" : {
+          "type" : "string"
+        }
+      }
+    },
+    "processDefinitionId" : {
+      "type" : "string"
+    },
+    "processInstanceId" : {
+      "type" : "string"
+    },
+    "timestamp" : {
+      "type" : "integer"
+    },
+    "eventType" : {
+      "type" : "string",
+      "enum" : [ "TASK_CANDIDATE_GROUP_ADDED", "TASK_CANDIDATE_GROUP_REMOVED" ]
+    },
+    "parentProcessInstanceId" : {
+      "type" : "string"
+    },
+    "processDefinitionKey" : {
+      "type" : "string"
+    },
+    "processDefinitionVersion" : {
+      "type" : "integer"
+    },
+    "businessKey" : {
+      "type" : "string"
+    }
+  }
+}

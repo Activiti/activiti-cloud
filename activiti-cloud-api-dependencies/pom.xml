@@ -65,6 +65,11 @@
         <artifactId>activiti-cloud-api-task-model-impl</artifactId>
         <version>${activiti-cloud-api.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.api</groupId>
+        <artifactId>activiti-cloud-api-events</artifactId>
+        <version>${activiti-cloud-api.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>

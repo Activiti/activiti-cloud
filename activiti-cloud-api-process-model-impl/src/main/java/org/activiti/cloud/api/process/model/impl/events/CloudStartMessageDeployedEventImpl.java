@@ -29,7 +29,8 @@ public class CloudStartMessageDeployedEventImpl extends CloudRuntimeEventImpl<St
         super.setEntity(builder.entity);
     }
 
-    CloudStartMessageDeployedEventImpl() { }
+    public CloudStartMessageDeployedEventImpl() {
+    }
     
     public CloudStartMessageDeployedEventImpl(StartMessageDeploymentDefinition entity) {
         super(entity);
@@ -46,8 +47,9 @@ public class CloudStartMessageDeployedEventImpl extends CloudRuntimeEventImpl<St
                                               StartMessageDeploymentDefinition entity) {
         super(id, timestamp, entity);
         
-        if (getEntity() != null)
+        if (getEntity() != null) {
             setEntityId(getEntity().getMessageSubscription().getId());
+        }
     }    
 
     @Override

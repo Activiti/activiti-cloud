@@ -59,8 +59,8 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFailedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
@@ -70,7 +70,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -109,12 +109,12 @@ public class CloudProcessModelAutoConfiguration {
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name()));
         module.registerSubtypes(new NamedType(CloudProcessCancelledEventImpl.class,
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name()));
-        module.registerSubtypes(new NamedType(CloudSequenceFlowTakenImpl.class,
+        module.registerSubtypes(new NamedType(CloudSequenceFlowTakenEventImpl.class,
                                               SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name()));
 
-        module.registerSubtypes(new NamedType(CloudIntegrationRequestedImpl.class,
+        module.registerSubtypes(new NamedType(CloudIntegrationRequestedEventImpl.class,
                                               IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED.name()));
-        module.registerSubtypes(new NamedType(CloudIntegrationResultReceivedImpl.class,
+        module.registerSubtypes(new NamedType(CloudIntegrationResultReceivedEventImpl.class,
                                               IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name()));
         
         module.registerSubtypes(new NamedType(CloudBPMNTimerFiredEventImpl.class,

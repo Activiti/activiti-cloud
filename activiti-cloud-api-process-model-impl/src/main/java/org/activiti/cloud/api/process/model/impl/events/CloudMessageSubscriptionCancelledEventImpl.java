@@ -29,7 +29,7 @@ public class CloudMessageSubscriptionCancelledEventImpl extends CloudRuntimeEven
        this(builder.entity);
     }
 
-    CloudMessageSubscriptionCancelledEventImpl() {
+    public CloudMessageSubscriptionCancelledEventImpl() {
     }
 
     public CloudMessageSubscriptionCancelledEventImpl(MessageSubscription entity) {
@@ -38,7 +38,7 @@ public class CloudMessageSubscriptionCancelledEventImpl extends CloudRuntimeEven
         setProcessInstanceId(entity.getProcessInstanceId());
         setProcessDefinitionId(entity.getProcessDefinitionId());
         
-        if (entity!=null) {
+        if (entity != null) {
             setEntityId(entity.getId());
         }
     }
@@ -55,7 +55,7 @@ public class CloudMessageSubscriptionCancelledEventImpl extends CloudRuntimeEven
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
         
-        if (entity!=null) {
+        if (entity != null) {
             setEntityId(entity.getId());
         }
     }

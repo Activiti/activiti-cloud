@@ -1,0 +1,105 @@
+{
+  "type" : "object",
+  "id" : "urn:jsonschema:org:activiti:cloud:api:process:model:events:CloudBPMNTimerScheduledEvent",
+  "properties" : {
+    "messageId" : {
+      "type" : "string"
+    },
+    "entityId" : {
+      "type" : "string"
+    },
+    "sequenceNumber" : {
+      "type" : "integer"
+    },
+    "appName" : {
+      "type" : "string"
+    },
+    "appVersion" : {
+      "type" : "string"
+    },
+    "serviceName" : {
+      "type" : "string"
+    },
+    "serviceFullName" : {
+      "type" : "string"
+    },
+    "serviceType" : {
+      "type" : "string"
+    },
+    "serviceVersion" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "entity" : {
+      "type" : "object",
+      "id" : "urn:jsonschema:org:activiti:api:process:model:BPMNTimer",
+      "properties" : {
+        "timerPayload" : {
+          "type" : "object",
+          "id" : "urn:jsonschema:org:activiti:api:process:model:payloads:TimerPayload",
+          "properties" : {
+            "id" : {
+              "type" : "string"
+            },
+            "endDate" : {
+              "type" : "integer",
+              "format" : "utc-millisec"
+            },
+            "retries" : {
+              "type" : "integer"
+            },
+            "maxIterations" : {
+              "type" : "integer"
+            },
+            "repeat" : {
+              "type" : "string"
+            },
+            "exceptionMessage" : {
+              "type" : "string"
+            },
+            "duedate" : {
+              "type" : "integer",
+              "format" : "utc-millisec"
+            }
+          }
+        },
+        "elementId" : {
+          "type" : "string"
+        },
+        "processDefinitionId" : {
+          "type" : "string"
+        },
+        "processInstanceId" : {
+          "type" : "string"
+        }
+      }
+    },
+    "processDefinitionId" : {
+      "type" : "string"
+    },
+    "processInstanceId" : {
+      "type" : "string"
+    },
+    "timestamp" : {
+      "type" : "integer"
+    },
+    "eventType" : {
+      "type" : "string",
+      "enum" : [ "TIMER_SCHEDULED", "TIMER_FIRED", "TIMER_CANCELLED", "TIMER_EXECUTED", "TIMER_FAILED", "TIMER_RETRIES_DECREMENTED" ]
+    },
+    "parentProcessInstanceId" : {
+      "type" : "string"
+    },
+    "processDefinitionKey" : {
+      "type" : "string"
+    },
+    "processDefinitionVersion" : {
+      "type" : "integer"
+    },
+    "businessKey" : {
+      "type" : "string"
+    }
+  }
+}
