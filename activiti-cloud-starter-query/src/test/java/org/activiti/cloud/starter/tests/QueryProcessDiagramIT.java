@@ -36,7 +36,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStarted
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
@@ -221,7 +221,7 @@ public class QueryProcessDiagramIT {
                                    new CloudProcessStartedEventImpl(process, null, null),
                                    new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
                                    new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
-                                   new CloudSequenceFlowTakenImpl(sequenceFlow),
+                                   new CloudSequenceFlowTakenEventImpl(sequenceFlow),
                                    new CloudBPMNActivityStartedEventImpl(taskActivity, processDefinitionId, process.getId())
         );
         
@@ -269,7 +269,7 @@ public class QueryProcessDiagramIT {
                                    new CloudProcessStartedEventImpl(process, null, null),
                                    new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
                                    new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
-                                   new CloudSequenceFlowTakenImpl(sequenceFlow),
+                                   new CloudSequenceFlowTakenEventImpl(sequenceFlow),
                                    new CloudBPMNActivityStartedEventImpl(taskActivity, processDefinitionId, process.getId())
         );
         
@@ -301,7 +301,7 @@ public class QueryProcessDiagramIT {
                                    new CloudProcessStartedEventImpl(process, null, null),
                                    new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
                                    new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
-                                   new CloudSequenceFlowTakenImpl(sequenceFlow),
+                                   new CloudSequenceFlowTakenEventImpl(sequenceFlow),
                                    new CloudBPMNActivityStartedEventImpl(taskActivity, processDefinitionId, process.getId())
         );
         
