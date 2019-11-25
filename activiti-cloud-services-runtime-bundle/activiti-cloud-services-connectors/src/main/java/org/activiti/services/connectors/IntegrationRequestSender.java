@@ -16,7 +16,7 @@
 package org.activiti.services.connectors;
 
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
@@ -56,7 +56,7 @@ public class IntegrationRequestSender {
 
     private void sendAuditEvent(IntegrationRequest integrationRequest) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            CloudIntegrationRequestedImpl integrationRequested = new CloudIntegrationRequestedImpl(integrationRequest.getIntegrationContext());
+            CloudIntegrationRequestedEventImpl integrationRequested = new CloudIntegrationRequestedEventImpl(integrationRequest.getIntegrationContext());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequested);
 
             Message<?> message = messageBuilderFactory.create(integrationRequest.getIntegrationContext())
