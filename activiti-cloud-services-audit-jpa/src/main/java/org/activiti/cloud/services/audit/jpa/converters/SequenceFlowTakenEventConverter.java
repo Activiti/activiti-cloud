@@ -4,7 +4,7 @@ import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
-import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.SequenceFlowAuditEventEntity;
 
@@ -28,8 +28,8 @@ public class SequenceFlowTakenEventConverter extends BaseEventToEntityConverter 
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         SequenceFlowAuditEventEntity sequenceFlowTakenAuditEventEntity = (SequenceFlowAuditEventEntity) auditEventEntity;
 
-        return new CloudSequenceFlowTakenImpl(sequenceFlowTakenAuditEventEntity.getEventId(),
-                                              sequenceFlowTakenAuditEventEntity.getTimestamp(),
-                                              sequenceFlowTakenAuditEventEntity.getSequenceFlow());
+        return new CloudSequenceFlowTakenEventImpl(sequenceFlowTakenAuditEventEntity.getEventId(),
+                                                   sequenceFlowTakenAuditEventEntity.getTimestamp(),
+                                                   sequenceFlowTakenAuditEventEntity.getSequenceFlow());
     }
 }
