@@ -61,13 +61,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud.app</groupId>
-        <artifactId>activiti-cloud-app-dependencies</artifactId>
-        <version>${activiti-cloud-app-service.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
     </dependencies>
   </dependencyManagement>
   
