@@ -18,9 +18,11 @@ package org.activiti.services.connectors.channel;
 
 import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
 
+import java.util.List;
+
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.RuntimeService;
@@ -34,8 +36,6 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-
-import java.util.List;
 
 public class ServiceTaskIntegrationResultEventHandler {
 
@@ -89,9 +89,9 @@ public class ServiceTaskIntegrationResultEventHandler {
 
     private void sendAuditMessage(IntegrationResult integrationResult) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            CloudIntegrationResultReceivedImpl integrationResultReceived = new CloudIntegrationResultReceivedImpl(integrationResult.getIntegrationContext());
+            CloudIntegrationResultReceivedEventImpl integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(integrationResult.getIntegrationContext());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationResultReceived);
-            Message<CloudIntegrationResultReceivedImpl> message = MessageBuilder.withPayload(
+            Message<CloudIntegrationResultReceivedEventImpl> message = MessageBuilder.withPayload(
                     integrationResultReceived).build();
 
             auditProducer.send(message);

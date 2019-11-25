@@ -16,6 +16,17 @@
 
 package org.activiti.services.connectors.channel;
 
+import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -24,7 +35,7 @@ import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.RuntimeService;
@@ -41,14 +52,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-
-import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ServiceTaskIntegrationResultEventHandlerTest {
 
@@ -85,7 +88,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
 
     @Captor
-    private ArgumentCaptor<Message<CloudIntegrationResultReceivedImpl>> messageCaptor;
+    private ArgumentCaptor<Message<CloudIntegrationResultReceivedEventImpl>> messageCaptor;
 
     @Mock
     private ExecutionQuery executionQuery;
@@ -175,8 +178,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
         //then
         verify(auditProducer).send(messageCaptor.capture());
-        Message<CloudIntegrationResultReceivedImpl> message = messageCaptor.getValue();
-        CloudIntegrationResultReceivedImpl event = message.getPayload();
+        Message<CloudIntegrationResultReceivedEventImpl> message = messageCaptor.getValue();
+        CloudIntegrationResultReceivedEventImpl event = message.getPayload();
         assertThat(event.getEntity().getId()).isEqualTo(ENTITY_ID);
         assertThat(event.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(event.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);

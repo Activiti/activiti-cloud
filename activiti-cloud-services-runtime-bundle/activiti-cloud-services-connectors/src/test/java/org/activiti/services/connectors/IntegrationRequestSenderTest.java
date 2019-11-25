@@ -15,12 +15,20 @@
  */
 package org.activiti.services.connectors;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.delegate.DelegateExecution;
@@ -44,14 +52,6 @@ import org.mockito.Spy;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class IntegrationRequestSenderTest {
 
@@ -227,7 +227,7 @@ public class IntegrationRequestSenderTest {
         verify(auditProducer).send(auditMessageArgumentCaptor.capture());
 
         Message<CloudRuntimeEvent<?, ?>> message = auditMessageArgumentCaptor.getValue();
-        assertThat(message.getPayload()).isInstanceOf(CloudIntegrationRequestedImpl.class);
+        assertThat(message.getPayload()).isInstanceOf(CloudIntegrationRequestedEventImpl.class);
 
         Assertions.assertThat(message.getHeaders())
             .containsKey("routingKey")
@@ -249,7 +249,7 @@ public class IntegrationRequestSenderTest {
             .containsEntry("serviceFullName",APP_NAME);
 
 
-        CloudIntegrationRequestedImpl integrationRequested = (CloudIntegrationRequestedImpl) message.getPayload();
+        CloudIntegrationRequestedEventImpl integrationRequested = (CloudIntegrationRequestedEventImpl) message.getPayload();
 
         assertThat(integrationRequested.getEntity().getId()).isEqualTo(INTEGRATION_CONTEXT_ID);
         assertThat(integrationRequested.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
