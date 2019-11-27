@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.Objects;
 
 import org.activiti.api.task.model.Task;
-import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
 
@@ -44,6 +43,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private Long duration;
     private Integer processDefinitionVersion;
     private String businessKey;
+    private String taskDefinitionKey;
 
     public CloudTaskImpl() {
     }
@@ -65,6 +65,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         status = task.getStatus();
         processDefinitionVersion = task.getProcessDefinitionVersion();
         businessKey = task.getBusinessKey();
+        taskDefinitionKey = task.getTaskDefinitionKey();
     }
 
     @Override
@@ -217,6 +218,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         this.status = status;
     }
 
+    @Override
     public Date getCompletedDate() {
         return completedDate;
     }
@@ -230,9 +232,19 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         this.duration = duration;
     }
 
+    @Override
     public Long getDuration() {
         return duration;
     }
+    
+    @Override
+    public String getTaskDefinitionKey() {
+        return taskDefinitionKey;
+    }
+
+    public void setTaskDefinitionKey(String taskDefinitionKey) {
+        this.taskDefinitionKey = taskDefinitionKey;
+    }  
 
     @Override
     public String toString() {
@@ -253,6 +265,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
                 ", status=" + status +
                 ", processDefinitionVersion=" + processDefinitionVersion +
                 ", businessKey=" + businessKey +
+                ", taskDefinitionKey=" + taskDefinitionKey +
                 '}';
     }
 
