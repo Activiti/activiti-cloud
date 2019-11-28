@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import javax.persistence.EntityManager;
 
-import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
@@ -41,29 +40,7 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskCreatedEvent taskCreatedEvent = (CloudTaskCreatedEvent) event;
-        Task eventEntity = taskCreatedEvent.getEntity();
-        TaskEntity queryTaskEntity = new TaskEntity(eventEntity.getId(),
-                                                    eventEntity.getAssignee(),
-                                                    eventEntity.getName(),
-                                                    eventEntity.getDescription(),
-                                                    eventEntity.getCreatedDate(),
-                                                    eventEntity.getDueDate(),
-                                                    eventEntity.getPriority(),
-                                                    eventEntity.getProcessDefinitionId(),
-                                                    eventEntity.getProcessInstanceId(),
-                                                    event.getServiceName(),
-                                                    event.getServiceFullName(),
-                                                    event.getServiceVersion(),
-                                                    event.getAppName(),
-                                                    event.getAppVersion(),
-                                                    eventEntity.getStatus(),
-                                                    eventEntity.getCreatedDate(),
-                                                    eventEntity.getClaimedDate(),
-                                                    eventEntity.getOwner(),
-                                                    eventEntity.getParentTaskId(),
-                                                    eventEntity.getFormKey(),
-                                                    event.getProcessDefinitionVersion(),
-                                                    event.getBusinessKey());
+        TaskEntity queryTaskEntity = new TaskEntity(taskCreatedEvent);
 
         if (!queryTaskEntity.isStandalone()) {
             // Get processInstanceEntity reference proxy without database query

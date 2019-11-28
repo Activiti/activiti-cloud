@@ -1,6 +1,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.resourcesResponseFields;
+import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -9,10 +10,12 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.api.task.model.Task;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -37,11 +40,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 @TestPropertySource(properties="activiti.rest.enable-deletion=true")
 @RunWith(SpringRunner.class)
@@ -110,31 +108,5 @@ public class TaskEntityDeleteControllerIT {
                 ));
 
         verify(taskRepository).deleteAll(taskEntities);
-    }
-
-    private TaskEntity buildDefaultTask() {
-        return new TaskEntity(UUID.randomUUID().toString(),
-                "john",
-                "Review",
-                "Review the report",
-                new Date(),
-                new Date(),
-                20,
-                UUID.randomUUID().toString(),
-                UUID.randomUUID().toString(),
-                "My app",
-                "My app",
-                "1",
-                null,
-                null,
-                Task.TaskStatus.ASSIGNED,
-                new Date(),
-                new Date(),
-                "peter",
-                null,
-                "aFormKey",
-                10,
-                "businessKey"
-        );
     }
 }

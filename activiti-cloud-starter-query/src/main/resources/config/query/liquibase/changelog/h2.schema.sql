@@ -147,6 +147,7 @@ create table task
     process_definition_version integer,
     process_instance_id        varchar(255),
     status                     varchar(255),
+    task_definition_key        varchar(255),
     primary key (id)
 );
 create table task_candidate_group

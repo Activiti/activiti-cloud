@@ -15,7 +15,6 @@
              stripComments="true"/>
   </changeSet>
 
-
   <changeSet author="activiti-query"
              id="initial-schema-m3" dbms="postgresql">
     <preConditions onFail="CONTINUE">
@@ -30,4 +29,15 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
+  
+  <changeSet author="activiti-query"
+             id="alter-schema-m6" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/02-alter.pg.schema.m6.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet> 
+  
 </databaseChangeLog>

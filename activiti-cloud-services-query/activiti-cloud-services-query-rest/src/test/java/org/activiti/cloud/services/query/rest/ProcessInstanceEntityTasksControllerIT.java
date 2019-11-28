@@ -20,16 +20,18 @@ import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pageRequestParameters;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.pagedResourcesResponseFields;
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processInstanceIdParameter;
+import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collections;
+
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.api.task.model.Task;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
@@ -54,10 +56,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProcessInstanceTasksController.class)
@@ -94,29 +92,7 @@ public class ProcessInstanceEntityTasksControllerIT {
     @Test
     public void getTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
-        TaskEntity taskEntity = new TaskEntity(UUID.randomUUID().toString(),
-                                               "john",
-                                               "Review",
-                                               "Review the report",
-                                               new Date(),
-                                               new Date(),
-                                               20,
-                                               UUID.randomUUID().toString(),
-                                               UUID.randomUUID().toString(),
-                                               "My app",
-                                               "My app",
-                                               "1",
-                                               null,
-                                               null,
-                                               Task.TaskStatus.ASSIGNED,
-                                               new Date(),
-                                               new Date(),
-                                               "peter",
-                                               null,
-                                               "aFormKey",
-                                               10,
-                                               "businessKey"
-        );
+        TaskEntity taskEntity = buildDefaultTask();
 
         given(taskRepository.findAll(any(),
                                      ArgumentMatchers.<Pageable>any()))

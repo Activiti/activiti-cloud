@@ -20,6 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.UUID;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
@@ -58,13 +65,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -308,17 +308,13 @@ public class QueryTasksIT {
             rootTaskNoSubtask.setParentTaskId(null);
             eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(rootTaskNoSubtask));
 
-            
-        TaskImpl rootTask = new TaskImpl(UUID.randomUUID().toString(),
-                                     "Root task",
-                                     Task.TaskStatus.CREATED);
+
+        TaskImpl rootTask = aCreatedTask("Root task");
         rootTask.setProcessInstanceId(runningProcessInstance.getId());
         rootTask.setParentTaskId(null);
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(rootTask));
 
-        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
-                                     "Task with parent",
-                                     Task.TaskStatus.CREATED);
+        TaskImpl task = aCreatedTask("Task with parent");
         task.setProcessInstanceId(runningProcessInstance.getId());
         task.setParentTaskId(rootTask.getId());
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
@@ -353,10 +349,8 @@ public class QueryTasksIT {
         processTask.setProcessInstanceId(runningProcessInstance.getId());
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(processTask));
 
-            
-        TaskImpl standAloneTask = new TaskImpl(UUID.randomUUID().toString(),
-                                               "Task2",
-                                               Task.TaskStatus.CREATED);
+
+        TaskImpl standAloneTask = aCreatedTask("Task2");
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(standAloneTask));
 
         eventsAggregator.sendAll();
@@ -917,10 +911,8 @@ public class QueryTasksIT {
         
         Task task3 = taskEventContainedBuilder.aCreatedTask("Task 3 for filter standalone",
                                                             null);
-    
-        TaskImpl task4 = new TaskImpl(UUID.randomUUID().toString(),
-                                      "Task 4 for filter description",
-                                      Task.TaskStatus.CREATED);
+
+        TaskImpl task4 = aCreatedTask("Task 4 for filter description");
         task4.setDescription("My task description");
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task4));
 
@@ -972,9 +964,7 @@ public class QueryTasksIT {
     public void shouldSetProcessDefinitionVersionAndBusinessKeyOnTaskWhenThisInformationIsAvailableInTheEvent() {
       //given
         //event with process definition version set
-        TaskImpl task1 = new TaskImpl(UUID.randomUUID().toString(),
-                                     "Task1",
-                                     Task.TaskStatus.CREATED);
+        TaskImpl task1 = aCreatedTask("Task1");
 
         CloudTaskCreatedEventImpl task1Created = new CloudTaskCreatedEventImpl(task1);
         task1Created.setProcessDefinitionVersion(10);
@@ -983,9 +973,7 @@ public class QueryTasksIT {
         eventsAggregator.addEvents(task1Created);
 
         //event with process definition unset
-        TaskImpl task2 = new TaskImpl(UUID.randomUUID().toString(),
-                                      "Task2",
-                                      Task.TaskStatus.CREATED);
+        TaskImpl task2 = aCreatedTask("Task2");
 
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task2));
 
@@ -1039,6 +1027,83 @@ public class QueryTasksIT {
         
     }
     
+    @Test
+    public void should_getTask_when_queryFilteredByTaskDefinitionKey() {
+        //given
+        CloudTaskCreatedEventImpl task1Created = buildTaskCreatedEvent("Task1",
+                                                                       "taskDefinitionKey");
+        CloudTaskCreatedEventImpl task2Created = buildTaskCreatedEvent("Task2",
+                                                                       null);
+        eventsAggregator.addEvents(task1Created);
+        eventsAggregator.addEvents(task2Created);
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = executeRequestGetTasks();
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId,
+                                Task::getStatus,
+                                Task::getTaskDefinitionKey)
+                    .contains(tuple(task1Created.getEntity().getId(),
+                                    Task.TaskStatus.CREATED,
+                                    "taskDefinitionKey"),
+                              tuple(task2Created.getEntity().getId(),
+                                    Task.TaskStatus.CREATED,
+                                    null));
+        });
+
+        await().untilAsserted(() -> {
+
+            //when
+            ResponseEntity<PagedResources<Task>> responseEntity = testRestTemplate.exchange(TASKS_URL + "?taskDefinitionKey={taskDefinitionKey}",
+                                                                                            HttpMethod.GET,
+                                                                                            keycloakTokenProducer.entityWithAuthorizationHeader(),
+                                                                                            PAGED_TASKS_RESPONSE_TYPE,
+                                                                                            "taskDefinitionKey");
+
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(responseEntity.getBody()).isNotNull();
+            Collection<Task> tasks = responseEntity.getBody().getContent();
+            assertThat(tasks)
+                    .extracting(Task::getId)
+                    .containsExactly(task1Created.getEntity().getId());
+        });
+        
+    }
+
+    private CloudTaskCreatedEventImpl buildTaskCreatedEvent(String taskName,
+                                                            String taskDefinitionKey) {
+        TaskImpl task1 = aCreatedTask(taskName,
+                                      taskDefinitionKey);
+
+        return new CloudTaskCreatedEventImpl(task1);
+    }
+
+    private TaskImpl aCreatedTask(String taskName,
+                                  String taskDefinitionKey) {
+        TaskImpl task = aCreatedTask(taskName);
+        task.setTaskDefinitionKey(taskDefinitionKey);
+        return task;
+    }
+
+    private TaskImpl aCreatedTask(String taskName) {
+        return new TaskImpl(UUID.randomUUID().toString(),
+                            taskName,
+                            Task.TaskStatus.CREATED);
+    }
+
     @Test
     public void shouldGetTaskGroupCandidatesAfterTaskCompleted() {
         //given

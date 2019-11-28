@@ -19,7 +19,6 @@ package org.activiti.cloud.services.query.model;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
-
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -35,15 +34,17 @@ import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.springframework.format.annotation.DateTimeFormat;
 
-@Entity(name="Task")
+@Entity(name = "Task")
 @Table(name = "TASK",
-	indexes= {
-		@Index(name="task_status_idx", columnList="status", unique=false),
-		@Index(name="task_processInstance_idx", columnList="processInstanceId", unique=false)
-})
+        indexes = {
+                @Index(name = "task_status_idx", columnList = "status", unique = false),
+                @Index(name = "task_processInstance_idx", columnList = "processInstanceId", unique = false)
+        })
 public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
 
     /**
@@ -67,6 +68,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     private String processInstanceId;
     private Integer processDefinitionVersion;
     private String businessKey;
+    private String taskDefinitionKey;
     
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
@@ -113,76 +115,57 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     
     @JsonIgnore
     @ManyToOne(optional = true, fetch=FetchType.LAZY)
-    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false,
+            foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private ProcessInstanceEntity processInstance;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
+            foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private Set<TaskCandidateUser> taskCandidateUsers;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
+            foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private Set<TaskCandidateGroup> taskCandidateGroups;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false,
+            foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
 
     private Set<TaskVariableEntity> variables;
 
     public TaskEntity() {
     }
 
-    public TaskEntity(String id,
-                      String assignee,
-                      String name,
-                      String description,
-                      Date createTime,
-                      Date dueDate,
-                      int priority,
-                      String processDefinitionId,
-                      String processInstanceId,
-                      String serviceName,
-                      String serviceFullName,
-                      String serviceVersion,
-                      String appName,
-                      String appVersion,
-                      TaskStatus status,
-                      Date lastModified,
-                      Date claimedDate,
-                      String owner,
-                      String parentTaskId,
-                      String formKey,
-                      Integer processDefinitionVersion,
-                      String businessKey) {
-        super(serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion);
-        this.id = id;
-        this.assignee = assignee;
-        this.name = name;
-        this.description = description;
-        this.createdDate = createTime;
-        this.dueDate = dueDate;
-        this.priority = priority;
-        this.processDefinitionId = processDefinitionId;
-        this.processInstanceId = processInstanceId;
-        this.status = status;
-        this.lastModified = lastModified;
-        this.claimedDate = claimedDate;
-        this.owner = owner;
-        this.parentTaskId = parentTaskId;
-        this.formKey = formKey;
-        this.processDefinitionVersion = processDefinitionVersion;
-        this.businessKey = businessKey;
+    public TaskEntity(CloudTaskCreatedEvent taskCreatedEvent) {
+        super(taskCreatedEvent.getServiceName(),
+              taskCreatedEvent.getServiceFullName(),
+              taskCreatedEvent.getServiceVersion(),
+              taskCreatedEvent.getAppName(),
+              taskCreatedEvent.getAppVersion());
+        Task task = taskCreatedEvent.getEntity();
+        this.id = task.getId();
+        this.assignee = task.getAssignee();
+        this.name = task.getName();
+        this.description = task.getDescription();
+        this.createdDate = task.getCreatedDate();
+        this.dueDate = task.getDueDate();
+        this.priority = task.getPriority();
+        this.processDefinitionId = task.getProcessDefinitionId();
+        this.processInstanceId = task.getProcessInstanceId();
+        this.status = task.getStatus();
+        this.lastModified = task.getCreatedDate();
+        this.claimedDate = task.getClaimedDate();
+        this.owner = task.getOwner();
+        this.parentTaskId = task.getParentTaskId();
+        this.formKey = task.getFormKey();
+        this.processDefinitionVersion = taskCreatedEvent.getProcessDefinitionVersion();
+        this.businessKey = taskCreatedEvent.getBusinessKey();
+        this.taskDefinitionKey = task.getTaskDefinitionKey();
     }
 
     @Override
@@ -235,10 +218,12 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         return processDefinitionVersion;
     }
     
+    @Override
     public String getBusinessKey() {
         return businessKey;
     }
 
+    @Override
     public boolean isStandalone() {
         return getProcessInstanceId() == null;
     }
@@ -414,6 +399,16 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.formKey = formKey;
     }
 
+    @Override
+    public String getTaskDefinitionKey() {
+        return taskDefinitionKey;
+    }
+
+    public void setTaskDefinitionKey(String taskDefinitionKey) {
+        this.taskDefinitionKey = taskDefinitionKey;
+    }
+    
+    @Override
     public Long getDuration() {
         return duration;
     }
@@ -422,6 +417,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         this.duration = duration;
     }
 
+    @Override
     @Transient
     public Date getCompletedDate() {
         return completedDate;
@@ -435,8 +431,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public Date getCreatedTo() {
         return createdTo;
     }
-
-    
+   
     public void setCreatedTo(Date createdTo) {
         this.createdTo = createdTo;
     }
@@ -445,8 +440,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public Date getCreatedFrom() {
         return createdFrom;
     }
-
-    
+   
     public void setCreatedFrom(Date createdFrom) {
         this.createdFrom = createdFrom;
     }
@@ -475,8 +469,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     public Date getCompletedTo() {
         return completedTo;
     }
-
-    
+   
     public void setCompletedTo(Date completedTo) {
         this.completedTo = completedTo;
     }
@@ -516,5 +509,4 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
         return Objects.equals(id, other.id);
     }
     
-
 }

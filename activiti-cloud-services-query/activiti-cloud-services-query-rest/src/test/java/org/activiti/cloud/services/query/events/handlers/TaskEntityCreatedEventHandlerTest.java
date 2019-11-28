@@ -66,6 +66,7 @@ public class TaskEntityCreatedEventHandlerTest {
         task.setCreatedDate(new Date());
         task.setProcessInstanceId(UUID.randomUUID().toString());
         task.setProcessDefinitionId("processDefinitionId");
+        task.setTaskDefinitionKey("taskDefinitionKey");
  
         CloudTaskCreatedEventImpl event = new CloudTaskCreatedEventImpl(
                 task
@@ -92,6 +93,7 @@ public class TaskEntityCreatedEventHandlerTest {
         assertThat(captor.getValue().getProcessDefinitionId()).isEqualTo(task.getProcessDefinitionId());
         assertThat(captor.getValue().getProcessDefinitionVersion()).isEqualTo(event.getProcessDefinitionVersion());
         assertThat(captor.getValue().getBusinessKey()).isEqualTo(event.getBusinessKey());
+        assertThat(captor.getValue().getTaskDefinitionKey()).isEqualTo(task.getTaskDefinitionKey());
         
     }
 
