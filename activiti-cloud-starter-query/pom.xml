@@ -174,6 +174,7 @@
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
             <configuration>
+              <startParallel>true</startParallel>
               <images>
                 <image>
                   <name>activiti/activiti-keycloak</name>
@@ -184,7 +185,7 @@
                     </ports>
                     <wait>
                       <log>Keycloak .* started in</log>
-                      <time>45000</time>
+                      <time>60000</time>
                       <shutdown>5000</shutdown>
                       <kill>1000</kill>
                     </wait>
