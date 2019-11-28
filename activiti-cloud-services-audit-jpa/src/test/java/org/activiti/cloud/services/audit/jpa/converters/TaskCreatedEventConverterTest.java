@@ -67,6 +67,7 @@ public class TaskCreatedEventConverterTest {
         TaskImpl taskCreated = new TaskImpl("1234-abc-5678-def",
                                             "my task",
                                             Task.TaskStatus.CREATED);
+        taskCreated.setTaskDefinitionKey("taskDefinitionKey");
         CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl("TaskCreatedEventId",
                                                                                         System.currentTimeMillis(),
                                                                                         taskCreated);

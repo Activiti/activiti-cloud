@@ -72,6 +72,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEve
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
@@ -190,7 +191,39 @@ public class AuditServiceIT {
             }
         });
     }
+    
+    @Test
+    public void should_getTaskCreatedEvent_when_filteredOnProcessInstanceIdEventType() {
+        //given
+        List<CloudRuntimeEvent> coveredEvents = getTestEvents();
+        producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
+        await().untilAsserted(() -> {
+
+            //when
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("processInstanceId",
+                        "47");
+            filters.put("eventType",
+                        TaskRuntimeEvent.TaskEvents.TASK_CREATED.name());
+            
+            ResponseEntity<PagedResources<CloudRuntimeEvent>> eventsPagedResources = eventsRestTemplate.executeFind(filters);
+
+            //then
+            assertThat(eventsPagedResources).isNotNull();
+            assertThat(eventsPagedResources.getBody())
+                .isNotEmpty()
+                .filteredOn(event -> ((CloudTaskCreatedEvent)event).getEntity().getTaskDefinitionKey().equals("taskDefinitionKey"))
+                .extracting(event -> event.getEventType(),
+                            event -> ((CloudTaskCreatedEvent)event).getEntity().getName(),
+                            event -> ((CloudTaskCreatedEvent)event).getEntity().getTaskDefinitionKey())
+                .contains(  tuple(TaskRuntimeEvent.TaskEvents.TASK_CREATED,
+                                  "task created",
+                                  "taskDefinitionKey"));
+
+        });
+    }
+   
     @Test
     public void shouldGetProcessStartedUpdatedCompletedEvents() {
         //given
@@ -940,6 +973,7 @@ public class AuditServiceIT {
                                             Task.TaskStatus.CREATED);
         taskCreated.setProcessDefinitionId("28");
         taskCreated.setProcessInstanceId("47");
+        taskCreated.setTaskDefinitionKey("taskDefinitionKey");
         CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl("TaskCreatedEventId",
                                                                                         System.currentTimeMillis(),
                                                                                         taskCreated);
