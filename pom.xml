@@ -60,6 +60,7 @@
     <module>activiti-cloud-service-common-config</module>
     <module>activiti-cloud-services-swagger</module>
     <module>activiti-cloud-service-error-handlers</module>
+    <module>activiti-cloud-services-test-security-keycloak</module>
   </modules>
   <scm>
     <url>https://github.com/Activiti/activiti-cloud-service-common</url>

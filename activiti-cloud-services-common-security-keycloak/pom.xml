@@ -45,6 +45,11 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.common</groupId>
+      <artifactId>activiti-cloud-services-test-security-keycloak</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

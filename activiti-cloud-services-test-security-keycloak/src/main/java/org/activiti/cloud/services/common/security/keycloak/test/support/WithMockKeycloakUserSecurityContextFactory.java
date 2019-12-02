@@ -20,32 +20,37 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import org.assertj.core.util.Sets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.spi.KeycloakAccount;
+import org.keycloak.adapters.springsecurity.account.KeycloakRole;
 import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessToken.Access;
-import org.springframework.security.core.authority.AuthorityUtils;
+import org.mockito.internal.util.collections.Sets;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
-
-import java.util.Set;
-import java.util.UUID;
 
 public class WithMockKeycloakUserSecurityContextFactory implements WithSecurityContextFactory<WithMockKeycloakUser> {
 
     @Override
     public SecurityContext createSecurityContext(WithMockKeycloakUser annotation) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
-        
-        Set<String> roles = Sets.newLinkedHashSet(annotation.roles());
-        Set<String> groups = Sets.newLinkedHashSet(annotation.groups());
+
+        Set<String> roles = Sets.newSet(annotation.roles());
+        Set<String> groups = Sets.newSet(annotation.groups());
 
         RefreshableKeycloakSecurityContext securityContext = mock(RefreshableKeycloakSecurityContext.class);
+        when(securityContext.isActive()).thenReturn(true);
 
         Access realmAccess = new Access();
         realmAccess.roles(roles);
@@ -63,7 +68,18 @@ public class WithMockKeycloakUserSecurityContextFactory implements WithSecurityC
                                                             roles,
                                                             securityContext);
 
-        context.setAuthentication(new KeycloakAuthenticationToken(account, false, AuthorityUtils.createAuthorityList(annotation.roles())));
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+        
+        for (String role : account.getRoles()) {
+            grantedAuthorities.add(new KeycloakRole(role));
+        }        
+        
+        SimpleAuthorityMapper grantedAuthoritiesMapper = new SimpleAuthorityMapper();
+        grantedAuthoritiesMapper.setPrefix(annotation.rolePrefix());
+        
+        context.setAuthentication(new KeycloakAuthenticationToken(account, 
+                                                                  annotation.isInteractive(), 
+                                                                  grantedAuthoritiesMapper.mapAuthorities(grantedAuthorities)));
         
         return context;
     }
