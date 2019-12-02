@@ -25,9 +25,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.IOException;
-import java.util.Collections;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.organization.api.JsonModelType;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelContentValidator;
@@ -38,6 +36,7 @@ import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
 import org.activiti.cloud.services.organization.entity.ModelEntity;
+import org.activiti.cloud.services.organization.security.WithMockModelerUser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +50,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.Collections;
 
 /**
  * Integration tests for models rest api dealing with JSON models
@@ -61,6 +61,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SpringBootTest(classes = OrganizationRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@WithMockModelerUser
 public class GenericJsonModelTypeValidationControllerIT {
 
     @Autowired

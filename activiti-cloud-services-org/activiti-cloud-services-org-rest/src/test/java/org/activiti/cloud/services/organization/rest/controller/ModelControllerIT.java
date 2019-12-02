@@ -16,38 +16,6 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
-import java.util.Optional;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.organization.api.ConnectorModelType;
-import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.ModelValidationError;
-import org.activiti.cloud.organization.api.Project;
-import org.activiti.cloud.organization.api.process.Extensions;
-import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
-import org.activiti.cloud.organization.repository.ModelRepository;
-import org.activiti.cloud.organization.repository.ProjectRepository;
-import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
-import org.activiti.cloud.services.organization.entity.ModelEntity;
-import org.activiti.cloud.services.organization.entity.ProjectEntity;
-import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.context.WebApplicationContext;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
@@ -69,7 +37,8 @@ import static org.activiti.cloud.services.organization.mock.MockFactory.project;
 import static org.activiti.cloud.services.organization.mock.MockMultipartRequestBuilder.putMultipart;
 import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
@@ -89,10 +58,44 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.organization.api.ConnectorModelType;
+import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.organization.api.ModelValidationError;
+import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.organization.api.process.Extensions;
+import org.activiti.cloud.organization.core.error.SemanticModelValidationException;
+import org.activiti.cloud.organization.repository.ModelRepository;
+import org.activiti.cloud.organization.repository.ProjectRepository;
+import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
+import org.activiti.cloud.services.organization.entity.ModelEntity;
+import org.activiti.cloud.services.organization.entity.ProjectEntity;
+import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
+import org.activiti.cloud.services.organization.security.WithMockModelerUser;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Optional;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = OrganizationRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@WithMockModelerUser
 public class ModelControllerIT {
 
     @Rule

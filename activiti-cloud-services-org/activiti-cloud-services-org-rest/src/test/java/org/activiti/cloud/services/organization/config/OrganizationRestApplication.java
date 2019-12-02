@@ -16,14 +16,8 @@
 
 package org.activiti.cloud.services.organization.config;
 
-import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
-import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
-import java.security.Principal;
-import java.util.Optional;
 
 @SpringBootApplication
 public class OrganizationRestApplication {
@@ -33,33 +27,4 @@ public class OrganizationRestApplication {
                               args);
     }
     
-    @Bean
-    public SecurityContextPrincipalProvider securityContextPrincipalProvider() {
-        return new SecurityContextPrincipalProvider() {
-            
-            @Override
-            public Optional<Principal> getCurrentPrincipal() {
-                return Optional.of(new MockPrincipal("user"));
-            }
-        };
-    }
-    
-    @Bean
-    public PrincipalIdentityProvider principalIdentityProvider() {
-        return new PrincipalIdentityProvider() { };
-    }
-    
-    static class MockPrincipal implements Principal {
-        
-        private final String name;
-        
-        public MockPrincipal(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-    }
 }

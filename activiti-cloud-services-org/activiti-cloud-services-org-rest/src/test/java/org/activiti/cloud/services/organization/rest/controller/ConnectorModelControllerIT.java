@@ -32,6 +32,7 @@ import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
+import org.activiti.cloud.services.organization.security.WithMockModelerUser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +52,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = OrganizationRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@WithMockModelerUser
 public class ConnectorModelControllerIT {
 
     @Autowired

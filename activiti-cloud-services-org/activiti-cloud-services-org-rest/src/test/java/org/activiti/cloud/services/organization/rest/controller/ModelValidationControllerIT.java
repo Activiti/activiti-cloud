@@ -16,6 +16,25 @@
 
 package org.activiti.cloud.services.organization.rest.controller;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.organization.mock.MockFactory.connectorFileContent;
+import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
+import static org.activiti.cloud.services.organization.mock.MockFactory.multipartExtensionsFile;
+import static org.activiti.cloud.services.organization.mock.MockFactory.multipartProcessFile;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processModel;
+import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
+import static org.activiti.cloud.services.organization.mock.MockFactory.project;
+import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import org.activiti.cloud.organization.api.ConnectorModelType;
 import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.ModelValidationError;
@@ -26,6 +45,7 @@ import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
 import org.activiti.cloud.services.organization.entity.ProjectEntity;
+import org.activiti.cloud.services.organization.security.WithMockModelerUser;
 import org.activiti.cloud.services.organization.service.ModelService;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,24 +60,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
-import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.activiti.cloud.services.organization.mock.MockFactory.connectorFileContent;
-import static org.activiti.cloud.services.organization.mock.MockFactory.connectorModel;
-import static org.activiti.cloud.services.organization.mock.MockFactory.multipartExtensionsFile;
-import static org.activiti.cloud.services.organization.mock.MockFactory.multipartProcessFile;
-import static org.activiti.cloud.services.organization.mock.MockFactory.processModel;
-import static org.activiti.cloud.services.organization.mock.MockFactory.processModelWithExtensions;
-import static org.activiti.cloud.services.organization.mock.MockFactory.project;
-import static org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig.API_VERSION;
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
 /**
  * Integration tests for validating model content
  */
@@ -65,6 +67,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest(classes = OrganizationRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@WithMockModelerUser
 public class ModelValidationControllerIT {
 
     @Autowired

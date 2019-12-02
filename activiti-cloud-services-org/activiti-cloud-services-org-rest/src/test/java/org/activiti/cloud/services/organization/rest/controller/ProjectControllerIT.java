@@ -63,6 +63,7 @@ import org.activiti.cloud.organization.repository.ProjectRepository;
 import org.activiti.cloud.services.organization.config.OrganizationRestApplication;
 import org.activiti.cloud.services.organization.entity.ProjectEntity;
 import org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig;
+import org.activiti.cloud.services.organization.security.WithMockModelerUser;
 import org.activiti.cloud.services.organization.service.ModelService;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +87,7 @@ import java.util.Optional;
 @SpringBootTest(classes = OrganizationRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@WithMockModelerUser
 public class ProjectControllerIT {
 
     private MockMvc mockMvc;
