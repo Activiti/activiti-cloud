@@ -20,17 +20,16 @@ import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.MessageJpaJsonConverter;
 
-import java.util.Objects;
-
-import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
+import java.util.Objects;
 
 @MappedSuperclass
 public abstract class MessageAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = MessageJpaJsonConverter.class)
-    @Column(columnDefinition = "text")
+    @Lob
     private BPMNMessage message;
 
     public MessageAuditEventEntity() {

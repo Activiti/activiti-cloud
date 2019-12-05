@@ -21,12 +21,11 @@ import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateUserJpaJsonConverter;
 
-import java.util.Objects;
-
-import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
+import java.util.Objects;
 
 @Entity(name = TaskCandidateUserRemovedEventEntity.TASK_CANDIDATE_USER_REMOVED_EVENT)
 @DiscriminatorValue(value = TaskCandidateUserRemovedEventEntity.TASK_CANDIDATE_USER_REMOVED_EVENT)
@@ -35,7 +34,7 @@ public class TaskCandidateUserRemovedEventEntity extends AuditEventEntity {
     protected static final String TASK_CANDIDATE_USER_REMOVED_EVENT = "TaskCandidateUserRemovedEvent";
 
     @Convert(converter = TaskCandidateUserJpaJsonConverter.class)
-    @Column(columnDefinition = "text")
+    @Lob
     private TaskCandidateUserImpl candidateUser;
     
     public TaskCandidateUserRemovedEventEntity() {

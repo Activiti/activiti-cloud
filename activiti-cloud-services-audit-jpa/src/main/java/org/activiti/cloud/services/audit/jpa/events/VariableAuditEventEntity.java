@@ -4,11 +4,10 @@ import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 
-import java.util.Objects;
-
-import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
+import java.util.Objects;
 
 @MappedSuperclass
 public abstract class VariableAuditEventEntity extends AuditEventEntity {
@@ -18,7 +17,7 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
     private String taskId;
 
     @Convert(converter = VariableJpaJsonConverter.class)
-    @Column(columnDefinition = "text")
+    @Lob
     private VariableInstance variableInstance;
 
     public VariableAuditEventEntity() {

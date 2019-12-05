@@ -21,12 +21,11 @@ import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateGroupJpaJsonConverter;
 
-import java.util.Objects;
-
-import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
+import java.util.Objects;
 
 @Entity(name = TaskCandidateGroupAddedEventEntity.TASK_CANDIDATE_GROUP_ADDED_EVENT)
 @DiscriminatorValue(value = TaskCandidateGroupAddedEventEntity.TASK_CANDIDATE_GROUP_ADDED_EVENT)
@@ -35,7 +34,7 @@ public class TaskCandidateGroupAddedEventEntity extends AuditEventEntity {
     protected static final String TASK_CANDIDATE_GROUP_ADDED_EVENT = "TaskCandidateGroupAddedEvent";
    
     @Convert(converter = TaskCandidateGroupJpaJsonConverter.class)
-    @Column(columnDefinition = "text")
+    @Lob
     private TaskCandidateGroupImpl candidateGroup;
     
     public TaskCandidateGroupAddedEventEntity() {

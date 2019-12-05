@@ -16,14 +16,14 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 import org.activiti.api.process.model.MessageSubscription;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.MessageSubscriptionJpaJsonConverter;
+
+import javax.persistence.Convert;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Lob;
 
 @Entity
 @DiscriminatorValue(value = MessageSubscriptionCancelledAuditEventEntity.MESSAGE_SUBSCRIPTION_CANCELLED_EVENT)
@@ -32,7 +32,7 @@ public class MessageSubscriptionCancelledAuditEventEntity extends AuditEventEnti
     protected static final String MESSAGE_SUBSCRIPTION_CANCELLED_EVENT = "MsgSubscriptionCancelledEvent";
     
     @Convert(converter = MessageSubscriptionJpaJsonConverter.class)
-    @Column(columnDefinition="text")
+    @Lob
     private MessageSubscription messageSubscription;
 
     public MessageSubscriptionCancelledAuditEventEntity() {
