@@ -31,7 +31,7 @@ create table bpmn_sequence_flow
     service_type               varchar(255),
     service_version            varchar(255),
     business_key               varchar(255),
-    takendate                     timestamp,
+    taken_date                     timestamp,
     element_id                 varchar(255),
     event_id                   varchar(255),
     process_definition_id      varchar(255),
