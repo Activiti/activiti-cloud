@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.persistence.Column;
 
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.springframework.format.annotation.DateTimeFormat;
