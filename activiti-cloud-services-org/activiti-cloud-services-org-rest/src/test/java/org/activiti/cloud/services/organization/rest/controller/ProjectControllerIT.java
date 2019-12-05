@@ -400,6 +400,57 @@ public class ProjectControllerIT {
     }
 
     @Test
+    public void should_throwSemanticModelValidationException_when_validatingEmptyProjectWithValidationErrors() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository
+                .createProject(project("project-without-process"));
+
+        MvcResult response = mockMvc.perform(
+                get("{version}/projects/{projectId}/validate",
+                        API_VERSION,
+                        project.getId()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
+                .hasSize(1)
+                .extracting(ModelValidationError::getProblem,
+                        ModelValidationError::getDescription)
+                .containsOnly(tuple("Invalid project",
+                        "Project must contain at least one process"));
+    }
+
+    @Test
+    public void should_returnStatusNoContent_when_ProjectIsValid() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
+
+        modelRepository.createModel(connectorModel(project,
+                "movies",
+                resourceAsByteArray("connector/movies.json")));
+
+        Model processModel = modelService.importSingleModel(project,
+                processModelType,
+                processFileContent("process-model",
+                        resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+
+        modelRepository.updateModel(processModel,
+                processModelWithExtensions("process-model",
+                        extensions("Task_1spvopd",
+                                processVariables("movieName",
+                                        "movieDescription"),
+                                inputsMappings("movieName"),
+                                outputsMappings("movieDescription"))));
+
+        MvcResult response = mockMvc.perform(
+                get("{version}/projects/{projectId}/validate",
+                        API_VERSION,
+                        project.getId()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
     public void should_throwSemanticModelValidationException_when_exportingProjectWithNoAssigneeShouldReturnErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
         modelService.importSingleModel(project,

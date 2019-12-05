@@ -70,6 +70,8 @@ public interface ProjectRestApi {
 
     String EXPORT_PROJECT_ID_PARAM_DESCR = "The id of the project to export";
 
+    String VALIDATE_PROJECT_ID_PARAM_DESCR = "The id of the project to validate";
+
     String ATTACHMENT_API_PARAM_DESCR =
             "<b>true</b> value enables a web browser to download the file as an attachment.<br> " +
                     "<b>false</b> means that a web browser may preview the file in a new tab or window, " +
@@ -162,4 +164,12 @@ public interface ProjectRestApi {
             @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
                     required = false,
                     defaultValue = "true") boolean attachment) throws IOException;
+
+    @ApiOperation(
+            tags = PROJECTS,
+            value = "Validate an project by id")
+    @GetMapping(path = "/projects/{projectId}/validate")
+    void validateProject(
+            @ApiParam(VALIDATE_PROJECT_ID_PARAM_DESCR)
+            @PathVariable String projectId) throws IOException;
 }
