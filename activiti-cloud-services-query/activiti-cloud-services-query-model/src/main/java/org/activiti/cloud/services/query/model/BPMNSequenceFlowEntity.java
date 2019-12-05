@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.persistence.Column;
 
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -31,6 +32,7 @@ public class BPMNSequenceFlowEntity extends ActivitiEntityMetadata implements BP
     private String processDefinitionId;
 
     /** The date/time of the sequence flow was taken */
+    @Column(name="taken_date")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date date;
 

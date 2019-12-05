@@ -38,6 +38,18 @@
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
-  </changeSet> 
-  
+  </changeSet>
+
+  <changeSet author="activiti-query"
+             id="alter2-schema-m6" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/03-alter.pg.schema.m6.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+
+
 </databaseChangeLog>
