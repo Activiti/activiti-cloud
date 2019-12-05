@@ -32,7 +32,7 @@ public class BPMNSequenceFlowEntity extends ActivitiEntityMetadata implements BP
     private String processDefinitionId;
 
     /** The date/time of the sequence flow was taken */
-    @Column(name="takendate")
+    @Column(name="taken_date")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date date;
 
