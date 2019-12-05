@@ -21,6 +21,7 @@ import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ResourcesAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;

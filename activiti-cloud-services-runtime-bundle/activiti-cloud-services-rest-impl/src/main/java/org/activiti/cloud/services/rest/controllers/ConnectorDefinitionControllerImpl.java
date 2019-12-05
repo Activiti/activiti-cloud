@@ -17,6 +17,7 @@ package org.activiti.cloud.services.rest.controllers;
 
 import org.activiti.cloud.services.rest.api.ConnectorDefinitionController;
 import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionResourceAssembler;
+import org.activiti.cloud.services.rest.assemblers.ResourcesAssembler;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.springframework.hateoas.Resource;

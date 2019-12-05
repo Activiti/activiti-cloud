@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.rest.controllers;
+package org.activiti.cloud.services.rest.assemblers;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
@@ -26,12 +27,12 @@ import org.springframework.hateoas.Resources;
 public class ResourcesAssembler {
 
     public <T, D extends ResourceSupport> Resources<D> toResources(List<T> entities,
-                                                                             ResourceAssembler<T, D> resourceAssembler) {
-        return new Resources<>(entities
-                                       .stream()
-                                       .map(
-                                               resourceAssembler::toResource)
-                                       .collect(Collectors.toList()));
-    }
+                                                                   ResourceAssembler<T, D> resourceAssembler,
+                                                                   Link ... links) {
 
+        return new Resources<>(entities.stream()
+                                       .map(resourceAssembler::toResource)
+                                       .collect(Collectors.toList()),
+                               links);
+    }
 }

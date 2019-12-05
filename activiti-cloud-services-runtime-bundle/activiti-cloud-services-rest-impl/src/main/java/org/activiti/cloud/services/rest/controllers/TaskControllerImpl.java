@@ -15,13 +15,9 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.List;
-
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
-import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
-import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
@@ -50,7 +46,7 @@ public class TaskControllerImpl implements TaskController {
     private final SpringPageConverter pageConverter;
 
     private final TaskRuntime taskRuntime;
-    
+
     @Autowired
     public TaskControllerImpl(TaskResourceAssembler taskResourceAssembler,
                               AlfrescoPagedResourcesAssembler<Task> pagedResourcesAssembler,
@@ -106,7 +102,7 @@ public class TaskControllerImpl implements TaskController {
         } else {
             completeTaskPayload.setTaskId(taskId);
         }
-        
+
         Task task = taskRuntime.complete(completeTaskPayload);
         return taskResourceAssembler.toResource(task);
     }
@@ -148,54 +144,6 @@ public class TaskControllerImpl implements TaskController {
                                                   pageConverter.toSpringPage(pageable,
                                                                              taskPage),
                                                   taskResourceAssembler);
-    }
-
-
-    @Override
-    public void addCandidateUsers(@PathVariable String taskId,
-                                  @RequestBody CandidateUsersPayload candidateUsersPayload) {
-        if (candidateUsersPayload!=null)
-            candidateUsersPayload.setTaskId(taskId);
-
-        taskRuntime.addCandidateUsers(candidateUsersPayload);
-    }
-
-    @Override
-    public void deleteCandidateUsers(@PathVariable String taskId,
-                              @RequestBody CandidateUsersPayload candidateUsersPayload) {
-        if (candidateUsersPayload!=null)
-            candidateUsersPayload.setTaskId(taskId);
-
-        taskRuntime.deleteCandidateUsers(candidateUsersPayload);
-
-    }
-
-    @Override
-    public List<String> getUserCandidates(@PathVariable String taskId) {
-        return taskRuntime.userCandidates(taskId);
-    }
-
-    @Override
-    public void addCandidateGroups(@PathVariable String taskId,
-                                   @RequestBody CandidateGroupsPayload candidateGroupsPayload) {
-        if (candidateGroupsPayload!=null)
-            candidateGroupsPayload.setTaskId(taskId);
-
-        taskRuntime.addCandidateGroups(candidateGroupsPayload);
-    }
-
-    @Override
-    public void deleteCandidateGroups(@PathVariable String taskId,
-                                      @RequestBody CandidateGroupsPayload candidateGroupsPayload) {
-        if (candidateGroupsPayload!=null)
-            candidateGroupsPayload.setTaskId(taskId);
-
-        taskRuntime.deleteCandidateGroups(candidateGroupsPayload);
-    }
-
-    @Override
-    public List<String> getGroupCandidates(@PathVariable String taskId) {
-        return taskRuntime.groupCandidates(taskId);
     }
 
     @Override

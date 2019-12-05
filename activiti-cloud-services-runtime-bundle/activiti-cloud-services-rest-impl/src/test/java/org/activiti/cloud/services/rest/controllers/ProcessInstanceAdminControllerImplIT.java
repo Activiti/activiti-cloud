@@ -237,11 +237,11 @@ public class ProcessInstanceAdminControllerImplIT {
                     .andExpect(status().isOk())
                     .andDo(document(DOCUMENTATION_IDENTIFIER + "/message"));
     }
-    
+
     @Test
     public void receiveMessage() throws Exception {
         ReceiveMessagePayload cmd = MessagePayloadBuilder.receive("messageName")
-                                                         .withCorrelationKey("correlationId")               
+                                                         .withCorrelationKey("correlationId")
                                                          .withVariable("name", "value")
                                                          .build();
 
@@ -251,6 +251,5 @@ public class ProcessInstanceAdminControllerImplIT {
                     .andExpect(status().isOk())
                     .andDo(document(DOCUMENTATION_IDENTIFIER + "/message"));
     }
-        
-            
+
 }

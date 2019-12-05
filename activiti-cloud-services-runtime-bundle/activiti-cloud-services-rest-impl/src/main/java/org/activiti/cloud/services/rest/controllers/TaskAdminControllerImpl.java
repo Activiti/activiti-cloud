@@ -15,14 +15,10 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.List;
-
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
-import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
-import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
@@ -87,7 +83,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         } else {
             completeTaskPayload.setTaskId(taskId);
         }
-        
+
         Task task = taskAdminRuntime.complete(completeTaskPayload);
         return taskResourceAssembler.toResource(task);
     }
@@ -118,52 +114,4 @@ public class TaskAdminControllerImpl implements TaskAdminController {
  
         return taskResourceAssembler.toResource(taskAdminRuntime.assign(assignTaskPayload));
     }
-    
-    @Override
-    public void addCandidateUsers(@PathVariable String taskId,
-                                  @RequestBody CandidateUsersPayload candidateUsersPayload) {
-        if (candidateUsersPayload!=null)
-            candidateUsersPayload.setTaskId(taskId);
-        
-        taskAdminRuntime.addCandidateUsers(candidateUsersPayload);
-    }
-    
-    @Override
-    public void deleteCandidateUsers(@PathVariable String taskId,
-                                     @RequestBody CandidateUsersPayload candidateUsersPayload) {
-        if (candidateUsersPayload!=null)
-            candidateUsersPayload.setTaskId(taskId);
-        
-        taskAdminRuntime.deleteCandidateUsers(candidateUsersPayload);
-        
-    }
-    
-    @Override
-    public List<String> getUserCandidates(@PathVariable String taskId) {   
-        return taskAdminRuntime.userCandidates(taskId);
-    }
-    
-    @Override
-    public void addCandidateGroups(@PathVariable String taskId,
-                                   @RequestBody CandidateGroupsPayload candidateGroupsPayload) {
-        if (candidateGroupsPayload!=null)
-            candidateGroupsPayload.setTaskId(taskId);
-        
-        taskAdminRuntime.addCandidateGroups(candidateGroupsPayload);
-    }
-    
-    @Override
-    public void deleteCandidateGroups(@PathVariable String taskId,
-                                      @RequestBody CandidateGroupsPayload candidateGroupsPayload) {
-        if (candidateGroupsPayload!=null)
-            candidateGroupsPayload.setTaskId(taskId);
-        
-        taskAdminRuntime.deleteCandidateGroups(candidateGroupsPayload);
-    }
-    
-    @Override
-    public List<String> getGroupCandidates(@PathVariable String taskId) {   
-        return taskAdminRuntime.groupCandidates(taskId);
-    }
-
 }
