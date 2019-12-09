@@ -31,7 +31,6 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = ProcessInstanceJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private ProcessInstance processInstance;
 
     public ProcessAuditEventEntity() {

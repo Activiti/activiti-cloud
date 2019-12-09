@@ -34,7 +34,6 @@ public class ErrorReceivedAuditEventEntity extends AuditEventEntity {
     
     @Convert(converter = ErrorJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private BPMNError error;
 
     public ErrorReceivedAuditEventEntity() {

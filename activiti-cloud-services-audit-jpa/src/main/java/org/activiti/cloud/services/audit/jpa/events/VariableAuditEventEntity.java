@@ -19,7 +19,6 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = VariableJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private VariableInstance variableInstance;
 
     public VariableAuditEventEntity() {

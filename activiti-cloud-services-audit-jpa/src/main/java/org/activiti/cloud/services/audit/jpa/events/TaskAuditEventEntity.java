@@ -15,7 +15,6 @@ public abstract class TaskAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = TaskJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private Task task;
 
     private String taskId;

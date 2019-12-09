@@ -35,7 +35,6 @@ public class ProcessDeployedAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = ProcessDefinitionJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private ProcessDefinition processDefinition;
 
     public ProcessDeployedAuditEventEntity() {

@@ -36,7 +36,6 @@ public class TaskCandidateGroupRemovedEventEntity extends AuditEventEntity {
 
     @Convert(converter = TaskCandidateGroupJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private TaskCandidateGroupImpl candidateGroup;
     
     public TaskCandidateGroupRemovedEventEntity() {

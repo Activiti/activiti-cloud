@@ -35,7 +35,6 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = SequenceFlowJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private BPMNSequenceFlow sequenceFlow;
 
     public SequenceFlowAuditEventEntity() {

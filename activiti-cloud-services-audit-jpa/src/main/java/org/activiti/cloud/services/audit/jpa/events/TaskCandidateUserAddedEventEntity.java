@@ -36,7 +36,6 @@ public class TaskCandidateUserAddedEventEntity extends AuditEventEntity {
 
     @Convert(converter = TaskCandidateUserJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private TaskCandidateUserImpl candidateUser;
     
     public TaskCandidateUserAddedEventEntity() {

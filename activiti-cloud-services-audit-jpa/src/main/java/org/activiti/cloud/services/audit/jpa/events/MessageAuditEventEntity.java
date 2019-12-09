@@ -31,7 +31,6 @@ public abstract class MessageAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = MessageJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private BPMNMessage message;
 
     public MessageAuditEventEntity() {

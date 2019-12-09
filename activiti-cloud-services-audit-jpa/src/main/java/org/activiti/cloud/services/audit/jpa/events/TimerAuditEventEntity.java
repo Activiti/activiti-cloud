@@ -15,7 +15,6 @@ public abstract class TimerAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = TimerJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private BPMNTimer timer;
 
     public TimerAuditEventEntity() {

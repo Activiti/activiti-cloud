@@ -35,7 +35,6 @@ public class SignalReceivedAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = SignalJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private BPMNSignal signal;
 
     public SignalReceivedAuditEventEntity() {

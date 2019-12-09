@@ -34,7 +34,6 @@ public class MessageSubscriptionCancelledAuditEventEntity extends AuditEventEnti
 
     @Convert(converter = MessageSubscriptionJpaJsonConverter.class)
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
     private MessageSubscription messageSubscription;
 
     public MessageSubscriptionCancelledAuditEventEntity() {
