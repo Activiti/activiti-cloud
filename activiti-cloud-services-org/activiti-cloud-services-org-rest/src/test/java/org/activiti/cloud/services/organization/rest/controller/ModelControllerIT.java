@@ -751,6 +751,43 @@ public class ModelControllerIT {
     }
 
     @Test
+    public void should_thowBadRequestException_when_validatingProcessExtensionsWithInvalidDateTimeVariableContent() throws Exception {
+
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-datetime-variable-extensions.json");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "extensions.json",
+                                                       CONTENT_TYPE_JSON,
+                                                       invalidContent);
+
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
+        Model processModel = modelRepository.createModel(processModelWithExtensions(project,
+                                                                                    "process-model",
+                                                                                    new Extensions()));
+        final ResultActions resultActions = mockMvc
+                .perform(multipart("{version}/models/{model_id}/validate/extensions",
+                                   RepositoryRestConfig.API_VERSION,
+                                   processModel.getId()).file(file))
+                .andDo(print());
+        resultActions.andExpect(status().isBadRequest());
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException) resolvedException;
+
+        assertThat(semanticModelValidationException.getValidationErrors())
+            .extracting(ModelValidationError::getProblem, ModelValidationError::getDescription)
+            .containsExactly(
+                tuple("string [2019-12-06T00:60:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                    "#/extensions/properties/e0740a3a-fec4-4ee5-bece-61f39df2a47g/value: string [2019-12-06T00:60:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$"),
+                tuple("string [2019-12-06T00:00:60] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                    "#/extensions/properties/e0740a3a-fec4-4ee5-bece-61f39df2a47f/value: string [2019-12-06T00:00:60] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$"),
+                tuple("string [2019-12-06T24:00:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                    "#/extensions/properties/e0740a3a-fec4-4ee5-bece-61f39df2a47e/value: string [2019-12-06T24:00:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$")
+            );
+    }
+
+    @Test
     public void should_thowNotFoundException_when_validaingeModelThatNotExistsShouldThrowException() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file",
                                                        "diagram.bpm",
