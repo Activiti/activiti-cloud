@@ -3,6 +3,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Convert;
 import javax.persistence.Lob;
@@ -18,6 +19,7 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = VariableJpaJsonConverter.class)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private VariableInstance variableInstance;
 
     public VariableAuditEventEntity() {

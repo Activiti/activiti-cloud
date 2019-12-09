@@ -20,6 +20,7 @@ import org.activiti.api.task.model.TaskCandidateGroup;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateGroupJpaJsonConverter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
@@ -32,11 +33,12 @@ import java.util.Objects;
 public class TaskCandidateGroupAddedEventEntity extends AuditEventEntity {
 
     protected static final String TASK_CANDIDATE_GROUP_ADDED_EVENT = "TaskCandidateGroupAddedEvent";
-   
+
     @Convert(converter = TaskCandidateGroupJpaJsonConverter.class)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private TaskCandidateGroupImpl candidateGroup;
-    
+
     public TaskCandidateGroupAddedEventEntity() {
     }
 
@@ -44,13 +46,13 @@ public class TaskCandidateGroupAddedEventEntity extends AuditEventEntity {
         super(cloudEvent);
         setCandidateGroup(cloudEvent.getEntity());
     }
-    
+
     public TaskCandidateGroup getCandidateGroup() {
         return candidateGroup;
     }
 
     public void setCandidateGroup(TaskCandidateGroup candidateGroup) {
-        this.candidateGroup = new TaskCandidateGroupImpl(candidateGroup.getGroupId(),candidateGroup.getTaskId());
+        this.candidateGroup = new TaskCandidateGroupImpl(candidateGroup.getGroupId(), candidateGroup.getTaskId());
     }
 
     @Override

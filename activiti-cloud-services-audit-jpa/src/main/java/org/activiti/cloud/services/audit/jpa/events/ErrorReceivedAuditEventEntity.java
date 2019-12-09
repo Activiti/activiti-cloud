@@ -19,6 +19,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import org.activiti.api.process.model.BPMNError;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ErrorJpaJsonConverter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
@@ -33,6 +34,7 @@ public class ErrorReceivedAuditEventEntity extends AuditEventEntity {
     
     @Convert(converter = ErrorJpaJsonConverter.class)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private BPMNError error;
 
     public ErrorReceivedAuditEventEntity() {

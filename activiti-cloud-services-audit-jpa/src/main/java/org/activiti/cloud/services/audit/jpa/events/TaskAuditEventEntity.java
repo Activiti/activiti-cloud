@@ -3,6 +3,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Convert;
 import javax.persistence.Lob;
@@ -14,6 +15,7 @@ public abstract class TaskAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = TaskJpaJsonConverter.class)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private Task task;
 
     private String taskId;
@@ -76,9 +78,9 @@ public abstract class TaskAuditEventEntity extends AuditEventEntity {
             return false;
         }
         TaskAuditEventEntity other = (TaskAuditEventEntity) obj;
-        return Objects.equals(task, other.task) 
-                && Objects.equals(taskId, other.taskId) 
-                && Objects.equals(taskName, other.taskName);
+        return Objects.equals(task, other.task)
+                       && Objects.equals(taskId, other.taskId)
+                       && Objects.equals(taskName, other.taskName);
     }
 
     @Override

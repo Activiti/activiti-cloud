@@ -19,6 +19,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import org.activiti.api.process.model.MessageSubscription;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.MessageSubscriptionJpaJsonConverter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
@@ -30,9 +31,10 @@ import javax.persistence.Lob;
 public class MessageSubscriptionCancelledAuditEventEntity extends AuditEventEntity {
 
     protected static final String MESSAGE_SUBSCRIPTION_CANCELLED_EVENT = "MsgSubscriptionCancelledEvent";
-    
+
     @Convert(converter = MessageSubscriptionJpaJsonConverter.class)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private MessageSubscription messageSubscription;
 
     public MessageSubscriptionCancelledAuditEventEntity() {
@@ -40,14 +42,14 @@ public class MessageSubscriptionCancelledAuditEventEntity extends AuditEventEnti
 
     public MessageSubscriptionCancelledAuditEventEntity(CloudMessageSubscriptionCancelledEvent cloudEvent) {
         super(cloudEvent);
-        setMessageSubscription(cloudEvent.getEntity()) ;
+        setMessageSubscription(cloudEvent.getEntity());
         if (messageSubscription != null) {
             setProcessDefinitionId(messageSubscription.getProcessDefinitionId());
             setProcessInstanceId(messageSubscription.getProcessInstanceId());
             setEntityId(messageSubscription.getId());
         }
     }
-    
+
     public MessageSubscription getMessageSubscription() {
         return messageSubscription;
     }

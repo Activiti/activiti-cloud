@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import org.hibernate.annotations.Type;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ActivityJpaJsonConverter;
@@ -30,6 +31,7 @@ public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = ActivityJpaJsonConverter.class)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private BPMNActivity bpmnActivity;
 
     public BPMNActivityAuditEventEntity() {

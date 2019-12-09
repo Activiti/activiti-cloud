@@ -19,6 +19,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.MessageJpaJsonConverter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Convert;
 import javax.persistence.Lob;
@@ -30,6 +31,7 @@ public abstract class MessageAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = MessageJpaJsonConverter.class)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private BPMNMessage message;
 
     public MessageAuditEventEntity() {

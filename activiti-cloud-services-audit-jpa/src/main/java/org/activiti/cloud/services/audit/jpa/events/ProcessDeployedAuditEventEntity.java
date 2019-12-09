@@ -19,6 +19,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessDefinitionJpaJsonConverter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
@@ -34,6 +35,7 @@ public class ProcessDeployedAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = ProcessDefinitionJpaJsonConverter.class)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private ProcessDefinition processDefinition;
 
     public ProcessDeployedAuditEventEntity() {

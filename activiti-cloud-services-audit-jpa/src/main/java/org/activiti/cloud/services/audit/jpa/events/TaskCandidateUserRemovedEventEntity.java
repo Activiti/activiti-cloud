@@ -20,6 +20,7 @@ import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateUserJpaJsonConverter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
@@ -35,6 +36,7 @@ public class TaskCandidateUserRemovedEventEntity extends AuditEventEntity {
 
     @Convert(converter = TaskCandidateUserJpaJsonConverter.class)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private TaskCandidateUserImpl candidateUser;
     
     public TaskCandidateUserRemovedEventEntity() {

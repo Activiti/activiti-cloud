@@ -3,6 +3,7 @@ package org.activiti.cloud.services.audit.jpa.events;
 import org.activiti.api.process.model.BPMNTimer;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TimerJpaJsonConverter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Convert;
 import javax.persistence.Lob;
@@ -14,6 +15,7 @@ public abstract class TimerAuditEventEntity extends AuditEventEntity {
 
     @Convert(converter = TimerJpaJsonConverter.class)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private BPMNTimer timer;
 
     public TimerAuditEventEntity() {
