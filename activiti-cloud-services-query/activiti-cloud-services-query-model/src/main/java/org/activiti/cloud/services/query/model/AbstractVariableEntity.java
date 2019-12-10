@@ -58,7 +58,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     private VariableValue<?> value;
 
     private Boolean markedAsDeleted = false;
-    
+
     private String processInstanceId;
 
     @JsonIgnore
@@ -66,7 +66,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
             , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
     private ProcessInstanceEntity processInstance;
-    
+
 
     public AbstractVariableEntity() {
     }
@@ -160,23 +160,23 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
         this.markedAsDeleted = markedAsDeleted;
     }
 
-    
+
     @Override
     public String getProcessInstanceId() {
         return processInstanceId;
     }
 
-    
+
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
     }
 
-    
+
     public ProcessInstanceEntity getProcessInstance() {
         return processInstance;
     }
 
-    
+
     public void setProcessInstance(ProcessInstanceEntity processInstance) {
         this.processInstance = processInstance;
     }

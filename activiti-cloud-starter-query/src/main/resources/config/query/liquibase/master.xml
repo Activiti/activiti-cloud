@@ -16,6 +16,16 @@
   </changeSet>
 
   <changeSet author="activiti-query"
+             id="oracle-schema-creation" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/oracle.schema.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query"
              id="initial-schema-m3" dbms="postgresql">
     <preConditions onFail="CONTINUE">
       <not>
