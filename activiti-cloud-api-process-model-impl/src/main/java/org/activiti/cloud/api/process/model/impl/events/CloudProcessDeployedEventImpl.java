@@ -31,12 +31,14 @@ public class CloudProcessDeployedEventImpl extends CloudRuntimeEventImpl<Process
     public CloudProcessDeployedEventImpl(ProcessDefinition entity) {
         super(entity);
         setEntityId(entity.getId());
+        setAppVersion(entity.getAppVersion());
     }
     public CloudProcessDeployedEventImpl(String id,
                                          Long timestamp,
                                          ProcessDefinition entity) {
         super(id, timestamp, entity);
         setEntityId(entity.getId());
+        setAppVersion(entity.getAppVersion());
     }
 
     @Override

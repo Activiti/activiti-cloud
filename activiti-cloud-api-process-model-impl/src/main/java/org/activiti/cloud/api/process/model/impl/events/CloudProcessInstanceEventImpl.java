@@ -31,7 +31,6 @@ public abstract class CloudProcessInstanceEventImpl extends CloudRuntimeEventImp
     }
 
     private void setFlattenInfo(ProcessInstance processInstance) {
-        if (processInstance != null) {
             setProcessDefinitionId(processInstance.getProcessDefinitionId());
             setProcessInstanceId(processInstance.getId());
             setEntityId(processInstance.getId());
@@ -39,7 +38,7 @@ public abstract class CloudProcessInstanceEventImpl extends CloudRuntimeEventImp
             setProcessDefinitionKey(processInstance.getProcessDefinitionKey());
             setProcessDefinitionVersion(processInstance.getProcessDefinitionVersion());
             setParentProcessInstanceId(processInstance.getParentId());
-        }
+            setAppVersion(processInstance.getAppVersion());
     }
 
     public CloudProcessInstanceEventImpl(String id,

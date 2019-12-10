@@ -31,13 +31,12 @@ public abstract class CloudTaskEventImpl extends CloudRuntimeEventImpl<Task, Tas
     }
 
     private void setFlattenInformation(Task task) {
-        if (task != null) {
             setEntityId(task.getId());
             setProcessDefinitionId(task.getProcessDefinitionId());
             setProcessInstanceId(task.getProcessInstanceId());
             setProcessDefinitionVersion(task.getProcessDefinitionVersion());
             setBusinessKey(task.getBusinessKey());
-        }
+            setAppVersion(task.getAppVersion());
     }
 
     public CloudTaskEventImpl(String id,
