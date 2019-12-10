@@ -20,13 +20,13 @@ import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateUserJpaJsonConverter;
-import org.hibernate.annotations.Type;
 
+import java.util.Objects;
+
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
-import java.util.Objects;
 
 @Entity(name = TaskCandidateUserAddedEventEntity.TASK_CANDIDATE_USER_ADDED_EVENT)
 @DiscriminatorValue(value = TaskCandidateUserAddedEventEntity.TASK_CANDIDATE_USER_ADDED_EVENT)
@@ -35,7 +35,7 @@ public class TaskCandidateUserAddedEventEntity extends AuditEventEntity {
     protected static final String TASK_CANDIDATE_USER_ADDED_EVENT = "TaskCandidateUserAddedEvent";
 
     @Convert(converter = TaskCandidateUserJpaJsonConverter.class)
-    @Lob
+    @Column(columnDefinition = "text")
     private TaskCandidateUserImpl candidateUser;
     
     public TaskCandidateUserAddedEventEntity() {

@@ -19,13 +19,13 @@ package org.activiti.cloud.services.audit.jpa.events;
 import org.activiti.api.process.model.BPMNSignal;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SignalJpaJsonConverter;
-import org.hibernate.annotations.Type;
 
+import java.util.Objects;
+
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
-import java.util.Objects;
 
 @Entity(name = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
 @DiscriminatorValue(value = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
@@ -34,7 +34,7 @@ public class SignalReceivedAuditEventEntity extends AuditEventEntity {
     protected static final String SIGNAL_RECEIVED_EVENT = "SignalReceivedEvent";
 
     @Convert(converter = SignalJpaJsonConverter.class)
-    @Lob
+    @Column(columnDefinition="text")
     private BPMNSignal signal;
 
     public SignalReceivedAuditEventEntity() {
@@ -42,7 +42,7 @@ public class SignalReceivedAuditEventEntity extends AuditEventEntity {
 
     public SignalReceivedAuditEventEntity(CloudBPMNSignalReceivedEvent cloudEvent) {
         super(cloudEvent);
-        setSignal(cloudEvent.getEntity());
+        setSignal(cloudEvent.getEntity()) ;
     }
 
     public BPMNSignal getSignal() {

@@ -16,24 +16,23 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.api.process.model.BPMNError;
-import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
-import org.activiti.cloud.services.audit.jpa.converters.json.ErrorJpaJsonConverter;
-import org.hibernate.annotations.Type;
-
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
+
+import org.activiti.api.process.model.BPMNError;
+import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
+import org.activiti.cloud.services.audit.jpa.converters.json.ErrorJpaJsonConverter;
 
 @Entity
 @DiscriminatorValue(value = ErrorReceivedAuditEventEntity.ERROR_RECEIVED_EVENT)
 public class ErrorReceivedAuditEventEntity extends AuditEventEntity {
 
     protected static final String ERROR_RECEIVED_EVENT = "ErrorReceivedEvent";
-    
+
     @Convert(converter = ErrorJpaJsonConverter.class)
-    @Lob
+    @Column(columnDefinition = "text")
     private BPMNError error;
 
     public ErrorReceivedAuditEventEntity() {
@@ -41,14 +40,14 @@ public class ErrorReceivedAuditEventEntity extends AuditEventEntity {
 
     public ErrorReceivedAuditEventEntity(CloudBPMNErrorReceivedEvent cloudEvent) {
         super(cloudEvent);
-        setError(cloudEvent.getEntity()) ;
+        setError(cloudEvent.getEntity());
         if (error != null) {
             setProcessDefinitionId(error.getProcessDefinitionId());
             setProcessInstanceId(error.getProcessInstanceId());
             setEntityId(error.getElementId());
         }
     }
-    
+
     public BPMNError getError() {
         return error;
     }

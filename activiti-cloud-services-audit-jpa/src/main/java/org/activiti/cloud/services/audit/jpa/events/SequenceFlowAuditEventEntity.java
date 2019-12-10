@@ -19,13 +19,13 @@ package org.activiti.cloud.services.audit.jpa.events;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SequenceFlowJpaJsonConverter;
-import org.hibernate.annotations.Type;
 
+import java.util.Objects;
+
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
-import java.util.Objects;
 
 @Entity(name = SequenceFlowAuditEventEntity.SEQUENCE_FLOW_TAKEN_EVENT)
 @DiscriminatorValue(value = SequenceFlowAuditEventEntity.SEQUENCE_FLOW_TAKEN_EVENT)
@@ -34,7 +34,7 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
     protected static final String SEQUENCE_FLOW_TAKEN_EVENT = "SequenceFlowTakenEvent";
 
     @Convert(converter = SequenceFlowJpaJsonConverter.class)
-    @Lob
+    @Column(columnDefinition = "text")
     private BPMNSequenceFlow sequenceFlow;
 
     public SequenceFlowAuditEventEntity() {
@@ -42,7 +42,7 @@ public class SequenceFlowAuditEventEntity extends AuditEventEntity {
 
     public SequenceFlowAuditEventEntity(CloudSequenceFlowTakenEvent cloudEvent) {
         super(cloudEvent);
-        setSequenceFlow(cloudEvent.getEntity());
+        setSequenceFlow(cloudEvent.getEntity()) ;
     }
 
     public BPMNSequenceFlow getSequenceFlow() {
