@@ -33,11 +33,11 @@ import javax.persistence.Entity;
 public class TaskCandidateGroupAddedEventEntity extends AuditEventEntity {
 
     protected static final String TASK_CANDIDATE_GROUP_ADDED_EVENT = "TaskCandidateGroupAddedEvent";
-   
+
     @Convert(converter = TaskCandidateGroupJpaJsonConverter.class)
     @Column(columnDefinition = "text")
     private TaskCandidateGroupImpl candidateGroup;
-    
+
     public TaskCandidateGroupAddedEventEntity() {
     }
 
@@ -45,7 +45,7 @@ public class TaskCandidateGroupAddedEventEntity extends AuditEventEntity {
         super(cloudEvent);
         setCandidateGroup(cloudEvent.getEntity());
     }
-    
+
     public TaskCandidateGroup getCandidateGroup() {
         return candidateGroup;
     }

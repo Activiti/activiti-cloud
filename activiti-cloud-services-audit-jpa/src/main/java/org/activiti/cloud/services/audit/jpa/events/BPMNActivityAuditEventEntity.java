@@ -40,7 +40,7 @@ public abstract class BPMNActivityAuditEventEntity extends AuditEventEntity {
         super(cloudEvent);
         setBpmnActivity(cloudEvent.getEntity());
     }
-    
+
 
     public BPMNActivity getBpmnActivity() {
         return bpmnActivity;

@@ -30,7 +30,7 @@ import org.activiti.cloud.services.audit.jpa.converters.json.MessageSubscription
 public class MessageSubscriptionCancelledAuditEventEntity extends AuditEventEntity {
 
     protected static final String MESSAGE_SUBSCRIPTION_CANCELLED_EVENT = "MsgSubscriptionCancelledEvent";
-    
+
     @Convert(converter = MessageSubscriptionJpaJsonConverter.class)
     @Column(columnDefinition="text")
     private MessageSubscription messageSubscription;
@@ -47,7 +47,7 @@ public class MessageSubscriptionCancelledAuditEventEntity extends AuditEventEnti
             setEntityId(messageSubscription.getId());
         }
     }
-    
+
     public MessageSubscription getMessageSubscription() {
         return messageSubscription;
     }

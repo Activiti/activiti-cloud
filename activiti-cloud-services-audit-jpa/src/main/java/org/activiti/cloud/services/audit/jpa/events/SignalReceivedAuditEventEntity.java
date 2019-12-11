@@ -32,7 +32,7 @@ import javax.persistence.Entity;
 public class SignalReceivedAuditEventEntity extends AuditEventEntity {
 
     protected static final String SIGNAL_RECEIVED_EVENT = "SignalReceivedEvent";
-    
+
     @Convert(converter = SignalJpaJsonConverter.class)
     @Column(columnDefinition="text")
     private BPMNSignal signal;
@@ -44,7 +44,7 @@ public class SignalReceivedAuditEventEntity extends AuditEventEntity {
         super(cloudEvent);
         setSignal(cloudEvent.getEntity()) ;
     }
-    
+
     public BPMNSignal getSignal() {
         return signal;
     }
