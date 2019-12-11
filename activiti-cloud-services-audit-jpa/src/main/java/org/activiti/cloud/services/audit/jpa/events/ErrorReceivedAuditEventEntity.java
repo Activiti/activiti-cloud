@@ -30,9 +30,9 @@ import org.activiti.cloud.services.audit.jpa.converters.json.ErrorJpaJsonConvert
 public class ErrorReceivedAuditEventEntity extends AuditEventEntity {
 
     protected static final String ERROR_RECEIVED_EVENT = "ErrorReceivedEvent";
-    
+
     @Convert(converter = ErrorJpaJsonConverter.class)
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     private BPMNError error;
 
     public ErrorReceivedAuditEventEntity() {
@@ -40,14 +40,14 @@ public class ErrorReceivedAuditEventEntity extends AuditEventEntity {
 
     public ErrorReceivedAuditEventEntity(CloudBPMNErrorReceivedEvent cloudEvent) {
         super(cloudEvent);
-        setError(cloudEvent.getEntity()) ;
+        setError(cloudEvent.getEntity());
         if (error != null) {
             setProcessDefinitionId(error.getProcessDefinitionId());
             setProcessInstanceId(error.getProcessInstanceId());
             setEntityId(error.getElementId());
         }
     }
-    
+
     public BPMNError getError() {
         return error;
     }

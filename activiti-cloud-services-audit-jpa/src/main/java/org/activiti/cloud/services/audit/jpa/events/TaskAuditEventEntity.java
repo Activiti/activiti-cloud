@@ -77,8 +77,8 @@ public abstract class TaskAuditEventEntity extends AuditEventEntity {
             return false;
         }
         TaskAuditEventEntity other = (TaskAuditEventEntity) obj;
-        return Objects.equals(task, other.task) 
-                && Objects.equals(taskId, other.taskId) 
+        return Objects.equals(task, other.task)
+                && Objects.equals(taskId, other.taskId)
                 && Objects.equals(taskName, other.taskName);
     }
 
