@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    org.activiti.cloud.services.test.TestConfiguration
+    org.activiti.cloud.services.test.TestConfiguration,\
+  org.activiti.cloud.services.test.TestProducerAutoConfiguration

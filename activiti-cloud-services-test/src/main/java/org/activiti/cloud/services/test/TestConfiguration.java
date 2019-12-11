@@ -20,17 +20,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
-import org.activiti.cloud.starters.test.MyProducer;
-import org.activiti.cloud.starters.test.StreamProducer;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
@@ -38,14 +36,9 @@ import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.messaging.MessageChannel;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
-@AutoConfigureBefore(value=RestTemplateAutoConfiguration.class)
+@AutoConfigureBefore(value = RestTemplateAutoConfiguration.class)
 public class TestConfiguration {
 
     private final List<Module> modules;
@@ -54,17 +47,6 @@ public class TestConfiguration {
         this.modules = modules;
     }
 
-    @ConditionalOnBean(BindingService.class)
-    @EnableBinding(StreamProducer.class)
-    static class MyProducerConfiguration {
-    
-        @Bean
-        @ConditionalOnMissingBean
-        public MyProducer myProducer(MessageChannel producer) {
-            return new MyProducer(producer);
-        }
-    }
-    
     @Bean
     @ConditionalOnMissingBean
     public KeycloakTokenProducer keycloakTokenProducer(KeycloakProperties keycloakProperties) {
