@@ -26,7 +26,7 @@ import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.organization.rest.api.ProjectRestApi;
 import org.activiti.cloud.services.organization.rest.assembler.ProjectResourceAssembler;
-import org.activiti.cloud.services.organization.service.ProjectService;
+import org.activiti.cloud.services.organization.service.api.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;

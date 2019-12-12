@@ -20,10 +20,10 @@ import org.activiti.cloud.organization.api.Model;
 import org.activiti.cloud.organization.api.Project;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
-import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
+import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 
 @Configuration
-public class RepositoryRestConfig extends RepositoryRestConfigurerAdapter {
+public class RepositoryRestConfig implements RepositoryRestConfigurer {
 
     public static final String API_VERSION = "/v1";
 
@@ -31,7 +31,7 @@ public class RepositoryRestConfig extends RepositoryRestConfigurerAdapter {
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
 
         config.setBasePath(API_VERSION)
-              .exposeIdsFor(Project.class)
-              .exposeIdsFor(Model.class);
+                .exposeIdsFor(Project.class)
+                .exposeIdsFor(Model.class);
     }
 }

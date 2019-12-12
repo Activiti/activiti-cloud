@@ -14,6 +14,7 @@ import org.activiti.cloud.organization.api.Project;
 import org.activiti.cloud.organization.converter.JsonConverter;
 import org.activiti.cloud.organization.repository.ModelRepository;
 import org.activiti.cloud.organization.repository.ProjectRepository;
+import org.activiti.cloud.services.organization.service.api.ProjectService;
 import org.activiti.cloud.services.organization.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.organization.validation.project.ProjectValidator;
 import org.everit.json.schema.loader.SchemaLoader;
@@ -32,14 +33,14 @@ public class OrgServiceAutoConfiguration {
                                        modelConverters,
                                        contentUpdateListeners);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ExtensionsModelValidator extensionsModelValidator(SchemaLoader modelExtensionsSchemaLoader) {
         return new ExtensionsModelValidator(modelExtensionsSchemaLoader);
     }
-    
-    
+
+
     @Bean
     public ModelExtensionsService modelExtensionsService(Set<ModelExtensionsValidator> metadataValidators,
                                                          ExtensionsModelValidator extensionsModelValidator,
@@ -76,7 +77,7 @@ public class OrgServiceAutoConfiguration {
                                          JsonConverter<Map> jsonMetadataConverter,
                                          Set<ProjectValidator> projectValidators) {
 
-        return new ProjectService(projectRepository,
+        return new ProjectServiceImpl(projectRepository,
                                   modelService,
                                   modelTypeService,
                                   jsonConverter,
