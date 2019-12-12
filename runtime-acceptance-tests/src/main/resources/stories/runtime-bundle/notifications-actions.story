@@ -4,17 +4,17 @@ Narrative:
 As a user
 I want to perform operations on process instances with subscriptions to receive event notifications
 
-#Scenario: complete a process instance that uses a connector with subscription to PROCESS event notifications
-#Given the user is authenticated as testadmin
-#And notifications: session variable called businessKey with value set to businessKey
-#When notifications: the user subscribes to PROCESS_STARTED,PROCESS_COMPLETED notifications
-#And notifications: the user starts a process CONNECTOR_PROCESS_INSTANCE
-#Then notifications: verify process instance started response
-#And notifications: the payload with PROCESS_STARTED notifications is expected
-#And notifications: the payload with PROCESS_COMPLETED notifications is expected
-#And notifications: verify the status of the process is completed
-#And notifications: the user completes the subscription
-#And notifications: verify all expected notifications are received
+Scenario: complete a process instance that uses a connector with subscription to PROCESS event notifications
+Given the user is authenticated as testadmin
+And notifications: session variable called businessKey with value set to businessKey
+When notifications: the user subscribes to PROCESS_STARTED,PROCESS_COMPLETED notifications
+And notifications: the user starts a process CONNECTOR_PROCESS_INSTANCE
+Then notifications: verify process instance started response
+And notifications: the payload with PROCESS_STARTED notifications is expected
+And notifications: the payload with PROCESS_COMPLETED notifications is expected
+And notifications: verify the status of the process is completed
+And notifications: the user completes the subscription 
+And notifications: verify all expected notifications are received
 
 Scenario: complete a process instance that sends a signal with subscription to SIGNAL event notifications 
 

@@ -16,10 +16,8 @@
 
 package org.activiti.cloud.qa;
 
-//import net.serenitybdd.jbehave.annotations.Metafilter;
 import org.activiti.cloud.acc.shared.serenity.ExtendedSerenityStories;
 
-//@Metafilter("+current")
 public class AcceptanceTests extends ExtendedSerenityStories {
 
     //TODO: We need this for now to pick up classes from the classpath
