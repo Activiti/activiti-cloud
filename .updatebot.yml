@@ -5,6 +5,12 @@ github:
     - name: activiti-cloud-full-chart
       branch: master
       useSinglePullRequest: true
+  - name: alfresco
+    repositories:
+    - name: alfresco-process-oracle-kafka-application
+      useSinglePullRequest: true
+      
+        
     # - name: ttc-connectors-reward
     #   branch: master
     # - name: ttc-campaigns-service
