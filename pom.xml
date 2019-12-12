@@ -55,7 +55,7 @@
     <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
 
-    <activiti-cloud-acceptance-tests.version>7.1.114</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-acceptance-tests.version>7.1.115</activiti-cloud-acceptance-tests.version>
   </properties>
   <dependencyManagement>
     <dependencies>
