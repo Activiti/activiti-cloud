@@ -33,6 +33,7 @@ public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implement
     }
 
     public CloudProcessDefinitionImpl(ProcessDefinition processDefinition) {
+        super(processDefinition);
         id = processDefinition.getId();
         name = processDefinition.getName();
         key = processDefinition.getKey();

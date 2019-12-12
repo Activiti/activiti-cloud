@@ -16,16 +16,24 @@
 
 package org.activiti.cloud.api.model.shared.impl;
 
+import org.activiti.api.model.shared.model.ApplicationElement;
+import org.activiti.api.runtime.model.impl.ApplicationElementImpl;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
-public class CloudRuntimeEntityImpl implements CloudRuntimeEntity {
+public class CloudRuntimeEntityImpl extends ApplicationElementImpl implements CloudRuntimeEntity {
 
     private String appName;
-    private String appVersion;
     private String serviceName;
     private String serviceFullName;
     private String serviceType;
     private String serviceVersion;
+
+    public CloudRuntimeEntityImpl() {
+    }
+
+    public CloudRuntimeEntityImpl(ApplicationElement applicationElement) {
+        setAppVersion(applicationElement.getAppVersion());
+    }
 
     @Override
     public String getAppName() {
@@ -34,15 +42,6 @@ public class CloudRuntimeEntityImpl implements CloudRuntimeEntity {
 
     public void setAppName(String appName) {
         this.appName = appName;
-    }
-
-    @Override
-    public String getAppVersion() {
-        return appVersion;
-    }
-
-    public void setAppVersion(String appVersion) {
-        this.appVersion = appVersion;
     }
 
     @Override

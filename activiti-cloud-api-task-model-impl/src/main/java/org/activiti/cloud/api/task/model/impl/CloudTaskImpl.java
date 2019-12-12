@@ -49,6 +49,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     }
 
     public CloudTaskImpl(Task task) {
+        super(task);
         id = task.getId();
         owner = task.getOwner();
         assignee = task.getAssignee();
@@ -172,7 +173,6 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         return processDefinitionVersion;
     }
 
-    
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
     }
@@ -226,7 +226,6 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     public void setCompletedDate(Date completedDate) {
         this.completedDate = completedDate;
     }
-
 
     public void setDuration(Long duration) {
         this.duration = duration;
