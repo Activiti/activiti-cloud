@@ -46,8 +46,8 @@ public class ServiceTaskConsumerHandler {
     private static final String SERVICE_VERSION = "serviceVersion";
     private static final String SERVICE_TYPE = "serviceType";
     private static final String SERVICE_NAME = "serviceName";
-    private static final String APP_VERSION = "appVersion";
     private static final String APP_NAME = "appName";
+    private static final String APP_VERSION = "appVersion";
     private static final String PROCESS_DEFINITION_ID = "processDefinitionId";
     private static final String PROCESS_INSTANCE_ID = "processInstanceId";
     private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";
@@ -199,7 +199,7 @@ public class ServiceTaskConsumerHandler {
                   .containsEntry(PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
                   .containsEntry(PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())
                   .containsEntry(APP_NAME, integrationRequest.getAppName())
-                  .containsEntry(APP_VERSION, integrationRequest.getAppVersion())
+                  .containsEntry(APP_VERSION, integrationRequest.getIntegrationContext().getAppVersion())
                   .containsEntry(SERVICE_NAME, integrationRequest.getServiceName())
                   .containsEntry(SERVICE_TYPE, integrationRequest.getServiceType())
                   .containsEntry(SERVICE_VERSION, integrationRequest.getServiceVersion())

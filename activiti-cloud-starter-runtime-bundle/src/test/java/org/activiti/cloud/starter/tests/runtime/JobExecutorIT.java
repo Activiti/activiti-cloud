@@ -645,7 +645,6 @@ public class JobExecutorIT {
         
         assertThat(message.getHeaders()).as("should build runtime bundle properties as headers")
                                         .containsEntry(RuntimeBundleInfoMessageHeaders.APP_NAME, properties.getAppName())
-                                        .containsEntry(RuntimeBundleInfoMessageHeaders.APP_VERSION, properties.getAppVersion())
                                         .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, properties.getServiceName())
                                         .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_TYPE, properties.getServiceType())
                                         .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_VERSION, properties.getServiceVersion())

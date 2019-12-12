@@ -40,7 +40,8 @@ public class IntegrationContextMessageBuilderAppender implements MessageBuilderA
                 .setHeader(IntegrationContextMessageHeaders.PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())
                 .setHeader(IntegrationContextMessageHeaders.PROCESS_DEFINITION_KEY, integrationContext.getProcessDefinitionKey())
                 .setHeader(IntegrationContextMessageHeaders.PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
-                .setHeader(IntegrationContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId());
+                .setHeader(IntegrationContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId())
+                .setHeader(IntegrationContextMessageHeaders.APP_VERSION, integrationContext.getAppVersion());
     }
 
 }

@@ -28,4 +28,6 @@ class IntegrationContextMessageHeaders {
     public static final String PROCESS_DEFINITION_ID = "processDefinitionId";
     public static final String PROCESS_DEFINITION_KEY = "processDefinitionKey";
     public static final String PROCESS_DEFINITION_VERSION = "processDefinitionVersion";
+    public static final String APP_VERSION = "appVersion";
+
 }

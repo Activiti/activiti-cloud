@@ -36,9 +36,6 @@ public class RuntimeBundleProperties {
     @Value("${activiti.cloud.application.name:}")
     private String appName;
 
-    @Value("${activiti.cloud.application.version:}")
-    private String appVersion;
-
     private RuntimeBundleEventsProperties eventsProperties = new RuntimeBundleEventsProperties();
     
     public String getRbSpringAppName() {
@@ -81,14 +78,6 @@ public class RuntimeBundleProperties {
 
     public void setAppName(String appName) {
         this.appName = appName;
-    }
-
-    public String getAppVersion() {
-        return appVersion;
-    }
-
-    public void setAppVersion(String appVersion) {
-        this.appVersion = appVersion;
     }
 
     public RuntimeBundleEventsProperties getEventsProperties() {

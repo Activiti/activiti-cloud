@@ -32,7 +32,7 @@ import org.springframework.messaging.support.MessageBuilder;
 
 public class ExecutionContextMessageBuilderAppenderTest {
 
-    private static final String MOCK_SUPER_EXECTUION_ID = "mockSuperExectuionId";
+    private static final String MOCK_SUPER_EXECUTION_ID = "mockSuperExectuionId";
     private static final String MOCK_PROCESS_DEFINITION_NAME = "mockProcessDefinitionName";
     private static final String MOCK_PARENT_PROCESS_NAME = "mockParentProcessName";
     private static final String MOCK_PROCESS_NAME = "mockProcessName";
@@ -44,6 +44,7 @@ public class ExecutionContextMessageBuilderAppenderTest {
     private static final String MOCK_PARENT_PROCESS_INSTANCE_ID = "mockParentId";
     private static final String MOCK_PROCESS_INSTANCE_ID = "mockProcessInstanceId";
     private static final String MOCK_BUSINESS_KEY = "mockBusinessKey";
+    private static final int MOCK_APP_VERSION = 1;
     
     private ExecutionContextMessageBuilderAppender subject;
 
@@ -76,7 +77,8 @@ public class ExecutionContextMessageBuilderAppenderTest {
                 .containsEntry(ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_NAME, MOCK_PARENT_PROCESS_NAME)
                 .containsEntry(ExecutionContextMessageHeaders.PROCESS_DEFINITION_NAME, MOCK_PROCESS_DEFINITION_NAME)
                 .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_ID, MOCK_DEPLOYMENT_ID)
-                .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_NAME, MOCK_DEPLOYMENT_NAME);
+                .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_NAME, MOCK_DEPLOYMENT_NAME)
+                .containsEntry(ExecutionContextMessageHeaders.APP_VERSION, MOCK_APP_VERSION);
         
     }
 
@@ -95,7 +97,7 @@ public class ExecutionContextMessageBuilderAppenderTest {
         when(processInstance.getName()).thenReturn(MOCK_PROCESS_NAME);
 
         ExecutionEntity superExectuion = mock(ExecutionEntity.class);
-        when(processInstance.getSuperExecutionId()).thenReturn(MOCK_SUPER_EXECTUION_ID);
+        when(processInstance.getSuperExecutionId()).thenReturn(MOCK_SUPER_EXECUTION_ID);
         when(processInstance.getSuperExecution()).thenReturn(superExectuion);
 
         ExecutionEntity parentProcessInstance = mock(ExecutionEntity.class);
@@ -111,7 +113,8 @@ public class ExecutionContextMessageBuilderAppenderTest {
 
         when(deploymentEntity.getId()).thenReturn(MOCK_DEPLOYMENT_ID);
         when(deploymentEntity.getName()).thenReturn(MOCK_DEPLOYMENT_NAME);
-        
+        when(deploymentEntity.getVersion()).thenReturn(MOCK_APP_VERSION);
+
         return context;
     }
     

@@ -78,7 +78,7 @@ public class EmbeddedSubProcessAuditIT {
     private static final String NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS = "messageNonInterruptingSubProcess";
 
     private static final String ROUTING_KEY_HEADER = "routingKey";
-    private static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "appVersion", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
+    private static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
     private static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS)
             .flatMap(Stream::of)
             .toArray(String[]::new);

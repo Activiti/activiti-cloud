@@ -30,7 +30,6 @@ public class RuntimeBundleInfoMessageBuilderAppenderTest {
     private static final String SPRING_APP_NAME = "springAppName";
     private static final String SERVICE_VERSION = "serviceVersion";
     private static final String SERVICE_TYPE = "serviceType";
-    private static final String APP_VERSION = "appVersion";
     private static final String APP_NAME = "appName";
 
     private RuntimeBundleInfoMessageBuilderAppender subject;
@@ -41,7 +40,6 @@ public class RuntimeBundleInfoMessageBuilderAppenderTest {
            RuntimeBundleProperties properties = new RuntimeBundleProperties();
            
            properties.setAppName(APP_NAME);
-           properties.setAppVersion(APP_VERSION);
            properties.setServiceType(SERVICE_TYPE);
            properties.setServiceVersion(SERVICE_VERSION);
            properties.setRbSpringAppName(SPRING_APP_NAME);
@@ -62,7 +60,6 @@ public class RuntimeBundleInfoMessageBuilderAppenderTest {
         
         assertThat(message.getHeaders())
                 .containsEntry(RuntimeBundleInfoMessageHeaders.APP_NAME, APP_NAME)
-                .containsEntry(RuntimeBundleInfoMessageHeaders.APP_VERSION, APP_VERSION)
                 .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, SPRING_APP_NAME)
                 .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_TYPE, SERVICE_TYPE)
                 .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_VERSION, SERVICE_VERSION);

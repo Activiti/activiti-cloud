@@ -16,13 +16,13 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
+
 import java.util.Date;
 import java.util.UUID;
 
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
-
-import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
 
 public class TaskSamples {
 
@@ -82,6 +82,7 @@ public class TaskSamples {
         task.setPriority(10);
         task.setProcessInstanceId(processInstanceId);
         task.setProcessDefinitionId(processDefinitionId);
+        task.setAppVersion("1");
         return task;
     }
 

@@ -61,7 +61,6 @@ public class IntegrationRequestSenderTest {
     private static final String SERVICE_VERSION = "serviceVersion";
     private static final String SERVICE_TYPE = "serviceType";
     private static final String SPRING_APP_NAME = "springAppName";
-    private static final String APP_VERSION = "appVersion";
     private static final String CONNECTOR_TYPE = "payment";
     private static final String EXECUTION_ID = "execId";
     private static final String PROC_INST_ID = "procInstId";
@@ -87,7 +86,6 @@ public class IntegrationRequestSenderTest {
     private RuntimeBundleProperties runtimeBundleProperties = new RuntimeBundleProperties() {
         {
             setAppName(APP_NAME);
-            setAppVersion(APP_VERSION);
             setServiceType(SERVICE_TYPE);
             setServiceVersion(SERVICE_VERSION);
             setRbSpringAppName(SPRING_APP_NAME);
@@ -242,7 +240,6 @@ public class IntegrationRequestSenderTest {
             .containsEntry("processInstanceId", PROC_INST_ID)
             .containsEntry("processDefinitionId", PROC_DEF_ID)
             .containsEntry("appName", APP_NAME)
-            .containsEntry("appVersion", APP_VERSION)
             .containsEntry("serviceName",SPRING_APP_NAME)
             .containsEntry("serviceType",SERVICE_TYPE)
             .containsEntry("serviceVersion",SERVICE_VERSION)

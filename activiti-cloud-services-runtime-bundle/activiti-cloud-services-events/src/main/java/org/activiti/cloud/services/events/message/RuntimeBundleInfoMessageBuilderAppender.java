@@ -34,7 +34,6 @@ public class RuntimeBundleInfoMessageBuilderAppender implements MessageBuilderAp
         Assert.notNull(request, "request must not be null");
         
         return request.setHeader(RuntimeBundleInfoMessageHeaders.APP_NAME, properties.getAppName())
-                .setHeader(RuntimeBundleInfoMessageHeaders.APP_VERSION, properties.getAppVersion())
                 .setHeader(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, properties.getServiceName())
                 .setHeader(RuntimeBundleInfoMessageHeaders.SERVICE_FULL_NAME, properties.getServiceFullName())
                 .setHeader(RuntimeBundleInfoMessageHeaders.SERVICE_TYPE, properties.getServiceType())

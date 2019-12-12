@@ -42,6 +42,8 @@ public class ExecutionContextMessageBuilderAppender implements MessageBuilderApp
             ProcessDefinition processDefinition = executionContext.getProcessDefinition();
             DeploymentEntity deploymentEntity = executionContext.getDeployment();
 
+
+
             if(processInstance != null) { 
                 request.setHeader(ExecutionContextMessageHeaders.BUSINESS_KEY, processInstance.getBusinessKey())
                     .setHeader(ExecutionContextMessageHeaders.PROCESS_INSTANCE_ID, processInstance.getId())
@@ -59,8 +61,9 @@ public class ExecutionContextMessageBuilderAppender implements MessageBuilderApp
             }
 
             if(deploymentEntity != null) {
-                request.setHeader(ExecutionContextMessageHeaders.DEPLOYMENT_ID, deploymentEntity.getId())
-                    .setHeader(ExecutionContextMessageHeaders.DEPLOYMENT_NAME, deploymentEntity.getName());
+                 request.setHeader(ExecutionContextMessageHeaders.DEPLOYMENT_ID, deploymentEntity.getId())
+                        .setHeader(ExecutionContextMessageHeaders.DEPLOYMENT_NAME, deploymentEntity.getName())
+                        .setHeader(ExecutionContextMessageHeaders.APP_VERSION, deploymentEntity.getVersion());
             }
             
         }
