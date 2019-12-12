@@ -97,7 +97,7 @@
     <activiti-cloud-query-service.version>7.1.180</activiti-cloud-query-service.version>
     <activiti-cloud-audit-service.version>7.1.125</activiti-cloud-audit-service.version>
     <activiti-cloud-connectors.version>7.1.104</activiti-cloud-connectors.version>
-    <activiti-cloud-notifications-service-graphql.version>7.1.176</activiti-cloud-notifications-service-graphql.version>
+    <activiti-cloud-notifications-service-graphql.version>7.1.177</activiti-cloud-notifications-service-graphql.version>
   </properties>
 
   <dependencyManagement>
