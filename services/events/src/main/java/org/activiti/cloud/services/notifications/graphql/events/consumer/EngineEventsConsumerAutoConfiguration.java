@@ -36,9 +36,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.messaging.Message;
-import reactor.core.publisher.EmitterProcessor;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.TopicProcessor;
 
 /**
  * Notification Gateway configuration that enables messaging channel bindings
@@ -94,9 +95,11 @@ public class EngineEventsConsumerAutoConfiguration {
         private final List<Subscriber<Message<List<EngineEvent>>>> subscribers = new ArrayList<>();
         private boolean running;
 
-        private EmitterProcessor<Message<List<EngineEvent>>> engineEventsProcessor = EmitterProcessor.<Message<List<EngineEvent>>>create(1024,
-                                                                                                                              false);
-
+        private TopicProcessor<Message<List<EngineEvent>>> engineEventsProcessor = TopicProcessor.<Message<List<EngineEvent>>>builder()
+                                                                                                 .autoCancel(false)
+                                                                                                 .share(true)
+                                                                                                 .bufferSize(1024)
+                                                                                                 .build();
         @Autowired
         public EngineEventsFluxProcessorConfiguration() {
         }
@@ -109,7 +112,8 @@ public class EngineEventsConsumerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public Flux<Message<List<EngineEvent>>> engineEventsFlux() {
-            return engineEventsProcessor.publish().autoConnect(0);
+            return engineEventsProcessor.publish()
+                                        .autoConnect(0);
         }
 
         @Bean

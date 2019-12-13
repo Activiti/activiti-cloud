@@ -19,9 +19,10 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 
-import graphql.schema.DataFetchingEnvironment;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.springframework.messaging.Message;
+
+import graphql.schema.DataFetchingEnvironment;
 import reactor.core.publisher.Flux;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -43,11 +44,10 @@ public class EngineEventsFluxPublisherFactory implements EngineEventsPublisherFa
     public Flux<List<EngineEvent>> getPublisher(DataFetchingEnvironment environment) {
         Predicate<? super EngineEvent> predicate = predicateFactory.getPredicate(environment);
 
-        return engineEventsFlux.log(logger, Level.CONFIG, true)
-                               .flatMapSequential(message -> Flux.fromIterable(message.getPayload())
-                                                                 .filter(predicate)
-                                                                 .collectList()
-                                                                 .filter(list -> !list.isEmpty())
-                               );
+        return Flux.from(engineEventsFlux.log(logger, Level.CONFIG, true)
+                                         .flatMapSequential(message -> Flux.fromIterable(message.getPayload())
+                                                                           .filter(predicate)
+                                                                           .collectList()
+                                                                           .filter(list -> !list.isEmpty())));
     }
 }
