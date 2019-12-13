@@ -69,7 +69,7 @@ public class ProcessInstanceSignalEvents {
         assertThat(processInstanceCatchSignal).isNotNull();
     }
     
-    @Then("the task is created with a name $taskName")
+    @Then("the task '$taskName' is created")
     public void checkTaskIsCreated(String taskName) {
         List<Task> tasks = new ArrayList<>(
                 runtimeBundleSteps.getTaskByProcessInstanceId(processInstanceBoundarySignal.getId()));

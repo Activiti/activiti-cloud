@@ -18,6 +18,13 @@ package org.activiti.cloud.qa.story;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -41,13 +48,6 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedResources;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class Tasks {
 
@@ -104,7 +104,7 @@ public class Tasks {
         Serenity.setSessionVariable(STAND_ALONE_TASK_ID).to(newTask.getId());
     }
 
-    @Then("the task is created and the status is assigned")
+    @Then("the created task has a status assigned")
     public void taskIsCreatedAndAssigned() throws Exception {
         final CloudTask assignedTask = taskRuntimeBundleSteps.getTaskById(newTask.getId());
         assertThat(assignedTask).isNotNull();
@@ -296,7 +296,7 @@ public class Tasks {
         auditSteps.checkTaskUpdatedEvent(newTask.getId());
     }
 
-    @Then("the user will see only root tasks when quering for root tasks")
+    @Then("the user will get only root tasks when quering for root tasks")
     public void checkRootTasks(){
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
         Collection <CloudTask> rootTasksCollection = taskQuerySteps.getRootTasksByProcessInstance(processInstanceId).getContent();
@@ -309,7 +309,7 @@ public class Tasks {
         );
     }
 
-    @Then("the user will see only standalone tasks when quering for standalone tasks")
+    @Then("the user will get only standalone tasks when quering for standalone tasks")
     public void checkStandaloneTasks(){
         Collection <CloudTask> standaloneTasksCollection = taskQuerySteps.getStandaloneTasks().getContent();
 

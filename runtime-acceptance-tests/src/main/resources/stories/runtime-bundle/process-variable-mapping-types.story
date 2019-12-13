@@ -1,6 +1,5 @@
 Meta:
 
-
 Narrative:
 As a user
 I want to perform operations on process instance variables
@@ -20,3 +19,10 @@ When the user ask to claim the task
 When update task variables
 And the user ask to complete the task
 Then variables have correct values in process
+
+Scenario: variables mapping for the process start event
+Given the user is authenticated as hruser
+When the user starts the process with variables mapping on start event
+Then process variables are properly mapped on start event
+And process variables are properly mapped to the task variables
+And the user may complete the task
