@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.config;
 
-import graphql.GraphQL;
-import graphql.schema.GraphQLSchema;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerMessageHandler;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerSubProtocolHandler;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSubscriptionExecutor;
@@ -42,6 +40,9 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
+import graphql.GraphQL;
+import graphql.schema.GraphQLSchema;
+
 @Configuration
 @ConditionalOnWebApplication
 @ConditionalOnClass({GraphQL.class, EnableWebSocketMessageBroker.class})
@@ -62,15 +63,7 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
          */
         @Override
         public void configureMessageBroker(MessageBrokerRegistry registry) {
-            registry
-                    .enableStompBrokerRelay()
-                    .setRelayHost(configurationProperties.getRelayHost())
-                    .setRelayPort(configurationProperties.getRelayPort())
-                    .setClientLogin(configurationProperties.getClientLogin())
-                    .setClientPasscode(configurationProperties.getClientPasscode())
-                    .setSystemLogin(configurationProperties.getSystemLogin())
-                    .setSystemPasscode(configurationProperties.getSystemPasscode())
-            ;
+            registry.enableSimpleBroker();
         }
 
         @Override
