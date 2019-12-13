@@ -49,12 +49,8 @@ public class HeadersConnector {
                     condition = "headers['processDefinitionVersion']!=null")
     public void receiveHeadersConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
         
-        Map<String, Object> result = new HashMap<>();
-
-        result.put("processDefinitionVersion",headers.get("processDefinitionVersion"));
-        result.put("processDefinitionKey",headers.get("processDefinitionKey"));
-        result.put("processDefinitionId",headers.get("processDefinitionId"));
-
+        Map<String, Object> result = new HashMap<>(headers);
+        
         Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(integrationRequest, connectorProperties)
                 .withOutboundVariables(result)
                 .buildMessage();
