@@ -31,17 +31,22 @@ Then the exported project contains the process model landing-rover with process 
 Scenario: export an invalid project
 Given the user is authenticated as modeler
 And an project 'mission-europe' with process model 'landing-rover-not-executable'
-Then the project cannot be exported due to validation errors
+Then the project can be exported due to validation errors
 
-Scenario: export an invalid project containing user task with no assignee
+Scenario: the project should contain validation errors
+Given the user is authenticated as modeler
+And an project 'mission-europe' with process model 'landing-rover-not-executable'
+Then the project should contain validation errors
+
+Scenario: validate an invalid project containing user task with no assignee
 Given the user is authenticated as modeler
 And an project 'mission-europe' with process model 'spacex-usertask-with-no-assignee'
-Then the project cannot be exported due to validation errors with message "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task"
+Then the project should have validation errors with message "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task"
 
-Scenario: export an invalid project containing service task with invalid implementation
+Scenario: validate an invalid project containing service task with invalid implementation
 Given the user is authenticated as modeler
 And an project 'mission-europe' with process model 'spacex-service-task-with-invalid-implementation'
-Then the project cannot be exported due to validation errors with message "Invalid service implementation on service 'ServiceTask_1qr4ad0'"
+Then the project should have validation errors with message "Invalid service implementation on service 'ServiceTask_1qr4ad0'"
 
 Scenario: get project filtering by name
 Given the user is authenticated as modeler

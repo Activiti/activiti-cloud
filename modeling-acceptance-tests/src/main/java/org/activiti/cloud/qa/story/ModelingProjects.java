@@ -191,13 +191,23 @@ public class ModelingProjects {
                 processVariables);
     }
 
-    @Then("the project cannot be exported due to validation errors")
-    public void checkCurrentProjectExportFailsOnValidation() throws IOException {
-        modelingProjectsSteps.checkCurrentProjectExportFails("Validation errors found in project's models");
+    @Then("the project can be exported due to validation errors")
+    public void checkCurrentProjectExportNotFailsOnValidation() throws IOException {
+        modelingProjectsSteps.checkCurrentProjectExportNotFail("Validation errors found in project's models");
     }
 
-    @Then("the project cannot be exported due to validation errors with message $errorMessage")
+    @When("the user validate the project")
+    public void validateProject() throws IOException {
+        modelingProjectsSteps.checkCurrentProjectValidate();
+    }
+
+    @Then("the project should contain validation errors")
+    public void checkCurrentProjectExportFailsOnValidation() throws IOException {
+        modelingProjectsSteps.checkCurrentProjectValidationFails("Validation errors found in project's models");
+    }
+
+    @Then("the project should have validation errors with message $errorMessage")
     public void checkCurrentProjectExportFailsOnValidation(String errorMessage) throws IOException {
-        modelingProjectsSteps.checkCurrentProjectExportFails(errorMessage);
+        modelingProjectsSteps.checkCurrentProjectValidationFails(errorMessage);
     }
 }
