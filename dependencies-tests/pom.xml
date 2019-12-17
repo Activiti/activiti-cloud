@@ -17,7 +17,7 @@
     <enforceFail>true</enforceFail>
     <example-runtime-bundle.version>7.1.316</example-runtime-bundle.version>
     <example-cloud-connector.version>7.1.265</example-cloud-connector.version>
-    <activiti-cloud-audit.version>7.1.254</activiti-cloud-audit.version>
+    <activiti-cloud-audit.version>7.1.255</activiti-cloud-audit.version>
     <activiti-cloud-query.version>7.1.266</activiti-cloud-query.version>
     <activiti-cloud-notifications-graphql.version>7.1.288</activiti-cloud-notifications-graphql.version>
   </properties>
