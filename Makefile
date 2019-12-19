@@ -55,7 +55,7 @@ update-ea:
 	@cd alfresco-process-parent && curl --request POST --header "PRIVATE-TOKEN: $(GITLAB_TOKEN)" --header "Content-Type: application/json" -d '{"id": ${ID} ,"source_branch": "update-cloud-to-${ACTIVITI_CLOUD_VERSION}-${MODELING_DEPENDENCIES_VERSION}" ,"target_branch":"develop","title":"community propagation ACTIVITI_CLOUD_VERSION to ${ACTIVITI_CLOUD_VERSION} MODELING_DEPENDENCIES_VERSION to ${MODELING_DEPENDENCIES_VERSION}"}' https://git.alfresco.com/api/v4/projects/1031/merge_requests
 
 updatebot/push-version:
-	updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(VERSION) --merge false
+	updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(VERSION) org.activiti.cloud.dependencies:activiti-cloud-modeling-dependencies $(MODELING_DEPENDENCIES_VERSION) --merge false
 	updatebot push-version --kind helm $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
 
 updatebot/push-version-dry:
