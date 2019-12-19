@@ -19,8 +19,8 @@
   <properties>
     <activiti-cloud-build.version>7.1.12</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
-    <activiti-core-common.version>7.1.146</activiti-core-common.version>
-    <activiti-cloud-api.version>7.1.70</activiti-cloud-api.version>
+    <activiti-core-common.version>7.1.147</activiti-core-common.version>
+    <activiti-cloud-api.version>7.1.71</activiti-cloud-api.version>
     <!-- dependencies -->
     <awaitility.version>3.0.0</awaitility.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
