@@ -43,7 +43,7 @@
   </repositories>
   <properties>
     <activiti-cloud-modeling-build.version>7.1.5</activiti-cloud-modeling-build.version>
-    <activiti-dependencies.version>7.1.146</activiti-dependencies.version>
+    <activiti-dependencies.version>7.1.147</activiti-dependencies.version>
     <activiti-cloud-service-common.version>7.1.111</activiti-cloud-service-common.version>
     <activiti-cloud-acceptance-tests.version>7.1.117</activiti-cloud-acceptance-tests.version>
     <activiti-cloud-org-service.version>${project.version}</activiti-cloud-org-service.version>
