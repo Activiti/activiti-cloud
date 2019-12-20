@@ -156,7 +156,6 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Override
     public FileContent exportProject(Project project) throws IOException {
-        validateProject(project);
 
         ZipBuilder zipBuilder = new ZipBuilder(project.getName())
                 .appendFile(jsonConverter.convertToJsonBytes(project), toJsonFilename(project.getName()));

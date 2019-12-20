@@ -134,11 +134,25 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     }
 
     @Step
-    public void checkCurrentProjectExportFails(String errorMessage) throws IOException {
+    public void checkCurrentProjectValidate() throws IOException {
+        Response response = validateCurrentProject();
+        assertThat(response.status()).isEqualTo(SC_OK);
+        modelingContextHandler.setCurrentModelingFile(toFileContent(response));
+    }
+
+    @Step
+    public void checkCurrentProjectExportNotFail(String errorMessage) throws IOException {
         Response response = exportCurrentProject();
+        assertThat(response.status()).isEqualTo(SC_OK);
+        modelingContextHandler.setCurrentModelingFile(toFileContent(response));
+    }
+
+    @Step
+    public void checkCurrentProjectValidationFails(String errorMessage) throws IOException {
+        Response response = validateCurrentProject();
         assertThat(response.status()).isEqualTo(SC_BAD_REQUEST);
         assertThat(IOUtils.toString(response.body().asInputStream(),
-                                    StandardCharsets.UTF_8)).contains(errorMessage);
+                StandardCharsets.UTF_8)).contains(errorMessage);
     }
 
     private Response exportCurrentProject() {
@@ -146,6 +160,14 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
         Link exportLink = currentProject.getLink("export");
         assertThat(exportLink).isNotNull();
         return modelingProjectService.exportProjectByUri(modelingUri(exportLink.getHref()));
+    }
+
+    private Response validateCurrentProject() {
+        Resource<Project> currentProject = checkAndGetCurrentContext(Project.class);
+        Link exportLink = currentProject.getLink("export");
+        String validateLink = exportLink.getHref().replace("/export","/validate");
+        assertThat(validateLink).isNotNull();
+        return modelingProjectService.validateProjectByUri(modelingUri(validateLink));
     }
 
     @Step

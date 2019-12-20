@@ -357,7 +357,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_throwBadRequestException_when_exportingProjectWithValidationErrors() throws Exception {
+    public void should_throwBadRequestException_when_validatingProjectWithValidationErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository
                 .createProject(project("project-with-models"));
 
@@ -370,7 +370,7 @@ public class ProjectControllerIT {
                               new ModelValidationError());
 
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/export",
+                get("{version}/projects/{projectId}/validate",
                     API_VERSION,
                     project.getId()))
                 .andDo(print())
@@ -379,12 +379,12 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_exportingEmptyProjectWithValidationErrors() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingEmptyProjectWithValidationErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository
                 .createProject(project("project-without-process"));
 
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/export",
+                get("{version}/projects/{projectId}/validate",
                     API_VERSION,
                     project.getId()))
                 .andDo(print())
@@ -397,27 +397,6 @@ public class ProjectControllerIT {
                             ModelValidationError::getDescription)
                 .containsOnly(tuple("Invalid project",
                                     "Project must contain at least one process"));
-    }
-
-    @Test
-    public void should_throwSemanticModelValidationException_when_validatingEmptyProjectWithValidationErrors() throws Exception {
-        ProjectEntity project = (ProjectEntity) projectRepository
-                .createProject(project("project-without-process"));
-
-        MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/validate",
-                        API_VERSION,
-                        project.getId()))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
-                .hasSize(1)
-                .extracting(ModelValidationError::getProblem,
-                        ModelValidationError::getDescription)
-                .containsOnly(tuple("Invalid project",
-                        "Project must contain at least one process"));
     }
 
     @Test
@@ -451,7 +430,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_exportingProjectWithNoAssigneeShouldReturnErrors() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeShouldReturnErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
         modelService.importSingleModel(project,
                                  processModelType,
@@ -459,7 +438,7 @@ public class ProjectControllerIT {
                                                     resourceAsByteArray("process/no-assignee.bpmn20.xml")));
 
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/export",
+                get("{version}/projects/{projectId}/validate",
                     API_VERSION,
                     project.getId()))
                 .andExpect(status().isBadRequest())
@@ -486,7 +465,7 @@ public class ProjectControllerIT {
                                                    "invalid-connector-action",
                                                    resourceAsByteArray("connector/invalid-connector-action.json")));
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/export",
+                get("{version}/projects/{projectId}/validate",
                     API_VERSION,
                     project.getId()))
                 .andExpect(status().isBadRequest())
@@ -502,7 +481,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_exportingProjectWithServiceTaskEmptyImplementationReturnErrors() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithServiceTaskEmptyImplementationReturnErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-invalid-task"));
         modelRepository.createModel(processModelWithContent(project,
                                                             "invalid-connector-action",
@@ -512,7 +491,7 @@ public class ProjectControllerIT {
                                                    "invalid-connector-action",
                                                    resourceAsByteArray("connector/invalid-connector-action.json")));
         MvcResult response = mockMvc.perform(
-                get("{version}/projects/{projectId}/export",
+                get("{version}/projects/{projectId}/validate",
                     API_VERSION,
                     project.getId()))
                 .andExpect(status().isBadRequest())
@@ -531,7 +510,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_exportingProjectWithProcessExtensionsForUnknownTask() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownTask() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -546,7 +525,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/export",
+                        get("{version}/projects/{projectId}/validate",
                             API_VERSION,
                             project.getId()))
                         .andExpect(status().isBadRequest())
@@ -558,7 +537,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_exportingProjectWithProcessExtensionsForUnknownOutputProcessVariableMapping() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownOutputProcessVariableMapping() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -573,7 +552,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/export",
+                        get("{version}/projects/{projectId}/validate",
                             API_VERSION,
                             project.getId()))
                         .andExpect(status().isBadRequest())
@@ -585,7 +564,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_exportingProjectWithProcessExtensionsForConnectorWithoutInputsOutputs() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForConnectorWithoutInputsOutputs() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -600,7 +579,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/export",
+                        get("{version}/projects/{projectId}/validate",
                             API_VERSION,
                             project.getId()))
                         .andExpect(status().isBadRequest())
@@ -614,7 +593,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_exportingProjectWithProcessExtensionsForUnknownConnectorParameterMapping() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownConnectorParameterMapping() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -629,7 +608,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/export",
+                        get("{version}/projects/{projectId}/validate",
                             API_VERSION,
                             project.getId()))
                         .andExpect(status().isBadRequest())
@@ -643,7 +622,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_exportingProjectWithProcessExtensionsForUnknownInputProcessVariableMapping() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownInputProcessVariableMapping() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -658,7 +637,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/export",
+                        get("{version}/projects/{projectId}/validate",
                             API_VERSION,
                             project.getId()))
                         .andExpect(status().isBadRequest())
@@ -670,7 +649,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_exportingProjectWithInvalidCallActivityReference() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithInvalidCallActivityReference() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-call-activiti"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
@@ -691,7 +670,7 @@ public class ProjectControllerIT {
 
         assertThatResponse(
                 mockMvc.perform(
-                        get("{version}/projects/{projectId}/export",
+                        get("{version}/projects/{projectId}/validate",
                             API_VERSION,
                             project.getId()))
                         .andExpect(status().isBadRequest())
