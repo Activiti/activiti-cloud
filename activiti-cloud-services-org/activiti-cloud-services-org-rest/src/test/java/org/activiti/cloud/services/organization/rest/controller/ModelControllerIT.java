@@ -619,7 +619,7 @@ public class ModelControllerIT {
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: String, found: Integer",
-                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: String, found: Integer"));
+                                       "Mismatch value type - stringVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is string"));
     }
 
     @Test
@@ -650,7 +650,7 @@ public class ModelControllerIT {
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: Number, found: String",
-                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: Number, found: String"));
+                                       "Mismatch value type - integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"));
     }
 
     @Test
@@ -681,7 +681,7 @@ public class ModelControllerIT {
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: Boolean, found: Integer",
-                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: Boolean, found: Integer"));
+                                       "Mismatch value type - booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is boolean"));
     }
 
     @Test
@@ -712,7 +712,7 @@ public class ModelControllerIT {
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
                 .containsExactly(tuple("expected type: JSONObject, found: Integer",
-                                       "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: JSONObject, found: Integer"));
+                                       "Mismatch value type - objectVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is json"));
     }
 
     @Test
@@ -744,9 +744,9 @@ public class ModelControllerIT {
                             ModelValidationError::getDescription)
                 .containsExactly(
                         tuple("expected type: String, found: Integer",
-                              "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c68/value: expected type: String, found: Integer"),
+                              "Mismatch value type - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is date"),
                         tuple("string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
-                              "#/extensions/properties/c297ec88-0ecf-4841-9b0f-2ae814957c64/value: string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$")
+                              "Invalid date - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68)")
                 );
     }
 
@@ -777,13 +777,15 @@ public class ModelControllerIT {
 
         assertThat(semanticModelValidationException.getValidationErrors())
             .extracting(ModelValidationError::getProblem, ModelValidationError::getDescription)
-            .containsExactly(
+            .containsExactlyInAnyOrder(
+                tuple("expected type: String, found: Integer",
+                        "Mismatch value type - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47k). Expected type is datetime"),
                 tuple("string [2019-12-06T00:60:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
-                    "#/extensions/properties/e0740a3a-fec4-4ee5-bece-61f39df2a47g/value: string [2019-12-06T00:60:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$"),
+                    "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47g)"),
                 tuple("string [2019-12-06T00:00:60] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
-                    "#/extensions/properties/e0740a3a-fec4-4ee5-bece-61f39df2a47f/value: string [2019-12-06T00:00:60] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$"),
+                    "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47f)"),
                 tuple("string [2019-12-06T24:00:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
-                    "#/extensions/properties/e0740a3a-fec4-4ee5-bece-61f39df2a47e/value: string [2019-12-06T24:00:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$")
+                    "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47e)")
             );
     }
 

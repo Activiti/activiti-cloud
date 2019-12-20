@@ -84,7 +84,11 @@
             "properties": {
               "value": {
                 "type": "string",
-                "pattern": "^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$"
+                "pattern": "^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
+                "message": {
+                  "pattern": "Invalid date - {{name}}({{id}})",
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is date"
+                }
               }
             }
           }
@@ -101,7 +105,11 @@
             "properties": {
               "value": {
                 "type": "string",
-                "pattern": "^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$"
+                "pattern": "^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                "message": {
+                  "pattern": "Invalid datetime - {{name}}({{id}})",
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is datetime"
+                }
               }
             }
           }
@@ -117,7 +125,11 @@
           "then": {
             "properties": {
               "value": {
-                "type": "string"
+                "type": "string",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is string"
+                }
+
               }
             }
           }
@@ -133,7 +145,10 @@
           "then": {
             "properties": {
               "value": {
-                "type": "integer"
+                "type": "integer",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is integer"
+                }
               }
             }
           }
@@ -149,7 +164,10 @@
           "then": {
             "properties": {
               "value": {
-                "type": "boolean"
+                "type": "boolean",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is boolean"
+                }
               }
             }
           }
@@ -165,7 +183,10 @@
           "then": {
             "properties": {
               "value": {
-                "type": "object"
+                "type": "object",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is json"
+                }
               }
             }
           }
@@ -181,7 +202,10 @@
           "then": {
             "properties": {
               "value": {
-                "type": "object"
+                "type": "object",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is file"
+                }
               }
             }
           }
