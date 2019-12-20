@@ -94,8 +94,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Page<Project> getProjects(Pageable pageable,
                                      String name) {
+        String projectName = name != null ? name.toLowerCase() : null;
         return projectRepository.getProjects(pageable,
-                name);
+                projectName);
     }
 
     /**

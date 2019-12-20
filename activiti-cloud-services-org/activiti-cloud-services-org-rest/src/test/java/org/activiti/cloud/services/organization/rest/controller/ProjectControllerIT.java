@@ -169,6 +169,25 @@ public class ProjectControllerIT {
     }
 
     @Test
+    public void should_returnProjectsContainingTheName_when_gettingProjectsFilteredByInsensitiveContainingName() throws Exception {
+
+        projectRepository.createProject(project("project-main-1"));
+        projectRepository.createProject(project("project-main-2"));
+        projectRepository.createProject(project("project-secondary-2"));
+
+        mockMvc.perform(get("{version}/projects?name=MAIN", 
+                RepositoryRestConfig.API_VERSION))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.projects",
+                        hasSize(2)))
+                .andExpect(jsonPath("$._embedded.projects[0].name",
+                        is("project-main-1")))
+                .andExpect(jsonPath("$._embedded.projects[1].name",
+                        is("project-main-2")));
+    }
+
+    @Test
     public void should_returnProject_when_gettingExistingProject() throws Exception {
         Project project = projectRepository.createProject(project("existing-project"));
 
