@@ -229,7 +229,7 @@
           ]
         },
         "value": {
-          "type": "string"
+          "type": ["string", "number", "integer", "boolean", "object", "array"]
         }
       },
       "dependencies": {
@@ -239,7 +239,25 @@
         "value": [
           "type"
         ]
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "variable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
     },
     "constants": {
       "type": "object",

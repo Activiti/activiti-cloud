@@ -18,6 +18,7 @@ package org.activiti.cloud.services.organization.validation.extensions;
 
 import static java.lang.String.format;
 import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
+import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.OUTPUTS;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import org.activiti.bpmn.model.FlowNode;
@@ -29,6 +30,7 @@ import org.activiti.cloud.organization.api.ValidationContext;
 import org.activiti.cloud.organization.api.process.Constant;
 import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
 import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
+import org.activiti.cloud.organization.api.process.VariableMappingType;
 import org.activiti.cloud.services.organization.converter.ConnectorActionParameter;
 import org.activiti.cloud.services.organization.converter.ConnectorModelAction;
 import org.activiti.cloud.services.organization.converter.ConnectorModelContentConverter;
@@ -94,25 +96,29 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                                                                 ProcessVariableMapping processVariableMapping,
                                                                 Map<String, ConnectorModelAction> availableConnectorActions) {
 
-        String connectorParameterName = actionType == INPUTS ? processVariableMappingKey : processVariableMapping.getValue();
-        return getTaskImplementation(task)
-                .map(availableConnectorActions::get)
-                .flatMap(action -> Optional.ofNullable(actionType == INPUTS ? action.getInputs() : action.getOutputs())
-                        .map(Arrays::stream)
-                        .orElseGet(Stream::empty)
-                        .map(ConnectorActionParameter::getName)
-                        .filter(parameter -> parameter.equals(connectorParameterName))
-                        .findFirst()
-                        .map(parameter -> Optional.<ModelValidationError>empty())
-                        .orElseGet(() -> Optional.of(createModelValidationError(
-                                format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_PROBLEM,
-                                       actionType.name().toLowerCase(),
-                                       connectorParameterName),
-                                format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_DESCRIPTION,
-                                       processId,
-                                       task.getId(),
-                                       actionType.name().toLowerCase(),
-                                       connectorParameterName)))));
+        if(actionType == OUTPUTS && processVariableMapping.getType() == VariableMappingType.VALUE) {
+            return Optional.<ModelValidationError>empty();
+        }else {
+            Object connectorParameterName = actionType == INPUTS ? processVariableMappingKey : processVariableMapping.getValue();
+            return getTaskImplementation(task)
+                    .map(availableConnectorActions::get)
+                    .flatMap(action -> Optional.ofNullable(actionType == INPUTS ? action.getInputs() : action.getOutputs())
+                            .map(Arrays::stream)
+                            .orElseGet(Stream::empty)
+                            .map(ConnectorActionParameter::getName)
+                            .filter(parameter -> parameter.equals(connectorParameterName))
+                            .findFirst()
+                            .map(parameter -> Optional.<ModelValidationError>empty())
+                            .orElseGet(() -> Optional.of(createModelValidationError(
+                                    format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_PROBLEM,
+                                           actionType.name().toLowerCase(),
+                                           connectorParameterName),
+                                    format(UNKNOWN_CONNECTOR_PARAMETER_VALIDATION_ERROR_DESCRIPTION,
+                                           processId,
+                                           task.getId(),
+                                           actionType.name().toLowerCase(),
+                                           connectorParameterName)))));
+        }
     }
 
     private Optional<String> getTaskImplementation(FlowNode task) {

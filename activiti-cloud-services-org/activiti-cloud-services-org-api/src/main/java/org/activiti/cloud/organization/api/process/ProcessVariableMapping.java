@@ -30,7 +30,7 @@ public class ProcessVariableMapping {
 
     private VariableMappingType type;
 
-    private String value;
+    private Object value;
 
     public VariableMappingType getType() {
         return type;
@@ -40,11 +40,11 @@ public class ProcessVariableMapping {
         this.type = type;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 }

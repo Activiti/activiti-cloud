@@ -77,7 +77,7 @@ public class ProcessExtensionsProcessVariablesValidator implements ProcessExtens
                                                                           ProcessVariableMapping processVariableMapping,
                                                                           String processId,
                                                                           Set<String> availableProcessVariables) {
-        String variableName = action == INPUTS ? processVariableMapping.getValue() : processVariableMappingKey;
+        Object variableName = action == INPUTS ? processVariableMapping.getValue() : processVariableMappingKey;
         return processVariableMapping.getType() == VARIABLE &&
                 !availableProcessVariables.contains(variableName) ?
                 Optional.of(createModelValidationError(

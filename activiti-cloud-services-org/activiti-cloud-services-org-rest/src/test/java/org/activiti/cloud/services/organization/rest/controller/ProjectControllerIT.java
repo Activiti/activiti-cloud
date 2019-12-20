@@ -800,5 +800,25 @@ public class ProjectControllerIT {
                 .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
                                                                                    is("application-xy")));
     }
+    
+    @Test
+    public void should_returnStatusOK_when_exportingProjectWithProcessExtensionsWithValueOutputProcessVariableMapping() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
+        Model processModel = modelService.importSingleModel(project,
+                                                            processModelType,
+                                                            processFileContent("RankMovie",
+                                                                               resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        modelRepository.updateModel(processModel,
+                                    processModelWithExtensions("process-model",
+                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-value-output-process-variable.json"))));
+        modelRepository.createModel(connectorModel(project,
+                                                   "movies",
+                                                   resourceAsByteArray("connector/movies.json")));
+
+        mockMvc.perform(get("{version}/projects/{projectId}/export",
+                            API_VERSION,
+                            project.getId()))
+                .andExpect(status().isOk());
+    }
 
 }
