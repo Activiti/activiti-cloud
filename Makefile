@@ -8,6 +8,7 @@ ACTIVITI_CLOUD_MODELING :=7.1.548
 MODELING_DEPENDENCIES_VERSION := 7.1.310
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.101
 
+
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
 
 ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(ACTIVITI_CLOUD_RB_VERSION) activiti-cloud-connector $(ACTIVITI_CLOUD_CONNECTORS_VERSION) \
@@ -149,7 +150,7 @@ git-rev-list:
 	$(eval REV_TAG = $(shell git describe ${PREVIOUS_REV}))
 	$(eval PREVIOUS_REV_TAG = $(shell git describe ${REV}))
 	@echo Found commits between $(PREVIOUS_REV_TAG) and $(REV_TAG) tags:
-	git rev-list $(PREVIOUS_REV)..$(REV) --first-parent --pretty
+	git rev-list $(PREVIOUS_REV)..$(REV) --format=%B |grep -v ^commit
 
 changelog: git-rev-list
 	@echo Creating Github changelog for release: $(HELM_ACTIVITI_VERSION)
