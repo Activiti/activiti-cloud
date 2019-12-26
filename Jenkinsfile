@@ -24,6 +24,7 @@ pipeline {
         }
         steps {
           container('maven') {
+            sh "touch VERSION"  
             sh "export CHANGE_LOG=\$(make git-rev-list)" 
             sh "echo   \$CHANGE_LOG"
             //slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls \$CHANGE_LOG" , sendAsText: true)
@@ -36,10 +37,6 @@ pipeline {
             sh "make prepare-helm-chart"
             sh "make run-helm-chart"
             sh "make acc-tests"
-            ///test need to remove later  
-            sh "export CHANGE_LOG=\$(make git-rev-list)" 
-            slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls \$CHANGE_LOG" , sendAsText: true)
-  
           }
         }
       }
