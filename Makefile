@@ -146,13 +146,9 @@ RELEASE_GREP_EXPR := '^[Rr]elease'
 
 git-rev-list:
 	$(eval REV = $(shell git rev-list --tags --max-count=1 --grep $(RELEASE_GREP_EXPR)))
-	$(eval PREVIOUS_REV = $(shell git rev-list --tags --max-count=1 --skip=1 --grep $(RELEASE_GREP_EXPR)))
-	#$(eval REV_TAG = $(shell git describe ${PREVIOUS_REV}))
-	#$(eval PREVIOUS_REV_TAG = $(shell git describe ${REV}))
-	#@echo Found commits between $(PREVIOUS_REV_TAG) and $(REV_TAG) tags:
-	@echo "$(eval DIFF = $( shell git rev-list $(PREVIOUS_REV)..$(REV) --format=%B |grep -v ^commit))"
-	$(eval DIFF = $( shell git rev-list $(PREVIOUS_REV)..$(REV) --format=%B |grep -v ^commit))
-	@echo $(DIFF)
+	$(eval PREVIOUS_REV = $(shell git rev-list --tags --max-count=1 --skip=1 --grep $(RELEASE_GREP_EXPR)))		
+	$(eval DIFF_MSG = $(shell git rev-list $(PREVIOUS_REV)..$(REV) --format=%B |grep -v ^commit))
+	@echo $(DIFF_MSG)
 
 changelog: git-rev-list
 	@echo Creating Github changelog for release: $(HELM_ACTIVITI_VERSION)
