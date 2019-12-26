@@ -12,6 +12,7 @@ pipeline {
       GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
+      CHANGE_LOG=""  
       //GITLAB_TOKEN = credentials('GITLAB_TOKEN')
 
 
@@ -31,6 +32,10 @@ pipeline {
             sh "make prepare-helm-chart"
             sh "make run-helm-chart"
             sh "make acc-tests"
+            ///test need to remove later  
+            sh "export CHANGE_LOG=$(make git-rev-list)" 
+            slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls $CHANGE_LOG" , sendAsText: true)
+  
           }
         }
       }
@@ -75,7 +80,8 @@ pipeline {
                 sh "make updatebot/push-version"
             }
 //            sh "make update-ea"
-            slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls", sendAsText: true)
+            sh "export CHANGE_LOG=$(make git-rev-list)" 
+            slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls $CHANGE_LOG" , sendAsText: true)
 
           }
         }
