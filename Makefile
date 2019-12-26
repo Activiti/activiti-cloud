@@ -139,3 +139,18 @@ run-helm-chart:
             		--wait
 delete:
 	helm delete --purge ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
+	
+
+RELEASE_GREP_EXPR := '^[Rr]elease'
+
+git-rev-list:
+	$(eval REV = $(shell git rev-list --tags --max-count=1 --grep $(RELEASE_GREP_EXPR)))
+	$(eval PREVIOUS_REV = $(shell git rev-list --tags --max-count=1 --skip=1 --grep $(RELEASE_GREP_EXPR)))
+	$(eval REV_TAG = $(shell git describe ${PREVIOUS_REV}))
+	$(eval PREVIOUS_REV_TAG = $(shell git describe ${REV}))
+	@echo Found commits between $(PREVIOUS_REV_TAG) and $(REV_TAG) tags:
+	git rev-list $(PREVIOUS_REV)..$(REV) --first-parent --pretty
+
+changelog: git-rev-list
+	@echo Creating Github changelog for release: $(HELM_ACTIVITI_VERSION)
+	jx step changelog --version v$(HELM_ACTIVITI_VERSION) --generate-yaml=false --rev=$(REV) --previous-rev=$(PREVIOUS_REV)
