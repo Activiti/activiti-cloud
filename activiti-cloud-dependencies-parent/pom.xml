@@ -29,7 +29,6 @@
   <properties>
     <spring-boot.version>2.1.10.RELEASE</spring-boot.version>
     <spring-cloud.version>Greenwich.SR3</spring-cloud.version>
-    <spring-cloud-k8s.version>1.0.2.RELEASE</spring-cloud-k8s.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -44,13 +43,6 @@
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
         <version>${spring-cloud.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-kubernetes-dependencies</artifactId>
-        <version>${spring-cloud-k8s.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

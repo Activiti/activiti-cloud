@@ -23,12 +23,6 @@ github:
     - name: activiti-cloud-api
       branch: develop
       useSinglePullRequest: true
-#     - name: activiti-cloud-process-model-service
-#       branch: develop
-#       useSinglePullRequest: true
-#     - name: activiti-cloud-app-service
-#       branch: develop
-#       useSinglePullRequest: true
     - name: activiti-cloud-notifications-service-graphql
       branch: develop
       useSinglePullRequest: true
