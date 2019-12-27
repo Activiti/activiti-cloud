@@ -145,9 +145,11 @@ delete:
 RELEASE_GREP_EXPR := '^[Rr]elease'
 
 git-rev-list:
-	pwd
 	$(eval REV = $(shell git rev-list --tags --max-count=1 --grep $(RELEASE_GREP_EXPR)))
+	git rev-list --tags --max-count=1 --grep $(RELEASE_GREP_EXPR)
 	$(eval PREVIOUS_REV = $(shell git rev-list --tags --max-count=1 --skip=1 --grep $(RELEASE_GREP_EXPR)))
+	git rev-list --tags --max-count=1 --skip=1 --grep $(RELEASE_GREP_EXPR)
+	
 	git rev-list --format=%B $(PREVIOUS_REV)..$(REV) 
 	
 
