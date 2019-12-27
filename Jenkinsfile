@@ -14,8 +14,6 @@ pipeline {
       GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
       CHANGE_LOG=""  
       //GITLAB_TOKEN = credentials('GITLAB_TOKEN')
-
-
     }
     stages {
       stage('CI Build and push snapshot') {
@@ -33,11 +31,11 @@ pipeline {
             //sh "export CHANGE_LOG=\$(make git-rev-list)" 
             
             
-            GIT_COMMIT_EMAIL = sh (
+            def GIT_COMMIT_DETAILS = sh (
                 script: 'make git-rev-list',
                 returnStdout: true
             ).trim()
-            echo "CHANGE_LOG=${CHANGE_LOG}"
+            println GIT_COMMIT_DETAILS
               
             //slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls \$CHANGE_LOG" , sendAsText: true)
             sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
