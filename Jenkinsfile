@@ -27,7 +27,7 @@ pipeline {
             sh "git config --global credential.helper store"
             sh "jx step git credentials"  
             sh "touch VERSION"
-            sh "yum instll -y git"
+            sh "yum install -y git"
               
             sh "export CHANGE_LOG=\$(make git-rev-list)" 
             sh "echo   \$CHANGE_LOG"
