@@ -23,14 +23,15 @@ pipeline {
           branch 'PR-*'
         }
         steps {
-          container('maven') {
-            sh "touch VERSION"  
+          container('maven') {                   
+            sh "git config --global credential.helper store"
+            sh "jx step git credentials"  
+            sh "touch VERSION"
+            sh "yum instll -y git"
+              
             sh "export CHANGE_LOG=\$(make git-rev-list)" 
             sh "echo   \$CHANGE_LOG"
             //slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls \$CHANGE_LOG" , sendAsText: true)
-       
-            sh "git config --global credential.helper store"
-            sh "jx step git credentials"
             sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
             sh "mvn install"
             sh "make updatebot/push-version-dry"
