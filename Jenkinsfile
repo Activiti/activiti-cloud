@@ -23,9 +23,6 @@ pipeline {
           container('maven') {                   
             sh "git config --global credential.helper store"
             sh "jx step git credentials"  
-            sh "touch VERSION"
-            //sh "yum install -y git"
-            sh "git fetch --tags"                            
             sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
             sh "mvn install"
             sh "make updatebot/push-version-dry"
