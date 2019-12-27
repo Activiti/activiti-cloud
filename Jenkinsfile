@@ -83,7 +83,7 @@ pipeline {
             }
 //            sh "make update-ea"
             sh "export CHANGE_LOG=\$(make git-rev-list)" 
-            slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls \$CHANGE_LOG" , sendAsText: true)
+            slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls $CHANGE_LOG" , sendAsText: true)
 
           }
         }
