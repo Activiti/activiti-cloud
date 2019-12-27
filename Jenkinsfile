@@ -106,7 +106,7 @@ pipeline {
            slackSend(
              channel: "#activiti-community-builds",
              color: "danger",
-             message: "activiti-cloud-service-common branch=$BRANCH_NAME is failed http://jenkins.jx.35.242.205.159.nip.io/job/Activiti/job/activiti-cloud-service-common"
+             message: "$BUILD_URL"
            )
         } 
         always {
