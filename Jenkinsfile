@@ -12,8 +12,7 @@ pipeline {
       GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
-      CHANGE_LOG=""  
-      //GITLAB_TOKEN = credentials('GITLAB_TOKEN')
+
     }
     stages {
       stage('CI Build and push snapshot') {
@@ -98,11 +97,18 @@ pipeline {
         }
         post {
             success {
+                
+              script {
+                def GIT_COMMIT_DETAILS = sh (
+                    script: 'make git-rev-list',
+                    returnStdout: true
+                ).trim()                                                 
               slackSend(
                 channel: "#activiti-community-builds",
                 color: "good",
-                message: "Activiti cloud dependencies successfully propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls"
+                message: "Activiti cloud dependencies successfully propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls \\n ${GIT_COMMIT_DETAILS}"
               )
+              }
             }
 
             failure {
