@@ -30,8 +30,15 @@ pipeline {
             //sh "yum install -y git"
             sh "git fetch --tags"  
               
-            sh "export CHANGE_LOG=\$(make git-rev-list)" 
-            sh "echo   \$CHANGE_LOG"
+            //sh "export CHANGE_LOG=\$(make git-rev-list)" 
+            
+            
+            GIT_COMMIT_EMAIL = sh (
+                script: 'make git-rev-list',
+                returnStdout: true
+            ).trim()
+            echo "CHANGE_LOG=${CHANGE_LOG}"
+              
             //slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls \$CHANGE_LOG" , sendAsText: true)
             sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
             sh "mvn install"
@@ -84,7 +91,7 @@ pipeline {
                 sh "make updatebot/push-version"
             }
 //            sh "make update-ea"
-            sh "export CHANGE_LOG=\$(make git-rev-list)" 
+           
             slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls $CHANGE_LOG" , sendAsText: true)
 
           }
@@ -152,5 +159,6 @@ def delete_deployment() {
    sh "kubectl delete namespace $PREVIEW_NAMESPACE|echo 'try to remove namespace '$PREVIEW_NAMESPACE "
   }
 }
+
 
 
