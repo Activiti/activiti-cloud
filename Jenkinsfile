@@ -23,21 +23,6 @@ pipeline {
           container('maven') {                   
             sh "git config --global credential.helper store"
             sh "jx step git credentials"  
-            sh "touch VERSION"
-            //sh "yum install -y git"
-            sh "git fetch --tags"  
-              
-            //sh "export CHANGE_LOG=\$(make git-rev-list)" 
-            
-            //script {
-            //    def GIT_COMMIT_DETAILS = sh (
-            //        script: 'make git-rev-list',
-            //        returnStdout: true
-            //    ).trim()                 
-            //    println GIT_COMMIT_DETAILS
-              
-            //slackSend(channel: "##activiti-community-builds", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
-            //}            
             sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
             sh "mvn install"
             sh "make updatebot/push-version-dry"
@@ -88,23 +73,18 @@ pipeline {
             retry(2){
                 sh "make updatebot/push-version"
             }
-          }
-        }
-        post {
-            success {
-                
-              script {
+            script {
                 def GIT_COMMIT_DETAILS = sh (
                     script: 'make git-rev-list',
                     returnStdout: true
-                ).trim()                                                 
-              slackSend(
-                channel: "#activiti-community-builds",
-                color: "good",
-                message: "Activiti cloud dependencies successfully propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls \\n ${GIT_COMMIT_DETAILS}"
-              )
-              }
-            }
+                ).trim()                 
+                println GIT_COMMIT_DETAILS
+              
+            slackSend(channel: "##activiti-community-builds", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
+            }              
+          }
+        }
+        post {
 
             failure {
               slackSend(
