@@ -12,8 +12,6 @@ pipeline {
       GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
       GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
-      //GITLAB_TOKEN = credentials('GITLAB_TOKEN')
-
 
     }
     stages {
@@ -22,9 +20,24 @@ pipeline {
           branch 'PR-*'
         }
         steps {
-          container('maven') {
+          container('maven') {                   
             sh "git config --global credential.helper store"
-            sh "jx step git credentials"
+            sh "jx step git credentials"  
+            sh "touch VERSION"
+            //sh "yum install -y git"
+            sh "git fetch --tags"  
+              
+            //sh "export CHANGE_LOG=\$(make git-rev-list)" 
+            
+            //script {
+            //    def GIT_COMMIT_DETAILS = sh (
+            //        script: 'make git-rev-list',
+            //        returnStdout: true
+            //    ).trim()                 
+            //    println GIT_COMMIT_DETAILS
+              
+            //slackSend(channel: "##activiti-community-builds", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
+            //}            
             sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
             sh "mvn install"
             sh "make updatebot/push-version-dry"
@@ -47,6 +60,7 @@ pipeline {
 
             sh "jx step git credentials"
             // so we can retrieve the version in later steps
+            sh "git fetch --tags"  
             sh "echo \$(jx-release-version) > VERSION"
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
             sh "mvn clean verify"
@@ -74,18 +88,22 @@ pipeline {
             retry(2){
                 sh "make updatebot/push-version"
             }
-//            sh "make update-ea"
-            slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls", sendAsText: true)
-
           }
         }
         post {
             success {
+                
+              script {
+                def GIT_COMMIT_DETAILS = sh (
+                    script: 'make git-rev-list',
+                    returnStdout: true
+                ).trim()                                                 
               slackSend(
                 channel: "#activiti-community-builds",
                 color: "good",
-                message: "Activiti cloud dependencies successfully propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls"
+                message: "Activiti cloud dependencies successfully propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls \\n ${GIT_COMMIT_DETAILS}"
               )
+              }
             }
 
             failure {
@@ -142,5 +160,6 @@ def delete_deployment() {
    sh "kubectl delete namespace $PREVIEW_NAMESPACE|echo 'try to remove namespace '$PREVIEW_NAMESPACE "
   }
 }
+
 
 
