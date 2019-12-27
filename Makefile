@@ -149,7 +149,7 @@ git-rev-list:
 	$(eval REV = $(shell git rev-list --tags --max-count=1 --grep $(RELEASE_GREP_EXPR)))
 	$(eval PREVIOUS_REV = $(shell git rev-list --tags --max-count=1 --skip=1 --grep $(RELEASE_GREP_EXPR)))
 	git --version
-	git rev-list $(PREVIOUS_REV)..$(REV) --format=%B --pretty
+	git rev-list --format=%B $(PREVIOUS_REV)..$(REV) 
 	
 
 changelog: git-rev-list
