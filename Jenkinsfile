@@ -36,9 +36,9 @@ pipeline {
                     returnStdout: true
                 ).trim()                 
                 println GIT_COMMIT_DETAILS
-              }
+              
             slackSend(channel: "##activiti-community-builds", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
-  
+            }
             //slackSend(channel: "#feature-teams-exp", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls \$CHANGE_LOG" , sendAsText: true)
             sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
             sh "mvn install"
