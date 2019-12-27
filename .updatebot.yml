@@ -2,6 +2,6 @@ github:
   organisations:
   - name: activiti
     repositories:
-    - name: activiti-cloud-modeling-dependencies
+    - name: activiti-cloud-dependencies
       branch: develop
-      useSinglePullRequest: true      
+      useSinglePullRequest: true

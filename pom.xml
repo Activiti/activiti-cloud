@@ -3,9 +3,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.activiti.cloud.modeling.build</groupId>
-    <artifactId>activiti-cloud-modeling-parent</artifactId>
-    <version>7.1.5</version>
+    <groupId>org.activiti.cloud.build</groupId>
+    <artifactId>activiti-cloud-parent</artifactId>
+    <version>7.1.13</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.modeling</groupId>
@@ -42,7 +42,7 @@
     </repository>
   </repositories>
   <properties>
-    <activiti-cloud-modeling-build.version>7.1.5</activiti-cloud-modeling-build.version>
+    <activiti-cloud-dependencies.version>7.1.13</activiti-cloud-dependencies.version>
     <activiti-dependencies.version>7.1.150</activiti-dependencies.version>
     <activiti-cloud-service-common.version>7.1.115</activiti-cloud-service-common.version>
     <activiti-cloud-acceptance-tests.version>7.1.123</activiti-cloud-acceptance-tests.version>
@@ -51,7 +51,6 @@
     <org.json.version>20180813</org.json.version>
     <org.apache.common.version>4.1</org.apache.common.version>
   </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -62,11 +61,11 @@
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>org.activiti.cloud.modeling.build</groupId>
-        <artifactId>activiti-cloud-modeling-dependencies-parent</artifactId>
-        <version>${activiti-cloud-modeling-build.version}</version>
+        <groupId>org.activiti.cloud.build</groupId>
+        <artifactId>activiti-cloud-dependencies-parent</artifactId>
+        <version>${activiti-cloud-dependencies.version}</version>
         <scope>import</scope>
-        <type>pom</type>       
+        <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.activiti.dependencies</groupId>
@@ -77,14 +76,7 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
   <dependencies>
-    <dependency>
-      <groupId>org.activiti.cloud.modeling.build</groupId>
-      <artifactId>activiti-cloud-modeling-parent</artifactId>
-      <version>${activiti-cloud-modeling-build.version}</version>
-      <type>pom</type>
-    </dependency>
     <dependency>
       <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-service-common-dependencies</artifactId>
@@ -92,13 +84,11 @@
       <type>pom</type>
     </dependency>
   </dependencies>
-  
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
         <configuration>
           <deployAtEnd>true</deployAtEnd>
         </configuration>
