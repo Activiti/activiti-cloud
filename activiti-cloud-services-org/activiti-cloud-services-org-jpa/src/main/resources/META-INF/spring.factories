@@ -1,3 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-	org.activiti.cloud.services.organization.entity.ObjectMapperJpaConfiguration,\
-	org.activiti.cloud.services.organization.jpa.config.OrganizationJpaAutoConfiguration

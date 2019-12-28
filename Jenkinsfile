@@ -4,7 +4,7 @@ pipeline {
     }
     environment {
       ORG               = 'activiti'
-      APP_NAME          = 'activiti-cloud-org-service'
+      APP_NAME          = 'activiti-cloud-modeling-service'
       CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
     }
     stages {
@@ -51,7 +51,7 @@ pipeline {
             sh 'export VERSION=`cat VERSION`'
 
             sh "jx step git credentials"
-            sh "updatebot push-version --kind maven org.activiti.cloud.modeling:activiti-cloud-org-dependencies \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies \$(cat VERSION)"
             sh "updatebot update --merge false"
           }
         }
@@ -87,7 +87,7 @@ pipeline {
             sh "echo pushing with update using version \$(cat VERSION)"
 
             //add updatebot configuration to push to downstream
-            sh "updatebot push-version --kind maven org.activiti.cloud.modeling:activiti-cloud-org-dependencies \$(cat VERSION)"
+            sh "updatebot push-version --kind maven org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies \$(cat VERSION)"
           }
         }
       }
@@ -97,7 +97,7 @@ pipeline {
            slackSend(
              channel: "#activiti-community-builds",
              color: "danger",
-             message: "activiti-cloud-org-service branch=$BRANCH_NAME is failed http://jenkins.jx.35.242.205.159.nip.io/job/Activiti/job/activiti-cloud-org-service"
+             message: "activiti-cloud-modeling-service branch=$BRANCH_NAME is failed http://jenkins.jx.35.242.205.159.nip.io/job/Activiti/job/activiti-cloud-modeling-service"
            )
         } 
         always {

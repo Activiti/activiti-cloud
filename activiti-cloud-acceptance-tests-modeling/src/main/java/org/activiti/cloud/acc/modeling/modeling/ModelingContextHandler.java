@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import net.serenitybdd.core.Serenity;
-import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.hateoas.Resource;
 

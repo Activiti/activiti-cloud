@@ -28,7 +28,7 @@ import org.activiti.cloud.acc.modeling.service.ModelingProjectsService;
 import org.activiti.cloud.acc.shared.rest.feign.FeignConfiguration;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.acc.shared.service.SwaggerService;
-import org.activiti.cloud.organization.api.impl.config.ObjectMapperConfiguration;
+import org.activiti.cloud.modeling.api.impl.config.ObjectMapperConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;

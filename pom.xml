@@ -9,44 +9,45 @@
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.modeling</groupId>
-  <artifactId>activiti-cloud-org-service-parent</artifactId>
+  <artifactId>activiti-cloud-modeling-service-parent</artifactId>
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>Activiti Cloud :: Organization Services :: Parent</name>
+  <name>Activiti Cloud :: Modeling Services :: Parent</name>
   <url>http://activiti.org</url>
   <modules>
     <module>dependencies-tests</module>
-    <module>activiti-cloud-org-dependencies</module>
-    <module>activiti-cloud-services-org</module>
-    <module>activiti-cloud-starter-org</module>
+    <module>activiti-cloud-modeling-dependencies</module>
+    <module>activiti-cloud-services-modeling</module>
+    <module>activiti-cloud-starter-modeling</module>
     <module>activiti-cloud-acceptance-tests-modeling</module>
   </modules>
   <scm>
-    <url>https://github.com/Activiti/activiti-cloud-org-service</url>
-    <connection>scm:git:https://github.com/Activiti/activiti-cloud-org-service.git</connection>
-    <developerConnection>scm:git:https://github.com/Activiti/activiti-cloud-org-service.git</developerConnection>
+    <url>https://github.com/Activiti/${project.scm.repository}</url>
+    <connection>scm:git:https://github.com/Activiti/${project.scm.repository}.git</connection>
+    <developerConnection>scm:git:https://github.com/Activiti/${project.scm.repository}.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <ciManagement>
     <system>Travis</system>
-    <url>https://travis-ci/Activiti/activiti-cloud-org-service</url>
+    <url>https://travis-ci/Activiti/${project.scm.repository}</url>
   </ciManagement>
   <repositories>
     <repository>
       <id>alfresco</id>
       <name>Activiti Releases</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
       <releases>
         <enabled>true</enabled>
       </releases>
     </repository>
   </repositories>
   <properties>
+    <project.scm.repository>activiti-cloud-modeling-service</project.scm.repository>
     <activiti-cloud-dependencies.version>7.1.15</activiti-cloud-dependencies.version>
     <activiti-dependencies.version>7.1.151</activiti-dependencies.version>
     <activiti-cloud-service-common.version>7.1.119</activiti-cloud-service-common.version>
     <activiti-cloud-acceptance-tests.version>7.1.130</activiti-cloud-acceptance-tests.version>
-    <activiti-cloud-org-service.version>${project.version}</activiti-cloud-org-service.version>
+    <activiti-cloud-modeling-service.version>${project.version}</activiti-cloud-modeling-service.version>
     <everit-json-schema.version>1.11.0</everit-json-schema.version>
     <org.json.version>20180813</org.json.version>
     <org.apache.common.version>4.1</org.apache.common.version>

@@ -25,8 +25,8 @@ import feign.codec.Encoder;
 import feign.form.FormEncoder;
 import feign.jackson.JacksonEncoder;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
-import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.Project;
+import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.Project;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 

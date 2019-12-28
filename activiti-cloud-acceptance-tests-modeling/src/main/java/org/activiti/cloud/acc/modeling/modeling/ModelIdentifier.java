@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.acc.modeling.modeling;
 
-import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.modeling.api.Model;
 
 import java.util.Optional;
 

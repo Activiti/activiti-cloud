@@ -1,4 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-	org.activiti.cloud.services.organization.rest.config.ExtendedWebMvcConfigurer,\
-	org.activiti.cloud.services.organization.rest.config.RepositoryRestConfig,\
-	org.activiti.cloud.services.organization.rest.config.RestControllerAutoConfiguration

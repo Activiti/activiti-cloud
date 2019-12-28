@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.activiti.cloud.modeling</groupId>
-        <artifactId>activiti-cloud-org-dependencies</artifactId>
+        <artifactId>activiti-cloud-modeling-dependencies</artifactId>
         <version>7.1.0-SNAPSHOT</version>
-        <relativePath>../activiti-cloud-org-dependencies</relativePath>
+        <relativePath>../activiti-cloud-modeling-dependencies</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>org.activiti.cloud.modeling</groupId>
-            <artifactId>activiti-cloud-services-org-api-impl</artifactId>
+            <artifactId>activiti-cloud-services-modeling-api-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.activiti.cloud.common</groupId>

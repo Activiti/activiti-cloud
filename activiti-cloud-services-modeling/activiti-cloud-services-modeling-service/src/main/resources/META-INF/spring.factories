@@ -1,0 +1,6 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+	org.activiti.cloud.services.modeling.validation.ProcessModelValidatorConfiguration,\
+	org.activiti.cloud.services.modeling.validation.JsonSchemaModelValidatorConfiguration,\
+	org.activiti.cloud.services.modeling.service.JsonConverterConfiguration,\
+	org.activiti.cloud.services.modeling.converter.ProcessModelConverterConfiguration,\
+	org.activiti.cloud.services.modeling.service.ModelingServiceAutoConfiguration

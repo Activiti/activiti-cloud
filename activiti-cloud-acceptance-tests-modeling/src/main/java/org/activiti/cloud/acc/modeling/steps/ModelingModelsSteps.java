@@ -35,11 +35,11 @@ import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.modeling.config.ModelingTestsConfigurationProperties;
 import org.activiti.cloud.acc.modeling.modeling.EnableModelingContext;
 import org.activiti.cloud.acc.modeling.service.ModelingModelsService;
-import org.activiti.cloud.organization.api.Model;
-import org.activiti.cloud.organization.api.process.Extensions;
-import org.activiti.cloud.organization.api.process.ProcessVariable;
-import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
-import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
+import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.process.Extensions;
+import org.activiti.cloud.modeling.api.process.ProcessVariable;
+import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
+import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
@@ -48,10 +48,10 @@ import org.springframework.hateoas.Resource;
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.EXTENSIONS_TASK_NAME;
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.HOST_VALUE;
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.extensions;
-import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
-import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.OUTPUTS;
-import static org.activiti.cloud.organization.api.process.VariableMappingType.VALUE;
-import static org.activiti.cloud.organization.api.process.VariableMappingType.VARIABLE;
+import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
+import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTPUTS;
+import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
+import static org.activiti.cloud.modeling.api.process.VariableMappingType.VARIABLE;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
@@ -67,7 +67,7 @@ import static org.springframework.hateoas.Link.REL_SELF;
 public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     private static final String PROJECT_MODELS_REL = "models";
-    
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
@@ -238,7 +238,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         return modelingModelsService.validateModelByUri(modelingUri(validateModelLink.getHref() + "/validate"),
                                                         file);
     }
-    
+
     @Step
     public Response validateExtensions(Resource<Model> model,
                                        FormData file) {
@@ -311,7 +311,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     public ModelingModelsService service() {
         return modelingModelsService;
     }
-    
+
     private Extensions getExtensionFromMap(Map<String,Object> map) {
         try {
             return objectMapper.readValue(objectMapper.writeValueAsString(map), Extensions.class);

@@ -25,7 +25,7 @@ import feign.codec.Encoder;
 import feign.form.FormData;
 import feign.form.FormEncoder;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
-import org.activiti.cloud.organization.api.Model;
+import org.activiti.cloud.modeling.api.Model;
 
 import static org.activiti.cloud.acc.modeling.rest.ModelingFeignConfiguration.modelingDecoder;
 import static org.activiti.cloud.acc.modeling.rest.ModelingFeignConfiguration.modelingEncoder;

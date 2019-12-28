@@ -17,10 +17,10 @@
 package org.activiti.cloud.acc.modeling.modeling;
 
 import com.google.common.collect.ImmutableMap;
-import org.activiti.cloud.organization.api.process.Extensions;
-import org.activiti.cloud.organization.api.process.ProcessVariable;
-import org.activiti.cloud.organization.api.process.ProcessVariableMapping;
-import org.activiti.cloud.organization.api.process.ServiceTaskActionType;
+import org.activiti.cloud.modeling.api.process.Extensions;
+import org.activiti.cloud.modeling.api.process.ProcessVariable;
+import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
+import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,10 +30,10 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
-import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.INPUTS;
-import static org.activiti.cloud.organization.api.process.ServiceTaskActionType.OUTPUTS;
-import static org.activiti.cloud.organization.api.process.VariableMappingType.VALUE;
-import static org.activiti.cloud.organization.api.process.VariableMappingType.VARIABLE;
+import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.INPUTS;
+import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTPUTS;
+import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
+import static org.activiti.cloud.modeling.api.process.VariableMappingType.VARIABLE;
 
 /**
  * Modeling utils
