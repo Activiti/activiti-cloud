@@ -1,6 +1,7 @@
 pipeline {
     options {
         disableConcurrentBuilds()
+        quietPeriod(30)
     }      
     agent {
       label "jenkins-maven-java11"
