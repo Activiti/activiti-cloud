@@ -1,12 +1,11 @@
-ACTIVITI_CLOUD_CONNECTORS_VERSION := 7.1.276
-ACTIVITI_CLOUD_AUDIT_VERSION := 7.1.265
-ACTIVITI_CLOUD_QUERY_VERSION := 7.1.276
-ACTIVITI_CLOUD_RB_VERSION := 7.1.327
+ACTIVITI_CLOUD_CONNECTORS_VERSION := $(shell mvn help:evaluate -Dexpression=example-cloud-connector.version -q -DforceStdout -f dependencies-tests/pom.xml)
+ACTIVITI_CLOUD_AUDIT_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-audit.version -q -DforceStdout -f dependencies-tests/pom.xml)
+ACTIVITI_CLOUD_QUERY_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-query.version -q -DforceStdout -f dependencies-tests/pom.xml)
+ACTIVITI_CLOUD_RB_VERSION := $(shell mvn help:evaluate -Dexpression=example-runtime-bundle.version -q -DforceStdout -f dependencies-tests/pom.xml)
 ACTIVITI_CLOUD_NOTIFICATIONS_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-notifications-graphql.version -q -DforceStdout -f dependencies-tests/pom.xml)
-ACTIVITI_CLOUD_MODELING :=7.1.555
+ACTIVITI_CLOUD_MODELING := $(shell mvn help:evaluate -Dexpression=activiti-cloud-modeling.version -q -DforceStdout -f dependencies-tests/pom.xml)
 
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.111
-
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
 
