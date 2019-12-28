@@ -71,12 +71,9 @@ updatebot/push-version:
 	$(eval ACTIVITI_CLOUD_CONNECTORS_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud-connectors.version -q -DforceStdout -f ../../pom.xml))
 
 	@echo Doing updatebot push-version.....
-
-	cd ../../ && updatebot push-version --kind maven org.activiti.cloud.connector:activiti-cloud-connectors-dependencies $(ACTIVITI_CLOUD_CONNECTORS_VERSION) org.activiti.cloud.examples:example-cloud-connector $(RELEASE_VERSION)
-	cd ../../ && updatebot push-version --kind make  ACTIVITI_CLOUD_CONNECTORS_VERSION $(RELEASE_VERSION)
-	cd ../../ && rm -rf .updatebot-repos/
-	sleep $$[ ( $$RANDOM % 10 )  + 1 ]s
-	cd ../../ && updatebot push-version --kind maven org.activiti.cloud.connector:activiti-cloud-connectors-dependencies $(ACTIVITI_CLOUD_CONNECTORS_VERSION) org.activiti.cloud.examples:example-cloud-connector $(RELEASE_VERSION)
-	cd ../../ && updatebot push-version --kind make  ACTIVITI_CLOUD_CONNECTORS_VERSION $(RELEASE_VERSION)
-
-
+	for number in 1 2; do \
+		updatebot -d ../../ push-version --kind maven org.activiti.cloud.connector:activiti-cloud-connectors-dependencies $(ACTIVITI_CLOUD_CONNECTORS_VERSION) org.activiti.cloud.examples:example-cloud-connector $(RELEASE_VERSION); \
+		rm -rf ../../.updatebot-repos/; \
+		sleep $$[ ( $$RANDOM % 10 )  + 1 ]s; \
+	done
+	
