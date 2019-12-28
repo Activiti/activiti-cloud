@@ -1,4 +1,10 @@
 pipeline {
+    options {
+        disableConcurrentBuilds()
+    }     
+    options {
+        disableConcurrentBuilds()
+    }      
     agent {
       label "jenkins-maven-java11"
     }
