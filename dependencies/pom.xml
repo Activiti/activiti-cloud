@@ -28,7 +28,7 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.modeling</groupId>
-        <artifactId>activiti-cloud-org-dependencies</artifactId>
+        <artifactId>activiti-cloud-modeling-dependencies</artifactId>
         <version>${activiti-cloud-modeling-service.version}</version>
         <type>pom</type>
         <scope>import</scope>

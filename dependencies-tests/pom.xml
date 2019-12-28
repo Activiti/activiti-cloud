@@ -14,7 +14,7 @@
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <enforceFail>true</enforceFail>
-    <activiti-cloud-modeling.version>7.1.554</activiti-cloud-modeling.version>
+    <activiti-cloud-modeling.version>7.1.555</activiti-cloud-modeling.version>
     <example-runtime-bundle.version>7.1.327</example-runtime-bundle.version>
     <example-cloud-connector.version>7.1.276</example-cloud-connector.version>
     <activiti-cloud-audit.version>7.1.265</activiti-cloud-audit.version>
@@ -30,7 +30,7 @@
       <exclusions>
         <exclusion>
           <groupId>org.activiti.cloud.modeling</groupId>
-          <artifactId>activiti-cloud-starter-org</artifactId>
+          <artifactId>activiti-cloud-starter-modeling</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.postgresql</groupId>
