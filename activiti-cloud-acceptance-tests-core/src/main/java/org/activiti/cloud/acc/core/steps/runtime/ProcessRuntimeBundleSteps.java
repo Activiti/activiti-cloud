@@ -8,13 +8,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
@@ -24,6 +23,9 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.PagedResources;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.thucydides.core.annotations.Step;
 
 @EnableRuntimeFeignContext
 public class ProcessRuntimeBundleSteps {
@@ -44,15 +46,19 @@ public class ProcessRuntimeBundleSteps {
     public void checkServicesHealth() {
         assertThat(processRuntimeService.isServiceUp()).isTrue();
     }
+    
+    @Step
+    public CloudProcessInstance startProcess(StartProcessPayload payload) {
+        return dirtyContextHandler.dirty(processRuntimeService.startProcess(payload));
+    }    
 
     @Step
-    public CloudProcessInstance startProcess(String process, boolean variables ) throws IOException {
-
+    public CloudProcessInstance startProcess(String process, boolean variables, String businessKey) throws IOException {
         StartProcessPayloadBuilder payload = ProcessPayloadBuilder
                 .start()
                 .withProcessDefinitionKey(process)
                 .withName("processInstanceName")
-                .withBusinessKey("businessKey");
+                .withBusinessKey(businessKey);
 
         if(variables){
             payload.withVariable("test_variable_name", "test-variable-value");
@@ -62,28 +68,28 @@ public class ProcessRuntimeBundleSteps {
             payload.withVariable("test_long_json_variable_name",objectMapper.readTree("{ \"verylongjson\":\""+ StringUtils.repeat("a", 4000)+"\"}"));
         }
 
-        return dirtyContextHandler.dirty(processRuntimeService
-                .startProcess(payload.build()));
+        return startProcess(payload.build());
+    }
+    
+    @Step
+    public CloudProcessInstance startProcess(String process, boolean variables) throws IOException {
+        return startProcess(process, variables, "businessKey");
     }
 
     @Step
     public CloudProcessInstance startProcess(String process) {
-
-        return dirtyContextHandler.dirty(processRuntimeService.startProcess(ProcessPayloadBuilder
-                .start()
-                .withProcessDefinitionKey(process)
-                .withName("process-instance-name")
-                .build()));
+        return startProcess(ProcessPayloadBuilder.start()
+                                                 .withProcessDefinitionKey(process)
+                                                 .withName("process-instance-name")
+                                                 .build());
     }
 
     @Step
     public CloudProcessInstance startProcessWithVariables(String process, Map<String,Object> variables) {
-
-        return dirtyContextHandler.dirty(processRuntimeService.startProcess(ProcessPayloadBuilder
-                .start()
-                .withProcessDefinitionKey(process)
-                .withVariables(variables)
-                .build()));
+        return startProcess(ProcessPayloadBuilder.start()
+                                                 .withProcessDefinitionKey(process)
+                                                 .withVariables(variables)
+                                                 .build());
     }
 
     @Step
