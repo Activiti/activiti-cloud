@@ -70,10 +70,11 @@ endif
 updatebot/push-version: 
 	@echo Resolving push versions for artifacts........
 	$(eval ACTIVITI_CLOUD_RB_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud-runtime-bundle-service.version -q -DforceStdout -f ../../pom.xml))
+	$(eval MAVEN_VERSIONS=org.activiti.cloud.examples:example-runtime-bundle $(RELEASE_VERSION) org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies $(ACTIVITI_CLOUD_RB_VERSION))
 
 	@echo Doing updatebot push-version.....
 	for number in 1 2; do \
-		updatebot -d ../../ push-version --kind maven org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies $(ACTIVITI_CLOUD_RB_VERSION) org.activiti.cloud.examples:example-runtime-bundle $(RELEASE_VERSION); \
+		updatebot -d ../../ push-version --kind maven $(MAVEN_VERSIONS); \
 		rm -rf ../../.updatebot-repos/; \
 		sleep $$[ ( $$RANDOM % 10 )  + 1 ]s; \
 	done
