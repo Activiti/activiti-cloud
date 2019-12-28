@@ -1,6 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud.dependencies</groupId>
@@ -9,20 +10,38 @@
   </parent>
   <artifactId>activiti-cloud-dependencies-tests</artifactId>
   <packaging>pom</packaging>
-
   <name>Activiti Cloud :: BOM (Bill of Materials) Tests</name>
-
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <enforceFail>true</enforceFail>
+    <activiti-cloud-modeling.version>7.1.554</activiti-cloud-modeling.version>
     <example-runtime-bundle.version>7.1.327</example-runtime-bundle.version>
     <example-cloud-connector.version>7.1.276</example-cloud-connector.version>
     <activiti-cloud-audit.version>7.1.265</activiti-cloud-audit.version>
     <activiti-cloud-query.version>7.1.276</activiti-cloud-query.version>
     <activiti-cloud-notifications-graphql.version>7.1.299</activiti-cloud-notifications-graphql.version>
   </properties>
-  
   <dependencies>
+    <dependency>
+      <groupId>org.activiti.cloud.examples</groupId>
+      <artifactId>activiti-cloud-modeling</artifactId>
+      <version>${activiti-cloud-modeling.version}</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.activiti.cloud.modeling</groupId>
+          <artifactId>activiti-cloud-starter-org</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
     <dependency>
       <groupId>org.activiti.cloud.examples</groupId>
       <artifactId>example-runtime-bundle</artifactId>
@@ -51,7 +70,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.activiti.cloud.examples</groupId>
       <artifactId>example-cloud-connector</artifactId>
@@ -68,7 +86,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.activiti.cloud.examples</groupId>
       <artifactId>activiti-cloud-audit</artifactId>
@@ -93,7 +110,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.activiti.cloud.examples</groupId>
       <artifactId>activiti-cloud-query</artifactId>
@@ -118,7 +134,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.activiti.cloud.examples</groupId>
       <artifactId>activiti-cloud-notifications-graphql</artifactId>
@@ -133,7 +148,6 @@
           <groupId>org.activiti.cloud.common</groupId>
           <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.postgresql</groupId>
           <artifactId>postgresql</artifactId>
@@ -148,16 +162,12 @@
         </exclusion>
       </exclusions>
     </dependency>
-
-
-  </dependencies> 
-
+  </dependencies>
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.0.0-M2</version>
         <executions>
           <execution>
             <id>enforce-dependency-convergence</id>
@@ -171,7 +181,7 @@
                   <message>The reactor is not valid</message>
                   <ignoreModuleDependencies>false</ignoreModuleDependencies>
                 </reactorModuleConvergence>
-                <dependencyConvergence />
+                <dependencyConvergence/>
               </rules>
             </configuration>
           </execution>
@@ -186,5 +196,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>

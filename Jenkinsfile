@@ -2,7 +2,7 @@ pipeline {
     options {
         disableConcurrentBuilds()
         quietPeriod(30)
-    }      
+    }
     agent {
       label "jenkins-maven-java11"
     }
@@ -42,14 +42,14 @@ pipeline {
         }
         steps {
           container('maven') {
-              
+
             // ensure we're not on a detached head
             sh "git checkout develop"
             sh "git config --global credential.helper store"
 
             sh "jx step git credentials"
             // so we can retrieve the version in later steps
-            sh "git fetch --tags"  
+            sh "git fetch --tags"
             sh "echo \$(jx-release-version) > VERSION"
             sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
             sh "mvn clean verify"
@@ -81,11 +81,11 @@ pipeline {
                 def GIT_COMMIT_DETAILS = sh (
                     script: 'make git-rev-list',
                     returnStdout: true
-                ).trim()                 
+                ).trim()
                 println GIT_COMMIT_DETAILS
-              
+
             slackSend(channel: "##activiti-community-builds", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
-            }              
+            }
           }
         }
         post {
@@ -144,6 +144,4 @@ def delete_deployment() {
    sh "kubectl delete namespace $PREVIEW_NAMESPACE|echo 'try to remove namespace '$PREVIEW_NAMESPACE "
   }
 }
-
-
 

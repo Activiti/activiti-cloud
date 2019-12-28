@@ -5,7 +5,6 @@ ACTIVITI_CLOUD_RB_VERSION := 7.1.327
 ACTIVITI_CLOUD_NOTIFICATIONS_VERSION := 7.1.299
 ACTIVITI_CLOUD_MODELING :=7.1.553
 
-MODELING_DEPENDENCIES_VERSION := 7.1.314
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.111
 
 
@@ -21,8 +20,6 @@ GITHUB_CHARTS_BRANCH := "gh-pages"
 	
 
 ACTIVITI_CLOUD_VERSION := $(shell cat VERSION)
-get-modeling-dependencies-version:
-	@echo $(MODELING_DEPENDENCIES_VERSION)
 get-acc-scenarious-version:
 	@echo $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
@@ -36,9 +33,9 @@ acc-tests:
 
 update-ea:
 	#$(eval ACTIVITI_CLOUD_VERSION = $(shell cat VERSION))
-	@echo "ACTIVITI_CLOUD_VERSION =<$(ACTIVITI_CLOUD_VERSION)>"
+	@echo "ACTIVITI_CLOUD_VERSION=<$(ACTIVITI_CLOUD_VERSION)>"
 
-	$(eval ID = $(shell echo ${ACTIVITI_CLOUD_VERSION}${MODELING_DEPENDENCIES_VERSION}|tr -dc '[:alnum:]\n\r'))
+	$(eval ID = $(shell echo ${ACTIVITI_CLOUD_VERSION}|tr -dc '[:alnum:]\n\r'))
 	@echo ID=${ID}
 
 	rm -rf alfresco-process-parent||echo removing alfresco-process-parent
@@ -47,16 +44,15 @@ update-ea:
 
 	cd alfresco-process-parent && \
 	  git checkout develop && \
-	  git checkout -b update-cloud-to-$(ACTIVITI_CLOUD_VERSION)-$(MODELING_DEPENDENCIES_VERSION) && \
+	  git checkout -b update-cloud-to-$(ACTIVITI_CLOUD_VERSION) && \
 	  mvn versions:set-property -Dproperty=activiti-cloud.version -DnewVersion=$(ACTIVITI_CLOUD_VERSION) && \
-	  mvn versions:set-property -Dproperty=activiti-cloud-modeling.version -DnewVersion=$(MODELING_DEPENDENCIES_VERSION) && \
 	  git diff --word-diff && \
-	  git commit -a -m "AAE-0 update ACTIVITI_CLOUD_VERSION to ${ACTIVITI_CLOUD_VERSION} MODELING_DEPENDENCIES_VERSION to ${MODELING_DEPENDENCIES_VERSION} ACTIVITI-0000" && \
-	  git push  --set-upstream origin update-cloud-to-${ACTIVITI_CLOUD_VERSION}-${MODELING_DEPENDENCIES_VERSION}
-	@cd alfresco-process-parent && curl --request POST --header "PRIVATE-TOKEN: $(GITLAB_TOKEN)" --header "Content-Type: application/json" -d '{"id": ${ID} ,"source_branch": "update-cloud-to-${ACTIVITI_CLOUD_VERSION}-${MODELING_DEPENDENCIES_VERSION}" ,"target_branch":"develop","title":"community propagation ACTIVITI_CLOUD_VERSION to ${ACTIVITI_CLOUD_VERSION} MODELING_DEPENDENCIES_VERSION to ${MODELING_DEPENDENCIES_VERSION}"}' https://git.alfresco.com/api/v4/projects/1031/merge_requests
+	  git commit -a -m "AAE-0 update ACTIVITI_CLOUD_VERSION to ${ACTIVITI_CLOUD_VERSION}" && \
+	  git push  --set-upstream origin update-cloud-to-${ACTIVITI_CLOUD_VERSION}
+	@cd alfresco-process-parent && curl --request POST --header "PRIVATE-TOKEN: $(GITLAB_TOKEN)" --header "Content-Type: application/json" -d '{"id": ${ID} ,"source_branch": "update-cloud-to-${ACTIVITI_CLOUD_VERSION}" ,"target_branch":"develop","title":"community propagation ACTIVITI_CLOUD_VERSION to ${ACTIVITI_CLOUD_VERSION}"}' https://git.alfresco.com/api/v4/projects/1031/merge_requests
 
 updatebot/push-version:
-	updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) org.activiti.cloud.dependencies:activiti-cloud-modeling-dependencies $(MODELING_DEPENDENCIES_VERSION) --merge false
+	updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) --merge false
 	updatebot push-version --kind helm $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
 
 updatebot/push-version-dry:
@@ -140,7 +136,7 @@ run-helm-chart:
             		--wait
 delete:
 	helm delete --purge ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
-	
+
 
 RELEASE_GREP_EXPR := '^[Rr]elease'
 
