@@ -5,3 +5,6 @@ github:
     - name: activiti-cloud-modeling
       branch: master
       useSinglePullRequest: true
+    - name: activiti-cloud-acceptance-scenarios
+      branch: master
+      useSinglePullRequest: true
