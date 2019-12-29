@@ -52,7 +52,7 @@ update-ea:
 
 updatebot/push-version:
 	updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) --merge false
-	updatebot push-version --kind helm $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
+	updatebot push-version --kind helm activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
 
 updatebot/push-version-dry:
 	updatebot --dry push-version --kind helm $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
