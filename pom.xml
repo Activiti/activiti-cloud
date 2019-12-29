@@ -38,7 +38,7 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <activiti-cloud-modeling.version>7.1.314</activiti-cloud-modeling.version>
+    <activiti-cloud-modeling.version>7.1.316</activiti-cloud-modeling.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <enforcer.skip>true</enforcer.skip>
     <java.version>11</java.version>
@@ -59,13 +59,6 @@
   </properties>
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.activiti.cloud.dependencies</groupId>
-        <artifactId>activiti-cloud-modeling-dependencies</artifactId>
-        <version>${activiti-cloud-modeling.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
@@ -111,6 +104,7 @@
         <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
         <version>${activiti-cloud-acceptance-tests.version}</version>
         <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

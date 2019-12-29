@@ -8,6 +8,19 @@
     <version>7.1.0-SNAPSHOT</version>
   </parent>
   <artifactId>modeling-acceptance-tests</artifactId>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti.cloud.modeling</groupId>
+        <artifactId>activiti-cloud-modeling-dependencies</artifactId>
+        <version>${activiti-cloud-modeling.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud.modeling</groupId>

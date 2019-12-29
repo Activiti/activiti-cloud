@@ -6,7 +6,7 @@ I want to perform operations on process instances with subscriptions to receive 
 
 Scenario: complete a process instance that uses a connector with subscription to PROCESS event notifications
 Given the user is authenticated as testadmin
-And notifications: session variable called businessKey with value set to businessKey
+And notifications: generated random value for session variable called businessKey
 When notifications: the user subscribes to PROCESS_STARTED,PROCESS_COMPLETED notifications
 And notifications: the user starts a process CONNECTOR_PROCESS_INSTANCE
 Then notifications: verify process instance started response

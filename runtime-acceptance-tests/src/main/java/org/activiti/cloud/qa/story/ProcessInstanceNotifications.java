@@ -19,10 +19,18 @@ package org.activiti.cloud.qa.story;
 import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.serenitybdd.core.Serenity;
-import net.thucydides.core.annotations.Steps;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
@@ -37,22 +45,15 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.serenitybdd.core.Serenity;
+import net.thucydides.core.annotations.Steps;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.test.StepVerifier;
 import reactor.test.StepVerifier.Step;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 public class ProcessInstanceNotifications {
 
@@ -131,8 +132,11 @@ public class ProcessInstanceNotifications {
     @When("notifications: the user starts a process $processName")
     public void startProcess(String processName) throws IOException, InterruptedException {
         String processDefinitionKey = processDefinitionKeyMatcher(processName);
+        String businessKey = sessionVariableCalled("businessKey", String.class).orElse("businessKey");
         
-        processInstanceRef =  new AtomicReference<>(processRuntimeBundleSteps.startProcess(processDefinitionKey, true));
+        processInstanceRef =  new AtomicReference<>(processRuntimeBundleSteps.startProcess(processDefinitionKey, 
+                                                                                           true, 
+                                                                                           businessKey));
     }
 
     @When("notifications: the user sends a start message named $messageName with businessKey value from session variable called $variableName")

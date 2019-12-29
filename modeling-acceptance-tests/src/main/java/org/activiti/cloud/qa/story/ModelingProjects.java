@@ -16,23 +16,24 @@
 
 package org.activiti.cloud.qa.story;
 
-import java.io.IOException;
-import java.util.List;
-
-import net.thucydides.core.annotations.Steps;
-import org.activiti.cloud.acc.modeling.steps.ModelingModelsSteps;
-import org.activiti.cloud.acc.modeling.steps.ModelingProjectsSteps;
-import org.activiti.cloud.organization.api.Model;
-import org.jbehave.core.annotations.Given;
-import org.jbehave.core.annotations.Then;
-import org.jbehave.core.annotations.When;
-import org.springframework.hateoas.Resource;
-
 import static org.activiti.cloud.acc.modeling.modeling.ModelIdentifier.identified;
 import static org.activiti.cloud.acc.modeling.modeling.ModelingNamingIdentifier.projectNamed;
 import static org.activiti.cloud.acc.modeling.modeling.ModelingNamingIdentifier.projectsNamed;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsFile;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.activiti.cloud.acc.modeling.steps.ModelingModelsSteps;
+import org.activiti.cloud.acc.modeling.steps.ModelingProjectsSteps;
+import org.activiti.cloud.modeling.api.Model;
+import org.jbehave.core.annotations.Given;
+import org.jbehave.core.annotations.Then;
+import org.jbehave.core.annotations.When;
+import org.springframework.hateoas.Resource;
+
+import net.thucydides.core.annotations.Steps;
 
 /**
  * Modeling projects scenarios
