@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.serenitybdd.core.Serenity;
-import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -39,6 +37,9 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.Resources;
+
+import net.serenitybdd.core.Serenity;
+import net.thucydides.core.annotations.Steps;
 
 public class ProcessInstanceVariablesMappingOnStartEvent {
 
@@ -59,7 +60,7 @@ public class ProcessInstanceVariablesMappingOnStartEvent {
         taskRuntimeBundleSteps.checkServicesHealth();
     }
 
-    @When("the user starts the process with variables mapping on start event")
+    @When("the user starts variables mapping process on start event")
     public void startProcessWithVariablesMappingOnStartEvent() throws ParseException {
 
         Map<String,Object> variables = new HashMap<>();

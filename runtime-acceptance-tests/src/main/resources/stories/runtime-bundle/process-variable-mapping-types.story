@@ -22,7 +22,7 @@ Then variables have correct values in process
 
 Scenario: variables mapping for the process start event
 Given the user is authenticated as hruser
-When the user starts the process with variables mapping on start event
+When the user starts variables mapping process on start event
 Then process variables are properly mapped on start event
 And process variables are properly mapped to the task variables
 And the user may complete the task
