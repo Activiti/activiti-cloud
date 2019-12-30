@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.modeling.service;
 
+import static java.util.Objects.nonNull;
 import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.modeling.api.ValidationContext.EMPTY_CONTEXT;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
@@ -27,16 +28,21 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFil
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.removeEnd;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.transaction.Transactional;
-
+import javax.xml.stream.XMLStreamException;
+import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.Process;
+import org.activiti.bpmn.model.Task;
 import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
@@ -50,13 +56,16 @@ import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
+import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.Assert;
 
 /**
  * Business logic related to {@link Model} entities including process models, form models, connectors, data models and decision table models.
@@ -77,6 +86,8 @@ public class ModelService {
 
     private final JsonConverter<Model> jsonConverter;
 
+    private final ProcessModelContentConverter processModelContentConverter;
+
     private final HashMap<String, String> modelIdentifiers = new HashMap();
 
     @Autowired
@@ -84,12 +95,14 @@ public class ModelService {
                         ModelTypeService modelTypeService,
                         ModelContentService modelContentService,
                         ModelExtensionsService modelExtensionsService,
-                        JsonConverter<Model> jsonConverter) {
+                        JsonConverter<Model> jsonConverter,
+                        ProcessModelContentConverter processModelContentConverter) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;
         this.jsonConverter = jsonConverter;
         this.modelExtensionsService = modelExtensionsService;
+        this.processModelContentConverter = processModelContentConverter;
     }
 
     public List<Model> getAllModels(Project project) {
@@ -292,6 +305,35 @@ public class ModelService {
         return model;
     }
 
+    public <T extends Task> List<T> getTasksBy(Project project, ModelType processModelType, @NonNull Class<T> clazz) {
+        Assert.notNull(clazz, "Class task type it must not be null");
+        return getProcessesBy(project, processModelType)
+                .stream()
+                .map(Process::getFlowElements)
+                .flatMap(Collection::stream)
+                .filter(clazz::isInstance)
+                .map(clazz::cast)
+                .collect(Collectors.toList());
+    }
+
+    public List<Process> getProcessesBy(Project project, ModelType type) {
+        return this.getModels(project, type, Pageable.unpaged())
+                .stream()
+                .filter(model -> nonNull(model.getContent()))
+                .map(this::safeGetBpmnModel)
+                .map(BpmnModel::getProcesses)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+    }
+
+    private BpmnModel safeGetBpmnModel(Model model) {
+        try {
+            return processModelContentConverter.convertToBpmnModel(model.getContent());
+        } catch (IOException | XMLStreamException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private String retrieveModelIdFromModelContent(Model model,
                                                    FileContent fileContent) {
         Optional<ModelContent> modelContent = this.createModelContentFromModel(model,
@@ -405,5 +447,24 @@ public class ModelService {
     private ModelType findModelType(Model model) {
         return Optional.ofNullable(model.getType()).flatMap(modelTypeService::findModelTypeByName)
                 .orElseThrow(() -> new UnknownModelTypeException("Unknown model type: " + model.getType()));
+    }
+
+    public static class ProjectAccessControl  {
+
+        private final Set<String> users;
+        private final Set<String> groups;
+
+        public ProjectAccessControl(Set<String> users, Set<String> groups) {
+            this.users = users;
+            this.groups = groups;
+        }
+
+        public Set<String> getGroups() {
+            return groups;
+        }
+
+        public Set<String> getUsers() {
+            return users;
+        }
     }
 }

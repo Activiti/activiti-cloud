@@ -28,7 +28,7 @@
     <bpmn2:endEvent id="EndEvent_0211pj5">
       <bpmn2:incoming>SequenceFlow_0hczb50</bpmn2:incoming>
     </bpmn2:endEvent>
-    <bpmn2:userTask id="Task_01uy47y" name="Add Rating" activiti:candidateGroups="hr,testgroup">
+    <bpmn2:userTask id="Task_01uy47y" name="Add Rating" activiti:candidateGroups="hr,testgroup" activiti:candidateUsers="userOne" activiti:assignee="userTwo">
       <bpmn2:incoming>SequenceFlow_1maw9gg</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_0hczb50</bpmn2:outgoing>
     </bpmn2:userTask>

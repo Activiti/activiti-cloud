@@ -41,6 +41,12 @@ public class JsonConverterConfiguration {
     }
 
     @Bean
+    public JsonConverter<ProjectDescriptor> projectDescriptorJsonConverter(ObjectMapper objectMapper) {
+        return new JsonConverter<>(ProjectDescriptor.class,
+                objectMapper);
+    }
+
+    @Bean
     public JsonConverter<Model> modelJsonConverter(ObjectMapper objectMapper) {
         return new JsonConverter<>(Model.class,
                                    objectMapper);

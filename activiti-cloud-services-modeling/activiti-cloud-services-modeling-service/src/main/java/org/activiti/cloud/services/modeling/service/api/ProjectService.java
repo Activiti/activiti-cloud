@@ -2,6 +2,7 @@ package org.activiti.cloud.services.modeling.service.api;
 
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
+import org.activiti.cloud.services.modeling.service.ModelService.ProjectAccessControl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
@@ -27,6 +28,8 @@ public interface ProjectService {
     Optional<Project> findProjectById(String projectId);
 
     FileContent exportProject(Project project) throws IOException;
+
+    ProjectAccessControl getProjectAccessControl(Project project);
 
     Project importProject(MultipartFile file, @Nullable String name) throws IOException;
 

@@ -14,6 +14,7 @@ import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
+import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
@@ -55,12 +56,14 @@ public class ModelingServiceAutoConfiguration {
                                      ModelTypeService modelTypeService,
                                      ModelContentService modelContentService,
                                      ModelExtensionsService modelExtensionsService,
-                                     JsonConverter<Model> jsonConverter) {
+                                     JsonConverter<Model> jsonConverter,
+                                     ProcessModelContentConverter processModelContentConverter) {
         return new ModelService(modelRepository,
                                 modelTypeService,
                                 modelContentService,
                                 modelExtensionsService,
-                                jsonConverter);
+                                jsonConverter,
+                                processModelContentConverter);
 
     }
 
@@ -74,12 +77,14 @@ public class ModelingServiceAutoConfiguration {
                                          ModelService modelService,
                                          ModelTypeService modelTypeService,
                                          JsonConverter<Project> jsonConverter,
+                                         JsonConverter<ProjectDescriptor> projectDescriptorJsonConverter,
                                          JsonConverter<Map> jsonMetadataConverter,
                                          Set<ProjectValidator> projectValidators) {
 
         return new ProjectServiceImpl(projectRepository,
                                   modelService,
                                   modelTypeService,
+                                  projectDescriptorJsonConverter,
                                   jsonConverter,
                                   jsonMetadataConverter,
                                   projectValidators);

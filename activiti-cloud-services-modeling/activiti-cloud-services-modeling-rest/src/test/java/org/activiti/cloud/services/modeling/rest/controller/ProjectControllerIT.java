@@ -359,6 +359,20 @@ public class ProjectControllerIT {
                 .hasJsonContentSatisfying("project-with-models.json",
                                           jsonContent -> jsonContent
                                                   .node("name").isEqualTo("project-with-models"))
+                .hasJsonContentSatisfying("project-with-models.json",
+                        jsonContent -> jsonContent
+                                .node("users")
+                                .isArray()
+                                .ofLength(2)
+                                .thatContains("userOne")
+                                .thatContains("userTwo"))
+                .hasJsonContentSatisfying("project-with-models.json",
+                        jsonContent -> jsonContent
+                                .node("groups")
+                                .isArray()
+                                .ofLength(2)
+                                .thatContains("hr")
+                                .thatContains("testgroup"))
                 .hasJsonContentSatisfying("processes/process-model-extensions.json",
                                           jsonContent -> jsonContent
                                                   .node("name").isEqualTo("process-model")
