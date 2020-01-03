@@ -36,14 +36,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.transaction.Transactional;
 import javax.xml.stream.XMLStreamException;
+
+import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.Task;
-import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
 import org.activiti.cloud.modeling.api.ModelType;
@@ -57,6 +58,7 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
+import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,9 +74,9 @@ import org.springframework.util.Assert;
  */
 @PreAuthorize("hasRole('ACTIVITI_MODELER')")
 @Transactional
-public class ModelService {
+public class ModelServiceImpl implements ModelService{
 
-    private static final Logger logger = LoggerFactory.getLogger(ModelService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ModelServiceImpl.class);
 
     private final ModelRepository modelRepository;
 
@@ -91,12 +93,12 @@ public class ModelService {
     private final HashMap<String, String> modelIdentifiers = new HashMap();
 
     @Autowired
-    public ModelService(ModelRepository modelRepository,
-                        ModelTypeService modelTypeService,
-                        ModelContentService modelContentService,
-                        ModelExtensionsService modelExtensionsService,
-                        JsonConverter<Model> jsonConverter,
-                        ProcessModelContentConverter processModelContentConverter) {
+    public ModelServiceImpl(ModelRepository modelRepository,
+                            ModelTypeService modelTypeService,
+                            ModelContentService modelContentService,
+                            ModelExtensionsService modelExtensionsService,
+                            JsonConverter<Model> jsonConverter,
+                            ProcessModelContentConverter processModelContentConverter) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;
@@ -105,6 +107,7 @@ public class ModelService {
         this.processModelContentConverter = processModelContentConverter;
     }
 
+    @Override
     public List<Model> getAllModels(Project project) {
         return modelTypeService.getAvailableModelTypes().stream().map(modelType -> getModels(project,
                                                                                              modelType,
@@ -112,6 +115,7 @@ public class ModelService {
                 .map(Page::getContent).flatMap(List::stream).collect(Collectors.toList());
     }
 
+    @Override
     public Page<Model> getModels(Project project,
                                  ModelType modelType,
                                  Pageable pageable) {
@@ -120,6 +124,7 @@ public class ModelService {
                                          pageable);
     }
 
+    @Override
     public Model buildModel(String type,
                             String name) {
         try {
@@ -132,6 +137,7 @@ public class ModelService {
         }
     }
 
+    @Override
     public Model createModel(Project project,
                              Model model) {
         model.setId(null);
@@ -147,20 +153,24 @@ public class ModelService {
         return modelRepository.createModel(model);
     }
 
+    @Override
     public Model updateModel(Model modelToBeUpdated,
                              Model newModel) {
         return modelRepository.updateModel(modelToBeUpdated,
                                            newModel);
     }
 
+    @Override
     public void deleteModel(Model model) {
         modelRepository.deleteModel(model);
     }
 
+    @Override
     public Optional<Model> findModelById(String modelId) {
         return modelRepository.findModelById(modelId);
     }
 
+    @Override
     public Optional<FileContent> getModelExtensionsFileContent(Model model) {
         if (model.getExtensions() == null && isJsonContentType(model.getContentType())) {
             return Optional.empty();
@@ -182,24 +192,29 @@ public class ModelService {
         return Optional.of(extensionsFileContent);
     }
 
+    @Override
     public void cleanModelIdList() {
         this.modelIdentifiers.clear();
     }
 
+    @Override
     public Optional<FileContent> getModelDiagramFile(String modelId) {
         //TODO: to implement
         return Optional.empty();
     }
 
+    @Override
     public String getExtensionsFilename(Model model) {
         return toJsonFilename(model.getName() + findModelType(model).getExtensionsFileSuffix());
     }
 
+    @Override
     public FileContent getModelContentFile(Model model) {
         return getModelFileContent(model,
                                    modelRepository.getModelContent(model));
     }
 
+    @Override
     public FileContent exportModel(Model model) {
         return getModelFileContent(model,
                                    modelRepository.getModelExport(model));
@@ -213,6 +228,7 @@ public class ModelService {
                                modelBytes);
     }
 
+    @Override
     public Model updateModelContent(Model modelToBeUpdate,
                                     FileContent fileContent) {
         FileContent fixedFileContent = this.modelIdentifiers.isEmpty()
@@ -238,6 +254,7 @@ public class ModelService {
                                                   fixedFileContent);
     }
 
+    @Override
     public FileContent overrideModelContentId(Model model,
                                               FileContent fileContent) {
         return modelContentService.findModelContentConverter(model.getType()).map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent,
@@ -245,12 +262,14 @@ public class ModelService {
                 .orElse(fileContent);
     }
 
+    @Override
     public Optional<ModelContent> createModelContentFromModel(Model model,
                                                               FileContent fileContent) {
         return (Optional<ModelContent>) modelContentService.findModelContentConverter(model.getType())
                 .map(modelContentConverter -> modelContentConverter.convertToModelContent(fileContent.getFileContent())).orElse(Optional.empty());
     }
 
+    @Override
     public Model importSingleModel(Project project,
                                    ModelType modelType,
                                    FileContent fileContent) {
@@ -263,6 +282,7 @@ public class ModelService {
         return model;
     }
 
+    @Override
     public Model importModel(Project project,
                              ModelType modelType,
                              FileContent fileContent) {
@@ -277,6 +297,7 @@ public class ModelService {
         return model;
     }
 
+    @Override
     public Model importModelFromContent(Project project,
                                         ModelType modelType,
                                         FileContent fileContent) {
@@ -305,6 +326,7 @@ public class ModelService {
         return model;
     }
 
+    @Override
     public <T extends Task> List<T> getTasksBy(Project project, ModelType processModelType, @NonNull Class<T> clazz) {
         Assert.notNull(clazz, "Class task type it must not be null");
         return getProcessesBy(project, processModelType)
@@ -316,6 +338,7 @@ public class ModelService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public List<Process> getProcessesBy(Project project, ModelType type) {
         return this.getModels(project, type, Pageable.unpaged())
                 .stream()
@@ -341,6 +364,7 @@ public class ModelService {
         return modelContent.isPresent() ? modelContent.get().getId() : null;
     }
 
+    @Override
     public Model convertContentToModel(ModelType modelType,
                                        FileContent fileContent) {
         Model model = jsonConverter.tryConvertToEntity(fileContent.getFileContent())
@@ -353,6 +377,7 @@ public class ModelService {
         return model;
     }
 
+    @Override
     public Model createModelFromContent(ModelType modelType,
                                         FileContent fileContent) {
         return contentFilenameToModelName(fileContent.getFilename(),
@@ -365,12 +390,14 @@ public class ModelService {
                                                                   fileContent.getFilename())));
     }
 
+    @Override
     public Optional<String> contentFilenameToModelName(String filename,
                                                        ModelType modelType) {
         return Arrays.stream(modelType.getAllowedContentFileExtension()).filter(filename::endsWith).findFirst().map(extension -> removeExtension(filename,
                                                                                                                                                  extension));
     }
 
+    @Override
     public void validateModelContent(Model model,
                                      ValidationContext validationContext) {
         validateModelContent(model.getType(),
@@ -378,6 +405,7 @@ public class ModelService {
                              validationContext);
     }
 
+    @Override
     public void validateModelContent(Model model,
                                      FileContent fileContent) {
         ValidationContext validationContext = !modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)
@@ -397,6 +425,7 @@ public class ModelService {
         return new ProjectValidationContext(model);
     }
 
+    @Override
     public void validateModelContent(Model model,
                                      FileContent fileContent,
                                      ValidationContext validationContext) {
@@ -412,6 +441,7 @@ public class ModelService {
                                                                                                                                                validationContext));
     }
 
+    @Override
     public void validateModelExtensions(Model model,
                                         ValidationContext validationContext) {
         validateModelExtensions(model.getType(),
@@ -419,6 +449,7 @@ public class ModelService {
                                 validationContext);
     }
 
+    @Override
     public void validateModelExtensions(Model model,
                                         FileContent fileContent) {
         ValidationContext validationContext = !modelTypeService.isJson(findModelType(model))
@@ -429,6 +460,7 @@ public class ModelService {
                                 validationContext);
     }
 
+    @Override
     public void validateModelExtensions(Model model,
                                         FileContent fileContent,
                                         ValidationContext validationContext) {
@@ -449,22 +481,4 @@ public class ModelService {
                 .orElseThrow(() -> new UnknownModelTypeException("Unknown model type: " + model.getType()));
     }
 
-    public static class ProjectAccessControl  {
-
-        private final Set<String> users;
-        private final Set<String> groups;
-
-        public ProjectAccessControl(Set<String> users, Set<String> groups) {
-            this.users = users;
-            this.groups = groups;
-        }
-
-        public Set<String> getGroups() {
-            return groups;
-        }
-
-        public Set<String> getUsers() {
-            return users;
-        }
-    }
 }

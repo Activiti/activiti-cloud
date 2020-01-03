@@ -46,7 +46,7 @@ import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.activiti.cloud.services.modeling.service.ModelService;
+import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

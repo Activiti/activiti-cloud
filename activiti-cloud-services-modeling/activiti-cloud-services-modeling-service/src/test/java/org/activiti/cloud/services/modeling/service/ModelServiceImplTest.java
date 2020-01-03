@@ -12,7 +12,9 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.xml.stream.XMLStreamException;
+
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
@@ -31,10 +33,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ModelServiceTest {
+public class ModelServiceImplTest {
 
     @InjectMocks
-    private ModelService modelService;
+    private ModelServiceImpl modelService;
 
     @Mock
     private ModelRepository modelRepository;

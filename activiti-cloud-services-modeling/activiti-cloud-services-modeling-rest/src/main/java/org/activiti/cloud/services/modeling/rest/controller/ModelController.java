@@ -16,23 +16,29 @@
 
 package org.activiti.cloud.services.modeling.rest.controller;
 
+import static org.activiti.cloud.services.common.util.HttpUtils.multipartToFileContent;
+import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
+import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
+import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.UPLOAD_FILE_PARAM_NAME;
+
 import java.io.IOException;
 import java.util.Optional;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import io.swagger.annotations.ApiParam;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
-import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.rest.api.ModelRestApi;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelResourceAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeResourceAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.PagedModelTypeAssembler;
-import org.activiti.cloud.services.modeling.service.ModelService;
 import org.activiti.cloud.services.modeling.service.ModelTypeService;
+import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.PagedResources;
@@ -46,12 +52,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebInputException;
-
-import static org.activiti.cloud.services.common.util.HttpUtils.multipartToFileContent;
-import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
-import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.EXPORT_AS_ATTACHMENT_PARAM_NAME;
-import static org.activiti.cloud.services.modeling.rest.api.ProjectRestApi.UPLOAD_FILE_PARAM_NAME;
-import static org.activiti.cloud.services.modeling.rest.controller.ProjectController.ATTACHMENT_API_PARAM_DESCR;
 
 /**
  * Controller for {@link Model} resources

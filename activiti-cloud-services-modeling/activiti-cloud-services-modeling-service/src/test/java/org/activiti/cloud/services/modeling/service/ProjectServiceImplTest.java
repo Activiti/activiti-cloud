@@ -9,10 +9,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.LinkedList;
 import java.util.List;
+
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
-import org.activiti.cloud.services.modeling.service.ModelService.ProjectAccessControl;
+import org.activiti.cloud.services.modeling.service.api.ModelService;
+import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
