@@ -16,9 +16,9 @@
   <url>http://activiti.org</url>
 
   <properties>
-    <activiti-dependencies.version>7.1.151</activiti-dependencies.version>
+    <activiti-dependencies.version>7.1.154</activiti-dependencies.version>
     <activiti-cloud-build.version>7.1.15</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>7.1.119</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.1.121</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>${project.version}</activiti-cloud-runtime-bundle-service.version>
   </properties>
 
