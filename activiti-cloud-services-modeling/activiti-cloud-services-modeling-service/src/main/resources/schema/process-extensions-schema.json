@@ -245,7 +245,7 @@
           ]
         },
         "value": {
-          "type": "string"
+          "type": ["string", "number", "integer", "boolean", "object", "array"]
         }
       },
       "dependencies": {

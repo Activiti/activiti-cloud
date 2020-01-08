@@ -71,7 +71,6 @@ public class JsonSchemaFlattenerTest {
         JSONArray arrObject = new JSONArray();
         arrObject.put(refObject);
 
-        JSONObject obj = new JSONObject();
         object.put("name", "value");
         object.put("allOf", arrObject);
 
@@ -87,7 +86,6 @@ public class JsonSchemaFlattenerTest {
         JSONArray arrObject = new JSONArray();
         arrObject.put(refObject);
 
-        JSONObject obj = new JSONObject();
         object.put("name", "value");
         object.put("allOf", arrObject);
 
