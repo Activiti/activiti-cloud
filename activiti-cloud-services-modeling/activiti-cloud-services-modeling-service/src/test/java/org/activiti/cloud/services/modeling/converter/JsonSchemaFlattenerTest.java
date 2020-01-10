@@ -13,102 +13,93 @@ import org.springframework.core.io.ClassPathResource;
 
 public class JsonSchemaFlattenerTest {
 
-   private JsonSchemaFlattener flattener = new JsonSchemaFlattener();
+    private JsonSchemaFlattener flattener = new JsonSchemaFlattener();
 
-   @Test
-   public void should_flattenProcessExtensionSchema() throws IOException {
+    @Test
+    public void should_flattenProcessExtensionSchema() throws IOException {
+        JSONObject schema =  getSchemaFromResource("/schema/process-extensions-schema.json");
+        assertThat(schema).isNotNull();
 
-       String sectionName =  flattener.getSectionNameFromFileName("schema/model-extensions-schema.json");
+        JSONObject flattenSchema = flattener.flatten(schema);
+        assertThat(flattenSchema).isNotNull();
 
-       JSONObject schema =  getSchemaFromResource("/schema/process-extensions-schema.json");
-       assertThat(schema).isNotNull();
+        JSONObject definitions = (JSONObject)flattenSchema.get("definitions");
+        assertThat(definitions).isNotNull();
+    }
 
-       JSONObject flattenSchema = flattener.flatten(schema);
-       assertThat(flattenSchema).isNotNull();
+    @Test
+    public void should_flattenSchemaShouldAddDefiniitons_when_noDefinitionsPresent() throws IOException {
 
-       JSONObject definitions = (JSONObject)flattenSchema.get("definitions");
-       assertThat(definitions).isNotNull();
-       assertThat(definitions.has(sectionName)).isTrue();
-   }
+        JSONObject schema =  getTestJSONObjectWithoutDefinitions("classpath://schema/model-extensions-schema.json");
+        assertThat(schema).isNotNull();
 
-   @Test
-   public void should_flattenSchemaShouldAddDefiniitons_when_noDefinitionsPresent() throws IOException {
+        JSONObject flattenSchema = flattener.flatten(schema);
+        assertThat(flattenSchema).isNotNull();
 
-       JSONObject schema =  getTestJSONObjectWithoutDefinitions("classpath://schema/model-extensions-schema.json");
-       assertThat(schema).isNotNull();
+        JSONObject definitions = (JSONObject)flattenSchema.get("definitions");
+        assertThat(definitions).isNotNull();
+    }
 
-       String sectionName =  flattener.getSectionNameFromFileName("schema/model-extensions-schema.json");
+    @Test
+    public void should_flattenSchemaShouldAddSection_when_definitionsArePresent() throws IOException {
 
-       JSONObject flattenSchema = flattener.flatten(schema);
-       assertThat(flattenSchema).isNotNull();
+        JSONObject schema =  getTestJSONObjectWithDefinitions("classpath://schema/model-extensions-schema.json");
+        assertThat(schema).isNotNull();
 
-       JSONObject definitions = (JSONObject)flattenSchema.get("definitions");
-       assertThat(definitions).isNotNull();
-       assertThat(definitions.has(sectionName)).isTrue();
-   }
+        String sectionName =  flattener.getSectionNameFromFileName("schema/model-extensions-schema.json");
 
-   @Test
-   public void should_flattenSchemaShouldAddSection_when_definitionsArePresent() throws IOException {
+        JSONObject flattenSchema = flattener.flatten(schema);
+        assertThat(flattenSchema).isNotNull();
 
-       JSONObject schema =  getTestJSONObjectWithDefinitions("classpath://schema/model-extensions-schema.json");
-       assertThat(schema).isNotNull();
+        JSONObject definitions = (JSONObject)flattenSchema.get("definitions");
+        assertThat(definitions).isNotNull();
+        assertThat(definitions.has(sectionName)).isTrue();
+    }
 
-       String sectionName =  flattener.getSectionNameFromFileName("schema/model-extensions-schema.json");
+    private JSONObject getSchemaFromResource(String schemaFileName) throws IOException {
 
-       JSONObject flattenSchema = flattener.flatten(schema);
-       assertThat(flattenSchema).isNotNull();
+        return new JSONObject(new JSONTokener(new ClassPathResource(schemaFileName)
+            .getInputStream()));
+    }
 
-       JSONObject definitions = (JSONObject)flattenSchema.get("definitions");
-       assertThat(definitions).isNotNull();
-       assertThat(definitions.has(sectionName)).isTrue();
-   }
+    private JSONObject getTestJSONObjectWithoutDefinitions(String classPath) {
+        JSONObject object = new JSONObject();
 
-   private JSONObject getSchemaFromResource(String schemaFileName) throws IOException {
+        JSONObject refObject = new JSONObject();
+        refObject.put("$ref", classPath);
 
-       return new JSONObject(new JSONTokener(new ClassPathResource(schemaFileName)
-                                          .getInputStream()));
-   }
+        JSONArray arrObject = new JSONArray();
+        arrObject.put(refObject);
 
-   private JSONObject getTestJSONObjectWithoutDefinitions(String classPath) {
-       JSONObject object = new JSONObject();
+        object.put("name", "value");
+        object.put("allOf", arrObject);
 
-       JSONObject refObject = new JSONObject();
-       refObject.put("$ref", classPath);
+        return object;
+    }
 
-       JSONArray arrObject = new JSONArray();
-       arrObject.put(refObject);
+    private JSONObject getTestJSONObjectWithDefinitions(String classPath) {
+        JSONObject object = new JSONObject();
 
-       JSONObject obj = new JSONObject();
-       object.put("name", "value");
-       object.put("allOf", arrObject);
+        JSONObject refObject = new JSONObject();
+        refObject.put("$ref", classPath);
 
-       return object;
-   }
+        JSONArray arrObject = new JSONArray();
+        arrObject.put(refObject);
 
-   private JSONObject getTestJSONObjectWithDefinitions(String classPath) {
-       JSONObject object = new JSONObject();
+        object.put("name", "value");
+        object.put("allOf", arrObject);
 
-       JSONObject refObject = new JSONObject();
-       refObject.put("$ref", classPath);
+        JSONObject definition = new JSONObject();
+        definition.put("name1", "value1");
+        definition.put("name2", "value2");
+        definition.put("keywithref", refObject);
 
-       JSONArray arrObject = new JSONArray();
-       arrObject.put(refObject);
+        JSONObject definitions = new JSONObject();
+        definitions.put("definition1", definition);
 
-       JSONObject obj = new JSONObject();
-       object.put("name", "value");
-       object.put("allOf", arrObject);
+        object.put("definitions", definitions);
 
-       JSONObject definition = new JSONObject();
-       definition.put("name1", "value1");
-       definition.put("name2", "value2");
-       definition.put("keywithref", refObject);
-
-       JSONObject definitions = new JSONObject();
-       definitions.put("definition1", definition);
-
-       object.put("definitions", definitions);
-
-       return object;
-   }
+        return object;
+    }
 
 }

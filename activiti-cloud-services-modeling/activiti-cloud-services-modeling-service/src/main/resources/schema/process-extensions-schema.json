@@ -6,47 +6,22 @@
   "definitions": {
     "extensions": {
       "type": "object",
-      "properties": {
-        "properties": {
-          "description": "The extensions properties",
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/properties"
-          }
-        },
-        "mappings": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object",
-            "propertyNames": {
-              "type": "string",
-              "enum": [
-                "inputs",
-                "outputs"
-              ]
-            },
-            "additionalProperties": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object",
-                "$ref": "#/definitions/mappings"
-              }
-            }
-          }
-        },
-        "constants": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object",
-              "$ref": "#/definitions/constants"
-            }
-          }
-        }
+      "additionalProperties": false,
+      "patternProperties": {
+        "properties": { "$ref": "#/definitions/properties" },
+        "mappings": { "$ref": "#/definitions/mappings" },
+        "constants": { "$ref": "#/definitions/constants" }
       }
     },
     "properties": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/property"
+        }
+      }
+    },
+    "property": {
       "type": "object",
       "properties": {
         "id": {
@@ -220,6 +195,47 @@
     },
     "mappings": {
       "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/mapping-object"
+        }
+      }
+    },
+    "mapping-object": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            ".*": {
+              "$ref": "#/definitions/mapping-property"
+            }
+          }
+        },
+        "outputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            ".*": {
+              "$ref": "#/definitions/mapping-property"
+            }
+          }
+        }
+      },
+      "anyOf": [
+        {
+          "required": ["inputs"]
+        },
+        {
+          "required": ["outputs"]
+        }
+      ]
+    },
+    "mapping-property": {
+      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "type": {
           "type": "string",
@@ -239,28 +255,28 @@
         "value": [
           "type"
         ]
-      },
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "type": {
-                "const": "variable"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "value": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      ]
+      }
     },
     "constants": {
       "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/constant-container"
+        }
+      }
+    },
+    "constant-container": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/constant-element"
+        }
+      }
+    },
+    "constant-element": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
       "properties": {
         "value": {
           "type": "string"
@@ -268,10 +284,17 @@
       }
     }
   },
-  "allOf": [{"$ref": "classpath://schema/model-extensions-schema.json"}],
-  "properties": {
-    "extensions": {
-      "$ref": "#/definitions/extensions"
+  "patternProperties": {
+    "extensions": { "$ref": "#/definitions/extensions" },
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
     }
-  }
+  },
+  "additionalProperties": false
 }
