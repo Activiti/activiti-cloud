@@ -126,9 +126,9 @@ public class ModelingModels {
     public void checkCurrentModelValidationErrorsForExtensions(String numberOfErrors) throws IOException {
         modelingModelsSteps.checkCurrentModelValidationFailureForExtensions("#: " + numberOfErrors + " schema violations found");
     }
-    
+
     @Then("$numberOfErrors validation schemas are matched for extensions")
     public void checkCurrentModelValidationSchemaMatchesForExtensions(String numberOfErrors) throws IOException {
-        modelingModelsSteps.checkCurrentModelValidationFailureForExtensions("#: #: only " + numberOfErrors + " subschema matches out of 2");
+        modelingModelsSteps.checkCurrentModelValidationFailureForExtensions("#: only " + numberOfErrors + " subschema matches out of 2");
     }
 }
