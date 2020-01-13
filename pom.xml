@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.1.15</version>
+    <version>7.1.16</version>
   </parent>
 
   <groupId>org.activiti.cloud.rb</groupId>
@@ -16,9 +16,9 @@
   <url>http://activiti.org</url>
 
   <properties>
-    <activiti-dependencies.version>7.1.154</activiti-dependencies.version>
-    <activiti-cloud-build.version>7.1.15</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>7.1.122</activiti-cloud-service-common.version>
+    <activiti-dependencies.version>7.1.155</activiti-dependencies.version>
+    <activiti-cloud-build.version>7.1.16</activiti-cloud-build.version>
+    <activiti-cloud-service-common.version>7.1.124</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>${project.version}</activiti-cloud-runtime-bundle-service.version>
   </properties>
 
