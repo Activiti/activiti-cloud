@@ -38,7 +38,7 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <activiti-cloud-modeling.version>7.1.327</activiti-cloud-modeling.version>
+    <activiti-cloud-modeling.version>7.1.331</activiti-cloud-modeling.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <enforcer.skip>true</enforcer.skip>
     <java.version>11</java.version>
@@ -55,7 +55,7 @@
     <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
 
-    <activiti-cloud-acceptance-tests.version>7.1.135</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-acceptance-tests.version>7.1.136</activiti-cloud-acceptance-tests.version>
   </properties>
   <dependencyManagement>
     <dependencies>
