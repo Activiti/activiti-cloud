@@ -22,9 +22,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
-import net.serenitybdd.core.Serenity;
-import net.thucydides.core.annotations.Steps;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
@@ -33,14 +38,13 @@ import org.activiti.cloud.acc.core.steps.audit.AuditSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import net.serenitybdd.core.Serenity;
+import net.thucydides.core.annotations.Steps;
 
 public class ProcessInstanceMessages {
 
@@ -148,6 +152,53 @@ public class ProcessInstanceMessages {
         processQuerySteps.checkProcessInstanceStatus(processId,
                                                      ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
+    
+    @Then("messages: the process with definition key of '$processDefinitionKey' having businessKey value of '$sessionVariable' session variable has status '$status'")
+    public void verifyProcessInstanceStatus(String processDefinitionKey,
+                                            String sessionVariable,
+                                            String status) throws Exception {
+        long timeoutSeconds = sessionTimeoutSeconds();
+        
+        String businessKey = Serenity.sessionVariableCalled(sessionVariable);
+        
+        await()
+               .atMost(timeoutSeconds, TimeUnit.SECONDS)
+               .untilAsserted(() -> {
+                   Collection<CloudProcessInstance> result = processQuerySteps.getProcessInstancesByProcessDefinitionKey(processDefinitionKey)
+                                                                    .getContent()
+                                                                    .stream()
+                                                                    .filter(it -> businessKey.equals(it.getBusinessKey()))
+                                                                    .collect(Collectors.toList());
+                   assertThat(result).isNotEmpty()
+                                     .extracting("status")
+                                     .contains(ProcessInstanceStatus.valueOf(status));
+               });
+    }
+
+    @Then("messages: $eventType event is emitted for the message '$messageName' for process definition key '$processDefinitionKey' having businessKey value of '$sessionVariable' session variable")
+    public void verifyMessageEventIsEmitted(String eventType,
+                                     String messageName,
+                                     String processDefinitionKey,
+                                     String sessionVariable) throws Exception {
+
+        long timeoutSeconds = sessionTimeoutSeconds();
+        
+        String businessKey = Serenity.sessionVariableCalled(sessionVariable);
+        
+        await()
+               .atMost(timeoutSeconds, TimeUnit.SECONDS)
+               .untilAsserted(() -> {
+                   Collection<CloudRuntimeEvent> events = auditSteps.getEventsByProcessDefinitionKey(processDefinitionKey)
+                                                                    .stream()
+                                                                    .filter(event -> businessKey.equals(event.getBusinessKey()))
+                                                                    .filter(event -> eventType.equals(event.getEventType().name()))
+                                                                    .collect(Collectors.toList());
+                   assertThat(events).isNotEmpty()
+                                     .extracting("entity.messagePayload.name")
+                                     .contains(messageName);
+               });
+    }
+    
     
     private long sessionTimeoutSeconds() {
         long timeoutSeconds = Serenity.sessionVariableCalled("timeoutSeconds");
