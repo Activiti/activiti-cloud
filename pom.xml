@@ -43,10 +43,10 @@
   </repositories>
   <properties>
     <project.scm.repository>activiti-cloud-modeling-service</project.scm.repository>
-    <activiti-cloud-dependencies.version>7.1.17</activiti-cloud-dependencies.version>
-    <activiti-dependencies.version>7.1.151</activiti-dependencies.version>
-    <activiti-cloud-service-common.version>7.1.124</activiti-cloud-service-common.version>
-    <activiti-cloud-acceptance-tests.version>7.1.137</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-build.version>7.1.17</activiti-cloud-build.version>    
+    <activiti-dependencies.version>7.1.155</activiti-dependencies.version>
+    <activiti-cloud-service-common.version>7.1.125</activiti-cloud-service-common.version>
+    <activiti-cloud-acceptance-tests.version>7.1.138</activiti-cloud-acceptance-tests.version>
     <activiti-cloud-modeling-service.version>${project.version}</activiti-cloud-modeling-service.version>
     <everit-json-schema.version>1.11.0</everit-json-schema.version>
     <org.json.version>20180813</org.json.version>
@@ -64,7 +64,7 @@
       <dependency>
         <groupId>org.activiti.cloud.build</groupId>
         <artifactId>activiti-cloud-dependencies-parent</artifactId>
-        <version>${activiti-cloud-dependencies.version}</version>
+        <version>${activiti-cloud-build.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -77,7 +77,27 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <dependencies>
+
+  <!-- Marker BoMs for dependency convergence tests --> 
+  <dependencies> 
+    <dependency> 
+      <groupId>org.activiti.cloud.build</groupId> 
+      <artifactId>activiti-cloud-parent</artifactId> 
+      <version>${activiti-cloud-build.version}</version> 
+      <type>pom</type> 
+    </dependency> 
+    <dependency>
+      <groupId>org.activiti.dependencies</groupId>
+      <artifactId>activiti-dependencies</artifactId>
+      <version>${activiti-dependencies.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.acc</groupId>
+      <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
+      <version>${activiti-cloud-acceptance-tests.version}</version>
+      <type>pom</type>
+    </dependency>
     <dependency>
       <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-service-common-dependencies</artifactId>
