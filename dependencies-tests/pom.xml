@@ -20,6 +20,7 @@
     <activiti-cloud-audit.version>7.1.271</activiti-cloud-audit.version>
     <activiti-cloud-query.version>7.1.283</activiti-cloud-query.version>
     <activiti-cloud-notifications-graphql.version>7.1.308</activiti-cloud-notifications-graphql.version>
+    <activiti-cloud-messages.version>7.1.0-PR-1-16-SNAPSHOT</activiti-cloud-messages.version>
   </properties>
   <dependencies>
     <dependency>
@@ -162,7 +163,28 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.examples</groupId>
+      <artifactId>activiti-cloud-messages</artifactId>
+      <version>${activiti-cloud-messages.version}</version>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.activiti.cloud.messages</groupId>
+          <artifactId>activiti-cloud-starter-messages</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>

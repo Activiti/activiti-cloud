@@ -80,12 +80,20 @@
   </ciManagement>
   <repositories>
     <repository>
-      <id>alfresco</id>
+      <id>activiti-releases</id>
       <name>Activiti Releases</name>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
       <releases>
         <enabled>true</enabled>
       </releases>
+    </repository>
+    <repository>
+      <id>activiti-snapshots</id>
+      <name>Activiti Snapshots</name>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
   <properties>
@@ -98,6 +106,7 @@
     <activiti-cloud-audit-service.version>7.1.141</activiti-cloud-audit-service.version>
     <activiti-cloud-connectors.version>7.1.121</activiti-cloud-connectors.version>
     <activiti-cloud-notifications-service-graphql.version>7.1.193</activiti-cloud-notifications-service-graphql.version>
+    <activiti-cloud-messages-service.version>7.1.0-PR-1-33-SNAPSHOT</activiti-cloud-messages-service.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -145,6 +154,12 @@
       <groupId>org.activiti.cloud.query</groupId>
       <artifactId>activiti-cloud-query-dependencies</artifactId>
       <version>${activiti-cloud-query-service.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.messages</groupId>
+      <artifactId>activiti-cloud-messages-dependencies</artifactId>
+      <version>${activiti-cloud-messages-service.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>

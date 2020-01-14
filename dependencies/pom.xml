@@ -48,6 +48,13 @@
         <scope>import</scope>
       </dependency>
       <dependency>
+        <groupId>org.activiti.cloud.messages</groupId>
+        <artifactId>activiti-cloud-messages-dependencies</artifactId>
+        <version>${activiti-cloud-messages-service.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
         <groupId>org.activiti.cloud.notifications.graphql</groupId>
         <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
         <version>${activiti-cloud-notifications-service-graphql.version}</version>
