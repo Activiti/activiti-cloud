@@ -20,3 +20,6 @@ github:
     - name: activiti-cloud-connectors
       branch: develop
       useSinglePullRequest: true
+    - name: activiti-cloud-messages-service
+      branch: develop
+      useSinglePullRequest: true
