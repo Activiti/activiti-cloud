@@ -46,7 +46,7 @@
     <activiti-cloud-dependencies.version>7.1.17</activiti-cloud-dependencies.version>
     <activiti-dependencies.version>7.1.151</activiti-dependencies.version>
     <activiti-cloud-service-common.version>7.1.124</activiti-cloud-service-common.version>
-    <activiti-cloud-acceptance-tests.version>7.1.136</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-acceptance-tests.version>7.1.137</activiti-cloud-acceptance-tests.version>
     <activiti-cloud-modeling-service.version>${project.version}</activiti-cloud-modeling-service.version>
     <everit-json-schema.version>1.11.0</everit-json-schema.version>
     <org.json.version>20180813</org.json.version>
