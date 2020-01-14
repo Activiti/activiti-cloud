@@ -1,0 +1,78 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.activiti.cloud.messages</groupId>
+    <artifactId>activiti-cloud-services-messages</artifactId>
+    <version>7.1.0-SNAPSHOT</version>
+  </parent>
+  
+  <name>Activiti Cloud Services :: Messages Core</name>
+  <artifactId>activiti-cloud-services-messages-core</artifactId>
+  
+  <dependencies>
+    <!-- Activiti Cloud -->          
+    <dependency>
+      <groupId>org.activiti.cloud.api</groupId>
+      <artifactId>activiti-cloud-api-process-model-impl</artifactId>
+    </dependency>
+    <!-- Third-party -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jdk8</artifactId>
+    </dependency>
+    <!-- Spring -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-messaging</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-stream</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <!-- Spring Integration -->
+    <dependency>
+      <groupId>org.springframework.integration</groupId>
+      <artifactId>spring-integration-core</artifactId>
+    </dependency>  
+    <!-- Test -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>        
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+       <groupId>org.springframework.cloud</groupId>
+       <artifactId>spring-cloud-stream-test-support</artifactId>
+       <scope>test</scope>
+   </dependency>    
+    <dependency>
+      <groupId>org.springframework.integration</groupId>
+      <artifactId>spring-integration-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Spring Configuration Properties Metadata Support -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
+</project>

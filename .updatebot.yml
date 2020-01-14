@@ -1,0 +1,7 @@
+github:
+  organisations:
+  - name: activiti
+    repositories:
+    - name: activiti-cloud-messages
+      branch: master
+      useSinglePullRequest: true      
