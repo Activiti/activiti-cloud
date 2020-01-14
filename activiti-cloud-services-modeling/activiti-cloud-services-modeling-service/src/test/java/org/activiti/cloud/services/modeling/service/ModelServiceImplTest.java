@@ -11,10 +11,13 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 import javax.xml.stream.XMLStreamException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
@@ -22,7 +25,10 @@ import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.impl.ModelImpl;
+import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.repository.ModelRepository;
+import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +43,12 @@ public class ModelServiceImplTest {
 
     @InjectMocks
     private ModelServiceImpl modelService;
+
+    @Mock
+    private JsonConverter jsonConverter;
+
+    @Mock
+    private ModelTypeService modelTypeService;
 
     @Mock
     private ModelRepository modelRepository;
@@ -113,10 +125,40 @@ public class ModelServiceImplTest {
         verify(bpmnModelOne, times(1)).getProcesses();
     }
 
+    @Test
+    public void should_returnProcessExtensionsFileForTheModelGiven() throws IOException, XMLStreamException {
+        ProcessModelType modelType = new ProcessModelType();
+        ModelImpl extensionModelImpl = this.createModelImpl();
+        when(modelRepository.getModelType()).thenReturn(ModelImpl.class);
+        when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
+        when(jsonConverter.convertToJsonBytes(any()))
+            .thenReturn(new ObjectMapper().writeValueAsBytes(extensionModelImpl));
+
+        Optional<FileContent> fileContent = modelService.getModelExtensionsFileContent(extensionModelImpl);
+        assertThat(fileContent.get().getFilename()).isEqualTo("fake-process-model-extensions.json");
+        assertThat(new String(fileContent.get().getFileContent()))
+            .isEqualToIgnoringCase("{\"id\":\"12345678\",\"name\":\"fake-process-model\",\"type\":\"PROCESS\",\"extensions\":{\"mappings\":\"\",\"constants\":\"\",\"properties\":\"\"}}");
+    }
+
+    private ModelImpl createModelImpl() {
+        ModelImpl transoformationModelImpl = new ModelImpl();
+        LinkedHashMap extension = new LinkedHashMap<>();
+        extension.put("mappings", "");
+        extension.put("constants", "");
+        extension.put("properties", "");
+        transoformationModelImpl.setExtensions(extension);
+        transoformationModelImpl.setName("fake-process-model");
+        transoformationModelImpl.setType("PROCESS");
+        transoformationModelImpl.setId("12345678");
+        return transoformationModelImpl;
+    }
+
     private Process initProcess(FlowElement... elements) {
         Process process = spy(new Process());
         Arrays.asList(elements)
                 .forEach(process::addFlowElement);
         return process;
     }
+
+
 }

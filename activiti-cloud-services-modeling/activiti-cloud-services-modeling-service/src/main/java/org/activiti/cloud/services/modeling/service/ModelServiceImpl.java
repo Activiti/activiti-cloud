@@ -177,13 +177,9 @@ public class ModelServiceImpl implements ModelService{
         }
 
         Model fullModel = findModelById(model.getId()).orElse(model);
-        byte[] modelContent = modelRepository.getModelContent(model);
-        final String bpmnModelId = modelContentService.findModelContentConverter(model.getType()).flatMap(converter -> converter.convertToModelContent(modelContent))
-                .map(ModelContent::getId).orElseGet(() -> modelContentService.getModelContentId(model));
-
         Model modelToFile = buildModel(fullModel.getType(),
                                        fullModel.getName());
-        modelToFile.setId(bpmnModelId);
+        modelToFile.setId(model.getId());
         modelToFile.setExtensions(fullModel.getExtensions());
 
         FileContent extensionsFileContent = new FileContent(getExtensionsFilename(model),
