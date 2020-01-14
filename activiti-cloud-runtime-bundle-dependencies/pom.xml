@@ -89,12 +89,12 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.rb</groupId>
-        <artifactId>activiti-cloud-services-message-connector</artifactId>      
+        <artifactId>activiti-cloud-services-messages-aggregator</artifactId>      
         <version>${activiti-cloud-runtime-bundle-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.rb</groupId>
-        <artifactId>activiti-cloud-services-message-events</artifactId>
+        <artifactId>activiti-cloud-services-messages-events</artifactId>
         <version>${activiti-cloud-runtime-bundle-service.version}</version>
       </dependency>
       <dependency>
@@ -104,7 +104,7 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.rb</groupId>
-        <artifactId>activiti-cloud-starter-message-connector</artifactId>
+        <artifactId>activiti-cloud-starter-messages</artifactId>
         <version>${activiti-cloud-runtime-bundle-service.version}</version>
       </dependency>
       <dependency>

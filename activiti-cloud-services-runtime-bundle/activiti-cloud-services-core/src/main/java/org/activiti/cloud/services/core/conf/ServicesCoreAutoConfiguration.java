@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.services.core.conf;
 
+import java.util.Set;
+
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
@@ -25,11 +27,14 @@ import org.activiti.cloud.services.core.commands.CommandEndpoint;
 import org.activiti.cloud.services.core.commands.CommandExecutor;
 import org.activiti.cloud.services.core.commands.CompleteTaskCmdExecutor;
 import org.activiti.cloud.services.core.commands.CreateTaskVariableCmdExecutor;
+import org.activiti.cloud.services.core.commands.DeleteProcessInstanceCmdExecutor;
+import org.activiti.cloud.services.core.commands.ReceiveMessageCmdExecutor;
 import org.activiti.cloud.services.core.commands.ReleaseTaskCmdExecutor;
 import org.activiti.cloud.services.core.commands.RemoveProcessVariablesCmdExecutor;
 import org.activiti.cloud.services.core.commands.ResumeProcessInstanceCmdExecutor;
 import org.activiti.cloud.services.core.commands.SetProcessVariablesCmdExecutor;
 import org.activiti.cloud.services.core.commands.SignalCmdExecutor;
+import org.activiti.cloud.services.core.commands.StartMessageCmdExecutor;
 import org.activiti.cloud.services.core.commands.StartProcessInstanceCmdExecutor;
 import org.activiti.cloud.services.core.commands.SuspendProcessInstanceCmdExecutor;
 import org.activiti.cloud.services.core.commands.UpdateTaskVariableCmdExecutor;
@@ -42,11 +47,10 @@ import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.MessageChannel;
-
-import java.util.Set;
+import org.springframework.context.annotation.PropertySource;
 
 @Configuration
+@PropertySource("classpath:config/command-endpoint-channels.properties")
 public class ServicesCoreAutoConfiguration {
 
     @Bean
@@ -56,95 +60,92 @@ public class ServicesCoreAutoConfiguration {
     
     @Bean
     @ConditionalOnMissingBean
-    public ClaimTaskCmdExecutor claimTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime,
-                                                     MessageChannel commandResults) {
-        return new ClaimTaskCmdExecutor(taskAdminRuntime, 
-                                        commandResults);
+    public ClaimTaskCmdExecutor claimTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+        return new ClaimTaskCmdExecutor(taskAdminRuntime);
     }
     
     @Bean
     @ConditionalOnMissingBean
-    public CompleteTaskCmdExecutor completeTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime,
-                                                           MessageChannel commandResults) {
-        return new CompleteTaskCmdExecutor(taskAdminRuntime,
-                                           commandResults);
+    public CompleteTaskCmdExecutor completeTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+        return new CompleteTaskCmdExecutor(taskAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public CreateTaskVariableCmdExecutor createTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime,
-                                                                       MessageChannel commandResults) {
-        return new CreateTaskVariableCmdExecutor(taskAdminRuntime,
-                                                 commandResults);
+    public CreateTaskVariableCmdExecutor createTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+        return new CreateTaskVariableCmdExecutor(taskAdminRuntime);
     }
     
     @Bean
     @ConditionalOnMissingBean
-    public ReleaseTaskCmdExecutor releaseTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime,
-                                                         MessageChannel commandResults) {
-        return new ReleaseTaskCmdExecutor(taskAdminRuntime,
-                                          commandResults);
+    public ReleaseTaskCmdExecutor releaseTaskCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+        return new ReleaseTaskCmdExecutor(taskAdminRuntime);
     }    
 
     @Bean
     @ConditionalOnMissingBean
-    public UpdateTaskVariableCmdExecutor updateTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime,
-                                                                       MessageChannel commandResults) {
-        return new UpdateTaskVariableCmdExecutor(taskAdminRuntime,
-                                                 commandResults);
+    public UpdateTaskVariableCmdExecutor updateTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+        return new UpdateTaskVariableCmdExecutor(taskAdminRuntime);
     }
     
     @Bean
     @ConditionalOnMissingBean
-    public RemoveProcessVariablesCmdExecutor removeProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime,
-                                                                               MessageChannel commandResults) {
-        return new RemoveProcessVariablesCmdExecutor(processAdminRuntime,
-                                                     commandResults);
+    public RemoveProcessVariablesCmdExecutor removeProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+        return new RemoveProcessVariablesCmdExecutor(processAdminRuntime);
     }    
 
     @Bean
     @ConditionalOnMissingBean
-    public ResumeProcessInstanceCmdExecutor resumeProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime,
-                                                                             MessageChannel commandResults) {
-        return new ResumeProcessInstanceCmdExecutor(processAdminRuntime,
-                                                    commandResults);
+    public ResumeProcessInstanceCmdExecutor resumeProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+        return new ResumeProcessInstanceCmdExecutor(processAdminRuntime);
     }  
     
     @Bean
     @ConditionalOnMissingBean
-    public SetProcessVariablesCmdExecutor setProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime,
-                                                                         MessageChannel commandResults) {
-        return new SetProcessVariablesCmdExecutor(processAdminRuntime,
-                                                  commandResults);
+    public SetProcessVariablesCmdExecutor setProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+        return new SetProcessVariablesCmdExecutor(processAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public SignalCmdExecutor signalCmdExecutor(ProcessAdminRuntime processAdminRuntime,
-                                               MessageChannel commandResults) {
-        return new SignalCmdExecutor(processAdminRuntime,
-                                     commandResults);
+    public SignalCmdExecutor signalCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+        return new SignalCmdExecutor(processAdminRuntime);
     }
     
     @Bean
     @ConditionalOnMissingBean
-    public StartProcessInstanceCmdExecutor startProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime,
-                                                                           MessageChannel commandResults) {
-        return new StartProcessInstanceCmdExecutor(processAdminRuntime,
-                                                   commandResults);
+    public StartProcessInstanceCmdExecutor startProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+        return new StartProcessInstanceCmdExecutor(processAdminRuntime);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public SuspendProcessInstanceCmdExecutor suspendProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime,
-                                                                               MessageChannel commandResults) {
-        return new SuspendProcessInstanceCmdExecutor(processAdminRuntime,
-                                                     commandResults);
+    public SuspendProcessInstanceCmdExecutor suspendProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+        return new SuspendProcessInstanceCmdExecutor(processAdminRuntime);
     }    
+
+    @Bean
+    @ConditionalOnMissingBean
+    public StartMessageCmdExecutor startMessageCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+        return new StartMessageCmdExecutor(processAdminRuntime);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ReceiveMessageCmdExecutor receiveMessageCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+        return new ReceiveMessageCmdExecutor(processAdminRuntime);
+    }
     
     @Bean
+    @ConditionalOnMissingBean
+    public DeleteProcessInstanceCmdExecutor deleteProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+        return new DeleteProcessInstanceCmdExecutor(processAdminRuntime);
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
     public <T extends Payload> CommandEndpoint<T> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
-        return new CommandEndpoint<>(cmdExecutors);
+        return new CommandEndpoint<T>(cmdExecutors);
     }
     
     @Bean

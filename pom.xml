@@ -64,7 +64,6 @@
     <module>activiti-cloud-services-runtime-bundle</module>
     <module>activiti-cloud-starter-runtime-bundle</module>
     <module>activiti-cloud-starter-runtime-bundle-it</module>
-    <module>activiti-cloud-starter-message-connector</module>
   </modules>
 
   <scm>
