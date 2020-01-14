@@ -4,14 +4,16 @@ ACTIVITI_CLOUD_QUERY_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-
 ACTIVITI_CLOUD_RB_VERSION := $(shell mvn help:evaluate -Dexpression=example-runtime-bundle.version -q -DforceStdout -f dependencies-tests/pom.xml)
 ACTIVITI_CLOUD_NOTIFICATIONS_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-notifications-graphql.version -q -DforceStdout -f dependencies-tests/pom.xml)
 ACTIVITI_CLOUD_MODELING_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-modeling.version -q -DforceStdout -f dependencies-tests/pom.xml)
+ACTIVITI_CLOUD_MESSAGES_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-messages.version -q -DforceStdout -f dependencies-tests/pom.xml)
 
-ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.123
+ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.134
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
 
 ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(ACTIVITI_CLOUD_RB_VERSION) activiti-cloud-connector $(ACTIVITI_CLOUD_CONNECTORS_VERSION) \
     activiti-cloud-query $(ACTIVITI_CLOUD_QUERY_VERSION) activiti-cloud-notifications-graphql $(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)  \
-    activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING_VERSION)
+    activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING_VERSION) \
+    activiti-cloud-messages $(ACTIVITI_CLOUD_MESSAGES_VERSION)
 
 $(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\./-/'|rev))
 
@@ -72,6 +74,7 @@ pull-docker-images:
 	docker pull activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_RB_VERSION)
 	docker pull activiti/example-cloud-connector:$(ACTIVITI_CLOUD_CONNECTORS_VERSION)
 	docker pull activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_MODELING_VERSION)
+	docker pull activiti/activiti-cloud-messages:$(ACTIVITI_CLOUD_MESSAGES_VERSION)
 
 retag-docker-images: pull-docker-images
 	docker image tag activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION) activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_VERSION)
@@ -80,6 +83,7 @@ retag-docker-images: pull-docker-images
 	docker image tag activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_RB_VERSION) activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_VERSION)
 	docker image tag activiti/example-cloud-connector:$(ACTIVITI_CLOUD_CONNECTORS_VERSION) activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
 	docker image tag activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_MODELING_VERSION) activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_VERSION)
+	docker image tag activiti/activiti-cloud-messages:$(ACTIVITI_CLOUD_MESSAGES_VERSION) activiti/activiti-cloud-messages:$(ACTIVITI_CLOUD_VERSION)
 	
 push-docker-images:
 	docker push activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_VERSION)
@@ -88,6 +92,8 @@ push-docker-images:
 	docker push activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_VERSION)
+	docker push activiti/activiti-cloud-messages:$(ACTIVITI_CLOUD_VERSION)
+
 github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
@@ -103,6 +109,7 @@ github:
 	   git push --force origin "$(GITHUB_CHARTS_BRANCH)"
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
      rm -rf $(GITHUB_CHARTS_DIR)
+
 tag:
 	#sed -i -e "s/version:.*/version: $(HELM_ACTIVITI_VERSION)/" Chart.yaml
 	#sed -i -e "s/tag: .*/tag: $(RELEASE_VERSION)/" values.yaml
@@ -125,6 +132,7 @@ prepare-helm-chart:
         	helm dependency build && \
         	helm lint && \
 		helm package .
+
 run-helm-chart:
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
             	helm upgrade ${PREVIEW_NAMESPACE} . \
@@ -133,6 +141,7 @@ run-helm-chart:
             		--namespace ${PREVIEW_NAMESPACE} \
             		--debug \
             		--wait
+
 delete:
 	helm delete --purge ${PREVIEW_NAMESPACE} || echo "try to remove helm chart"
 

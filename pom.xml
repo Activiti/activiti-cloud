@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.1.15</version>
+    <version>7.1.17</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.dependencies</groupId>
@@ -80,24 +80,33 @@
   </ciManagement>
   <repositories>
     <repository>
-      <id>alfresco</id>
+      <id>activiti-releases</id>
       <name>Activiti Releases</name>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
       <releases>
         <enabled>true</enabled>
       </releases>
     </repository>
+    <repository>
+      <id>activiti-snapshots</id>
+      <name>Activiti Snapshots</name>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
   <properties>
-    <activiti-cloud-build.version>7.1.15</activiti-cloud-build.version>
-    <activiti-cloud-api.version>7.1.81</activiti-cloud-api.version>
-    <activiti-cloud-service-common.version>7.1.122</activiti-cloud-service-common.version>
-    <activiti-cloud-modeling-service.version>7.1.324</activiti-cloud-modeling-service.version>
-    <activiti-cloud-runtime-bundle-service.version>7.1.211</activiti-cloud-runtime-bundle-service.version>
-    <activiti-cloud-query-service.version>7.1.193</activiti-cloud-query-service.version>
-    <activiti-cloud-audit-service.version>7.1.140</activiti-cloud-audit-service.version>
-    <activiti-cloud-connectors.version>7.1.119</activiti-cloud-connectors.version>
-    <activiti-cloud-notifications-service-graphql.version>7.1.192</activiti-cloud-notifications-service-graphql.version>
+    <activiti-cloud-build.version>7.1.17</activiti-cloud-build.version>
+    <activiti-cloud-api.version>7.1.84</activiti-cloud-api.version>
+    <activiti-cloud-service-common.version>7.1.125</activiti-cloud-service-common.version>
+    <activiti-cloud-modeling-service.version>7.1.334</activiti-cloud-modeling-service.version>
+    <activiti-cloud-runtime-bundle-service.version>7.1.215</activiti-cloud-runtime-bundle-service.version>
+    <activiti-cloud-query-service.version>7.1.195</activiti-cloud-query-service.version>
+    <activiti-cloud-audit-service.version>7.1.142</activiti-cloud-audit-service.version>
+    <activiti-cloud-connectors.version>7.1.122</activiti-cloud-connectors.version>
+    <activiti-cloud-notifications-service-graphql.version>7.1.194</activiti-cloud-notifications-service-graphql.version>
+    <activiti-cloud-messages-service.version>7.1.1</activiti-cloud-messages-service.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -145,6 +154,12 @@
       <groupId>org.activiti.cloud.query</groupId>
       <artifactId>activiti-cloud-query-dependencies</artifactId>
       <version>${activiti-cloud-query-service.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.messages</groupId>
+      <artifactId>activiti-cloud-messages-dependencies</artifactId>
+      <version>${activiti-cloud-messages-service.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
