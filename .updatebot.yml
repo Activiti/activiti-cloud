@@ -7,4 +7,8 @@ github:
       useSinglePullRequest: true      
     - name: activiti-cloud-messages-service
       branch: develop
-      useSinglePullRequest: true      
+      useSinglePullRequest: true
+  - name: alfresco
+    repositories:
+    - name: alfresco-process-oracle-kafka-application
+      useSinglePullRequest: true 
