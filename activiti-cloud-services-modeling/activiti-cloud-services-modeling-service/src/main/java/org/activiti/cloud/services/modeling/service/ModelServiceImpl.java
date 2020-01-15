@@ -179,7 +179,7 @@ public class ModelServiceImpl implements ModelService{
         Model fullModel = findModelById(model.getId()).orElse(model);
         Model modelToFile = buildModel(fullModel.getType(),
                                        fullModel.getName());
-        modelToFile.setId(model.getId());
+        modelToFile.setId(fullModel.getType().toLowerCase().concat("-"+model.getId()));
         modelToFile.setExtensions(fullModel.getExtensions());
 
         FileContent extensionsFileContent = new FileContent(getExtensionsFilename(model),
