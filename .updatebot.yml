@@ -5,3 +5,7 @@ github:
     - name: activiti-cloud-dependencies
       branch: develop
       useSinglePullRequest: true
+  - name: alfresco
+    repositories:
+    - name: alfresco-process-oracle-kafka-application
+      useSinglePullRequest: true
