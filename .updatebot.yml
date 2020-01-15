@@ -3,4 +3,8 @@ github:
   - name: activiti
     repositories:
     - name: example-cloud-connector
-      useSinglePullRequest: true      
+      useSinglePullRequest: true
+  - name: alfresco
+    repositories:
+    - name: alfresco-process-oracle-kafka-application
+      useSinglePullRequest: true
