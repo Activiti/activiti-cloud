@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.1.10.RELEASE</version>
+    <version>2.1.11.RELEASE</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.activiti.cloud.examples</groupId>
@@ -20,25 +20,18 @@
     <tag>HEAD</tag>
   </scm>
   <properties>
-      <java.version>11</java.version>
-      <maven.compiler.source>${java.version}</maven.compiler.source>
-      <maven.compiler.target>${java.version}</maven.compiler.target>
-      <activiti-cloud-runtime-bundle-service.version>7.1.222</activiti-cloud-runtime-bundle-service.version>
-      <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
-      <maven-failsafe-plugin.version>3.0.0-M3</maven-failsafe-plugin.version>
-      <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
-      <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>   
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <activiti-cloud-runtime-bundle-service.version>7.1.222</activiti-cloud-runtime-bundle-service.version>
+    <docker-maven-plugin.version>0.32.0</docker-maven-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
-     <dependency>
-       <groupId>org.activiti.cloud.rb</groupId>
-       <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-       <version>${activiti-cloud-runtime-bundle-service.version}</version>
-       <scope>import</scope> 
-      <type>pom</type>
-     </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.rb</groupId>
+        <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
+        <version>${activiti-cloud-runtime-bundle-service.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
@@ -68,13 +61,13 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
-    
+
     <!-- Marker Pom for Dependency Conversion Validation  -->
     <dependency>
-     <groupId>org.activiti.cloud.rb</groupId>
-     <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-     <version>${activiti-cloud-runtime-bundle-service.version}</version>
-     <type>pom</type>
+      <groupId>org.activiti.cloud.rb</groupId>
+      <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
+      <version>${activiti-cloud-runtime-bundle-service.version}</version>
+      <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -83,19 +76,15 @@
       <type>pom</type>
     </dependency>
     <!-- Marker Pom for Dependency Conversion Validation  -->
-        
+
   </dependencies>
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven-compiler-plugin.version}</version>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
         <configuration>
-          <release>${java.version}</release>
-          <showDeprecation>true</showDeprecation>
-          <showWarnings>true</showWarnings>
-          <optimize>true</optimize>
+          <verbose>false</verbose>
         </configuration>
       </plugin>
       <plugin>
@@ -104,20 +93,10 @@
         <executions>
           <execution>
             <goals>
-              <goal>repackage</goal>
+              <goal>build-info</goal>
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>${maven-deploy-plugin.version}</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${maven-surefire-plugin.version}</version>
       </plugin>
     </plugins>
   </build>
@@ -125,7 +104,6 @@
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
         <property>
           <name>skipITs</name>
           <value>false</value>
@@ -136,24 +114,11 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${maven-failsafe-plugin.version}</version>
-            <configuration>
-              <forkCount>0</forkCount>
-              <useSystemClassLoader>false</useSystemClassLoader>
-            </configuration>
-            <executions>
-              <execution>
-                <id>integration-test</id>
-                <goals>
-                  <goal>integration-test</goal>
-                  <goal>verify</goal>
-                </goals>
-              </execution>
-            </executions>
           </plugin>
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
+            <version>${docker-maven-plugin.version}</version>
             <configuration>
               <images>
                 <image>
@@ -188,7 +153,6 @@
                   </run>
                 </image>
               </images>
-              <skip>${skipTests}</skip>
             </configuration>
             <executions>
               <execution>
@@ -203,17 +167,26 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>mock-spring-cloud-stream</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-stream-test-support</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
   </profiles>
   <repositories>
     <repository>
       <id>activiti-releases</id>
       <name>Activiti Releases</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
     </repository>
     <repository>
       <id>activiti-snapshots</id>
       <name>Activiti Snapshots</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</url>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
     </repository>
   </repositories>
 </project>
