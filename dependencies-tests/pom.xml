@@ -15,7 +15,7 @@
     <maven.deploy.skip>true</maven.deploy.skip>
     <enforceFail>true</enforceFail>
     <activiti-cloud-modeling.version>7.1.601</activiti-cloud-modeling.version>
-    <example-runtime-bundle.version>7.1.347</example-runtime-bundle.version>
+    <example-runtime-bundle.version>7.1.348</example-runtime-bundle.version>
     <example-cloud-connector.version>7.1.291</example-cloud-connector.version>
     <activiti-cloud-audit.version>7.1.280</activiti-cloud-audit.version>
     <activiti-cloud-query.version>7.1.292</activiti-cloud-query.version>
