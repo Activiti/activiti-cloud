@@ -3,11 +3,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.10.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.1.11.RELEASE</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
   <groupId>org.activiti.cloud.examples</groupId>
   <artifactId>activiti-cloud-query</artifactId>
   <version>7.1.0-SNAPSHOT</version>
@@ -20,24 +20,17 @@
     <tag>HEAD</tag>
   </scm>
   <properties>
-    <java.version>11</java.version>
-    <maven.compiler.source>${java.version}</maven.compiler.source>
-    <maven.compiler.target>${java.version}</maven.compiler.target>
     <activiti-cloud-query-service.version>7.1.201</activiti-cloud-query-service.version>
-    <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
-    <maven-failsafe-plugin.version>3.0.0-M3</maven-failsafe-plugin.version>
-    <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
-    <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
-       <groupId>org.activiti.cloud.query</groupId>
-       <artifactId>activiti-cloud-query-dependencies</artifactId>
-       <version>${activiti-cloud-query-service.version}</version>
-       <scope>import</scope>
-      <type>pom</type>
-    </dependency>
+        <groupId>org.activiti.cloud.query</groupId>
+        <artifactId>activiti-cloud-query-dependencies</artifactId>
+        <version>${activiti-cloud-query-service.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
@@ -80,7 +73,6 @@
       <version>${activiti-cloud-query-service.version}</version>
       <type>pom</type>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
@@ -88,20 +80,14 @@
       <type>pom</type>
     </dependency>
     <!-- Marker Pom for Dependency Conversion Validation  -->
-
   </dependencies>
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven-compiler-plugin.version}</version>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
         <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <showDeprecation>true</showDeprecation>
-          <showWarnings>true</showWarnings>
-          <optimize>true</optimize>
+          <verbose>false</verbose>
         </configuration>
       </plugin>
       <plugin>
@@ -110,51 +96,21 @@
         <executions>
           <execution>
             <goals>
-              <goal>repackage</goal>
+              <goal>build-info</goal>
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>${maven-deploy-plugin.version}</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${maven-surefire-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${maven-failsafe-plugin.version}</version>
-        <configuration>
-          <forkCount>0</forkCount>
-          <useSystemClassLoader>false</useSystemClassLoader>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
   <repositories>
     <repository>
-        <id>activiti-releases</id>
-        <name>Activiti Releases</name>
-        <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
-        <snapshots>
-          <enabled>true</enabled>
-        </snapshots>
-        <releases>
-          <enabled>true</enabled>
-        </releases>
+      <id>activiti-releases</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
     </repository>
   </repositories>
 </project>
