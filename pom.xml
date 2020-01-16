@@ -15,8 +15,8 @@
 
   <properties>
     <activiti-cloud-build.version>7.1.18</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>7.1.132</activiti-cloud-service-common.version>
-    <activiti-cloud-runtime-bundle-service.version>7.1.224</activiti-cloud-runtime-bundle-service.version>
+    <activiti-cloud-service-common.version>7.1.133</activiti-cloud-service-common.version>
+    <activiti-cloud-runtime-bundle-service.version>7.1.225</activiti-cloud-runtime-bundle-service.version>
     <activiti-cloud-messages-service.version>${project.version}</activiti-cloud-messages-service.version>
   </properties>
 
