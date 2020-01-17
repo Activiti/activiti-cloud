@@ -26,7 +26,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ConnectorModelAction {
+public class ConnectorModelFeature {
 
     private String id;
     private String name;

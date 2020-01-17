@@ -37,7 +37,9 @@ public class ConnectorModelContent implements ModelContent {
 
     private String template;
 
-    private Map<String, ConnectorModelAction> actions;
+    private Map<String, ConnectorModelFeature> actions;
+
+    private Map<String, ConnectorModelFeature> events;
 
     @Override
     public String getId() {
@@ -65,11 +67,19 @@ public class ConnectorModelContent implements ModelContent {
         this.template = template;
     }
 
-    public Map<String, ConnectorModelAction> getActions() {
+    public Map<String, ConnectorModelFeature> getActions() {
         return actions;
     }
 
-    public void setActions(Map<String, ConnectorModelAction> actions) {
+    public void setActions(Map<String, ConnectorModelFeature> actions) {
         this.actions = actions;
+    }
+
+    public Map<String, ConnectorModelFeature> getEvents() {
+        return events;
+    }
+
+    public void setEvents(Map<String, ConnectorModelFeature> events) {
+        this.events = events;
     }
 }

@@ -32,7 +32,7 @@ import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
 import org.activiti.cloud.modeling.api.process.ServiceTaskActionType;
 import org.activiti.cloud.modeling.api.process.VariableMappingType;
 import org.activiti.cloud.services.modeling.converter.ConnectorActionParameter;
-import org.activiti.cloud.services.modeling.converter.ConnectorModelAction;
+import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConverter;
 
 import java.util.Arrays;
@@ -66,7 +66,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
     public Stream<ModelValidationError> validateTaskMappings(List<TaskMapping> taskMappings,
                                                              Map<String, Constant> taskConstants,
                                                              ValidationContext validationContext) {
-        Map<String, ConnectorModelAction> availableConnectorActions = getAvailableConnectorActions(validationContext);
+        Map<String, ConnectorModelFeature> availableConnectorActions = getAvailableConnectorActions(validationContext);
         return taskMappings
                 .stream()
                 .flatMap(taskMapping -> validateTaskMapping(taskMapping,
@@ -74,7 +74,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
     }
 
     private Stream<ModelValidationError> validateTaskMapping(TaskMapping taskMapping,
-                                                            Map<String, ConnectorModelAction> availableConnectorActions) {
+                                                            Map<String, ConnectorModelFeature> availableConnectorActions) {
         return taskMapping
                 .getProcessVariableMappings()
                 .entrySet()
@@ -94,7 +94,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                                                                 ServiceTaskActionType actionType,
                                                                 String processVariableMappingKey,
                                                                 ProcessVariableMapping processVariableMapping,
-                                                                Map<String, ConnectorModelAction> availableConnectorActions) {
+                                                                Map<String, ConnectorModelFeature> availableConnectorActions) {
 
         if(actionType == OUTPUTS && processVariableMapping.getType() == VariableMappingType.VALUE) {
             return Optional.<ModelValidationError>empty();
@@ -128,8 +128,8 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                 .map(ServiceTask::getImplementation);
     }
 
-    private Map<String, ConnectorModelAction> getAvailableConnectorActions(ValidationContext validationContext) {
-        Map<String, ConnectorModelAction> availableConnectorActions = new HashMap<>();
+    private Map<String, ConnectorModelFeature> getAvailableConnectorActions(ValidationContext validationContext) {
+        Map<String, ConnectorModelFeature> availableConnectorActions = new HashMap<>();
         validationContext.getAvailableModels(connectorModelType)
                 .stream()
                 .map(Model::getContent)
@@ -145,7 +145,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
     }
 
     private String getImplementationKey(String connectorName,
-                                        ConnectorModelAction action) {
+                                        ConnectorModelFeature action) {
         return isEmpty(action) && isEmpty(action.getName()) ?
                 connectorName :
                 String.join(".",

@@ -99,6 +99,22 @@ public class ConnectorValidationControllerIT {
     }
 
     @Test
+    public void should_returnStatusNoContent_when_validatingConnectorWithEvents() throws IOException {
+        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+
+        given()
+                .multiPart("file",
+                        "connector-with-events.json",
+                        resourceAsByteArray("connector/connector-with-events.json"),
+                        "text/plain")
+                .post("/v1/models/{modelId}/validate",
+                        connectorModel.getId())
+                .then()
+                .expect(status().isNoContent())
+                .body(isEmptyString());
+    }
+
+    @Test
     public void should_throwSemanticValidationException_when_validatingInvalidSimpleConnector() throws IOException {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 

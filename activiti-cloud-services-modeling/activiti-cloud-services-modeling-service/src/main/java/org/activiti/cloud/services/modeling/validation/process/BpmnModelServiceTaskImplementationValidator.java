@@ -25,7 +25,7 @@ import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.services.modeling.converter.ConnectorModelAction;
+import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContent;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConverter;
 
@@ -95,11 +95,11 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnModelVal
                 .filter(connectorModelContent -> connectorModelContent.getActions() != null);
     }
 
-    private String concatNameAndAction(ConnectorModelAction connectorModelAction,
+    private String concatNameAndAction(ConnectorModelFeature connectorModelFeature,
                                        Model model) {
-        return isEmpty(connectorModelAction) && isEmpty(connectorModelAction.getName()) ?
+        return isEmpty(connectorModelFeature) && isEmpty(connectorModelFeature.getName()) ?
                 model.getName() :
-                model.getName() + "." + connectorModelAction.getName();
+                model.getName() + "." + connectorModelFeature.getName();
     }
 
     private Optional<ModelValidationError> validateServiceTaskImplementation(ServiceTask serviceTask,

@@ -24,7 +24,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [ "string", "integer", "boolean", "date", "json", "file" ]
+            "enum": [ "string", "integer", "boolean", "date", "json", "file", "datetime", "array" ]
           },
           "required": {
             "type": "boolean"
@@ -33,7 +33,7 @@
         "required": [ "id", "name", "type" ]
       }
     },
-    "connector-action": {
+    "connector-feature": {
       "type": "object",
       "additionalProperties" : false,
       "properties": {
@@ -54,7 +54,6 @@
       "required": [ "id", "name" ]
     }
   },
-
   "additionalProperties" : false,
   "properties": {
     "id": {
@@ -78,7 +77,12 @@
     },
     "actions" : {
       "type": "object",
-      "additionalProperties": { "$ref": "#/definitions/connector-action" },
+      "additionalProperties": { "$ref": "#/definitions/connector-feature" },
+      "default": {}
+    },
+    "events" : {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/connector-feature" },
       "default": {}
     }
   },
