@@ -8,7 +8,3 @@ github:
     - name: activiti-cloud-notifications-service-graphql
       branch: develop
       useSinglePullRequest: true
-  - name: alfresco
-    repositories:
-    - name: alfresco-process-oracle-kafka-application
-      useSinglePullRequest: true
