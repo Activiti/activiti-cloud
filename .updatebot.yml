@@ -5,7 +5,3 @@ github:
     - name: activiti-cloud-audit
       branch: master
       useSinglePullRequest: true
-  - name: alfresco
-    repositories:
-    - name: alfresco-process-oracle-kafka-application
-      useSinglePullRequest: true
