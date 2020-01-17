@@ -6,10 +6,23 @@ ACTIVITI_CLOUD_NOTIFICATIONS_VERSION := $(shell mvn help:evaluate -Dexpression=a
 ACTIVITI_CLOUD_MODELING_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-modeling.version -q -DforceStdout -f dependencies-tests/pom.xml)
 ACTIVITI_CLOUD_MESSAGES_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-messages.version -q -DforceStdout -f dependencies-tests/pom.xml)
 
+ACTIVITI_CLOUD_CONNECTORS_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-connectors.version -q -DforceStdout)
+ACTIVITI_CLOUD_AUDIT_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-audit-service.version -q -DforceStdout)
+ACTIVITI_CLOUD_QUERY_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-query-service.version -q -DforceStdout)
+ACTIVITI_CLOUD_RB_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-runtime-bundle-service.version -q -DforceStdout)
+ACTIVITI_CLOUD_NOTIFICATIONS_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-notifications-service-graphql.version -q -DforceStdout)
+ACTIVITI_CLOUD_MODELING_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-modeling-service.version -q -DforceStdout)
+ACTIVITI_CLOUD_MESSAGES_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-messages-service.version -q -DforceStdout)
+
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.153
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
 
+ACTIVITI_CLOUD_SERVICES_VERSIONS := org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies  $(ACTIVITI_CLOUD_RB_SERVICE_VERSION) org.activiti.cloud.connector:activiti-cloud-connectors-dependencies $(ACTIVITI_CLOUD_CONNECTORS_SERVICE_VERSION) \
+    org.activiti.cloud.query:activiti-cloud-query-dependencies $(ACTIVITI_CLOUD_QUERY_SERVICE_VERSION) org.activiti.cloud.notifications.graphql:activiti-cloud-notifications-graphql-dependencies $(ACTIVITI_CLOUD_NOTIFICATIONS_SERVICE_VERSION)  \
+    org.activiti.cloud.audit:activiti-cloud-audit-dependencies $(ACTIVITI_CLOUD_AUDIT_SERVICE_VERSION) org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $(ACTIVITI_CLOUD_MODELING_SERVICE_VERSION) \
+    org.activiti.cloud.messages:activiti-cloud-messages-dependencies $(ACTIVITI_CLOUD_MESSAGES_SERVICE_VERSION)
+		
 ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(ACTIVITI_CLOUD_RB_VERSION) activiti-cloud-connector $(ACTIVITI_CLOUD_CONNECTORS_VERSION) \
     activiti-cloud-query $(ACTIVITI_CLOUD_QUERY_VERSION) activiti-cloud-notifications-graphql $(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)  \
     activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING_VERSION) \
@@ -53,8 +66,9 @@ update-ea:
 	@cd alfresco-process-parent && curl --request POST --header "PRIVATE-TOKEN: $(GITLAB_TOKEN)" --header "Content-Type: application/json" -d '{"id": ${ID} ,"source_branch": "update-cloud-to-${ACTIVITI_CLOUD_VERSION}" ,"target_branch":"develop","title":"community propagation ACTIVITI_CLOUD_VERSION to ${ACTIVITI_CLOUD_VERSION}"}' https://git.alfresco.com/api/v4/projects/1031/merge_requests
 
 updatebot/push-version:
-	updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) --merge false
+	updatebot push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_SERVICES_VERSIONS)   --merge false
 	updatebot push-version --kind helm activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
+	updatebot push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
 updatebot/push-version-dry:
 	updatebot --dry push-version --kind helm $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
