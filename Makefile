@@ -7,7 +7,7 @@ ACTIVITI_CLOUD_MODELING_VERSION := $(shell mvn help:evaluate -Dexpression=activi
 ACTIVITI_CLOUD_MESSAGES_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-messages.version -q -DforceStdout -f dependencies-tests/pom.xml)
 
 ACTIVITI_CLOUD_CONNECTORS_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-connectors.version -q -DforceStdout)
-ACTIVITI_CLOUD_AUDIT_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=aactiviti-cloud-audit-service.version -q -DforceStdout)
+ACTIVITI_CLOUD_AUDIT_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-audit-service.version -q -DforceStdout)
 ACTIVITI_CLOUD_QUERY_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-query-service.version -q -DforceStdout)
 ACTIVITI_CLOUD_RB_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-runtime-bundle-service.version -q -DforceStdout)
 ACTIVITI_CLOUD_NOTIFICATIONS_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-notifications-service-graphql.version -q -DforceStdout)
