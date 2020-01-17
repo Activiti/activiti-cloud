@@ -9,6 +9,10 @@ github:
     repositories:
     - name: alfresco-process-parent
       useSinglePullRequest: true
+  - name: alfresco
+    repositories:
+    - name: alfresco-process-oracle-kafka-application
+      useSinglePullRequest: true  
       
         
     # - name: ttc-connectors-reward
