@@ -4,7 +4,3 @@ github:
     repositories:
     - name: example-cloud-connector
       useSinglePullRequest: true
-  - name: alfresco
-    repositories:
-    - name: alfresco-process-oracle-kafka-application
-      useSinglePullRequest: true
