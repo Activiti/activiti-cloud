@@ -1,12 +1,15 @@
-language: java 
-sudo: required
-cache:
-  directories:
-  - $HOME/.m2
-services:
-  - docker
+language: java
+
 jdk:
   - openjdk11
+
+cache:
+  directories:
+    - ${HOME}/.m2/repository
+
+services:
+  - docker
+
 notifications:
   webhooks:
     urls:
@@ -15,12 +18,17 @@ notifications:
     on_failure: always  # options: [always|never|change] default: always
     on_start: never     # options: [always|never|change] default: always
 
+branches:
+  only:
+    - master
+    - develop
+
 before_script:
   - echo MAVEN_OPTS=-Xmx1536m > ~/.mavenrc
 
 # Enable integration tests
 script:
-  - mvn verify -B -Pdependency-check
+  - mvn verify -B -DskipITs=false
 
 # Send coverage data
 after_success:
