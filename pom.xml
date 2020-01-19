@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.1.18</version>
+    <version>7.1.19</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.common</groupId>
@@ -34,10 +34,9 @@
     <module>activiti-cloud-services-test-security-keycloak</module>
   </modules>
   <properties>
-    <project.scm.repository>activiti-cloud-service-common</project.scm.repository>
     <activiti-api.version>7.1.172</activiti-api.version>
     <activiti-core.version>${activiti-api.version}</activiti-core.version>
-    <activiti-cloud-build.version>7.1.18</activiti-cloud-build.version>
+    <activiti-cloud-build.version>7.1.19</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
     <activiti-core-common.version>7.1.165</activiti-core-common.version>
     <activiti-cloud-api.version>7.1.95</activiti-cloud-api.version>
