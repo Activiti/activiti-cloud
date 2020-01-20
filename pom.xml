@@ -7,20 +7,17 @@
     <artifactId>activiti-cloud-parent</artifactId>
     <version>7.1.19</version>
   </parent>
-
   <groupId>org.activiti.cloud.api</groupId>
   <artifactId>activiti-cloud-api</artifactId>
   <version>7.1.0-SNAPSHOT</version>
   <name>Activiti Cloud :: Runtime API Parent</name>
-
   <packaging>pom</packaging>
-
   <properties>
     <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
     <activiti-cloud-build.version>7.1.19</activiti-cloud-build.version>
+    <activiti-core.version>${activiti-api.version}</activiti-core.version>
     <activiti-api.version>7.1.167</activiti-api.version>
   </properties>
-
   <modules>
     <module>dependencies-tests</module>
     <module>activiti-cloud-api-dependencies</module>
@@ -32,18 +29,12 @@
     <module>activiti-cloud-api-task-model-impl</module>
     <module>activiti-cloud-api-events</module>
   </modules>
-  
   <repositories>
     <repository>
-      <id>alfresco</id>
-      <name>Activiti Releases</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
+      <id>activiti-releases</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
     </repository>
   </repositories>
-  
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -51,11 +42,10 @@
         <artifactId>activiti-cloud-dependencies-parent</artifactId>
         <version>${activiti-cloud-build.version}</version>
         <scope>import</scope>
-        <type>pom</type>       
-      </dependency>    
+        <type>pom</type>
+      </dependency>
     </dependencies>
   </dependencyManagement>
-
   <!-- BoMs markers for dependency convergence tests -->
   <dependencies>
     <dependency>
@@ -69,19 +59,6 @@
       <artifactId>activiti-api-dependencies</artifactId>
       <version>${activiti-api.version}</version>
       <type>pom</type>
-    </dependency>      
+    </dependency>
   </dependencies>
-  
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
-        <configuration>
-          <deployAtEnd>true</deployAtEnd>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
