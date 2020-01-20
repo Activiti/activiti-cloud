@@ -8,15 +8,33 @@
     <version>7.1.18</version>
     <relativePath/>
   </parent>
-
   <groupId>org.activiti.cloud.common</groupId>
   <artifactId>activiti-cloud-service-common-parent</artifactId>
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Service Common Parent</name>
-  <url>http://activiti.org</url>
-
+  <modules>
+    <module>dependencies-tests</module>
+    <module>activiti-cloud-service-common-dependencies</module>
+    <module>activiti-cloud-services-test</module>
+    <module>activiti-cloud-services-monitoring</module>
+    <module>activiti-cloud-services-tracing</module>
+    <module>activiti-cloud-services-logging</module>
+    <module>activiti-cloud-services-metadata</module>
+    <module>activiti-cloud-services-dbp-rest</module>
+    <module>activiti-cloud-services-rest-docs</module>
+    <module>activiti-cloud-services-common-security-keycloak</module>
+    <module>activiti-cloud-services-common-identity-keycloak</module>
+    <module>activiti-cloud-services-auditable</module>
+    <module>activiti-cloud-services-commons-io</module>
+    <module>activiti-cloud-services-common-security</module>
+    <module>activiti-cloud-service-common-config</module>
+    <module>activiti-cloud-services-swagger</module>
+    <module>activiti-cloud-service-error-handlers</module>
+    <module>activiti-cloud-services-test-security-keycloak</module>
+  </modules>
   <properties>
+    <project.scm.repository>activiti-cloud-service-common</project.scm.repository>
     <activiti-cloud-build.version>7.1.18</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
     <activiti-core-common.version>7.1.165</activiti-core-common.version>
@@ -41,48 +59,6 @@
     <javax.annotation.version>1.3.2</javax.annotation.version>
     <testcontainers.version>1.12.2</testcontainers.version>
   </properties>
-
-  <modules>
-    <module>dependencies-tests</module>
-    <module>activiti-cloud-service-common-dependencies</module>
-    <module>activiti-cloud-services-test</module>
-    <module>activiti-cloud-services-monitoring</module>
-    <module>activiti-cloud-services-tracing</module>
-    <module>activiti-cloud-services-logging</module>
-    <module>activiti-cloud-services-metadata</module>
-    <module>activiti-cloud-services-dbp-rest</module>
-    <module>activiti-cloud-services-rest-docs</module>
-    <module>activiti-cloud-services-common-security-keycloak</module>
-    <module>activiti-cloud-services-common-identity-keycloak</module>
-    <module>activiti-cloud-services-auditable</module>
-    <module>activiti-cloud-services-commons-io</module>
-    <module>activiti-cloud-services-common-security</module>
-    <module>activiti-cloud-service-common-config</module>
-    <module>activiti-cloud-services-swagger</module>
-    <module>activiti-cloud-service-error-handlers</module>
-    <module>activiti-cloud-services-test-security-keycloak</module>
-  </modules>
-  <scm>
-    <url>https://github.com/Activiti/activiti-cloud-service-common</url>
-    <connection>scm:git:https://github.com/Activiti/activiti-cloud-service-common.git</connection>
-    <developerConnection>scm:git:https://github.com/Activiti/activiti-cloud-service-common.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
-  <ciManagement>
-    <system>Travis</system>
-    <url>https://travis-ci.org/Activiti/activiti-cloud-service-common</url>
-  </ciManagement>
-  <repositories>
-    <repository>
-      <id>alfresco</id>
-      <name>Activiti Releases</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-  </repositories>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -226,7 +202,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
   <!-- Activiti build parent marker dependency for dependency convergence tests -->
   <dependencies>
     <dependency>
@@ -248,17 +223,10 @@
       <type>pom</type>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
-        <configuration>
-          <deployAtEnd>true</deployAtEnd>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+  <repositories>
+    <repository>
+      <id>activiti-releases</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+    </repository>
+  </repositories>
 </project>
