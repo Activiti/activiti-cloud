@@ -3,7 +3,6 @@ package org.activiti.cloud.services.modeling.converter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.activiti.bpmn.model.CallActivity;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.ReferenceOverrider;
 import org.activiti.bpmn.model.StartEvent;
@@ -27,15 +26,6 @@ public class ReferenceIdOverrider implements ReferenceOverrider {
     }
 
     @Override
-    public void override(CallActivity callActivity) {
-        String oldCalledElement = callActivity.getCalledElement();
-        String newCalledElement = modelIdentifiers.get(oldCalledElement);
-        if (newCalledElement != null) {
-            callActivity.setCalledElement(newCalledElement);
-        }
-    }
-
-    @Override
     public void override(StartEvent startEvent) {
         String oldFormKey = startEvent.getFormKey();
         String newFormKey = modelIdentifiers.get(oldFormKey);
@@ -51,4 +41,5 @@ public class ReferenceIdOverrider implements ReferenceOverrider {
             process.setId(newProcessId);
         }
     }
+
 }

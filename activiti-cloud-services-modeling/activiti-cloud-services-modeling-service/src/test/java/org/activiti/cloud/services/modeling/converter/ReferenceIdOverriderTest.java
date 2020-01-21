@@ -58,36 +58,6 @@ public class ReferenceIdOverriderTest {
     }
 
     @Test
-    public void should_overrideCallActivity_when_hasNewCalledElement() {
-        CallActivity callActivity = new CallActivity();
-        callActivity.setCalledElement("oldCalledElement");
-
-        referenceIdOverrider.override(callActivity);
-
-        assertThat(callActivity.getCalledElement()).isEqualTo("newCalledElement");
-    }
-
-    @Test
-    public void should_notOverrideCallActivity_when_sameCalledElement() {
-        CallActivity callActivity = new CallActivity();
-        callActivity.setCalledElement("sameCalledElement");
-
-        referenceIdOverrider.override(callActivity);
-
-        assertThat(callActivity.getCalledElement()).isEqualTo("sameCalledElement");
-    }
-
-    @Test
-    public void should_overrideCallActivity_when_notNewCalledElement() {
-        CallActivity callActivity = new CallActivity();
-        callActivity.setCalledElement("notNewCalledElement");
-
-        referenceIdOverrider.override(callActivity);
-
-        assertThat(callActivity.getCalledElement()).isEqualTo("notNewCalledElement");
-    }
-
-    @Test
     public void should_overrideStartEvent_when_hasNewFormKey() {
         StartEvent startEvent = new StartEvent();
         startEvent.setFormKey("oldFormKey");
