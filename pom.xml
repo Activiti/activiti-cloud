@@ -35,9 +35,9 @@
   </modules>
   <properties>
     <project.scm.repository>activiti-cloud-service-common</project.scm.repository>
-    <activiti-api.version>7.1.172</activiti-api.version>
+    <activiti-api.version>7.1.173</activiti-api.version>
     <activiti-core.version>7.1.173</activiti-core.version>
-    <activiti-cloud-build.version>7.1.20</activiti-cloud-build.version>
+    <activiti-cloud-build.version>7.1.21</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
     <activiti-core-common.version>7.1.173</activiti-core-common.version>
     <activiti-cloud-api.version>7.1.101</activiti-cloud-api.version>
