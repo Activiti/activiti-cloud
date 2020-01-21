@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud.messages</groupId>
@@ -6,7 +8,6 @@
     <version>7.1.0-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-messages-tests</artifactId>
-  
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud.messages</groupId>
@@ -21,11 +22,10 @@
     <dependency>
        <groupId>org.springframework.cloud</groupId>
        <artifactId>spring-cloud-stream-test-support</artifactId>
-   </dependency>    
+   </dependency>
     <dependency>
       <groupId>org.springframework.integration</groupId>
       <artifactId>spring-integration-test</artifactId>
     </dependency>
   </dependencies>
-
 </project>
