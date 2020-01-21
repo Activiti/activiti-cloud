@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -7,21 +7,25 @@
     <artifactId>activiti-cloud-parent</artifactId>
     <version>7.1.18</version>
   </parent>
-
   <groupId>org.activiti.cloud.rb</groupId>
   <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud Runtime Bundle Service :: Parent</name>
-  <url>http://activiti.org</url>
-
+  <modules>
+    <module>dependencies-tests</module>
+    <module>activiti-cloud-runtime-bundle-dependencies</module>
+    <module>activiti-cloud-services-runtime-bundle</module>
+    <module>activiti-cloud-starter-runtime-bundle</module>
+    <module>activiti-cloud-starter-runtime-bundle-it</module>
+  </modules>
   <properties>
+	  <project.scm.repository>activiti-cloud-runtime-bundle-service</project.scm.repository>
     <activiti-dependencies.version>7.1.165</activiti-dependencies.version>
     <activiti-cloud-build.version>7.1.18</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>7.1.135</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>${project.version}</activiti-cloud-runtime-bundle-service.version>
   </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -33,7 +37,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
   <!-- Marker BoMs for dependency convergence tests -->
   <dependencies>
     <dependency>
@@ -57,48 +60,10 @@
       <type>pom</type>
     </dependency>
   </dependencies>
-
-  <modules>
-    <module>dependencies-tests</module>
-    <module>activiti-cloud-runtime-bundle-dependencies</module>
-    <module>activiti-cloud-services-runtime-bundle</module>
-    <module>activiti-cloud-starter-runtime-bundle</module>
-    <module>activiti-cloud-starter-runtime-bundle-it</module>
-  </modules>
-
-  <scm>
-    <url>https://github.com/Activiti/activiti-cloud-runtime-bundle-service</url>
-    <connection>scm:git:https://github.com/Activiti/activiti-cloud-runtime-bundle-service.git</connection>
-    <developerConnection>scm:git:https://github.com/Activiti/activiti-cloud-runtime-bundle-service.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
-
-  <ciManagement>
-    <system>Travis</system>
-    <url>https://travis-ci.org/Activiti/activiti-cloud-runtime-bundle-service</url>
-  </ciManagement>
- 
   <repositories>
     <repository>
-      <id>alfresco</id>
-      <name>Activiti Releases</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
+      <id>activiti-releases</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
     </repository>
   </repositories>
-    
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
-        <configuration>
-          <deployAtEnd>true</deployAtEnd>
-        </configuration>
-      </plugin>
-    </plugins>
-    </build>
-  </project>
+</project>
