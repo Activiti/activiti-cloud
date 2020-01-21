@@ -15,12 +15,17 @@ notifications:
     on_failure: always  # options: [always|never|change] default: always
     on_start: never     # options: [always|never|change] default: always
 
+branches:
+  only:
+    - master
+    - develop
+
 before_script:
   - echo MAVEN_OPTS=-Xmx1536m > ~/.mavenrc
 
 # Enable integration tests
 script:
-  - mvn verify -B -Pdependency-check
+  - mvn verify -B
 
 # Send coverage data
 after_success:
