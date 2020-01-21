@@ -16,7 +16,7 @@
       <artifactId>activiti-api-model-shared</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.api</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-api-model-shared-impl</artifactId>
     </dependency>
     <dependency>
@@ -32,7 +32,7 @@
       <artifactId>activiti-api-process-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.api</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
@@ -44,7 +44,7 @@
       <artifactId>activiti-api-task-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.api</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-api-task-model-impl</artifactId>
     </dependency>
     <dependency>
