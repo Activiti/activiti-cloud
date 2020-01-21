@@ -13,7 +13,6 @@
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Modeling Services :: Parent</name>
-  <url>http://activiti.org</url>
   <modules>
     <module>dependencies-tests</module>
     <module>activiti-cloud-modeling-dependencies</module>
@@ -21,29 +20,9 @@
     <module>activiti-cloud-starter-modeling</module>
     <module>activiti-cloud-acceptance-tests-modeling</module>
   </modules>
-  <scm>
-    <url>https://github.com/Activiti/${project.scm.repository}</url>
-    <connection>scm:git:https://github.com/Activiti/${project.scm.repository}.git</connection>
-    <developerConnection>scm:git:https://github.com/Activiti/${project.scm.repository}.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
-  <ciManagement>
-    <system>Travis</system>
-    <url>https://travis-ci/Activiti/${project.scm.repository}</url>
-  </ciManagement>
-  <repositories>
-    <repository>
-      <id>alfresco</id>
-      <name>Activiti Releases</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-  </repositories>
   <properties>
     <project.scm.repository>activiti-cloud-modeling-service</project.scm.repository>
-    <activiti-cloud-build.version>7.1.18</activiti-cloud-build.version>    
+    <activiti-cloud-build.version>7.1.18</activiti-cloud-build.version>
     <activiti-dependencies.version>7.1.165</activiti-dependencies.version>
     <activiti-cloud-service-common.version>7.1.135</activiti-cloud-service-common.version>
     <activiti-cloud-acceptance-tests.version>7.1.149</activiti-cloud-acceptance-tests.version>
@@ -77,15 +56,14 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <!-- Marker BoMs for dependency convergence tests --> 
-  <dependencies> 
-    <dependency> 
-      <groupId>org.activiti.cloud.build</groupId> 
-      <artifactId>activiti-cloud-parent</artifactId> 
-      <version>${activiti-cloud-build.version}</version> 
-      <type>pom</type> 
-    </dependency> 
+  <!-- Marker BoMs for dependency convergence tests -->
+  <dependencies>
+    <dependency>
+      <groupId>org.activiti.cloud.build</groupId>
+      <artifactId>activiti-cloud-parent</artifactId>
+      <version>${activiti-cloud-build.version}</version>
+      <type>pom</type>
+    </dependency>
     <dependency>
       <groupId>org.activiti.dependencies</groupId>
       <artifactId>activiti-dependencies</artifactId>
@@ -105,15 +83,10 @@
       <type>pom</type>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <deployAtEnd>true</deployAtEnd>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+  <repositories>
+    <repository>
+      <id>alfresco</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+    </repository>
+  </repositories>
 </project>
