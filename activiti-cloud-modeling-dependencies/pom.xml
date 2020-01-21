@@ -72,23 +72,23 @@
       <dependency>
         <groupId>org.activiti.cloud.modeling</groupId>
         <artifactId>activiti-cloud-starter-modeling</artifactId>
+        <version>${activiti-cloud-modeling-service.version}</version>
         <classifier>api-docs</classifier>
         <type>json</type>
-        <version>${activiti-cloud-modeling-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.modeling</groupId>
         <artifactId>activiti-cloud-starter-modeling</artifactId>
+        <version>${activiti-cloud-modeling-service.version}</version>
         <classifier>api-docs</classifier>
         <type>yaml</type>
-        <version>${activiti-cloud-modeling-service.version}</version>
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud.modeling</groupId>
         <artifactId>activiti-cloud-starter-modeling</artifactId>
+        <version>${activiti-cloud-modeling-service.version}</version>
         <classifier>api-docs-hal</classifier>
         <type>json</type>
-        <version>${activiti-cloud-modeling-service.version}</version>
       </dependency>
       <dependency>
         <groupId>com.github.erosb</groupId>
@@ -104,12 +104,12 @@
       <dependency>
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>
-        <version>${org.json.version}</version>
+        <version>${json.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-collections4</artifactId>
-        <version>${org.apache.common.version}</version>
+        <version>${commons-collections4.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
