@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.1.21</version>
+    <version>7.1.23</version>
   </parent>
   <groupId>org.activiti.cloud.api</groupId>
   <artifactId>activiti-cloud-api</artifactId>
@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
   <properties>
     <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
-    <activiti-cloud-build.version>7.1.21</activiti-cloud-build.version>
+    <activiti-cloud-build.version>7.1.23</activiti-cloud-build.version>
     <activiti-core.version>7.1.174</activiti-core.version>
     <activiti-api.version>7.1.174</activiti-api.version>
   </properties>
