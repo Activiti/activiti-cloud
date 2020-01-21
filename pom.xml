@@ -40,7 +40,6 @@
     <activiti-core-common.version>7.1.165</activiti-core-common.version>
     <activiti-cloud-api.version>7.1.95</activiti-cloud-api.version>
     <!-- dependencies -->
-    <awaitility.version>3.0.0</awaitility.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
@@ -179,11 +178,6 @@
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-jackson2-provider</artifactId>
         <version>${resteasy.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.awaitility</groupId>
-        <artifactId>awaitility</artifactId>
-        <version>${awaitility.version}</version>
       </dependency>
       <dependency>
         <groupId>com.github.zafarkhaja</groupId>

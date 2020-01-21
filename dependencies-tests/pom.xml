@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud.common</groupId>
@@ -7,20 +9,16 @@
   </parent>
   <artifactId>activiti-cloud-service-common-dependencies-tests</artifactId>
   <packaging>pom</packaging>
-  
   <name>Activiti Cloud :: Service Common Dependencies BOM (Bill Of Materials) Tests</name>
-  
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
-    <enforceFail>true</enforceFail>    
+    <enforcer.fail>true</enforcer.fail>
   </properties>
-  
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.0.0-M2</version>
         <executions>
           <execution>
             <id>enforce-dependency-convergence</id>
@@ -28,26 +26,17 @@
               <goal>enforce</goal>
             </goals>
             <configuration>
-              <fail>${enforceFail}</fail>
               <rules>
                 <reactorModuleConvergence>
                   <message>The reactor is not valid</message>
                   <ignoreModuleDependencies>false</ignoreModuleDependencies>
-                </reactorModuleConvergence>              
+                </reactorModuleConvergence>
                 <dependencyConvergence/>
               </rules>
-            </configuration>
-          </execution>
-          <execution>
-            <!-- disable parent execution which fails here -->
-            <id>enforce-plugin-versions</id>
-            <configuration>
-              <fail>false</fail>
             </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
-  
 </project>
