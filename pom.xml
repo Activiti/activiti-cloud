@@ -13,35 +13,14 @@
   <name>Activiti Cloud Query :: Parent</name>
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <url>http://activiti.org</url>
   <modules>
     <module>dependencies-tests</module>
     <module>activiti-cloud-query-dependencies</module>
     <module>activiti-cloud-services-query</module>
     <module>activiti-cloud-starter-query</module>
   </modules>
-  <scm>
-    <url>https://github.com/Activiti/activiti-cloud-query-service</url>
-    <connection>scm:git:https://github.com/Activiti/activiti-cloud-query-service.git</connection>
-    <developerConnection>scm:git:https://github.com/Activiti/activiti-cloud-query-service.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
-  <ciManagement>
-    <system>Travis</system>
-    <url>https://travis-ci.org/Activiti/activiti-cloud-query-service</url>
-  </ciManagement>
-  <repositories>
-    <repository>
-      <id>alfresco</id>
-      <name>Activiti Releases</name>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-  </repositories>
-
   <properties>
+	  <project.scm.repository>activiti-cloud-query-service</project.scm.repository>
     <activiti-cloud-build.version>7.1.18</activiti-cloud-build.version>
     <activiti-dependencies.version>7.1.165</activiti-dependencies.version>
     <activiti-cloud-service-common.version>7.1.135</activiti-cloud-service-common.version>
@@ -49,7 +28,6 @@
     <json-unit.version>1.24.0</json-unit.version>
     <testcontainers.version>1.12.0</testcontainers.version>
   </properties>
-
   <!-- BoM Marker Dependencies -->
   <dependencies>
     <dependency>
@@ -90,18 +68,10 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
-        <configuration>
-          <deployAtEnd>true</deployAtEnd>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
+  <repositories>
+    <repository>
+      <id>activiti-releases</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+    </repository>
+  </repositories>
 </project>
