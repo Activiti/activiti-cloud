@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.1.23</version>
+    <version>7.1.24</version>
   </parent>
 
   <groupId>org.activiti.cloud.messages</groupId>
@@ -14,7 +14,7 @@
   <url>http://activiti.org</url>
 
   <properties>
-    <activiti-cloud-build.version>7.1.23</activiti-cloud-build.version>
+    <activiti-cloud-build.version>7.1.24</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>7.1.142</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>7.1.228</activiti-cloud-runtime-bundle-service.version>
     <activiti-cloud-messages-service.version>${project.version}</activiti-cloud-messages-service.version>
