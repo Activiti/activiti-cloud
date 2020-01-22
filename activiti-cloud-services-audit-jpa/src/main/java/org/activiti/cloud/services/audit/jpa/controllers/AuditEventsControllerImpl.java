@@ -16,7 +16,9 @@
 
 package org.activiti.cloud.services.audit.jpa.controllers;
 
-import com.google.common.base.Joiner;
+import static java.util.stream.Collectors.joining;
+
+import java.util.Arrays;
 import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedResourcesAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -71,7 +73,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     private final APIEventToEntityConverters eventConverters;
-     
+
     @Autowired
     public AuditEventsControllerImpl(EventsRepository eventsRepository,
                                      EventResourceAssembler eventResourceAssembler,
@@ -133,9 +135,8 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     private Specification<AuditEventEntity> createSearchSpec(String search) {
         EventSpecificationsBuilder builder = new EventSpecificationsBuilder();
         if (search != null && !search.isEmpty()) {
-            String operationSetExper = Joiner.on("|")
-                    .join(SearchOperation.SIMPLE_OPERATION_SET);
-            Pattern pattern = Pattern.compile("(\\w+?)(" + operationSetExper + ")(\\p{Punct}?)([a-zA-Z0-9-_]+?)(\\p{Punct}?),");
+            String operationSetExpr = Arrays.asList(SearchOperation.SIMPLE_OPERATION_SET).stream().collect(joining("|"));
+            Pattern pattern = Pattern.compile("(\\w+?)(" + operationSetExpr + ")(\\p{Punct}?)([a-zA-Z0-9-_]+?)(\\p{Punct}?),");
             Matcher matcher = pattern.matcher(search + ",");
             while (matcher.find()) {
                 builder.with(matcher.group(1),
