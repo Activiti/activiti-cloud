@@ -60,6 +60,26 @@ public class ProjectServiceImplTest {
     }
 
     @Test
+    public void should_getUsersAndGroupsBelongingToAProjectExludingExpressions_when_getProcessAccessControl() {
+        List<UserTask> userTasks = asList(taskOne, taskTwo);
+
+        when(taskOne.getCandidateGroups()).thenReturn(asList("groupOne", "${processsVariable.groupName}", "groupTwo"));
+        when(taskOne.getCandidateUsers()).thenReturn(asList("${username_Var}", "userOne"));
+        when(taskTwo.getAssignee()).thenReturn("${processsVariable.username}");
+        when(modelService.getTasksBy(eq(project), any(ProcessModelType.class), eq(UserTask.class)))
+                .thenReturn(userTasks);
+
+        ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(project);
+
+        assertThat(projectAccessControl.getGroups())
+                .hasSize(2)
+                .contains("groupOne", "groupTwo");
+        assertThat(projectAccessControl.getUsers())
+                .hasSize(1)
+                .contains("userOne");
+    }
+
+    @Test
     public void should_returnEmptyLists_when_thereAreNotAssigneeAndCandidateUsersAndGroups() {
         List<UserTask> userTasks = asList(taskOne, taskTwo);
 
