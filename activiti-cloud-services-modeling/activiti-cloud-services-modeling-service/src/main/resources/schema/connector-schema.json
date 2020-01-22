@@ -52,6 +52,33 @@
         "outputs": { "$ref": "#/definitions/connector-parameters" }
       },
       "required": [ "id", "name" ]
+    },
+    "connector-config": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties" : false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [ "string", "integer", "boolean", "date", "json", "file" ]
+          },
+          "value": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": [ "id", "name", "type" ]
+      }
     }
   },
   "additionalProperties" : false,
@@ -83,6 +110,11 @@
     "events" : {
       "type": "object",
       "additionalProperties": { "$ref": "#/definitions/connector-feature" },
+      "default": {}
+    },
+    "config" : {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/connector-config" },
       "default": {}
     }
   },
