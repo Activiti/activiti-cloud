@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.1.18</version>
+    <version>7.1.25</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.dependencies</groupId>
@@ -15,16 +15,16 @@
   <name>Activiti Cloud :: BOM (Bill of Materials) Parent</name>
   <properties>
     <project.scm.repository>activiti-cloud-dependencies</project.scm.repository>
-    <activiti-cloud-build.version>7.1.18</activiti-cloud-build.version>
-    <activiti-cloud-api.version>7.1.93</activiti-cloud-api.version>
-    <activiti-cloud-service-common.version>7.1.133</activiti-cloud-service-common.version>
-    <activiti-cloud-modeling-service.version>7.1.342</activiti-cloud-modeling-service.version>
-    <activiti-cloud-runtime-bundle-service.version>7.1.225</activiti-cloud-runtime-bundle-service.version>
-    <activiti-cloud-query-service.version>7.1.203</activiti-cloud-query-service.version>
-    <activiti-cloud-audit-service.version>7.1.150</activiti-cloud-audit-service.version>
-    <activiti-cloud-connectors.version>7.1.131</activiti-cloud-connectors.version>
-    <activiti-cloud-notifications-service-graphql.version>7.1.203</activiti-cloud-notifications-service-graphql.version>
-    <activiti-cloud-messages-service.version>7.1.9</activiti-cloud-messages-service.version>
+    <activiti-cloud-build.version>7.1.25</activiti-cloud-build.version>
+    <activiti-cloud-api.version>7.1.108</activiti-cloud-api.version>
+    <activiti-cloud-service-common.version>7.1.145</activiti-cloud-service-common.version>
+    <activiti-cloud-modeling-service.version>7.1.348</activiti-cloud-modeling-service.version>
+    <activiti-cloud-runtime-bundle-service.version>7.1.229</activiti-cloud-runtime-bundle-service.version>
+    <activiti-cloud-query-service.version>7.1.207</activiti-cloud-query-service.version>
+    <activiti-cloud-audit-service.version>7.1.154</activiti-cloud-audit-service.version>
+    <activiti-cloud-connectors.version>7.1.136</activiti-cloud-connectors.version>
+    <activiti-cloud-notifications-service-graphql.version>7.1.207</activiti-cloud-notifications-service-graphql.version>
+    <activiti-cloud-messages-service.version>7.1.13</activiti-cloud-messages-service.version>
   </properties>
   <repositories>
     <repository>
