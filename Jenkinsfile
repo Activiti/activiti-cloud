@@ -24,9 +24,9 @@ pipeline {
           branch 'PR-*'
         }
         steps {
-          container('maven') {                   
+          container('maven') {
             sh "git config --global credential.helper store"
-            sh "jx step git credentials"  
+            sh "jx step git credentials"
             sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
             sh "mvn install"
             sh "make updatebot/push-version-dry"
@@ -84,7 +84,7 @@ pipeline {
                 ).trim()
                 println GIT_COMMIT_DETAILS
 
-            slackSend(channel: "##activiti-community-builds", message: "New build propagated to AE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
+            slackSend(channel: "##activiti-community-builds", message: "New build propagated to AAE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
             }
           }
         }

@@ -1,12 +1,15 @@
-language: java 
-sudo: required
-cache:
-  directories:
-  - $HOME/.m2
-services:
-  - docker
+language: java
+
 jdk:
   - openjdk11
+
+cache:
+  directories:
+    - ${HOME}/.m2/repository
+
+services:
+  - docker
+
 notifications:
   webhooks:
     urls:
@@ -23,13 +26,18 @@ notifications:
     template:
       - "Repo `%{repository_slug}` *%{result}* build (<%{build_url}|#%{build_number}>) for commit (<%{compare_url}|%{commit}>) on branch `%{branch}`."
       - "Author: %{author} Execution time: *%{duration}*"
-      - "Message: %{message}"  
+      - "Message: %{message}"
+
+branches:
+  only:
+    - master
+    - develop
+
 before_script:
   - echo MAVEN_OPTS=-Xmx1536m > ~/.mavenrc
 
 # Enable integration tests
 script:
-  - echo "TRAVIS_PULL_REQUEST is $TRAVIS_PULL_REQUEST"
   - mvn verify -B -DskipITs=false
 
 # Send coverage data
@@ -39,7 +47,3 @@ after_success:
 after_failure:
   - cat **/target/surefire-reports/*.xml | grep -B 1 -A 10 "<error"
   - cat **/target/failsafe-reports/*.xml | grep -B 1 -A 10 "<error"
-
-env:
-  global:
-  - DOCKER_HOST=tcp://127.0.0.1:2375
