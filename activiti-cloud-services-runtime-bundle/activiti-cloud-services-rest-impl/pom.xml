@@ -59,7 +59,7 @@
       <artifactId>activiti-api-task-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti.api</groupId>
+      <groupId>org.activiti</groupId>
       <artifactId>activiti-api-model-shared-impl</artifactId>
     </dependency>
     <dependency>
