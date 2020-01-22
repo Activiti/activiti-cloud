@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud.messages</groupId>
@@ -8,12 +10,17 @@
   </parent>
   <artifactId>activiti-cloud-starters-messages</artifactId>
   <packaging>pom</packaging>
-  
+  <modules>
+    <module>jdbc</module>
+    <module>redis</module>
+    <module>mongodb</module>
+    <module>hazelcast</module>
+  </modules>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-integration</artifactId>
-    </dependency>  
+    </dependency>
     <dependency>
       <groupId>org.activiti.cloud.messages</groupId>
       <artifactId>activiti-cloud-services-messages-core</artifactId>
@@ -70,7 +77,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
   <build>
     <plugins>
       <plugin>
@@ -89,11 +95,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <modules>
-    <module>jdbc</module>
-    <module>redis</module>
-    <module>mongodb</module>
-    <module>hazelcast</module>
-  </modules>
 </project>
