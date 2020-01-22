@@ -136,6 +136,7 @@ public class MQServiceTaskIT {
                                false);
 
         //engine can resolve annotated pojo in var to correct type but not without annotation
+        //temporary comment to unblock propogation
         assertThat(updatedVariables.get("customPojo").getClass()).isEqualTo(ObjectNode.class);
         assertThat(updatedVariables.get("customPojoAnnotated").getClass()).isEqualTo(CustomPojoAnnotated.class);
 
