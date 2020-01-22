@@ -66,10 +66,6 @@
           "description": {
             "type": "string"
           },
-          "type": {
-            "type": "string",
-            "enum": [ "string", "integer", "boolean", "date", "json", "file" ]
-          },
           "value": {
             "type": "string"
           },
@@ -77,7 +73,7 @@
             "type": "boolean"
           }
         },
-        "required": [ "id", "name", "type" ]
+        "required": [ "name", "type" ]
       }
     }
   },
