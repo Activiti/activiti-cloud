@@ -36,15 +36,16 @@ public class IntegrationContextMessageBuilderAppenderTest {
     private static final String CONNECTOR_TYPE = "connectorType";
     private static final String BUSINESS_KEY = "businessKey";
     private static final String ID = "id";
+    private static final String APP_VERSION = "1";
 
-    private IntegrationContextMessageBuilderAppender subject;
+    private IntegrationContextMessageBuilderAppender integrationBuilder;
     
     private IntegrationContextImpl integrationContext;
     
     @Before
     public void setUp() {
         integrationContext = anIntegrationContext();
-        subject = new IntegrationContextMessageBuilderAppender(integrationContext);
+        integrationBuilder = new IntegrationContextMessageBuilderAppender(integrationContext);
     }
 
     @Test
@@ -53,7 +54,7 @@ public class IntegrationContextMessageBuilderAppenderTest {
         MessageBuilder<IntegrationRequest> request = MessageBuilder.withPayload(new IntegrationRequestImpl());
         
         // when
-        subject.apply(request);
+        integrationBuilder.apply(request);
         
         // then
         Message<IntegrationRequest> message = request.build();
@@ -66,6 +67,7 @@ public class IntegrationContextMessageBuilderAppenderTest {
             .containsEntry(IntegrationContextMessageHeaders.PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())
             .containsEntry(IntegrationContextMessageHeaders.PROCESS_DEFINITION_KEY, integrationContext.getProcessDefinitionKey())
             .containsEntry(IntegrationContextMessageHeaders.PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
+            .containsEntry(IntegrationContextMessageHeaders.APP_VERSION, integrationContext.getAppVersion())
             .containsEntry(IntegrationContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId());
                     
         
@@ -81,6 +83,7 @@ public class IntegrationContextMessageBuilderAppenderTest {
         integrationContext.setProcessDefinitionKey(PROCESS_DEFINITION_KEY);
         integrationContext.setProcessDefinitionVersion(_1);
         integrationContext.setProcessInstanceId(PROCESS_INSTANCE_ID);
+        integrationContext.setAppVersion(APP_VERSION);
         integrationContext.setParentProcessInstanceId(PARENT_PROCESS_INSTANCE_ID);
         
         return integrationContext;

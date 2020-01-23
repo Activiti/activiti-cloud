@@ -75,7 +75,7 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
      * @param integrationContext the related integration context
      */
     private void publishSpringEvent(DelegateExecution execution,
-                                      IntegrationContextEntity integrationContext) {
+                                    IntegrationContextEntity integrationContext) {
 
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContextBuilder.from(integrationContext,
                                                                                                               execution));
