@@ -17,14 +17,10 @@
 package org.activiti.cloud.services.modeling.mock;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -78,10 +74,10 @@ public class MockFactory {
     }
 
     public static ModelEntity processModelWithExtensions(String name,
-                                                         Extensions extensions) {
+                                                         Map<String, Extensions> extensions) {
         return processModelWithExtensions(null,
                                           name,
-                                          extensions);
+                                          extensions!=null ? extensions.get(name) : null);
     }
 
     public static ModelEntity processModelWithExtensions(String name,
@@ -109,12 +105,18 @@ public class MockFactory {
         ModelEntity processModel = new ModelEntity(name,
                                                    PROCESS);
         processModel.setProject(parentProject);
-        processModel.setExtensions(extensions!=null?extensions.getAsMap():null);
+        processModel.setExtensions(extensions!=null? buildExtensions(name, extensions):null);
         if (content != null) {
             processModel.setContentType(CONTENT_TYPE_XML);
             processModel.setContent(content);
         }
         return processModel;
+    }
+
+    private static Map<String, Object> buildExtensions(String name, Extensions extensions) {
+        Map<String, Object> generatedExtension = new HashMap<String, Object>();
+        generatedExtension.put(name, extensions.getAsMap());
+        return generatedExtension;
     }
 
     public static ModelEntity processModelWithContent(String name,
@@ -157,7 +159,7 @@ public class MockFactory {
                                                       String content) {
         ModelEntity processModel = processModel(name);
         processModel.setProject(project);
-        processModel.setExtensions(extensions!=null?extensions.getAsMap():null);
+        processModel.setExtensions(extensions!=null? buildExtensions(name, extensions):null);
         if (content != null) {
             processModel.setContentType(CONTENT_TYPE_XML);
             processModel.setContent(content.getBytes());
@@ -165,9 +167,9 @@ public class MockFactory {
         return processModel;
     }
 
-    public static Extensions extensions(byte[] bytes) {
+    public static Map<String, Extensions> extensions(byte[] bytes) {
         try {
-            return getFromMap(new ObjectMapper()
+            return getExtensionMapFromJson(new ObjectMapper()
                     .readValue(bytes,
                                ModelEntity.class)
                     .getExtensions());
@@ -176,13 +178,13 @@ public class MockFactory {
         }
     }
 
-    private static Extensions getFromMap(Map<String,Object> map) throws IOException {
+    private static Map<String, Extensions> getExtensionMapFromJson(Map<String,Object> map) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         String exstensionJson = objectMapper.writeValueAsString(map);
         if (StringUtils.isEmpty(exstensionJson)) {
             return null;
         }
-        return objectMapper.readValue(exstensionJson,Extensions.class);
+        return objectMapper.readValue(exstensionJson, objectMapper.getTypeFactory().constructMapType(Map.class,String.class, Extensions.class));
     }
 
     public static Extensions extensions(String serviceTask,

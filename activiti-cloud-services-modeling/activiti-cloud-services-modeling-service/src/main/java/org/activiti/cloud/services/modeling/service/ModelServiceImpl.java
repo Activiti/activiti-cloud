@@ -31,11 +31,7 @@ import static org.apache.commons.lang3.StringUtils.removeEnd;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -144,11 +140,7 @@ public class ModelServiceImpl implements ModelService{
         ModelType modelType = findModelType(model);
         model.setProject(project);
         if (model.getExtensions() == null) {
-            if (PROCESS.equals(modelType.getName())) {
-                model.setExtensions(new Extensions().getAsMap());
-            } else if (isJsonContentType(model.getContentType())) {
-                model.setExtensions(new HashMap<String, Object>());
-            }
+          model.setExtensions(new HashMap<String,Object>());
         }
         return modelRepository.createModel(model);
     }
@@ -179,7 +171,7 @@ public class ModelServiceImpl implements ModelService{
         Model fullModel = findModelById(model.getId()).orElse(model);
         Model modelToFile = buildModel(fullModel.getType(),
                                        fullModel.getName());
-        modelToFile.setId(fullModel.getType().toLowerCase().concat("-"+model.getId()));
+        modelToFile.setId(fullModel.getType().toLowerCase().concat("-").concat(model.getId()));
         modelToFile.setExtensions(fullModel.getExtensions());
 
         FileContent extensionsFileContent = new FileContent(getExtensionsFilename(model),

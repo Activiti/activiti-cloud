@@ -52,15 +52,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
@@ -327,16 +326,19 @@ public class ProjectControllerIT {
 
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
-                                                      processFileContent("process-model",
+                                                      processFileContent("Process_RankMovieId",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
 
+
+        Map<String, Extensions> extensionsMap = Collections.singletonMap("Process_RankMovieId",
+            extensions("Task_1spvopd",
+                                    processVariables("movieName",
+                                        "movieDescription"),
+                                    inputsMappings("movieName"),
+                                    outputsMappings("movieDescription")));
+
         modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("process-model",
-                                                               extensions("Task_1spvopd",
-                                                                          processVariables("movieName",
-                                                                                           "movieDescription"),
-                                                                          inputsMappings("movieName"),
-                                                                          outputsMappings("movieDescription"))));
+                                    processModelWithExtensions("Process_RankMovieId", extensionsMap));
 
        MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/export",
@@ -352,8 +354,8 @@ public class ProjectControllerIT {
                 .hasEntries(
                         "project-with-models.json",
                         "processes/",
-                        "processes/process-model.bpmn20.xml",
-                        "processes/process-model-extensions.json",
+                        "processes/Process_RankMovieId.bpmn20.xml",
+                        "processes/Process_RankMovieId-extensions.json",
                         "connectors/",
                         "connectors/movies.json")
                 .hasJsonContentSatisfying("project-with-models.json",
@@ -373,13 +375,13 @@ public class ProjectControllerIT {
                                 .ofLength(2)
                                 .thatContains("hr")
                                 .thatContains("testgroup"))
-                .hasJsonContentSatisfying("processes/process-model-extensions.json",
+                .hasJsonContentSatisfying("processes/Process_RankMovieId-extensions.json",
                                           jsonContent -> jsonContent
-                                                  .node("name").isEqualTo("process-model")
+                                                  .node("name").isEqualTo("Process_RankMovieId")
                                                   .node("type").isEqualTo("PROCESS")
-                                                  .node("extensions.properties").matches(allOf(hasKey("movieName"),
+                                                  .node("extensions.Process_RankMovieId.properties").matches(allOf(hasKey("movieName"),
                                                                                                hasKey("movieDescription")))
-                                                  .node("extensions.mappings").matches(
+                                                  .node("extensions.Process_RankMovieId.mappings").matches(
                                                           hasEntry(equalTo("Task_1spvopd"),
                                                                    allOf(hasEntry(equalTo("inputs"),
                                                                                   hasKey("movieName")),
@@ -442,16 +444,17 @@ public class ProjectControllerIT {
 
         Model processModel = modelService.importSingleModel(project,
                 processModelType,
-                processFileContent("process-model",
+                processFileContent("Process_RankMovieId",
                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
 
+        Map<String, Extensions> extensionsMap = Collections.singletonMap("Process_RankMovieId",
+            extensions("Task_1spvopd",
+                processVariables("movieName",
+                    "movieDescription"),
+                inputsMappings("movieName"),
+                outputsMappings("movieDescription")));
         modelRepository.updateModel(processModel,
-                processModelWithExtensions("process-model",
-                        extensions("Task_1spvopd",
-                                processVariables("movieName",
-                                        "movieDescription"),
-                                inputsMappings("movieName"),
-                                outputsMappings("movieDescription"))));
+                processModelWithExtensions("process-model", extensionsMap));
 
         MvcResult response = mockMvc.perform(
                 get("{version}/projects/{projectId}/validate",
@@ -491,7 +494,7 @@ public class ProjectControllerIT {
     public void should_throwSemanticModelValidationException_when_exportingProjectWithInvalidServiceTaskReturnErrors() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-connectors"));
         modelRepository.createModel(processModelWithContent(project,
-                                                            "invalid-service",
+                                                            "Process_InvalidTask",
                                                             resourceAsByteArray("process/invalid-service-task.bpmn20.xml")));
 
         modelRepository.createModel(connectorModel(project,
@@ -550,7 +553,7 @@ public class ProjectControllerIT {
                                                       processFileContent("RankMovie",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("process-model",
+                                    processModelWithExtensions("Process_RankMovieId",
                                                                extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-task.json"))));
         modelRepository.createModel(connectorModel(project,
                                                    "movies",
@@ -565,8 +568,8 @@ public class ProjectControllerIT {
                         .andReturn())
                 .isSemanticValidationException()
                 .hasValidationErrorMessages(
-                        "The extensions for process 'process-" + processModel.getId() +
-                                "' contains mappings for an unknown task 'unknown-task'");
+                        "The extensions for process 'Process_RankMovieId' " +
+                            "contains mappings for an unknown task 'unknown-task'");
     }
 
     @Test
@@ -577,7 +580,7 @@ public class ProjectControllerIT {
                                                       processFileContent("RankMovie",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("process-model",
+                                    processModelWithExtensions("Process_RankMovieId",
                                                                extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-output-process-variable.json"))));
         modelRepository.createModel(connectorModel(project,
                                                    "movies",
@@ -592,8 +595,8 @@ public class ProjectControllerIT {
                         .andReturn())
                 .isSemanticValidationException()
                 .hasValidationErrorMessages(
-                        "The extensions for process 'process-" + processModel.getId() +
-                                "' contains mappings for an unknown process variable 'unknown-output-variable'");
+                        "The extensions for process 'Process_RankMovieId' " +
+                            "contains mappings for an unknown process variable 'unknown-output-variable'");
     }
 
     @Test
@@ -604,7 +607,7 @@ public class ProjectControllerIT {
                                                       processFileContent("RankMovie",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("process-model",
+                                    processModelWithExtensions("Process_RankMovieId",
                                                                extensions(resourceAsByteArray("process-extensions/RankMovie-extensions.json"))));
         modelRepository.createModel(connectorModel(project,
                                                    "movies",
@@ -619,10 +622,10 @@ public class ProjectControllerIT {
                         .andReturn())
                 .isSemanticValidationException()
                 .hasValidationErrorMessages(
-                        "The extensions for process 'process-" + processModel.getId() +
-                                "' contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'movieName'",
-                        "The extensions for process 'process-" + processModel.getId() +
-                                "' contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'movieDescription'");
+                        "The extensions for process 'Process_RankMovieId' " +
+                            "contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'movieName'",
+                        "The extensions for process 'Process_RankMovieId' " +
+                            "contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'movieDescription'");
     }
 
     @Test
@@ -633,7 +636,7 @@ public class ProjectControllerIT {
                                                       processFileContent("RankMovie",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("process-model",
+                                    processModelWithExtensions("Process_RankMovieId",
                                                                extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-connector-parameter.json"))));
         modelRepository.createModel(connectorModel(project,
                                                    "movies",
@@ -648,10 +651,10 @@ public class ProjectControllerIT {
                         .andReturn())
                 .isSemanticValidationException()
                 .hasValidationErrorMessages(
-                        "The extensions for process 'process-" + processModel.getId() +
-                                "' contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'unknown-input-parameter'",
-                        "The extensions for process 'process-" + processModel.getId() +
-                                "' contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'unknown-output-parameter'");
+                        "The extensions for process 'Process_RankMovieId' " +
+                            "contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'unknown-input-parameter'",
+                        "The extensions for process 'Process_RankMovieId' " +
+                            "contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'unknown-output-parameter'");
     }
 
     @Test
@@ -662,7 +665,7 @@ public class ProjectControllerIT {
                                                       processFileContent("RankMovie",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("process-model",
+                                    processModelWithExtensions("Process_RankMovieId",
                                                                extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-input-process-variable.json"))));
         modelRepository.createModel(connectorModel(project,
                                                    "movies",
@@ -677,8 +680,8 @@ public class ProjectControllerIT {
                         .andReturn())
                 .isSemanticValidationException()
                 .hasValidationErrorMessages(
-                        "The extensions for process 'process-" + processModel.getId() +
-                                "' contains mappings for an unknown process variable 'unknown-input-variable'");
+                        "The extensions for process 'Process_RankMovieId' " +
+                            "contains mappings for an unknown process variable 'unknown-input-variable'");
     }
 
     @Test
@@ -686,10 +689,10 @@ public class ProjectControllerIT {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-call-activiti"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
-                                                      processFileContent("RankMovie",
+                                                      processFileContent("Process_RankMovieId",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("process-model",
+                                    processModelWithExtensions("Process_RankMovieId",
                                                                extensions(resourceAsByteArray("process-extensions/RankMovie-extensions.json"))));
         modelRepository.createModel(connectorModel(project,
                                                    "movies",
@@ -697,7 +700,7 @@ public class ProjectControllerIT {
 
         Model mainProcessModel = modelService.importSingleModel(project,
                                                           processModelType,
-                                                          processFileContentWithCallActivity("main-process",
+                                                          processFileContentWithCallActivity("Process_TwoCall",
                                                                                              processModel,
                                                                                              resourceAsByteArray("process/two-call-activities.bpmn20.xml")));
 
@@ -710,9 +713,8 @@ public class ProjectControllerIT {
                         .andReturn())
                 .isSemanticValidationException()
                 .hasValidationErrorMessages(
-                        "Call activity 'Task_1mbp1v0' with call element 'not-present' found in process 'process-" +
-                                mainProcessModel.getId() +
-                                "' references a process id that does not exist in the current project.");
+                        "Call activity 'Task_1mbp1v0' with call element 'not-present' found in process 'Process_TwoCall' " +
+                            "references a process id that does not exist in the current project.");
     }
 
     @Test

@@ -1,49 +1,51 @@
 {
   "id": "process-db995012-b417-4cea-a981",
   "extensions": {
-    "constants": {
-      "ServiceTask_06crg3b": {
-        "my-custom-variable": {
-          "value": "name2"
+    "Process_x": {
+      "constants": {
+        "ServiceTask_06crg3b": {
+          "my-custom-variable": {
+            "value": "name2"
+          }
         }
-      }
-    },
-    "properties": {
-      "c297ec88-0ecf-4841-9b0f-2ae814957c68": {
-        "id": "c297ec88-0ecf-4841-9b0f-2ae814957c48",
-        "name": "integerVariable",
-        "type": "integer",
-        "required": false,
-        "value": 12
       },
-      "c297ec88-0ecf-4841-9b0f-2ae814957c69": {
-        "id": "c297ec88-0ecf-4841-9b0f-2ae814957c38",
-        "name": "stringVariable",
-        "type": "string",
-        "required": false,
-        "value": "aloha"
-      },
-      "c297ec88-0ecf-4841-9b0f-2ae814957c62": {
-        "id": "c297ec88-0ecf-4841-9b0f-2ae814957c28",
-        "name": "dateVariable",
-        "type": "date",
-        "required": false,
-        "value": "1993-06-03"
-      },
-      "c297ec88-0ecf-4841-9b0f-2ae814957c64": {
-        "id": "c297ec88-0ecf-4841-9b0f-2ae814957c18",
-        "name": "booleanVariable",
-        "type": "boolean",
-        "required": false,
-        "value": true
-      },
-      "c297ec88-0ecf-4841-9b0f-2ae814957c67": {
-        "id": "c297ec88-0ecf-4841-9b0f-2ae814957c08",
-        "name": "jsonVariable",
-        "type": "json",
-        "required": false,
-        "value": {
-          "foo": "bar"
+      "properties": {
+        "c297ec88-0ecf-4841-9b0f-2ae814957c68": {
+          "id": "c297ec88-0ecf-4841-9b0f-2ae814957c48",
+          "name": "integerVariable",
+          "type": "integer",
+          "required": false,
+          "value": 12
+        },
+        "c297ec88-0ecf-4841-9b0f-2ae814957c69": {
+          "id": "c297ec88-0ecf-4841-9b0f-2ae814957c38",
+          "name": "stringVariable",
+          "type": "string",
+          "required": false,
+          "value": "aloha"
+        },
+        "c297ec88-0ecf-4841-9b0f-2ae814957c62": {
+          "id": "c297ec88-0ecf-4841-9b0f-2ae814957c28",
+          "name": "dateVariable",
+          "type": "date",
+          "required": false,
+          "value": "1993-06-03"
+        },
+        "c297ec88-0ecf-4841-9b0f-2ae814957c64": {
+          "id": "c297ec88-0ecf-4841-9b0f-2ae814957c18",
+          "name": "booleanVariable",
+          "type": "boolean",
+          "required": false,
+          "value": true
+        },
+        "c297ec88-0ecf-4841-9b0f-2ae814957c67": {
+          "id": "c297ec88-0ecf-4841-9b0f-2ae814957c08",
+          "name": "jsonVariable",
+          "type": "json",
+          "required": false,
+          "value": {
+            "foo": "bar"
+          }
         }
       }
     }

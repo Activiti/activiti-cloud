@@ -18,10 +18,7 @@ package org.activiti.cloud.services.modeling.validation.extensions;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -93,14 +90,25 @@ public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidat
     protected Stream<ModelValidationError> validateBpmnModel(Model model,
                                                                    ValidationContext validationContext,
                                                                    BpmnProcessModelContent bpmnModel) {
+        return bpmnModel.getBpmnModel().getProcesses().stream()
+            .map(process -> this.retrieveExtensionByProcessId(model, process.getId()))
+            .flatMap(extensions -> validateProcessExtension(extensions, validationContext, bpmnModel));
+    }
 
-        return jsonExtensionsConverter.tryConvertToEntity(model.getExtensions()).
-                map(extensions -> processExtensionsValidators
-                        .stream()
-                        .flatMap(validator -> validator.validateExtensions(extensions,
-                                                                 bpmnModel,
-                                                                 validationContext)))
-                .orElseGet(Stream::empty);
+    private Map<String, Object> retrieveExtensionByProcessId(Model model, String processId){
+        return model.getExtensions() != null ? (Map<String, Object>) model.getExtensions().get(processId) : null;
+    }
+
+    private Stream<ModelValidationError> validateProcessExtension(Map<String,Object> processExtension,
+                                                                  ValidationContext validationContext,
+                                                                  BpmnProcessModelContent bpmnModel){
+        return jsonExtensionsConverter.tryConvertToEntity(processExtension)
+            .map(extensions -> processExtensionsValidators
+                .stream()
+                .flatMap(validator -> validator.validateExtensions(extensions,
+                    bpmnModel,
+                    validationContext)))
+            .orElseGet(Stream::empty);
     }
 
     private Optional<Model> findProcessModelInContext(String modelId,

@@ -1,32 +1,34 @@
 {
   "id": "process-2826e9c6-8b07-48aa-bd24-51dd5616fe80",
   "extensions": {
-    "constants": {},
-    "mappings": {
-      "IntermediateThrowEvent_0jo6gz9": {
-        "inputs": {
-          "animalMessage": {
-            "type": "value",
-            "value": "cat"
+    "Process_test": {
+      "constants": {},
+      "mappings": {
+        "IntermediateThrowEvent_0jo6gz9": {
+          "inputs": {
+            "animalMessage": {
+              "type": "value",
+              "value": "cat"
+            }
+          }
+        },
+        "IntermediateCatchEvent_1n53e58": {
+          "outputs": {
+            "animal": {
+              "type": "variable",
+              "value": "animalMessage"
+            }
           }
         }
       },
-      "IntermediateCatchEvent_1n53e58": {
-        "outputs": {
-          "animal": {
-            "type": "variable",
-            "value": "animalMessage"
-          }
+      "properties": {
+        "412ac30e-4bdf-475e-b24e-139a851abb8b": {
+          "id": "412ac30e-4bdf-475e-b24e-139a851abb8b",
+          "name": "animal",
+          "type": "string",
+          "value": "",
+          "required": false
         }
-      }
-    },
-    "properties": {
-      "412ac30e-4bdf-475e-b24e-139a851abb8b": {
-        "id": "412ac30e-4bdf-475e-b24e-139a851abb8b",
-        "name": "animal",
-        "type": "string",
-        "value": "",
-        "required": false
       }
     }
   }
