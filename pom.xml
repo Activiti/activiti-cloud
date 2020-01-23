@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.build</groupId>
     <artifactId>activiti-parent</artifactId>
-    <version>7.1.178</version>
+    <version>7.1.179</version>
   </parent>
   <groupId>org.activiti.cloud.build</groupId>
   <artifactId>activiti-cloud-parent</artifactId>
