@@ -20,7 +20,7 @@
     <tag>HEAD</tag>
   </scm>
   <properties>
-    <activiti-cloud-runtime-bundle-service.version>7.1.229</activiti-cloud-runtime-bundle-service.version>
+    <activiti-cloud-runtime-bundle-service.version>7.1.230</activiti-cloud-runtime-bundle-service.version>
     <docker-maven-plugin.version>0.32.0</docker-maven-plugin.version>
   </properties>
   <dependencyManagement>
@@ -100,7 +100,7 @@
       </plugin>
     </plugins>
   </build>
-  <profiles>
+    <profiles>
     <profile>
       <id>integration-test</id>
       <activation>
@@ -115,6 +115,20 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
+            <version>${maven-failsafe-plugin.version}</version>
+            <configuration>
+              <forkCount>0</forkCount>
+              <useSystemClassLoader>false</useSystemClassLoader>
+            </configuration>
+            <executions>
+              <execution>
+                <id>integration-test</id>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
           <plugin>
             <groupId>io.fabric8</groupId>
@@ -154,6 +168,7 @@
                   </run>
                 </image>
               </images>
+              <skip>${skipTests}</skip>
             </configuration>
             <executions>
               <execution>
