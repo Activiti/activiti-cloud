@@ -17,12 +17,16 @@ package org.activiti.cloud.notifications.graphql.starter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import graphql.ExecutionResult;
-import graphql.GraphQLError;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Duration;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
+
 import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
@@ -52,7 +56,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.notifications.graphql.test.EngineEventsMessageProducer;
 import org.activiti.cloud.notifications.graphql.test.EngineEventsMessageProducer.EngineEvents;
-import org.activiti.cloud.services.graphql.web.ActivitiGraphQLController.GraphQLQueryRequest;
+import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
@@ -69,7 +73,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -77,23 +80,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClient.WebsocketSender;
 import reactor.test.StepVerifier;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.Duration;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -1041,13 +1039,13 @@ public class ActivitiGraphQLStarterIT {
     public void testGraphql() {
         GraphQLQueryRequest query = new GraphQLQueryRequest("{Tasks(where:{name:{EQ: \"" + TASK_NAME + "\"}}){select{id assignee priority}}}");
         
-        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query,authHeaders), Result.class);
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query,authHeaders), GraphQLQueryResult.class);
 
         assertThat(entity.getStatusCode())
             .describedAs(entity.toString())
             .isEqualTo(HttpStatus.OK);
 
-        Result result = entity.getBody();
+        GraphQLQueryResult result = entity.getBody();
 
         assertThat(result).isNotNull();
         assertThat(result.getErrors())
@@ -1065,7 +1063,7 @@ public class ActivitiGraphQLStarterIT {
         keycloakTokenProducer.setKeycloakTestUser(HRUSER);
         authHeaders = keycloakTokenProducer.authorizationHeaders();
         
-        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query,authHeaders), Result.class);
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query,authHeaders), GraphQLQueryResult.class);
 
         assertThat(HttpStatus.FORBIDDEN)
             .describedAs(entity.toString())
@@ -1096,13 +1094,13 @@ public class ActivitiGraphQLStarterIT {
         	    "	}");
        // @formatter:on
 
-        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), GraphQLQueryResult.class);
 
         assertThat(entity.getStatusCode())
             .describedAs(entity.toString())
             .isEqualTo(HttpStatus.OK);
 
-        Result result = entity.getBody();
+        GraphQLQueryResult result = entity.getBody();
 
         assertThat(result).isNotNull();
         assertThat(result.getErrors())
@@ -1144,13 +1142,13 @@ public class ActivitiGraphQLStarterIT {
                 + "}");
        // @formatter:on
 
-        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), GraphQLQueryResult.class);
 
         assertThat(entity.getStatusCode())
             .describedAs(entity.toString())
             .isEqualTo(HttpStatus.OK);
 
-        Result result = entity.getBody();
+        GraphQLQueryResult result = entity.getBody();
 
         assertThat(result).isNotNull();
         assertThat(result.getErrors())
@@ -1178,19 +1176,19 @@ public class ActivitiGraphQLStarterIT {
         		);
        // @formatter:on
 
-        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), GraphQLQueryResult.class);
 
         assertThat(entity.getStatusCode())
             .describedAs(entity.toString())
             .isEqualTo(HttpStatus.OK);
 
-        Result result = entity.getBody();
+        GraphQLQueryResult result = entity.getBody();
 
         assertThat(result).isNotNull();
         assertThat(result.getErrors())
             .isNull();
         
-        assertThat(((Map<String, Object>) result.getData()).get("ProcessVariables")).isNotNull();
+        assertThat(result.getData().get("ProcessVariables")).isNotNull();
     }
     
     @Test
@@ -1202,13 +1200,13 @@ public class ActivitiGraphQLStarterIT {
 
         query.setVariables(variables);
 
-        ResponseEntity<Result> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), Result.class);
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(GRAPHQL_URL, new HttpEntity<>(query, authHeaders), GraphQLQueryResult.class);
 
         assertThat(entity.getStatusCode())
             .describedAs(entity.toString())
             .isEqualTo(HttpStatus.OK);
 
-        Result result = entity.getBody();
+        GraphQLQueryResult result = entity.getBody();
 
         assertThat(result).isNotNull();
         assertThat(result.getErrors())
@@ -1234,9 +1232,6 @@ class StringObjectMapBuilder extends MapBuilder<StringObjectMapBuilder, String, 
 
 class MapBuilder<B extends MapBuilder<B, K, V>, K, V> {
     
-
-    protected static final SpelExpressionParser PARSER = new SpelExpressionParser();
-
     private final Map<K, V> map = new LinkedHashMap<>();
 
     public B put(K key, V value) {
@@ -1255,57 +1250,3 @@ class MapBuilder<B extends MapBuilder<B, K, V>, K, V> {
 
 }
 
-
-class Result implements ExecutionResult {
-
-    private Map<String, Object> data;
-    private List<GraphQLError> errors;
-    private Map<Object, Object> extensions;
-
-    /**
-     * Default
-     */
-    Result() {
-    }
-
-    /**
-     * @param data the data to set
-     */
-    public void setData(Map<String, Object> data) {
-        this.data = data;
-    }
-
-    /**
-     * @param errors the errors to set
-     */
-    public void setErrors(List<GraphQLError> errors) {
-        this.errors = errors;
-    }
-
-    /**
-     * @param extensions the extensions to set
-     */
-    public void setExtensions(Map<Object, Object> extensions) {
-        this.extensions = extensions;
-    }
-
-    @Override
-    public <T> T getData() {
-        return (T) data;
-    }
-
-    @Override
-    public List<GraphQLError> getErrors() {
-        return errors;
-    }
-
-    @Override
-    public Map<Object, Object> getExtensions() {
-        return extensions;
-    }
-
-    @Override
-    public Map<String, Object> toSpecification() {
-        return null;
-    }
-}
