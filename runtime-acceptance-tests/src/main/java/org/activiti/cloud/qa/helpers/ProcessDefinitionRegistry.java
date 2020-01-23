@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.qa.helpers;
 
 import java.util.HashMap;
 
 public class ProcessDefinitionRegistry {
 
-    private static final HashMap <String, String> processWithTasksDefinitionKeys = new HashMap<>() {{
+    private static final HashMap<String, String> processWithTasksDefinitionKeys = new HashMap<String, String>() {{
         put("PROCESS_INSTANCE_WITH_VARIABLES",
             "ProcessWithVariables");
         put("TWO_TASK_PROCESS",
@@ -48,7 +49,7 @@ public class ProcessDefinitionRegistry {
             "process-b42a166d-605b-4eec-8b96-82b1253666bf");
     }};
 
-    private static final HashMap <String, String> processWithNoTasksDefinitionKeys = new HashMap<>() {{
+    private static final HashMap<String, String> processWithNoTasksDefinitionKeys = new HashMap<String, String>() {{
         put("SIMPLE_PROCESS_INSTANCE",
             "SimpleProcess");
         put("CONNECTOR_PROCESS_INSTANCE",
@@ -65,7 +66,7 @@ public class ProcessDefinitionRegistry {
             "parentproc-843144bc-3797-40db-8edc-d23190b118e5");
     }};
 
-    private static final HashMap <String, String> processWithTimerEvents = new HashMap<>() {{
+    private static final HashMap<String, String> processWithTimerEvents = new HashMap<String, String>() {{
         put("INTERMEDIATE_TIMER_EVENT_PROCESS",
             "intermediateTimerEventExample");
         put("START_TIMER_EVENT_PROCESS",
@@ -73,8 +74,8 @@ public class ProcessDefinitionRegistry {
         put("BOUNDARY_TIMER_EVENT_PROCESS",
             "boundaryTimerEventExample");
     }};
-    
-    private static final HashMap <String, String> processWithErrorEvents = new HashMap<>() {{
+
+    private static final HashMap<String, String> processWithErrorEvents = new HashMap<String, String>() {{
         put("ERROR_BOUNDARY_EVENT_SUBPROCESS",
             "errorBoundaryEventSubProcess");
         put("ERROR_START_EVENT_SUBPROCESS",
@@ -83,14 +84,14 @@ public class ProcessDefinitionRegistry {
             "catchErrorOnCallActivity");
     }};
 
-    public static final HashMap <String, String> processDefinitionKeys = new HashMap<>() {{
+    public static final HashMap<String, String> processDefinitionKeys = new HashMap<String, String>() {{
         putAll(processWithTasksDefinitionKeys);
         putAll(processWithNoTasksDefinitionKeys);
         putAll(processWithTimerEvents);
         putAll(processWithErrorEvents);
     }};
 
-    public static String processDefinitionKeyMatcher (String processName){
+    public static String processDefinitionKeyMatcher(String processName) {
         return processDefinitionKeys.get(processName);
     }
 

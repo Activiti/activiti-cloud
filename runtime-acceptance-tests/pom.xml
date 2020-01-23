@@ -7,23 +7,7 @@
     <artifactId>activiti-cloud-acceptance-scenarios-parent</artifactId>
     <version>7.1.0-SNAPSHOT</version>
   </parent>
-
   <artifactId>runtime-acceptance-tests</artifactId>
-
-<!--  FIXME: temporary for spring boot version to 2.1.10.RELEASE
- as 2.1.11.RELEASE is making notification acc test to fail-->
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.1.10.RELEASE</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud.api</groupId>
