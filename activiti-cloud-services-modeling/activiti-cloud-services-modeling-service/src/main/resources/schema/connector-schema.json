@@ -68,12 +68,9 @@
           },
           "value": {
             "type": "string"
-          },
-          "required": {
-            "type": "boolean"
           }
         },
-        "required": [ "name", "type" ]
+        "required": [ "name" ]
       }
     }
   },
@@ -109,9 +106,7 @@
       "default": {}
     },
     "config" : {
-      "type": "object",
-      "additionalProperties": { "$ref": "#/definitions/connector-config" },
-      "default": {}
+      "$ref": "#/definitions/connector-config"
     }
   },
   "required": [ "name" ]
