@@ -21,7 +21,7 @@
         <modeler:editor-resource-id>sid-3C0516C4-1BF7-48F8-88CF-04C41810FE00</modeler:editor-resource-id>
       </extensionElements>
     </sequenceFlow>
-    <serviceTask id="sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94" name="Connector Task" implementation="Example Connector">
+    <serviceTask id="sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94" name="Connector Task" implementation="ExampleConnector">
       <incoming>sid-68945AF1-396F-4B8A-B836-FC318F62313F</incoming>
       <outgoing>sid-3C0516C4-1BF7-48F8-88CF-04C41810FE00</outgoing>
     </serviceTask>
