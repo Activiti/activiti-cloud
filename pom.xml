@@ -17,7 +17,7 @@
     <project.scm.repository>activiti-cloud-dependencies</project.scm.repository>
     <activiti-cloud-build.version>7.1.27</activiti-cloud-build.version>
     <activiti-cloud-api.version>7.1.111</activiti-cloud-api.version>
-    <activiti-cloud-service-common.version>7.1.146</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.1.147</activiti-cloud-service-common.version>
     <activiti-cloud-modeling-service.version>7.1.351</activiti-cloud-modeling-service.version>
     <activiti-cloud-runtime-bundle-service.version>7.1.229</activiti-cloud-runtime-bundle-service.version>
     <activiti-cloud-query-service.version>7.1.208</activiti-cloud-query-service.version>
