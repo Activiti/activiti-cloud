@@ -8,9 +8,19 @@
       "type": "object",
       "additionalProperties": false,
       "patternProperties": {
+        "Process_.": {
+          "$ref": "#/definitions/extension-element"
+        }
+      }
+    },
+    "extension-element": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
         "properties": { "$ref": "#/definitions/properties" },
         "mappings": { "$ref": "#/definitions/mappings" },
-        "constants": { "$ref": "#/definitions/constants" }
+        "constants": { "$ref": "#/definitions/constants" },
+        "assignments": { "$ref": "#/definitions/assignments" }
       }
     },
     "properties": {
@@ -280,6 +290,33 @@
       "properties": {
         "value": {
           "type": "string"
+        }
+      }
+    },
+    "assignments": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/assignment-property"
+        }
+      }
+    },
+    "assignment-property": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "assignment": {
+          "type": "string",
+          "enum": ["assignee", "candidates"],
+          "additionalProperties": false
+        },
+        "type": {
+          "type": "string",
+          "enum": ["static", "identity", "expression"],
+          "additionalProperties": false
         }
       }
     }

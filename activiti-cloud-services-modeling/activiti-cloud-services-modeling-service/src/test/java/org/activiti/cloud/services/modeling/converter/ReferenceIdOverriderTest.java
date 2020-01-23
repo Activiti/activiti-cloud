@@ -86,24 +86,4 @@ public class ReferenceIdOverriderTest {
 
         assertThat(startEvent.getFormKey()).isEqualTo("notNewFormKey");
     }
-
-    @Test
-    public void should_overrideProcessId_when_newProcessId() {
-        Process process = new Process();
-        process.setId("oldProcessId");
-
-        referenceIdOverrider.overrideProcessId(process);
-
-        assertThat(process.getId()).isEqualTo("newProcessId");
-    }
-
-    @Test
-    public void should_notOverrideProcessId_when_processIdNotFound() {
-        Process process = new Process();
-        process.setId("notNewProcessId");
-
-        referenceIdOverrider.overrideProcessId(process);
-
-        assertThat(process.getId()).isEqualTo("notNewProcessId");
-    }
 }

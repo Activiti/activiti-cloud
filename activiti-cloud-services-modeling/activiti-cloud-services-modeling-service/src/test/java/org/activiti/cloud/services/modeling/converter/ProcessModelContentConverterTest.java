@@ -62,7 +62,6 @@ public class ProcessModelContentConverterTest {
 
         processModelContentConverter.overrideAllProcessDefinition(processModelContent, referenceIdOverrider);
 
-        verify(referenceIdOverrider).overrideProcessId(process);
         verify(flowElement).accept(referenceIdOverrider);
     }
 

@@ -281,7 +281,7 @@ public class ModelValidationControllerIT {
                 .andDo(print());
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-                .isEqualTo("#/extensions/mappings/ServiceTask_06crg3b: #: only 0 subschema matches out of 2");
+                .isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: #: only 0 subschema matches out of 2");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
@@ -292,13 +292,13 @@ public class ModelValidationControllerIT {
                 .extracting(ModelValidationError::getProblem,
                             ModelValidationError::getDescription)
                 .containsOnly(tuple("extraneous key [inputds] is not permitted",
-                                    "#/extensions/mappings/ServiceTask_06crg3b: extraneous key [inputds] is not permitted"),
+                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [inputds] is not permitted"),
                               tuple("extraneous key [outputss] is not permitted",
-                                    "#/extensions/mappings/ServiceTask_06crg3b: extraneous key [outputss] is not permitted"),
+                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is not permitted"),
                               tuple("required key [inputs] not found",
-                                    "#/extensions/mappings/ServiceTask_06crg3b: required key [inputs] not found"),
+                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: required key [inputs] not found"),
                               tuple("required key [outputs] not found",
-                                    "#/extensions/mappings/ServiceTask_06crg3b: required key [outputs] not found"));
+                                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: required key [outputs] not found"));
     }
 
     @Test

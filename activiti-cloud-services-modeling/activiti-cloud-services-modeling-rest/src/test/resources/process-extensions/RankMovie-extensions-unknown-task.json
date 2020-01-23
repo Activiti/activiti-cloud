@@ -3,41 +3,43 @@
     "type": "PROCESS",
     "name": "RankMovie",
     "extensions": {
+      "Process_RankMovieId": {
         "properties": {
-            "0d9ff66b-4d12-4ec7-b8c6-2082468cd885": {
-                "id": "0d9ff66b-4d12-4ec7-b8c6-2082468cd885",
-                "name": "movieToRank",
-                "type": "string",
-                "required": true
-            },
-            "b6d935ce-6cc8-49f8-8339-8ceece2a48d2": {
-                "id": "b6d935ce-6cc8-49f8-8339-8ceece2a48d2",
-                "name": "movieDesc",
-                "type": "string",
-                "required": false
-            },
-            "fdc1dc9f-9123-4fec-bab7-a938fb01906e": {
-                "id": "fdc1dc9f-9123-4fec-bab7-a938fb01906e",
-                "name": "rating",
-                "type": "integer",
-                "required": false
-            }
+          "0d9ff66b-4d12-4ec7-b8c6-2082468cd885": {
+            "id": "0d9ff66b-4d12-4ec7-b8c6-2082468cd885",
+            "name": "movieToRank",
+            "type": "string",
+            "required": true
+          },
+          "b6d935ce-6cc8-49f8-8339-8ceece2a48d2": {
+            "id": "b6d935ce-6cc8-49f8-8339-8ceece2a48d2",
+            "name": "movieDesc",
+            "type": "string",
+            "required": false
+          },
+          "fdc1dc9f-9123-4fec-bab7-a938fb01906e": {
+            "id": "fdc1dc9f-9123-4fec-bab7-a938fb01906e",
+            "name": "rating",
+            "type": "integer",
+            "required": false
+          }
         },
         "mappings": {
-            "unknown-task": {
-                "inputs": {
-                    "movieName": {
-                        "type": "variable",
-                        "value": "movieToRank"
-                    }
-                },
-                "outputs": {
-                    "movieDesc": {
-                        "type": "variable",
-                        "value": "movieDescription"
-                    }
-                }
+          "unknown-task": {
+            "inputs": {
+              "movieName": {
+                "type": "variable",
+                "value": "movieToRank"
+              }
+            },
+            "outputs": {
+              "movieDesc": {
+                "type": "variable",
+                "value": "movieDescription"
+              }
             }
+          }
         }
+      }
     }
 }

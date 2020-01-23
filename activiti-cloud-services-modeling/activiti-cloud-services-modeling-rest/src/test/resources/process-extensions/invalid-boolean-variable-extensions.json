@@ -1,40 +1,42 @@
 {
   "id": "process-db995012-b417-4cea-a981",
   "extensions": {
-    "mappings": {
-      "ServiceTask_06crg3b": {
-        "inputs": {
-          "78ff4945-a09e-4d25-8b91-a9b97e0b2d92": {
-            "type": "variable",
-            "value": "db995012-b417-4cea-a981-cef287de8e4a"
+    "Process_test": {
+      "mappings": {
+        "ServiceTask_06crg3b": {
+          "inputs": {
+            "78ff4945-a09e-4d25-8b91-a9b97e0b2d92": {
+              "type": "variable",
+              "value": "db995012-b417-4cea-a981-cef287de8e4a"
+            },
+            "aa4a9329-71be-4889-8265-398b68536d4a": {
+              "type": "variable",
+              "value": "ee9eb6d4-8cd6-4098-8340-13ce2f470faa"
+            }
           },
-          "aa4a9329-71be-4889-8265-398b68536d4a": {
-            "type": "variable",
+          "outputs": {
+            "7d74c83b-6d52-48db-a816-1d4992a40947": {
+              "type": "value",
+              "value": "test"
+            }
+          }
+        }
+      },
+      "constants": {
+        "ServiceTask_06crg3b": {
+          "my-custom-variable": {
             "value": "ee9eb6d4-8cd6-4098-8340-13ce2f470faa"
           }
-        },
-        "outputs": {
-          "7d74c83b-6d52-48db-a816-1d4992a40947": {
-            "type": "value",
-            "value": "test"
-          }
         }
-      }
-    },
-    "constants": {
-      "ServiceTask_06crg3b": {
-        "my-custom-variable": {
-          "value": "ee9eb6d4-8cd6-4098-8340-13ce2f470faa"
+      },
+      "properties": {
+        "c297ec88-0ecf-4841-9b0f-2ae814957c68": {
+          "id": "c297ec88-0ecf-4841-9b0f-2ae814957c68",
+          "name": "booleanVariable",
+          "type": "boolean",
+          "required": false,
+          "value": 12
         }
-      }
-    },
-    "properties": {
-      "c297ec88-0ecf-4841-9b0f-2ae814957c68": {
-        "id": "c297ec88-0ecf-4841-9b0f-2ae814957c68",
-        "name": "booleanVariable",
-        "type": "boolean",
-        "required": false,
-        "value": 12
       }
     }
   }

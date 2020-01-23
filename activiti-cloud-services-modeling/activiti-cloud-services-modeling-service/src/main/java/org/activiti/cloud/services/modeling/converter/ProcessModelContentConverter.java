@@ -108,7 +108,6 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
     public void overrideAllProcessDefinition(BpmnProcessModelContent processModelContent,
                                              ReferenceIdOverrider referenceIdOverrider) {
         processModelContent.getBpmnModel().getProcesses().forEach(process -> {
-            referenceIdOverrider.overrideProcessId(process);
             overrideAllIdReferences(process, referenceIdOverrider);
         });
     }

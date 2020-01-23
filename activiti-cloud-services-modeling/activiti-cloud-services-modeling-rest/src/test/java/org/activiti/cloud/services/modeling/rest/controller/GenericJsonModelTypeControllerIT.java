@@ -22,6 +22,7 @@ import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assert
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
@@ -279,7 +280,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
-    public void should_returnStatusCreatedAndNullExtensions_when_creatingGenericJsonModelWithNullExtensions() throws Exception {
+    public void should_returnStatusCreatedAndEmptyExtensions_when_creatingGenericJsonModelWithNullExtensions() throws Exception {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
@@ -288,10 +289,11 @@ public class GenericJsonModelTypeControllerIT {
 
         genericJsonModel.setExtensions(extensions);
 
-        given().accept(APPLICATION_JSON_VALUE).contentType(APPLICATION_JSON_VALUE).body(objectMapper.writeValueAsString(genericJsonModel)).post("/v1/projects/{projectId}/models",
-                                                                                                                                                project.getId())
-                .then().expect(status().isCreated()).body("entry.extensions",
-                                                          nullValue());
+        given().accept(APPLICATION_JSON_VALUE).contentType(APPLICATION_JSON_VALUE)
+            .body(objectMapper.writeValueAsString(genericJsonModel))
+            .post("/v1/projects/{projectId}/models", project.getId())
+            .then().expect(status().isCreated())
+            .body("entry.extensions", notNullValue());
     }
 
     @Test
