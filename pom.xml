@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.1.26</version>
+    <version>7.1.27</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.modeling</groupId>
@@ -22,10 +22,10 @@
   </modules>
   <properties>
     <project.scm.repository>activiti-cloud-modeling-service</project.scm.repository>
-    <activiti-cloud-build.version>7.1.26</activiti-cloud-build.version>
-    <activiti-dependencies.version>7.1.177</activiti-dependencies.version>
-    <activiti-cloud-service-common.version>7.1.146</activiti-cloud-service-common.version>
-    <activiti-cloud-acceptance-tests.version>7.1.157</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-build.version>7.1.27</activiti-cloud-build.version>
+    <activiti-dependencies.version>7.1.178</activiti-dependencies.version>
+    <activiti-cloud-service-common.version>7.1.147</activiti-cloud-service-common.version>
+    <activiti-cloud-acceptance-tests.version>7.1.159</activiti-cloud-acceptance-tests.version>
     <activiti-cloud-modeling-service.version>${project.version}</activiti-cloud-modeling-service.version>
     <everit-json-schema.version>1.12.1</everit-json-schema.version>
     <json.version>20180813</json.version>
