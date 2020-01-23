@@ -40,7 +40,7 @@
     <activiti-cloud-build.version>7.1.26</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
     <activiti-core-common.version>7.1.177</activiti-core-common.version>
-    <activiti-cloud-api.version>7.1.109</activiti-cloud-api.version>
+    <activiti-cloud-api.version>7.1.110</activiti-cloud-api.version>
     <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
