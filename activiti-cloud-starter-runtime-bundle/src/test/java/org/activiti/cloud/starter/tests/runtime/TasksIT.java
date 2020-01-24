@@ -335,7 +335,7 @@ public class TasksIT {
 
         //then
         assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getBody()).isEqualToComparingFieldByField(task);
+        assertThat(responseEntity.getBody().getId()).isEqualTo(task.getId());
     }
     
     @Test
