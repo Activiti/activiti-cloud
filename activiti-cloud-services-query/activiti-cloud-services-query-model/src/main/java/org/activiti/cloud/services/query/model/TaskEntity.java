@@ -17,8 +17,10 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -231,6 +233,22 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @Override
     public TaskStatus getStatus() {
         return status;
+    }
+
+    @Override
+    public List<String> getCandidateGroups() {
+        return this.getTaskCandidateGroups()
+                       .stream()
+                       .map(TaskCandidateGroup::getGroupId)
+                       .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getCandidateUsers() {
+        return this.getTaskCandidateUsers()
+                       .stream()
+                       .map(TaskCandidateUser::getUserId)
+                       .collect(Collectors.toList());
     }
 
     public Date getLastModified() {
