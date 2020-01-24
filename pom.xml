@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.1.29</version>
+    <version>7.1.30</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.common</groupId>
@@ -36,11 +36,11 @@
   <properties>
     <project.scm.repository>activiti-cloud-service-common</project.scm.repository>
     <activiti-api.version>7.1.173</activiti-api.version>
-    <activiti-core.version>7.1.180</activiti-core.version>
-    <activiti-cloud-build.version>7.1.29</activiti-cloud-build.version>
+    <activiti-core.version>7.1.181</activiti-core.version>
+    <activiti-cloud-build.version>7.1.30</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
-    <activiti-core-common.version>7.1.180</activiti-core-common.version>
-    <activiti-cloud-api.version>7.1.116</activiti-cloud-api.version>
+    <activiti-core-common.version>7.1.181</activiti-core-common.version>
+    <activiti-cloud-api.version>7.1.118</activiti-cloud-api.version>
     <!-- dependencies -->
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.8</commons-configuration.version>
