@@ -15,8 +15,8 @@
   <properties>
     <activiti-cloud-api.version>${project.version}</activiti-cloud-api.version>
     <activiti-cloud-build.version>7.1.29</activiti-cloud-build.version>
-    <activiti-core.version>7.1.180</activiti-core.version>
-    <activiti-api.version>7.1.180</activiti-api.version>
+    <activiti-core.version>7.1.181</activiti-core.version>
+    <activiti-api.version>7.1.181</activiti-api.version>
   </properties>
   <modules>
     <module>dependencies-tests</module>
