@@ -19,7 +19,7 @@
   <properties>
     <project.scm.repository>activiti-cloud-connectors</project.scm.repository>
     <activiti-cloud-build.version>7.1.30</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>7.1.150</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.1.151</activiti-cloud-service-common.version>
     <activiti-cloud-connectors.version>${project.version}</activiti-cloud-connectors.version>
   </properties>
   <dependencyManagement>
