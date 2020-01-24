@@ -18,13 +18,7 @@ package org.activiti.cloud.acc.modeling.steps;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -83,7 +77,8 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         doReturn(modelType.toUpperCase()).when(model).getType();
         doReturn(modelName).when(model).getName();
         if (processVariables != null) {
-            doReturn(extensions(processVariables).getAsMap()).when(model).getExtensions();
+            Map<String, Extensions> processExtension = Collections.singletonMap(modelName, extensions(processVariables));
+            doReturn(processExtension).when(model).getExtensions();
         }
         return create(model);
     }
