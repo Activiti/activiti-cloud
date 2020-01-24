@@ -17,7 +17,6 @@
 package org.activiti.cloud.api.task.model.impl;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 
 import org.activiti.api.task.model.Task;
@@ -45,8 +44,6 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private Integer processDefinitionVersion;
     private String businessKey;
     private String taskDefinitionKey;
-    private List<String> candidateUsers;
-    private List<String> candidateGroups;
 
     public CloudTaskImpl() {
     }
@@ -70,8 +67,6 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         processDefinitionVersion = task.getProcessDefinitionVersion();
         businessKey = task.getBusinessKey();
         taskDefinitionKey = task.getTaskDefinitionKey();
-        candidateUsers = task.getCandidateUsers();
-        candidateGroups = task.getCandidateGroups();
     }
 
     @Override
@@ -248,25 +243,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
 
     public void setTaskDefinitionKey(String taskDefinitionKey) {
         this.taskDefinitionKey = taskDefinitionKey;
-    }
-
-    @Override
-    public List<String> getCandidateGroups() {
-        return candidateGroups;
-    }
-
-    public void setCandidateGroups(List<String> candidateGroups) {
-        this.candidateGroups = candidateGroups;
-    }
-
-    @Override
-    public List<String> getCandidateUsers() {
-        return candidateUsers;
-    }
-
-    public void setCandidateUsers(List<String> candidateUsers) {
-        this.candidateUsers = candidateUsers;
-    }
+    }  
 
     @Override
     public String toString() {
