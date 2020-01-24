@@ -15,7 +15,7 @@
   <name>Activiti Cloud :: BOM (Bill of Materials) Parent</name>
   <properties>
     <project.scm.repository>activiti-cloud-dependencies</project.scm.repository>
-    <activiti-cloud-build.version>7.1.29</activiti-cloud-build.version>
+    <activiti-cloud-build.version>7.1.30</activiti-cloud-build.version>
     <activiti-cloud-api.version>7.1.118</activiti-cloud-api.version>
     <activiti-cloud-service-common.version>7.1.151</activiti-cloud-service-common.version>
     <activiti-cloud-modeling-service.version>7.1.358</activiti-cloud-modeling-service.version>
