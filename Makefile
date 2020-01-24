@@ -14,7 +14,7 @@ ACTIVITI_CLOUD_NOTIFICATIONS_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpr
 ACTIVITI_CLOUD_MODELING_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-modeling-service.version -q -DforceStdout)
 ACTIVITI_CLOUD_MESSAGES_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-messages-service.version -q -DforceStdout)
 
-ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.188
+ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.189
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
 
