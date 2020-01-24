@@ -15,17 +15,16 @@
  */
 package org.activiti.cloud.services.graphql.autoconfigure;
 
-import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
-import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
-import graphql.GraphQL;
-import graphql.schema.GraphQLSchema;
-import org.activiti.cloud.services.graphql.web.ActivitiGraphQLController;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+
+import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
+import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
+import graphql.GraphQL;
+import graphql.schema.GraphQLSchema;
 
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
@@ -39,7 +38,6 @@ public class ActivitiGraphQLAutoConfiguration {
      * Provides default configuration of Activiti GraphQL JPA Query Components
      */
     @Configuration
-    @Import(ActivitiGraphQLController.class)
     public static class DefaultActivitiGraphQLJpaConfiguration {
 
         @Bean

@@ -27,11 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
-import graphql.ExecutionResultImpl;
-import org.activiti.cloud.services.graphql.web.ActivitiGraphQLController.GraphQLQueryRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,9 +41,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
+import com.introproventures.graphql.jpa.query.web.GraphQLController;
+import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
+import graphql.ExecutionResultImpl;
+
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = ActivitiGraphQLController.class)
+@WebMvcTest(controllers = GraphQLController.class)
 public class ActivitiGraphQLControllerTest {
+    
+    public static final String APPLICATION_GRAPHQL_VALUE = "application/graphql";
 
     @Autowired
     private MockMvc mockmvc;
@@ -60,7 +64,7 @@ public class ActivitiGraphQLControllerTest {
     private ObjectMapper mapper;
 
     @Configuration
-    @Import(ActivitiGraphQLController.class)
+    @Import(GraphQLController.class)
     static class Config {
     }
     
@@ -101,7 +105,7 @@ public class ActivitiGraphQLControllerTest {
     public void testGraphqlGetQueryNoVariables() throws Exception {
         mockmvc.perform(get("/graphql")
                .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
-               .contentType(ActivitiGraphQLController.APPLICATION_GRAPHQL_VALUE)               
+               .contentType(APPLICATION_GRAPHQL_VALUE)               
                .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -115,7 +119,7 @@ public class ActivitiGraphQLControllerTest {
     public void testGraphqlPostQuery() throws Exception {
         mockmvc.perform(post("/graphql")
                .content("{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
-               .contentType(ActivitiGraphQLController.APPLICATION_GRAPHQL_VALUE)               
+               .contentType(APPLICATION_GRAPHQL_VALUE)               
                .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -131,7 +135,7 @@ public class ActivitiGraphQLControllerTest {
         mockmvc.perform(get("/graphql")
                 .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
                 .param("variables", (String) null)
-                .contentType(ActivitiGraphQLController.APPLICATION_GRAPHQL_VALUE)
+                .contentType(APPLICATION_GRAPHQL_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
              .andExpect(status().isOk())
              .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -150,7 +154,7 @@ public class ActivitiGraphQLControllerTest {
         mockmvc.perform(get("/graphql")
                 .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
                 .param("variables", variablesStr)
-                .contentType(ActivitiGraphQLController.APPLICATION_GRAPHQL_VALUE)
+                .contentType(APPLICATION_GRAPHQL_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
              .andExpect(status().isOk())
              .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -165,7 +169,7 @@ public class ActivitiGraphQLControllerTest {
         mockmvc.perform(get("/graphql")
                 .param("query", "{Tasks(where: {name: {EQ: \"name\"}}){select{id}}}")
                 .param("variables", "")
-                .contentType(ActivitiGraphQLController.APPLICATION_GRAPHQL_VALUE))
+                .contentType(APPLICATION_GRAPHQL_VALUE))
              .andExpect(status().isOk())
              .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
              ;

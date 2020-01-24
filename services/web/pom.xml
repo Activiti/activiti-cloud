@@ -18,6 +18,10 @@
       <artifactId>graphql-jpa-query-schema</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.introproventures</groupId>
+      <artifactId>graphql-jpa-query-web</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>

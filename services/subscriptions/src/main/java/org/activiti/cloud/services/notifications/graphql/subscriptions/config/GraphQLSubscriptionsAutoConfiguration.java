@@ -17,9 +17,6 @@ package org.activiti.cloud.services.notifications.graphql.subscriptions.config;
 
 import java.util.List;
 
-import graphql.GraphQL;
-import org.activiti.cloud.notifications.graphql.schema.GraphQLSchemaConfigurer;
-import org.activiti.cloud.notifications.graphql.schema.GraphQLShemaRegistration;
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.activiti.cloud.services.notifications.graphql.subscriptions.GraphQLSubscriptionSchemaBuilder;
@@ -37,6 +34,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.ReactorNettyTcpStompClient;
+
+import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaConfigurer;
+import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLShemaRegistration;
+import graphql.GraphQL;
 import reactor.core.publisher.Flux;
 
 @Configuration
