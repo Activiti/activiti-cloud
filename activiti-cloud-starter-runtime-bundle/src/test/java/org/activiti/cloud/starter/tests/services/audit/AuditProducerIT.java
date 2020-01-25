@@ -877,6 +877,7 @@ public class AuditProducerIT {
 
             List<CloudRuntimeEvent<?, ?>> applicationElementEvents = receivedEvents
                     .stream()
+                    .filter(event -> startProcessEntity.getBody().getId().equals(event.getProcessInstanceId()))
                     .filter(event -> event.getEntity().getClass().getSuperclass().equals(ApplicationElementImpl.class))
                     .collect(Collectors.toList());
 

@@ -20,7 +20,7 @@
     <module>activiti-cloud-starter-runtime-bundle-it</module>
   </modules>
   <properties>
-	  <project.scm.repository>activiti-cloud-runtime-bundle-service</project.scm.repository>
+	<project.scm.repository>activiti-cloud-runtime-bundle-service</project.scm.repository>
     <activiti-dependencies.version>7.1.181</activiti-dependencies.version>
     <activiti-cloud-build.version>7.1.30</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>7.1.151</activiti-cloud-service-common.version>
@@ -35,6 +35,20 @@
         <version>${activiti-cloud-build.version}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.common</groupId>
+        <artifactId>activiti-cloud-service-common-dependencies</artifactId>
+        <version>${activiti-cloud-service-common.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.dependencies</groupId>
+        <artifactId>activiti-dependencies</artifactId>
+        <version>${activiti-dependencies.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
