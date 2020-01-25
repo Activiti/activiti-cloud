@@ -127,8 +127,8 @@ public class ModelingModels {
         modelingModelsSteps.checkCurrentModelValidationFailureForExtensions("#: " + numberOfErrors + " schema violations found");
     }
 
-    @Then("$numberOfErrors validation schemas are matched for extensions")
-    public void checkCurrentModelValidationSchemaMatchesForExtensions(String numberOfErrors) throws IOException {
-        modelingModelsSteps.checkCurrentModelValidationFailureForExtensions("#: only " + numberOfErrors + " subschema matches out of 2");
+    @Then("$propertySchema not valid find in extensions")
+    public void checkCurrentModelValidationSchemaMatchesForExtensions(String propertySchema) throws IOException {
+        modelingModelsSteps.checkCurrentModelValidationFailureForExtensions("#/extensions: extraneous key [" + propertySchema + "] is not permitted");
     }
 }
