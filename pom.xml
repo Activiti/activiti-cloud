@@ -38,6 +38,13 @@
         <type>pom</type>
       </dependency>
       <dependency>
+        <groupId>org.activiti.cloud.common</groupId>
+        <artifactId>activiti-cloud-service-common-dependencies</artifactId>
+        <version>${activiti-cloud-service-common.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>    
+      <dependency>
         <groupId>net.javacrumbs.json-unit</groupId>
         <artifactId>json-unit-fluent</artifactId>
         <version>${json-unit.version}</version>
