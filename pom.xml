@@ -20,6 +20,7 @@
     <module>activiti-cloud-acceptance-tests-core</module>
   </modules>
   <properties>
+    <activiti-cloud-build.version>7.1.30</activiti-cloud-build.version>
     <activiti-cloud-api.version>7.1.118</activiti-cloud-api.version>
     <activiti-cloud-acceptance-tests.version>${project.version}</activiti-cloud-acceptance-tests.version>
     <serenity.version>1.9.6</serenity.version>
@@ -30,6 +31,20 @@
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.activiti.cloud.build</groupId>
+        <artifactId>activiti-cloud-dependencies-parent</artifactId>
+        <version>${activiti-cloud-build.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.api</groupId>
+        <artifactId>activiti-cloud-api-dependencies</artifactId>
+        <version>${activiti-cloud-api.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
       <dependency>
         <groupId>net.serenity-bdd</groupId>
         <artifactId>serenity-core</artifactId>

@@ -13,13 +13,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.cloud.api</groupId>
-        <artifactId>activiti-cloud-api-dependencies</artifactId>
-        <version>${activiti-cloud-api.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-      <dependency>
         <groupId>org.activiti.cloud.acc</groupId>
         <artifactId>activiti-cloud-acceptance-tests-shared</artifactId>
         <version>${activiti-cloud-acceptance-tests.version}</version>
