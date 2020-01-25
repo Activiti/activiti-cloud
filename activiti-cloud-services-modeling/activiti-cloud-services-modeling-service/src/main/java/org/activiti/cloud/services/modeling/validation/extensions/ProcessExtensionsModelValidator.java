@@ -96,7 +96,10 @@ public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidat
     }
 
     private Map<String, Object> retrieveExtensionByProcessId(Model model, String processId){
-        return model.getExtensions() != null ? (Map<String, Object>) model.getExtensions().get(processId) : null;
+        return model.getExtensions() != null &&
+            model.getExtensions().get(processId) != null ?
+                (Map<String, Object>) model.getExtensions().get(processId) :
+                model.getExtensions();
     }
 
     private Stream<ModelValidationError> validateProcessExtension(Map<String,Object> processExtension,
