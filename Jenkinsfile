@@ -28,62 +28,77 @@ pipeline {
                 }
             }
         }
-        stage('Build Preview BoM ') {
-            when {
-                branch 'PR-*'
-            }
-            steps {
-                container('maven') {
-                    sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE install"
+        stage('Set Versions') {
+            parallel {
+                stage('Preview Version') {
+                    when {
+                        branch 'PR-*'
+                    }
+                    environment {
+                        VERSION = "$PREVIEW_NAMESPACE"
+                    }
+                    steps {
+                        container('maven') {
+                            echo "VERSION=$VERSION"
+                            // so we can retrieve the version in later steps
+                            sh "echo $VERSION > VERSION"
+                        }
+                    }
                 }
-            }
-        }
-        stage('Build Release BoM') {
-            when {
-                branch "$RELEASE_BRANCH"
-            }
-            environment {
-                RELEASE_VERSION = jx_release_version()
-            }
-            steps {
-                container('maven') {
-                    // ensure we're not on a detached head
-                    sh "git checkout $RELEASE_BRANCH"
-                    sh "git fetch --tags"
+                stage('Release Version') {
+                    when {
+                        branch "$RELEASE_BRANCH"
+                    }
+                    environment {
+                        VERSION = jx_release_version()
+                    }
+                    steps {
+                        container('maven') {
+                            echo "VERSION=$VERSION"
+                            // so we can retrieve the version in later steps
+                            sh "echo $VERSION > VERSION"
 
-                    // so we can retrieve the version in later steps
-                    sh "echo $RELEASE_VERSION > VERSION"
-                    
-                    sh "mvn versions:set -DnewVersion=$RELEASE_VERSION install"
-                }
-            }
-        }
-        stage('Build Release Tag BoM') {
-            when {
-                tag "$RELEASE_TAG_REGEX"
-            }
-            environment {
-                RELEASE_VERSION = "$TAG_NAME"
-            }
-            steps {
-                container('maven') {
-                    sh "echo $RELEASE_VERSION > VERSION"
-                    sh "git checkout $RELEASE_VERSION"
-                    sh "git fetch --all --tags --prune"
-                    sh "git checkout tags/$RELEASE_VERSION -b $RELEASE_VERSION"
+                            // ensure we're not on a detached head
+                            sh "git checkout $RELEASE_BRANCH"
+                            sh "git fetch --tags"
 
-                    sh "mvn versions:set -DnewVersion=$RELEASE_VERSION install"
+                        }
+                    }
                 }
+                stage('Tag Version') {
+                    when {
+                        tag "$RELEASE_TAG_REGEX"
+                    }
+                    environment {
+                        VERSION = "$TAG_NAME"
+                    }
+                    steps {
+                        container('maven') {
+                            echo "VERSION=$VERSION"
+                            sh "git checkout $VERSION"
+                            sh "git fetch --all --tags --prune"
+                            sh "git checkout tags/$VERSION -b $VERSION"
+
+                            sh "echo $VERSION > VERSION"
+                        }
+                    }
+                }                
             }
         }
-        stage('Update Helm Chart Version') {
+        stage('Build Artifacts') {
+            environment {
+                VERSION = version()
+            }
             steps {
                 container('maven') {
+                    echo "VERSION=$VERSION"
+                    sh "mvn versions:set -DnewVersion=`cat VERSION`"
+                    sh "mvn clean install"
                     sh "make updatebot/push-version-dry"
                 }
             }
         }
-        stage('Update Helm Chart Versions From Tag') {
+        stage('Tag Helm Chart Release') {
             when {
                 tag "$RELEASE_TAG_REGEX"
             }
@@ -155,7 +170,7 @@ pipeline {
                         message: "Activiti Cloud Dependendencies Acceptance Tests passed: $BUILD_URL"
                     )
                 }
-            }            
+            }
         }
         stage('Tag Release') {
             when {
@@ -172,7 +187,7 @@ pipeline {
                 }
             }
         }
-        stage('Deploy Release') {
+        stage('Publish Release') {
             when {
                 branch "$RELEASE_BRANCH"
             }
@@ -210,7 +225,7 @@ pipeline {
                 }
             }
         }
-        stage('Publish Helm Chart Release') {
+        stage('Publish Helm Release') {
             when {
                 tag "$RELEASE_TAG_REGEX"
             }
@@ -241,6 +256,12 @@ def delete_deployment() {
     container('maven') {
         sh "make delete"
         sh "kubectl delete namespace $PREVIEW_NAMESPACE|echo 'try to remove namespace '$PREVIEW_NAMESPACE "
+    }
+}
+
+def version() {
+    container('maven') {
+        return sh( script: "echo \$(cat VERSION)", returnStdout: true).trim()
     }
 }
 
