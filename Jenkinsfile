@@ -12,11 +12,12 @@ pipeline {
         CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
         PREVIEW_NAMESPACE = "example-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase().replaceAll("[\\-\\+\\.\\^:,]","");
         GLOBAL_GATEWAY_DOMAIN="35.242.205.159.nip.io"
-        REALM = "activiti"
-        GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
-        SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
+        REALM              = "activiti"
+        GATEWAY_HOST       = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
+        SSO_HOST           = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
         GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
         RELEASE_BRANCH     = "develop"
+        RELEASE_TAG_REGEX  = "*M*"
     }
     stages {
         stage('Configure Git') {
@@ -41,24 +42,62 @@ pipeline {
             when {
                 branch "$RELEASE_BRANCH"
             }
+            environment {
+                RELEASE_VERSION = jx_release_version()
+            }
             steps {
                 container('maven') {
                     // ensure we're not on a detached head
-                    sh "git checkout "$RELEASE_BRANCH"
+                    sh "git checkout $RELEASE_BRANCH"
+                    sh "git fetch --tags"
 
                     // so we can retrieve the version in later steps
-                    sh "git fetch --tags"
-                    sh "echo \$(jx-release-version) > VERSION"
-                    sh "mvn versions:set -DnewVersion=\$(cat VERSION) install"
+                    sh "echo $RELEASE_VERSION > VERSION"
+                    
+                    sh "mvn versions:set -DnewVersion=$RELEASE_VERSION install"
+                }
+            }
+        }
+        stage('Build Release Tag BoM') {
+            when {
+                tag "$RELEASE_TAG_REGEX"
+            }
+            environment {
+                RELEASE_VERSION = "$TAG_NAME"
+            }
+            steps {
+                container('maven') {
+                    sh "echo $RELEASE_VERSION > VERSION"
+                    sh "git checkout $RELEASE_VERSION"
+                    sh "git fetch --all --tags --prune"
+                    sh "git checkout tags/$RELEASE_VERSION -b $RELEASE_VERSION"
+
+                    sh "mvn versions:set -DnewVersion=$RELEASE_VERSION install"
+                }
+            }
+        }
+        stage('Update Helm Chart Version') {
+            steps {
+                container('maven') {
+                    sh "make updatebot/push-version-dry"
+                }
+            }
+        }
+        stage('Update Helm Chart Versions From Tag') {
+            when {
+                tag "$RELEASE_TAG_REGEX"
+            }
+            steps {
+                container('maven') {
+                    sh "make replace-release-full-chart-names"
                 }
             }
         }
         stage('Deploy Helm Chart') {
             parallel {
-                stage('Deploy Preview Helm Chart') {
+                stage('Build & Deploy Helm Chart') {
                     steps {
                         container('maven') {
-                            sh "make updatebot/push-version-dry"
                             sh "make prepare-helm-chart"
                             sh "make run-helm-chart"
                             sh "sleep 90"
@@ -171,34 +210,21 @@ pipeline {
                 }
             }
         }
-        stage('helm chart release') {
+        stage('Publish Helm Chart Release') {
             when {
-                tag '*M*'
-            }
-            environment {
-                //TAG_NAME = sh(returnStdout: true, script: 'git describe --always').trim()
-                //HELM_ACTIVITI_VERSION = "$TAG_NAME"
-                APP_ACTIVITI_VERSION = "$TAG_NAME"
-                //APP_ACTIVITI_VERSION = "$BRANCH_NAME"
+                tag "$RELEASE_TAG_REGEX"
             }
             steps {
                 container('maven') {
-                    sh "echo $APP_ACTIVITI_VERSION >VERSION"
-                    sh "git checkout $APP_ACTIVITI_VERSION"
-                    sh "git config --global credential.helper store"
-                    sh "jx step git credentials"
-                    sh "git fetch --all --tags --prune"
-                    sh "git checkout tags/$APP_ACTIVITI_VERSION -b $APP_ACTIVITI_VERSION"
-                    //sh "make retag-docker-images"
-                    //sh "make push-docker-images"
-                    sh "make updatebot/push-version-dry"
-                    sh "make replace-release-full-chart-names"
-                    sh "make prepare-helm-chart"
-                    sh "make run-helm-chart"
-
-                    sh "make acc-tests"
                     sh "make github"
                     sh "make tag"
+                }
+            }
+            post {
+                success {
+                    script {
+                        slackSend(channel: "#activiti-community-builds", message: "New Helm Chart verison $TAG_NAME released." , sendAsText: true)
+                    }                    
                 }
             }
         }
@@ -210,10 +236,16 @@ pipeline {
         }
     }
 }
+
 def delete_deployment() {
-  container('maven') {
-   sh "make delete"
-   sh "kubectl delete namespace $PREVIEW_NAMESPACE|echo 'try to remove namespace '$PREVIEW_NAMESPACE "
-  }
+    container('maven') {
+        sh "make delete"
+        sh "kubectl delete namespace $PREVIEW_NAMESPACE|echo 'try to remove namespace '$PREVIEW_NAMESPACE "
+    }
 }
 
+def jx_release_version() {
+    container('maven') {
+        return sh( script: "echo \$(jx-release-version)", returnStdout: true).trim()
+    }
+}
