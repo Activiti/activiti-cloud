@@ -19,21 +19,41 @@ pipeline {
 
     }
     stages {
+        stage('Configure Git Client') {
+            steps {
+                container('maven') {
+                    sh "git config --global credential.helper store"
+                    sh "jx step git credentials"
+                }
+            }
+        }
+        stage('Validate Versions') {
+            steps {
+                container('maven') {
+                    sh "mvn validate"
+                }
+            }
+        }
         stage('Build and Prepare Preview') {
             when {
                 branch 'PR-*'
             }
             parallel {
-                stage('PR Build and Deploy Preview') {
+                stage('PR Build Preview') {
                     steps {
                         container('maven') {
-                            sh "git config --global credential.helper store"
-                            sh "jx step git credentials"
                             sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
                             sh "mvn install"
+                        }
+                    }
+                }
+                stage('PR Deploy Preview') {
+                    steps {
+                        container('maven') {
                             sh "make updatebot/push-version-dry"
                             sh "make prepare-helm-chart"
                             sh "make run-helm-chart"
+                            sh "sleep 90"
                         }
                     }
                 }
@@ -41,7 +61,6 @@ pipeline {
                     steps {
                         container('maven') {
                             sh "make activiti-cloud-acceptance-scenarios"
-                            sh "sleep 90"
                         }
                     }
                 }
@@ -58,12 +77,38 @@ pipeline {
                             sh "make modeling-acceptance-tests"
                         }
                     }
+                    post {
+                        failure {
+                            slackSend(
+                                channel: "#activiti-community-builds",
+                                color: "danger",
+                                message: "Modeling Acceptance Tests had failed: $BUILD_URL"
+                            )
+                        }
+                    }
                 }
                 stage("Runtime Acceptance Scenarios") {
                     steps {
                         container('maven') {
                             sh "make runtime-acceptance-tests"
                         }
+                    }
+                    post {
+                        failure {
+                            slackSend(
+                                channel: "#activiti-community-builds",
+                                color: "danger",
+                                message: "Runtime Acceptance Tests had failed: $BUILD_URL"
+                            )
+                        }
+                    }
+                }
+                post {
+                    success {
+                        slackSend(
+                            channel: "#activiti-community-builds",
+                            message: "Runtime Acceptance Tests passed: $BUILD_URL"
+                        )
                     }
                 }
             }
@@ -74,12 +119,9 @@ pipeline {
         }
         steps {
           container('maven') {
-
             // ensure we're not on a detached head
             sh "git checkout develop"
-            sh "git config --global credential.helper store"
 
-            sh "jx step git credentials"
             // so we can retrieve the version in later steps
             sh "git fetch --tags"
             sh "echo \$(jx-release-version) > VERSION"
@@ -131,7 +173,7 @@ pipeline {
               slackSend(
                 channel: "#activiti-community-builds",
                   color: "danger",
-                  message: "Develop is failed http://jenkins.jx.35.242.205.159.nip.io/job/Activiti/job/activiti-cloud-dependencies/job/develop/"
+                  message: "Develop is failed $BUILD_URL"
               )
             }
         }
