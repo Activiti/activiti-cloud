@@ -19,7 +19,7 @@ pipeline {
 
     }
     stages {
-      stage('CI Build and push snapshot') {
+      stage('CI Build and Test PR') {
         when {
           branch 'PR-*'
         }
@@ -32,8 +32,33 @@ pipeline {
             sh "make updatebot/push-version-dry"
             sh "make prepare-helm-chart"
             sh "make run-helm-chart"
-            sh "make acc-tests"
           }
+        }
+        stage("Acceptance Scenarios") {
+            stage('Fetch Acceptance Scenarios') {
+                steps {
+                    container('maven') {
+                        sh "make activiti-cloud-acceptance-scenarios"
+                        sh "sleep 90"
+                    }
+                }
+            }
+            parallel {
+                stage("Modeling Acceptance Tests") {
+                    steps {
+                        container('maven') {
+                            sh "make modeling-acceptance-tests"
+                        }
+                    }
+                }
+                stage("Runtime Acceptance Scenarios") {
+                    steps {
+                        container('maven') {
+                            sh "make runtime-acceptance-tests"
+                        }
+                    }
+                }
+            }
         }
       }
       stage('Build Release') {
@@ -57,7 +82,11 @@ pipeline {
             sh "make updatebot/push-version-dry"
             sh "make prepare-helm-chart"
             sh "make run-helm-chart"
-            sh "make acc-tests"
+
+            sh "make activiti-cloud-acceptance-scenarios"
+            sh "sleep 90"
+
+            sh "make modeling-acceptance-tests runtime-acceptance-tests"
 
             retry(5){
               sh "git add --all"
@@ -66,6 +95,7 @@ pipeline {
               sh "git push origin v\$(cat VERSION)"
             }
           }
+
           container('maven') {
             sh 'mvn clean deploy'
 
