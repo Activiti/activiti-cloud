@@ -33,28 +33,26 @@ pipeline {
             sh "make prepare-helm-chart"
             sh "make run-helm-chart"
           }
-        }
-        stage("Acceptance Scenarios") {
-            stage('Fetch Acceptance Scenarios') {
+            stage("Acceptance Scenarios") {
                 steps {
                     container('maven') {
                         sh "make activiti-cloud-acceptance-scenarios"
                         sh "sleep 90"
                     }
-                }
-            }
-            parallel {
-                stage("Modeling Acceptance Tests") {
-                    steps {
-                        container('maven') {
-                            sh "make modeling-acceptance-tests"
+                    parallel {
+                        stage("Modeling Acceptance Tests") {
+                            steps {
+                                container('maven') {
+                                    sh "make modeling-acceptance-tests"
+                                }
+                            }
                         }
-                    }
-                }
-                stage("Runtime Acceptance Scenarios") {
-                    steps {
-                        container('maven') {
-                            sh "make runtime-acceptance-tests"
+                        stage("Runtime Acceptance Scenarios") {
+                            steps {
+                                container('maven') {
+                                    sh "make runtime-acceptance-tests"
+                                }
+                            }
                         }
                     }
                 }
