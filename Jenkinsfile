@@ -19,46 +19,50 @@ pipeline {
 
     }
     stages {
-      stage('CI Build and Test PR') {
-        when {
-          branch 'PR-*'
-        }
-        steps {
-          container('maven') {
-            sh "git config --global credential.helper store"
-            sh "jx step git credentials"
-            sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
-            sh "mvn install"
-            sh "make updatebot/push-version-dry"
-            sh "make prepare-helm-chart"
-            sh "make run-helm-chart"
-          }
-            stage("Acceptance Scenarios") {
-                steps {
-                    container('maven') {
-                        sh "make activiti-cloud-acceptance-scenarios"
-                        sh "sleep 90"
+        stage('CI Build, Deploy and Test Preview') {
+            when {
+                branch 'PR-*'
+            }
+            stages {
+                stage('Build Preview') {
+                    steps {
+                        container('maven') {
+                            sh "git config --global credential.helper store"
+                            sh "jx step git credentials"
+                            sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
+                            sh "mvn install"
+                            sh "make updatebot/push-version-dry"
+                            sh "make prepare-helm-chart"
+                            sh "make run-helm-chart"
+                        }
                     }
-                    parallel {
-                        stage("Modeling Acceptance Tests") {
-                            steps {
-                                container('maven') {
-                                    sh "make modeling-acceptance-tests"
-                                }
+                }
+                stage("Fetch Acceptance Scenarios") {
+                    steps {
+                        container('maven') {
+                            sh "make activiti-cloud-acceptance-scenarios"
+                            sh "sleep 90"
+                        }
+                    }
+                }
+                parallel {
+                    stage("Modeling Acceptance Tests") {
+                        steps {
+                            container('maven') {
+                                sh "make modeling-acceptance-tests"
                             }
                         }
-                        stage("Runtime Acceptance Scenarios") {
-                            steps {
-                                container('maven') {
-                                    sh "make runtime-acceptance-tests"
-                                }
+                    }
+                    stage("Runtime Acceptance Scenarios") {
+                        steps {
+                            container('maven') {
+                                sh "make runtime-acceptance-tests"
                             }
                         }
                     }
                 }
             }
         }
-      }
       stage('Build Release') {
         when {
           branch 'develop'
