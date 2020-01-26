@@ -6,7 +6,6 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/6f4b834c5b8b4f37bfe2817ac4a15d94)](https://www.codacy.com/app/Activiti/activiti-cloud-runtime-bundle-service?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Activiti/activiti-cloud-runtime-bundle-service&amp;utm_campaign=Badge_Grade)
 [![ASL 2.0](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/Activiti/activiti-cloud-runtime-bundle-service/blob/master/LICENSE.txt)
 [![CLA](https://cla-assistant.io/readme/badge/Activiti/activiti-cloud-runtime-bundle-service)](https://cla-assistant.io/Activiti/activiti-cloud-runtime-bundle-service)
-[![Known Vulnerabilities](https://snyk.io/test/github/Activiti/activiti-cloud-runtime-bundle-service/badge.svg)](https://snyk.io/test/github/Activiti/activiti-cloud-runtime-bundle-service)
 [![security status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-runtime-bundle-service/security)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-runtime-bundle-service)
 [![stability status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-runtime-bundle-service/stability)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-runtime-bundle-service)
 
