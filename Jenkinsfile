@@ -19,47 +19,51 @@ pipeline {
 
     }
     stages {
-        stage('CI Build, Deploy and Test Preview') {
+        parallel {
+            stage(PR Build and Deploy Preview') {
+                when {
+                    branch 'PR-*'
+                }
+                steps {
+                    container('maven') {
+                        sh "git config --global credential.helper store"
+                        sh "jx step git credentials"
+                        sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
+                        sh "mvn install"
+                        sh "make updatebot/push-version-dry"
+                        sh "make prepare-helm-chart"
+                        sh "make run-helm-chart"
+                    }
+                }
+            }
+            stage("PR Prepare Acceptance Scenarios") {
+                when {
+                    branch 'PR-*'
+                }
+                steps {
+                    container('maven') {
+                        sh "make activiti-cloud-acceptance-scenarios"
+                        sh "sleep 90"
+                    }
+                }
+            }
+        }
+        stage("PR Run Acceptance Scenarios") {
             when {
                 branch 'PR-*'
             }
             parallel {
-                stage('Build and Deploy Preview') {
+                stage("Modeling Acceptance Tests") {
                     steps {
                         container('maven') {
-                            sh "git config --global credential.helper store"
-                            sh "jx step git credentials"
-                            sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
-                            sh "mvn install"
-                            sh "make updatebot/push-version-dry"
-                            sh "make prepare-helm-chart"
-                            sh "make run-helm-chart"
+                            sh "make modeling-acceptance-tests"
                         }
                     }
                 }
-                stage("Prepare Acceptance Scenarios") {
+                stage("Runtime Acceptance Scenarios") {
                     steps {
                         container('maven') {
-                            sh "make activiti-cloud-acceptance-scenarios"
-                            sh "sleep 90"
-                        }
-                    }
-                }
-            }
-            stage("Run Acceptance Scenarios") {
-                parallel {
-                    stage("Modeling Acceptance Tests") {
-                        steps {
-                            container('maven') {
-                                sh "make modeling-acceptance-tests"
-                            }
-                        }
-                    }
-                    stage("Runtime Acceptance Scenarios") {
-                        steps {
-                            container('maven') {
-                                sh "make runtime-acceptance-tests"
-                            }
+                            sh "make runtime-acceptance-tests"
                         }
                     }
                 }
