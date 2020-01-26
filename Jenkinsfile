@@ -103,15 +103,15 @@ pipeline {
                         }
                     }
                 }
-                post {
-                    success {
-                        slackSend(
-                            channel: "#activiti-community-builds",
-                            message: "Runtime Acceptance Tests passed: $BUILD_URL"
-                        )
-                    }
-                }
             }
+            post {
+                success {
+                    slackSend(
+                        channel: "#activiti-community-builds",
+                        message: "Runtime Acceptance Tests passed: $BUILD_URL"
+                    )
+                }
+            }            
         }
       stage('Build Release') {
         when {
