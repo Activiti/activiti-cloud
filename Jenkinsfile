@@ -4,22 +4,22 @@ pipeline {
         quietPeriod(30)
     }
     agent {
-      label "jenkins-maven-java11"
+        label "jenkins-maven-java11"
     }
     environment {
-      ORG               = 'activiti'
-      APP_NAME          = 'activiti-cloud-dependencies'
-      CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
-      PREVIEW_NAMESPACE = "example-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase().replaceAll("[\\-\\+\\.\\^:,]","");
-      GLOBAL_GATEWAY_DOMAIN="35.242.205.159.nip.io"
-      REALM = "activiti"
-      GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
-      SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
-      GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
-
+        ORG               = 'activiti'
+        APP_NAME          = 'activiti-cloud-dependencies'
+        CHARTMUSEUM_CREDS = credentials('jenkins-x-chartmuseum')
+        PREVIEW_NAMESPACE = "example-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase().replaceAll("[\\-\\+\\.\\^:,]","");
+        GLOBAL_GATEWAY_DOMAIN="35.242.205.159.nip.io"
+        REALM = "activiti"
+        GATEWAY_HOST = "gateway.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
+        SSO_HOST = "identity.$PREVIEW_NAMESPACE.$GLOBAL_GATEWAY_DOMAIN"
+        GITHUB_CHARTS_REPO = "https://github.com/Activiti/activiti-cloud-helm-charts.git"
+        RELEASE_BRANCH     = "develop"
     }
     stages {
-        stage('Configure Git Client') {
+        stage('Configure Git') {
             steps {
                 container('maven') {
                     sh "git config --global credential.helper store"
@@ -27,27 +27,35 @@ pipeline {
                 }
             }
         }
-        stage('Validate Versions') {
-            steps {
-                container('maven') {
-                    sh "mvn validate"
-                }
-            }
-        }
-        stage('Build and Prepare Preview') {
+        stage('Build Preview BoM ') {
             when {
                 branch 'PR-*'
             }
-            parallel {
-                stage('PR Build Preview') {
-                    steps {
-                        container('maven') {
-                            sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
-                            sh "mvn install"
-                        }
-                    }
+            steps {
+                container('maven') {
+                    sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE install"
                 }
-                stage('PR Deploy Preview') {
+            }
+        }
+        stage('Build Release BoM') {
+            when {
+                branch "$RELEASE_BRANCH"
+            }
+            steps {
+                container('maven') {
+                    // ensure we're not on a detached head
+                    sh "git checkout "$RELEASE_BRANCH""
+
+                    // so we can retrieve the version in later steps
+                    sh "git fetch --tags"
+                    sh "echo \$(jx-release-version) > VERSION"
+                    sh "mvn versions:set -DnewVersion=\$(cat VERSION) install"
+                }
+            }
+        }
+        stage('Deploy Helm Chart') {
+            parallel {
+                stage('Deploy Preview Helm Chart') {
                     steps {
                         container('maven') {
                             sh "make updatebot/push-version-dry"
@@ -57,7 +65,7 @@ pipeline {
                         }
                     }
                 }
-                stage("PR Prepare Acceptance Scenarios") {
+                stage("Build Acceptance Scenarios") {
                     steps {
                         container('maven') {
                             sh "make activiti-cloud-acceptance-scenarios"
@@ -67,9 +75,6 @@ pipeline {
             }
         }
         stage("Run Acceptance Scenarios") {
-            when {
-                branch 'PR-*'
-            }
             parallel {
                 stage("Modeling Acceptance Tests") {
                     steps {
@@ -108,87 +113,75 @@ pipeline {
                 success {
                     slackSend(
                         channel: "#activiti-community-builds",
-                        message: "Runtime Acceptance Tests passed: $BUILD_URL"
+                        message: "Activiti Cloud Dependendencies Acceptance Tests passed: $BUILD_URL"
                     )
                 }
             }            
         }
-      stage('Build Release') {
-        when {
-          branch 'develop'
-        }
-        steps {
-          container('maven') {
-            // ensure we're not on a detached head
-            sh "git checkout develop"
-
-            // so we can retrieve the version in later steps
-            sh "git fetch --tags"
-            sh "echo \$(jx-release-version) > VERSION"
-            sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
-            sh "mvn clean verify"
-
-            sh "make updatebot/push-version-dry"
-            sh "make prepare-helm-chart"
-            sh "make run-helm-chart"
-
-            sh "make activiti-cloud-acceptance-scenarios"
-            sh "sleep 90"
-
-            sh "make modeling-acceptance-tests runtime-acceptance-tests"
-
-            retry(5){
-              sh "git add --all"
-              sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
-              sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
-              sh "git push origin v\$(cat VERSION)"
+        stage('Tag Release') {
+            when {
+                branch "$RELEASE_BRANCH"
             }
-          }
-
-          container('maven') {
-            sh 'mvn clean deploy'
-
-            sh 'export VERSION=`cat VERSION`'
-            sh 'export UPDATEBOT_MERGE=false'
-
-            sh "jx step git credentials"
-
-            retry(2){
-                sh "make updatebot/push-version"
-            }
-            script {
-                def GIT_COMMIT_DETAILS = sh (
-                    script: 'make git-rev-list',
-                    returnStdout: true
-                ).trim()
-                println GIT_COMMIT_DETAILS
-
-            slackSend(channel: "##activiti-community-builds", message: "New build propagated to AAE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
-            }
-          }
-        }
-        post {
-
-            failure {
-              slackSend(
-                channel: "#activiti-community-builds",
-                  color: "danger",
-                  message: "Develop is failed $BUILD_URL"
-              )
+            steps {
+                container('maven') {
+                    retry(5){
+                        sh "git add --all"
+                        sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
+                        sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
+                        sh "git push origin v\$(cat VERSION)"
+                    }
+                }
             }
         }
-      }
-      stage('helm chart release') {
-              when {
+        stage('Deploy Release') {
+            when {
+                branch "$RELEASE_BRANCH"
+            }
+            steps {
+                container('maven') {
+                    sh 'mvn clean deploy'
+
+                    sh 'export VERSION=`cat VERSION`'
+                    sh 'export UPDATEBOT_MERGE=false'
+
+                    sh "jx step git credentials"
+
+                    retry(2){
+                        sh "make updatebot/push-version"
+                    }
+                    script {
+                        def GIT_COMMIT_DETAILS = sh (
+                            script: 'make git-rev-list',
+                            returnStdout: true
+                        ).trim()
+
+                        println GIT_COMMIT_DETAILS
+
+                        slackSend(channel: "#activiti-community-builds", message: "New build propagated to AAE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
+                    }
+                }
+            }
+            post {
+                failure {
+                    slackSend(
+                        channel: "#activiti-community-builds",
+                        color: "danger",
+                        message: "$RELEASE_BRANCH deploy release has failed: $BUILD_URL"
+                    )
+                }
+            }
+        }
+        stage('helm chart release') {
+            when {
                 tag '*M*'
-              }
-              environment {
+            }
+            environment {
                 //TAG_NAME = sh(returnStdout: true, script: 'git describe --always').trim()
                 //HELM_ACTIVITI_VERSION = "$TAG_NAME"
                 APP_ACTIVITI_VERSION = "$TAG_NAME"
                 //APP_ACTIVITI_VERSION = "$BRANCH_NAME"
-              }
-              steps {
+            }
+            steps {
                 container('maven') {
                     sh "echo $APP_ACTIVITI_VERSION >VERSION"
                     sh "git checkout $APP_ACTIVITI_VERSION"
@@ -207,8 +200,8 @@ pipeline {
                     sh "make github"
                     sh "make tag"
                 }
-              }
-      }
+            }
+        }
     }
     post {
         always {
