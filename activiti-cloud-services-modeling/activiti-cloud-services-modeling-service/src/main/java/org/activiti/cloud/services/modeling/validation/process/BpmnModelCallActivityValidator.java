@@ -9,8 +9,11 @@ import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.ValidationContext;
+import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
+import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
-
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,6 +29,8 @@ public class BpmnModelCallActivityValidator implements BpmnModelValidator {
     private final String NO_REFERENCE_FOR_CALL_ACTIVITY_DESCRIPTION = "No call element found for call activity '%s' found in process '%s'. Call activity must have a call element that reference a process id present in the current project.";
     private final String NO_REFERENCE_FOR_CALL_ACTIVITY_PROBLEM = "No call element found for call activity '%s' in process '%s'";
     private final String NO_REFERENCE_FOR_CALL_ACTIVITY_REFERENCE_NAME = "Call activity must have a call element validator.";
+    private final String XML_CONTENT_NOT_PRESEND = "Xml content for the model is not present";
+    private final String XML_NOT_PARSABLE = "Xml content for the model is not valid.";
 
     public BpmnModelCallActivityValidator(ProcessModelType processModelType,
                                           ProcessModelContentConverter processModelContentConverter) {
@@ -38,26 +43,43 @@ public class BpmnModelCallActivityValidator implements BpmnModelValidator {
                                                  ValidationContext validationContext) {
         Set<String> availableProcessesIds = validationContext.getAvailableModels(processModelType)
                 .stream()
-                .map(Model::getId)
+                .flatMap(model -> this.retrieveProcessIdFromModel(model))
                 .collect(Collectors.toSet());
         return validateCallActivities(availableProcessesIds,
                                       bpmnModel);
     }
 
+    private Stream<String> retrieveProcessIdFromModel(Model model) throws RuntimeException {
+        try {
+            return processModelContentConverter.convertToBpmnModel(model.getContent())
+                .getProcesses().stream().map(process -> process.getId());
+        } catch (IOException ioError) {
+            throw new RuntimeException(this.XML_CONTENT_NOT_PRESEND, ioError);
+        } catch (XMLStreamException xmlParsingError) {
+            throw new RuntimeException(this.XML_NOT_PARSABLE, xmlParsingError);
+        }
+    }
+
     private Stream<ModelValidationError> validateCallActivities(Set<String> availableProcessesIds,
                                                                 BpmnModel bpmnModel) {
         return processModelContentConverter.convertToModelContent(bpmnModel)
-                .map(
-                        converter -> {
-                            Set<CallActivity> availableActivities = converter.findAllNodes(CallActivity.class);
-                            return availableActivities.stream()
-                                    .map(activity -> validateCallActivity(availableProcessesIds,
-                                                                          bpmnModel.getMainProcess().getId(),
-                                                                          activity))
-                                    .filter(Optional::isPresent)
-                                    .map(Optional::get);
-                        }).orElse(Stream.empty());
+                .map(converter ->
+                    this.evaluateProcessCallActivity(converter, availableProcessesIds, bpmnModel))
+            .orElse(Stream.empty());
     }
+
+    private Stream<ModelValidationError> evaluateProcessCallActivity(BpmnProcessModelContent converter,
+                                                                     Set<String> availableProcessesIds,
+                                                                     BpmnModel bpmnModel) {
+        Set<CallActivity> availableActivities = converter.findAllNodes(CallActivity.class);
+        return availableActivities.stream()
+            .map(activity -> validateCallActivity(availableProcessesIds,
+                bpmnModel.getMainProcess().getId(),
+                activity))
+            .filter(Optional::isPresent)
+            .map(Optional::get);
+    }
+
 
     private Optional<ModelValidationError> validateCallActivity(Set<String> availableProcessesIds,
                                                                 String mainProcess,
