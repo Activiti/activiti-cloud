@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.1.30</version>
+    <version>7.1.31</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.audit</groupId>
@@ -22,7 +22,7 @@
   </modules>
   <properties>
     <project.scm.repository>activiti-cloud-audit-service</project.scm.repository>
-    <activiti-cloud-build.version>7.1.30</activiti-cloud-build.version>
+    <activiti-cloud-build.version>7.1.31</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>7.1.154</activiti-cloud-service-common.version>
     <activiti-cloud-audit-service.version>${project.version}</activiti-cloud-audit-service.version>
     <json-unit.version>1.24.0</json-unit.version>
