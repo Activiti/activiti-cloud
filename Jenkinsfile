@@ -23,8 +23,8 @@ pipeline {
             when {
                 branch 'PR-*'
             }
-            stages {
-                stage('Build Preview') {
+            parallel {
+                stage('Build and Deploy Preview') {
                     steps {
                         container('maven') {
                             sh "git config --global credential.helper store"
@@ -37,7 +37,7 @@ pipeline {
                         }
                     }
                 }
-                stage("Fetch Acceptance Scenarios") {
+                stage("Prepare Acceptance Scenarios") {
                     steps {
                         container('maven') {
                             sh "make activiti-cloud-acceptance-scenarios"
@@ -45,20 +45,20 @@ pipeline {
                         }
                     }
                 }
-                stage("Run Acceptance Scenarios") {
-                    parallel {
-                        stage("Modeling Acceptance Tests") {
-                            steps {
-                                container('maven') {
-                                    sh "make modeling-acceptance-tests"
-                                }
+            }
+            stage("Run Acceptance Scenarios") {
+                parallel {
+                    stage("Modeling Acceptance Tests") {
+                        steps {
+                            container('maven') {
+                                sh "make modeling-acceptance-tests"
                             }
                         }
-                        stage("Runtime Acceptance Scenarios") {
-                            steps {
-                                container('maven') {
-                                    sh "make runtime-acceptance-tests"
-                                }
+                    }
+                    stage("Runtime Acceptance Scenarios") {
+                        steps {
+                            container('maven') {
+                                sh "make runtime-acceptance-tests"
                             }
                         }
                     }
