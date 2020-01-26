@@ -92,13 +92,13 @@ pipeline {
             steps {
                 container('maven') {
                     echo "VERSION=$VERSION"
-                    sh "mvn versions:set -DnewVersion=`cat VERSION`"
+                    sh "mvn versions:set -DnewVersion=$VERSION"
                     sh "mvn clean install"
                     sh "make updatebot/push-version-dry"
                 }
             }
         }
-        stage('Tag Helm Chart Release') {
+        stage('Tag Helm Chart') {
             when {
                 tag "$RELEASE_TAG_REGEX"
             }
@@ -176,13 +176,16 @@ pipeline {
             when {
                 branch "$RELEASE_BRANCH"
             }
+            environment {
+                VERSION = version()
+            }
             steps {
                 container('maven') {
                     retry(5){
                         sh "git add --all"
-                        sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
-                        sh "git tag -fa v\$(cat VERSION) -m \"Release version \$(cat VERSION)\""
-                        sh "git push origin v\$(cat VERSION)"
+                        sh "git commit -m \"Release $VERSION\" --allow-empty"
+                        sh "git tag -fa v$VERSION -m \"Release version $VERSION\""
+                        sh "git push origin v$VERSION"
                     }
                 }
             }
@@ -191,12 +194,12 @@ pipeline {
             when {
                 branch "$RELEASE_BRANCH"
             }
+            environment {
+                VERSION = version()
+            }
             steps {
                 container('maven') {
                     sh 'mvn clean deploy'
-
-                    sh 'export VERSION=`cat VERSION`'
-                    sh 'export UPDATEBOT_MERGE=false'
 
                     sh "jx step git credentials"
 
@@ -211,7 +214,7 @@ pipeline {
 
                         println GIT_COMMIT_DETAILS
 
-                        slackSend(channel: "#activiti-community-builds", message: "New build propagated to AAE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
+                        slackSend(channel: "#activiti-community-builds", message: "New BoM release version $VERSION propagated to AAE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
                     }
                 }
             }
