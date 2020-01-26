@@ -19,7 +19,7 @@ pipeline {
 
     }
     stages {
-        stage {
+        stage('Build and Prepare Preview') {
             when {
                 branch 'PR-*'
             }
@@ -47,7 +47,7 @@ pipeline {
                 }
             }
         }
-        stage("PR Run Acceptance Scenarios") {
+        stage("Run Acceptance Scenarios") {
             when {
                 branch 'PR-*'
             }
