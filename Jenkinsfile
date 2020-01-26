@@ -44,7 +44,7 @@ pipeline {
             steps {
                 container('maven') {
                     // ensure we're not on a detached head
-                    sh "git checkout "$RELEASE_BRANCH""
+                    sh "git checkout "$RELEASE_BRANCH"
 
                     // so we can retrieve the version in later steps
                     sh "git fetch --tags"
