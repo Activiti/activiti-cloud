@@ -4,7 +4,6 @@
 [![Build Status Travis](https://travis-ci.com/Activiti/activiti-cloud-build.svg?branch=master)](https://travis-ci.com/Activiti/activiti-cloud-build)
 [![ASL 2.0](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/Activiti/activiti-cloud-build/blob/master/LICENSE.txt)
 [![CLA](https://cla-assistant.io/readme/badge/Activiti/activiti-cloud-build)](https://cla-assistant.io/Activiti/activiti-cloud-build)
-[![Known Vulnerabilities](https://snyk.io/test/github/Activiti/activiti-cloud-build/badge.svg)](https://snyk.io/test/github/Activiti/activiti-cloud-build)
 [![security status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-build/security)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-build)
 [![stability status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-build/stability)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-build)
 
