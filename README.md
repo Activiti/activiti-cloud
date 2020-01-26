@@ -6,7 +6,6 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5ee4e6ceacda459a9bffb12e5fb4574d)](https://www.codacy.com/app/Activiti/activiti-cloud-query-service?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Activiti/activiti-cloud-query-service&amp;utm_campaign=Badge_Grade)
 [![ASL 2.0](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/Activiti/activiti-cloud-query-service/blob/master/LICENSE.txt)
 [![CLA](https://cla-assistant.io/readme/badge/Activiti/activiti-cloud-query-service)](https://cla-assistant.io/Activiti/activiti-cloud-query-service)
-[![Known Vulnerabilities](https://snyk.io/test/github/Activiti/activiti-cloud-query-service/badge.svg)](https://snyk.io/test/github/Activiti/activiti-cloud-query-service)
 [![security status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-query-service/security)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-query-service)
 [![stability status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-query-service/stability)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-query-service)
 
