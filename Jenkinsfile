@@ -45,18 +45,20 @@ pipeline {
                         }
                     }
                 }
-                parallel {
-                    stage("Modeling Acceptance Tests") {
-                        steps {
-                            container('maven') {
-                                sh "make modeling-acceptance-tests"
+                stage("Run Acceptance Scenarios") {
+                    parallel {
+                        stage("Modeling Acceptance Tests") {
+                            steps {
+                                container('maven') {
+                                    sh "make modeling-acceptance-tests"
+                                }
                             }
                         }
-                    }
-                    stage("Runtime Acceptance Scenarios") {
-                        steps {
-                            container('maven') {
-                                sh "make runtime-acceptance-tests"
+                        stage("Runtime Acceptance Scenarios") {
+                            steps {
+                                container('maven') {
+                                    sh "make runtime-acceptance-tests"
+                                }
                             }
                         }
                     }
