@@ -20,7 +20,7 @@ pipeline {
     }
     stages {
         parallel {
-            stage(PR Build and Deploy Preview') {
+            stage('PR Build and Deploy Preview') {
                 when {
                     branch 'PR-*'
                 }
