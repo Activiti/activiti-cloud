@@ -19,31 +19,30 @@ pipeline {
 
     }
     stages {
-        parallel {
-            stage('PR Build and Deploy Preview') {
-                when {
-                    branch 'PR-*'
-                }
-                steps {
-                    container('maven') {
-                        sh "git config --global credential.helper store"
-                        sh "jx step git credentials"
-                        sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
-                        sh "mvn install"
-                        sh "make updatebot/push-version-dry"
-                        sh "make prepare-helm-chart"
-                        sh "make run-helm-chart"
+        stage {
+            when {
+                branch 'PR-*'
+            }
+            parallel {
+                stage('PR Build and Deploy Preview') {
+                    steps {
+                        container('maven') {
+                            sh "git config --global credential.helper store"
+                            sh "jx step git credentials"
+                            sh "mvn versions:set -DnewVersion=$PREVIEW_NAMESPACE"
+                            sh "mvn install"
+                            sh "make updatebot/push-version-dry"
+                            sh "make prepare-helm-chart"
+                            sh "make run-helm-chart"
+                        }
                     }
                 }
-            }
-            stage("PR Prepare Acceptance Scenarios") {
-                when {
-                    branch 'PR-*'
-                }
-                steps {
-                    container('maven') {
-                        sh "make activiti-cloud-acceptance-scenarios"
-                        sh "sleep 90"
+                stage("PR Prepare Acceptance Scenarios") {
+                    steps {
+                        container('maven') {
+                            sh "make activiti-cloud-acceptance-scenarios"
+                            sh "sleep 90"
+                        }
                     }
                 }
             }
