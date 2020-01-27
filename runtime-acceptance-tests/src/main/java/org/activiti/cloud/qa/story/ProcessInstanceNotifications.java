@@ -319,9 +319,11 @@ public class ProcessInstanceNotifications {
                         "  }" +
                         "}";
 
-        Map<String, Object> variables = Map.of("serviceName", serviceName,
-                                               "eventTypes", eventTypes,
-                                               "businessKey", businessKey);
+        Map<String, Object> variables = new ObjectMap() {{
+            put("serviceName", serviceName);
+            put("eventTypes", eventTypes);
+            put("businessKey", businessKey);
+        }};
 
         Consumer<Subscription> action = countDownLatchAction(countDownLatch, 
                                                              subscriptionRef, 
