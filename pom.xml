@@ -23,7 +23,7 @@
 	  <project.scm.repository>activiti-cloud-query-service</project.scm.repository>
     <activiti-cloud-build.version>7.1.32</activiti-cloud-build.version>
     <activiti-dependencies.version>7.1.183</activiti-dependencies.version>
-    <activiti-cloud-service-common.version>7.1.157</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.1.158</activiti-cloud-service-common.version>
     <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
     <json-unit.version>1.24.0</json-unit.version>
     <testcontainers.version>1.12.0</testcontainers.version>
