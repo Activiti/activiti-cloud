@@ -7,18 +7,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.ProcessRuntimeService;
 import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.thucydides.core.annotations.Step;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
-import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClient.WebsocketSender;
 import reactor.test.StepVerifier;
@@ -84,19 +84,25 @@ public class NotificationsSteps {
         
         // handle start subscription
         client.handle((i, o) -> {
-            o.options(NettyPipeline.SendOptions::flushOnEach)
-                    .sendString(Mono.just(startMessage))
-                    .then()
-                    .log("start")
-                    .subscribe();
+            o.sendString(Mono.just(startMessage))
+             .then()
+             .log("send")
+             .subscribe();
 
-            return i.receive()
+            return i.aggregateFrames()
+                    .receive()
                     .asString()
-                    .log("data")
-                    .doOnSubscribe(action)
-                    .subscribeWith(data);
+                    .log("receive")
+                    .subscribeWith(data)
+                    .doOnCancel(() -> {
+                        // Let's close websocket and complete data processor
+                        o.sendClose()
+                         .doOnTerminate(data::onComplete)
+                         .block(Duration.ofSeconds(2));
+                    })
+                    .doOnSubscribe(action);
         })
-        .collectList()
+        .log("handle")
         .subscribe();
 
         return data;
