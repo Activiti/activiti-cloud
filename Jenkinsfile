@@ -287,6 +287,6 @@ def jx_release_version() {
 
 def mvn_dependency_tree() {
     container('maven') {
-        return sh( script: "mvn dependency:tree -pl activiti-cloud-dependencies", returnStdout: true).trim()
+        return sh( script: "mvn dependency:tree -pl dependencies", returnStdout: true).trim()
     }
 }
