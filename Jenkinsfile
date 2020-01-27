@@ -165,7 +165,7 @@ pipeline {
                 success {
                     slackSend(
                         channel: "#activiti-community-builds",
-                        color: "green",
+                        color: "good",
                         message: "SUCCESSFUL: Activiti Cloud Dependendencies Acceptance Tests: $BUILD_URL"
                     )
                 }
@@ -211,7 +211,7 @@ pipeline {
                         println GIT_COMMIT_DETAILS
 
                         slackSend(channel: "#activiti-community-builds", 
-                            color: "green",
+                            color: "good",
                             message: "SUCCESSFUL: New BoM release version $VERSION propagated to AAE https://github.com/Alfresco/alfresco-process-parent/pulls \n${GIT_COMMIT_DETAILS}" , 
                             sendAsText: true)
                     }
