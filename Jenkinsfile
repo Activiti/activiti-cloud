@@ -115,7 +115,7 @@ pipeline {
                         container('maven') {
                             sh "make prepare-helm-chart"
                             sh "make run-helm-chart"
-                            sh "sleep 90"
+                            sh "sleep 30"
                         }
                     }
                 }
