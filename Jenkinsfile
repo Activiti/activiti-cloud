@@ -138,11 +138,10 @@ pipeline {
                     }
                     post {
                         failure {
-                                slackSend(channel: "#activiti-community-builds", 
-                                    color: "danger",
-                                    message: "FAILED: Modeling Acceptance Tests: $BUILD_URL" 
-                                )
-                            }
+                            slackSend(channel: "#activiti-community-builds", 
+                                color: "danger",
+                                message: "FAILED: Modeling Acceptance Tests: $BUILD_URL" 
+                            )
                         }
                     }
                 }
@@ -240,9 +239,7 @@ pipeline {
             }
             post {
                 success {
-                    script {
-                        slackSend(channel: "#activiti-community-builds", message: "New Helm Chart verison $TAG_NAME released." , sendAsText: true)
-                    }                    
+                    slackSend(channel: "#activiti-community-builds", message: "New Helm Chart verison $TAG_NAME released." , sendAsText: true)
                 }
             }
         }
