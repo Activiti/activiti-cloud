@@ -14,7 +14,7 @@ ACTIVITI_CLOUD_NOTIFICATIONS_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpr
 ACTIVITI_CLOUD_MODELING_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-modeling-service.version -q -DforceStdout)
 ACTIVITI_CLOUD_MESSAGES_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-messages-service.version -q -DforceStdout)
 
-ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.168
+ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.208
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
 
@@ -37,13 +37,21 @@ ACTIVITI_CLOUD_VERSION := $(shell cat VERSION)
 get-acc-scenarious-version:
 	@echo $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
-acc-tests:
-	git clone https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git
+activiti-cloud-acceptance-scenarios: 
+	rm -rf activiti-cloud-acceptance-scenarios && \
+	git clone https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git && \
 	cd activiti-cloud-acceptance-scenarios && \
 	git fetch --all --tags --prune && \
 	git checkout tags/v$(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION) -b $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION) && \
-	sleep 90 && \
-	mvn clean install -DskipTests && mvn -pl 'runtime-acceptance-tests,modeling-acceptance-tests' clean verify
+	mvn clean install -DskipTests
+
+modeling-acceptance-tests: 
+	cd activiti-cloud-acceptance-scenarios && \
+	mvn -pl 'modeling-acceptance-tests' clean verify
+
+runtime-acceptance-tests: 
+	cd activiti-cloud-acceptance-scenarios && \
+	mvn -pl 'runtime-acceptance-tests' clean verify
 
 update-ea:
 	#$(eval ACTIVITI_CLOUD_VERSION = $(shell cat VERSION))
