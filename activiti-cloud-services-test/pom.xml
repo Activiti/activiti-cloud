@@ -130,11 +130,6 @@
       <artifactId>json-unit-fluent</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>rabbitmq</artifactId>
-      <version>${testcontainers.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.activiti.cloud.common</groupId>
       <artifactId>activiti-cloud-services-test-security-keycloak</artifactId>
     </dependency>
