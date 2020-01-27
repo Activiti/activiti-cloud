@@ -44,6 +44,7 @@ import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
+import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
@@ -103,8 +104,9 @@ public class ModelValidationControllerIT {
                                                        CONTENT_TYPE_XML,
                                                        validContent);
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        Model processModel = modelRepository.createModel(processModel(project,
-                                                                      "process-model"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(validContent);
+        Model processModel = modelRepository.createModel(generatedProcess);
 
         mockMvc.perform(multipart("{version}/models/{model_id}/validate",
                                   API_VERSION,
@@ -121,8 +123,9 @@ public class ModelValidationControllerIT {
                                                        CONTENT_TYPE_XML,
                                                        validContent);
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        Model processModel = modelRepository.createModel(processModel(project,
-                                                                      "process-model"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(validContent);
+        Model processModel = modelRepository.createModel(generatedProcess);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
@@ -235,11 +238,11 @@ public class ModelValidationControllerIT {
 
     @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessModelWithInvalidName() throws Exception {
-
+        byte[] validContent = resourceAsByteArray("process/invalid-process-name.bpmn20.xml");
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        Model processModel = modelRepository.createModel(
-                processModel(project,
-                             "process-model"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(validContent);
+        Model processModel = modelRepository.createModel(generatedProcess);
         MockMultipartFile file = multipartProcessFile(processModel,
                                                       resourceAsByteArray("process/invalid-process-name.bpmn20.xml"));
 
@@ -536,8 +539,9 @@ public class ModelValidationControllerIT {
                                                        CONTENT_TYPE_XML,
                                                        validContent);
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        Model processModel = modelRepository.createModel(processModel(project,
-                                                                      "process-model"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(validContent);
+        Model processModel = modelRepository.createModel(generatedProcess);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
@@ -565,8 +569,9 @@ public class ModelValidationControllerIT {
                                                        CONTENT_TYPE_XML,
                                                        validContent);
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        Model processModel = modelRepository.createModel(processModel(project,
-                                                                      "process-model"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(validContent);
+        Model processModel = modelRepository.createModel(generatedProcess);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
@@ -585,8 +590,9 @@ public class ModelValidationControllerIT {
                                                        CONTENT_TYPE_XML,
                                                        validContent);
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        Model processModel = modelRepository.createModel(processModel(project,
-                                                                      "process-model"));
+        ModelEntity generatedProcess = processModel(project, "process-model");
+        generatedProcess.setContent(validContent);
+        Model processModel = modelRepository.createModel(generatedProcess);
 
         ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",
