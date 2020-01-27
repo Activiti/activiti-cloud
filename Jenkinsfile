@@ -139,10 +139,7 @@ pipeline {
                     post {
                         failure {
                             script {
-                                def GIT_COMMIT_DETAILS = sh (
-                                    script: 'mvn dependency:tree -pl activiti-cloud-dependencies',
-                                    returnStdout: true
-                                ).trim()
+                                def GIT_COMMIT_DETAILS = mvn_dependency_tree()
 
                                 println GIT_COMMIT_DETAILS
 
@@ -164,10 +161,7 @@ pipeline {
                     post {
                         failure {
                             script {
-                                def GIT_COMMIT_DETAILS = sh (
-                                    script: 'mvn dependency:tree -pl activiti-cloud-dependencies',
-                                    returnStdout: true
-                                ).trim()
+                                def GIT_COMMIT_DETAILS = mvn_dependency_tree()
 
                                 println GIT_COMMIT_DETAILS
 
@@ -225,10 +219,7 @@ pipeline {
                         sh "make updatebot/push-version"
                     }
                     script {
-                        def GIT_COMMIT_DETAILS = sh (
-                            script: 'mvn dependency:tree -pl activiti-cloud-dependencies',
-                            returnStdout: true
-                        ).trim()
+                        def GIT_COMMIT_DETAILS = mvn_dependency_tree()
 
                         println GIT_COMMIT_DETAILS
 
@@ -291,5 +282,11 @@ def version() {
 def jx_release_version() {
     container('maven') {
         return sh( script: "echo \$(jx-release-version)", returnStdout: true).trim()
+    }
+}
+
+def mvn_dependency_tree() {
+    container('maven') {
+        return sh( script: "mvn dependency:tree -pl activiti-cloud-dependencies", returnStdout: true).trim()
     }
 }
