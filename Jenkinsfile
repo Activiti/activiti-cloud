@@ -138,11 +138,20 @@ pipeline {
                     }
                     post {
                         failure {
-                            slackSend(
-                                channel: "#activiti-community-builds",
-                                color: "danger",
-                                message: "Modeling Acceptance Tests had failed: $BUILD_URL"
-                            )
+                            script {
+                                def GIT_COMMIT_DETAILS = sh (
+                                    script: 'mvn dependency:tree -pl activiti-cloud-dependencies',
+                                    returnStdout: true
+                                ).trim()
+
+                                println GIT_COMMIT_DETAILS
+
+                                slackSend(channel: "#activiti-community-builds", 
+                                    color: "danger",
+                                    message: "Modeling Acceptance Tests had failed: $BUILD_URL \n${GIT_COMMIT_DETAILS}" , 
+                                    sendAsText: true
+                                )
+                            }
                         }
                     }
                 }
@@ -154,11 +163,20 @@ pipeline {
                     }
                     post {
                         failure {
-                            slackSend(
-                                channel: "#activiti-community-builds",
-                                color: "danger",
-                                message: "Runtime Acceptance Tests had failed: $BUILD_URL"
-                            )
+                            script {
+                                def GIT_COMMIT_DETAILS = sh (
+                                    script: 'mvn dependency:tree -pl activiti-cloud-dependencies',
+                                    returnStdout: true
+                                ).trim()
+
+                                println GIT_COMMIT_DETAILS
+
+                                slackSend(channel: "#activiti-community-builds", 
+                                    color: "danger",
+                                    message: "Runtime Acceptance Tests had failed: $BUILD_URL \n${GIT_COMMIT_DETAILS}" , 
+                                    sendAsText: true
+                                )
+                            }
                         }
                     }
                 }
@@ -208,13 +226,15 @@ pipeline {
                     }
                     script {
                         def GIT_COMMIT_DETAILS = sh (
-                            script: 'make git-rev-list',
+                            script: 'mvn dependency:tree -pl activiti-cloud-dependencies',
                             returnStdout: true
                         ).trim()
 
                         println GIT_COMMIT_DETAILS
 
-                        slackSend(channel: "#activiti-community-builds", message: "New BoM release version $VERSION propagated to AAE https://github.com/Alfresco/alfresco-process-parent/pulls ${GIT_COMMIT_DETAILS}" , sendAsText: true)
+                        slackSend(channel: "#activiti-community-builds", 
+                            message: "New BoM release version $VERSION propagated to AAE https://github.com/Alfresco/alfresco-process-parent/pulls \n${GIT_COMMIT_DETAILS}" , 
+                            sendAsText: true)
                     }
                 }
             }
