@@ -26,13 +26,7 @@ import static org.activiti.cloud.services.modeling.mock.ConstantsBuilder.constan
 import static org.activiti.cloud.services.modeling.mock.IsObjectEquals.isBooleanEquals;
 import static org.activiti.cloud.services.modeling.mock.IsObjectEquals.isDateEquals;
 import static org.activiti.cloud.services.modeling.mock.IsObjectEquals.isIntegerEquals;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.extensions;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.multipartExtensionsFile;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.processModel;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.processModelWithContent;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.processModelWithExtensions;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.*;
 import static org.activiti.cloud.services.modeling.mock.MockMultipartRequestBuilder.putMultipart;
 import static org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig.API_VERSION;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
@@ -484,8 +478,10 @@ public class ModelControllerIT {
                                                        validContent);
 
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
-        Model processModel = modelRepository.createModel(processModel(project,
-                                                                      "process-model"));
+        ModelEntity generatedProcess =processModel(project, "process-model");
+        generatedProcess.setContent(validContent);
+
+        Model processModel = modelRepository.createModel(generatedProcess);
 
         final ResultActions resultActions = mockMvc
                 .perform(multipart("{version}/models/{model_id}/validate",

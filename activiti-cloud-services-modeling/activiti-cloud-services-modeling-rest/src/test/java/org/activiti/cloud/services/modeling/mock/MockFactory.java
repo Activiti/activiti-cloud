@@ -328,7 +328,7 @@ public class MockFactory {
                                CONTENT_TYPE_XML,
                                new String(content)
                                        .replaceFirst("calledElement=\".*\"",
-                                                     "calledElement=\"process-" + callActivity.getId() + "\"")
+                                                     "calledElement=\"" + callActivity.getName() + "\"")
                                        .getBytes());
     }
 

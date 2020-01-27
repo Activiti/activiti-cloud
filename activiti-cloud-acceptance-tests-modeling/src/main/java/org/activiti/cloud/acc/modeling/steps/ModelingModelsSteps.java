@@ -89,17 +89,17 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         assertThat(currentContext.getContent()).isInstanceOf(Model.class);
         Model model = currentContext.getContent();
 
-        Optional.ofNullable(this.getExtensionFromMap(model.getExtensions()))
+        Optional.ofNullable(this.getExtensionFromMap(model))
                 .map(Extensions::getProcessVariables)
                 .ifPresent(processVariables -> processVariables.remove(processVariable));
 
-        Optional.ofNullable(this.getExtensionFromMap(model.getExtensions()))
+        Optional.ofNullable(this.getExtensionFromMap(model))
                 .map(Extensions::getVariablesMappings)
                 .map(mappings -> mappings.get(EXTENSIONS_TASK_NAME))
                 .map(mappingsTypes -> mappingsTypes.get(INPUTS))
                 .ifPresent(processVariableMappings -> processVariableMappings.remove(processVariable));
 
-        Optional.ofNullable(this.getExtensionFromMap(model.getExtensions()))
+        Optional.ofNullable(this.getExtensionFromMap(model))
                 .map(Extensions::getVariablesMappings)
                 .map(mappings -> mappings.get(EXTENSIONS_TASK_NAME))
                 .map(mappingsTypes -> mappingsTypes.get(OUTPUTS))
@@ -119,14 +119,15 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     @Step
     public void addProcessVariableToModelModel(Model model,
                                                List<String> processVariable) {
-        Set<String> processVariables = Optional.ofNullable(this.getExtensionFromMap(model.getExtensions()))
+        Set<String> processVariables = Optional.ofNullable(this.getExtensionFromMap(model))
                 .map(Extensions::getProcessVariables)
                 .map(Map::keySet)
                 .map(HashSet::new)
                 .orElseGet(HashSet::new);
         processVariables.addAll(processVariable);
-
-        model.setExtensions(extensions(processVariables).getAsMap());
+        Map<String, Extensions> processsExtensionMap = new HashMap();
+        processsExtensionMap.put(model.getName(), extensions(processVariables));
+        model.setExtensions(processsExtensionMap);
     }
 
     @Step
@@ -255,9 +256,9 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         Resource<Model> currentContext = checkAndGetCurrentContext(Model.class);
         Model model = currentContext.getContent();
         assertThat(model.getExtensions()).isNotNull();
-        assertThat(this.getExtensionFromMap(model.getExtensions()).getProcessVariables()).containsKeys(processVariables);
+        assertThat(this.getExtensionFromMap(model).getProcessVariables()).containsKeys(processVariables);
         Arrays.stream(processVariables).forEach(processVariableId -> {
-            ProcessVariable processVariable = this.getExtensionFromMap(model.getExtensions()).getProcessVariables().get(processVariableId);
+            ProcessVariable processVariable = this.getExtensionFromMap(model).getProcessVariables().get(processVariableId);
             assertThat(processVariable.getId()).isEqualTo(processVariableId);
             assertThat(processVariable.getName()).isEqualTo(processVariableId);
             assertThat(processVariable.isRequired()).isEqualTo(false);
@@ -265,8 +266,8 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
             assertThat(processVariable.getValue()).isEqualTo(true);
         });
 
-        assertThat(this.getExtensionFromMap(model.getExtensions()).getVariablesMappings()).containsKeys(EXTENSIONS_TASK_NAME);
-        assertThat(this.getExtensionFromMap(model.getExtensions()).getVariablesMappings().get(EXTENSIONS_TASK_NAME)).containsKeys(INPUTS,
+        assertThat(this.getExtensionFromMap(model).getVariablesMappings()).containsKeys(EXTENSIONS_TASK_NAME);
+        assertThat(this.getExtensionFromMap(model).getVariablesMappings().get(EXTENSIONS_TASK_NAME)).containsKeys(INPUTS,
                                                                                                         OUTPUTS);
         assertProcessVariableMappings(model,
                                       INPUTS,
@@ -280,7 +281,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     private void assertProcessVariableMappings(Model model,
                                                ServiceTaskActionType serviceTaskActionType,
                                                String... processVariables) {
-        Map<String, ProcessVariableMapping> outputsMappings = this.getExtensionFromMap(model.getExtensions())
+        Map<String, ProcessVariableMapping> outputsMappings = this.getExtensionFromMap(model)
                 .getVariablesMappings()
                 .get(EXTENSIONS_TASK_NAME)
                 .get(serviceTaskActionType);
@@ -307,10 +308,16 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         return modelingModelsService;
     }
 
-    private Extensions getExtensionFromMap(Map<String,Object> map) {
+    private Extensions getExtensionFromMap(Model model) {
+        Map<String, Extensions> extensionProcessMap = this.retrieveExtensionForModel(model);
+        return extensionProcessMap.get(model.getName());
+    }
+
+    private Map<String, Extensions> retrieveExtensionForModel(Model model) {
         try {
-            return objectMapper.readValue(objectMapper.writeValueAsString(map), Extensions.class);
-       } catch (IOException e) {
+            return objectMapper.readValue(objectMapper.writeValueAsString(model.getExtensions()),
+                objectMapper.getTypeFactory().constructMapType(Map.class,String.class, Extensions.class));
+        } catch (IOException e) {
             return null;
         }
     }

@@ -196,7 +196,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
                                     jsonContent.node("id").matches(startsWith("process-"));
                                     jsonContent.node("name").isEqualTo(modelName);
                                     processVariables.forEach(processVariable -> {
-                                        jsonContent.node("extensions.properties")
+                                        jsonContent.node("extensions."+modelName+".properties")
                                                 .matches(hasEntry(equalTo(processVariable),
                                                                   allOf(hasEntry(equalTo("id"),
                                                                                  equalTo(processVariable)),
@@ -207,7 +207,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
                                                                         hasEntry(equalTo("value"),
                                                                                  is(true))
                                                                   )));
-                                        jsonContent.node("extensions.mappings").matches(
+                                        jsonContent.node("extensions."+modelName+".mappings").matches(
                                                 hasEntry(equalTo(EXTENSIONS_TASK_NAME),
                                                          allOf(hasEntry(equalTo("inputs"),
                                                                         hasEntry(equalTo(processVariable),
