@@ -138,15 +138,9 @@ pipeline {
                     }
                     post {
                         failure {
-                            script {
-                                def GIT_COMMIT_DETAILS = mvn_dependency_tree()
-
-                                println GIT_COMMIT_DETAILS
-
                                 slackSend(channel: "#activiti-community-builds", 
                                     color: "danger",
-                                    message: "Modeling Acceptance Tests had failed: $BUILD_URL \n${GIT_COMMIT_DETAILS}" , 
-                                    sendAsText: true
+                                    message: "FAILED: Modeling Acceptance Tests: $BUILD_URL" 
                                 )
                             }
                         }
@@ -160,17 +154,10 @@ pipeline {
                     }
                     post {
                         failure {
-                            script {
-                                def GIT_COMMIT_DETAILS = mvn_dependency_tree()
-
-                                println GIT_COMMIT_DETAILS
-
-                                slackSend(channel: "#activiti-community-builds", 
-                                    color: "danger",
-                                    message: "Runtime Acceptance Tests had failed: $BUILD_URL \n${GIT_COMMIT_DETAILS}" , 
-                                    sendAsText: true
-                                )
-                            }
+                            slackSend(channel: "#activiti-community-builds", 
+                                color: "danger",
+                                message: "FAILED: Runtime Acceptance Tests: $BUILD_URL" 
+                            )
                         }
                     }
                 }
@@ -179,7 +166,8 @@ pipeline {
                 success {
                     slackSend(
                         channel: "#activiti-community-builds",
-                        message: "Activiti Cloud Dependendencies Acceptance Tests passed: $BUILD_URL"
+                        color: "green",
+                        message: "SUCCESSFUL: Activiti Cloud Dependendencies Acceptance Tests: $BUILD_URL"
                     )
                 }
             }
@@ -224,7 +212,8 @@ pipeline {
                         println GIT_COMMIT_DETAILS
 
                         slackSend(channel: "#activiti-community-builds", 
-                            message: "New BoM release version $VERSION propagated to AAE https://github.com/Alfresco/alfresco-process-parent/pulls \n${GIT_COMMIT_DETAILS}" , 
+                            color: "green",
+                            message: "SUCCESSFUL: New BoM release version $VERSION propagated to AAE https://github.com/Alfresco/alfresco-process-parent/pulls \n${GIT_COMMIT_DETAILS}" , 
                             sendAsText: true)
                     }
                 }
