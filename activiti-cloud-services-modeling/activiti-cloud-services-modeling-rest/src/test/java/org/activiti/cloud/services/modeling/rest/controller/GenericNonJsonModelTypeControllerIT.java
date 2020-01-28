@@ -271,7 +271,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    public void should_returnStatusCreatedAndEmptyExtensions_when_creatingGenericNonJsonModelWithNullExtensions() throws Exception {
+    public void should_returnStatusCreatedAndNullExtensions_when_creatingGenericNonJsonModelWithNullExtensions() throws Exception {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
@@ -283,7 +283,7 @@ public class GenericNonJsonModelTypeControllerIT {
         given().accept(APPLICATION_JSON_VALUE).contentType(APPLICATION_JSON_VALUE).body(objectMapper.writeValueAsString(genericNonJsonModel)).post("/v1/projects/{projectId}/models",
                                                                                                                                                 project.getId())
                 .then().expect(status().isCreated()).body("entry.extensions",
-                                                          notNullValue());
+                                                                nullValue());
     }
 
     @Test
