@@ -9,30 +9,7 @@ github:
     repositories:
     - name: alfresco-process-parent
       useSinglePullRequest: true
-  - name: alfresco
-    repositories:
     - name: alfresco-process-oracle-kafka-application
-      useSinglePullRequest: true  
-      
-        
-    # - name: ttc-connectors-reward
-    #   branch: master
-    # - name: ttc-campaigns-service
-    #   branch: master
-    # - name: ttc-acceptance-tests
-    #   branch: master
-    # - name: ttc-rb-english-campaign
-    #   branch: master
-    # - name: ttc-query-campaign
-    #   branch: master
-    # - name: ttc-connectors-dummytwitter
-    #   branch: master
-    # - name: ttc-connectors-ranking
-    #   branch: master
-    # - name: ttc-connectors-processing
-    #   branch: master
-#    - name: activiti-cloud-acceptance-scenarios
-#      branch: master
-#      useSinglePullRequest: true
-#    - name: activiti-cloud-modeling
-#      branch: master
+      useSinglePullRequest: true
+    - name: alfresco-process-application-deployment
+      useSinglePullRequest: true
