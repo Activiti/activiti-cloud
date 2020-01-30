@@ -25,7 +25,7 @@
     <activiti-cloud-connectors.version>7.1.154</activiti-cloud-connectors.version>
     <activiti-cloud-notifications-service-graphql.version>7.1.219</activiti-cloud-notifications-service-graphql.version>
     <activiti-cloud-messages-service.version>7.1.24</activiti-cloud-messages-service.version>
-    <activiti-cloud-acceptance-tests.version>7.1.177</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-acceptance-tests.version>7.1.178</activiti-cloud-acceptance-tests.version>
   </properties>
   <repositories>
     <repository>
