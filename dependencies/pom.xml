@@ -75,6 +75,13 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.acc</groupId>
+        <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
+        <version>${activiti-cloud-acceptance-tests.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
