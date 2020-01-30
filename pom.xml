@@ -64,6 +64,12 @@
       <type>pom</type>
     </dependency>
     <dependency>
+      <groupId>org.activiti.cloud.acc</groupId>
+      <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
+      <version>${activiti-cloud-acceptance-tests.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud.modeling</groupId>
       <artifactId>activiti-cloud-modeling-dependencies</artifactId>
       <version>${activiti-cloud-modeling-service.version}</version>
@@ -103,12 +109,6 @@
       <groupId>org.activiti.cloud.notifications.graphql</groupId>
       <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
       <version>${activiti-cloud-notifications-service-graphql.version}</version>
-      <type>pom</type>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud.acc</groupId>
-      <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
-      <version>${activiti-cloud-acceptance-tests.version}</version>
       <type>pom</type>
     </dependency>
   </dependencies>
