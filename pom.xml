@@ -18,6 +18,7 @@
     <activiti-cloud-build.version>7.1.32</activiti-cloud-build.version>
     <activiti-cloud-api.version>7.1.127</activiti-cloud-api.version>
     <activiti-cloud-service-common.version>7.1.162</activiti-cloud-service-common.version>
+    <activiti-cloud-acceptance-tests.version>7.1.178</activiti-cloud-acceptance-tests.version>
     <activiti-cloud-modeling-service.version>7.1.373</activiti-cloud-modeling-service.version>
     <activiti-cloud-runtime-bundle-service.version>7.1.244</activiti-cloud-runtime-bundle-service.version>
     <activiti-cloud-query-service.version>7.1.220</activiti-cloud-query-service.version>
@@ -25,7 +26,6 @@
     <activiti-cloud-connectors.version>7.1.155</activiti-cloud-connectors.version>
     <activiti-cloud-notifications-service-graphql.version>7.1.220</activiti-cloud-notifications-service-graphql.version>
     <activiti-cloud-messages-service.version>7.1.25</activiti-cloud-messages-service.version>
-    <activiti-cloud-acceptance-tests.version>7.1.178</activiti-cloud-acceptance-tests.version>
   </properties>
   <repositories>
     <repository>
