@@ -1,18 +1,17 @@
-ACTIVITI_CLOUD_CONNECTORS_VERSION := $(shell mvn help:evaluate -Dexpression=example-cloud-connector.version -q -DforceStdout -f dependencies-tests/pom.xml)
-ACTIVITI_CLOUD_AUDIT_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-audit.version -q -DforceStdout -f dependencies-tests/pom.xml)
-ACTIVITI_CLOUD_QUERY_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-query.version -q -DforceStdout -f dependencies-tests/pom.xml)
-ACTIVITI_CLOUD_RB_VERSION := $(shell mvn help:evaluate -Dexpression=example-runtime-bundle.version -q -DforceStdout -f dependencies-tests/pom.xml)
-ACTIVITI_CLOUD_NOTIFICATIONS_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-notifications-graphql.version -q -DforceStdout -f dependencies-tests/pom.xml)
-ACTIVITI_CLOUD_MODELING_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-modeling.version -q -DforceStdout -f dependencies-tests/pom.xml)
-ACTIVITI_CLOUD_MESSAGES_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-messages.version -q -DforceStdout -f dependencies-tests/pom.xml)
-
-ACTIVITI_CLOUD_CONNECTORS_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-connectors.version -q -DforceStdout)
-ACTIVITI_CLOUD_AUDIT_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-audit-service.version -q -DforceStdout)
-ACTIVITI_CLOUD_QUERY_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-query-service.version -q -DforceStdout)
-ACTIVITI_CLOUD_RB_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-runtime-bundle-service.version -q -DforceStdout)
-ACTIVITI_CLOUD_NOTIFICATIONS_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-notifications-service-graphql.version -q -DforceStdout)
-ACTIVITI_CLOUD_MODELING_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-modeling-service.version -q -DforceStdout)
-ACTIVITI_CLOUD_MESSAGES_SERVICE_VERSION := $(shell mvn help:evaluate -Dexpression=activiti-cloud-messages-service.version -q -DforceStdout)
+ACTIVITI_CLOUD_CONNECTORS_VERSION := $(shell grep -oPm1 "(?<=<example-cloud-connector.version>)[^<]+" "dependencies-tests/pom.xml") 
+ACTIVITI_CLOUD_AUDIT_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-audit.version>)[^<]+" "dependencies-tests/pom.xml") 
+ACTIVITI_CLOUD_QUERY_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-query.version>)[^<]+" "dependencies-tests/pom.xml") 
+ACTIVITI_CLOUD_RB_VERSION := $(shell grep -oPm1 "(?<=<example-runtime-bundle.version>)[^<]+" "dependencies-tests/pom.xml") 
+ACTIVITI_CLOUD_NOTIFICATIONS_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-notifications-graphql.version>)[^<]+" "dependencies-tests/pom.xml") 
+ACTIVITI_CLOUD_MODELING_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-modeling.version>)[^<]+" "dependencies-tests/pom.xml") 
+ACTIVITI_CLOUD_MESSAGES_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-messages.version>)[^<]+" "dependencies-tests/pom.xml") 
+ACTIVITI_CLOUD_CONNECTORS_SERVICE_VERSION :=  $(shell grep -oPm1 "(?<=<activiti-cloud-connectors.version>)[^<]+" "pom.xml") 
+ACTIVITI_CLOUD_AUDIT_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-audit-service.version>)[^<]+" "pom.xml") 
+ACTIVITI_CLOUD_QUERY_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-query-service.version>)[^<]+" "pom.xml") 
+ACTIVITI_CLOUD_RB_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-runtime-bundle-service.version>)[^<]+" "pom.xml") 
+ACTIVITI_CLOUD_NOTIFICATIONS_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-notifications-service-graphql.version>)[^<]+" "pom.xml") 
+ACTIVITI_CLOUD_MODELING_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-modeling-service.version>)[^<]+" "pom.xml") 
+ACTIVITI_CLOUD_MESSAGES_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-messages-service.version>)[^<]+" "pom.xml") 
 
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.218
 
@@ -79,7 +78,9 @@ updatebot/push-version:
 	updatebot push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
 updatebot/push-version-dry:
-	updatebot --dry push-version --kind helm $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
+	updatebot --dry push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_SERVICES_VERSIONS)   --merge false
+	updatebot --dry push-version --kind helm activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
+	updatebot --dry push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
 replace-release-full-chart-names:
 	echo HELM_ACTIVITI_VERSION = $(HELM_ACTIVITI_VERSION)
