@@ -11,5 +11,9 @@ github:
       useSinglePullRequest: true
     - name: alfresco-process-oracle-kafka-application
       useSinglePullRequest: true
-    # - name: alfresco-process-application-deployment
-    #   useSinglePullRequest: true
+    - name: alfresco-process-application-deployment
+      useSinglePullRequest: true
+    - name: alfresco-process-springboot-service-deployment
+      useSinglePullRequest: true
+    - name: alfresco-adf-app-deployment
+      useSinglePullRequest: true
