@@ -1,27 +1,29 @@
 {
-  "id":"connectorConstants",
-  "name":"myProcess.bpmn",
+  "id": "connectorConstants",
+  "name": "myProcess.bpmn",
   "extensions": {
-    "properties": {
-      "age-id": {
-        "id": "age-id",
-        "name": "age",
-        "type": "integer",
-        "value": 20
+    "connectorConstants": {
+      "properties": {
+        "age-id": {
+          "id": "age-id",
+          "name": "age",
+          "type": "integer",
+          "value": 20
+        },
+        "name-id": {
+          "id": "name-id",
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "value": "inName"
+        }
       },
-      "name-id": {
-        "id": "name-id",
-        "name": "name",
-        "type": "string",
-        "required": true,
-        "value": "inName"
-      }
-    },
-    "mappings": {},
-    "constants" : {
-      "serviceTaskConstants": {
-        "_constant_value_" : {
-          "value": "myConstantValue"
+      "mappings": {},
+      "constants": {
+        "serviceTaskConstants": {
+          "_constant_value_": {
+            "value": "myConstantValue"
+          }
         }
       }
     }

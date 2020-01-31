@@ -3,36 +3,37 @@
   "type": "PROCESS",
   "name": "throwmessagemapping",
   "extensions": {
-    "constants": {
-    },
-    "mappings": {
-      "IntermediateThrowEvent_0d3t2mv": {
-        "inputs": {
-          "stringvar": {
-            "type": "value",
-            "value": "string"
-          },
-          "variablevar": {
-            "type": "variable",
-            "value": "variable"
+    "process-be954b8b-b412-4fcb-9fc5-bf1d096d249f": {
+      "constants": {},
+      "mappings": {
+        "IntermediateThrowEvent_0d3t2mv": {
+          "inputs": {
+            "stringvar": {
+              "type": "value",
+              "value": "string"
+            },
+            "variablevar": {
+              "type": "variable",
+              "value": "variable"
+            }
           }
         }
-      }
-    },
-    "properties": {
-      "a1279632-75cd-42c7-81d1-648f9e0483d6": {
-        "id": "a1279632-75cd-42c7-81d1-648f9e0483d6",
-        "name": "corr",
-        "type": "string",
-        "value": "corr",
-        "required": false
       },
-      "20681f63-0b1a-4e2c-92fc-442536f3168c": {
-        "id": "20681f63-0b1a-4e2c-92fc-442536f3168c",
-        "name": "variable",
-        "type": "string",
-        "value": "default",
-        "required": false
+      "properties": {
+        "a1279632-75cd-42c7-81d1-648f9e0483d6": {
+          "id": "a1279632-75cd-42c7-81d1-648f9e0483d6",
+          "name": "corr",
+          "type": "string",
+          "value": "corr",
+          "required": false
+        },
+        "20681f63-0b1a-4e2c-92fc-442536f3168c": {
+          "id": "20681f63-0b1a-4e2c-92fc-442536f3168c",
+          "name": "variable",
+          "type": "string",
+          "value": "default",
+          "required": false
+        }
       }
     }
   }

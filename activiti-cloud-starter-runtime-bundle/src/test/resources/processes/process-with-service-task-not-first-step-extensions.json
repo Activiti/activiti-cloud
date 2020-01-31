@@ -1,27 +1,29 @@
 {
   "id": "process-f0d643a4-27d7-474f-b71f-4d7f04989843",
   "extensions": {
-    "properties": {
-      "787abffa-6536-4178-b7eb-fc5f3e2f1c75": {
-        "id": "787abffa-6536-4178-b7eb-fc5f3e2f1c75",
-        "name": "restResult",
-        "type": "string",
-        "required": false,
-        "value": "234"
-      }
-    },
-    "mappings": {
-      "ServiceTask_1hrl8wv": {
-        "inputs": {
-          "restResult": {
-            "type": "value",
-            "value": "https://restcountries.eu/rest/v2/name/italy"
-          }
-        },
-        "outputs": {
-          "restResult": {
-            "type": "variable",
-            "value": "restResult"
+    "process-f0d643a4-27d7-474f-b71f-4d7f04989843": {
+      "properties": {
+        "787abffa-6536-4178-b7eb-fc5f3e2f1c75": {
+          "id": "787abffa-6536-4178-b7eb-fc5f3e2f1c75",
+          "name": "restResult",
+          "type": "string",
+          "required": false,
+          "value": "234"
+        }
+      },
+      "mappings": {
+        "ServiceTask_1hrl8wv": {
+          "inputs": {
+            "restResult": {
+              "type": "value",
+              "value": "https://restcountries.eu/rest/v2/name/italy"
+            }
+          },
+          "outputs": {
+            "restResult": {
+              "type": "variable",
+              "value": "restResult"
+            }
           }
         }
       }
