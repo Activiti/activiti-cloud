@@ -7,6 +7,7 @@
     "type": "PROCESS",
     "name": "RankMovie",
     "extensions": {
+      "RankMovieId": {
         "mappings": {
             "Task_1spvopd": {
                 "inputs": {
@@ -47,6 +48,7 @@
             }
 
         }
+      }
     },
     "version": "0.0.16",
     "projectId": "8abc837168dd7f940168ddbdecc70000"
