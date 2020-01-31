@@ -14,6 +14,7 @@ ACTIVITI_CLOUD_MODELING_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-clo
 ACTIVITI_CLOUD_MESSAGES_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-messages-service.version>)[^<]+" "pom.xml") 
 
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.218
+ACTIVITI_CLOUD_COMMON_HELM_CHART := 1.1.21
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
 
