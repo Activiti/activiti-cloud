@@ -16,7 +16,7 @@
   <properties>
     <project.scm.repository>activiti-cloud-notifications-service-graphql</project.scm.repository>
     <activiti-cloud-build.version>7.1.32</activiti-cloud-build.version>
-    <activiti-cloud-query-service.version>7.1.221</activiti-cloud-query-service.version>
+    <activiti-cloud-query-service.version>7.1.222</activiti-cloud-query-service.version>
     <activiti-cloud-notifications-service-graphql.version>${project.version}</activiti-cloud-notifications-service-graphql.version>
     <graphql-jpa-query.version>0.4.0</graphql-jpa-query.version>
   </properties>
