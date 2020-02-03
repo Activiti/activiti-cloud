@@ -9,7 +9,7 @@ github:
     repositories:
     - name: alfresco-process-parent
       useSinglePullRequest: true
-    - name: alfresco-process-oracle-kafka-application
+    - name: alfresco-process-application-oracle-kafka
       useSinglePullRequest: true
     # - name: alfresco-process-application-deployment
     #   useSinglePullRequest: true
