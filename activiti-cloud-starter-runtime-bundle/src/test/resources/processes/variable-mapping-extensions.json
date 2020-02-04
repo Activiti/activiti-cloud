@@ -51,6 +51,18 @@
           "type": "string",
           "required": false,
           "value": "default"
+        },
+        "outVarFromJsonExpressionId": {
+          "id": "outVarFromJsonExpressionId",
+          "name": "outVarFromJsonExpression",
+          "type": "string",
+          "required": false
+        },
+        "outVarFromListExpressionId": {
+          "id": "outVarFromListExpressionId",
+          "name": "outVarFromListExpression",
+          "type": "string",
+          "required": false
         }
       },
       "mappings": {
@@ -77,6 +89,14 @@
             "age": {
               "type": "variable",
               "value": "out_variable_name_2"
+            },
+            "outVarFromJsonExpression": {
+              "type": "value",
+              "value": "${sightSeeing.city.place}"
+            },
+            "outVarFromListExpression": {
+              "type": "value",
+              "value": "${visitors.get(0)}"
             }
           }
         }

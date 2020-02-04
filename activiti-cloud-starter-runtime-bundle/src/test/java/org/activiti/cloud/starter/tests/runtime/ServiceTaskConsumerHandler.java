@@ -19,10 +19,11 @@ package org.activiti.cloud.starter.tests.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
@@ -57,7 +58,7 @@ public class ServiceTaskConsumerHandler {
     private static final String PROCESS_DEFINITION_VERSION = "processDefinitionVersion";
     private static final String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
     private static final String ROUTING_KEY = "routingKey";
-    
+
     private final BinderAwareChannelResolver resolver;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ObjectMapper objectMapper;
@@ -73,10 +74,10 @@ public class ServiceTaskConsumerHandler {
 
     @StreamListener(value = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER)
     public void receive(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
-        assertIntegrationContextHeaders(integrationRequest, headers);        
-        
+        assertIntegrationContextHeaders(integrationRequest, headers);
+
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
-       
+
         Map<String, Object> requestVariables = integrationContext.getInBoundVariables();
 
         Object customPojo = requestVariables.get("customPojo");
@@ -102,11 +103,11 @@ public class ServiceTaskConsumerHandler {
     }
 
     @StreamListener(value = ConnectorIntegrationChannels.VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
-    public void receiveVariablesConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
-        assertIntegrationContextHeaders(integrationRequest, headers);        
+    public void receiveVariablesConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) throws Exception {
+        assertIntegrationContextHeaders(integrationRequest, headers);
 
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
-        
+
         Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
         String variableOne = "input_variable_name_1";
         String variableTwo = "input_variable_name_2";
@@ -137,6 +138,15 @@ public class ServiceTaskConsumerHandler {
                                                "outTest");
         integrationContext.addOutBoundVariable("out_unmapped_variable_non_matching_name",
                                                "outTest");
+
+        JsonNode value = new ObjectMapper().readTree("{\n"
+            + "  \"city\": {\n"
+            + "    \"name\": \"London\",\n"
+            + "    \"place\": \"Tower of London\"\n"
+            + "  }\n"
+            + "}");
+        integrationContext.addOutBoundVariable("sightSeeing", value);
+        integrationContext.addOutBoundVariable("visitors", Arrays.asList("Peter", "Paul", "Jack"));
 
         IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
         Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
@@ -171,10 +181,10 @@ public class ServiceTaskConsumerHandler {
         resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER, 
+    @StreamListener(value = ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER,
                     condition = "headers['processDefinitionVersion']!=null")
     public void receiveRestConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
-        assertIntegrationContextHeaders(integrationRequest, headers);        
+        assertIntegrationContextHeaders(integrationRequest, headers);
 
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
         integrationContext.addOutBoundVariable("restResult", "fromConnector");
@@ -183,8 +193,8 @@ public class ServiceTaskConsumerHandler {
         Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
         resolver.resolveDestination("integrationResult_" + runtimeBundleProperties.getServiceFullName()).send(message);
     }
-    
-    
+
+
     private void assertIntegrationContextHeaders(IntegrationRequest integrationRequest, Map<String, Object> headers) {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
 
@@ -204,14 +214,14 @@ public class ServiceTaskConsumerHandler {
                   .containsEntry(SERVICE_TYPE, integrationRequest.getServiceType())
                   .containsEntry(SERVICE_VERSION, integrationRequest.getServiceVersion())
                   .containsEntry(SERVICE_FULL_NAME, integrationRequest.getServiceFullName());
-        
+
         // conditional on existing businessKey in integration context
-        if(integrationContext.getBusinessKey() != null) 
+        if(integrationContext.getBusinessKey() != null)
             Assertions.assertThat(headers)
                       .containsEntry(BUSINESS_KEY, integrationContext.getBusinessKey());
 
         // conditional on existing parentProcessInstanceId in integration context
-        if(integrationContext.getParentProcessInstanceId() != null) 
+        if(integrationContext.getParentProcessInstanceId() != null)
             Assertions.assertThat(headers)
                       .containsEntry(PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId());
     }
