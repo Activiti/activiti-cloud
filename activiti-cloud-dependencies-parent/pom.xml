@@ -12,7 +12,7 @@
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
     <spring-boot.version>2.1.12.RELEASE</spring-boot.version>
-    <spring-cloud.version>Greenwich.SR4</spring-cloud.version>
+    <spring-cloud.version>Greenwich.SR5</spring-cloud.version>
   </properties>
   <dependencyManagement>
     <dependencies>
