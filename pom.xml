@@ -21,7 +21,7 @@
   </modules>
   <properties>
     <activiti-cloud-build.version>7.1.32</activiti-cloud-build.version>
-    <activiti-cloud-api.version>7.1.129</activiti-cloud-api.version>
+    <activiti-cloud-api.version>7.1.130</activiti-cloud-api.version>
     <activiti-cloud-acceptance-tests.version>${project.version}</activiti-cloud-acceptance-tests.version>
     <serenity.version>1.9.6</serenity.version>
     <serenity-jbehave.version>1.38.0</serenity-jbehave.version>
