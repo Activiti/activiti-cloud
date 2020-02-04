@@ -16,16 +16,16 @@
   <properties>
     <project.scm.repository>activiti-cloud-dependencies</project.scm.repository>
     <activiti-cloud-build.version>7.1.32</activiti-cloud-build.version>
-    <activiti-cloud-api.version>7.1.129</activiti-cloud-api.version>
-    <activiti-cloud-service-common.version>7.1.164</activiti-cloud-service-common.version>
-    <activiti-cloud-acceptance-tests.version>7.1.180</activiti-cloud-acceptance-tests.version>
-    <activiti-cloud-modeling-service.version>7.1.375</activiti-cloud-modeling-service.version>
-    <activiti-cloud-runtime-bundle-service.version>7.1.247</activiti-cloud-runtime-bundle-service.version>
-    <activiti-cloud-query-service.version>7.1.222</activiti-cloud-query-service.version>
-    <activiti-cloud-audit-service.version>7.1.175</activiti-cloud-audit-service.version>
-    <activiti-cloud-connectors.version>7.1.157</activiti-cloud-connectors.version>
-    <activiti-cloud-notifications-service-graphql.version>7.1.222</activiti-cloud-notifications-service-graphql.version>
-    <activiti-cloud-messages-service.version>7.1.28</activiti-cloud-messages-service.version>
+    <activiti-cloud-api.version>7.1.130</activiti-cloud-api.version>
+    <activiti-cloud-service-common.version>7.1.165</activiti-cloud-service-common.version>
+    <activiti-cloud-acceptance-tests.version>7.1.181</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-modeling-service.version>7.1.376</activiti-cloud-modeling-service.version>
+    <activiti-cloud-runtime-bundle-service.version>7.1.249</activiti-cloud-runtime-bundle-service.version>
+    <activiti-cloud-query-service.version>7.1.223</activiti-cloud-query-service.version>
+    <activiti-cloud-audit-service.version>7.1.176</activiti-cloud-audit-service.version>
+    <activiti-cloud-connectors.version>7.1.158</activiti-cloud-connectors.version>
+    <activiti-cloud-notifications-service-graphql.version>7.1.223</activiti-cloud-notifications-service-graphql.version>
+    <activiti-cloud-messages-service.version>7.1.29</activiti-cloud-messages-service.version>
   </properties>
   <repositories>
     <repository>
