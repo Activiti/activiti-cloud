@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2018 Alfresco, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +16,13 @@
 
 package org.activiti.cloud.api.task.model.impl;
 
-import java.util.Date;
-import java.util.Objects;
-
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
+
+import java.util.Date;
+import java.util.Objects;
+import java.util.Set;
 
 public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
 
@@ -44,6 +45,8 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private Integer processDefinitionVersion;
     private String businessKey;
     private String taskDefinitionKey;
+    private Set<String> candidateUsers;
+    private Set<String> candidateGroups;
 
     public CloudTaskImpl() {
     }
@@ -67,6 +70,26 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         processDefinitionVersion = task.getProcessDefinitionVersion();
         businessKey = task.getBusinessKey();
         taskDefinitionKey = task.getTaskDefinitionKey();
+        candidateUsers = task.getCandidateUsers();
+        candidateGroups = task.getCandidateGroups();
+    }
+
+    @Override
+    public Set<String> getCandidateGroups() {
+        return candidateGroups;
+    }
+
+    public void setCandidateGroups(Set<String> candidateGroups) {
+        this.candidateGroups = candidateGroups;
+    }
+
+    @Override
+    public Set<String> getCandidateUsers() {
+        return candidateUsers;
+    }
+
+    public void setCandidateUsers(Set<String> candidateUsers) {
+        this.candidateUsers = candidateUsers;
     }
 
     @Override
@@ -167,7 +190,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
     }
-    
+
     @Override
     public Integer getProcessDefinitionVersion() {
         return processDefinitionVersion;
@@ -176,7 +199,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
     }
-    
+
     @Override
     public String getBusinessKey() {
         return businessKey;
@@ -235,7 +258,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     public Long getDuration() {
         return duration;
     }
-    
+
     @Override
     public String getTaskDefinitionKey() {
         return taskDefinitionKey;
@@ -243,29 +266,29 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
 
     public void setTaskDefinitionKey(String taskDefinitionKey) {
         this.taskDefinitionKey = taskDefinitionKey;
-    }  
+    }
 
     @Override
     public String toString() {
         return "CloudTaskImpl{" +
-                "id='" + id + '\'' +
-                ", owner='" + owner + '\'' +
-                ", assignee='" + assignee + '\'' +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", createdDate=" + createdDate +
-                ", claimedDate=" + claimedDate +
-                ", dueDate=" + dueDate +
-                ", priority=" + priority +
-                ", processDefinitionId='" + processDefinitionId + '\'' +
-                ", processInstanceId='" + processInstanceId + '\'' +
-                ", parentTaskId='" + parentTaskId + '\'' +
-                ", formKey='" + formKey + '\'' +
-                ", status=" + status +
-                ", processDefinitionVersion=" + processDefinitionVersion +
-                ", businessKey=" + businessKey +
-                ", taskDefinitionKey=" + taskDefinitionKey +
-                '}';
+               "id='" + id + '\'' +
+               ", owner='" + owner + '\'' +
+               ", assignee='" + assignee + '\'' +
+               ", name='" + name + '\'' +
+               ", description='" + description + '\'' +
+               ", createdDate=" + createdDate +
+               ", claimedDate=" + claimedDate +
+               ", dueDate=" + dueDate +
+               ", priority=" + priority +
+               ", processDefinitionId='" + processDefinitionId + '\'' +
+               ", processInstanceId='" + processInstanceId + '\'' +
+               ", parentTaskId='" + parentTaskId + '\'' +
+               ", formKey='" + formKey + '\'' +
+               ", status=" + status +
+               ", processDefinitionVersion=" + processDefinitionVersion +
+               ", businessKey=" + businessKey +
+               ", taskDefinitionKey=" + taskDefinitionKey +
+               '}';
     }
 
     @Override
@@ -278,35 +301,35 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         }
         CloudTaskImpl task = (CloudTaskImpl) o;
         return priority == task.priority &&
-                Objects.equals(id,
-                               task.id) &&
-                Objects.equals(owner,
-                               task.owner) &&
-                Objects.equals(assignee,
-                               task.assignee) &&
-                Objects.equals(name,
-                               task.name) &&
-                Objects.equals(description,
-                               task.description) &&
-                Objects.equals(createdDate,
-                               task.createdDate) &&
-                Objects.equals(claimedDate,
-                               task.claimedDate) &&
-                Objects.equals(dueDate,
-                               task.dueDate) &&
-                Objects.equals(processDefinitionId,
-                               task.processDefinitionId) &&
-                Objects.equals(processInstanceId,
-                               task.processInstanceId) &&
-                Objects.equals(parentTaskId,
-                               task.parentTaskId) &&
-                Objects.equals(formKey,
-                               task.formKey) &&
-                Objects.equals(processDefinitionVersion,
-                               task.processDefinitionVersion) &&
-                Objects.equals(businessKey,
-                               task.businessKey) &&
-                status == task.status;
+               Objects.equals(id,
+                              task.id) &&
+               Objects.equals(owner,
+                              task.owner) &&
+               Objects.equals(assignee,
+                              task.assignee) &&
+               Objects.equals(name,
+                              task.name) &&
+               Objects.equals(description,
+                              task.description) &&
+               Objects.equals(createdDate,
+                              task.createdDate) &&
+               Objects.equals(claimedDate,
+                              task.claimedDate) &&
+               Objects.equals(dueDate,
+                              task.dueDate) &&
+               Objects.equals(processDefinitionId,
+                              task.processDefinitionId) &&
+               Objects.equals(processInstanceId,
+                              task.processInstanceId) &&
+               Objects.equals(parentTaskId,
+                              task.parentTaskId) &&
+               Objects.equals(formKey,
+                              task.formKey) &&
+               Objects.equals(processDefinitionVersion,
+                              task.processDefinitionVersion) &&
+               Objects.equals(businessKey,
+                              task.businessKey) &&
+               status == task.status;
     }
 }
 
