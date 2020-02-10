@@ -21,7 +21,7 @@
   </modules>
   <properties>
 	<project.scm.repository>activiti-cloud-runtime-bundle-service</project.scm.repository>
-    <activiti-dependencies.version>7.1.190</activiti-dependencies.version>
+    <activiti-dependencies.version>7.1.191</activiti-dependencies.version>
     <activiti-cloud-build.version>7.1.33</activiti-cloud-build.version>
     <activiti-cloud-service-common.version>7.1.166</activiti-cloud-service-common.version>
     <activiti-cloud-runtime-bundle-service.version>${project.version}</activiti-cloud-runtime-bundle-service.version>
