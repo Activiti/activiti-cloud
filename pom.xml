@@ -23,7 +23,7 @@
   <properties>
     <project.scm.repository>activiti-cloud-audit-service</project.scm.repository>
     <activiti-cloud-build.version>7.1.34</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>7.1.167</activiti-cloud-service-common.version>
+    <activiti-cloud-service-common.version>7.1.168</activiti-cloud-service-common.version>
     <activiti-cloud-audit-service.version>${project.version}</activiti-cloud-audit-service.version>
     <json-unit.version>1.24.0</json-unit.version>
     <testcontainers.version>1.12.0</testcontainers.version>
