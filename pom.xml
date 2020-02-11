@@ -168,7 +168,6 @@
 
     <java.release>8</java.release>
     <java.version>1.${java.release}</java.version>
-    <maven.compiler.release>${java.release}</maven.compiler.release>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
 
@@ -577,6 +576,15 @@
           </plugins>
         </pluginManagement>
       </build>
+    </profile>
+    <profile>
+      <id>jdk9+</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+      <properties>
+        <maven.compiler.release>${java.release}</maven.compiler.release>
+      </properties>
     </profile>
   </profiles>
 </project>
