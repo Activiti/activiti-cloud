@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
+import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
-import org.springframework.stereotype.Service;
 
 /**
  * Service for managing {@link ModelExtensionsService}
@@ -37,22 +37,27 @@ public class ModelExtensionsService {
     public ModelExtensionsService(Set<ModelExtensionsValidator> metadataValidators,
                                   ExtensionsModelValidator extensionsModelValidator,
                                   ModelTypeService modelTypeService) {
-        this.modelExtensionsValidatorsMapByModelType = metadataValidators.stream().filter(validator -> validator.getHandledModelType() != null)
-                .collect(Collectors.groupingBy(validator -> validator.getHandledModelType().getName()));
+    this.modelExtensionsValidatorsMapByModelType = metadataValidators.stream()
+        .filter(validator -> validator.getHandledModelType() != null)
+        .collect(Collectors.groupingBy(validator -> validator.getHandledModelType().getName()));
 
-        // Add the generic JSON extensions schema to all the avaliable model types
-        modelTypeService.getAvailableModelTypes().stream().forEach(modelType -> this.modelExtensionsValidatorsMapByModelType.put(modelType.getName(),
-                                                                                                                                 this.modelExtensionsValidatorsMapByModelType
-                                                                                                                                         .containsKey(modelType.getName())
-                                                                                                                                                 ? Stream.concat(this.modelExtensionsValidatorsMapByModelType
-                                                                                                                                                         .get(modelType.getName())
-                                                                                                                                                         .stream(),
-                                                                                                                                                                 Stream.of(extensionsModelValidator))
-                                                                                                                                                         .collect(Collectors
-                                                                                                                                                                 .toList())
-                                                                                                                                                 : Collections
-                                                                                                                                                         .singletonList(extensionsModelValidator)));
+    // Add the generic JSON extensions schema to all the available model types except PROCESS
+    modelTypeService.getAvailableModelTypes().stream().forEach(modelType ->
+                this.modelExtensionsValidatorsMapByModelType.put(modelType.getName(), this.getExtensionValidators(modelType, extensionsModelValidator)));
+  }
 
+    private List<ModelExtensionsValidator> getExtensionValidators(ModelType modelType, ExtensionsModelValidator extensionsModelValidator) {
+
+        if(modelType.getName().equals(org.activiti.cloud.modeling.api.ProcessModelType.PROCESS)) {
+            return this.modelExtensionsValidatorsMapByModelType.get(modelType.getName());
+        }
+
+        if (this.modelExtensionsValidatorsMapByModelType.containsKey(modelType.getName())) {
+            return Stream.concat(this.modelExtensionsValidatorsMapByModelType.get(modelType.getName()).stream(),
+                Stream.of(extensionsModelValidator)).collect(Collectors.toList());
+        }
+
+        return Collections.singletonList(extensionsModelValidator);
     }
 
     public List<ModelExtensionsValidator> findExtensionsValidators(String modelType) {

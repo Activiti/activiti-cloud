@@ -35,8 +35,7 @@ import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
+
 
 public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidator {
 

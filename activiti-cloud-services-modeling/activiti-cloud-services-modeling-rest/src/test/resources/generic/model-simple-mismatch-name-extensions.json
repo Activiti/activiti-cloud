@@ -1,6 +1,7 @@
 {
     "type": "FILE",
-    "name": "invalid-model-extension",
+    "id": "extension-123456",
+    "name": "!@#$%^&*()",
     "extensions": {
         "a": "1",
         "b": 1,

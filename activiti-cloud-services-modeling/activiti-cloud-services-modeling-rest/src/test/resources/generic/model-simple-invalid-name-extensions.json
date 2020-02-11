@@ -1,6 +1,5 @@
 {
     "type": "FILE",
-    "name": "invalid-model-extension",
     "extensions": {
         "a": "1",
         "b": 1,

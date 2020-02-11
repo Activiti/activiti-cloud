@@ -231,6 +231,101 @@ public class GenericJsonModelTypeValidationControllerIT {
                                          Mockito.argThat(context -> !context.isEmpty()));
     }
 
+
+    @Test
+    public void sholud_throwSemanticValidationException_when_validatingModelInvalidNameExtensions() throws IOException {
+        byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-name-extensions.json");
+
+        assertThatResponse(given().multiPart("file",
+            "model-simple-invalid-name-extensions.json",
+            fileContent,
+            "application/json")
+            .post("/v1/models/{modelId}/validate/extensions",
+                genericJsonModel.getId())
+            .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found", "required key [name] not found");
+
+        Mockito.verify(genericJsonContentValidator,
+            Mockito.times(0))
+            .validateModelContent(Mockito.any(),
+                Mockito.any());
+
+        Mockito.verify(genericJsonExtensionsValidator,
+            Mockito.times(1))
+            .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
+                Mockito.argThat(context -> !context.isEmpty()));
+    }
+
+    @Test
+    public void sholud_throwSemanticValidationException_when_validatingModelMismatchNameExtensions() throws IOException {
+        byte[] fileContent = resourceAsByteArray("generic/model-simple-mismatch-name-extensions.json");
+
+        assertThatResponse(given().multiPart("file",
+            "model-simple-mismatch-name-extensions.json",
+            fileContent,
+            "application/json")
+            .post("/v1/models/{modelId}/validate/extensions",
+                genericJsonModel.getId())
+            .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("string [!@#$%^&*()] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$");
+
+        Mockito.verify(genericJsonContentValidator,
+            Mockito.times(0))
+            .validateModelContent(Mockito.any(),
+                Mockito.any());
+
+        Mockito.verify(genericJsonExtensionsValidator,
+            Mockito.times(1))
+            .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
+                Mockito.argThat(context -> !context.isEmpty()));
+    }
+
+    @Test
+    public void sholud_throwSemanticValidationException_when_validatingModelLongNameExtensions() throws IOException {
+        byte[] fileContent = resourceAsByteArray("generic/model-simple-long-name-extensions.json");
+
+        assertThatResponse(given().multiPart("file",
+            "model-simple-long-name-extensions.json",
+            fileContent,
+            "application/json")
+            .post("/v1/models/{modelId}/validate/extensions",
+                genericJsonModel.getId())
+            .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors(
+                "expected maxLength: 26, actual: 35", "string [alfresco-adf-app-deployment-develop] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$");
+
+        Mockito.verify(genericJsonContentValidator,
+            Mockito.times(0))
+            .validateModelContent(Mockito.any(),
+                Mockito.any());
+
+        Mockito.verify(genericJsonExtensionsValidator,
+            Mockito.times(1))
+            .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
+                Mockito.argThat(context -> !context.isEmpty()));
+    }
+
+    @Test
+    public void sholud_throwSemanticValidationException_when_validatingModelEmptyNameExtensions() throws IOException {
+        byte[] fileContent = resourceAsByteArray("generic/model-simple-empty-name-extensions.json");
+
+        assertThatResponse(given().multiPart("file",
+            "model-simple-empty-name-extensions.json",
+            fileContent,
+            "application/json")
+            .post("/v1/models/{modelId}/validate/extensions",
+                genericJsonModel.getId())
+            .then().log().all().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors(
+                "expected minLength: 1, actual: 0", "string [] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$");
+
+        Mockito.verify(genericJsonContentValidator,
+            Mockito.times(0))
+            .validateModelContent(Mockito.any(),
+                Mockito.any());
+
+        Mockito.verify(genericJsonExtensionsValidator,
+            Mockito.times(1))
+            .validateModelExtensions(Mockito.argThat(content -> new String(content).equals(new String(fileContent))),
+                Mockito.argThat(context -> !context.isEmpty()));
+    }
+
     @Test
     public void sholud_throwSyntacticValidationException_when_validatingInvalidJsonExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-json-extensions.json");
