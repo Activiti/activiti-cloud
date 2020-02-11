@@ -333,5 +333,6 @@
       "type": "string"
     }
   },
+  "required": [ "id" ],
   "additionalProperties": false
 }
