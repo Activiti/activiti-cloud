@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.1.33</version>
+    <version>7.1.34</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.query</groupId>
@@ -21,9 +21,9 @@
   </modules>
   <properties>
 	  <project.scm.repository>activiti-cloud-query-service</project.scm.repository>
-    <activiti-cloud-build.version>7.1.33</activiti-cloud-build.version>
-    <activiti-dependencies.version>7.1.191</activiti-dependencies.version>
-    <activiti-cloud-service-common.version>7.1.167</activiti-cloud-service-common.version>
+    <activiti-cloud-build.version>7.1.34</activiti-cloud-build.version>
+    <activiti-dependencies.version>7.1.192</activiti-dependencies.version>
+    <activiti-cloud-service-common.version>7.1.168</activiti-cloud-service-common.version>
     <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
     <json-unit.version>1.24.0</json-unit.version>
     <testcontainers.version>1.12.0</testcontainers.version>
