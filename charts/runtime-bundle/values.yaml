@@ -97,7 +97,7 @@ terminationGracePeriodSeconds: 20
 
 ingress:
   ## Set to true to enable ingress record generation
-  enabled: false
+  enabled: true
 
   path: /rb
 
