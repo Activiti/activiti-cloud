@@ -68,6 +68,9 @@
           },
           "value": {
             "type": "string"
+          },
+          "required": {
+            "type": "boolean"
           }
         },
         "required": [ "name" ]
