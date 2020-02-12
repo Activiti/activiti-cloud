@@ -379,8 +379,11 @@ public class AuditProducerIT {
     @Test
     public void shouldEmitEventsForTaskDelete() {
         //given
-        CloudTask task = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("my task name").withDescription(
-                "long description here").build());
+        CloudTask task = taskRestTemplate.createTask(TaskPayloadBuilder.create()
+            .withName("my task name")
+            .withDescription("long description here")
+            .withCandidateUsers("hruser")
+            .build());
 
         //when
         taskRestTemplate.delete(task);
@@ -452,8 +455,12 @@ public class AuditProducerIT {
     @Test
     public void shouldEmitEventsForTaskAddDeleteUserCandidates() {
         //given
-        CloudTask task = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("task1").withDescription(
-                "task description").withAssignee("hruser").build());
+        CloudTask task = taskRestTemplate.createTask(TaskPayloadBuilder.create()
+            .withName("task1")
+            .withDescription("task description")
+            .withAssignee("hruser")
+            .withCandidateUsers("hruser")
+            .build());
 
         //when
         taskRestTemplate.addUserCandidates(TaskPayloadBuilder.addCandidateUsers().withTaskId(task.getId()).withCandidateUser("testuser").build());
@@ -481,7 +488,6 @@ public class AuditProducerIT {
         ResponseEntity<Resources<Resource<CandidateUser>>>  userCandidates = taskRestTemplate.getUserCandidates(task.getId());
         assertThat(userCandidates).isNotNull();
         assertThat(userCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(userCandidates.getBody().getContent().size()).isEqualTo(2);
         assertThat(userCandidates.getBody().getContent()
                            .stream()
                            .map(Resource::getContent)

@@ -19,6 +19,11 @@ package org.activiti.cloud.starter.tests.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -55,14 +60,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
@@ -77,13 +74,13 @@ public class TasksIT {
 
     @Autowired
     private TaskRestTemplate taskRestTemplate;
-    
+
     @Autowired
     private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
 
     @Autowired
     private KeycloakTokenProducer keycloakSecurityContextClientRequestInterceptor;
-    
+
     @Autowired
     private  VariablesUtil variablesUtil;
 
@@ -158,7 +155,7 @@ public class TasksIT {
 
         assertThat(taskResponseEntity.getBody().getName()).isEqualTo("Updated name");
         assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("Updated description");
-        
+
         //Check UpdateTaskPayload without taskId
         updateTask = TaskPayloadBuilder.update()
                 .withName("New Updated name")
@@ -174,7 +171,7 @@ public class TasksIT {
         assertThat(taskResponseEntity.getBody().getName()).isEqualTo("New Updated name");
         assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("New Updated description");
     }
-    
+
     @Test
     public void adminShouldUpdateNameDescription() {
         //given
@@ -219,7 +216,7 @@ public class TasksIT {
         assertThat(taskResponseEntity.getBody().getName()).isEqualTo("New Updated name");
         assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("New Updated description");
     }
-    
+
     @Test
     public void shouldNotGetTasksWithoutPermission() {
 
@@ -271,7 +268,7 @@ public class TasksIT {
         assertThat(tasks).extracting(Task::getName).contains("Perform action");
         assertThat(tasks.size()).isGreaterThanOrEqualTo(2);
     }
-    
+
     @Test
     public void shouldGetTasksRelatedToTheGivenProcessInstance() {
         //given
@@ -279,7 +276,7 @@ public class TasksIT {
 
         //when
         ResponseEntity<PagedResources<CloudTask>> tasksEntity = processInstanceRestTemplate.getTasks(startProcessResponse);
-        
+
         //then
         assertThat(tasksEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(tasksEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Perform action");
@@ -304,7 +301,11 @@ public class TasksIT {
     @Test
     public void shouldBeAbleToDeleteTask() {
         //given
-        CloudTask standaloneTask = taskRestTemplate.createTask(TaskPayloadBuilder.create().withName("parent task").withDescription("This is my parent task").build());
+        CloudTask standaloneTask = taskRestTemplate.createTask(TaskPayloadBuilder.create()
+            .withName("parent task")
+            .withDescription("This is my parent task")
+            .withAssignee("hruser")
+            .build());
         //when
         ResponseEntity<CloudTask> delete = taskRestTemplate.delete(standaloneTask);
 
@@ -323,7 +324,7 @@ public class TasksIT {
         //then
         assertThat(delete.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
     }
-    
+
     @Test
     public void shouldGetTaskById() {
         //given
@@ -337,7 +338,7 @@ public class TasksIT {
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getBody().getId()).isEqualTo(task.getId());
     }
-    
+
     @Test
     public void adminShouldGetTaskById() {
         //given
@@ -378,7 +379,7 @@ public class TasksIT {
 
         //when
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.release(task.getId());
- 
+
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -398,13 +399,13 @@ public class TasksIT {
         //then
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
     }
-    
+
     @Test
     public void adminShouldCompleteATask() {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
-    
+
         //when
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.adminComplete(task);
@@ -425,12 +426,12 @@ public class TasksIT {
 
         //when
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.complete(task,completeTaskPayload);
-        
+
 
         //then
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
     }
-    
+
     @Test
     public void adminShouldAssignUser() {
         //given
@@ -441,7 +442,7 @@ public class TasksIT {
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testadmin");
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.adminGetTask(taskId);
         assertThat(responseEntity).isNotNull();
-            
+
         //then
         Task task = responseEntity.getBody();
         assertThat(task.getAssignee()).isNull();
@@ -453,7 +454,7 @@ public class TasksIT {
                                               .withTaskId(task.getId())
                                               .withAssignee("hruser")
                                               .build();
-                                                                                                                                                
+
         ResponseEntity<CloudTask> assignResponseEntity = taskRestTemplate.adminAssignTask(assignTaskPayload);
 
         //then
@@ -461,13 +462,13 @@ public class TasksIT {
         assertThat(assignResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(assignResponseEntity.getBody().getAssignee()).isEqualTo("hruser");
     }
-    
+
     @Test
     public void shouldAddUserCandidateAndClaimTaskAnotherUser() {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
-        
+
         //then check that we have one candidate
         ResponseEntity<Resources<Resource<CandidateUser>>> userCandidates = taskRestTemplate.getUserCandidates(task.getId());
         assertThat(userCandidates).isNotNull();
@@ -479,7 +480,7 @@ public class TasksIT {
                            .map(CandidateUser::getUser)
         ).containsExactly("hruser");
         taskRestTemplate.claim(task);
-        
+
         //when
         CandidateUsersPayload candidateusers = TaskPayloadBuilder
                 .addCandidateUsers()
@@ -491,7 +492,7 @@ public class TasksIT {
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        
+
         userCandidates = taskRestTemplate.getUserCandidates(task.getId());
         //then
         assertThat(responseEntity).isNotNull();
@@ -506,7 +507,7 @@ public class TasksIT {
 
         //when
         taskRestTemplate.release(task);
-        
+
         //Claim task by another user
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser("testuser");
         ResponseEntity<CloudTask> responseTask = taskRestTemplate.claim(task);
@@ -515,7 +516,7 @@ public class TasksIT {
         assertThat(responseTask).isNotNull();
         assertThat(responseTask.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseTask.getBody().getAssignee()).isEqualTo("testuser");
-        
+
     }
 
     @Test
@@ -523,7 +524,7 @@ public class TasksIT {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
-        
+
         //then check that we have one candidate
         ResponseEntity<Resources<Resource<CandidateUser>>> userCandidates = taskRestTemplate.getUserCandidates(task.getId());
         assertThat(userCandidates).isNotNull();
@@ -534,9 +535,9 @@ public class TasksIT {
                            .map(Resource::getContent)
                            .map(CandidateUser::getUser)
         ).containsExactly("hruser");
-          
+
         taskRestTemplate.claim(task);
-        
+
         //when
         CandidateUsersPayload candidateusers = TaskPayloadBuilder
                 .addCandidateUsers()
@@ -548,9 +549,9 @@ public class TasksIT {
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        
+
         userCandidates = taskRestTemplate.getUserCandidates(task.getId());
-        
+
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -561,8 +562,8 @@ public class TasksIT {
                            .map(CandidateUser::getUser)
         ).containsExactly("hruser",
                           "testuser");
-        
-        
+
+
         candidateusers = TaskPayloadBuilder
                 .addCandidateUsers()
                 .withTaskId(task.getId())
@@ -573,7 +574,7 @@ public class TasksIT {
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        
+
         userCandidates = taskRestTemplate.getUserCandidates(task.getId());
         //then
         assertThat(responseEntity).isNotNull();
@@ -584,7 +585,7 @@ public class TasksIT {
                            .map(Resource::getContent)
                            .map(CandidateUser::getUser)
         ).containsExactly("hruser");
-        
+
     }
 
     @Test
@@ -643,17 +644,17 @@ public class TasksIT {
         ).containsExactly("hr");
 
     }
- 
+
     @Test
     public void shouldSaveATask() throws Exception {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
         taskRestTemplate.claim(task);
-        
-        Map<String, Object> variables = new HashMap<>();   
+
+        Map<String, Object> variables = new HashMap<>();
         Date date = new Date();
-        
+
         variables.put("variableInt",
                       2);
         variables.put("variableStr",
@@ -674,7 +675,7 @@ public class TasksIT {
 
         //then
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
-        
+
         // when
         ResponseEntity<Resources<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(task.getId());
 
@@ -686,10 +687,10 @@ public class TasksIT {
                                                             .containsExactlyInAnyOrder(
                                                                              tuple("variableInt",
                                                                                    "integer",
-                                                                                   2), 
+                                                                                   2),
                                                                              tuple("variableStr",
                                                                                    "string",
-                                                                                   "new value"),        
+                                                                                   "new value"),
                                                                              tuple("variableBool",
                                                                                    "boolean",
                                                                                    false),
@@ -702,9 +703,9 @@ public class TasksIT {
                                                                              );
         // cleanup
         processInstanceRestTemplate.delete(processInstanceEntity);
-        
+
     }
-    
+
     @Test()
     public void shouldNotSaveATaskWithEmptyPayload() {
         //given
@@ -713,7 +714,7 @@ public class TasksIT {
         taskRestTemplate.claim(task);
 
         SaveTaskPayload saveTaskPayload = null;
-        
+
         //when
         ResponseEntity<Void> responseEntity = taskRestTemplate.save(task, saveTaskPayload);
 
@@ -723,6 +724,6 @@ public class TasksIT {
         // cleanup
         processInstanceRestTemplate.delete(processInstanceEntity);
     }
-    
-        
+
+
 }
