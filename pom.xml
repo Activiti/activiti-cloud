@@ -21,7 +21,7 @@
     <activiti-cloud-acceptance-tests.version>7.1.187</activiti-cloud-acceptance-tests.version>
     <activiti-cloud-modeling-service.version>7.1.383</activiti-cloud-modeling-service.version>
     <activiti-cloud-runtime-bundle-service.version>7.1.252</activiti-cloud-runtime-bundle-service.version>
-    <activiti-cloud-query-service.version>7.1.227</activiti-cloud-query-service.version>
+    <activiti-cloud-query-service.version>7.1.228</activiti-cloud-query-service.version>
     <activiti-cloud-audit-service.version>7.1.181</activiti-cloud-audit-service.version>
     <activiti-cloud-connectors.version>7.1.163</activiti-cloud-connectors.version>
     <activiti-cloud-notifications-service-graphql.version>7.1.227</activiti-cloud-notifications-service-graphql.version>
