@@ -16,9 +16,8 @@
 
 package org.activiti.cloud.services.query.model;
 
-import java.util.Date;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -69,7 +68,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     private Integer processDefinitionVersion;
     private String businessKey;
     private String taskDefinitionKey;
-    
+
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
     private String owner;
@@ -88,7 +87,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date createdFrom;
-    
+
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastModifiedTo;
@@ -96,7 +95,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastModifiedFrom;
-    
+
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date lastClaimedTo;
@@ -112,7 +111,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date completedFrom;
-    
+
     @JsonIgnore
     @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false,
@@ -365,6 +364,20 @@ public class TaskEntity extends ActivitiEntityMetadata implements CloudTask {
      */
     public void setTaskCandidateUsers(Set<TaskCandidateUser> taskCandidateUsers) {
         this.taskCandidateUsers = taskCandidateUsers;
+    }
+
+    public List<String> getCandidateUsers(){
+        return this.taskCandidateUsers != null ? this.taskCandidateUsers
+                       .stream()
+                       .map(TaskCandidateUser::getUserId)
+                       .collect(Collectors.toList()) : Collections.emptyList();
+    }
+
+    public List<String> getCandidateGroups(){
+        return this.taskCandidateGroups != null ? this.taskCandidateGroups
+                       .stream()
+                       .map(TaskCandidateGroup::getGroupId)
+                       .collect(Collectors.toList()): Collections.emptyList();
     }
 
     /**

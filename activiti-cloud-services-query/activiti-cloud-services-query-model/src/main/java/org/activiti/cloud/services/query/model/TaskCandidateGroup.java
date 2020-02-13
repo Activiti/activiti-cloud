@@ -1,5 +1,7 @@
 package org.activiti.cloud.services.query.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.util.Objects;
 
 import javax.persistence.ConstraintMode;

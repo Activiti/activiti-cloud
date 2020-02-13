@@ -569,13 +569,15 @@ public class QueryTasksIT {
 
         //when
         ResponseEntity<List<String>> responseEntity = getCandidateGroups(createdTask.getId());
+        ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
 
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().size()).isEqualTo(1);
-        assertThat(responseEntity.getBody().get(0)).isEqualTo("testgroup");
+        assertThat(responseEntity.getBody()).containsExactly("testgroup");
+        assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactly("testgroup");
 
         //Check adding group candidate
         //when
@@ -585,13 +587,14 @@ public class QueryTasksIT {
 
         //then
         responseEntity = getCandidateGroups(createdTask.getId());
+        taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
 
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().size()).isEqualTo(2);
-        assertThat(responseEntity.getBody().get(0)).isIn("hrgroup","testgroup");
-        assertThat(responseEntity.getBody().get(1)).isIn("hrgroup","testgroup");
+        assertThat(responseEntity.getBody()).containsExactlyInAnyOrder("hrgroup","testgroup");
+        assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactlyInAnyOrder("hrgroup","testgroup");
 
         //Check deleting group candidate
         //when
@@ -601,12 +604,14 @@ public class QueryTasksIT {
 
         //then
         responseEntity = getCandidateGroups(createdTask.getId());
+        taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
 
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().size()).isEqualTo(1);
-        assertThat(responseEntity.getBody().get(0)).isEqualTo("testgroup");
+        assertThat(responseEntity.getBody()).containsExactly("testgroup");
+        assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactly("testgroup");
     }
 
     @Test
@@ -773,7 +778,7 @@ public class QueryTasksIT {
                                          new ParameterizedTypeReference<List<String>>() {
                                          });
     }
-    
+
     @Test
     public void shouldFilterTaskByCreatedDateFromTo(){
         //given
@@ -1116,13 +1121,15 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
             //when
             ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
+            ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
             //then
             assertThat(response).isNotNull();
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull();
-            assertThat(response.getBody().size()).isEqualTo(1);
-            assertThat(response.getBody().get(0)).isEqualTo("testgroup");
+            assertThat(response.getBody()).hasSize(1);
+            assertThat(response.getBody()).containsExactly("testgroup");
+            assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactly("testgroup");
         });
         
         keycloakTokenProducer.setKeycloakTestUser("testuser");
@@ -1135,13 +1142,15 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
             //when
             ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
+            ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
             //then
             assertThat(response).isNotNull();
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull();
-            assertThat(response.getBody().size()).isEqualTo(1);
-            assertThat(response.getBody().get(0)).isEqualTo("testgroup");
+            assertThat(response.getBody()).hasSize(1);
+            assertThat(response.getBody()).containsExactly("testgroup");
+            assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactly("testgroup");
         });
 
         ((TaskImpl)task).setStatus(Task.TaskStatus.COMPLETED);
@@ -1155,13 +1164,15 @@ public class QueryTasksIT {
         await().untilAsserted(() -> {
             //when
             ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
+            ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
             //then
             assertThat(response).isNotNull();
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull();
-            assertThat(response.getBody().size()).isEqualTo(1);
-            assertThat(response.getBody().get(0)).isEqualTo("testgroup");
+            assertThat(response.getBody()).hasSize(1);
+            assertThat(response.getBody()).containsExactly("testgroup");
+            assertThat(taskResponseEntity.getBody().getCandidateGroups()).containsExactly("testgroup");
         });
       
     }
@@ -1178,13 +1189,16 @@ public class QueryTasksIT {
 
         //when
         ResponseEntity<List<String>> responseEntity = getCandidateUsers(task.getId());
+        ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().size()).isEqualTo(1);
-        assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+        assertThat(responseEntity.getBody()).hasSize(1);
+        assertThat(responseEntity.getBody()).containsExactly("testuser");
+        assertThat(taskResponseEntity.getBody().getCandidateUsers()).hasSize(1);
+        assertThat(taskResponseEntity.getBody().getCandidateUsers()).containsExactly("testuser");
         
         //when  
         ((TaskImpl)task).setAssignee("testuser");
@@ -1193,13 +1207,16 @@ public class QueryTasksIT {
         eventsAggregator.sendAll();
         
         responseEntity = getCandidateUsers(task.getId());
+        taskResponseEntity = executeRequestGetTasksById(task.getId());
 
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().size()).isEqualTo(1);
-        assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+        assertThat(responseEntity.getBody()).hasSize(1);
+        assertThat(responseEntity.getBody()).containsExactly("testuser");
+        assertThat(taskResponseEntity.getBody().getCandidateUsers()).hasSize(1);
+        assertThat(taskResponseEntity.getBody().getCandidateUsers()).containsExactly("testuser");
         
 
         ((TaskImpl)task).setStatus(Task.TaskStatus.COMPLETED);
@@ -1212,13 +1229,17 @@ public class QueryTasksIT {
 
         //then
         responseEntity = getCandidateUsers(task.getId());
+        taskResponseEntity = executeRequestGetTasksById(task.getId());
 
         //then
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().size()).isEqualTo(1);
-        assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+        assertThat(responseEntity.getBody()).hasSize(1);
+        assertThat(responseEntity.getBody()).containsExactly("testuser");
+        assertThat(taskResponseEntity.getBody().getCandidateUsers()).hasSize(1);
+        assertThat(taskResponseEntity.getBody().getCandidateUsers()).containsExactly("testuser");
 
     }
+
 }
