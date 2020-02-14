@@ -90,7 +90,7 @@ public class RuntimeBundleProperties {
 
     public static class RuntimeBundleEventsProperties {
 
-        private boolean integrationAuditEventsEnabled;
+        private boolean integrationAuditEventsEnabled = true;
 
         public boolean isIntegrationAuditEventsEnabled() {
             return integrationAuditEventsEnabled;
