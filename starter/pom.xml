@@ -177,7 +177,8 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <configuration>
+            <configuration> 
+              <startParallel>true</startParallel>
               <images>
                 <image>
                   <name>activiti/activiti-keycloak</name>
