@@ -77,9 +77,12 @@
               <startParallel>true</startParallel>
               <images>
                 <image>
-                  <name>postgres</name>
+                  <name>bitnami/postgresql:10.7.0</name>
                   <alias>postgres</alias>
                   <run>
+                    <env>
+                      <ALLOW_EMPTY_PASSWORD>yes</ALLOW_EMPTY_PASSWORD>
+                    </env> 
                     <ports>
                       <port>5432:5432</port>
                     </ports>
