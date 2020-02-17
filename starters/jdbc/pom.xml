@@ -47,7 +47,7 @@
               <startParallel>true</startParallel>
               <images>
                 <image>
-                  <name>postgres:10.7.0</name>
+                  <name>bitnami/postgresql:10.7.0</name>
                   <alias>postgres</alias>
                   <run>
                     <ports>
