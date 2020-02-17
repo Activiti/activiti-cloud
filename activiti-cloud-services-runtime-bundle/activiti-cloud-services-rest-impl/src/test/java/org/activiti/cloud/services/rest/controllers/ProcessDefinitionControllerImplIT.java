@@ -23,15 +23,19 @@ import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processDefin
 import static org.activiti.alfresco.rest.docs.AlfrescoDocumentation.processDefinitionIdParameter;
 import static org.activiti.alfresco.rest.docs.HALDocumentation.pagedProcessDefinitionFields;
 import static org.activiti.alfresco.rest.docs.HALDocumentation.selfLink;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.ByteArrayInputStream;
@@ -39,7 +43,6 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
@@ -62,7 +65,6 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +100,7 @@ import org.springframework.test.web.servlet.MvcResult;
 public class ProcessDefinitionControllerImplIT {
 
     private static final String DOCUMENTATION_IDENTIFIER = "process-definition";
-   
+
     private static final String DOCUMENTATION_IDENTIFIER_ALFRESCO = "process-definition-alfresco";
 
     @Autowired
@@ -121,18 +123,12 @@ public class ProcessDefinitionControllerImplIT {
 
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
-    
+
     @MockBean
     private MessageChannel commandResults;
-    
+
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
-
-    @Before
-    public void setUp() {
-        assertThat(processEngineChannels).isNotNull();
-        assertThat(processDeployedProducer).isNotNull();
-    }
 
     @Test
     public void getProcessDefinitions() throws Exception {
@@ -149,7 +145,7 @@ public class ProcessDefinitionControllerImplIT {
                                                                        processDefinitionList.size());
         when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
-        this.mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
+        mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isOk())
         .andDo(document(DOCUMENTATION_IDENTIFIER + "/list",
@@ -157,8 +153,8 @@ public class ProcessDefinitionControllerImplIT {
                         links(selfLink()
                        )
         ));
-        
-        
+
+
     }
 
     private ProcessDefinition buildProcessDefinition(String processDefinitionId,
@@ -187,7 +183,7 @@ public class ProcessDefinitionControllerImplIT {
         given(processRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
 
         //when
-        MvcResult result = this.mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
+        MvcResult result = mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/list",
                                 pageRequestParameters(),
@@ -219,7 +215,7 @@ public class ProcessDefinitionControllerImplIT {
                                                    "this is my process",
                                                    1));
 
-        this.mockMvc.perform(get("/v1/process-definitions/{id}",
+        mockMvc.perform(get("/v1/process-definitions/{id}",
                                  processId).accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/get",
@@ -235,7 +231,7 @@ public class ProcessDefinitionControllerImplIT {
                                                    "This is my process",
                                                    1));
 
-        MvcResult result = this.mockMvc.perform(get("/v1/process-definitions/{id}",
+        MvcResult result = mockMvc.perform(get("/v1/process-definitions/{id}",
                                                     procDefId).accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER_ALFRESCO + "/get",
@@ -261,7 +257,7 @@ public class ProcessDefinitionControllerImplIT {
         InputStream xml = new ByteArrayInputStream("activiti".getBytes());
         when(repositoryService.getProcessModel(processDefinitionId)).thenReturn(xml);
 
-        this.mockMvc.perform(
+        mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
                     processDefinitionId).accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isOk())
@@ -282,9 +278,9 @@ public class ProcessDefinitionControllerImplIT {
         bpmnModel.getProcesses().add(process);
         when(repositoryService.getBpmnModel(processDefinitionId)).thenReturn(bpmnModel);
 
-        this.mockMvc.perform(
+        mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
-                    processDefinitionId).accept(MediaType.APPLICATION_JSON))
+                    processDefinitionId).accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(document(DOCUMENTATION_IDENTIFIER + "/bpmn-model/get",
                                 processDefinitionIdParameter()));
@@ -301,7 +297,7 @@ public class ProcessDefinitionControllerImplIT {
         when(processDiagramGenerator.generateDiagram(any(BpmnModel.class)))
                 .thenReturn("img".getBytes());
 
-        this.mockMvc.perform(
+        mockMvc.perform(
                 get("/v1/process-definitions/{id}/model",
                     processDefinitionId).accept("image/svg+xml"))
                 .andExpect(status().isOk())
@@ -310,33 +306,32 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void getProcessDiagramShouldReturnNotFoundWhenRelatedProcessDefinitionIsNotFound() throws Exception {
-        String processDefinitionId = UUID.randomUUID().toString();
-        given(processRuntime.processDefinition(processDefinitionId))
-                .willThrow(new ActivitiObjectNotFoundException("missing"));
+    public void should_getProcessDiagramReturnNotFound_when_processDefinitionIsNotFound() throws Exception {
+        String processDefinitionId = "missingProcessDefinitionId";
+        willThrow(new ActivitiObjectNotFoundException("not found"))
+            .given(processRuntime).processDefinition(processDefinitionId);
 
-        this.mockMvc.perform(
-                get("/v1/process-definitions/{id}/model",
-                    processDefinitionId).accept("image/svg+xml"))
-                .andExpect(status().isNotFound())
-                .andDo(document(DOCUMENTATION_IDENTIFIER + "/diagram",
-                                processDefinitionIdParameter()));
+        mockMvc.perform(get("/v1/process-definitions/{id}/model", processDefinitionId)
+            .accept("image/svg+xml"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("entry.code", is(404)))
+            .andExpect(jsonPath("entry.message", is("not found")));
     }
 
     @Test
-    public void getProcessDiagramShouldReturnNoContentStatusWhenNoInterchangeInfo() throws Exception {
+    public void should_getProcessDiagramReturnNoContent_when_noInterchangeInfo() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
-        given(processRuntime.processDefinition(processDefinitionId))
-                .willReturn(mock(ProcessDefinition.class));
-
         BpmnModel bpmnModel = new BpmnModel();
-        when(repositoryService.getBpmnModel("1")).thenReturn(bpmnModel);
-        when(processDiagramGenerator.generateDiagram(any(BpmnModel.class)))
-                .thenThrow(new ActivitiInterchangeInfoNotFoundException("No interchange information found."));
+        given(repositoryService.getBpmnModel(processDefinitionId)).willReturn(bpmnModel);
 
-        this.mockMvc.perform(
-                get("/v1/process-definitions/{id}/model",
-                    1).accept("image/svg+xml"))
-                .andExpect(status().isNoContent());
+        willThrow(new ActivitiInterchangeInfoNotFoundException("No interchange information found."))
+            .given(processDiagramGenerator).generateDiagram(bpmnModel);
+
+        mockMvc.perform(get("/v1/process-definitions/{id}/model", processDefinitionId)
+            .accept("image/svg+xml"))
+            .andExpect(status().isNoContent())
+            .andExpect(jsonPath("entry.code", is(404)))
+            .andExpect(jsonPath("entry.message", is("No interchange information found.")));
+        verify(processRuntime).processDefinition(processDefinitionId);
     }
 }
