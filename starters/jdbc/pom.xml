@@ -53,6 +53,9 @@
                     <ports>
                       <port>5432:5432</port>
                     </ports>
+                    <env>
+                      <ALLOW_EMPTY_PASSWORD>yes</ALLOW_EMPTY_PASSWORD>
+                    </env>  
                     <wait>
                       <log>.*database system is ready to accept connections</log>
                       <time>45000</time>
