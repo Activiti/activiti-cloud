@@ -13,7 +13,7 @@ ACTIVITI_CLOUD_NOTIFICATIONS_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activit
 ACTIVITI_CLOUD_MODELING_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-modeling-service.version>)[^<]+" "pom.xml") 
 ACTIVITI_CLOUD_MESSAGES_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-messages-service.version>)[^<]+" "pom.xml") 
 
-ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.238
+ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.242
 ACTIVITI_CLOUD_COMMON_HELM_CHART := 1.1.21
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
@@ -79,9 +79,9 @@ updatebot/push-version:
 	updatebot push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
 updatebot/push-version-dry:
-	updatebot --dry push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_SERVICES_VERSIONS)   --merge false
+	#updatebot --dry push-version --kind maven org.activiti.cloud.dependencies:activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_SERVICES_VERSIONS)   --merge false
 	updatebot --dry push-version --kind helm activiti-cloud-dependencies $(ACTIVITI_CLOUD_VERSION) $(ACTIVITI_CLOUD_FULL_CHART_VERSIONS)
-	updatebot --dry push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
+	#updatebot --dry push-version --kind make ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
 replace-release-full-chart-names:
 	echo HELM_ACTIVITI_VERSION = $(HELM_ACTIVITI_VERSION)
