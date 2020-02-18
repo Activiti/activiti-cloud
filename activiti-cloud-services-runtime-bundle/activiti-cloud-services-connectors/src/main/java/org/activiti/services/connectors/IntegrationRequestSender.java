@@ -15,6 +15,9 @@
  */
 package org.activiti.services.connectors;
 
+import java.util.stream.Stream;
+
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -23,6 +26,7 @@ import org.activiti.services.connectors.message.IntegrationContextMessageBuilder
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -59,9 +63,9 @@ public class IntegrationRequestSender {
             CloudIntegrationRequestedEventImpl integrationRequested = new CloudIntegrationRequestedEventImpl(integrationRequest.getIntegrationContext());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequested);
 
-            Message<?> message = messageBuilderFactory.create(integrationRequest.getIntegrationContext())
-                                                      .withPayload(integrationRequested)
-                                                      .build();
+            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderFactory.create(integrationRequest.getIntegrationContext()).withPayload(Stream.of(integrationRequested)
+                                                                                        .toArray(CloudRuntimeEvent<?, ?>[]::new))
+                .build();
             
             auditProducer.send(message);
         }

@@ -109,7 +109,7 @@ public class IntegrationRequestSenderTest {
     private DelegateExecution delegateExecution;
 
     @Captor
-    private ArgumentCaptor<Message<CloudRuntimeEvent<?,?>>> auditMessageArgumentCaptor;
+    private ArgumentCaptor<Message<CloudRuntimeEvent<?,?>[]>> auditMessageArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<Message<IntegrationRequest>> integrationRequestMessageCaptor;
@@ -224,8 +224,8 @@ public class IntegrationRequestSenderTest {
         //then
         verify(auditProducer).send(auditMessageArgumentCaptor.capture());
 
-        Message<CloudRuntimeEvent<?, ?>> message = auditMessageArgumentCaptor.getValue();
-        assertThat(message.getPayload()).isInstanceOf(CloudIntegrationRequestedEventImpl.class);
+        Message<CloudRuntimeEvent<?, ?>[]>  message = auditMessageArgumentCaptor.getValue();
+        assertThat(message.getPayload()[0]).isInstanceOf(CloudIntegrationRequestedEventImpl.class);
 
         Assertions.assertThat(message.getHeaders())
             .containsKey("routingKey")
@@ -245,13 +245,11 @@ public class IntegrationRequestSenderTest {
             .containsEntry("serviceVersion",SERVICE_VERSION)
             .containsEntry("serviceFullName",APP_NAME);
 
-
-        CloudIntegrationRequestedEventImpl integrationRequested = (CloudIntegrationRequestedEventImpl) message.getPayload();
+        CloudIntegrationRequestedEventImpl integrationRequested = (CloudIntegrationRequestedEventImpl) (message.getPayload())[0];
 
         assertThat(integrationRequested.getEntity().getId()).isEqualTo(INTEGRATION_CONTEXT_ID);
         assertThat(integrationRequested.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(integrationRequested.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequested);
     }
-
 }

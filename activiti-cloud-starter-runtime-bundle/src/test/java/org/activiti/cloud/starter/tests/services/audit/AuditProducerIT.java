@@ -5,6 +5,8 @@ import static org.activiti.api.model.shared.event.VariableEvent.VariableEvents.V
 import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED;
 import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
 import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
+import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED;
+import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED;
 import static org.activiti.api.process.model.events.ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED;
 import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED;
 import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
@@ -50,6 +52,7 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.TaskCandidateGroup;
 import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -337,6 +340,27 @@ public class AuditProducerIT {
                             PROCESS_CANCELLED.name());
         });
     }
+
+    @Test
+    public void shouldSendIntegrationResultReceiveEvent() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
+            ProcessPayloadBuilder.start()
+                .withProcessDefinitionKey("connectorConstants")
+                .withBusinessKey("businessKey")
+                .build());
+
+        await().untilAsserted(() -> {
+            //when
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+
+            assertThat(receivedEvents)
+                .extracting(event -> event.getEventType().name())
+                .contains(INTEGRATION_RESULT_RECEIVED.name())
+                .contains(INTEGRATION_REQUESTED.name());
+        });
+    }
+
 
     @Test
     public void shouldProduceEventsForAProcessUpdate() {

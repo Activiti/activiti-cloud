@@ -19,8 +19,10 @@ package org.activiti.services.connectors.channel;
 import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -78,9 +80,9 @@ public class ServiceTaskIntegrationResultEventHandler {
                                                                                           integrationContext.getOutBoundVariables()));
             } else {
                 String message = "No task is in this RB is waiting for integration result with execution id `" +
-                        integrationContextEntity.getExecutionId() +
-                        ", flow node id `" + integrationContext.getClientId() +
-                        "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
+                    integrationContextEntity.getExecutionId() +
+                    ", flow node id `" + integrationContext.getClientId() +
+                    "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
                 LOGGER.debug(message);
             }
             sendAuditMessage(integrationResult);
@@ -91,8 +93,9 @@ public class ServiceTaskIntegrationResultEventHandler {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationResultReceivedEventImpl integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(integrationResult.getIntegrationContext());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationResultReceived);
-            Message<CloudIntegrationResultReceivedEventImpl> message = MessageBuilder.withPayload(
-                    integrationResultReceived).build();
+            Message<CloudRuntimeEvent<?, ?>[]> message = MessageBuilder.withPayload(Stream.of(integrationResultReceived)
+                                                                                        .toArray(CloudRuntimeEvent<?, ?>[]::new))
+                .build();
 
             auditProducer.send(message);
         }

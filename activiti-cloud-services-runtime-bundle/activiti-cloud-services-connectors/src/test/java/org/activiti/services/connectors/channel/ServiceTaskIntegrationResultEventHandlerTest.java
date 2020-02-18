@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
@@ -88,7 +89,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private RuntimeBundleProperties.RuntimeBundleEventsProperties eventsProperties;
 
     @Captor
-    private ArgumentCaptor<Message<CloudIntegrationResultReceivedEventImpl>> messageCaptor;
+    private ArgumentCaptor<Message<CloudRuntimeEvent<?, ?>[]>> messageCaptor;
 
     @Mock
     private ExecutionQuery executionQuery;
@@ -178,8 +179,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
         //then
         verify(auditProducer).send(messageCaptor.capture());
-        Message<CloudIntegrationResultReceivedEventImpl> message = messageCaptor.getValue();
-        CloudIntegrationResultReceivedEventImpl event = message.getPayload();
+        Message<CloudRuntimeEvent<?, ?>[]> message = messageCaptor.getValue();
+        CloudIntegrationResultReceivedEventImpl event = (CloudIntegrationResultReceivedEventImpl) message.getPayload()[0];
         assertThat(event.getEntity().getId()).isEqualTo(ENTITY_ID);
         assertThat(event.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(event.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
