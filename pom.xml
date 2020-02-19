@@ -22,6 +22,7 @@
   <properties>
     <activiti-cloud-runtime-bundle-service.version>7.1.258</activiti-cloud-runtime-bundle-service.version>
     <docker-maven-plugin.version>0.32.0</docker-maven-plugin.version>
+    <activiti-cloud-messages-service.version>7.1.37</activiti-cloud-messages-service.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -29,6 +30,13 @@
         <groupId>org.activiti.cloud.rb</groupId>
         <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
         <version>${activiti-cloud-runtime-bundle-service.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.messages</groupId>
+        <artifactId>activiti-cloud-messages-dependencies</artifactId>
+        <version>${activiti-cloud-messages-service.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -46,6 +54,10 @@
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.messages</groupId>
+      <artifactId>activiti-cloud-starter-messages-jdbc</artifactId>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
