@@ -162,26 +162,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud.examples</groupId>
-      <artifactId>activiti-cloud-messages</artifactId>
-      <version>${activiti-cloud-messages.version}</version>
-      <type>pom</type>
-      <exclusions>
-        <exclusion>
-          <groupId>org.activiti.cloud.messages</groupId>
-          <artifactId>activiti-cloud-starter-messages</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.springframework.cloud</groupId>
-          <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.postgresql</groupId>
-          <artifactId>postgresql</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
