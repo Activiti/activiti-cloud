@@ -2,6 +2,6 @@ github:
   organisations:
   - name: activiti
     repositories:
-    - name: activiti-cloud-messages
+    - name: example-runtime-bundle
       branch: master
-      useSinglePullRequest: true      
+      useSinglePullRequest: true
