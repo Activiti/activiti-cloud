@@ -29,6 +29,7 @@ import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.common.swagger.DocketCustomizer;
@@ -66,7 +67,9 @@ public class PayloadsDocketCustomizer implements DocketCustomizer {
                 .directModelSubstitute(UpdateTaskVariablePayload.class,
                                        UpdateTaskVariablePayloadApiModel.class)
                 .directModelSubstitute(UpdateTaskPayload.class,
-                                       UpdateTaskPayloadApiModel.class);
+                                       UpdateTaskPayloadApiModel.class)
+                .directModelSubstitute(SaveTaskPayload.class,
+                                        SaveTaskPayloadApiModel.class);
     }
 
     @ApiModel("StartProcessPayload")
@@ -157,6 +160,13 @@ public class PayloadsDocketCustomizer implements DocketCustomizer {
     public class UpdateTaskPayloadApiModel extends UpdateTaskPayload {
 
         @ApiModelProperty(allowableValues = "UpdateTaskPayload")
+        public String payloadType;
+    }
+
+    @ApiModel("SaveTaskPayload")
+    public class SaveTaskPayloadApiModel extends SaveTaskPayload {
+
+        @ApiModelProperty(allowableValues = "SaveTaskPayload")
         public String payloadType;
     }
 }
