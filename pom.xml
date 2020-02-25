@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
-    <version>7.1.34</version>
+    <version>7.1.0</version>
     <relativePath/>
   </parent>
   <groupId>org.activiti.cloud.dependencies</groupId>
@@ -15,7 +15,7 @@
   <name>Activiti Cloud :: BOM (Bill of Materials) Parent</name>
   <properties>
     <project.scm.repository>activiti-cloud-dependencies</project.scm.repository>
-    <activiti-cloud-build.version>7.1.34</activiti-cloud-build.version>
+    <activiti-cloud-build.version>7.1.0</activiti-cloud-build.version>
     <activiti-cloud-api.version>7.1.136</activiti-cloud-api.version>
     <activiti-cloud-service-common.version>7.1.171</activiti-cloud-service-common.version>
     <activiti-cloud-acceptance-tests.version>7.1.190</activiti-cloud-acceptance-tests.version>
