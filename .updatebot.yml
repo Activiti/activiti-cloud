@@ -1,0 +1,12 @@
+github:
+  organisations:
+  - name: activiti
+    repositories:
+    - name: activiti-cloud-acceptance-scenarios
+      useSinglePullRequest: true      
+    - name: activiti-cloud-modeling-service
+      branch: develop
+      useSinglePullRequest: true
+    - name: activiti-cloud-dependencies
+      branch: develop
+      useSinglePullRequest: true
