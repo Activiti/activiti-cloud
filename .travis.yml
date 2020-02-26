@@ -1,0 +1,107 @@
+language: java
+
+jdk:
+  - openjdk11
+
+env:
+  global:
+    - MAVEN_CLI_OPTS="--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=false -U"
+    - MAVEN_TEST_OPTS=" -Dspring.main.banner-mode=off -Denforcer.skip"
+    - MAVEN_CMD="mvn ${MAVEN_CLI_OPTS} verify ${MAVEN_TEST_OPTS} -DskipITs=false"
+
+before_install:
+  - mkdir -p $HOME/.m2
+
+install: travis_wait mvn ${MAVEN_CLI_OPTS} dependency:resolve dependency:resolve-plugins || true
+
+cache:
+  directories:
+    - ${HOME}/.m2/repository
+    - ${HOME}/sourceclear
+
+services:
+  - docker
+
+branches:
+  only:
+    - master
+    - develop
+
+stages:
+  - name: activiti-cloud-build
+  - name: activiti-cloud-api
+  - name: activiti-cloud-service-common
+  - name: activiti-cloud-runtime-bundle-service
+  - name: activiti-cloud-messages-service
+  - name: activiti-cloud-query-service
+  - name: activiti-cloud-audit-service
+  - name: activiti-cloud-modeling-service
+  - name: activiti-cloud-notifications-graphql-service
+  - name: activiti-cloud-acceptance-tests
+  - name: activiti-cloud-connectors
+
+jobs:
+  include:
+    - name: activiti-cloud-build
+      stage: activiti-cloud-build
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-build/pom.xml
+
+    - name: activiti-cloud-api
+      stage: activiti-cloud-api
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-api/pom.xml
+
+    - name: activiti-cloud-service-common
+      stage: activiti-cloud-service-common
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-service-common/pom.xml
+
+    - name: activiti-cloud-runtime-bundle-service
+      stage: activiti-cloud-runtime-bundle-service
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-runtime-bundle-service/pom.xml
+
+    - name: activiti-cloud-messages-service
+      stage: activiti-cloud-messages-service
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-messages-service/pom.xml
+
+    - name: activiti-cloud-query-service
+      stage: activiti-cloud-query-service
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-query-service/pom.xml
+
+    - name: activiti-cloud-audit-service
+      stage: activiti-cloud-audit-service
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-audit-service/pom.xml
+
+    - name: activiti-cloud-modeling-service
+      stage: activiti-cloud-modeling-service
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-modeling-service/pom.xml
+
+    - name: activiti-cloud-notifications-graphql-service
+      stage: activiti-cloud-notifications-graphql-service
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml
+
+    - name: activiti-cloud-acceptance-tests
+      stage: activiti-cloud-acceptance-tests
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-acceptance-tests/pom.xml
+
+    - name: activiti-cloud-connectors
+      stage: activiti-cloud-connectors
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-connectors/pom.xml
+
+# Send coverage data
+after_success:
+  bash <(curl -s https://codecov.io/bash)
+
+after_failure:
+  - cat **/target/surefire-reports/*.xml | grep -B 1 -A 10 "<error"
+  - cat **/target/failsafe-reports/*.xml | grep -B 1 -A 10 "<error"
+
