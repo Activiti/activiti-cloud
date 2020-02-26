@@ -1,6 +1,0 @@
-github:
-  organisations:
-  - name: activiti
-    repositories:
-    - name: example-cloud-connector
-      useSinglePullRequest: true
