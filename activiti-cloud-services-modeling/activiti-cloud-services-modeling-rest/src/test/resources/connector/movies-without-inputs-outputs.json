@@ -1,0 +1,11 @@
+{
+  "id": "MoviesId",
+  "name": "movies",
+  "description": "",
+  "actions": {
+    "getMovieDescId": {
+      "id": "getMovieDescId",
+      "name": "getMovieDesc"
+    }
+  }
+}

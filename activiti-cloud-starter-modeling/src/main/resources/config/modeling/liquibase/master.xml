@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="aae-modeling"
+             id="h2-schema-creation" dbms="h2">
+    <sqlFile dbms="h2"
+             encoding="utf8"
+             path="changelog/h2.schema.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+
+  <changeSet author="aae-modeling"
+             id="initial-schema" dbms="postgresql">
+    <preConditions onFail="CONTINUE">
+      <not>
+        <tableExists tableName="latest_release"/>
+      </not>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/pg.schema.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/01.pg.update.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>         
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,16 @@
+{
+  "name": "invalid-connector-action",
+  "description": "",
+  "actions": {
+    "15eb8073-a96f-49ef-9f03-9fe00a110016": {
+      "id": "15eb8073-a96f-49ef-9f03-9fe00a110016",
+      "name": "testaction1",
+      "description": ""
+    },
+    "15eb8073-a96f-49ef-9f03-9fe00a867745": {
+      "id": "15eb8073-a96f-49ef-9f03-9fe00a867745",
+      "name": "testaction2",
+      "description": ""
+    }
+  }
+}

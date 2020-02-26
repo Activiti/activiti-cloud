@@ -1,0 +1,338 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Process extensions schema",
+  "description": "Process extensions schema",
+  "type": "object",
+  "definitions": {
+    "extensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "Process_.": {
+          "$ref": "#/definitions/extension-element"
+        }
+      }
+    },
+    "extension-element": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "properties": { "$ref": "#/definitions/properties" },
+        "mappings": { "$ref": "#/definitions/mappings" },
+        "constants": { "$ref": "#/definitions/constants" },
+        "assignments": { "$ref": "#/definitions/assignments" }
+      }
+    },
+    "properties": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/property"
+        }
+      }
+    },
+    "property": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "date",
+            "datetime",
+            "string",
+            "integer",
+            "boolean",
+            "json",
+            "file"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "date"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
+                "message": {
+                  "pattern": "Invalid date - {{name}}({{id}})",
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is date"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "datetime"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "pattern": "^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                "message": {
+                  "pattern": "Invalid datetime - {{name}}({{id}})",
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is datetime"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is string"
+                }
+
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "integer"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "integer",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is integer"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "boolean"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is boolean"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "json"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "object",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "file"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "object",
+                "message": {
+                  "type": "Mismatch value type - {{name}}({{id}}). Expected type is file"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "required": [
+        "id",
+        "name",
+        "type",
+        "required"
+      ]
+    },
+    "mappings": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/mapping-object"
+        }
+      }
+    },
+    "mapping-object": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            ".*": {
+              "$ref": "#/definitions/mapping-property"
+            }
+          }
+        },
+        "outputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            ".*": {
+              "$ref": "#/definitions/mapping-property"
+            }
+          }
+        }
+      },
+      "anyOf": [
+        {
+          "required": ["inputs"]
+        },
+        {
+          "required": ["outputs"]
+        }
+      ]
+    },
+    "mapping-property": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "variable",
+            "value"
+          ]
+        },
+        "value": {
+          "type": ["string", "number", "integer", "boolean", "object", "array"]
+        }
+      },
+      "dependencies": {
+        "type": [
+          "value"
+        ],
+        "value": [
+          "type"
+        ]
+      }
+    },
+    "constants": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/constant-container"
+        }
+      }
+    },
+    "constant-container": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/constant-element"
+        }
+      }
+    },
+    "constant-element": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
+      "properties": {
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "assignments": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/definitions/assignment-property"
+        }
+      }
+    },
+    "assignment-property": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "assignment": {
+          "type": "string",
+          "enum": ["assignee", "candidates"],
+          "additionalProperties": false
+        },
+        "type": {
+          "type": "string",
+          "enum": ["static", "identity", "expression"],
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "patternProperties": {
+    "extensions": { "$ref": "#/definitions/extensions" },
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    }
+  },
+  "required": [ "id" ],
+  "additionalProperties": false
+}
