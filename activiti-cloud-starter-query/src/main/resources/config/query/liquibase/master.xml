@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="activiti-query"
+             id="h2-schema-creation" dbms="h2">
+    <sqlFile dbms="h2"
+             encoding="utf8"
+             path="changelog/h2.schema.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+             id="oracle-schema-creation" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/oracle.schema.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+             id="initial-schema-m3" dbms="postgresql">
+    <preConditions onFail="CONTINUE">
+      <not>
+        <tableExists tableName="bpmn_activity"/>
+      </not>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/01-initial.pg.schema.m3.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+  
+  <changeSet author="activiti-query"
+             id="alter-schema-m6" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/02-alter.pg.schema.m6.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+             id="alter2-schema-m6" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/03-alter.pg.schema.m6.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+
+
+</databaseChangeLog>

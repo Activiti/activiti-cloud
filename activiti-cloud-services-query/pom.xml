@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.activiti.cloud.query</groupId>
+    <artifactId>activiti-cloud-query-dependencies</artifactId>
+    <version>7.1.0-SNAPSHOT</version>
+    <relativePath>../activiti-cloud-query-dependencies</relativePath>
+  </parent>
+  <artifactId>activiti-cloud-services-query</artifactId>
+  <name>Activiti Cloud Query :: Services :: Parent</name>
+  <packaging>pom</packaging>
+  <modules>
+    <module>activiti-cloud-services-query-model</module>
+    <module>activiti-cloud-services-query-repo</module>
+    <module>activiti-cloud-services-query-rest</module>
+  </modules>
+</project>
