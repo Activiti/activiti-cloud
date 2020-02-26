@@ -6,7 +6,7 @@
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
     <version>7.1.0-SNAPSHOT</version>
-    <relativePath/>
+    <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <groupId>org.activiti.cloud.query</groupId>
   <artifactId>activiti-cloud-query-service-parent</artifactId>

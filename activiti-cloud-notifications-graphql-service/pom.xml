@@ -6,7 +6,7 @@
     <groupId>org.activiti.cloud.build</groupId>
     <artifactId>activiti-cloud-parent</artifactId>
     <version>7.1.0-SNAPSHOT</version>
-    <relativePath/>
+    <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <groupId>org.activiti.cloud.notifications.graphql</groupId>
   <artifactId>activiti-cloud-notifications-service-graphql-parent</artifactId>
