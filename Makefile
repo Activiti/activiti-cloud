@@ -17,7 +17,7 @@ updatebot/push-version:
 	$(eval ACTIVITI_CLOUD_VERSION=$(shell mvn help:evaluate -Dexpression=activiti-cloud-mono-aggregator.version -q -DforceStdout))
 
 	@echo Doing updatebot push-version.....
-	@echo updatebot push-version --kind maven \
+	updatebot push-version --kind maven \
 		org.activiti.cloud.modeling:activiti-cloud-modeling-dependencies $(RELEASE_VERSION) \
 		org.activiti.cloud.audit:activiti-cloud-audit-dependencies $(RELEASE_VERSION) \
 		org.activiti.cloud.api:activiti-cloud-api-dependencies $(RELEASE_VERSION) \
