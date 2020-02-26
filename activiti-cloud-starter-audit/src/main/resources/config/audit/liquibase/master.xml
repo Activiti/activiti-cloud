@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="activiti-audit"
+             id="h2-schema-creation" dbms="h2">
+    <sqlFile dbms="h2"
+             encoding="utf8"
+             path="changelog/h2.schema.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-audit"
+             id="oracle-schema-creation" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/oracle.schema.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-audit"
+             id="initial-schema-m3" dbms="postgresql">
+    <preConditions onFail="CONTINUE">
+      <not>
+        <tableExists tableName="audit_event_entity"/>
+      </not>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/01-initial.pg.schema.m2.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+
+  <changeSet author="activiti-audit" id="alter-schema-m4" dbms="postgresql">
+    <preConditions onFail="CONTINUE">
+      <not>
+        <tableExists tableName="audit_event"/>
+        <sequenceExists sequenceName="audit_sequence"/>
+      </not>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/02-alter.pg.schema.m4.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+  
+  <changeSet author="activiti-audit" id="alter-schema-m5" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/03-alter.pg.schema.m5.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+</databaseChangeLog>
