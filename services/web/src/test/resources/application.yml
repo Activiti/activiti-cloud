@@ -1,0 +1,7 @@
+spring:
+  activiti:
+    cloud:
+      services:
+        query:
+          graphql:
+            enabled: true
