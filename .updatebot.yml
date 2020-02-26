@@ -1,0 +1,10 @@
+github:
+  organisations:
+  - name: activiti
+    repositories:
+    - name: example-runtime-bundle
+      branch: master
+      useSinglePullRequest: true
+    - name: activiti-cloud-dependencies
+      branch: develop
+      useSinglePullRequest: true
