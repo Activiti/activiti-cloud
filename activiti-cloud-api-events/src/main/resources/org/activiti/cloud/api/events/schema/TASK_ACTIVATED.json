@@ -1,0 +1,132 @@
+{
+  "type" : "object",
+  "id" : "urn:jsonschema:org:activiti:cloud:api:task:model:events:CloudTaskActivatedEvent",
+  "properties" : {
+    "messageId" : {
+      "type" : "string"
+    },
+    "entityId" : {
+      "type" : "string"
+    },
+    "sequenceNumber" : {
+      "type" : "integer"
+    },
+    "appName" : {
+      "type" : "string"
+    },
+    "appVersion" : {
+      "type" : "string"
+    },
+    "serviceName" : {
+      "type" : "string"
+    },
+    "serviceFullName" : {
+      "type" : "string"
+    },
+    "serviceType" : {
+      "type" : "string"
+    },
+    "serviceVersion" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "entity" : {
+      "type" : "object",
+      "id" : "urn:jsonschema:org:activiti:api:task:model:Task",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "priority" : {
+          "type" : "integer"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "owner" : {
+          "type" : "string"
+        },
+        "formKey" : {
+          "type" : "string"
+        },
+        "description" : {
+          "type" : "string"
+        },
+        "standalone" : {
+          "type" : "boolean"
+        },
+        "duration" : {
+          "type" : "integer"
+        },
+        "claimedDate" : {
+          "type" : "integer",
+          "format" : "utc-millisec"
+        },
+        "parentTaskId" : {
+          "type" : "string"
+        },
+        "completedDate" : {
+          "type" : "integer",
+          "format" : "utc-millisec"
+        },
+        "assignee" : {
+          "type" : "string"
+        },
+        "createdDate" : {
+          "type" : "integer",
+          "format" : "utc-millisec"
+        },
+        "dueDate" : {
+          "type" : "integer",
+          "format" : "utc-millisec"
+        },
+        "processDefinitionId" : {
+          "type" : "string"
+        },
+        "processInstanceId" : {
+          "type" : "string"
+        },
+        "processDefinitionVersion" : {
+          "type" : "integer"
+        },
+        "businessKey" : {
+          "type" : "string"
+        },
+        "status" : {
+          "type" : "string",
+          "enum" : [ "CREATED", "ASSIGNED", "SUSPENDED", "COMPLETED", "CANCELLED", "DELETED" ]
+        },
+        "appVersion" : {
+          "type" : "string"
+        }
+      }
+    },
+    "processDefinitionId" : {
+      "type" : "string"
+    },
+    "processInstanceId" : {
+      "type" : "string"
+    },
+    "timestamp" : {
+      "type" : "integer"
+    },
+    "eventType" : {
+      "type" : "string",
+      "enum" : [ "TASK_ASSIGNED", "TASK_COMPLETED", "TASK_CREATED", "TASK_UPDATED", "TASK_ACTIVATED", "TASK_SUSPENDED", "TASK_CANCELLED" ]
+    },
+    "parentProcessInstanceId" : {
+      "type" : "string"
+    },
+    "processDefinitionKey" : {
+      "type" : "string"
+    },
+    "processDefinitionVersion" : {
+      "type" : "integer"
+    },
+    "businessKey" : {
+      "type" : "string"
+    }
+  }
+}

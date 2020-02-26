@@ -1,0 +1,82 @@
+{
+  "type" : "object",
+  "id" : "urn:jsonschema:org:activiti:cloud:api:process:model:events:CloudBPMNActivityCompletedEvent",
+  "properties" : {
+    "processDefinitionId" : {
+      "type" : "string"
+    },
+    "processInstanceId" : {
+      "type" : "string"
+    },
+    "messageId" : {
+      "type" : "string"
+    },
+    "entityId" : {
+      "type" : "string"
+    },
+    "sequenceNumber" : {
+      "type" : "integer"
+    },
+    "appName" : {
+      "type" : "string"
+    },
+    "appVersion" : {
+      "type" : "string"
+    },
+    "serviceName" : {
+      "type" : "string"
+    },
+    "serviceFullName" : {
+      "type" : "string"
+    },
+    "serviceType" : {
+      "type" : "string"
+    },
+    "serviceVersion" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "entity" : {
+      "type" : "object",
+      "id" : "urn:jsonschema:org:activiti:api:process:model:BPMNActivity",
+      "properties" : {
+        "activityName" : {
+          "type" : "string"
+        },
+        "activityType" : {
+          "type" : "string"
+        },
+        "elementId" : {
+          "type" : "string"
+        },
+        "processDefinitionId" : {
+          "type" : "string"
+        },
+        "processInstanceId" : {
+          "type" : "string"
+        }
+      }
+    },
+    "timestamp" : {
+      "type" : "integer"
+    },
+    "eventType" : {
+      "type" : "string",
+      "enum" : [ "ACTIVITY_STARTED", "ACTIVITY_CANCELLED", "ACTIVITY_COMPLETED" ]
+    },
+    "parentProcessInstanceId" : {
+      "type" : "string"
+    },
+    "processDefinitionKey" : {
+      "type" : "string"
+    },
+    "processDefinitionVersion" : {
+      "type" : "integer"
+    },
+    "businessKey" : {
+      "type" : "string"
+    }
+  }
+}

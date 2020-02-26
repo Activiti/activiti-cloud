@@ -1,0 +1,112 @@
+{
+  "type" : "object",
+  "id" : "urn:jsonschema:org:activiti:cloud:api:process:model:events:CloudIntegrationResultReceivedEvent",
+  "properties" : {
+    "messageId" : {
+      "type" : "string"
+    },
+    "entityId" : {
+      "type" : "string"
+    },
+    "sequenceNumber" : {
+      "type" : "integer"
+    },
+    "appName" : {
+      "type" : "string"
+    },
+    "appVersion" : {
+      "type" : "string"
+    },
+    "serviceName" : {
+      "type" : "string"
+    },
+    "serviceFullName" : {
+      "type" : "string"
+    },
+    "serviceType" : {
+      "type" : "string"
+    },
+    "serviceVersion" : {
+      "type" : "string"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "entity" : {
+      "type" : "object",
+      "id" : "urn:jsonschema:org:activiti:api:process:model:IntegrationContext",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "clientId" : {
+          "type" : "string"
+        },
+        "clientName" : {
+          "type" : "string"
+        },
+        "connectorType" : {
+          "type" : "string"
+        },
+        "clientType" : {
+          "type" : "string"
+        },
+        "inBoundVariables" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "any"
+          }
+        },
+        "outBoundVariables" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "any"
+          }
+        },
+        "processDefinitionId" : {
+          "type" : "string"
+        },
+        "processInstanceId" : {
+          "type" : "string"
+        },
+        "parentProcessInstanceId" : {
+          "type" : "string"
+        },
+        "processDefinitionKey" : {
+          "type" : "string"
+        },
+        "processDefinitionVersion" : {
+          "type" : "integer"
+        },
+        "businessKey" : {
+          "type" : "string"
+        }
+      }
+    },
+    "processDefinitionId" : {
+      "type" : "string"
+    },
+    "processInstanceId" : {
+      "type" : "string"
+    },
+    "timestamp" : {
+      "type" : "integer"
+    },
+    "eventType" : {
+      "type" : "string",
+      "enum" : [ "INTEGRATION_REQUESTED", "INTEGRATION_RESULT_RECEIVED" ]
+    },
+    "parentProcessInstanceId" : {
+      "type" : "string"
+    },
+    "processDefinitionKey" : {
+      "type" : "string"
+    },
+    "processDefinitionVersion" : {
+      "type" : "integer"
+    },
+    "businessKey" : {
+      "type" : "string"
+    }
+  }
+}
