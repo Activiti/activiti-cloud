@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>activiti-cloud-service-common-dependencies</artifactId>
+    <groupId>org.activiti.cloud.common</groupId>
+    <version>7.1.0-SNAPSHOT</version>
+    <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
+  </parent>
+  <artifactId>activiti-cloud-services-test-security-keycloak</artifactId>
+  <name>Activiti Cloud Services :: Test Security Keycloak</name>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>    
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-spring-security-adapter</artifactId>
+    </dependency>      
+  </dependencies>
+</project>
