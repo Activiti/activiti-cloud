@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud Runtime Bundle Service :: Parent</name>
   <modules>
-    <module>dependencies-tests</module>
+
     <module>activiti-cloud-runtime-bundle-dependencies</module>
     <module>activiti-cloud-services-runtime-bundle</module>
     <module>activiti-cloud-starter-runtime-bundle</module>

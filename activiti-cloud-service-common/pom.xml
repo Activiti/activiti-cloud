@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Service Common Parent</name>
   <modules>
-    <module>dependencies-tests</module>
+
     <module>activiti-cloud-service-common-dependencies</module>
     <module>activiti-cloud-services-test</module>
     <module>activiti-cloud-services-monitoring</module>

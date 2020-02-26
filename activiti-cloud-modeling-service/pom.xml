@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Modeling Services :: Parent</name>
   <modules>
-    <module>dependencies-tests</module>
+
     <module>activiti-cloud-modeling-dependencies</module>
     <module>activiti-cloud-services-modeling</module>
     <module>activiti-cloud-starter-modeling</module>

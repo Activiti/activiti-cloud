@@ -14,7 +14,7 @@
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-    <module>dependencies-tests</module>
+
     <module>activiti-cloud-query-dependencies</module>
     <module>activiti-cloud-services-query</module>
     <module>activiti-cloud-starter-query</module>

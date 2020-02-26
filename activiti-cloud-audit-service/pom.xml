@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud Audit :: Parent</name>
   <modules>
-    <module>dependencies-tests</module>
+
     <module>activiti-cloud-audit-dependencies</module>
     <module>activiti-cloud-services-audit-api</module>
     <module>activiti-cloud-services-audit-jpa</module>
@@ -43,7 +43,7 @@
         <version>${activiti-cloud-service-common.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>    
+      </dependency>
       <dependency>
         <groupId>net.javacrumbs.json-unit</groupId>
         <artifactId>json-unit-fluent</artifactId>

@@ -19,7 +19,7 @@
     <activiti-api.version>7.1.196</activiti-api.version>
   </properties>
   <modules>
-    <module>dependencies-tests</module>
+
     <module>activiti-cloud-api-dependencies</module>
     <module>activiti-cloud-api-model-shared</module>
     <module>activiti-cloud-api-model-shared-impl</module>
