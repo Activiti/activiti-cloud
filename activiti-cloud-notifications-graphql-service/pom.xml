@@ -15,8 +15,8 @@
   <packaging>pom</packaging>
   <properties>
     <project.scm.repository>activiti-cloud-notifications-service-graphql</project.scm.repository>
-    <activiti-cloud-build.version>7.1.34</activiti-cloud-build.version>
-    <activiti-cloud-query-service.version>7.1.230</activiti-cloud-query-service.version>
+    <activiti-cloud-build.version>7.1.0-SNAPSHOT</activiti-cloud-build.version>
+    <activiti-cloud-query-service.version>7.1.0-SNAPSHOT</activiti-cloud-query-service.version>
     <activiti-cloud-notifications-service-graphql.version>${project.version}</activiti-cloud-notifications-service-graphql.version>
     <graphql-jpa-query.version>0.4.0</graphql-jpa-query.version>
   </properties>
