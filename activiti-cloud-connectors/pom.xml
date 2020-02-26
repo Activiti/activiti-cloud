@@ -19,8 +19,8 @@
   </modules>
   <properties>
     <project.scm.repository>activiti-cloud-connectors</project.scm.repository>
-    <activiti-cloud-build.version>7.1.0-SNAPSHOT</activiti-cloud-build.version>
-    <activiti-cloud-service-common.version>7.1.0-SNAPSHOT</activiti-cloud-service-common.version>
+    <activiti-cloud-build.version>${project.version}</activiti-cloud-build.version>
+    <activiti-cloud-service-common.version>${project.version}</activiti-cloud-service-common.version>
     <activiti-cloud-connectors.version>${project.version}</activiti-cloud-connectors.version>
   </properties>
   <dependencyManagement>
