@@ -25,7 +25,7 @@
     <activiti-dependencies.version>7.1.196</activiti-dependencies.version>
     <activiti-cloud-service-common.version>7.1.0-SNAPSHOT</activiti-cloud-service-common.version>
     <activiti-cloud-query-service.version>${project.version}</activiti-cloud-query-service.version>
-    <json-unit.version>2.13.0</json-unit.version>
+    <json-unit.version>1.24.0</json-unit.version>
     <testcontainers.version>1.12.0</testcontainers.version>
   </properties>
   <!-- BoM Marker Dependencies -->
