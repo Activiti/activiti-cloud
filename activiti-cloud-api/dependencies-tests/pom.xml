@@ -20,21 +20,21 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
-          <execution>
-            <id>enforce-dependency-convergence</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <reactorModuleConvergence>
-                  <message>The reactor is not valid</message>
-                  <ignoreModuleDependencies>false</ignoreModuleDependencies>
-                </reactorModuleConvergence>
-                <dependencyConvergence/>
-              </rules>
-            </configuration>
-          </execution>
+<!--          <execution>-->
+<!--            <id>enforce-dependency-convergence</id>-->
+<!--            <goals>-->
+<!--              <goal>enforce</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <rules>-->
+<!--                <reactorModuleConvergence>-->
+<!--                  <message>The reactor is not valid</message>-->
+<!--                  <ignoreModuleDependencies>false</ignoreModuleDependencies>-->
+<!--                </reactorModuleConvergence>-->
+<!--                <dependencyConvergence/>-->
+<!--              </rules>-->
+<!--            </configuration>-->
+<!--          </execution>-->
         </executions>
       </plugin>
     </plugins>

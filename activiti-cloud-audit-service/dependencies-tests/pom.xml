@@ -21,31 +21,31 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>3.0.0-M2</version>
-        <executions>
-          <execution>
-            <id>enforce-dependency-convergence</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <fail>${enforceFail}</fail>
-              <rules>
-                <reactorModuleConvergence>
-                  <message>The reactor is not valid</message>
-                  <ignoreModuleDependencies>false</ignoreModuleDependencies>
-                </reactorModuleConvergence>              
-                <dependencyConvergence/>
-              </rules>
-            </configuration>
-          </execution>
-          <execution>
-            <!-- disable parent execution which fails here -->
-            <id>enforce-plugin-versions</id>
-            <configuration>
-              <fail>false</fail>
-            </configuration>
-          </execution>
-        </executions>
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <id>enforce-dependency-convergence</id>-->
+<!--            <goals>-->
+<!--              <goal>enforce</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <fail>${enforceFail}</fail>-->
+<!--              <rules>-->
+<!--                <reactorModuleConvergence>-->
+<!--                  <message>The reactor is not valid</message>-->
+<!--                  <ignoreModuleDependencies>false</ignoreModuleDependencies>-->
+<!--                </reactorModuleConvergence>              -->
+<!--                <dependencyConvergence/>-->
+<!--              </rules>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--          <execution>-->
+<!--            &lt;!&ndash; disable parent execution which fails here &ndash;&gt;-->
+<!--            <id>enforce-plugin-versions</id>-->
+<!--            <configuration>-->
+<!--              <fail>false</fail>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--        </executions>-->
       </plugin>
     </plugins>
   </build>
