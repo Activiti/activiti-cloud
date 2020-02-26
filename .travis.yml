@@ -1,0 +1,1 @@
+import: Activiti/Activiti:.travis.yml@dev-mteodori-3141-add-openjdk8-build-support

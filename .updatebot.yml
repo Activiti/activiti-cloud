@@ -1,0 +1,37 @@
+github:
+  organisations:
+  - name: activiti
+    repositories:
+    - name: activiti-cloud-service-common
+      branch: develop
+      useSinglePullRequest: true
+    - name: activiti-cloud-connectors
+      branch: develop
+      useSinglePullRequest: true
+    - name: activiti-cloud-query-service
+      branch: develop
+      useSinglePullRequest: true
+    - name: activiti-cloud-modeling-service
+      branch: develop
+      useSinglePullRequest: true
+    - name: activiti-cloud-messages-service
+      branch: develop
+      useSinglePullRequest: true
+    - name: activiti-cloud-runtime-bundle-service
+      branch: develop
+      useSinglePullRequest: true
+    - name: activiti-cloud-audit-service
+      branch: develop
+      useSinglePullRequest: true
+    - name: activiti-cloud-api
+      branch: develop
+      useSinglePullRequest: true
+    - name: activiti-cloud-notifications-service-graphql
+      branch: develop
+      useSinglePullRequest: true
+    - name: activiti-cloud-dependencies
+      branch: develop
+      useSinglePullRequest: true
+    - name: activiti-cloud-acceptance-tests
+      branch: develop
+      useSinglePullRequest: true
