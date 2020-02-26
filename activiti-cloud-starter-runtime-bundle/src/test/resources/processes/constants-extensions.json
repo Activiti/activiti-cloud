@@ -1,0 +1,31 @@
+{
+  "id": "connectorConstants",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "connectorConstants": {
+      "properties": {
+        "age-id": {
+          "id": "age-id",
+          "name": "age",
+          "type": "integer",
+          "value": 20
+        },
+        "name-id": {
+          "id": "name-id",
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "value": "inName"
+        }
+      },
+      "mappings": {},
+      "constants": {
+        "serviceTaskConstants": {
+          "_constant_value_": {
+            "value": "myConstantValue"
+          }
+        }
+      }
+    }
+  }
+}

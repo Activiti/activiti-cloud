@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.activiti.cloud.build</groupId>
+    <artifactId>activiti-cloud-parent</artifactId>
+    <version>7.1.34</version>
+  </parent>
+  <groupId>org.activiti.cloud.rb</groupId>
+  <artifactId>activiti-cloud-runtime-bundle-service-parent</artifactId>
+  <version>7.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Activiti Cloud Runtime Bundle Service :: Parent</name>
+  <modules>
+    <module>dependencies-tests</module>
+    <module>activiti-cloud-runtime-bundle-dependencies</module>
+    <module>activiti-cloud-services-runtime-bundle</module>
+    <module>activiti-cloud-starter-runtime-bundle</module>
+    <module>activiti-cloud-starter-runtime-bundle-it</module>
+  </modules>
+  <properties>
+	<project.scm.repository>activiti-cloud-runtime-bundle-service</project.scm.repository>
+    <activiti-dependencies.version>7.1.196</activiti-dependencies.version>
+    <activiti-cloud-build.version>7.1.34</activiti-cloud-build.version>
+    <activiti-cloud-service-common.version>7.1.172</activiti-cloud-service-common.version>
+    <activiti-cloud-runtime-bundle-service.version>${project.version}</activiti-cloud-runtime-bundle-service.version>
+    <skipITs>false</skipITs>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti.cloud.build</groupId>
+        <artifactId>activiti-cloud-dependencies-parent</artifactId>
+        <version>${activiti-cloud-build.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud.common</groupId>
+        <artifactId>activiti-cloud-service-common-dependencies</artifactId>
+        <version>${activiti-cloud-service-common.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.dependencies</groupId>
+        <artifactId>activiti-dependencies</artifactId>
+        <version>${activiti-dependencies.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <!-- Marker BoMs for dependency convergence tests -->
+  <dependencies>
+    <dependency>
+      <groupId>org.activiti.cloud.build</groupId>
+      <artifactId>activiti-cloud-parent</artifactId>
+      <version>${activiti-cloud-build.version}</version>
+      <type>pom</type>
+    </dependency>
+    <!-- Activiti Cloud Common Dependencies -->
+    <dependency>
+      <groupId>org.activiti.cloud.common</groupId>
+      <artifactId>activiti-cloud-service-common-dependencies</artifactId>
+      <version>${activiti-cloud-service-common.version}</version>
+      <type>pom</type>
+    </dependency>
+    <!-- Activiti Core Dependencies -->
+    <dependency>
+      <groupId>org.activiti.dependencies</groupId>
+      <artifactId>activiti-dependencies</artifactId>
+      <version>${activiti-dependencies.version}</version>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+  <repositories>
+    <repository>
+      <id>activiti-releases</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+    </repository>
+  </repositories>
+</project>

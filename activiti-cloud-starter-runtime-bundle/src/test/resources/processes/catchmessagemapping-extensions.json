@@ -1,0 +1,59 @@
+{
+  "id": "process-bf064b4f-5cf7-440c-b6b1-e55ac532e56c",
+  "type": "PROCESS",
+  "name": "catchmessagemapping",
+  "extensions": {
+    "process-bf064b4f-5cf7-440c-b6b1-e55ac532e56c": {
+      "constants": {},
+      "mappings": {
+        "IntermediateCatchEvent_1yibl67": {
+          "outputs": {
+            "string": {
+              "type": "variable",
+              "value": "stringvar"
+            },
+            "variable": {
+              "type": "variable",
+              "value": "variablevar"
+            }
+          }
+        },
+        "UserTask_0ghvi9h": {
+          "inputs": {
+            "Text07gqlq": {
+              "type": "variable",
+              "value": "string"
+            },
+            "Text0hs9l0": {
+              "type": "variable",
+              "value": "variable"
+            }
+          }
+        }
+      },
+      "properties": {
+        "a1279632-75cd-42c7-81d1-648f9e0483d6": {
+          "id": "a1279632-75cd-42c7-81d1-648f9e0483d6",
+          "name": "corr",
+          "type": "string",
+          "value": "corr",
+          "required": false
+        },
+        "20681f63-0b1a-4e2c-92fc-442536f3168c": {
+          "id": "20681f63-0b1a-4e2c-92fc-442536f3168c",
+          "name": "variable",
+          "type": "string",
+          "value": "",
+          "required": false
+        },
+        "b42b86b9-f9b0-466a-988c-167fd3aeb794": {
+          "id": "b42b86b9-f9b0-466a-988c-167fd3aeb794",
+          "name": "string",
+          "type": "string",
+          "value": "",
+          "required": false
+        }
+      }
+    }
+  }
+}

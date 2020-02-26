@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             targetNamespace="Examples">
+
+  <signal id="mySignal" name="mySignal"/>
+
+  <process id="signalSubProcess" name="signalSubProcess">
+
+    <startEvent id="theStart"/>
+    <sequenceFlow id="flow1" sourceRef="theStart" targetRef="shipOrder"/>
+
+    <userTask id="shipOrder" name="Wait"/>
+
+    <sequenceFlow id="flow2" sourceRef="shipOrder" targetRef="theEnd"/>
+
+    <endEvent id="theEnd"/>
+
+    <sequenceFlow id="flow3" sourceRef="theStart" targetRef="eventSubProcess"/>
+
+    <subProcess id="eventSubProcess" name="eventSubProcess">
+      <startEvent id="startCatchSignal">
+      </startEvent>
+
+      <sequenceFlow id="flow4" sourceRef="startCatchSignal" targetRef="catchEvent"/>
+
+      <intermediateCatchEvent id="catchEvent" name="catchEvent">
+        <signalEventDefinition signalRef="mySignal"></signalEventDefinition>
+      </intermediateCatchEvent>
+
+      <sequenceFlow id="flow5" sourceRef="catchEvent" targetRef="endSubProcess"/>
+
+      <endEvent id="endSubProcess"/>
+    </subProcess>
+
+    <sequenceFlow id="flow6" sourceRef="eventSubProcess" targetRef="theEnd"/>
+
+  </process>
+
+</definitions>

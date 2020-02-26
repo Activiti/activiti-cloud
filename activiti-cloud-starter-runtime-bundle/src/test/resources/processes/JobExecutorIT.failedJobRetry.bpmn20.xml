@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:activiti="http://activiti.org/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1ckhqmp" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Activiti Modeler" exporterVersion="3.0.0-beta.3">
+  <bpmn:process id="failedJobRetry" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_0czgq93</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0czgq93" sourceRef="StartEvent_1" targetRef="failingJobTask" />
+    <bpmn:endEvent id="EndEvent_0m4t3uh">
+      <bpmn:incoming>SequenceFlow_1o3juq3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1o3juq3" sourceRef="failingJobTask" targetRef="EndEvent_0m4t3uh" />
+    <bpmn:serviceTask id="failingJobTask" name="Execute&#10;Failing&#10;Job" activiti:async="true" activiti:class="org.activiti.cloud.starter.tests.runtime.JobExecutorIT$RetryFailingDelegate">
+      <bpmn:extensionElements>
+        <activiti:failedJobRetryTimeCycle>R5/PT1S</activiti:failedJobRetryTimeCycle>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0czgq93</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1o3juq3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:textAnnotation id="TextAnnotation_046vui2">
+      <bpmn:text>activiti:async=true
+retryTimeCycle=R5/PT5S</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0bjfoub" sourceRef="failingJobTask" targetRef="TextAnnotation_046vui2" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="failedJobRetry">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="156" y="183" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0czgq93_di" bpmnElement="SequenceFlow_0czgq93">
+        <di:waypoint x="192" y="201" />
+        <di:waypoint x="242" y="201" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_0m4t3uh_di" bpmnElement="EndEvent_0m4t3uh">
+        <dc:Bounds x="392" y="183" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1o3juq3_di" bpmnElement="SequenceFlow_1o3juq3">
+        <di:waypoint x="342" y="201" />
+        <di:waypoint x="392" y="201" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_046vui2_di" bpmnElement="TextAnnotation_046vui2">
+        <dc:Bounds x="342" y="81" width="225" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0bjfoub_di" bpmnElement="Association_0bjfoub">
+        <di:waypoint x="342" y="170" />
+        <di:waypoint x="422" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_16n7tiq_di" bpmnElement="failingJobTask">
+        <dc:Bounds x="242" y="161" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

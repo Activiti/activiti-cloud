@@ -1,0 +1,46 @@
+{
+  "id": "ProcessWithExtensionVariables",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "ProcessWithExtensionVariables": {
+      "properties": {
+        "variableInt-id": {
+          "id": "variableInt-id",
+          "name": "variableInt",
+          "type": "integer",
+          "required": true,
+          "value": 1
+        },
+        "variableStr-id": {
+          "id": "variableStr-id",
+          "name": "variableStr",
+          "type": "string",
+          "required": true,
+          "value": "value"
+        },
+        "variableBool-id": {
+          "id": "variableBool-id",
+          "name": "variableBool",
+          "type": "boolean",
+          "required": true,
+          "value": true
+        },
+        "variableDateTime-id": {
+          "id": "variableDateTime-id",
+          "name": "variableDateTime",
+          "type": "date",
+          "required": true,
+          "value": "2019-08-20T00:00:00.000Z"
+        },
+        "variableDate-id": {
+          "id": "variableDate-id",
+          "name": "variableDate",
+          "type": "date",
+          "required": true,
+          "value": "2019-08-20"
+        }
+      },
+      "mappings": {}
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "constantsConnectorId",
+  "name": "Constants Connector",
+  "description": "Description of the connector",
+  "actions": {
+    "constantsAction": {
+      "id": "constantsAction",
+      "name": "constantsActionName",
+      "description": "...",
+      "inputs": [
+        {
+          "id": "input-variable-1",
+          "name": "input_variable_name_1",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "outputs": [
+        {
+          "id": "out-variable-1",
+          "name": "out_variable_name_1",
+          "type": "string",
+          "description": "",
+          "required": "false"
+        }
+      ]
+    }
+  }
+}
