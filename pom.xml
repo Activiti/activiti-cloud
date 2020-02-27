@@ -20,9 +20,9 @@
     <tag>HEAD</tag>
   </scm>
   <properties>
-    <activiti-cloud-runtime-bundle-service.version>7.1.401</activiti-cloud-runtime-bundle-service.version>
+    <activiti-cloud-runtime-bundle-service.version>7.1.402</activiti-cloud-runtime-bundle-service.version>
     <docker-maven-plugin.version>0.32.0</docker-maven-plugin.version>
-    <activiti-cloud-messages-service.version>7.1.401</activiti-cloud-messages-service.version>
+    <activiti-cloud-messages-service.version>7.1.402</activiti-cloud-messages-service.version>
   </properties>
   <dependencyManagement>
     <dependencies>
