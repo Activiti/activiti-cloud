@@ -29,6 +29,7 @@ updatebot/push-version:
 		org.activiti.cloud.notifications.graphql:activiti-cloud-notifications-graphql-dependencies $(RELEASE_VERSION) \
 		org.activiti.cloud.query:activiti-cloud-query-dependencies $(RELEASE_VERSION) \
 		org.activiti.cloud.rb:activiti-cloud-runtime-bundle-dependencies $(RELEASE_VERSION) \
+		org.activiti.cloud.acc:activiti-cloud-acceptance-tests-dependencies $(RELEASE_VERSION) \
 		org.activiti.cloud.common:activiti-cloud-service-common-dependencies $(RELEASE_VERSION)
 
 updatebot/update:
