@@ -41,7 +41,7 @@ import com.querydsl.core.types.Predicate;
 
 @RestController
 @RequestMapping(
-        value = "${activiti.cloud.query.uriprefix}/admin/v1/process-instances",
+        value = "${activiti.cloud.query.uri-prefix}/admin/v1/process-instances",
         produces = {
                 MediaTypes.HAL_JSON_VALUE,
                 MediaType.APPLICATION_JSON_VALUE

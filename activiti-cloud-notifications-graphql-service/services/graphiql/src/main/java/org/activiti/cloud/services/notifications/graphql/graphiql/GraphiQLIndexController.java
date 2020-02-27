@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class GraphiQLIndexController {
 	
 	@Value("${graphiql.index:/graphiql/graphiql.html}")
-	private String graphiqlHtml;
+    private String graphiqlHtml;
 
-    @GetMapping("/graphiql")
+    @Value("${activiti.cloud.notification.uri-prefix}")
+    private String path;
+
+    @GetMapping("${activiti.cloud.notification.uri-prefix:}/graphiql")
     public String getIndex() {
         return "forward:/"+graphiqlHtml;
     }
