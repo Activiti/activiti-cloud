@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.MessageJpaJsonConverter;
@@ -26,6 +27,7 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.MappedSuperclass;
 
+@GraphQLIgnore
 @MappedSuperclass
 public abstract class MessageAuditEventEntity extends AuditEventEntity {
 

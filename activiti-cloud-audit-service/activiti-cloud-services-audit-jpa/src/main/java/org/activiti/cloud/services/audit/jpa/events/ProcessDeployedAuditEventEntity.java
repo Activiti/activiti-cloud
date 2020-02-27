@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessDefinitionJpaJsonConverter;
@@ -27,6 +28,7 @@ import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+@GraphQLIgnore
 @Entity(name = ProcessDeployedAuditEventEntity.PROCESS_DEPLOYED_EVENT)
 @DiscriminatorValue(value = ProcessDeployedAuditEventEntity.PROCESS_DEPLOYED_EVENT)
 public class ProcessDeployedAuditEventEntity extends AuditEventEntity {

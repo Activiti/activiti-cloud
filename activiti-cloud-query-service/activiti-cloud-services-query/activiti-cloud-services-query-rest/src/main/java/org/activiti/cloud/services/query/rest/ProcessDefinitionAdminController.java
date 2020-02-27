@@ -40,7 +40,7 @@ import com.querydsl.core.types.Predicate;
 @RestController
 @ExposesResourceFor(ProcessDefinitionEntity.class)
 @RequestMapping(
-        value = "/admin/v1/process-definitions",
+        value = "${activiti.cloud.query.uriprefix}/admin/v1/process-definitions",
         produces = {
                 MediaTypes.HAL_JSON_VALUE,
                 MediaType.APPLICATION_JSON_VALUE

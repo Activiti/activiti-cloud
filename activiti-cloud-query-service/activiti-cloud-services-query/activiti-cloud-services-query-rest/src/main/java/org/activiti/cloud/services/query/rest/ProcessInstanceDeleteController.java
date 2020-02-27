@@ -22,7 +22,7 @@ import java.util.Collection;
 @ConditionalOnProperty(name = "activiti.rest.enable-deletion", matchIfMissing = true)
 @RestController
 @RequestMapping(
-        value = "/admin/v1/process-instances",
+        value = "${activiti.cloud.query.uriprefix}/admin/v1/process-instances",
         produces = {
                 MediaTypes.HAL_JSON_VALUE,
                 MediaType.APPLICATION_JSON_VALUE

@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SequenceFlowJpaJsonConverter;
@@ -27,6 +28,7 @@ import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+@GraphQLIgnore
 @Entity(name = SequenceFlowAuditEventEntity.SEQUENCE_FLOW_TAKEN_EVENT)
 @DiscriminatorValue(value = SequenceFlowAuditEventEntity.SEQUENCE_FLOW_TAKEN_EVENT)
 public class SequenceFlowAuditEventEntity extends AuditEventEntity {

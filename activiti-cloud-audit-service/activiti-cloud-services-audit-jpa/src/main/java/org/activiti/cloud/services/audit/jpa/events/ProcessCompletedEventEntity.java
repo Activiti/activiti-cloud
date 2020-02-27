@@ -16,11 +16,13 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+@GraphQLIgnore
 @Entity(name = ProcessCompletedEventEntity.PROCESS_COMPLETED_EVENT)
 @DiscriminatorValue(value = ProcessCompletedEventEntity.PROCESS_COMPLETED_EVENT)
 public class ProcessCompletedEventEntity extends ProcessAuditEventEntity {

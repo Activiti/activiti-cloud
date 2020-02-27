@@ -44,9 +44,12 @@ public class EngineEventsConsumerMessageHandler {
         this.transformer = transformer;
     }
 
-    @StreamListener
-    public void receive(@Input(EngineEventsConsumerChannels.SOURCE) 
-                            Flux<Message<List<Map<String,Object>>>> input) {
+    @StreamListener(EngineEventsConsumerChannels.SOURCE)
+    public synchronized void receive(Message<List<Map<String,Object>>>... events) {
+        this.receive(Flux.fromArray(events));
+    }
+
+    public void receive(Flux<Message<List<Map<String,Object>>>> input) {
         
         // Let's process and transform message from input stream
         input.flatMapSequential(message -> {

@@ -21,10 +21,12 @@ import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.api.process.model.MessageSubscription;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.MessageSubscriptionJpaJsonConverter;
 
+@GraphQLIgnore
 @Entity
 @DiscriminatorValue(value = MessageSubscriptionCancelledAuditEventEntity.MESSAGE_SUBSCRIPTION_CANCELLED_EVENT)
 public class MessageSubscriptionCancelledAuditEventEntity extends AuditEventEntity {

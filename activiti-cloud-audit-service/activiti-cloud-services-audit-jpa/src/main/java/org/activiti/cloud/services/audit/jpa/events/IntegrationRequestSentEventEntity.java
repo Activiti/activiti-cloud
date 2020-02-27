@@ -16,9 +16,12 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+@GraphQLIgnore
 @Entity(name = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT)
 @DiscriminatorValue(value = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT)
 public class IntegrationRequestSentEventEntity extends IntegrationEventEntity {

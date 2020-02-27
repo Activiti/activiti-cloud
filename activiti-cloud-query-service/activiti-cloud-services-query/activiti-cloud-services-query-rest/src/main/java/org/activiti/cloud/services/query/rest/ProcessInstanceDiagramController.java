@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/v1/process-instances/{processInstanceId}/diagram")
+@RequestMapping(value = "${activiti.cloud.query.uriprefix}/v1/process-instances/{processInstanceId}/diagram")
 public class ProcessInstanceDiagramController extends ProcessInstanceDiagramControllerBase {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceDiagramController.class);

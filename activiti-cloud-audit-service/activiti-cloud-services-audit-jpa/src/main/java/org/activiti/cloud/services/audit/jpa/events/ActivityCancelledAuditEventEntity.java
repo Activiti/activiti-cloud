@@ -23,6 +23,9 @@ import java.util.Objects;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
+
+@GraphQLIgnore
 @Entity(name = ActivityCancelledAuditEventEntity.ACTIVITY_CANCELLED_EVENT)
 @DiscriminatorValue(value = ActivityCancelledAuditEventEntity.ACTIVITY_CANCELLED_EVENT)
 public class ActivityCancelledAuditEventEntity extends BPMNActivityAuditEventEntity {

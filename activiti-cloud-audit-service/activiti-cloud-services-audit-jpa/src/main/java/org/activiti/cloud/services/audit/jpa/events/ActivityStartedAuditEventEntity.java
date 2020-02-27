@@ -16,11 +16,13 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+@GraphQLIgnore
 @Entity(name = ActivityStartedAuditEventEntity.ACTIVITY_STARTED_EVENT)
 @DiscriminatorValue(value = ActivityStartedAuditEventEntity.ACTIVITY_STARTED_EVENT)
 public class ActivityStartedAuditEventEntity extends BPMNActivityAuditEventEntity {

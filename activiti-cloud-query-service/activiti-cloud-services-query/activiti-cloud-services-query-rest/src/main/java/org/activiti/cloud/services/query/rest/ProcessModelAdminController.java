@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @ExposesResourceFor(ProcessModelEntity.class)
 @RequestMapping(
-        value = "/admin/v1/process-definitions/{processDefinitionId}/model")
+        value = "${activiti.cloud.query.uriprefix}/admin/v1/process-definitions/{processDefinitionId}/model")
 public class ProcessModelAdminController {
 
     private ProcessModelRepository processModelRepository;

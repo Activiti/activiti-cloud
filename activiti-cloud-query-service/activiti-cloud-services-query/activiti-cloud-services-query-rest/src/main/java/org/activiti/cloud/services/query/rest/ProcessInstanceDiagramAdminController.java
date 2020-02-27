@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/admin/v1/process-instances/{processInstanceId}/diagram")
+@RequestMapping(value = "${activiti.cloud.query.uriprefix}/admin/v1/process-instances/{processInstanceId}/diagram")
 public class ProcessInstanceDiagramAdminController extends ProcessInstanceDiagramControllerBase {
 
     @Autowired

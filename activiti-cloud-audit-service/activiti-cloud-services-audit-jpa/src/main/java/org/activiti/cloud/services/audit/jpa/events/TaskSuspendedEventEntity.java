@@ -16,11 +16,13 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
+import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.cloud.api.task.model.events.CloudTaskSuspendedEvent;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+@GraphQLIgnore
 @Entity(name = TaskSuspendedEventEntity.TASK_SUSPENDED_EVENT)
 @DiscriminatorValue(value = TaskSuspendedEventEntity.TASK_SUSPENDED_EVENT)
 public class TaskSuspendedEventEntity extends TaskAuditEventEntity {
