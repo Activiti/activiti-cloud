@@ -18,9 +18,10 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 
+import java.util.Objects;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import java.util.Objects;
 
 @Entity(name = TaskCancelledEventEntity.TASK_CANCELLED_EVENT)
 @DiscriminatorValue(value = TaskCancelledEventEntity.TASK_CANCELLED_EVENT)

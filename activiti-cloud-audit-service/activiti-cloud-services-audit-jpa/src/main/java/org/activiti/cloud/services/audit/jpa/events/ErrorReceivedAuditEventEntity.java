@@ -16,14 +16,14 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.api.process.model.BPMNError;
-import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
-import org.activiti.cloud.services.audit.jpa.converters.json.ErrorJpaJsonConverter;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+
+import org.activiti.api.process.model.BPMNError;
+import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
+import org.activiti.cloud.services.audit.jpa.converters.json.ErrorJpaJsonConverter;
 
 @Entity
 @DiscriminatorValue(value = ErrorReceivedAuditEventEntity.ERROR_RECEIVED_EVENT)

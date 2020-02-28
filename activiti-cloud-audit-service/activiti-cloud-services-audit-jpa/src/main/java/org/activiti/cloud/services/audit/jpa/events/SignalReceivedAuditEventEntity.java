@@ -20,11 +20,12 @@ import org.activiti.api.process.model.BPMNSignal;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SignalJpaJsonConverter;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import java.util.Objects;
 
 @Entity(name = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
 @DiscriminatorValue(value = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
