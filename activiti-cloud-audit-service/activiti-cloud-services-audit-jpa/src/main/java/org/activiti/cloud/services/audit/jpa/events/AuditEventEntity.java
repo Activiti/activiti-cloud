@@ -16,19 +16,11 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
-import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
+import javax.persistence.*;
 import java.util.Objects;
 
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-
-@GraphQLIgnore
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "TYPE")
 @Entity(name = "AuditEvent")

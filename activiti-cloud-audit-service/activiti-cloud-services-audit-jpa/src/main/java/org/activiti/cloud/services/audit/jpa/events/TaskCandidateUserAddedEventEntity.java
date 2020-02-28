@@ -16,20 +16,17 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
-import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateUserJpaJsonConverter;
 
-import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import java.util.Objects;
 
-@GraphQLIgnore
 @Entity(name = TaskCandidateUserAddedEventEntity.TASK_CANDIDATE_USER_ADDED_EVENT)
 @DiscriminatorValue(value = TaskCandidateUserAddedEventEntity.TASK_CANDIDATE_USER_ADDED_EVENT)
 public class TaskCandidateUserAddedEventEntity extends AuditEventEntity {

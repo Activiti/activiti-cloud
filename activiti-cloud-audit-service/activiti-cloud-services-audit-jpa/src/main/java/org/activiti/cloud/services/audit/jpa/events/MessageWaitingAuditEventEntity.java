@@ -16,13 +16,11 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
-import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageWaitingEvent;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-@GraphQLIgnore
 @Entity(name = MessageWaitingAuditEventEntity.MESSAGE_WAITING_EVENT)
 @DiscriminatorValue(value = MessageWaitingAuditEventEntity.MESSAGE_WAITING_EVENT)
 public class MessageWaitingAuditEventEntity extends MessageAuditEventEntity {

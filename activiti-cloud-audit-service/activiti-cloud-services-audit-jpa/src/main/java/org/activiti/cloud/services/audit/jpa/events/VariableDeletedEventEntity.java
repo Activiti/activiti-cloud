@@ -16,13 +16,11 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
-import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-@GraphQLIgnore
 @Entity(name = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT)
 @DiscriminatorValue(value = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT)
 public class VariableDeletedEventEntity extends VariableAuditEventEntity {

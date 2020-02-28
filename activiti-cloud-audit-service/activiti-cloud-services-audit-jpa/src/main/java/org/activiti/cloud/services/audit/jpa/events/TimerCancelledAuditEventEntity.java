@@ -16,13 +16,11 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
-import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerCancelledEvent;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-@GraphQLIgnore
 @Entity(name = TimerCancelledAuditEventEntity.TIMER_CANCELLED_EVENT)
 @DiscriminatorValue(value = TimerCancelledAuditEventEntity.TIMER_CANCELLED_EVENT)
 public class TimerCancelledAuditEventEntity extends TimerAuditEventEntity {

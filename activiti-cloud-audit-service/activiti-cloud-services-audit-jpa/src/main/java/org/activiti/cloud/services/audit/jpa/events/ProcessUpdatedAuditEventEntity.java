@@ -16,13 +16,11 @@
 
 package org.activiti.cloud.services.audit.jpa.events;
 
-import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import org.activiti.cloud.api.process.model.events.CloudProcessUpdatedEvent;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-@GraphQLIgnore
 @Entity(name = ProcessUpdatedAuditEventEntity.PROCESS_UPDATED_EVENT)
 @DiscriminatorValue(value = ProcessUpdatedAuditEventEntity.PROCESS_UPDATED_EVENT)
 public class ProcessUpdatedAuditEventEntity extends ProcessAuditEventEntity {
