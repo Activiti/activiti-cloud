@@ -5,6 +5,9 @@ github:
         - name: activiti-cloud-acceptance-scenarios
           branch: master
           useSinglePullRequest: true
+        - name: activiti-cloud-notifications-graphql
+          branch: master
+          useSinglePullRequest: true
         - name: activiti-cloud-dependencies
           branch: develop
           useSinglePullRequest: true
