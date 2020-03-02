@@ -25,6 +25,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@PropertySource("classpath:activiti-cloud-notification-graphiql.properties")
 @ConditionalOnProperty(name="spring.activiti.cloud.services.graphql.graphiql.enabled", matchIfMissing = true)
 public class GraphiQLAutoConfiguration {
 
@@ -36,7 +37,7 @@ public class GraphiQLAutoConfiguration {
     }
 
     @Bean
-    public WebMvcConfigurer webMvcConfigurer(@Value("${activiti.cloud.notification.uri-prefix:}") String notificationPrefix){
+    public WebMvcConfigurer webMvcConfigurer(@Value("${activiti.cloud.notification.graphiql.uri-prefix}") String notificationPrefix){
         return new WebMvcConfigurer() {
             @Override
             public void addResourceHandlers(final ResourceHandlerRegistry registry) {

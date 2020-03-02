@@ -12,10 +12,7 @@ public class GraphiQLIndexController {
 	@Value("${graphiql.index:/graphiql/graphiql.html}")
     private String graphiqlHtml;
 
-    @Value("${activiti.cloud.notification.uri-prefix}")
-    private String path;
-
-    @GetMapping("${activiti.cloud.notification.uri-prefix:}/graphiql")
+    @GetMapping("${activiti.cloud.notification.graphiql.uri-prefix}/graphiql")
     public String getIndex() {
         return "forward:/"+graphiqlHtml;
     }
