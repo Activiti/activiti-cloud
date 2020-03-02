@@ -50,7 +50,7 @@ public class QuerySwaggerIT {
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContent"))))
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContent"))))
-            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Query :: Starter :: Audit ReST API"));
+            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Query :: Starter :: Query ReST API"));
 
     }
 
