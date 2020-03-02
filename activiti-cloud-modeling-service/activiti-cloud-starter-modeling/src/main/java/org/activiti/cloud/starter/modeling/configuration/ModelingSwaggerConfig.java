@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.starter.modeling.configuration;
 
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.RequestHandler;
@@ -34,12 +35,17 @@ public class ModelingSwaggerConfig {
     }
 
     @Bean
-    public ApiInfo apiInfo(){
+    public ApiInfo apiInfo(BuildProperties buildProperties) {
         return new ApiInfoBuilder()
-                .title("Activiti Modeling REST API")
-                .description("Provides access to the core features of Activiti Modeling.")
-                .version("1.0")
-                .build();
+            .title(String.format("%s ReST API", buildProperties.getName()))
+            .description(buildProperties.get("description"))
+            .version(buildProperties.getVersion())
+            .license(String.format("© %s-%s %s. All rights reserved",
+                buildProperties.get("inceptionYear"),
+                buildProperties.get("year"),
+                buildProperties.get("organization.name")))
+            .termsOfServiceUrl(buildProperties.get("organization.url"))
+            .build();
     }
 
 }

@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import(SwaggerConfig.class)
+@Import(RuntimeBundleSwaggerConfig.class)
 public class ActivitiRuntimeBundleAutoConfiguration {
 
 }

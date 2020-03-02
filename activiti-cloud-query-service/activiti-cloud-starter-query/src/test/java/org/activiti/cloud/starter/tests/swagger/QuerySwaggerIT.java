@@ -16,43 +16,42 @@
 
 package org.activiti.cloud.starter.tests.swagger;
 
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.startsWith;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource("classpath:application-test.properties")
+@SpringBootTest
+@AutoConfigureMockMvc
 public class QuerySwaggerIT {
 
     @Autowired
-    private TestRestTemplate testRestTemplate;
+    private MockMvc mockMvc;
 
     @Test
-    public void defaultSpecificationFileShouldBeAlfrescoFormat() {
-        //when
-        ResponseEntity<Object> apiDoc = testRestTemplate.getForEntity("/v2/api-docs",
-                                                                      Object.class);
+    public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
+        mockMvc.perform(get("/v2/api-docs").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.paths").isNotEmpty())
+            .andExpect(jsonPath("$.definitions").isNotEmpty())
+            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContent"))))
+            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
+            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContent"))))
+            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Query :: Starter :: Audit ReST API"));
 
-
-        //then
-        assertThat(apiDoc.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(apiDoc.getBody()).isNotNull();
-        assertThat(apiDoc.getBody().toString())
-                .contains("ListResponseContent«CloudProcessDefinition»")
-                .contains("EntriesResponseContent«CloudProcessDefinition»")
-                .contains("EntryResponseContent«CloudProcessDefinition»")
-                .doesNotContain("PagedResources«")
-                .doesNotContain("Resources«Resource«")
-                .doesNotContain("Resource«");
     }
 
 }

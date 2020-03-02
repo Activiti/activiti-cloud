@@ -1,4 +1,4 @@
-package org.activiti.cloud.starter.modeling.swagger;
+package org.activiti.cloud.starter.tests.swagger;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ModelingSwaggerITSupport {
+public class QuerySwaggerITSupport {
 
     @Autowired
     private MockMvc mockMvc;
