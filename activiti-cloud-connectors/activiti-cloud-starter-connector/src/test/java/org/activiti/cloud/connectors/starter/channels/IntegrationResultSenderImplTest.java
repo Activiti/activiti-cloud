@@ -16,23 +16,21 @@
 
 package org.activiti.cloud.connectors.starter.channels;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
-import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class IntegrationResultSenderImplTest {
 
@@ -40,15 +38,10 @@ public class IntegrationResultSenderImplTest {
     private IntegrationResultSenderImpl integrationResultSender;
 
     @Mock
-    private BinderAwareChannelResolver resolver;
-
+    private IntegrationChannelResolver resolver;
+    
     @Mock
     private MessageChannel messageChannel;
-
-    @Mock
-    private ConnectorProperties connectorProperties;
-
-
 
     @Before
     public void setUp() throws Exception {
@@ -58,10 +51,6 @@ public class IntegrationResultSenderImplTest {
     @Test
     public void sendShouldSendMessageBasedOnTheTargetApplication() throws Exception {
         //given
-        given(connectorProperties.getMqDestinationSeparator()).willReturn("_");
-        given(resolver.resolveDestination("integrationResult" + connectorProperties.getMqDestinationSeparator() + "myApp")).willReturn(messageChannel);
-        given(connectorProperties.getServiceName()).willReturn("connectorName");
-
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setServiceFullName("myApp");
@@ -71,6 +60,8 @@ public class IntegrationResultSenderImplTest {
         integrationRequest.setServiceVersion("1.0");
         IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
                 integrationRequest.getIntegrationContext());
+        
+        given(resolver.resolveDestination(integrationRequest)).willReturn(messageChannel);
 
         Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
 

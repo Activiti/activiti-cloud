@@ -16,23 +16,23 @@
 
 package org.activiti.cloud.connectors.starter.channels;
 
+import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-public class IntegrationResultSenderImpl implements IntegrationResultSender {
+public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
 
     private final IntegrationChannelResolver resolver;
 
     @Autowired
-    public IntegrationResultSenderImpl(IntegrationChannelResolver resolver) {
+    public IntegrationErrorSenderImpl(IntegrationChannelResolver resolver) {
         this.resolver = resolver;
     }
 
     @Override
-    public void send(Message<IntegrationResult> message) {
+    public void send(Message<IntegrationError> message) {
         IntegrationRequest request = message.getPayload().getIntegrationRequest();
         
         MessageChannel destination = resolver.resolveDestination(request);
