@@ -38,25 +38,31 @@ public class EngineEventsConsumerMessageHandler {
     private final Transformer transformer;
 
     public EngineEventsConsumerMessageHandler(Transformer transformer,
-                                              FluxSink<Message<List<EngineEvent>>> engineEventsSink) {
+                                      FluxSink<Message<List<EngineEvent>>> engineEventsSink)
+    {
         this.processorSink = engineEventsSink;
         this.transformer = transformer;
     }
 
-    @StreamListener(EngineEventsConsumerChannels.SOURCE)
-    public void receive(Message<List<Map<String, Object>>> message) {
-        List<Map<String, Object>> events = message.getPayload();
-        String routingKey = (String) message.getHeaders().get("routingKey");
+    @StreamListener
+    public void receive(@Input(EngineEventsConsumerChannels.SOURCE)
+                            Flux<Message<List<Map<String,Object>>>> input) {
 
-        logger.info("Recieved source message with routingKey: {}", routingKey);
+        // Let's process and transform message from input stream
+        input.flatMapSequential(message -> {
+            List<Map<String, Object>> events = message.getPayload();
+            String routingKey = (String) message.getHeaders().get("routingKey");
 
-        Flux.fromIterable(transformer.transform(events))
-                .collectList()
-                .map(list -> MessageBuilder.<List<EngineEvent>>createMessage(list, message.getHeaders()))
-                .doOnNext(processorSink::next)
-                .doOnError(error -> logger.error("Error handling message ", error))
-                .retry()
-                .subscribe();
+            logger.info("Recieved source message with routingKey: {}", routingKey);
+
+            return Flux.fromIterable(transformer.transform(events))
+                       .collectList()
+                       .map(list -> MessageBuilder.<List<EngineEvent>> createMessage(list,
+                                                                                     message.getHeaders()));
+        })
+        .doOnNext(processorSink::next)
+        .doOnError(error -> logger.error("Error handling message ", error))
+        .retry()
+        .subscribe();
     }
-
 }
