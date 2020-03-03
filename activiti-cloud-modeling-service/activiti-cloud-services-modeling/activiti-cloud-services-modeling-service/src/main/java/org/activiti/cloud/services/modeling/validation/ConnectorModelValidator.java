@@ -22,12 +22,10 @@ import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelValidator;
 import org.everit.json.schema.loader.SchemaLoader;
-import org.springframework.stereotype.Component;
 
 /**
  * {@link ModelValidator} implementation of connector models
  */
-@Component
 public class ConnectorModelValidator extends JsonSchemaModelValidator implements ModelContentValidator {
 
     private final SchemaLoader connectorSchemaLoader;
