@@ -60,13 +60,11 @@ public class SwaggerDocketBuilder {
 
     private Docket baseDocket() {
         Docket baseDocket = new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(apiSelector::test)
-                .paths(PathSelectors.any())
-                .build();
-        if (apiInfo != null) {
-            baseDocket.apiInfo(apiInfo);
-        }
+            .apiInfo(apiInfo)
+            .select()
+            .apis(apiSelector::test)
+            .paths(PathSelectors.any())
+            .build();
         return applyCustomizations(baseDocket);
     }
 

@@ -55,7 +55,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class SwaggerAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
     public SwaggerDocketBuilder swaggerDocketBuilder(Predicate<RequestHandler> apiSelector,
                                                      TypeResolver typeResolver,
                                                      @Autowired(required = false) List<DocketCustomizer> docketCustomizers,
