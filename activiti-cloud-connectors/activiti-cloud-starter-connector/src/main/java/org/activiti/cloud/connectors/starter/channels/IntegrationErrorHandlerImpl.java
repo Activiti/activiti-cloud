@@ -8,40 +8,55 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ErrorMessage;
-import org.springframework.messaging.support.MessageBuilder;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
     private static Logger logger = LoggerFactory.getLogger(IntegrationErrorHandlerImpl.class);
-    
+
     private final IntegrationErrorSender integrationErrorSender;
     private final ConnectorProperties connectorProperties;
-    
+    private final ObjectMapper objectMapper;
+
     public IntegrationErrorHandlerImpl(IntegrationErrorSender integrationErrorSender,
-                                       ConnectorProperties connectorProperties) {
+                                       ConnectorProperties connectorProperties,
+                                       ObjectMapper objectMapper) {
         this.integrationErrorSender = integrationErrorSender;
         this.connectorProperties = connectorProperties;
+        this.objectMapper = objectMapper;
     }
-    
+
     @Override
     public void handleErrorMessage(ErrorMessage errorMessage) {
-        
-        Throwable errorMessagePayload = errorMessage.getPayload();
+        logger.debug("Error Message exception occurred: {}", errorMessage);
+
+        Throwable throwablePayload = errorMessage.getPayload();
         Message<?> originalMessage = errorMessage.getOriginalMessage();
 
-        if (originalMessage != null && IntegrationRequest.class.isInstance(originalMessage.getPayload())) {
-            IntegrationRequest integrationRequest = IntegrationRequest.class.cast(originalMessage.getPayload());
-            
-            IntegrationError integrationError = IntegrationErrorBuilder.errorFor(integrationRequest, 
+        if (originalMessage != null) {
+            byte[] data = (byte[]) originalMessage.getPayload();
+            IntegrationRequest integrationRequest = null;
+
+            try {
+                integrationRequest = objectMapper.readValue(data, IntegrationRequest.class);
+            } catch (Throwable cause) {
+                logger.error("Error reading IntegrationRequest", cause);
+
+                throw new RuntimeException(cause);
+            }
+
+            Throwable cause = throwablePayload.getCause();
+
+            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
                                                                                  connectorProperties,
-                                                                                 new Exception(errorMessagePayload))
-                                                                       .build();
-            
-            Message<IntegrationError> message = MessageBuilder.withPayload(integrationError)
-                                                              .build();
+                                                                                 cause)
+                                                                       .buildMessage();
+
             integrationErrorSender.send(message);
+
         } else {
-            logger.error("{}", errorMessagePayload);
+            logger.error("The originalMessage is empty");
         }
     }
-    
+
 }

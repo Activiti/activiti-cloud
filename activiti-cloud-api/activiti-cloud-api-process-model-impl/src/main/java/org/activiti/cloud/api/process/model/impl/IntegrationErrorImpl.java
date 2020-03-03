@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.api.process.model.impl;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
@@ -25,22 +28,21 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
 
     private IntegrationRequest integrationRequest;
     private IntegrationContext integrationContext;
-    private Exception error;
-
+    
+    private String errorMessage;
+    private List<StackTraceElement> stackTraceElements;
+    private String errorClassName;
+    
     IntegrationErrorImpl() {
     }
 
     public IntegrationErrorImpl(IntegrationRequest integrationRequest,
-                                IntegrationContext integrationContext,
-                                Exception error) {
+                                Throwable error) {
         this.integrationRequest = integrationRequest;
-        this.integrationContext = integrationContext;
-        this.error = error;
-    }
-
-    @Override
-    public Exception getError() {
-        return error;
+        this.integrationContext = integrationRequest.getIntegrationContext();
+        this.errorMessage = error.getMessage();
+        this.errorClassName = error.getClass().getName();
+        this.stackTraceElements = Arrays.asList(error.getStackTrace());
     }
 
     @Override
@@ -51,5 +53,20 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     @Override
     public IntegrationRequest getIntegrationRequest() {
         return integrationRequest;
+    }
+    
+    @Override
+    public List<StackTraceElement> getStackTraceElements() {
+        return stackTraceElements;
+    }
+    
+    @Override
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+    
+    @Override
+    public String getErrorClassName() {
+        return errorClassName;
     }
 }

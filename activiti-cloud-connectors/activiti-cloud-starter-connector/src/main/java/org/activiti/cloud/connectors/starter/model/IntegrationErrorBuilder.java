@@ -23,43 +23,46 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 
 public class IntegrationErrorBuilder {
 
-    private IntegrationRequest requestEvent;
-    private IntegrationErrorImpl integrationError;
-    private Exception error;
+    private final IntegrationRequest integrationRequest;
+    private final ConnectorProperties connectorProperties;
+    private final Throwable error;
 
-    private IntegrationErrorBuilder(IntegrationRequest integrationRequest, 
-                                    ConnectorProperties connectorProperties, 
-                                    Exception error) {
-        this.requestEvent = integrationRequest;
-        
-        this.integrationError = new IntegrationErrorImpl(integrationRequest, 
-                                                          integrationRequest.getIntegrationContext(), 
-                                                          error);
-        if(connectorProperties != null) {
-            this.integrationError.setAppName(connectorProperties.getAppName());
-            this.integrationError.setAppVersion(connectorProperties.getAppVersion());
-            this.integrationError.setServiceFullName(connectorProperties.getServiceFullName());
-            this.integrationError.setServiceType(connectorProperties.getServiceType());
-            this.integrationError.setServiceVersion(connectorProperties.getServiceVersion());
-            this.integrationError.setServiceName(connectorProperties.getServiceName());
-        }
+    private IntegrationErrorBuilder(IntegrationRequest integrationRequest,
+                                    ConnectorProperties connectorProperties,
+                                    Throwable error) {
+        this.integrationRequest = integrationRequest;
+        this.connectorProperties = connectorProperties;
+        this.error = error;
+
     }
 
     public static IntegrationErrorBuilder errorFor(IntegrationRequest integrationRequest,
                                                    ConnectorProperties connectorProperties,
-                                                   Exception error) {
+                                                   Throwable error) {
         return new IntegrationErrorBuilder(integrationRequest,
                                            connectorProperties,
                                            error);
     }
 
     public IntegrationError build() {
+        Objects.requireNonNull(integrationRequest);
         Objects.requireNonNull(error);
-        
+
+        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest,
+                                                                         error);
+        if (connectorProperties != null) {
+            integrationError.setAppVersion(connectorProperties.getAppVersion());
+            integrationError.setServiceFullName(connectorProperties.getServiceFullName());
+            integrationError.setServiceType(connectorProperties.getServiceType());
+            integrationError.setServiceVersion(connectorProperties.getServiceVersion());
+            integrationError.setServiceName(connectorProperties.getServiceName());
+        }
+
         return integrationError;
     }
 
@@ -69,8 +72,10 @@ public class IntegrationErrorBuilder {
 
     public MessageBuilder<IntegrationError> getMessageBuilder() {
         IntegrationError integrationError = build();
-        
-        return MessageBuilder.withPayload(integrationError).setHeader("targetService",
-                                                                       requestEvent.getServiceFullName());
+
+        return MessageBuilder.withPayload(integrationError)
+                             .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
+                             .setHeader("targetService",
+                                        integrationRequest.getServiceFullName());
     }
 }

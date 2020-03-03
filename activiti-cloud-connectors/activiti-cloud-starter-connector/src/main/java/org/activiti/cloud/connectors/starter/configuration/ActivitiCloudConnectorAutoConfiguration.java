@@ -1,6 +1,6 @@
 package org.activiti.cloud.connectors.starter.configuration;
 
-import org.activiti.cloud.connectors.starter.channels.ErrorChannelStreamListener;
+import org.activiti.cloud.connectors.starter.channels.ErrorChannelServiceActivator;
 import org.activiti.cloud.connectors.starter.channels.IntegrationChannelResolver;
 import org.activiti.cloud.connectors.starter.channels.IntegrationChannelResolverImpl;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorHandler;
@@ -18,6 +18,8 @@ import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Configuration
 @EnableBinding({ProcessRuntimeChannels.class})
 public class ActivitiCloudConnectorAutoConfiguration {
@@ -27,34 +29,36 @@ public class ActivitiCloudConnectorAutoConfiguration {
     public ConnectorProperties connectorProperties() {
         return new ConnectorProperties();
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public IntegrationErrorHandler integrationErrorHandler(IntegrationErrorSender integrationErrorSender,
-                                                           ConnectorProperties connectorProperties) {
+                                                           ConnectorProperties connectorProperties,
+                                                           ObjectMapper objectMapper) {
         return new IntegrationErrorHandlerImpl(integrationErrorSender,
-                                               connectorProperties);
+                                               connectorProperties,
+                                               objectMapper);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
-    public ErrorChannelStreamListener errorChannelStreamListener(IntegrationErrorHandler integrationErrorHandler) {
-        return new ErrorChannelStreamListener(integrationErrorHandler);
+    public ErrorChannelServiceActivator errorChannelServiceActivator(IntegrationErrorHandler integrationErrorHandler) {
+        return new ErrorChannelServiceActivator(integrationErrorHandler);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public IntegrationResultDestinationBuilder integrationResultDestinationBuilder(ConnectorProperties connectorProperties) {
         return new IntegrationResultDestinationBuilderImpl(connectorProperties);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public IntegrationChannelResolver integrationChannelResolver(BinderAwareChannelResolver resolver,
                                                                  IntegrationResultDestinationBuilder integrationResultDestinationBuilder) {
         return new IntegrationChannelResolverImpl(resolver, integrationResultDestinationBuilder);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public IntegrationResultSender integrationResultSender(IntegrationChannelResolver integrationChannelResolver) {
@@ -66,5 +70,5 @@ public class ActivitiCloudConnectorAutoConfiguration {
     public IntegrationErrorSender integrationErrorSender(IntegrationChannelResolver integrationChannelResolver) {
         return new IntegrationErrorSenderImpl(integrationChannelResolver);
     }
-    
+
 }
