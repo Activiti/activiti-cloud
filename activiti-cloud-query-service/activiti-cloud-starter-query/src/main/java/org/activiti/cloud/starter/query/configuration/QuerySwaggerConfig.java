@@ -17,6 +17,7 @@
 package org.activiti.cloud.starter.query.configuration;
 
 import java.util.function.Predicate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,6 +44,7 @@ public class QuerySwaggerConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "queryRestApiSelector")
     public Predicate<RequestHandler> queryRestApiSelector() {
         return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.query.rest")::apply;
     }

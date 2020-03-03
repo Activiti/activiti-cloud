@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.audit.configuration;
 
 import java.util.function.Predicate;
 import org.activiti.cloud.common.swagger.DocketCustomizer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,6 +45,7 @@ public class AuditSwaggerConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "auditApiSelector")
     public Predicate<RequestHandler> auditApiSelector() {
         return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.audit")::apply;
     }
