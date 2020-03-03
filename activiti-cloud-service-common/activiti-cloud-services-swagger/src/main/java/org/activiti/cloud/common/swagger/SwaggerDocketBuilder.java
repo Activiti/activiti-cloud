@@ -58,11 +58,6 @@ public class SwaggerDocketBuilder {
         this.apiInfo = apiInfo;
     }
 
-    public Docket buildHalAPIDocket() {
-        return baseDocket()
-                .groupName("hal");
-    }
-
     private Docket baseDocket() {
         Docket baseDocket = new Docket(DocumentationType.SWAGGER_2)
                 .select()
