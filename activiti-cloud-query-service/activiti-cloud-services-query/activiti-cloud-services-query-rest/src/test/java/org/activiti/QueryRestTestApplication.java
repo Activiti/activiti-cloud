@@ -18,8 +18,10 @@ package org.activiti;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.PropertySource;
 
 @SpringBootApplication
+@PropertySource("classpath:activiti-cloud-query-service.properties")
 public class QueryRestTestApplication {
 
     public static void main(String[] args) {
