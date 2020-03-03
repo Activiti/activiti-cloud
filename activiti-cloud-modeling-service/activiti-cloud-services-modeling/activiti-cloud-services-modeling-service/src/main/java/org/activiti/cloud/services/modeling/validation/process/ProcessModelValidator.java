@@ -38,14 +38,10 @@ import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
 
 /**
  * {@link ModelValidator} implementation of process models
  */
-@Component
-@ConditionalOnMissingBean(name = "ProcessModelValidator")
 public class ProcessModelValidator implements ModelContentValidator {
 
     private final Logger log = LoggerFactory.getLogger(ProcessModelValidator.class);
