@@ -80,11 +80,17 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
     @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Error'")
     public void mockTypeIntegrationErrorSender(IntegrationRequest integrationRequest) {
-        Throwable error = new Error("Mock Error");
+        try {
 
-        Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest, connectorProperties, error)
-                                                                   .buildMessage();
-        integrationErrorSender.send(message);
+            throw new Error("Mock Error");
+
+        } catch (Exception error) {
+            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
+                                                                                 connectorProperties,
+                                                                                 error)
+                                                                       .buildMessage();
+            integrationErrorSender.send(message);
+        }
     }
 
     private void verifyEventAndCreateResults(IntegrationRequest event) {
