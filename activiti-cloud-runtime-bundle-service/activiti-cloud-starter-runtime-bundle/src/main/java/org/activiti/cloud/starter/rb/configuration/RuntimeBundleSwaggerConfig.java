@@ -29,7 +29,7 @@ public class RuntimeBundleSwaggerConfig {
     @Bean
     @ConditionalOnMissingBean
     public Predicate<RequestHandler> apiSelector() {
-        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services")::apply;
+        return RequestHandlerSelectors.basePackage("org.activiti.cloud.services.rest")::apply;
     }
 
     @Bean
