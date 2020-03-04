@@ -84,7 +84,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
             throw new Error("Mock Error");
 
-        } catch (Exception error) {
+        } catch (Error error) {
             Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
                                                                                  connectorProperties,
                                                                                  error)
