@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @ExposesResourceFor(ProcessModelEntity.class)
 @RequestMapping(
-        value = "${activiti.cloud.query.uri-prefix}/v1/process-definitions/{processDefinitionId}/model")
+        value = "/v1/process-definitions/{processDefinitionId}/model")
 public class ProcessModelController {
 
     private ProcessModelRepository processModelRepository;

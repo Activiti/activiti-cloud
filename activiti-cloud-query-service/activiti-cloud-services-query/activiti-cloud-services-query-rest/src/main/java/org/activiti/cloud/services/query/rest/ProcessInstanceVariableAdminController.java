@@ -42,7 +42,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 
 @RestController
 @RequestMapping(
-        value = "${activiti.cloud.query.uri-prefix}/admin/v1/process-instances/{processInstanceId}/variables",
+        value = "/admin/v1/process-instances/{processInstanceId}/variables",
         produces = {
                 MediaTypes.HAL_JSON_VALUE,
                 MediaType.APPLICATION_JSON_VALUE

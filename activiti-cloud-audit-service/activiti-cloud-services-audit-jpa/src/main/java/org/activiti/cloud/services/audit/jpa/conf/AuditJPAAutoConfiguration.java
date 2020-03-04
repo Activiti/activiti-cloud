@@ -61,10 +61,8 @@ import org.activiti.cloud.services.audit.jpa.converters.VariableUpdatedEventConv
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource("classpath:activiti-cloud-audit-service.properties")
 public class AuditJPAAutoConfiguration {
 
     @ConditionalOnMissingBean

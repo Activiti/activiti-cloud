@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-        value = "${activiti.cloud.query.uri-prefix}/v1/process-instances/{processInstanceId}",
+        value = "/v1/process-instances/{processInstanceId}",
         produces = {
                 MediaTypes.HAL_JSON_VALUE,
                 MediaType.APPLICATION_JSON_VALUE

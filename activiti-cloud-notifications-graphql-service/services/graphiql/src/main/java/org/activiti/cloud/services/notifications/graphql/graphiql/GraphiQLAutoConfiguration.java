@@ -15,17 +15,12 @@
  */
 package org.activiti.cloud.services.notifications.graphql.graphiql;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@PropertySource("classpath:activiti-cloud-notification-graphiql.properties")
 @ConditionalOnProperty(name="spring.activiti.cloud.services.graphql.graphiql.enabled", matchIfMissing = true)
 public class GraphiQLAutoConfiguration {
 
@@ -34,16 +29,5 @@ public class GraphiQLAutoConfiguration {
     @Import({KeycloakJsonController.class, GraphiQLIndexController.class, GraphiQLConfigController.class})
     public static class DefaultGraphiQLConfiguration {
 
-    }
-
-    @Bean
-    public WebMvcConfigurer webMvcConfigurer(@Value("${activiti.cloud.notification.graphiql.uri-prefix}") String notificationPrefix){
-        return new WebMvcConfigurer() {
-            @Override
-            public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-                registry.addResourceHandler(notificationPrefix + "/graphiql/**")
-                        .addResourceLocations("classpath:/static/graphiql/");
-            }
-        };
     }
 }

@@ -54,7 +54,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 
 @RestController
 @RequestMapping(
-        value = "${activiti.cloud.query.uri-prefix}/v1/tasks",
+        value = "/v1/tasks",
         produces = {
                 MediaTypes.HAL_JSON_VALUE,
                 MediaType.APPLICATION_JSON_VALUE

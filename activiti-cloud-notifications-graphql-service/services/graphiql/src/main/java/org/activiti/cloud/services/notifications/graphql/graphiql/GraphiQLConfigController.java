@@ -26,7 +26,7 @@ public class GraphiQLConfigController {
     private String contextPath;
     
 	
-    @GetMapping(value="${activiti.cloud.notification.graphiql.uri-prefix}/graphiql/config.js",  produces = "application/javascript")
+    @GetMapping(value="graphiql/config.js",  produces = "application/javascript")
     @ResponseStatus(HttpStatus.OK)
     public String getConfigJs() {
     	
@@ -38,7 +38,7 @@ public class GraphiQLConfigController {
         return config;
     }	    
     
-    @GetMapping(value="${activiti.cloud.notification.graphiql.uri-prefix}/graphiql/config.json",  produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value="graphiql/config.json",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> getGraphiqlJson() {
         Map<String, Object> values = new LinkedHashMap<>();
         
