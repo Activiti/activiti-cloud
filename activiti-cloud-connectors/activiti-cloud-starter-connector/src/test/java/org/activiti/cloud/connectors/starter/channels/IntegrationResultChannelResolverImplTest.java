@@ -15,9 +15,9 @@ import org.mockito.Mockito;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.MessageChannel;
 
-public class IntegrationChannelResolverImplTest {
+public class IntegrationResultChannelResolverImplTest {
     
-    private IntegrationChannelResolver subject;
+    private IntegrationResultChannelResolver subject;
 
     @Mock
     private BinderAwareChannelResolver resolver;
@@ -39,7 +39,7 @@ public class IntegrationChannelResolverImplTest {
         
         builder = Mockito.spy(new IntegrationResultDestinationBuilderImpl(connectorProperties));
         
-        subject = new IntegrationChannelResolverImpl(resolver, 
+        subject = new IntegrationResultChannelResolverImpl(resolver, 
                                                      builder);
     }
 

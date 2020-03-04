@@ -24,19 +24,19 @@ import org.springframework.messaging.MessageChannel;
 
 public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
 
-    private final IntegrationChannelResolver resolver;
+    private final IntegrationErrorChannelResolver resolver;
 
     @Autowired
-    public IntegrationErrorSenderImpl(IntegrationChannelResolver resolver) {
+    public IntegrationErrorSenderImpl(IntegrationErrorChannelResolver resolver) {
         this.resolver = resolver;
     }
 
     @Override
     public void send(Message<IntegrationError> message) {
         IntegrationRequest request = message.getPayload().getIntegrationRequest();
-        
+
         MessageChannel destination = resolver.resolveDestination(request);
-        
+
         destination.send(message);
     }
 }

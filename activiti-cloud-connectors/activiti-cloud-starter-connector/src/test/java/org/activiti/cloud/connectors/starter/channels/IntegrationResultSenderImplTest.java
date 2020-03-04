@@ -38,7 +38,7 @@ public class IntegrationResultSenderImplTest {
     private IntegrationResultSenderImpl integrationResultSender;
 
     @Mock
-    private IntegrationChannelResolver resolver;
+    private IntegrationResultChannelResolver resolver;
     
     @Mock
     private MessageChannel messageChannel;

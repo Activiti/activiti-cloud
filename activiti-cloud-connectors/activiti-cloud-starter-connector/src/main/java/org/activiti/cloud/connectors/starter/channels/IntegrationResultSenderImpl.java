@@ -24,10 +24,10 @@ import org.springframework.messaging.MessageChannel;
 
 public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
-    private final IntegrationChannelResolver resolver;
+    private final IntegrationResultChannelResolver resolver;
 
     @Autowired
-    public IntegrationResultSenderImpl(IntegrationChannelResolver resolver) {
+    public IntegrationResultSenderImpl(IntegrationResultChannelResolver resolver) {
         this.resolver = resolver;
     }
 

@@ -1,12 +1,15 @@
 package org.activiti.cloud.connectors.starter.configuration;
 
 import org.activiti.cloud.connectors.starter.channels.ErrorChannelServiceActivator;
-import org.activiti.cloud.connectors.starter.channels.IntegrationChannelResolver;
-import org.activiti.cloud.connectors.starter.channels.IntegrationChannelResolverImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultChannelResolverImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorChannelResolver;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorChannelResolverImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorDestinationBuilder;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorHandler;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorHandlerImpl;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSenderImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultChannelResolver;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultDestinationBuilder;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultDestinationBuilderImpl;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
@@ -54,20 +57,28 @@ public class ActivitiCloudConnectorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationChannelResolver integrationChannelResolver(BinderAwareChannelResolver resolver,
-                                                                 IntegrationResultDestinationBuilder integrationResultDestinationBuilder) {
-        return new IntegrationChannelResolverImpl(resolver, integrationResultDestinationBuilder);
+    public IntegrationResultChannelResolver integrationResultChannelResolver(BinderAwareChannelResolver resolver,
+                                                                             IntegrationResultDestinationBuilder integrationResultDestinationBuilder) {
+        return new IntegrationResultChannelResolverImpl(resolver, integrationResultDestinationBuilder);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationResultSender integrationResultSender(IntegrationChannelResolver integrationChannelResolver) {
+    public IntegrationResultSender integrationResultSender(IntegrationResultChannelResolver integrationChannelResolver) {
         return new IntegrationResultSenderImpl(integrationChannelResolver);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationErrorSender integrationErrorSender(IntegrationChannelResolver integrationChannelResolver) {
+    public IntegrationErrorChannelResolver integrationErrorChannelResolver(BinderAwareChannelResolver resolver,
+                                                                           IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder) {
+        return new IntegrationErrorChannelResolverImpl(resolver, integrationErrorDestinationBuilder);
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IntegrationErrorSender integrationErrorSender(IntegrationErrorChannelResolver integrationChannelResolver) {
         return new IntegrationErrorSenderImpl(integrationChannelResolver);
     }
 
