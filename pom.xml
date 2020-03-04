@@ -20,7 +20,7 @@
     <tag>HEAD</tag>
   </scm>
   <properties>
-    <activiti-cloud-query-service.version>7.1.406</activiti-cloud-query-service.version>
+    <activiti-cloud-query-service.version>7.1.407</activiti-cloud-query-service.version>
   </properties>
   <dependencyManagement>
     <dependencies>
