@@ -48,7 +48,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  *     }
  *  </pre>
  *
- *  Also you need to have spring-boot-maven-plugin for {@link BuildProperties}.
  */
 @Configuration
 @EnableSwagger2
@@ -56,27 +55,10 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     public SwaggerDocketBuilder swaggerDocketBuilder(Predicate<RequestHandler> apiSelector,
-                                                     TypeResolver typeResolver,
-                                                     @Autowired(required = false) List<DocketCustomizer> docketCustomizers,
-                                                     ApiInfo apiInfo) {
-        return new SwaggerDocketBuilder(apiSelector,
-                                        typeResolver,
-                                        docketCustomizers,
-                                        apiInfo);
-    }
-
-    @Bean
-    public ApiInfo apiInfo(BuildProperties buildProperties) {
-        return new ApiInfoBuilder()
-            .title(String.format("%s ReST API", buildProperties.getName()))
-            .description(buildProperties.get("description"))
-            .version(buildProperties.getVersion())
-            .license(String.format("© %s-%s %s. All rights reserved",
-                buildProperties.get("inceptionYear"),
-                buildProperties.get("year"),
-                buildProperties.get("organization.name")))
-            .termsOfServiceUrl(buildProperties.get("organization.url"))
-            .build();
+        TypeResolver typeResolver,
+        @Autowired(required = false) List<DocketCustomizer> docketCustomizers,
+        @Autowired(required = false) ApiInfo apiInfo) {
+        return new SwaggerDocketBuilder(apiSelector, typeResolver, docketCustomizers, apiInfo);
     }
 
     @Bean(name = "alfrescoAPIDocket")

@@ -16,13 +16,14 @@
 
 package org.activiti.cloud.common.swagger;
 
+import static springfox.documentation.schema.AlternateTypeRules.newRule;
+
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.TypeResolver;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
-
-import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.TypeResolver;
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.springframework.core.Ordered;
@@ -38,8 +39,6 @@ import springfox.documentation.schema.WildcardType;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
-
-import static springfox.documentation.schema.AlternateTypeRules.newRule;
 
 public class SwaggerDocketBuilder {
 
@@ -60,11 +59,13 @@ public class SwaggerDocketBuilder {
 
     private Docket baseDocket() {
         Docket baseDocket = new Docket(DocumentationType.SWAGGER_2)
-            .apiInfo(apiInfo)
             .select()
             .apis(apiSelector::test)
             .paths(PathSelectors.any())
             .build();
+        if (apiInfo != null) {
+            baseDocket.apiInfo(apiInfo);
+        }
         return applyCustomizations(baseDocket);
     }
 
