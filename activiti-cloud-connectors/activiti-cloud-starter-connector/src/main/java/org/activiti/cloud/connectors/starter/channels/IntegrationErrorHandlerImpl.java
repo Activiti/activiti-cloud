@@ -7,6 +7,7 @@ import org.activiti.cloud.connectors.starter.model.IntegrationErrorBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,11 +31,11 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
     public void handleErrorMessage(ErrorMessage errorMessage) {
         logger.debug("Error Message exception occurred: {}", errorMessage);
 
-        Throwable throwablePayload = errorMessage.getPayload();
-        Message<?> originalMessage = errorMessage.getOriginalMessage();
+        MessagingException throwablePayload = MessagingException.class.cast(errorMessage.getPayload());
+        Message<?> failedMessage = throwablePayload.getFailedMessage();
 
-        if (originalMessage != null) {
-            byte[] data = (byte[]) originalMessage.getPayload();
+        if (failedMessage != null) {
+            byte[] data = (byte[]) failedMessage.getPayload();
             IntegrationRequest integrationRequest = null;
 
             try {
@@ -51,7 +52,6 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
                                                                                  connectorProperties,
                                                                                  cause)
                                                                        .buildMessage();
-
             integrationErrorSender.send(message);
 
         } else {
