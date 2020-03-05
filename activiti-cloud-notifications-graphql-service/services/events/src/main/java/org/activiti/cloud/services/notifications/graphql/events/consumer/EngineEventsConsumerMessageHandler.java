@@ -36,7 +36,7 @@ public class EngineEventsConsumerMessageHandler {
 
     private final FluxSink<Message<List<EngineEvent>>> processorSink;
     private final Transformer transformer;
-    
+
     public EngineEventsConsumerMessageHandler(Transformer transformer,
                                       FluxSink<Message<List<EngineEvent>>> engineEventsSink)
     {
@@ -45,9 +45,9 @@ public class EngineEventsConsumerMessageHandler {
     }
 
     @StreamListener
-    public void receive(@Input(EngineEventsConsumerChannels.SOURCE) 
+    public void receive(@Input(EngineEventsConsumerChannels.SOURCE)
                             Flux<Message<List<Map<String,Object>>>> input) {
-        
+
         // Let's process and transform message from input stream
         input.flatMapSequential(message -> {
             List<Map<String, Object>> events = message.getPayload();

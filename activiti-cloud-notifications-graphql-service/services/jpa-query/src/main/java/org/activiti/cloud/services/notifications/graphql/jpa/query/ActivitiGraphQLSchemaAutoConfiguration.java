@@ -41,14 +41,14 @@ import graphql.schema.GraphQLSchema;
 public class ActivitiGraphQLSchemaAutoConfiguration {
 
     @Configuration
-    @EntityScan(basePackageClasses=ProcessInstanceEntity.class)
+    @EntityScan(basePackageClasses = ProcessInstanceEntity.class)
     public static class ActivitiGraphQLSchemaConfigurer implements GraphQLSchemaConfigurer {
 
         private final EntityManager entityManager;
 
         public ActivitiGraphQLSchemaConfigurer(EntityManager entityManager) {
             this.entityManager = entityManager;
-            
+
             JavaScalars.register(VariableValue.class,
                                  new GraphQLScalarType("VariableValue", "VariableValue type", new JavaScalars.GraphQLObjectCoercing()));
         }
@@ -57,7 +57,8 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
         public void configure(GraphQLShemaRegistration registry) {
 
             GraphQLSchema graphQLSchema = new GraphQLJpaSchemaBuilder(entityManager).name("Query")
-                    .description("Activiti Cloud Query Schema").build();
+                                                  .entityPath(ProcessInstanceEntity.class.getPackage().getName())
+                                                  .description("Activiti Cloud Query Schema").build();
 
             registry.register(graphQLSchema);
         }

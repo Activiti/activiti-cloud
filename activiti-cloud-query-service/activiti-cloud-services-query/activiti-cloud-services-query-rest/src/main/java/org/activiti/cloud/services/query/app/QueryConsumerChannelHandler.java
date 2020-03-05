@@ -20,6 +20,8 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.springframework.cloud.stream.annotation.StreamListener;
 
+import java.util.List;
+
 public class QueryConsumerChannelHandler {
 
     private QueryEventHandlerContext eventHandlerContext;
@@ -29,8 +31,8 @@ public class QueryConsumerChannelHandler {
     }
 
     @StreamListener(QueryConsumerChannels.QUERY_CONSUMER)
-    public synchronized void receive(CloudRuntimeEvent<?, ?>... events) {
-        eventHandlerContext.handle(events);
+    public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
+        eventHandlerContext.handle(events.toArray(new CloudRuntimeEvent[]{}));
     }
 
 }
