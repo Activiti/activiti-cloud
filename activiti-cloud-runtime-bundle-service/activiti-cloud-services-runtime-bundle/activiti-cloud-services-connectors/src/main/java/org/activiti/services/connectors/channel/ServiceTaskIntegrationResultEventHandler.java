@@ -89,12 +89,14 @@ public class ServiceTaskIntegrationResultEventHandler {
         }
     }
 
+
+    @SuppressWarnings("rawtypes")
     private void sendAuditMessage(IntegrationResult integrationResult) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationResultReceivedEventImpl integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(integrationResult.getIntegrationContext());
             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationResultReceived);
-            Message<CloudRuntimeEvent<?, ?>[]> message = MessageBuilder.withPayload(Stream.of(integrationResultReceived)
-                                                                                        .toArray(CloudRuntimeEvent<?, ?>[]::new))
+            Message<CloudRuntimeEvent[]> message = MessageBuilder.withPayload(Stream.of(integrationResultReceived)
+                                                                                        .toArray(CloudRuntimeEvent[]::new))
                 .build();
 
             auditProducer.send(message);
