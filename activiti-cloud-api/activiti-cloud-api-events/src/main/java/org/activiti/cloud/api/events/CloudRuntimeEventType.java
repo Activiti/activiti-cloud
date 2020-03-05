@@ -16,6 +16,10 @@ public enum CloudRuntimeEventType {
      * The runtime bundle has received a result from a cloud connector.
      */
     INTEGRATION_RESULT_RECEIVED,
+    /**
+     * The runtime bundle has received a error from a cloud connector.
+     */
+    INTEGRATION_ERROR_RECEIVED,
     MESSAGE_RECEIVED,
     MESSAGE_SENT,
     MESSAGE_SUBSCRIPTION_CANCELLED,
