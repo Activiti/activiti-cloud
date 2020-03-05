@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import(SwaggerConfig.class)
+@Import(AuditSwaggerConfig.class)
 public class ActivitiAuditAutoConfiguration {
 
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.starter.modeling.swagger;
+package org.activiti.cloud.starter.tests.swagger;
 
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.startsWith;
@@ -23,11 +23,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.activiti.spring.ProcessDeployedEventProducer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,10 +37,13 @@ import org.springframework.test.web.servlet.MockMvc;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ModelingSwaggerIT {
+public class RuntimeBundleSwaggerIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private ProcessDeployedEventProducer producer;
 
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
@@ -50,7 +55,8 @@ public class ModelingSwaggerIT {
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContent"))))
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContent"))))
-            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Starter :: Modeling ReST API"));
+            .andExpect(jsonPath("$.definitions[\"SaveTaskPayload\"].properties").value(hasKey("payloadType")))
+            .andExpect(jsonPath("$.info.title").value("Activiti Cloud Starter :: Runtime Bundle ReST API"));
 
     }
 

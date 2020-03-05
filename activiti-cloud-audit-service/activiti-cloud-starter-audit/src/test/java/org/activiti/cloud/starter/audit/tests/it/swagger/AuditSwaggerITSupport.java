@@ -1,62 +1,46 @@
 package org.activiti.cloud.starter.audit.tests.it.swagger;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import org.apache.commons.io.FileUtils;
+import java.nio.file.Files;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class AuditSwaggerITSupport {
 
     @Autowired
-    private WebApplicationContext context;
+    private MockMvc mockMvc;
 
-    private Gson formatter = new GsonBuilder().setPrettyPrinting().create();
-
-    private JsonParser parser = new JsonParser();
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
-     * This is more than a simple test. It's actually generating the swagger.json definition of the service
+     * This is not a test. It's actually generating the swagger.json and yaml definition of the service.
+     * It is used by maven generate-swagger profile build.
      */
     @Test
     public void generateSwagger() throws Exception {
-        MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-        mockMvc.perform(MockMvcRequestBuilders.get("/v2/api-docs").accept(MediaType.APPLICATION_JSON))
-                .andDo((result) -> {
-                    JsonElement je = parser.parse(result.getResponse().getContentAsString());
-                    FileUtils.writeStringToFile(new File("target/swagger.json"),
-                            formatter.toJson(je),
-                            StandardCharsets.UTF_8);
-                    JsonNode jsonNodeTree = new ObjectMapper().readTree(result.getResponse().getContentAsString());
-                    FileUtils.writeStringToFile(new File("target/swagger.yaml"),
-                            new YAMLMapper().writeValueAsString(jsonNodeTree),
-                            StandardCharsets.UTF_8);
-                });
-        mockMvc.perform(MockMvcRequestBuilders.get("/v2/api-docs?group=hal").accept(MediaType.APPLICATION_JSON))
-                .andDo((result) -> {
-                    JsonElement je = parser.parse(result.getResponse().getContentAsString());
-                    FileUtils.writeStringToFile(new File("target/swagger-hal.json"),
-                            formatter.toJson(je),
-                            StandardCharsets.UTF_8);
-                    // TODO: 09/04/2019 the yaml generated out this json file will be produced once we make sure clients can be generated with swagger-hal.json
-                });
+        mockMvc.perform(get("/v2/api-docs").accept(MediaType.APPLICATION_JSON))
+            .andDo((result) -> {
+                JsonNode jsonNodeTree = objectMapper.readTree(result.getResponse().getContentAsByteArray());
+                Files.write(new File("target/swagger.json").toPath(),
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(jsonNodeTree));
+                Files.write(new File("target/swagger.yaml").toPath(),
+                    new YAMLMapper().writeValueAsBytes(jsonNodeTree));
+            });
     }
 }

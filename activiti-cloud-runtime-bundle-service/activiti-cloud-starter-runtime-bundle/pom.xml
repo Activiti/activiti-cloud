@@ -106,26 +106,6 @@
       <artifactId>spring-hateoas</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-spring-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-swagger2</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-swagger-ui</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
     </dependency>
@@ -198,11 +178,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
@@ -235,6 +210,17 @@
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -315,7 +301,6 @@
           </plugin>
         </plugins>
       </build>
-
     </profile>
     <profile>
       <id>generate-swagger</id>
@@ -364,12 +349,6 @@
                       <file>target/swagger.json</file>
                       <type>json</type>
                       <classifier>api-docs</classifier>
-                    </artifact>
-                    <!-- HAL format JSON-->
-                    <artifact>
-                      <file>target/swagger-hal.json</file>
-                      <type>json</type>
-                      <classifier>api-docs-hal</classifier>
                     </artifact>
                     <!-- Swagger YAML-->
                     <artifact>

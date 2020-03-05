@@ -27,9 +27,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @AutoConfigureBefore(ProcessEngineAutoConfiguration.class)
 @Configuration
+@Import(RuntimeBundleSwaggerConfig.class)
 public class ActivitiCloudEngineAutoConfiguration {
 
     @Bean(BEHAVIOR_FACTORY_MAPPING_CONFIGURER)

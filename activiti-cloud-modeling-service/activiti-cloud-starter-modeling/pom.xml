@@ -56,26 +56,6 @@
       <artifactId>spring-hateoas</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-spring-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-swagger2</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-swagger-ui</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
     </dependency>
@@ -141,6 +121,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.activiti.cloud.common</groupId>
+      <artifactId>activiti-cloud-services-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-test</artifactId>
       <scope>test</scope>
@@ -158,11 +143,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -183,6 +163,17 @@
                 <source>${generated-assertions-folder}</source>
               </sources>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
@@ -236,12 +227,6 @@
                       <file>target/swagger.json</file>
                       <type>json</type>
                       <classifier>api-docs</classifier>
-                    </artifact>
-                    <!-- HAL format JSON-->
-                    <artifact>
-                      <file>target/swagger-hal.json</file>
-                      <type>json</type>
-                      <classifier>api-docs-hal</classifier>
                     </artifact>
                     <!-- Swagger YAML-->
                     <artifact>

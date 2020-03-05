@@ -16,17 +16,18 @@
 
 package org.activiti.cloud.common.swagger.conf;
 
+import com.fasterxml.classmate.TypeResolver;
 import java.util.List;
 import java.util.function.Predicate;
-
-import com.fasterxml.classmate.TypeResolver;
 import org.activiti.cloud.common.swagger.DocketCustomizer;
 import org.activiti.cloud.common.swagger.SwaggerDocketBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.RequestHandler;
+import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -34,8 +35,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 /**
  * Provides base springfox configuration for swagger auto-generated specification file. It provides two
  * swagger specification files: the default one is available under `v2/api-docs` or `v2/api-docs?group=default`
- * and provides specification for Alfresco MediaType format; the HAL one is available under `v2/api-docs?group=hal`
- * and provides specification for HAL format
+ * and provides specification for Alfresco MediaType format
  *
  * This configuration is not self-contained: the one adding this as dependency should provide a bean of type
  * {@link Predicate<RequestHandler>} that will be injected under {@link Docket#select()}. I.e
@@ -47,27 +47,18 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  *         return RequestHandlerSelectors.basePackage("org.activiti.cloud.services")::apply;
  *     }
  *  </pre>
+ *
  */
 @Configuration
 @EnableSwagger2
 public class SwaggerAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
     public SwaggerDocketBuilder swaggerDocketBuilder(Predicate<RequestHandler> apiSelector,
-                                                     TypeResolver typeResolver,
-                                                     @Autowired(required = false) List<DocketCustomizer> docketCustomizers,
-                                                     @Autowired(required = false) ApiInfo apiInfo) {
-        return new SwaggerDocketBuilder(apiSelector,
-                                        typeResolver,
-                                        docketCustomizers,
-                                        apiInfo);
-    }
-
-    @Bean(name = "halAPIDocket")
-    @ConditionalOnMissingBean(name = "halAPIDocket")
-    public Docket halAPIDocket(SwaggerDocketBuilder swaggerDocketBuilder) {
-        return swaggerDocketBuilder.buildHalAPIDocket();
+        TypeResolver typeResolver,
+        @Autowired(required = false) List<DocketCustomizer> docketCustomizers,
+        @Autowired(required = false) ApiInfo apiInfo) {
+        return new SwaggerDocketBuilder(apiSelector, typeResolver, docketCustomizers, apiInfo);
     }
 
     @Bean(name = "alfrescoAPIDocket")
