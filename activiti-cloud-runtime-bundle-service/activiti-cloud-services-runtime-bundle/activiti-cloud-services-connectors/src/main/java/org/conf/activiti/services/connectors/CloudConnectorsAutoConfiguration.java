@@ -29,6 +29,7 @@ import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
+import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -49,7 +50,7 @@ import org.springframework.messaging.MessageChannel;
 public class CloudConnectorsAutoConfiguration {
 
     private static final String LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME = "localServiceTaskBehaviour";
-    
+
     @Bean
     @ConditionalOnMissingBean
     public ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
@@ -65,7 +66,21 @@ public class CloudConnectorsAutoConfiguration {
                                                             runtimeBundleInfoAppender,
                                                             outboundVariablesProvider);
     }
-    
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler(RuntimeService runtimeService,
+                                                                                           IntegrationContextService integrationContextService,
+                                                                                           MessageChannel auditProducer,
+                                                                                           RuntimeBundleProperties runtimeBundleProperties,
+                                                                                           RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+        return new ServiceTaskIntegrationErrorEventHandler(runtimeService,
+                                                           integrationContextService,
+                                                           auditProducer,
+                                                           runtimeBundleProperties,
+                                                           runtimeBundleInfoAppender);
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public IntegrationRequestSender integrationRequestSender(RuntimeBundleProperties runtimeBundleProperties,
@@ -73,13 +88,13 @@ public class CloudConnectorsAutoConfiguration {
                                                              BinderAwareChannelResolver resolver,
                                                              RuntimeBundleInfoAppender runtimeBundleInfoAppender,
                                                              IntegrationContextMessageBuilderFactory messageBuilderFactory) {
-        return new IntegrationRequestSender(runtimeBundleProperties, 
-                                            auditProducer, 
-                                            resolver, 
-                                            runtimeBundleInfoAppender, 
+        return new IntegrationRequestSender(runtimeBundleProperties,
+                                            auditProducer,
+                                            resolver,
+                                            runtimeBundleInfoAppender,
                                             messageBuilderFactory);
     }
-    
+
 
     @Bean
     @ConditionalOnMissingBean
@@ -103,7 +118,7 @@ public class CloudConnectorsAutoConfiguration {
                                               integrationContextBuilder,
                                               outboundVariablesProvider);
     }
-    
+
     @Bean(name = DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME)
     @ConditionalOnMissingBean(name = DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME)
     public MQServiceTaskBehavior mqServiceTaskBehavior(IntegrationContextManager integrationContextManager,
