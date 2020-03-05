@@ -53,6 +53,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFailedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
@@ -119,7 +120,9 @@ public class CloudProcessModelAutoConfiguration {
                                               IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED.name()));
         module.registerSubtypes(new NamedType(CloudIntegrationResultReceivedEventImpl.class,
                                               IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name()));
-        
+        module.registerSubtypes(new NamedType(CloudIntegrationErrorReceivedEventImpl.class,
+                                              IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name()));
+
         module.registerSubtypes(new NamedType(CloudBPMNTimerFiredEventImpl.class,
                                               BPMNTimerEvent.TimerEvents.TIMER_FIRED.name()));
         module.registerSubtypes(new NamedType(CloudBPMNTimerScheduledEventImpl.class,
@@ -132,17 +135,17 @@ public class CloudProcessModelAutoConfiguration {
                                               BPMNTimerEvent.TimerEvents.TIMER_RETRIES_DECREMENTED.name()));
         module.registerSubtypes(new NamedType(CloudBPMNTimerCancelledEventImpl.class,
                                               BPMNTimerEvent.TimerEvents.TIMER_CANCELLED.name()));
-        
+
         module.registerSubtypes(new NamedType(CloudBPMNMessageReceivedEventImpl.class,
                                               BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED.name()));
         module.registerSubtypes(new NamedType(CloudBPMNMessageSentEventImpl.class,
                                               BPMNMessageEvent.MessageEvents.MESSAGE_SENT.name()));
         module.registerSubtypes(new NamedType(CloudBPMNMessageWaitingEventImpl.class,
                                               BPMNMessageEvent.MessageEvents.MESSAGE_WAITING.name()));
-        
+
         module.registerSubtypes(new NamedType(CloudBPMNErrorReceivedEventImpl.class,
                                               BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED.name()));
-        
+
         module.registerSubtypes(new NamedType(CloudMessageSubscriptionCancelledEventImpl.class,
                                               MessageSubscriptionEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name()));
 
@@ -159,7 +162,7 @@ public class CloudProcessModelAutoConfiguration {
 
         resolver.addMapping(IntegrationRequest.class, IntegrationRequestImpl.class);
         resolver.addMapping(IntegrationResult.class, IntegrationResultImpl.class);
-        resolver.addMapping(IntegrationError.class, IntegrationErrorImpl.class);        
+        resolver.addMapping(IntegrationError.class, IntegrationErrorImpl.class);
 
         resolver.addMapping(CloudProcessDefinition.class,
                             CloudProcessDefinitionImpl.class);
