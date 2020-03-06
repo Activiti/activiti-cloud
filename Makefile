@@ -1,16 +1,16 @@
-ACTIVITI_CLOUD_CONNECTORS_VERSION := $(shell grep -oPm1 "(?<=<example-cloud-connector.version>)[^<]+" "dependencies-tests/pom.xml") 
-ACTIVITI_CLOUD_AUDIT_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-audit.version>)[^<]+" "dependencies-tests/pom.xml") 
-ACTIVITI_CLOUD_QUERY_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-query.version>)[^<]+" "dependencies-tests/pom.xml") 
-ACTIVITI_CLOUD_RB_VERSION := $(shell grep -oPm1 "(?<=<example-runtime-bundle.version>)[^<]+" "dependencies-tests/pom.xml") 
-ACTIVITI_CLOUD_NOTIFICATIONS_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-notifications-graphql.version>)[^<]+" "dependencies-tests/pom.xml") 
-ACTIVITI_CLOUD_MODELING_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-modeling.version>)[^<]+" "dependencies-tests/pom.xml") 
+ACTIVITI_CLOUD_CONNECTORS_VERSION := $(shell grep -oPm1 "(?<=<example-cloud-connector.version>)[^<]+" "dependencies-tests/pom.xml")
+ACTIVITI_CLOUD_AUDIT_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-audit.version>)[^<]+" "dependencies-tests/pom.xml")
+ACTIVITI_CLOUD_QUERY_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-query.version>)[^<]+" "dependencies-tests/pom.xml")
+ACTIVITI_CLOUD_RB_VERSION := $(shell grep -oPm1 "(?<=<example-runtime-bundle.version>)[^<]+" "dependencies-tests/pom.xml")
+ACTIVITI_CLOUD_NOTIFICATIONS_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-notifications-graphql.version>)[^<]+" "dependencies-tests/pom.xml")
+ACTIVITI_CLOUD_MODELING_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-modeling.version>)[^<]+" "dependencies-tests/pom.xml")
 ACTIVITI_CLOUD_CONNECTORS_SERVICE_VERSION :=  $(shell grep -oPm1 "(?<=<activiti-cloud-connectors.version>)[^<]+" "pom.xml")
-ACTIVITI_CLOUD_AUDIT_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-audit-service.version>)[^<]+" "pom.xml") 
-ACTIVITI_CLOUD_QUERY_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-query-service.version>)[^<]+" "pom.xml") 
-ACTIVITI_CLOUD_RB_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-runtime-bundle-service.version>)[^<]+" "pom.xml") 
-ACTIVITI_CLOUD_NOTIFICATIONS_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-notifications-service-graphql.version>)[^<]+" "pom.xml") 
-ACTIVITI_CLOUD_MODELING_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-modeling-service.version>)[^<]+" "pom.xml") 
-ACTIVITI_CLOUD_MESSAGES_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-messages-service.version>)[^<]+" "pom.xml") 
+ACTIVITI_CLOUD_AUDIT_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-audit-service.version>)[^<]+" "pom.xml")
+ACTIVITI_CLOUD_QUERY_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-query-service.version>)[^<]+" "pom.xml")
+ACTIVITI_CLOUD_RB_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-runtime-bundle-service.version>)[^<]+" "pom.xml")
+ACTIVITI_CLOUD_NOTIFICATIONS_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-notifications-service-graphql.version>)[^<]+" "pom.xml")
+ACTIVITI_CLOUD_MODELING_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-modeling-service.version>)[^<]+" "pom.xml")
+ACTIVITI_CLOUD_MESSAGES_SERVICE_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-messages-service.version>)[^<]+" "pom.xml")
 
 ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.252
 ACTIVITI_CLOUD_COMMON_HELM_CHART := 1.1.21
@@ -29,13 +29,13 @@ ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(ACTIVITI_CLOUD_RB_VERSION
 $(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\./-/'|rev))
 
 GITHUB_CHARTS_BRANCH := "gh-pages"
-	
+
 
 ACTIVITI_CLOUD_VERSION := $(shell cat VERSION)
 get-acc-scenarious-version:
 	@echo $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION)
 
-activiti-cloud-acceptance-scenarios: 
+activiti-cloud-acceptance-scenarios:
 	rm -rf activiti-cloud-acceptance-scenarios && \
 	git clone https://github.com/Activiti/activiti-cloud-acceptance-scenarios.git && \
 	cd activiti-cloud-acceptance-scenarios && \
@@ -43,11 +43,11 @@ activiti-cloud-acceptance-scenarios:
 	git checkout tags/v$(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION) -b $(ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION) && \
 	mvn clean install -DskipTests
 
-modeling-acceptance-tests: 
+modeling-acceptance-tests:
 	cd activiti-cloud-acceptance-scenarios && \
 	mvn -pl 'modeling-acceptance-tests' clean verify
 
-runtime-acceptance-tests: 
+runtime-acceptance-tests:
 	cd activiti-cloud-acceptance-scenarios && \
 	mvn -pl 'runtime-acceptance-tests' clean verify
 
@@ -88,7 +88,7 @@ replace-release-full-chart-names:
 	 sed -i -e "s/appVersion: .*/appVersion: $(HELM_ACTIVITI_VERSION)/" Chart.yaml && \
 	 sed -i -e "s/version: .*/version: $(HELM_ACTIVITI_VERSION)/" Chart.yaml && \
 	 sed -i -e "s/#tag: .*/tag: $(APP_ACTIVITI_VERSION)/" values.yaml
-	 
+
 pull-docker-images:
 	docker pull activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION)
 	docker pull activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_QUERY_VERSION)
@@ -112,14 +112,13 @@ push-docker-images:
 	docker push activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_VERSION)
-	docker push activiti/activiti-cloud-messages:$(ACTIVITI_CLOUD_VERSION)
 
 github:
 	$(eval GITHUB_CHARTS_DIR := $(shell basename $(GITHUB_CHARTS_REPO) .git))
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/ && \
 	[[ -d $(GITHUB_CHARTS_DIR) ]] ||git clone -b "$(GITHUB_CHARTS_BRANCH)" "$(GITHUB_CHARTS_REPO)" $(GITHUB_CHARTS_DIR) &&\
 	cp "activiti-cloud-full-example-$(HELM_ACTIVITI_VERSION).tgz" $(GITHUB_CHARTS_DIR)
-	
+
 	cd  .updatebot-repos/github/activiti/activiti-cloud-full-chart/charts/activiti-cloud-full-example/$(GITHUB_CHARTS_DIR) && \
 	   helm repo index . && \
 	   git add . && \
