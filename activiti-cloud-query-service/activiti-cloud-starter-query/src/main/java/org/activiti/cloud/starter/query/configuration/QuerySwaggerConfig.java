@@ -30,6 +30,7 @@ import springfox.documentation.service.ApiInfo;
 public class QuerySwaggerConfig {
 
     @Bean
+    @ConditionalOnMissingBean
     public ApiInfo apiInfo(BuildProperties buildProperties) {
         return new ApiInfoBuilder()
             .title(String.format("%s ReST API", buildProperties.getName()))
