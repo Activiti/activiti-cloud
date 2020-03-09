@@ -19,7 +19,7 @@ pipeline {
         }
         steps {
           container('maven') {
-            sh "mvn versions:set -DnewVersion=$PREVIEW_VERSION"
+            sh "mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$PREVIEW_VERSION"
             sh "mvn install"
             sh 'export VERSION=$PREVIEW_VERSION'
           }
@@ -38,7 +38,7 @@ pipeline {
             sh "jx step git credentials"
             // so we can retrieve the version in later steps
             sh "echo \$(jx-release-version) > VERSION"
-            sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
+            sh "mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=\$(cat VERSION)"
 
             sh 'mvn clean verify'
 
@@ -72,7 +72,7 @@ pipeline {
             sh "jx step git credentials"
             // so we can retrieve the version in later steps
             sh "echo \$TAG_NAME > VERSION"
-            sh "mvn versions:set -DnewVersion=\$(cat VERSION)"
+            sh "mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=\$(cat VERSION)"
           }
           container('maven') {
             sh '''

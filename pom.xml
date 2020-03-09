@@ -15,13 +15,13 @@
     <module>activiti-cloud-build</module>
     <module>activiti-cloud-api</module>
     <module>activiti-cloud-service-common</module>
+    <module>activiti-cloud-acceptance-tests</module>
     <module>activiti-cloud-runtime-bundle-service</module>
     <module>activiti-cloud-messages-service</module>
     <module>activiti-cloud-query-service</module>
     <module>activiti-cloud-audit-service</module>
     <module>activiti-cloud-modeling-service</module>
     <module>activiti-cloud-notifications-graphql-service</module>
-    <module>activiti-cloud-acceptance-tests</module>
     <module>activiti-cloud-connectors</module>
   </modules>
 
