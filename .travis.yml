@@ -7,7 +7,7 @@ env:
   global:
     - MAVEN_CLI_OPTS="--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=false -U"
     - MAVEN_TEST_OPTS=" -Dspring.main.banner-mode=off -Denforcer.skip"
-    - MAVEN_CMD="mvn ${MAVEN_CLI_OPTS} verify ${MAVEN_TEST_OPTS} -DskipITs=false"
+    - MAVEN_CMD="mvn ${MAVEN_CLI_OPTS}  install ${MAVEN_TEST_OPTS} -DskipITs=false"
 
 before_install:
   - mkdir -p $HOME/.m2
@@ -31,13 +31,13 @@ stages:
   - name: activiti-cloud-build
   - name: activiti-cloud-api
   - name: activiti-cloud-service-common
+  - name: activiti-cloud-acceptance-tests
   - name: activiti-cloud-runtime-bundle-service
   - name: activiti-cloud-messages-service
   - name: activiti-cloud-query-service
   - name: activiti-cloud-audit-service
   - name: activiti-cloud-modeling-service
   - name: activiti-cloud-notifications-graphql-service
-  - name: activiti-cloud-acceptance-tests
   - name: activiti-cloud-connectors
 
 jobs:
@@ -56,6 +56,11 @@ jobs:
       stage: activiti-cloud-service-common
       script:
         - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-service-common/pom.xml
+
+    - name: activiti-cloud-acceptance-tests
+      stage: activiti-cloud-acceptance-tests
+      script:
+        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-acceptance-tests/pom.xml
 
     - name: activiti-cloud-runtime-bundle-service
       stage: activiti-cloud-runtime-bundle-service
@@ -86,11 +91,6 @@ jobs:
       stage: activiti-cloud-notifications-graphql-service
       script:
         - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-notifications-graphql-service/pom.xml
-
-    - name: activiti-cloud-acceptance-tests
-      stage: activiti-cloud-acceptance-tests
-      script:
-        - travis_wait 120 ${MAVEN_CMD} -f activiti-cloud-acceptance-tests/pom.xml
 
     - name: activiti-cloud-connectors
       stage: activiti-cloud-connectors
