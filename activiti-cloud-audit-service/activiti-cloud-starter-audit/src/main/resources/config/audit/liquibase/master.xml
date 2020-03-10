@@ -26,15 +26,10 @@
   </changeSet>
 
   <changeSet author="activiti-audit"
-             id="oracle-schema-m6" dbms="oracle">
-    <preConditions onFail="CONTINUE">
-      <not>
-        <tableExists tableName="audit_event_entity"/>
-      </not>
-    </preConditions>
+             id="oracle-schema-m7" dbms="oracle">
     <sqlFile dbms="oracle"
              encoding="utf8"
-             path="changelog/01-alter.oracle.schema.m6.sql"
+             path="changelog/01-alter.oracle.schema.m7.sql"
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
@@ -85,7 +80,7 @@
              stripComments="true"/>
   </changeSet>
   
-  <changeSet author="activiti-audit" id="alter-schema-m6" dbms="postgresql">
+  <changeSet author="activiti-audit" id="alter-schema-m7" dbms="postgresql">
     <preConditions onFail="CONTINUE">
       <not>
         <tableExists tableName="audit_event"/>
@@ -94,7 +89,7 @@
     </preConditions>
     <sqlFile dbms="postgresql"
              encoding="utf8"
-             path="changelog/04-alter.pg.schema.m6.sql"
+             path="changelog/04-alter.pg.schema.m7.sql"
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
