@@ -19,11 +19,19 @@ package org.activiti.cloud.services.audit.jpa.events;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
+
 @Entity(name = IntegrationResultReceivedEventEntity.INTEGRATION_RESULT_RECEIVED_EVENT)
 @DiscriminatorValue(value = IntegrationResultReceivedEventEntity.INTEGRATION_RESULT_RECEIVED_EVENT)
 public class IntegrationResultReceivedEventEntity extends IntegrationEventEntity {
 
     protected static final String INTEGRATION_RESULT_RECEIVED_EVENT = "IntegrationResultReceivedEvent";
+
+    IntegrationResultReceivedEventEntity() {}
+
+    public IntegrationResultReceivedEventEntity(CloudIntegrationResultReceivedEvent event) {
+        super(event);
+    }
 
     @Override
     public int hashCode() {

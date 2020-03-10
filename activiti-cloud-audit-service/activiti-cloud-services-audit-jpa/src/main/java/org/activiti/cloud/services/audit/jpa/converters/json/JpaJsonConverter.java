@@ -20,15 +20,6 @@ import java.io.IOException;
 
 import javax.persistence.AttributeConverter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.BPMNError;
@@ -36,6 +27,7 @@ import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.BPMNSignal;
 import org.activiti.api.process.model.BPMNTimer;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.MessageSubscription;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
@@ -45,6 +37,7 @@ import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.api.runtime.model.impl.MessageSubscriptionImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -52,6 +45,16 @@ import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.services.audit.api.AuditException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
 
@@ -85,7 +88,7 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
             resolver.addMapping(BPMNSequenceFlow.class,
                                 BPMNSequenceFlowImpl.class);
             resolver.addMapping(BPMNSignal.class,
-            					BPMNSignalImpl.class);            
+            					BPMNSignalImpl.class);
             resolver.addMapping(BPMNTimer.class,
                                 BPMNTimerImpl.class);
             resolver.addMapping(BPMNError.class,
@@ -94,7 +97,9 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
                                 BPMNMessageImpl.class);
             resolver.addMapping(MessageSubscription.class,
                                 MessageSubscriptionImpl.class);
-            
+            resolver.addMapping(IntegrationContext.class,
+                                IntegrationContextImpl.class);
+
             module.setAbstractTypes(resolver);
 
             objectMapper.registerModule(module);
