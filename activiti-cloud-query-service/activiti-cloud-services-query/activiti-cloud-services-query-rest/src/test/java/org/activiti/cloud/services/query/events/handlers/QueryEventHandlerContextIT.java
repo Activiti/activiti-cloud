@@ -18,8 +18,11 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
+
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
+import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
@@ -31,8 +34,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -73,7 +74,9 @@ public class QueryEventHandlerContextIT {
                 BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name(),
                 BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name(),
                 BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name(),
-                SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name()
+                SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name(),
+                IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name(),
+                IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name()
         );
         assertThat(handlers.get(ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name())).isInstanceOf(ProcessDeployedEventHandler.class);
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name())).isInstanceOf(ProcessCreatedEventHandler.class);
@@ -101,5 +104,7 @@ public class QueryEventHandlerContextIT {
         assertThat(handlers.get(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name())).isInstanceOf(BPMNActivityCompletedEventHandler.class);
         assertThat(handlers.get(BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name())).isInstanceOf(BPMNActivityCancelledEventHandler.class);
         assertThat(handlers.get(SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name())).isInstanceOf(BPMNSequenceFlowTakenEventHandler.class);
+        assertThat(handlers.get(IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name())).isInstanceOf(IntegrationResultReceivedEventHandler.class);
+        assertThat(handlers.get(IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name())).isInstanceOf(IntegrationErrorReceivedEventHandler.class);
     }
 }
