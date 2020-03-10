@@ -19,6 +19,9 @@ create table bpmn_activity
     process_instance_id        varchar(255),
     started_date               timestamp,
     status                     varchar(255),
+    error_date                 timestamp,
+    error_message			   varchar(255),
+    error_class_name    	   varchar(255),
     primary key (id)
 );
 create table bpmn_sequence_flow
