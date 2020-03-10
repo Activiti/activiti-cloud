@@ -20,21 +20,21 @@ import org.springframework.format.annotation.DateTimeFormat;
     @Index(name="bpmn_activity_processInstance_elementId_idx", columnList="processInstanceId,elementId", unique=true)
 })
 public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudBPMNActivity {
-    
+
     public static enum BPMNActivityStatus {
-        STARTED, COMPLETED, CANCELLED
+        STARTED, COMPLETED, CANCELLED, ERROR
     }
-    
+
     /** The unique identifier of this historic activity instance. */
     @Id
     private String id;
 
     /** The unique identifier of the activity in the process */
-    private String elementId;       
-    
+    private String elementId;
+
     /** The display name for the activity */
     private String activityName;
-    
+
     /** The XML tag of the activity as in the process file */
     private String activityType;
 
@@ -43,20 +43,27 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
 
     /** The associated process definition id */
     private String processDefinitionId;
-    
+
     /** The current state of activity */
     @Enumerated(EnumType.STRING)
     private BPMNActivityStatus status;
-    
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date startedDate;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)    
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date completedDate;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)    
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date cancelledDate;
-    
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Date errorDate;
+
+    private String errorMessage;
+
+    private String errorClassName;
+
     /** The associated process definition key of the activity as in the process file */
     private String processDefinitionKey;
 
@@ -64,8 +71,8 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
     private Integer processDefinitionVersion;
 
     /** The associated business key of the activity as in the process instance */
-    private String businessKey;    
-    
+    private String businessKey;
+
     public BPMNActivityEntity() {}
 
     public BPMNActivityEntity(String serviceName,
@@ -78,8 +85,8 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
               serviceVersion,
               appName,
               appVersion);
-    }    
-    
+    }
+
     public String getId() {
         return id;
     }
@@ -89,13 +96,15 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
         return elementId;
     };
 
+    @Override
     public String getActivityName() {
         return activityName;
     };
 
+    @Override
     public String getActivityType() {
         return activityType;
-    }; 
+    };
 
     @Override
     public String getProcessDefinitionId() {
@@ -115,92 +124,92 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
         this.status = status;
     }
 
-    
+
     public Date getStartedDate() {
         return startedDate;
     }
 
-    
+
     public void setStartedDate(Date startedDate) {
         this.startedDate = startedDate;
     }
 
-    
+
     public Date getCompletedDate() {
         return completedDate;
     }
 
-    
+
     public void setCompletedDate(Date completedDate) {
         this.completedDate = completedDate;
     }
 
-    
+
     public void setId(String id) {
         this.id = id;
     }
 
-    
+
     public void setElementId(String elementId) {
         this.elementId = elementId;
     }
 
-    
+
     public void setActivityName(String activityName) {
         this.activityName = activityName;
     }
 
-    
+
     public void setActivityType(String activityType) {
         this.activityType = activityType;
     }
 
-    
+
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
     }
 
-    
+
     public void setProcessDefinitionId(String processDefinitionId) {
         this.processDefinitionId = processDefinitionId;
     }
 
-    
+
     public Date getCancelledDate() {
         return cancelledDate;
     }
 
-    
+
     public void setCancelledDate(Date cancelledDate) {
         this.cancelledDate = cancelledDate;
     }
 
-    
+
     public String getProcessDefinitionKey() {
         return processDefinitionKey;
     }
 
-    
+
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
     }
 
-    
+
     public Integer getProcessDefinitionVersion() {
         return processDefinitionVersion;
     }
 
-    
+
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
     }
 
-    
+
     public String getBusinessKey() {
         return businessKey;
     }
 
-    
+
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
     }
@@ -234,18 +243,18 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
         if (getClass() != obj.getClass())
             return false;
         BPMNActivityEntity other = (BPMNActivityEntity) obj;
-        return Objects.equals(activityName, other.activityName) && 
-               Objects.equals(activityType, other.activityType) && 
-               Objects.equals(businessKey, other.businessKey) && 
-               Objects.equals(cancelledDate, other.cancelledDate) && 
-               Objects.equals(completedDate, other.completedDate) && 
-               Objects.equals(elementId, other.elementId) && 
+        return Objects.equals(activityName, other.activityName) &&
+               Objects.equals(activityType, other.activityType) &&
+               Objects.equals(businessKey, other.businessKey) &&
+               Objects.equals(cancelledDate, other.cancelledDate) &&
+               Objects.equals(completedDate, other.completedDate) &&
+               Objects.equals(elementId, other.elementId) &&
                Objects.equals(id, other.id) &&
-               Objects.equals(processDefinitionId, other.processDefinitionId) && 
-               Objects.equals(processDefinitionKey, other.processDefinitionKey) && 
-               Objects.equals(processDefinitionVersion, other.processDefinitionVersion) && 
-               Objects.equals(processInstanceId, other.processInstanceId) && 
-               Objects.equals(startedDate, other.startedDate) && 
+               Objects.equals(processDefinitionId, other.processDefinitionId) &&
+               Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
+               Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
+               Objects.equals(processInstanceId, other.processInstanceId) &&
+               Objects.equals(startedDate, other.startedDate) &&
                status == other.status;
     }
 
@@ -282,6 +291,36 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
         return builder.toString();
     }
 
-    
+
+    public Date getErrorDate() {
+        return errorDate;
+    }
+
+
+    public void setErrorDate(Date errorDate) {
+        this.errorDate = errorDate;
+    }
+
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+
+    public String getErrorClassName() {
+        return errorClassName;
+    }
+
+
+    public void setErrorClassName(String errorClassName) {
+        this.errorClassName = errorClassName;
+    }
+
+
 
 }
