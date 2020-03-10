@@ -314,4 +314,9 @@ public class AuditJPAAutoConfiguration {
         return new IntegrationResultReceivedEventConverter(eventContextInfoAppender);
     }
 
+    @ConditionalOnMissingBean
+    @Bean
+    public IntegrationErrorReceivedEventConverter integrationErrorReceivedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new IntegrationErrorReceivedEventConverter(eventContextInfoAppender);
+    }
 }
