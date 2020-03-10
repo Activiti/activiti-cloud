@@ -26,6 +26,21 @@
   </changeSet>
 
   <changeSet author="activiti-audit"
+             id="oracle-schema-m6" dbms="oracle">
+    <preConditions onFail="CONTINUE">
+      <not>
+        <tableExists tableName="audit_event_entity"/>
+      </not>
+    </preConditions>
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/01-alter.oracle.schema.m6.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-audit"
              id="initial-schema-m3" dbms="postgresql">
     <preConditions onFail="CONTINUE">
       <not>
@@ -39,7 +54,6 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
-
 
   <changeSet author="activiti-audit" id="alter-schema-m4" dbms="postgresql">
     <preConditions onFail="CONTINUE">
@@ -57,9 +71,30 @@
   </changeSet>
   
   <changeSet author="activiti-audit" id="alter-schema-m5" dbms="postgresql">
+    <preConditions onFail="CONTINUE">
+      <not>
+        <tableExists tableName="audit_event"/>
+        <sequenceExists sequenceName="audit_sequence"/>
+      </not>
+    </preConditions>
     <sqlFile dbms="postgresql"
              encoding="utf8"
              path="changelog/03-alter.pg.schema.m5.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+  
+  <changeSet author="activiti-audit" id="alter-schema-m6" dbms="postgresql">
+    <preConditions onFail="CONTINUE">
+      <not>
+        <tableExists tableName="audit_event"/>
+        <sequenceExists sequenceName="audit_sequence"/>
+      </not>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/04-alter.pg.schema.m6.sql"
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
