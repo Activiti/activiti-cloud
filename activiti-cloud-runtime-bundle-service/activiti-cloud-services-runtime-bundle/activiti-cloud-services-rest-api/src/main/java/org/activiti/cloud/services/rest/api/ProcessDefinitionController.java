@@ -1,5 +1,6 @@
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.annotations.ApiOperation;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
@@ -27,17 +28,20 @@ public interface ProcessDefinitionController {
             method = RequestMethod.GET,
             produces = "application/xml")
     @ResponseBody
+    @ApiOperation("getProcessModel")
     String getProcessModel(@PathVariable String id);
 
     @RequestMapping(value = "/{id}/model",
             method = RequestMethod.GET,
             produces = "application/json")
     @ResponseBody
+    @ApiOperation("getProcessModel")
     String getBpmnModel(@PathVariable String id);
 
     @RequestMapping(value = "/{id}/model",
             method = RequestMethod.GET,
             produces = "image/svg+xml")
     @ResponseBody
+    @ApiOperation("getProcessModel")
     String getProcessDiagram(@PathVariable String id);
 }
