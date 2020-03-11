@@ -18,9 +18,9 @@ package org.activiti.cloud.services.audit.jpa.converters.json;
 
 import java.util.List;
 
-public class ListJpaJsonConverter extends JpaJsonConverter<List> {
+public class ListOfStackTraceElementsJpaJsonConverter extends JpaJsonConverter<List> {
 
-    public ListJpaJsonConverter() {
+    public ListOfStackTraceElementsJpaJsonConverter() {
         super(List.class);
     }
 }

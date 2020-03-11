@@ -22,12 +22,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import java.util.List;
 
-import org.activiti.cloud.services.audit.jpa.converters.json.ListJpaJsonConverter;
+import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceElementsJpaJsonConverter;
 import org.junit.Test;
 
-public class ListJpaJsonConverterTest {
+public class ListOfStackTraceElementsJpaJsonConverterTest {
 
-    private ListJpaJsonConverter converter = new ListJpaJsonConverter();
+    private ListOfStackTraceElementsJpaJsonConverter converter = new ListOfStackTraceElementsJpaJsonConverter();
 
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation() throws Exception {
