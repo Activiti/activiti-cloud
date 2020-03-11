@@ -104,12 +104,7 @@ ingress:
   ws:
     enabled: false
 
-  path: /
-  paths:
-    subPaths:
-      - "/query"
-      - "/notifications"
-      - "/audit"
+  path: /query
 
   ## Set this to true in order to enable TLS on the ingress record
   tls: 
