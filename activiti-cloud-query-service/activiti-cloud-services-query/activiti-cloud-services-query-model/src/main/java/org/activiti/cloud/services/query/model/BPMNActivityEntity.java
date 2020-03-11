@@ -67,7 +67,7 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
 
     private String errorClassName;
 
-    @Convert(converter = VariableValueJsonConverter.class)
+    @Convert(converter = ListOfStackTraceElementsJsonConverter.class)
     @Column(columnDefinition="text")
     private List<StackTraceElement> stackTraceElements;
 
