@@ -16,12 +16,14 @@
 
 package org.activiti.cloud.query;
 
+import org.activiti.cloud.starter.audit.configuration.EnableActivitiAudit;
 import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @EnableActivitiQuery
+@EnableActivitiAudit
 public class QueryApplication {
 
     public static void main(String[] args) {
