@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1008,10 +1009,13 @@ public class AuditServiceIT {
 
         testEvents.add(cloudIntegrationResultReceivedEvent);
 
+        Error error = new Error("Error Message");
+        error.fillInStackTrace();
+
         CloudIntegrationErrorReceivedEventImpl cloudIntegrationErrorReceivedEvent = new CloudIntegrationErrorReceivedEventImpl(integrationContext,
-                                                                                                                               "Error Message",
-                                                                                                                               "lang.java.RuntimeException",
-                                                                                                                               Collections.emptyList());
+                                                                                                                               error.getMessage(),
+                                                                                                                               error.getClass().getName(),
+                                                                                                                               Arrays.asList(error.getStackTrace()));
         testEvents.add(cloudIntegrationErrorReceivedEvent);
 
         return testEvents;
