@@ -48,7 +48,7 @@ public class ListOfStackTraceElementsJsonConverter implements AttributeConverter
     @Override
     public List<StackTraceElement> convertToEntityAttribute(String dbData) {
         try {
-            return objectMapper.readValue(dbData, new TypeReference<List<v>>() {});
+            return objectMapper.readValue(dbData, new TypeReference<List<StackTraceElement>>() {});
         } catch (IOException e) {
             throw new QueryException("Unable to deserialize list of StackTraceElements", e);
         }
