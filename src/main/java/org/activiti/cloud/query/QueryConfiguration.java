@@ -49,7 +49,6 @@ public class QueryConfiguration {
 
     @Bean
     @Primary
-    //TODO: This bean should be removed? Because it is duplicated in Query and Audit, I used the one defined in Query.
     public ProcessSecurityPoliciesManager processSecurityPoliciesManager(SecurityManager securityManager, SecurityPoliciesProperties securityPoliciesProperties, SecurityPoliciesRestrictionApplier<GetProcessDefinitionsPayload> processDefinitionRestrictionApplier, SecurityPoliciesRestrictionApplier<GetProcessInstancesPayload> processInstanceRestrictionApplier) {
         return new ProcessSecurityPoliciesManagerImpl(securityManager, securityPoliciesProperties, processDefinitionRestrictionApplier, processInstanceRestrictionApplier);
     }
