@@ -25,7 +25,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
-import org.activiti.cloud.services.audit.jpa.converters.json.IntegrationContextJpaJsonConverter;
+import org.activiti.cloud.services.audit.jpa.converters.json.ListJpaJsonConverter;
 
 @Entity(name = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
 @DiscriminatorValue(value = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
@@ -36,7 +36,7 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
     private String errorMessage;
     private String errorClassName;
 
-    @Convert(converter = IntegrationContextJpaJsonConverter.class)
+    @Convert(converter = ListJpaJsonConverter.class)
     @Column(columnDefinition = "text")
     private List<StackTraceElement> stackTraceElements;
 
