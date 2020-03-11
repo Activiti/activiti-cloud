@@ -22,6 +22,7 @@ create table bpmn_activity
     error_date                 timestamp,
     error_message			   varchar(255),
     error_class_name    	   varchar(255),
+	stack_trace_elements 	   text,
     primary key (id)
 );
 create table bpmn_sequence_flow

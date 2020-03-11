@@ -72,6 +72,7 @@ public class IntegrationErrorReceivedEventHandler implements QueryEventHandler {
         bpmnActivityEntity.setStatus(BPMNActivityStatus.ERROR);
         bpmnActivityEntity.setErrorMessage(integrationEvent.getErrorMessage());
         bpmnActivityEntity.setErrorClassName(integrationEvent.getErrorClassName());
+        bpmnActivityEntity.setStackTraceElements(integrationEvent.getStackTraceElements());
 
         persistIntoDatabase(event,
                             bpmnActivityEntity);

@@ -1,8 +1,11 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -63,6 +66,10 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
     private String errorMessage;
 
     private String errorClassName;
+
+    @Convert(converter = VariableValueJsonConverter.class)
+    @Column(columnDefinition="text")
+    private List<StackTraceElement> stackTraceElements;
 
     /** The associated process definition key of the activity as in the process file */
     private String processDefinitionKey;
@@ -319,6 +326,16 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
 
     public void setErrorClassName(String errorClassName) {
         this.errorClassName = errorClassName;
+    }
+
+
+    public List<StackTraceElement> getStackTraceElements() {
+        return stackTraceElements;
+    }
+
+
+    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
+        this.stackTraceElements = stackTraceElements;
     }
 
 
