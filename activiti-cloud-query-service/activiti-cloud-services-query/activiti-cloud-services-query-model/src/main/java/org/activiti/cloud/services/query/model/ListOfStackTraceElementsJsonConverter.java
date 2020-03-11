@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ListOfStackTraceElementsJsonConverter implements AttributeConverter<List<StackTraceElement>, String> {
 
-    private static ObjectMapper objectMapper;
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     public ListOfStackTraceElementsJsonConverter() {
     }
