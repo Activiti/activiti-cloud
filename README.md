@@ -13,17 +13,16 @@ Activiti Cloud Query Service JPA Implementation. This service uses a Relational 
 
 As all our services, this module was build using our starters:
 
- -   [activiti-cloud-starter-query](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-query-service/activiti-cloud-starter-query) 
- -   [activiti-cloud-starter-audit](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-audit-service/activiti-audit-starter-query) 
- -   [activiti-cloud-starter-notification-graphql](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-notification-graphql-service/activiti-cloud-starter-notification-graphql) 
+- [activiti-cloud-starter-query](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-query-service/activiti-cloud-starter-query) 
+- [activiti-cloud-starter-audit](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-audit-service/activiti-audit-starter-query) 
+- [activiti-cloud-starter-notification-graphql](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-notification-graphql-service/activiti-cloud-starter-notification-graphql) 
 
 You can use them to create your own version of this service as with any other Spring Boot Starter.
 Alternative, you can also split in multiple services, for instance there are two examples that include only Activiti Cloud Query Notifications and Activiti Cloud Query Audit:
 
- -   [activiti-cloud-audit](https://github.com/activiti/activiti-cloud-audit) 
- -   [activiti-cloud-notification-graphql](https://github.com/activiti/activiti-cloud-notification-graphql) 
+- [activiti-cloud-audit](https://github.com/activiti/activiti-cloud-audit) 
+- [activiti-cloud-notification-graphql](https://github.com/activiti/activiti-cloud-notification-graphql) 
  
-
 For more information about his module and the starters you can take a look at our [Activiti & Activiti Cloud GitBook](https://activiti.gitbooks.io/activiti-7-developers-guide/content/components/activiti-cloud-app/QueryService.html)
 
 [Docker Image](https://hub.docker.com/r/activiti/activiti-cloud-query/)
