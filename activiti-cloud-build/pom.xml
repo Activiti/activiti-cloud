@@ -472,6 +472,7 @@
             <executions>
               <execution>
                 <id>sign-artifacts</id>
+                <phase>deploy</phase>
                 <goals>
                   <goal>sign</goal>
                 </goals>
