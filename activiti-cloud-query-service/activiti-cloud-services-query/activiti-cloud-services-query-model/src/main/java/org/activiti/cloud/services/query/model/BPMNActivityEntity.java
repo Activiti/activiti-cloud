@@ -212,9 +212,16 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
         return businessKey;
     }
 
-
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
+    }
+
+    public IntegrationContextEntity getIntegrationContext() {
+        return integrationContext;
+    }
+
+    public void setIntegrationContext(IntegrationContextEntity integrationContext) {
+        this.integrationContext = integrationContext;
     }
 
     @Override
@@ -228,6 +235,7 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
                                                completedDate,
                                                elementId,
                                                id,
+                                               integrationContext,
                                                processDefinitionId,
                                                processDefinitionKey,
                                                processDefinitionVersion,
@@ -239,12 +247,15 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         BPMNActivityEntity other = (BPMNActivityEntity) obj;
         return Objects.equals(activityName, other.activityName) &&
                Objects.equals(activityType, other.activityType) &&
@@ -253,6 +264,7 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
                Objects.equals(completedDate, other.completedDate) &&
                Objects.equals(elementId, other.elementId) &&
                Objects.equals(id, other.id) &&
+               Objects.equals(integrationContext, other.integrationContext) &&
                Objects.equals(processDefinitionId, other.processDefinitionId) &&
                Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
                Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
@@ -264,33 +276,38 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("BPMNActivityEntity [id=");
-        builder.append(id);
-        builder.append(", elementId=");
-        builder.append(elementId);
-        builder.append(", activityName=");
-        builder.append(activityName);
-        builder.append(", activityType=");
-        builder.append(activityType);
-        builder.append(", processInstanceId=");
-        builder.append(processInstanceId);
-        builder.append(", processDefinitionId=");
-        builder.append(processDefinitionId);
-        builder.append(", status=");
-        builder.append(status);
-        builder.append(", startedDate=");
-        builder.append(startedDate);
-        builder.append(", completedDate=");
-        builder.append(completedDate);
-        builder.append(", cancelledDate=");
-        builder.append(cancelledDate);
-        builder.append(", processDefinitionKey=");
-        builder.append(processDefinitionKey);
-        builder.append(", processDefinitionVersion=");
-        builder.append(processDefinitionVersion);
-        builder.append(", businessKey=");
-        builder.append(businessKey);
-        builder.append("]");
+        builder.append("BPMNActivityEntity [id=")
+               .append(id)
+               .append(", elementId=")
+               .append(elementId)
+               .append(", activityName=")
+               .append(activityName)
+               .append(", activityType=")
+               .append(activityType)
+               .append(", processInstanceId=")
+               .append(processInstanceId)
+               .append(", processDefinitionId=")
+               .append(processDefinitionId)
+               .append(", status=")
+               .append(status)
+               .append(", startedDate=")
+               .append(startedDate)
+               .append(", completedDate=")
+               .append(completedDate)
+               .append(", cancelledDate=")
+               .append(cancelledDate)
+               .append(", integrationContext=")
+               .append(integrationContext)
+               .append(", processDefinitionKey=")
+               .append(processDefinitionKey)
+               .append(", processDefinitionVersion=")
+               .append(processDefinitionVersion)
+               .append(", businessKey=")
+               .append(businessKey)
+               .append(", toString()=")
+               .append(super.toString())
+               .append("]");
         return builder.toString();
     }
+
 }
