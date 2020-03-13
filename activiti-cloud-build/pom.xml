@@ -165,7 +165,7 @@
     <url>https://travis-ci.com/Activiti/${project.scm.repository}</url>
   </ciManagement>
   <properties>
-    <project.scm.repository>activiti-cloud-build</project.scm.repository>
+    <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 

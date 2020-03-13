@@ -11,6 +11,10 @@
   <description>Activiti Cloud Mono :: Aggregator</description>
   <url>http://activiti.org</url>
 
+  <properties>
+    <project.scm.repository>activiti-cloud</project.scm.repository>
+  </properties>
+
   <modules>
     <module>activiti-cloud-build</module>
     <module>activiti-cloud-api</module>
@@ -24,6 +28,154 @@
     <module>activiti-cloud-notifications-graphql-service</module>
     <module>activiti-cloud-connectors</module>
   </modules>
+
+  <repositories>
+    <repository>
+      <id>activiti-releases</id>
+      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+    </repository>
+  </repositories>
+
+  <licenses>
+    <license>
+      <name>Apache v2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>almerico</id>
+      <name>Oleksandr Merkulov</name>
+      <organization>IntroPro Ventures</organization>
+      <organizationUrl>http://introproventures.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>balsarori</id>
+      <name>Bassam Al-Sarori</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>daisuke-yoshimoto</id>
+      <name>Daisuke Yoshimoto</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>erdemedeiros</id>
+      <name>Elias De Medeiros</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>eromano</id>
+      <name>Eugenio Romano</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>ffazzini</id>
+      <name>Francesco Fazzini</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>igdianov</id>
+      <name>Igor Dianov</name>
+      <organization>IntroPro Ventures</organization>
+      <organizationUrl>http://introproventures.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>jesty</id>
+      <name>Davide Cerbo</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>magemello</id>
+      <name>Mario Romano</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>mauriziovitale</id>
+      <name>Maurizio Vitale</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>miguelruizdev</id>
+      <name>Miguel Ruiz</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>mmartinadanx</id>
+      <name>Miguel Ángel Martín</name>
+      <organization>Ixxus</organization>
+      <organizationUrl>http://www.ixxus.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>mteodori</id>
+      <name>Marcello Teodori</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>nazarethjim</id>
+      <name>Nazareth Jimenez Vela</name>
+      <organization>Ixxus</organization>
+      <organizationUrl>http://www.ixxus.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>pmartinezga</id>
+      <name>Pablo Martinez Garcia</name>
+      <organization>Ixxus</organization>
+      <organizationUrl>http://www.ixxus.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>popovicsandras</id>
+      <name>András Popovics</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>robfrank</id>
+      <name>Roberto Franchini</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>zoltanpalfi</id>
+      <name>Zoltan Palfi</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>CTI777</id>
+      <name>Illia Goncharov</name>
+      <organization>IntroPro Ventures</organization>
+      <organizationUrl>http://introproventures.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>EquinoxBlack</id>
+      <name>Rodion Savchuk</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>VitoAlbano</id>
+      <name>Vito Albano</name>
+      <organization>Alfresco</organization>
+      <organizationUrl>http://alfresco.com</organizationUrl>
+    </developer>
+  </developers>
+  <scm>
+    <url>http://github.com/Activiti/${project.scm.repository}</url>
+    <connection>scm:git:git://github.com/Activiti/${project.scm.repository}.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/Activiti/${project.scm.repository}.git
+    </developerConnection>
+  </scm>
 
   <build>
     <plugins>
