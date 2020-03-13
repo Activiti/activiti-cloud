@@ -23,26 +23,26 @@ import javax.persistence.EntityManager;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity.IntegrationContextStatus;
 import org.activiti.cloud.services.query.model.QueryException;
 
-public class IntegrationErrorReceivedEventHandler implements QueryEventHandler {
+public class IntegrationRequestedEventHandler implements QueryEventHandler {
 
     private final IntegrationContextRepository repository;
     private final EntityManager entityManager;
 
-    public IntegrationErrorReceivedEventHandler(IntegrationContextRepository repository,
-                                                EntityManager entityManager) {
+    public IntegrationRequestedEventHandler(IntegrationContextRepository repository,
+                                            EntityManager entityManager) {
         this.repository = repository;
         this.entityManager = entityManager;
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudIntegrationErrorReceivedEvent integrationEvent = CloudIntegrationErrorReceivedEvent.class.cast(event);
+        CloudIntegrationRequestedEvent integrationEvent = CloudIntegrationRequestedEvent.class.cast(event);
 
         IntegrationContext integrationContext = integrationEvent.getEntity();
 
@@ -52,10 +52,10 @@ public class IntegrationErrorReceivedEventHandler implements QueryEventHandler {
         // Let's create entity if does not exists
         if(entity == null) {
             entity = new IntegrationContextEntity(event.getServiceName(),
-                                                        event.getServiceFullName(),
-                                                        event.getServiceVersion(),
-                                                        event.getAppName(),
-                                                        event.getAppVersion());
+                                                  event.getServiceFullName(),
+                                                  event.getServiceVersion(),
+                                                  event.getAppName(),
+                                                  event.getAppVersion());
             // Let use event id to persist activity id
             entity.setId(event.getId());
             entity.setClientId(integrationContext.getClientId());
@@ -69,11 +69,9 @@ public class IntegrationErrorReceivedEventHandler implements QueryEventHandler {
             entity.setBusinessKey(integrationContext.getBusinessKey());
         }
 
-        entity.setErrorDate(new Date(integrationEvent.getTimestamp()));
-        entity.setStatus(IntegrationContextStatus.ERROR_RECEIVED);
-        entity.setErrorMessage(integrationEvent.getErrorMessage());
-        entity.setErrorClassName(integrationEvent.getErrorClassName());
-        entity.setStackTraceElements(integrationEvent.getStackTraceElements());
+        entity.setRequestDate(new Date(integrationEvent.getTimestamp()));
+        entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
+        entity.setOutBoundVariables(entity.getOutBoundVariables());
 
         persistIntoDatabase(event,
                             entity);
@@ -85,13 +83,13 @@ public class IntegrationErrorReceivedEventHandler implements QueryEventHandler {
         try {
             repository.save(entity);
         } catch (Exception cause) {
-            throw new QueryException("Error handling CloudIntegrationErrorReceivedEvent[" + event + "]",
+            throw new QueryException("Error handling CloudIntegrationRequestedEvent[" + event + "]",
                                      cause);
         }
     }
 
     @Override
     public String getHandledEvent() {
-        return IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name();
+        return IntegrationEvents.INTEGRATION_REQUESTED.name();
     }
 }

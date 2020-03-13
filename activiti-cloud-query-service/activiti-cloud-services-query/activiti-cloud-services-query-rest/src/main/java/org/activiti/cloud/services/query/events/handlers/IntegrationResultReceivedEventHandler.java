@@ -16,71 +16,74 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Date;
+
 import javax.persistence.EntityManager;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity.BPMNActivityStatus;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
+import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
+import org.activiti.cloud.services.query.model.IntegrationContextEntity;
+import org.activiti.cloud.services.query.model.IntegrationContextEntity.IntegrationContextStatus;
 import org.activiti.cloud.services.query.model.QueryException;
 
 public class IntegrationResultReceivedEventHandler implements QueryEventHandler {
 
-    private final BPMNActivityRepository bpmnActivitiyRepository;
+    private final IntegrationContextRepository repository;
     private final EntityManager entityManager;
 
-    public IntegrationResultReceivedEventHandler(BPMNActivityRepository activitiyRepository,
+    public IntegrationResultReceivedEventHandler(IntegrationContextRepository repository,
                                                  EntityManager entityManager) {
-        this.bpmnActivitiyRepository = activitiyRepository;
+        this.repository = repository;
         this.entityManager = entityManager;
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudIntegrationErrorReceivedEvent integrationEvent = CloudIntegrationErrorReceivedEvent.class.cast(event);
+        CloudIntegrationResultReceivedEvent integrationEvent = CloudIntegrationResultReceivedEvent.class.cast(event);
 
         IntegrationContext integrationContext = integrationEvent.getEntity();
 
-        BPMNActivityEntity bpmnActivityEntity = bpmnActivitiyRepository.findByProcessInstanceIdAndElementId(integrationContext.getProcessInstanceId(),
-                                                                                                            integrationContext.getClientId());
+        IntegrationContextEntity entity = repository.findByProcessInstanceIdAndClientId(integrationContext.getProcessInstanceId(),
+                                                                                        integrationContext.getClientId());
 
         // Let's create entity if does not exists
-        if(bpmnActivityEntity == null) {
-            bpmnActivityEntity = new BPMNActivityEntity(event.getServiceName(),
-                                                        event.getServiceFullName(),
-                                                        event.getServiceVersion(),
-                                                        event.getAppName(),
-                                                        event.getAppVersion());
+        if(entity == null) {
+            entity = new IntegrationContextEntity(event.getServiceName(),
+                                                  event.getServiceFullName(),
+                                                  event.getServiceVersion(),
+                                                  event.getAppName(),
+                                                  event.getAppVersion());
             // Let use event id to persist activity id
-            bpmnActivityEntity.setId(event.getId());
-            bpmnActivityEntity.setElementId(integrationContext.getClientId());
-            bpmnActivityEntity.setActivityName(integrationContext.getClientName());
-            bpmnActivityEntity.setActivityType(integrationContext.getClientType());
-            bpmnActivityEntity.setProcessDefinitionId(integrationContext.getProcessDefinitionId());
-            bpmnActivityEntity.setProcessInstanceId(integrationContext.getProcessInstanceId());
-            bpmnActivityEntity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
-            bpmnActivityEntity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
-            bpmnActivityEntity.setBusinessKey(integrationContext.getBusinessKey());
+            entity.setId(event.getId());
+            entity.setClientId(integrationContext.getClientId());
+            entity.setClientName(integrationContext.getClientName());
+            entity.setClientType(integrationContext.getClientType());
+            entity.setConnectorType(integrationContext.getConnectorType());
+            entity.setProcessDefinitionId(integrationContext.getProcessDefinitionId());
+            entity.setProcessInstanceId(integrationContext.getProcessInstanceId());
+            entity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
+            entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
+            entity.setBusinessKey(integrationContext.getBusinessKey());
         }
 
-        if (!BPMNActivityStatus.COMPLETED.equals(bpmnActivityEntity.getStatus())) {
-            bpmnActivityEntity.setStatus(BPMNActivityStatus.COMPLETED);
-        }
+        entity.setResultDate(new Date(integrationEvent.getTimestamp()));
+        entity.setStatus(IntegrationContextStatus.RESULT_RECEIVED);
+        entity.setOutBoundVariables(entity.getOutBoundVariables());
 
         persistIntoDatabase(event,
-                            bpmnActivityEntity);
+                            entity);
 
     }
 
     private void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
-                                     BPMNActivityEntity entity) {
+                                     IntegrationContextEntity entity) {
         try {
-            bpmnActivitiyRepository.save(entity);
+            repository.save(entity);
         } catch (Exception cause) {
-            throw new QueryException("Error handling CloudBPMNActivityCancelledEvent[" + event + "]",
+            throw new QueryException("Error handling CloudIntegrationResultReceivedEvent[" + event + "]",
                                      cause);
         }
     }

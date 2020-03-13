@@ -75,6 +75,7 @@ public class QueryEventHandlerContextIT {
                 BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name(),
                 BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name(),
                 SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name(),
+                IntegrationEvents.INTEGRATION_REQUESTED.name(),
                 IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name(),
                 IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name()
         );
@@ -104,6 +105,7 @@ public class QueryEventHandlerContextIT {
         assertThat(handlers.get(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name())).isInstanceOf(BPMNActivityCompletedEventHandler.class);
         assertThat(handlers.get(BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name())).isInstanceOf(BPMNActivityCancelledEventHandler.class);
         assertThat(handlers.get(SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name())).isInstanceOf(BPMNSequenceFlowTakenEventHandler.class);
+        assertThat(handlers.get(IntegrationEvents.INTEGRATION_REQUESTED.name())).isInstanceOf(IntegrationRequestedEventHandler.class);
         assertThat(handlers.get(IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name())).isInstanceOf(IntegrationResultReceivedEventHandler.class);
         assertThat(handlers.get(IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name())).isInstanceOf(IntegrationErrorReceivedEventHandler.class);
     }

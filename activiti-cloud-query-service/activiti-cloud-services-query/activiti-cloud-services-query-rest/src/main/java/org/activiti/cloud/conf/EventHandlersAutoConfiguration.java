@@ -25,6 +25,7 @@ import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
+import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
@@ -38,6 +39,7 @@ import org.activiti.cloud.services.query.events.handlers.BPMNActivityCompletedEv
 import org.activiti.cloud.services.query.events.handlers.BPMNActivityStartedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.BPMNSequenceFlowTakenEventHandler;
 import org.activiti.cloud.services.query.events.handlers.IntegrationErrorReceivedEventHandler;
+import org.activiti.cloud.services.query.events.handlers.IntegrationRequestedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.IntegrationResultReceivedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessCancelledEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessCompletedEventHandler;
@@ -274,18 +276,26 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationResultReceivedEventHandler integrationResultReceivedEventHandler(BPMNActivityRepository bpmnActivityRepository,
+    public IntegrationResultReceivedEventHandler integrationResultReceivedEventHandler(IntegrationContextRepository repository,
                                                                                        EntityManager entityManager) {
-        return new IntegrationResultReceivedEventHandler(bpmnActivityRepository,
+        return new IntegrationResultReceivedEventHandler(repository,
                                                          entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationErrorReceivedEventHandler integrationErrorReceivedEventHandler(BPMNActivityRepository bpmnActivityRepository,
+    public IntegrationRequestedEventHandler integrationRequestedEventHandler(IntegrationContextRepository repository,
+                                                                             EntityManager entityManager) {
+        return new IntegrationRequestedEventHandler(repository,
+                                                    entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IntegrationErrorReceivedEventHandler integrationErrorReceivedEventHandler(IntegrationContextRepository repository,
                                                                                      EntityManager entityManager) {
-        return new IntegrationErrorReceivedEventHandler(bpmnActivityRepository,
-                                                         entityManager);
+        return new IntegrationErrorReceivedEventHandler(repository,
+                                                        entityManager);
     }
 
 
