@@ -13,12 +13,12 @@
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <enforceFail>true</enforceFail>
-    <activiti-cloud-modeling.version>7.1.720</activiti-cloud-modeling.version>
-    <example-runtime-bundle.version>7.1.403</example-runtime-bundle.version>
-    <example-cloud-connector.version>7.1.345</example-cloud-connector.version>
-    <activiti-cloud-audit.version>7.1.331</activiti-cloud-audit.version>
-    <activiti-cloud-query.version>7.1.338</activiti-cloud-query.version>
-    <activiti-cloud-notifications-graphql.version>7.1.368</activiti-cloud-notifications-graphql.version>
+    <activiti-cloud-modeling.version>7.1.723</activiti-cloud-modeling.version>
+    <example-runtime-bundle.version>7.1.405</example-runtime-bundle.version>
+    <example-cloud-connector.version>7.1.347</example-cloud-connector.version>
+    <activiti-cloud-audit.version>7.1.333</activiti-cloud-audit.version>
+    <activiti-cloud-query.version>7.1.340</activiti-cloud-query.version>
+    <activiti-cloud-notifications-graphql.version>7.1.371</activiti-cloud-notifications-graphql.version>
   </properties>
   <dependencies>
     <dependency>
