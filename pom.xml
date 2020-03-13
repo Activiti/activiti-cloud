@@ -13,6 +13,7 @@
 
   <properties>
     <project.scm.repository>activiti-cloud</project.scm.repository>
+    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
   </properties>
 
   <modules>
@@ -176,7 +177,6 @@
     <developerConnection>scm:git:ssh://git@github.com/Activiti/${project.scm.repository}.git
     </developerConnection>
   </scm>
-
   <build>
     <plugins>
       <plugin>
@@ -192,4 +192,40 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!-- Profile to sign artifacts, triggered when releasing -->
+    <profile>
+      <id>sign</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>${maven-gpg-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+      <distributionManagement>
+        <repository>
+          <id>central-releases-staging</id>
+          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
 </project>
