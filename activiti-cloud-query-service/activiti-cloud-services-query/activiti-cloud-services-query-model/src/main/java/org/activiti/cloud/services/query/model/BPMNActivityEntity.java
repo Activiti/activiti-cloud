@@ -1,20 +1,22 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.MapsId;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity(name="BPMNActivity")
 @Table(name="BPMN_ACTIVITY", indexes={
@@ -25,7 +27,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudBPMNActivity {
 
     public static enum BPMNActivityStatus {
-        STARTED, COMPLETED, CANCELLED, ERROR
+        STARTED, COMPLETED, CANCELLED
     }
 
     /** The unique identifier of this historic activity instance. */
@@ -60,16 +62,10 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date cancelledDate;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private Date errorDate;
-
-    private String errorMessage;
-
-    private String errorClassName;
-
-    @Convert(converter = ListOfStackTraceElementsJsonConverter.class)
-    @Column(columnDefinition="text")
-    private List<StackTraceElement> stackTraceElements;
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @MapsId
+    private IntegrationContextEntity integrationContext;
 
     /** The associated process definition key of the activity as in the process file */
     private String processDefinitionKey;
@@ -297,47 +293,4 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
         builder.append("]");
         return builder.toString();
     }
-
-
-    public Date getErrorDate() {
-        return errorDate;
-    }
-
-
-    public void setErrorDate(Date errorDate) {
-        this.errorDate = errorDate;
-    }
-
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-
-    public String getErrorClassName() {
-        return errorClassName;
-    }
-
-
-    public void setErrorClassName(String errorClassName) {
-        this.errorClassName = errorClassName;
-    }
-
-
-    public List<StackTraceElement> getStackTraceElements() {
-        return stackTraceElements;
-    }
-
-
-    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
-        this.stackTraceElements = stackTraceElements;
-    }
-
-
-
 }
