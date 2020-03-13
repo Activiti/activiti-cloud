@@ -34,3 +34,7 @@ create table integration_context
     
     primary key (id)
 );
+
+alter table bpmn_activity
+    add column integration_context_id varchar(255);
+
