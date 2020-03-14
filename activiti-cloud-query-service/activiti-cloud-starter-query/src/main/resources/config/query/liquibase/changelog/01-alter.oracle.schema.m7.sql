@@ -31,9 +31,9 @@ create table integration_context
 
 	inbound_variables	 	   	CLOB,
 	out_bound_variables 	   	CLOB,
+	
+    bpmn_activity_id    	   	varchar(255) not null,
     
     primary key (id)
 );
 
-alter table bpmn_activity
-    add column integration_context_id varchar(255);

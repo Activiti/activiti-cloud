@@ -19,7 +19,6 @@ create table bpmn_activity
     process_instance_id        varchar(255),
     started_date               timestamp,
     status                     varchar(255),
-    integration_context_id	   varchar(255),
 	
     primary key (id)
 );
@@ -33,7 +32,7 @@ create table bpmn_sequence_flow
     service_type               varchar(255),
     service_version            varchar(255),
     business_key               varchar(255),
-    taken_date                     timestamp,
+    taken_date                 timestamp,
     element_id                 varchar(255),
     event_id                   varchar(255),
     process_definition_id      varchar(255),
@@ -218,6 +217,8 @@ create table integration_context
 
 	inbound_variables	 	   	text,
 	out_bound_variables 	   	text,
+
+    bpmn_activiti_id    	   	varchar(255) not null,
     
     primary key (id)
 );
