@@ -12,10 +12,14 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity(name="IntegrationContext")
 @Table(name="INTEGRATION_CONTEXT", indexes={
@@ -70,9 +74,9 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
 
     private IntegrationContextStatus status;
 
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @MapsId
-//    private BPMNActivityEntity bpmnActivity;
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    private BPMNActivityEntity bpmnActivity;
 
     public IntegrationContextEntity() {
         this.id = UUID.randomUUID().toString();
@@ -142,15 +146,6 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         return outBoundVariables;
     }
 
-    public void addOutBoundVariable(String name,
-                                    Object value) {
-        outBoundVariables.put(name, value);
-    }
-
-    public void addOutBoundVariables(Map<String, Object> variables) {
-        outBoundVariables.putAll(variables);
-    }
-
     public String getProcessDefinitionKey() {
         return processDefinitionKey;
     }
@@ -202,76 +197,61 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
         this.parentProcessInstanceId = parentProcessInstanceId;
     }
 
-
     public Map<String, Object> getInboundVariables() {
         return inboundVariables;
     }
-
 
     public void setInboundVariables(Map<String, Object> inboundVariables) {
         this.inboundVariables = inboundVariables;
     }
 
-
     public Date getRequestDate() {
         return requestDate;
     }
-
 
     public void setRequestDate(Date requestDate) {
         this.requestDate = requestDate;
     }
 
-
     public Date getResultDate() {
         return resultDate;
     }
-
 
     public void setResultDate(Date resultDate) {
         this.resultDate = resultDate;
     }
 
-
     public Date getErrorDate() {
         return errorDate;
     }
-
 
     public void setErrorDate(Date errorDate) {
         this.errorDate = errorDate;
     }
 
-
     public String getErrorMessage() {
         return errorMessage;
     }
-
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
-
     public String getErrorClassName() {
         return errorClassName;
     }
-
 
     public void setErrorClassName(String errorClassName) {
         this.errorClassName = errorClassName;
     }
 
-
     public List<StackTraceElement> getStackTraceElements() {
         return stackTraceElements;
     }
 
-
     public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
         this.stackTraceElements = stackTraceElements;
     }
-
 
     public void setOutBoundVariables(Map<String, Object> outBoundVariables) {
         this.outBoundVariables = outBoundVariables;
@@ -316,25 +296,26 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
             return false;
         }
         IntegrationContextEntity other = (IntegrationContextEntity) obj;
-        return Objects.equals(businessKey, other.businessKey) && Objects.equals(clientId, other.clientId) && Objects
-                                                                                                                    .equals(clientName,
-                                                                                                                            other.clientName) && Objects.equals(clientType,
-                                                                                                                                                                other.clientType) && Objects.equals(connectorType,
-                                                                                                                                                                                                    other.connectorType) && Objects.equals(errorClassName,
-                                                                                                                                                                                                                                           other.errorClassName) && Objects.equals(errorDate,
-                                                                                                                                                                                                                                                                                   other.errorDate) && Objects.equals(errorMessage,
-                                                                                                                                                                                                                                                                                                                      other.errorMessage) && Objects.equals(id,
-                                                                                                                                                                                                                                                                                                                                                            other.id) && Objects.equals(inboundVariables,
-                                                                                                                                                                                                                                                                                                                                                                                        other.inboundVariables) && Objects.equals(outBoundVariables,
-                                                                                                                                                                                                                                                                                                                                                                                                                                  other.outBoundVariables) && Objects.equals(parentProcessInstanceId,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                             other.parentProcessInstanceId) && Objects.equals(processDefinitionId,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              other.processDefinitionId) && Objects.equals(processDefinitionKey,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           other.processDefinitionKey) && Objects.equals(processDefinitionVersion,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         other.processDefinitionVersion) && Objects.equals(processInstanceId,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           other.processInstanceId) && Objects.equals(requestDate,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      other.requestDate) && Objects.equals(resultDate,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           other.resultDate) && Objects.equals(stackTraceElements,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               other.stackTraceElements) && status == other.status;
+        return Objects.equals(businessKey, other.businessKey) &&
+               Objects.equals(clientId, other.clientId) &&
+               Objects.equals(clientName, other.clientName) &&
+               Objects.equals(clientType, other.clientType) &&
+               Objects.equals(connectorType, other.connectorType) &&
+               Objects.equals(errorClassName, other.errorClassName) &&
+               Objects.equals(errorDate,other.errorDate) &&
+               Objects.equals(errorMessage, other.errorMessage) &&
+               Objects.equals(id, other.id) &&
+               Objects.equals(inboundVariables, other.inboundVariables) &&
+               Objects.equals(outBoundVariables, other.outBoundVariables) &&
+               Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId) &&
+               Objects.equals(processDefinitionId, other.processDefinitionId) &&
+               Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
+               Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
+               Objects.equals(processInstanceId, other.processInstanceId) &&
+               Objects.equals(requestDate, other.requestDate) &&
+               Objects.equals(resultDate, other.resultDate) &&
+               Objects.equals(stackTraceElements, other.stackTraceElements) &&
+               status == other.status;
     }
 
     @Override
@@ -407,6 +388,16 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
 
     public void setStatus(IntegrationContextStatus status) {
         this.status = status;
+    }
+
+
+    public BPMNActivityEntity getBpmnActivity() {
+        return bpmnActivity;
+    }
+
+
+    public void setBpmnActivity(BPMNActivityEntity bpmnActivity) {
+        this.bpmnActivity = bpmnActivity;
     }
 
 }

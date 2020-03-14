@@ -9,7 +9,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -63,8 +62,7 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
     private Date cancelledDate;
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY, optional = true)
-    @MapsId
+    @OneToOne(mappedBy = "bpmnActivity", fetch = FetchType.LAZY, optional = true)
     private IntegrationContextEntity integrationContext;
 
     /** The associated process definition key of the activity as in the process file */
@@ -76,7 +74,7 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
     /** The associated business key of the activity as in the process instance */
     private String businessKey;
 
-    public BPMNActivityEntity() {}
+    public BPMNActivityEntity() { }
 
     public BPMNActivityEntity(String serviceName,
                               String serviceFullName,
@@ -127,86 +125,69 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
         this.status = status;
     }
 
-
     public Date getStartedDate() {
         return startedDate;
     }
-
 
     public void setStartedDate(Date startedDate) {
         this.startedDate = startedDate;
     }
 
-
     public Date getCompletedDate() {
         return completedDate;
     }
-
 
     public void setCompletedDate(Date completedDate) {
         this.completedDate = completedDate;
     }
 
-
     public void setId(String id) {
         this.id = id;
     }
-
 
     public void setElementId(String elementId) {
         this.elementId = elementId;
     }
 
-
     public void setActivityName(String activityName) {
         this.activityName = activityName;
     }
-
 
     public void setActivityType(String activityType) {
         this.activityType = activityType;
     }
 
-
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
     }
-
 
     public void setProcessDefinitionId(String processDefinitionId) {
         this.processDefinitionId = processDefinitionId;
     }
 
-
     public Date getCancelledDate() {
         return cancelledDate;
     }
-
 
     public void setCancelledDate(Date cancelledDate) {
         this.cancelledDate = cancelledDate;
     }
 
-
     public String getProcessDefinitionKey() {
         return processDefinitionKey;
     }
-
 
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
     }
 
-
     public Integer getProcessDefinitionVersion() {
         return processDefinitionVersion;
     }
 
-
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
     }
-
 
     public String getBusinessKey() {
         return businessKey;
@@ -307,6 +288,7 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
                .append(", toString()=")
                .append(super.toString())
                .append("]");
+
         return builder.toString();
     }
 
