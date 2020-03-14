@@ -276,26 +276,26 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationResultReceivedEventHandler integrationResultReceivedEventHandler(IntegrationContextRepository repository,
-                                                                                       EntityManager entityManager) {
-        return new IntegrationResultReceivedEventHandler(repository,
-                                                         entityManager);
+    public IntegrationResultReceivedEventHandler integrationResultReceivedEventHandler(IntegrationContextRepository integrationContextRepository,
+                                                                                       BPMNActivityRepository bpmnActivityRepository) {
+        return new IntegrationResultReceivedEventHandler(integrationContextRepository,
+                                                         bpmnActivityRepository);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationRequestedEventHandler integrationRequestedEventHandler(IntegrationContextRepository repository,
-                                                                             EntityManager entityManager) {
-        return new IntegrationRequestedEventHandler(repository,
-                                                    entityManager);
+    public IntegrationRequestedEventHandler integrationRequestedEventHandler(IntegrationContextRepository integrationContextRepository,
+                                                                             BPMNActivityRepository bpmnActivityRepository) {
+        return new IntegrationRequestedEventHandler(integrationContextRepository,
+                                                    bpmnActivityRepository);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationErrorReceivedEventHandler integrationErrorReceivedEventHandler(IntegrationContextRepository repository,
-                                                                                     EntityManager entityManager) {
-        return new IntegrationErrorReceivedEventHandler(repository,
-                                                        entityManager);
+    public IntegrationErrorReceivedEventHandler integrationErrorReceivedEventHandler(IntegrationContextRepository integrationContextRepository,
+                                                                                     BPMNActivityRepository bpmnActivityRepository) {
+        return new IntegrationErrorReceivedEventHandler(integrationContextRepository,
+                                                        bpmnActivityRepository);
     }
 
 

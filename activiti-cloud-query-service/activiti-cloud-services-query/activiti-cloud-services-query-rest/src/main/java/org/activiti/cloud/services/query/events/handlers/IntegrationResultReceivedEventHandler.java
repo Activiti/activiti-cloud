@@ -18,56 +18,27 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
 
-import javax.persistence.EntityManager;
-
-import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
+import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity.IntegrationContextStatus;
-import org.activiti.cloud.services.query.model.QueryException;
 
-public class IntegrationResultReceivedEventHandler implements QueryEventHandler {
+public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
-    private final IntegrationContextRepository repository;
-    private final EntityManager entityManager;
-
-    public IntegrationResultReceivedEventHandler(IntegrationContextRepository repository,
-                                                 EntityManager entityManager) {
-        this.repository = repository;
-        this.entityManager = entityManager;
+    public IntegrationResultReceivedEventHandler(IntegrationContextRepository integrationContextRepository,
+                                                 BPMNActivityRepository bpmnActivityRepository) {
+        super(integrationContextRepository,
+              bpmnActivityRepository);
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudIntegrationResultReceivedEvent integrationEvent = CloudIntegrationResultReceivedEvent.class.cast(event);
 
-        IntegrationContext integrationContext = integrationEvent.getEntity();
-
-        IntegrationContextEntity entity = repository.findByProcessInstanceIdAndClientId(integrationContext.getProcessInstanceId(),
-                                                                                        integrationContext.getClientId());
-
-        // Let's create entity if does not exists
-        if(entity == null) {
-            entity = new IntegrationContextEntity(event.getServiceName(),
-                                                  event.getServiceFullName(),
-                                                  event.getServiceVersion(),
-                                                  event.getAppName(),
-                                                  event.getAppVersion());
-            // Let use event id to persist activity id
-            entity.setId(event.getId());
-            entity.setClientId(integrationContext.getClientId());
-            entity.setClientName(integrationContext.getClientName());
-            entity.setClientType(integrationContext.getClientType());
-            entity.setConnectorType(integrationContext.getConnectorType());
-            entity.setProcessDefinitionId(integrationContext.getProcessDefinitionId());
-            entity.setProcessInstanceId(integrationContext.getProcessInstanceId());
-            entity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
-            entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
-            entity.setBusinessKey(integrationContext.getBusinessKey());
-        }
+        IntegrationContextEntity entity = findOrCreateIntegrationContextEntity(integrationEvent);
 
         entity.setResultDate(new Date(integrationEvent.getTimestamp()));
         entity.setStatus(IntegrationContextStatus.RESULT_RECEIVED);
@@ -76,16 +47,6 @@ public class IntegrationResultReceivedEventHandler implements QueryEventHandler 
         persistIntoDatabase(event,
                             entity);
 
-    }
-
-    private void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
-                                     IntegrationContextEntity entity) {
-        try {
-            repository.save(entity);
-        } catch (Exception cause) {
-            throw new QueryException("Error handling CloudIntegrationResultReceivedEvent[" + event + "]",
-                                     cause);
-        }
     }
 
     @Override
