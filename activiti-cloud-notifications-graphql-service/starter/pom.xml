@@ -7,7 +7,7 @@
     <relativePath>../dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
-  
+
   <name>Activiti Cloud Notifications :: Starter :: GraphQL</name>
   <dependencies>
     <dependency>
@@ -140,36 +140,35 @@
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-test</artifactId>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency> 
-      <groupId>org.activiti.cloud.api</groupId> 
-      <artifactId>activiti-cloud-api-model-shared-impl</artifactId>     
+    <dependency>
+      <groupId>org.activiti.cloud.api</groupId>
+      <artifactId>activiti-cloud-api-model-shared-impl</artifactId>
       <scope>test</scope>
-    </dependency>     
-    <dependency> 
-      <groupId>org.activiti.cloud.api</groupId> 
-      <artifactId>activiti-cloud-api-process-model-impl</artifactId>     
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.api</groupId>
+      <artifactId>activiti-cloud-api-process-model-impl</artifactId>
       <scope>test</scope>
-    </dependency>   
-    <dependency> 
-      <groupId>org.activiti.cloud.api</groupId> 
-      <artifactId>activiti-cloud-api-task-model-impl</artifactId>     
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud.api</groupId>
+      <artifactId>activiti-cloud-api-task-model-impl</artifactId>
       <scope>test</scope>
-    </dependency>      
+    </dependency>
   </dependencies>
   <profiles>
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
+        <activeByDefault>true</activeByDefault>
         <property>
-          <name>skipITs</name>
-          <value>false</value>
+          <name>!skipITs</name>
         </property>
       </activation>
       <build>
@@ -177,7 +176,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <configuration> 
+            <configuration>
               <startParallel>true</startParallel>
               <images>
                 <image>
@@ -227,5 +226,5 @@
         </plugins>
       </build>
     </profile>
-  </profiles>  
+  </profiles>
 </project>

@@ -14,7 +14,6 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Modeling Services :: Parent</name>
   <modules>
-
     <module>activiti-cloud-modeling-dependencies</module>
     <module>activiti-cloud-services-modeling</module>
     <module>activiti-cloud-starter-modeling</module>
@@ -30,7 +29,6 @@
     <everit-json-schema.version>1.12.1</everit-json-schema.version>
     <json.version>20180813</json.version>
     <commons-collections4.version>4.1</commons-collections4.version>
-    <skipITs>false</skipITs>
   </properties>
   <dependencyManagement>
     <dependencies>

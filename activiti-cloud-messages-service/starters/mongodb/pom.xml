@@ -23,10 +23,9 @@
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
+        <activeByDefault>true</activeByDefault>
         <property>
-          <name>skipITs</name>
-          <value>false</value>
+          <name>!skipITs</name>
         </property>
       </activation>
       <build>
