@@ -16,11 +16,39 @@
 
 package org.activiti.cloud.services.audit.jpa.converters.json;
 
+import java.io.IOException;
 import java.util.List;
 
-public class ListOfStackTraceElementsJpaJsonConverter extends JpaJsonConverter<List> {
+import javax.persistence.AttributeConverter;
 
-    public ListOfStackTraceElementsJpaJsonConverter() {
-        super(List.class);
+import org.activiti.cloud.services.audit.api.AuditException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+public class ListOfStackTraceElementsJpaJsonConverter implements AttributeConverter<List<StackTraceElement>, String> {
+
+    private final static ObjectMapper objectMapper = new ObjectMapper();
+
+    @Override
+    public String convertToDatabaseColumn(List<StackTraceElement> entity) {
+        try {
+            return objectMapper.writeValueAsString(entity);
+        } catch (JsonProcessingException e) {
+            throw new AuditException("Unable to serialize object.",
+                                     e);
+        }
+    }
+
+    @Override
+    public List<StackTraceElement> convertToEntityAttribute(String entityTextRepresentation) {
+        try {
+            return objectMapper.readValue(entityTextRepresentation,
+                                          new TypeReference<List<StackTraceElement>>() { });
+        } catch (IOException e) {
+            throw new AuditException("Unable to deserialize object.",
+                                        e);
+        }
     }
 }
