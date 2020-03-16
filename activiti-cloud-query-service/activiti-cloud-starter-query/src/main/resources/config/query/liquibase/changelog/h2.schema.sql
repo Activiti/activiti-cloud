@@ -218,8 +218,6 @@ create table integration_context
 	inbound_variables	 	   	text,
 	out_bound_variables 	   	text,
 
-    bpmn_activity_id    	   	varchar(255) not null,
-    
     primary key (id)
 );
 

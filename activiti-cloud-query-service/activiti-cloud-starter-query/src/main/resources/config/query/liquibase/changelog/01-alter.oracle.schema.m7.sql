@@ -32,8 +32,6 @@ create table integration_context
 	inbound_variables	 	   	CLOB,
 	out_bound_variables 	   	CLOB,
 	
-    bpmn_activity_id    	   	varchar(255) not null,
-    
     primary key (id)
 );
 

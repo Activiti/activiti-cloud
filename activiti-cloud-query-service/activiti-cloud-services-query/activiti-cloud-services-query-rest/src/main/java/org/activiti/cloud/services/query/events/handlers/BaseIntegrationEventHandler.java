@@ -11,12 +11,12 @@ import org.activiti.cloud.services.query.model.QueryException;
 
 public abstract class BaseIntegrationEventHandler {
 
-    protected final IntegrationContextRepository repository;
+    protected final IntegrationContextRepository integrationContextRepository;
     protected final BPMNActivityRepository bpmnActivityRepository;
 
-    public BaseIntegrationEventHandler(IntegrationContextRepository repository,
+    public BaseIntegrationEventHandler(IntegrationContextRepository integrationContextRepository,
                                        BPMNActivityRepository bpmnActivityRepository) {
-        this.repository = repository;
+        this.integrationContextRepository = integrationContextRepository;
         this.bpmnActivityRepository = bpmnActivityRepository;
     }
 
@@ -24,8 +24,8 @@ public abstract class BaseIntegrationEventHandler {
 
         IntegrationContext integrationContext = event.getEntity();
 
-        IntegrationContextEntity entity = repository.findByProcessInstanceIdAndClientId(integrationContext.getProcessInstanceId(),
-                                                                                        integrationContext.getClientId());
+        IntegrationContextEntity entity = integrationContextRepository.findByProcessInstanceIdAndClientId(integrationContext.getProcessInstanceId(),
+                                                                                                          integrationContext.getClientId());
         // Let's create entity if does not exists
         if(entity == null) {
             BPMNActivityEntity bpmnActivityEntity = bpmnActivityRepository.findByProcessInstanceIdAndElementId(integrationContext.getProcessInstanceId(),
@@ -36,7 +36,7 @@ public abstract class BaseIntegrationEventHandler {
                                                         event.getAppName(),
                                                         event.getAppVersion());
             // Let use event id to persist activity id
-            entity.setId(event.getId());
+            entity.setId(bpmnActivityEntity.getId());
             entity.setClientId(integrationContext.getClientId());
             entity.setClientName(integrationContext.getClientName());
             entity.setClientType(integrationContext.getClientType());
@@ -46,22 +46,19 @@ public abstract class BaseIntegrationEventHandler {
             entity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
             entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
             entity.setBusinessKey(integrationContext.getBusinessKey());
-
             entity.setBpmnActivity(bpmnActivityEntity);
         }
 
         return entity;
     }
 
-
     protected void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
                                        IntegrationContextEntity entity) {
         try {
-            repository.save(entity);
+            integrationContextRepository.save(entity);
         } catch (Exception cause) {
             throw new QueryException("Error handling CloudIntegrationEvent[" + event + "]",
                                      cause);
         }
     }
-
 }

@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudBPMNActivity {
 
     public static enum BPMNActivityStatus {
-        STARTED, COMPLETED, CANCELLED
+        STARTED, COMPLETED, CANCELLED, ERROR
     }
 
     /** The unique identifier of this historic activity instance. */

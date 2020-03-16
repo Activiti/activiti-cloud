@@ -14,6 +14,7 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -76,6 +77,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
     private BPMNActivityEntity bpmnActivity;
 
     public IntegrationContextEntity() {
