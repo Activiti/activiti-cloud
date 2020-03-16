@@ -4,7 +4,7 @@
  * pursuant to a written agreement and any use of this program without such an
  * agreement is prohibited.
  */
-package org.activiti.cloud.query;
+package org.activiti.cloud.query.configuration;
 
 import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.model.payloads.GetProcessInstancesPayload;

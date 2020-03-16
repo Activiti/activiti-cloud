@@ -9,7 +9,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {QueryApplication.class})
-@DirtiesContext
 @WebAppConfiguration
 public class ApplicationIT {
 
