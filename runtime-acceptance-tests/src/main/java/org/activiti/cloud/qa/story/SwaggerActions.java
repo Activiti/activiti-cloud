@@ -57,18 +57,18 @@ public class SwaggerActions {
     @Then("the user gets swagger specification following Alfresco MediaType")
     public void isFollowingAlfrescoMediaType(){
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.RUNTIME_BUNDLE))
-                .contains("ListResponseContent«CloudProcessDefinition»")
-                .contains("EntriesResponseContent«CloudProcessDefinition»")
-                .contains("EntryResponseContent«CloudProcessDefinition»")
+                .contains("ListResponseContentOfCloudProcessDefinition")
+                .contains("EntriesResponseContentOfCloudProcessDefinition")
+                .contains("EntryResponseContentOfCloudProcessDefinition")
                 .contains("payloadType")
                 .doesNotContain("PagedResources«")
                 .doesNotContain("Resources«Resource«")
                 .doesNotContain("Resource«");
 
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.QUERY))
-                .contains("ListResponseContent«CloudProcessDefinition»")
-                .contains("EntriesResponseContent«CloudProcessDefinition»")
-                .contains("EntryResponseContent«CloudProcessDefinition»")
+                .contains("ListResponseContentOfCloudProcessDefinition")
+                .contains("EntriesResponseContentOfCloudProcessDefinition")
+                .contains("EntryResponseContentOfCloudProcessDefinition")
                 .doesNotContain("PagedResources«")
                 .doesNotContain("Resources«Resource«")
                 .doesNotContain("Resource«");
