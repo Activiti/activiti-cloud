@@ -29,7 +29,7 @@ import org.activiti.cloud.services.query.model.IntegrationContextEntity.Integrat
 public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
     public IntegrationRequestedEventHandler(IntegrationContextRepository repository,
-                                                BPMNActivityRepository bpmnActivityRepository) {
+                                            BPMNActivityRepository bpmnActivityRepository) {
         super(repository,
               bpmnActivityRepository);
     }
