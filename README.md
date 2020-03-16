@@ -13,9 +13,9 @@ Activiti Cloud Query Service JPA Implementation. This service uses a Relational 
 
 As all our services, this module was build using our starters:
 
-- [activiti-cloud-starter-query](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-query-service/activiti-cloud-starter-query)
-- [activiti-cloud-starter-audit](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-audit-service/activiti-audit-starter-query)
-- [activiti-cloud-starter-notification-graphql](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-notification-graphql-service/activiti-cloud-starter-notification-graphql)
+  - [activiti-cloud-starter-query](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-query-service/activiti-cloud-starter-query)
+  - [activiti-cloud-starter-audit](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-audit-service/activiti-audit-starter-query)
+  - [activiti-cloud-starter-notification-graphql](https://github.com/Activiti/activiti-cloud/tree/develop/activiti-cloud-notification-graphql-service/activiti-cloud-starter-notification-graphql)
 
 You can use them to create your own version of this service as with any other Spring Boot Starter.
 Alternative, you can also split in multiple services, for instance there are two examples that include only Activiti Cloud Query Notifications and Activiti Cloud Query Audit:
