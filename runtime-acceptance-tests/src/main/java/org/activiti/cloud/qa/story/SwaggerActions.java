@@ -66,9 +66,9 @@ public class SwaggerActions {
                 .doesNotContain("Resource«");
 
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.QUERY))
-                .contains("ListResponseContent«CloudProcessDefinition»")
-                .contains("EntriesResponseContent«CloudProcessDefinition»")
-                .contains("EntryResponseContent«CloudProcessDefinition»")
+                .contains("ListResponseContentOfCloudProcessDefinition")
+                .contains("EntriesResponseContentOfCloudProcessDefinition")
+                .contains("EntryResponseContentOfCloudProcessDefinition")
                 .doesNotContain("PagedResources«")
                 .doesNotContain("Resources«Resource«")
                 .doesNotContain("Resource«");
