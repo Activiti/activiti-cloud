@@ -12,6 +12,7 @@ create table integration_context
     process_definition_key     	varchar(255),
     process_definition_version 	integer,
     process_instance_id        	varchar(255),
+    parent_process_instance_id  varchar(255),
     business_key		      	varchar(255),
 
     client_id                  	varchar(255),
