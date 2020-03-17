@@ -37,14 +37,17 @@ public class SwaggerIT {
     public void defaultSpecificationFileShouldBeAlfrescoFormat() throws Exception {
         MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
         mockMvc.perform(MockMvcRequestBuilders.get("/v2/api-docs").accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().string(
-                both(notNullValue(String.class))
-                .and(not(containsString("PagedResources«")))
-                .and(not(containsString("PagedResources«")))
-                .and(not(containsString("Resources«Resource«")))
-                .and(not(containsString("Resource«")))
-            ));
+                .andExpect(status().isOk())
+                .andExpect(content().string(
+                        both(notNullValue(String.class))
+                                .and(containsString("ListResponseContentOfCloudProcessDefinition"))
+                                .and(containsString("EntriesResponseContentOfCloudProcessDefinition"))
+                                .and(containsString("EntryResponseContentOfCloudProcessDefinition"))
+                                .and(not(containsString("PagedResources«")))
+                                .and(not(containsString("PagedResources«")))
+                                .and(not(containsString("Resources«Resource«")))
+                                .and(not(containsString("Resource«")))
+                                           ));
     }
 
 }
