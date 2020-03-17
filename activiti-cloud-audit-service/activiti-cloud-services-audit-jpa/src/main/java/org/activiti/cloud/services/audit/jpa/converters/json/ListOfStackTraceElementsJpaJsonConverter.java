@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.audit.jpa.converters.json;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.AttributeConverter;
@@ -44,8 +45,12 @@ public class ListOfStackTraceElementsJpaJsonConverter implements AttributeConver
     @Override
     public List<StackTraceElement> convertToEntityAttribute(String entityTextRepresentation) {
         try {
-            return objectMapper.readValue(entityTextRepresentation,
-                                          new TypeReference<List<StackTraceElement>>() { });
+            if(entityTextRepresentation != null && entityTextRepresentation.length() > 0) {
+                return objectMapper.readValue(entityTextRepresentation,
+                                              new TypeReference<List<StackTraceElement>>() { });
+            } else {
+                return Collections.emptyList();
+            }
         } catch (IOException e) {
             throw new AuditException("Unable to deserialize object.",
                                         e);

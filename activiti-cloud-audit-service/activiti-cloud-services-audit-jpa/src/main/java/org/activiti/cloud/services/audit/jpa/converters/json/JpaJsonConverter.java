@@ -126,8 +126,13 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
     @Override
     public T convertToEntityAttribute(String entityTextRepresentation) {
         try {
-            return objectMapper.readValue(entityTextRepresentation,
-                                          entityClass);
+            if(entityTextRepresentation != null && entityTextRepresentation.length() > 0) {
+                return objectMapper.readValue(entityTextRepresentation,
+                                              entityClass);
+            } else {
+                return null;
+            }
+
         } catch (IOException e) {
             throw new AuditException("Unable to deserialize object.",
                                         e);
