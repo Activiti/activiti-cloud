@@ -17,7 +17,9 @@
 package org.activiti.cloud.services.query.model;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.AttributeConverter;
 
@@ -48,7 +50,11 @@ public class ListOfStackTraceElementsJsonConverter implements AttributeConverter
     @Override
     public List<StackTraceElement> convertToEntityAttribute(String dbData) {
         try {
-            return objectMapper.readValue(dbData, new TypeReference<List<StackTraceElement>>() {});
+            if(dbData != null && dbData.length() > 0) {
+                return objectMapper.readValue(dbData, new TypeReference<Map<String, Object>>() {});
+            } else {
+                return Collections.emptyList();
+            }
         } catch (IOException e) {
             throw new QueryException("Unable to deserialize list of StackTraceElements", e);
         }
