@@ -139,7 +139,6 @@
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
         <property>
           <name>!skipITs</name>
         </property>
