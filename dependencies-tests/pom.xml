@@ -13,11 +13,11 @@
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <enforceFail>true</enforceFail>
-    <activiti-cloud-modeling.version>7.1.723</activiti-cloud-modeling.version>
-    <example-runtime-bundle.version>7.1.405</example-runtime-bundle.version>
-    <example-cloud-connector.version>7.1.347</example-cloud-connector.version>
+    <activiti-cloud-modeling.version>7.1.726</activiti-cloud-modeling.version>
+    <example-runtime-bundle.version>7.1.407</example-runtime-bundle.version>
+    <example-cloud-connector.version>7.1.350</example-cloud-connector.version>
     <activiti-cloud-audit.version>7.1.333</activiti-cloud-audit.version>
-    <activiti-cloud-query.version>7.1.340</activiti-cloud-query.version>
+    <activiti-cloud-query.version>7.1.344</activiti-cloud-query.version>
     <activiti-cloud-notifications-graphql.version>7.1.371</activiti-cloud-notifications-graphql.version>
   </properties>
   <dependencies>
@@ -115,6 +115,30 @@
       <version>${activiti-cloud-query.version}</version>
       <type>pom</type>
       <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.javassist</groupId>
+          <artifactId>javassist</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcpkix-jdk15on</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.reflections</groupId>
+          <artifactId>reflections</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.reflections</groupId>
+          <artifactId>reflections</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>org.activiti.cloud.query</groupId>
           <artifactId>activiti-cloud-starter-query</artifactId>
