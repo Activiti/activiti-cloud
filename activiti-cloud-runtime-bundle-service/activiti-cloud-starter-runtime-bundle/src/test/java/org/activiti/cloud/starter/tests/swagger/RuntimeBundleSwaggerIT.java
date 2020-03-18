@@ -52,9 +52,9 @@ public class RuntimeBundleSwaggerIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.paths").isNotEmpty())
             .andExpect(jsonPath("$.definitions").isNotEmpty())
-            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContent"))))
-            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContent"))))
-            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContent"))))
+            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("ListResponseContentOf"))))
+            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntriesResponseContentOf"))))
+            .andExpect(jsonPath("$.definitions").value(hasKey(startsWith("EntryResponseContentOf"))))
             .andExpect(jsonPath("$.definitions[\"SaveTaskPayload\"].properties").value(hasKey("payloadType")))
             .andExpect(jsonPath("$.info.title").value("Activiti Cloud Starter :: Runtime Bundle ReST API"));
 

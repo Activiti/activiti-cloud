@@ -66,6 +66,8 @@ public class SwaggerDocketBuilder {
         if (apiInfo != null) {
             baseDocket.apiInfo(apiInfo);
         }
+
+        baseDocket.forCodeGeneration(true);
         return applyCustomizations(baseDocket);
     }
 
