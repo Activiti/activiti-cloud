@@ -26,7 +26,7 @@ import static org.activiti.cloud.services.modeling.validation.DNSNameValidator.D
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import java.io.IOException;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
@@ -41,8 +41,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.io.IOException;
 
 /**
  * Integration tests for connector models validation rest api
@@ -68,7 +66,7 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_returnStatusNoContent_when_validatingSimpleConnector() throws IOException {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
                 .multiPart("file",
@@ -84,7 +82,7 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorTextContentType() throws IOException {
-       Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+       final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
                 .multiPart("file",
@@ -100,7 +98,7 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithEvents() throws IOException {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
                 .multiPart("file",
@@ -116,7 +114,7 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidSimpleConnector() throws IOException {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
                 given()
@@ -139,7 +137,7 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_throwSyntacticValidationException_when_validatingJsonInvalidConnector() throws IOException {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
                 given()
@@ -158,7 +156,7 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_throwSyntacticValidationException_when_validatingInvalidConnectorTextContentType() throws IOException {
-       Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+       final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
                 given()
@@ -177,7 +175,7 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameTooLong() throws IOException {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
                 given()
@@ -197,7 +195,7 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameEmpty() throws IOException {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
                 given()
@@ -217,7 +215,7 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUnderscore() throws IOException {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
                 given()
@@ -236,20 +234,36 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUppercase() throws IOException {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
                 given()
                         .multiPart("file",
                                    "invalid-connector-name-with-uppercase.json",
-                                   resourceAsByteArray("connector/invalid-connector-name-with-uppercase.json"),
-                                   CONTENT_TYPE_JSON)
-                        .post("/v1/models/{modelId}/validate",
-                              connectorModel.getId())
-                        .then()
-                        .log().all()
-                        .expect(status().isBadRequest()))
-                .isSemanticValidationException()
-                    .hasValidationErrors("string [NameWithUppercase] does not match pattern " + DNS_LABEL_REGEX);
+                            resourceAsByteArray("connector/invalid-connector-name-with-uppercase.json"),
+                            CONTENT_TYPE_JSON)
+                    .post("/v1/models/{modelId}/validate",
+                        connectorModel.getId())
+                    .then()
+                    .log().all()
+                    .expect(status().isBadRequest()))
+            .isSemanticValidationException()
+            .hasValidationErrors("string [NameWithUppercase] does not match pattern " + DNS_LABEL_REGEX);
+    }
+
+    @Test
+    public void should_returnStatusNoContent_when_validatingConnectorWithCustomTypesInEventsAndActions() throws IOException {
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+
+        given()
+            .multiPart("file",
+                "connector-with-custom-type.json",
+                resourceAsByteArray("connector/connector-with-custom-type.json"),
+                "text/plain")
+            .post("/v1/models/{modelId}/validate",
+                connectorModel.getId())
+            .then()
+            .expect(status().isNoContent())
+            .body(isEmptyString());
     }
 }
