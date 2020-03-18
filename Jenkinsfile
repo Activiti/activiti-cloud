@@ -20,7 +20,7 @@ pipeline {
         steps {
           container('maven') {
             sh "mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$PREVIEW_VERSION"
-            sh "mvn install"
+            sh "mvn install -DskipITs"
             sh 'export VERSION=$PREVIEW_VERSION'
           }
         }
@@ -40,7 +40,7 @@ pipeline {
             sh "echo \$(jx-release-version) > VERSION"
             sh "mvn versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=\$(cat VERSION)"
 
-            sh 'mvn clean verify'
+            sh 'mvn clean verify -DskipITs'
 
             sh "git add --all"
             sh "git commit -m \"Release \$(cat VERSION)\" --allow-empty"
