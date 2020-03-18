@@ -317,6 +317,7 @@
                     <include>**/*ITSupport.java</include>
                   </includes>
                   <skipTests>false</skipTests>
+                  <skipITs>false</skipITs>
                 </configuration>
               </execution>
             </executions>
