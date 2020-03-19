@@ -236,10 +236,8 @@
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
         <property>
-          <name>skipITs</name>
-          <value>false</value>
+          <name>!skipITs</name>
         </property>
       </activation>
       <build>
@@ -318,6 +316,7 @@
                     <include>**/*ITSupport.java</include>
                   </includes>
                   <skipTests>false</skipTests>
+                  <skipITs>false</skipITs>
                 </configuration>
               </execution>
             </executions>

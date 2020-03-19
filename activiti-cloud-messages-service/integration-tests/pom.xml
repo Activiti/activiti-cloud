@@ -62,10 +62,8 @@
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
         <property>
-          <name>skipITs</name>
-          <value>false</value>
+          <name>!skipITs</name>
         </property>
       </activation>
       <build>
@@ -82,7 +80,7 @@
                   <run>
                     <env>
                       <ALLOW_EMPTY_PASSWORD>yes</ALLOW_EMPTY_PASSWORD>
-                    </env> 
+                    </env>
                     <ports>
                       <port>5432:5432</port>
                     </ports>
