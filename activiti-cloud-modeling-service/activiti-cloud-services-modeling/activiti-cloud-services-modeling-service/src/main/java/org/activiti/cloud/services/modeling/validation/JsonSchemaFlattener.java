@@ -25,33 +25,39 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.springframework.core.io.ClassPathResource;
 
 public class JsonSchemaFlattener {
 
-    public JsonSchemaFlattener() {
+    // TODO pass to the constructor the bean objectMapper
+    private ObjectMapper mapper;
 
+    public JsonSchemaFlattener() {
+        mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
     private void handleObject(Object value,
                               Map<String, Object> addDefinitions) {
-        if (value instanceof JSONObject) {
-            handleJSONObject((JSONObject) value,
+        if (value instanceof ObjectNode) {
+            handleJsonNode((ObjectNode) value,
                               addDefinitions);
-        } else if (value instanceof JSONArray) {
-            handleJSONArray((JSONArray) value,
+        } else if (value instanceof ArrayNode) {
+            handleJSONArray((ArrayNode) value,
                              addDefinitions);
         }
     }
 
-    private void handleJSONObject(JSONObject jsonObject,
+    private void handleJsonNode(ObjectNode jsonObject,
                                   Map<String, Object> addDefinitions) {
 
         if (!jsonObject.isEmpty()) {
-            Iterator iterator = jsonObject.keys();
+            Iterator iterator = jsonObject.fieldNames();
 
             while (iterator.hasNext()) {
                 String key = (String) iterator.next();
@@ -67,10 +73,10 @@ public class JsonSchemaFlattener {
         }
     }
 
-    private void handleJSONArray(JSONArray jsonArray,
+    private void handleJSONArray(ArrayNode jsonArray,
                                  Map<String, Object> addDefinitions) {
 
-        for (int i = 0; i < jsonArray.length(); i++) {
+        for (int i = 0; i < jsonArray.size(); i++) {
             handleObject(jsonArray.get(i),
                          addDefinitions);
         }
@@ -119,7 +125,7 @@ public class JsonSchemaFlattener {
             if (fileName.isPresent()) {
 
                 String sectionName = getSectionNameFromFileName(fileName.get());
-                JSONObject jsonObject = (JSONObject)addDefinitions.get(sectionName);
+                ObjectNode jsonObject = (ObjectNode)addDefinitions.get(sectionName);
 
                 if (jsonObject == null) {
 
@@ -142,17 +148,17 @@ public class JsonSchemaFlattener {
         return Optional.empty();
     }
 
-    private JSONObject loadResourceFromClassPass(String schemaFileName) throws IOException  {
+    private ObjectNode loadResourceFromClassPass(String schemaFileName) throws IOException  {
 
         try (InputStream schemaInputStream = new ClassPathResource(schemaFileName).getInputStream()) {
-            return  new JSONObject(new JSONTokener(schemaInputStream));
+            return  mapper.readValue(schemaInputStream, ObjectNode.class);
         }
     }
 
-    private Optional<JSONObject> flattenIntern(JSONObject jsonSchema,
+    private Optional<ObjectNode> flattenIntern(ObjectNode jsonSchema,
                                                Map<String, Object> addDefinitions) {
         if (!jsonSchema.isEmpty()) {
-            handleJSONObject(jsonSchema,
+            handleJsonNode(jsonSchema,
                              addDefinitions);
         }
         return Optional.of(jsonSchema);
@@ -169,31 +175,32 @@ public class JsonSchemaFlattener {
                 .replaceAll("[^a-zA-Z0-9_]+","");
     }
 
-    public JSONObject flatten(JSONObject jsonSchema) {
+    public ObjectNode flatten(ObjectNode jsonSchema) {
 
         if (jsonSchema == null) {
-            return new JSONObject();
+            return mapper.createObjectNode();
         }
 
         Map<String, Object> addDefinitions = new HashMap<>();
-        Optional<JSONObject> reply = flattenIntern(jsonSchema,
+        Optional<ObjectNode> reply = flattenIntern(jsonSchema,
                                                    addDefinitions);
 
-        JSONObject replyObject = reply.isPresent() ? reply.get() : jsonSchema;
+        ObjectNode replyObject = reply.isPresent() ? reply.get() : jsonSchema;
 
         if (!addDefinitions.isEmpty()) {
 
-            JSONObject definitions = null;
+            ObjectNode definitions = null;
             if (replyObject.has("definitions")) {
-                definitions = (JSONObject)replyObject.get("definitions");
+                definitions = (ObjectNode)replyObject.get("definitions");
             } else {
-                definitions = new JSONObject();
+                definitions = mapper.createObjectNode();
             }
             for (Map.Entry<String, Object> entry : addDefinitions.entrySet()) {
-                definitions.put(entry.getKey(), entry.getValue());
+                // TODO check if it's ok to use a String here
+                definitions.put(entry.getKey(), String.valueOf((entry.getValue())));
             }
 
-            replyObject.put("definitions", definitions);
+            replyObject.set("definitions", definitions);
         }
 
         return replyObject;

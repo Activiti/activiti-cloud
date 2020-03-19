@@ -18,10 +18,11 @@ package org.activiti.cloud.services.modeling.validation;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +39,9 @@ public class JsonSchemaModelValidatorConfiguration {
 
     @Value("${activiti.validation.model-extensions-schema:schema/model-extensions-schema.json}")
     private String modelExtensionsSchema;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @Bean(name = "connectorSchemaLoader")
     public SchemaLoader getConnectorSchemaLoader() throws IOException {
@@ -56,7 +60,7 @@ public class JsonSchemaModelValidatorConfiguration {
 
     private SchemaLoader buildSchemaLoaderFromClasspath(String schemaFileName) throws IOException {
         try (InputStream schemaInputStream = new ClassPathResource(schemaFileName).getInputStream()) {
-            JSONObject jsonSchema = new JSONObject(new JSONTokener(schemaInputStream));
+            ObjectNode jsonSchema =  mapper.readValue(schemaInputStream, ObjectNode.class);
 
             return SchemaLoader
                     .builder()
