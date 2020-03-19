@@ -36,8 +36,8 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <activiti-cloud-acceptance-tests.version>7.1.418</activiti-cloud-acceptance-tests.version>
-    <activiti-cloud-modeling.version>7.1.418</activiti-cloud-modeling.version>
+    <activiti-cloud-acceptance-tests.version>7.1.419</activiti-cloud-acceptance-tests.version>
+    <activiti-cloud-modeling.version>7.1.419</activiti-cloud-modeling.version>
     <asm.version>7.0</asm.version>
     <awaitility.version>3.1.1</awaitility.version>
     <batik.version>1.10</batik.version>
