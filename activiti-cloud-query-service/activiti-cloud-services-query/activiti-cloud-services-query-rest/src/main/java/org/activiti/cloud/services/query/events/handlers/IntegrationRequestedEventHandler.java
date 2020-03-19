@@ -42,7 +42,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
 
         entity.setRequestDate(new Date(integrationEvent.getTimestamp()));
         entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
-        entity.setInboundVariables(entity.getOutBoundVariables());
+        entity.setInboundVariables(entity.getInboundVariables());
 
         persistIntoDatabase(event,
                             entity);
