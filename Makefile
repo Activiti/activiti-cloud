@@ -1,14 +1,12 @@
 ACTIVITI_CLOUD_CONNECTORS_VERSION := $(shell grep -oPm1 "(?<=<example-cloud-connector.version>)[^<]+" "dependencies-tests/pom.xml")
-ACTIVITI_CLOUD_AUDIT_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-audit.version>)[^<]+" "dependencies-tests/pom.xml")
 ACTIVITI_CLOUD_QUERY_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-query.version>)[^<]+" "dependencies-tests/pom.xml")
 ACTIVITI_CLOUD_RB_VERSION := $(shell grep -oPm1 "(?<=<example-runtime-bundle.version>)[^<]+" "dependencies-tests/pom.xml")
-ACTIVITI_CLOUD_NOTIFICATIONS_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-notifications-graphql.version>)[^<]+" "dependencies-tests/pom.xml")
 ACTIVITI_CLOUD_MODELING_VERSION := $(shell grep -oPm1 "(?<=<activiti-cloud-modeling.version>)[^<]+" "dependencies-tests/pom.xml")
 
 ACTIVITI_CLOUD_VERSION_NUMBER := $(shell grep -oPm1 "(?<=<activiti-cloud-build.version>)[^<]+" "pom.xml")
 
 
-ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.260
+ACTIVITI_CLOUD_ACCEPTANCE_SCENARIOUS_VERSION := 7.1.262
 ACTIVITI_CLOUD_COMMON_HELM_CHART := 1.1.21
 
 GITHUB_CHARTS_BRANCH := $(or $(GITHUB_CHARTS_BRANCH),gh-pages)
@@ -19,8 +17,8 @@ ACTIVITI_CLOUD_SERVICES_VERSIONS := org.activiti.cloud.rb:activiti-cloud-runtime
     org.activiti.cloud.messages:activiti-cloud-messages-dependencies $(ACTIVITI_CLOUD_VERSION_NUMBER)
 
 ACTIVITI_CLOUD_FULL_CHART_VERSIONS := runtime-bundle $(ACTIVITI_CLOUD_RB_VERSION) activiti-cloud-connector $(ACTIVITI_CLOUD_CONNECTORS_VERSION) \
-    activiti-cloud-query $(ACTIVITI_CLOUD_QUERY_VERSION) activiti-cloud-notifications-graphql $(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)  \
-    activiti-cloud-audit $(ACTIVITI_CLOUD_AUDIT_VERSION) activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING_VERSION)
+    activiti-cloud-query $(ACTIVITI_CLOUD_QUERY_VERSION)  \
+    activiti-cloud-modeling $(ACTIVITI_CLOUD_MODELING_VERSION)
 
 $(eval HELM_ACTIVITI_VERSION = $(shell cat VERSION |rev|sed 's/\./-/'|rev))
 
@@ -86,25 +84,19 @@ replace-release-full-chart-names:
 	 sed -i -e "s/#tag: .*/tag: $(APP_ACTIVITI_VERSION)/" values.yaml
 
 pull-docker-images:
-	docker pull activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION)
 	docker pull activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_QUERY_VERSION)
-	docker pull activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION)
 	docker pull activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_RB_VERSION)
 	docker pull activiti/example-cloud-connector:$(ACTIVITI_CLOUD_CONNECTORS_VERSION)
 	docker pull activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_MODELING_VERSION)
 
 retag-docker-images: pull-docker-images
-	docker image tag activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_AUDIT_VERSION) activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_VERSION)
 	docker image tag activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_QUERY_VERSION) activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_VERSION)
-	docker image tag activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_NOTIFICATIONS_VERSION) activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_VERSION)
 	docker image tag activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_RB_VERSION) activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_VERSION)
 	docker image tag activiti/example-cloud-connector:$(ACTIVITI_CLOUD_CONNECTORS_VERSION) activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
 	docker image tag activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_MODELING_VERSION) activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_VERSION)
 
 push-docker-images:
-	docker push activiti/activiti-cloud-audit:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/activiti-cloud-query:$(ACTIVITI_CLOUD_VERSION)
-	docker push activiti/activiti-cloud-notifications-graphql:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/example-runtime-bundle:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/example-cloud-connector:$(ACTIVITI_CLOUD_VERSION)
 	docker push activiti/activiti-cloud-modeling:$(ACTIVITI_CLOUD_VERSION)
