@@ -75,7 +75,6 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
                 LOGGER.debug(message, integrationError);
 
-                sendAuditMessage(integrationError);
             } else {
                 String message = "No task is in this RB is waiting for integration result with execution id `" +
                     integrationContextEntity.getExecutionId() +
@@ -83,6 +82,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
                     "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
                 LOGGER.debug(message);
             }
+
+            sendAuditMessage(integrationError);
         }
     }
 
