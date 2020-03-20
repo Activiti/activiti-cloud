@@ -17,6 +17,7 @@ package org.activiti.cloud.services.modeling.validation;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.springframework.core.io.ClassPathResource;
 
 public class JsonSchemaFlattener {
@@ -99,11 +101,16 @@ public class JsonSchemaFlattener {
 
     private Optional<String> getUpdatedValue(Object value,
                                              Map<String, Object> addDefinitions) {
+        Optional<String> stringValue = Optional.empty();
+        if (value instanceof TextNode) {
+            stringValue = Optional.of(((TextNode) value).asText());
+        } else if (value != null) {
+            stringValue = Optional.of(value.toString());
+        }
 
-        Optional<String> stringValue = Optional.of(value)
-                                        .filter(String.class::isInstance)
-                                        .map(String.class::cast)
-                                        .filter(s -> !s.startsWith("#"));
+        if (stringValue.isPresent() && stringValue.get().startsWith("#")) {
+            return Optional.empty();
+        }
 
         if (stringValue.isPresent()) {
 
@@ -151,7 +158,7 @@ public class JsonSchemaFlattener {
     private ObjectNode loadResourceFromClassPass(String schemaFileName) throws IOException  {
 
         try (InputStream schemaInputStream = new ClassPathResource(schemaFileName).getInputStream()) {
-            return  mapper.readValue(schemaInputStream, ObjectNode.class);
+            return mapper.readValue(schemaInputStream, ObjectNode.class);
         }
     }
 
@@ -187,20 +194,19 @@ public class JsonSchemaFlattener {
 
         ObjectNode replyObject = reply.isPresent() ? reply.get() : jsonSchema;
 
-        if (!addDefinitions.isEmpty()) {
+        ObjectNode definitions = null;
+        if (replyObject.has("definitions")) {
+            definitions = (ObjectNode)replyObject.get("definitions");
+        } else {
+            definitions = mapper.createObjectNode();
+            replyObject.set("definitions", definitions);
+        }
 
-            ObjectNode definitions = null;
-            if (replyObject.has("definitions")) {
-                definitions = (ObjectNode)replyObject.get("definitions");
-            } else {
-                definitions = mapper.createObjectNode();
-            }
+        if (!addDefinitions.isEmpty()) {
             for (Map.Entry<String, Object> entry : addDefinitions.entrySet()) {
                 // TODO check if it's ok to use a String here
                 definitions.put(entry.getKey(), String.valueOf((entry.getValue())));
             }
-
-            replyObject.set("definitions", definitions);
         }
 
         return replyObject;
