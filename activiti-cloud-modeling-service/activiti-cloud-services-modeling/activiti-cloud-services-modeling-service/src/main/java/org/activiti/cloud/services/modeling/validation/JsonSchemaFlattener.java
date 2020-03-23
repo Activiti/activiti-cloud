@@ -30,8 +30,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import com.fasterxml.jackson.databind.node.TextNode;
+
 import org.springframework.core.io.ClassPathResource;
 
 public class JsonSchemaFlattener {
@@ -109,10 +109,6 @@ public class JsonSchemaFlattener {
         }
 
         if (stringValue.isPresent() && stringValue.get().startsWith("#")) {
-            return Optional.empty();
-        }
-
-        if (stringValue.isPresent()) {
 
             Optional<String> stringRef = Optional.empty();
             Optional<String> fileName = getClassPathFileName(stringValue.get());

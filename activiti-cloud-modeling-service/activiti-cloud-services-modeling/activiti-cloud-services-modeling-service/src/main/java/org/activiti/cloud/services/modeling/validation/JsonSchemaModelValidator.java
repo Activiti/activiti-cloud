@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.validation;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,9 +32,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.node.TextNode;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class JsonSchemaModelValidator implements ModelValidator {
 
+    private ObjectMapper mapper;
     private final Logger log = LoggerFactory.getLogger(JsonSchemaModelValidator.class);
 
     protected abstract SchemaLoader schemaLoader();
@@ -49,43 +55,46 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
     @Override
     public void validate(byte[] bytes,
                          ValidationContext validationContext) {
-        JSONObject processExtensionJson = null;
+
+        mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        ObjectNode processExtensionJson = null;
         try {
             log.debug("Validating json model content: " + new String(bytes));
-            processExtensionJson = new JSONObject(new JSONTokener(new String(bytes)));
+            processExtensionJson = mapper.readValue(bytes, ObjectNode.class);
             schemaLoader()
                     .load()
                     .build()
                     .validate(processExtensionJson);
-        } catch (JSONException jsonException) {
+        } catch (JsonParseException jsonException) {
             log.error("Syntactic model JSON validation errors encountered",
                       jsonException);
             throw new SyntacticModelValidationException(jsonException);
-        } catch (ValidationException validationException) {
-            log.error("Semantic model validation errors encountered: " + validationException.toJSON(),
-                      validationException);
-            throw new SemanticModelValidationException(validationException.getMessage(),
-                                                       getValidationErrors(validationException, processExtensionJson));
+        } catch (IOException ioException) {
+            log.error("Semantic model validation errors encountered: " ,ioException);
+            throw new SyntacticModelValidationException(ioException);
+
         }
     }
 
-    private List<ModelValidationError> getValidationErrors(ValidationException validationException, JSONObject prcessExtenstionJson) {
-        return getValidationExceptions(validationException)
-                .map(exception -> this.toModelValidationError(exception, prcessExtenstionJson))
-                .distinct()
-                .collect(Collectors.toList());
-    }
+//    private List<ModelValidationError> getValidationErrors(JsonParseException validationException, ObjectNode prcessExtenstionJson) {
+//        return getValidationExceptions(validationException)
+//                .map(exception -> this.toModelValidationError(exception, prcessExtenstionJson))
+//                .distinct()
+//                .collect(Collectors.toList());
+//    }
+//
+//    private Stream<ValidationException> getValidationExceptions(ValidationException validationException) {
+//        return Optional.ofNullable(validationException.getCausingExceptions())
+//                .filter(CollectionUtils::isNotEmpty)
+//                .map(exceptions -> exceptions
+//                        .stream()
+//                        .flatMap(this::getValidationExceptions))
+//                .orElseGet(() -> Stream.of(validationException));
+//    }
 
-    private Stream<ValidationException> getValidationExceptions(ValidationException validationException) {
-        return Optional.ofNullable(validationException.getCausingExceptions())
-                .filter(CollectionUtils::isNotEmpty)
-                .map(exceptions -> exceptions
-                        .stream()
-                        .flatMap(this::getValidationExceptions))
-                .orElseGet(() -> Stream.of(validationException));
-    }
-
-    private ModelValidationError toModelValidationError(ValidationException validationException, JSONObject prcessExtenstionJson) {
+    private ModelValidationError toModelValidationError(ValidationException validationException, ObjectNode prcessExtenstionJson) {
         String description = null;
 
         Map<String, Object>  unProcessedProperties = Optional.ofNullable(validationException.getViolatedSchema())
@@ -112,7 +121,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
                                           schema);
     }
 
-    private String resolveExpression(String message, String  pointerToViolation, JSONObject prcessExtenstionJson) {
+    private String resolveExpression(String message, String  pointerToViolation, ObjectNode prcessExtenstionJson) {
         final String path[] = pointerToViolation.replace("#/", "").split("/");
         final int lastIndex = path.length - 1;
 
@@ -131,22 +140,22 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
         return  message;
     }
 
-    private String getValueFromJson(String[] path, JSONObject processExtensionJson) {
-        JSONObject parent = null;
+    private String getValueFromJson(String[] path, ObjectNode processExtensionJson) {
+        ObjectNode parent = null;
         String value = "";
 
         if(path.length > 1) {
-            parent = processExtensionJson.getJSONObject(path[0]);
+            parent = (ObjectNode)processExtensionJson.get(path[0]);
 
             for(int iterator=1; iterator < path.length - 1; iterator++) {
-                parent = parent.getJSONObject(path[iterator]);
+                parent = (ObjectNode)parent.get(path[iterator]);
             }
 
-            value = parent.getString(path[path.length - 1]);
+            value = ((TextNode)parent.get(path[path.length - 1])).asText();
         }
 
         if (path.length == 1) {
-            value = processExtensionJson.getString(path[0]);
+            value = ((TextNode)processExtensionJson.get(path[0])).asText();
         }
 
         return  value;
