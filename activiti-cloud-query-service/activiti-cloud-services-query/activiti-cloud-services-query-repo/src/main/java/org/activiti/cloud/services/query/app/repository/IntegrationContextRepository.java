@@ -39,7 +39,8 @@ public interface IntegrationContextRepository extends PagingAndSortingRepository
                 (StringPath path, String value) -> path.eq(value));
     }
 
-    IntegrationContextEntity findByProcessInstanceIdAndClientId(String processInstanceId,
-                                                                String clientId);
+    IntegrationContextEntity findByProcessInstanceIdAndClientIdAndExecutionId(String processInstanceId,
+                                                                              String clientId,
+                                                                              String executionId);
 
 }
