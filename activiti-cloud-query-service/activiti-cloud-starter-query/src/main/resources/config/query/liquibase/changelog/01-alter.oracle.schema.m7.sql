@@ -12,6 +12,7 @@ create table integration_context
     process_definition_key     	varchar(255),
     process_definition_version 	integer,
     process_instance_id        	varchar(255),
+    execution_id	        	varchar(255),
     parent_process_instance_id  varchar(255),
     business_key		      	varchar(255),
 
@@ -36,3 +37,12 @@ create table integration_context
     primary key (id)
 );
 
+alter table bpmn_activity
+    add column execution_id varchar(255);
+    
+alter table bpmn_activity
+    delete constraint bpmn_activity_processInstance_elementId_idx;
+    
+alter table bpmn_activity
+    add constraint bpmn_activity_processInstance_elementId_idx unique (process_instance_id, element_id, executionId);
+    

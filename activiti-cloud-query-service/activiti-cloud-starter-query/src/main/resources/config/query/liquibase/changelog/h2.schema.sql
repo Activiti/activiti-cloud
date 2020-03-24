@@ -17,6 +17,7 @@ create table bpmn_activity
     process_definition_key     varchar(255),
     process_definition_version integer,
     process_instance_id        varchar(255),
+    execution_id	       	   varchar(255),
     started_date               timestamp,
     status                     varchar(255),
 	
@@ -198,6 +199,7 @@ create table integration_context
     process_definition_key     	varchar(255),
     process_definition_version 	integer,
     process_instance_id        	varchar(255),
+    execution_id	        	varchar(255),
     parent_process_instance_id  varchar(255),
     business_key		      	varchar(255),
 
@@ -225,7 +227,7 @@ create table integration_context
 create index bpmn_activity_status_idx on bpmn_activity (status);
 create index bpmn_activity_processInstance_idx on bpmn_activity (process_instance_id);
 alter table bpmn_activity
-    add constraint bpmn_activity_processInstance_elementId_idx unique (process_instance_id, element_id);
+    add constraint bpmn_activity_processInstance_elementId_idx unique (process_instance_id, element_id, execution_id);
 create index bpmn_sequence_flow_processInstance_idx on bpmn_sequence_flow (process_instance_id);
 create index bpmn_sequence_flow_elementId_idx on bpmn_sequence_flow (element_id);
 create index bpmn_sequence_flow_processInstance_elementId_idx on bpmn_sequence_flow (process_instance_id, element_id);
@@ -251,5 +253,7 @@ create index task_var_processInstanceId_idx on task_variable (process_instance_i
 create index task_var_taskId_idx on task_variable (task_id);
 create index task_var_name_idx on task_variable (name);
 create index task_var_executionId_idx on task_variable (execution_id);
+alter table integration_context
+    add constraint integration_context_unique_idx unique (process_instance_id, client_id, execution_id);
 alter table process_model
     add constraint FKmqdabtfsoy52f0585vkfj40b foreign key (process_definition_id) references process_definition;
