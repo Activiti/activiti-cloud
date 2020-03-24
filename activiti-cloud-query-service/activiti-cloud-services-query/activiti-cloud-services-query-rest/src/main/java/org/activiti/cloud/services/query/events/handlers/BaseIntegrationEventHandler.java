@@ -24,17 +24,19 @@ public abstract class BaseIntegrationEventHandler {
 
         IntegrationContext integrationContext = event.getEntity();
 
-        IntegrationContextEntity entity = integrationContextRepository.findByProcessInstanceIdAndClientId(integrationContext.getProcessInstanceId(),
-                                                                                                          integrationContext.getClientId());
+        IntegrationContextEntity entity = integrationContextRepository.findByProcessInstanceIdAndClientIdAndExecutionId(integrationContext.getProcessInstanceId(),
+                                                                                                                        integrationContext.getClientId(),
+                                                                                                                        integrationContext.getExecutionId());
         // Let's create entity if does not exists
         if(entity == null) {
-            BPMNActivityEntity bpmnActivityEntity = bpmnActivityRepository.findByProcessInstanceIdAndElementId(integrationContext.getProcessInstanceId(),
-                                                                                                               integrationContext.getClientId());
+            BPMNActivityEntity bpmnActivityEntity = bpmnActivityRepository.findByProcessInstanceIdAndElementIdAndExecutionId(integrationContext.getProcessInstanceId(),
+                                                                                                                             integrationContext.getClientId(),
+                                                                                                                             integrationContext.getExecutionId());
             entity = new IntegrationContextEntity(event.getServiceName(),
-                                                        event.getServiceFullName(),
-                                                        event.getServiceVersion(),
-                                                        event.getAppName(),
-                                                        event.getAppVersion());
+                                                  event.getServiceFullName(),
+                                                  event.getServiceVersion(),
+                                                  event.getAppName(),
+                                                  event.getAppVersion());
             // Let use event id to persist activity id
             entity.setId(bpmnActivityEntity.getId());
             entity.setClientId(integrationContext.getClientId());
@@ -43,6 +45,7 @@ public abstract class BaseIntegrationEventHandler {
             entity.setConnectorType(integrationContext.getConnectorType());
             entity.setProcessDefinitionId(integrationContext.getProcessDefinitionId());
             entity.setProcessInstanceId(integrationContext.getProcessInstanceId());
+            entity.setExecutionId(integrationContext.getExecutionId());
             entity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
             entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
             entity.setBusinessKey(integrationContext.getBusinessKey());
