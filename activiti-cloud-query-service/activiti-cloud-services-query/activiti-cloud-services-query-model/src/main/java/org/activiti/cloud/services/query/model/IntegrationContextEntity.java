@@ -48,6 +48,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
 
     private String processInstanceId;
     private String parentProcessInstanceId;
+    private String executionId;
     private String processDefinitionId;
     private String processDefinitionKey;
     private Integer processDefinitionVersion;
@@ -316,6 +317,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
                Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
                Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
                Objects.equals(processInstanceId, other.processInstanceId) &&
+               Objects.equals(executionId, other.executionId) &&
                Objects.equals(requestDate, other.requestDate) &&
                Objects.equals(resultDate, other.resultDate) &&
                Objects.equals(stackTraceElements, other.stackTraceElements) &&
@@ -334,6 +336,8 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
                .append(outBoundVariables != null ? toString(outBoundVariables.entrySet(), maxLen) : null)
                .append(", processInstanceId=")
                .append(processInstanceId)
+               .append(", executionId=")
+               .append(executionId)
                .append(", parentProcessInstanceId=")
                .append(parentProcessInstanceId)
                .append(", processDefinitionId=")
@@ -402,6 +406,14 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata {
 
     public void setBpmnActivity(BPMNActivityEntity bpmnActivity) {
         this.bpmnActivity = bpmnActivity;
+    }
+
+    public String getExecutionId() {
+        return executionId;
+    }
+
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
     }
 
 }
