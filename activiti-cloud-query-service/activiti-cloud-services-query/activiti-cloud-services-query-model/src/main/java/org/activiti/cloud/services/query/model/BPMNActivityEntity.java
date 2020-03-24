@@ -48,6 +48,9 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
     /** The associated process definition id */
     private String processDefinitionId;
 
+    /** The associated execution id */
+    private String executionId;
+
     /** The current state of activity */
     @Enumerated(EnumType.STRING)
     private BPMNActivityStatus status;
@@ -203,6 +206,14 @@ public class BPMNActivityEntity extends ActivitiEntityMetadata implements CloudB
 
     public void setIntegrationContext(IntegrationContextEntity integrationContext) {
         this.integrationContext = integrationContext;
+    }
+
+    public String getExecutionId() {
+        return executionId;
+    }
+
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
     }
 
     @Override
