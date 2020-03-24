@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.alfresco.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,8 +74,8 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public <T> AlfrescoJackson2HttpMessageConverter<T> alfrescoJackson2HttpMessageConverter() {
-        return new AlfrescoJackson2HttpMessageConverter<>(new PagedResourcesConverter(new PageMetadataConverter()));
+    public <T> AlfrescoJackson2HttpMessageConverter<T> alfrescoJackson2HttpMessageConverter(ObjectMapper objectMapper) {
+        return new AlfrescoJackson2HttpMessageConverter<>(new PagedResourcesConverter(new PageMetadataConverter()), objectMapper);
     }
 
     @Bean
