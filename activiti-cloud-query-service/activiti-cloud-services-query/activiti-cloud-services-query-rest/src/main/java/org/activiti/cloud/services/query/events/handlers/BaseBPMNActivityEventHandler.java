@@ -18,7 +18,7 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.QueryException;
@@ -32,7 +32,7 @@ public abstract class BaseBPMNActivityEventHandler  {
     }
 
     protected BPMNActivityEntity findOrCreateBPMNActivityEntityB(CloudRuntimeEvent<?, ?> event) {
-        CloudBPMNActivityStartedEvent activityEvent = CloudBPMNActivityStartedEvent.class.cast(event);
+        CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
 
