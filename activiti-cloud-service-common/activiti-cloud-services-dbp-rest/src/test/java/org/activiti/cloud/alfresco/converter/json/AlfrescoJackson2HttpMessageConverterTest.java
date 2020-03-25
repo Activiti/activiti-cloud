@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.alfresco.converter.json;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -50,6 +51,9 @@ public class AlfrescoJackson2HttpMessageConverterTest {
 
     @Mock
     private PagedResourcesConverter pagedResourcesConverter;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @Mock
     private ListResponseContent<String> alfrescoPageContentListWrapper;
@@ -162,6 +166,7 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     public void canWriteShouldReturnTrueWhenTypeIsNotStringAndMediaTypeIsApplicationJson() {
         //given
         Class<Resource> clazz = Resource.class;
+        given(httpMessageConverter.canWrite(clazz, MediaType.APPLICATION_JSON)).willReturn(true);
 
         //when
         boolean canWrite = httpMessageConverter.canWrite(clazz, clazz, MediaType.APPLICATION_JSON);
