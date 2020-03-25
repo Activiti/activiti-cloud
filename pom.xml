@@ -20,7 +20,7 @@
     <tag>HEAD</tag>
   </scm>
   <properties>
-    <activiti-cloud.version>7.1.422</activiti-cloud.version>
+    <activiti-cloud.version>7.1.423</activiti-cloud.version>
   </properties>
   <dependencyManagement>
     <dependencies>
