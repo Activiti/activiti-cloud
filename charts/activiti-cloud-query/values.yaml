@@ -106,9 +106,9 @@ ingress:
 
   path:
   subPaths:
-    - /audit
-    - /query
-    - /notifications
+    - /query/?(.*)
+    - /audit/?(.*)
+    - /notifications/?(.*)
 
   ## Set this to true in order to enable TLS on the ingress record
   tls: 
@@ -117,4 +117,5 @@ ingress:
   tlsSecret: 
 
   ## Ingress annotations done as key:value pairs
-  annotations: {}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
